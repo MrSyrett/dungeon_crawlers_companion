@@ -2240,6 +2240,8 @@ html:not([data-gm-sys="PB"]) .pb-only { display: none !important; }
 .pb-gen-card.pb-dead { border-left-color: #e6463a; box-shadow: inset 0 0 0 1px rgba(230,70,58,.35); }
 .pb-gen-card .gen-card-row-label { color: #d9cdb4; font-family: "1651 Alchemy", "EB Garamond", Georgia, serif; letter-spacing: .03em; text-transform: none; }
 .pb-gen-card .gen-card-tag { font-family: "EB Garamond", Georgia, serif; }
+.pb-gen-card .gen-card-row-label .pb-nf { font-family: "EB Garamond", Georgia, serif; font-size: .95em; letter-spacing: 0; }
+.pb-gen-card .gen-card-row-label { min-width: 0; }
 .pb-dim { color: var(--dim, #a89a8a); }
 .pb-src { font-size: 10.5px; margin-top: 4px; font-style: italic; }
 .pb-warn { color: #f08a7a; }
@@ -2335,7 +2337,7 @@ html:not([data-gm-sys="PB"]) .pb-init-banner { display: none; }
     MYZ: ['myzmonster','myztreasure','myzsector','myznpc','myzevents','myzfind'],
     LOTR:['lotrmonster','lotrtreasure','lotrjourney','lotrcouncil','lotreye','lotrnameless','lotrnpc','lotrshadow','lotrpatron'],
     DB:  ['dbmonster','dbtreasure','dbnpc','dbadventure','dbjourney','dbattack','dbfear','dbinjury','dbmishap','dbdemon','dbtrap','dbleaving'],
-    PB:  ['pbmonster','pbtreasure','pbnpc','pbnaval','pbrules','pbmorale','pbreaction','pbmaritime','pbweather','pbplunder','pbtrap','pbbroken','pbmisfire','pbdead','pbrelic','pbritual','pbmishap','pbjoker','pbshanty','pbderelict','pbzombie'],
+    PB:  ['pbmonster','pbtreasure','pbnpc','pbnaval','pbrules','pbmorale','pbreaction','pbmaritime','pbweather','pbplunder','pbtrap','pbbroken','pbmisfire','pbdead','pbrelic','pbritual','pbmishap','pbjoker','pbshanty','pbderelict','pbzombie','pbtables','pbpirate','pbenemy','pbshipsea','pbcaptain','pbwreck','pbisland','pbmap','pbcargo','pbash','pbjob','pbrumor','pbtravel','pbalchemy','pbmotive','pbcarouse','pbloot'],
     JLU: ['npc'],
     GB:  ['npc'],
   };
@@ -3480,6 +3482,23 @@ GMScenes.renderPins();
         <option value="pbmonster">Foe / NPC / Ship</option>
         <option value="pbtreasure">Plunder &amp; Treasure</option>
         <option value="pbnpc">Pirate NPC</option>
+        <option value="pbtables">Core Tables (by group)</option>
+        <option value="pbpirate">Pirate Generator</option>
+        <option value="pbenemy">Enemy Builder</option>
+        <option value="pbshipsea">Ships at Sea</option>
+        <option value="pbcaptain">Captains &amp; Fleets</option>
+        <option value="pbwreck">Derelict Ship</option>
+        <option value="pbisland">Uncharted Island</option>
+        <option value="pbmap">Treasure Map</option>
+        <option value="pbcargo">Cargo &amp; Market</option>
+        <option value="pbash">ASH Market</option>
+        <option value="pbjob">Job &amp; Quest</option>
+        <option value="pbrumor">Rumors &amp; History</option>
+        <option value="pbtravel">Travel Events (Core)</option>
+        <option value="pbalchemy">Alchemy Potion</option>
+        <option value="pbmotive">NPC Motivation</option>
+        <option value="pbcarouse">Carousing</option>
+        <option value="pbloot">Loot the Body</option>
         <option value="pbnaval">Naval Combat</option>
         <option value="pbrules">Rules Quick-Ref</option>
         <option value="pbmorale">Morale</option>
@@ -5168,7 +5187,8 @@ GMScenes.renderPins();
           <button class="btn small ghost" type="button" data-pb="act:come-about" title="Ship AGILITY + PC STRENGTH, DR12">Come About</button>
           <button class="btn small ghost" type="button" data-pb="act:repair" title="CREW SKILL + PC PRESENCE, DR12">Repair</button>
           <label class="pb-ck">hexes <input type="number" class="gen-select pb-num pbn-hexes" min="0" max="12" value="2" title="Hexes moved last turn (+1 ram damage each)"></label>
-          <button class="btn small ghost" type="button" data-pb="ram">Ram</button></div>
+          <button class="btn small ghost" type="button" data-pb="ram">Ram</button>
+          <button class="btn small ghost" type="button" data-pb="foeatk" title="The enemy's attacks against our hull — a sea monster's Naval Combat block, or an enemy ship's guns">Enemy attacks</button></div>
         <div class="pb-btnrow"><span class="pb-btnlbl">Damage</span>
           <input type="text" class="gen-select pbn-dmg" style="width:70px" placeholder="d10" title="Damage dice to apply to the enemy ship">
           <label class="pb-ck"><input type="checkbox" class="pbn-crit"> Crit</label>
@@ -5365,6 +5385,141 @@ GMScenes.renderPins();
         <div class="gen-results pb-out" style="margin-top:10px;"><div class="gen-empty">A ship at 0 HP or less takes more damage: roll d8.</div></div>
       </div>
 
+      <!-- PIRATE BORG (Core Rules): every PB_GM_TABLES group as a card -->
+      <div class="gen-panel" data-panel="pbtables">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Group<select class="gen-select pb-grp-group"></select></label><label class="gen-label">Table<select class="gen-select pb-grp-table"><option value="">Every table in the group</option></select></label><label class="gen-label">How many<select class="gen-select pb-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select></label>
+        </div>
+        <div class="gen-results pb-out" style="margin-top:10px;"><div class="gen-empty">Pick a group of tables: Roll gives one card with a result from each table (or just the one you choose).</div></div>
+      </div>
+
+      <!-- PIRATE BORG (Core Rules): Pirate Generator 3d12 + name + silver -->
+      <div class="gen-panel" data-panel="pbpirate">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Names<select class="gen-select pb-gender"><option value="">Either column</option><option value="male">Male names</option><option value="female">Female names</option></select></label><label class="pb-ck"><input type="checkbox" class="pb-mighty"> Mighty (HP ×2)</label><label class="gen-label">How many<select class="gen-select pb-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select></label>
+        </div>
+        <div class="gen-results pb-out" style="margin-top:10px;"><div class="gen-empty">Roll 3d12 on Tables A-C: highest die = Morale, lowest +2 = HP, the highest table sets the armor; a d66 name and the highest name roll in silver.</div></div>
+      </div>
+
+      <!-- PIRATE BORG (Core Rules): Make Your Own Enemies -->
+      <div class="gen-panel" data-panel="pbenemy">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Name<input type="text" class="gen-select pb-en-name" placeholder="e.g. Bone Reaver" style="width:130px"></label><label class="gen-label">Specials<select class="gen-select pb-en-sp"><option>0</option><option selected>1</option><option>2</option><option>3</option></select></label><label class="gen-label">How many<select class="gen-select pb-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select></label>
+        </div>
+        <div class="gen-results pb-out" style="margin-top:10px;"><div class="gen-empty">HP d10, Morale 2d6, Armor d4, Damage d12 and Special d10 — a stat block to send to the tracker.</div></div>
+      </div>
+
+      <!-- PIRATE BORG (Core Rules): Ships at Sea -->
+      <div class="gen-panel" data-panel="pbshipsea">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Vessel<select class="gen-select pb-sea-base"><option value="">Vessel class (d10)</option></select></label><label class="gen-label">Template<select class="gen-select pb-sea-tpl"><option value="">None</option><option value="random">Random undead vessel</option></select></label><label class="gen-label">How many<select class="gen-select pb-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select></label>
+        </div>
+        <div class="gen-results pb-out" style="margin-top:10px;"><div class="gen-empty">Sails! Vessel class, armament, crew and a d66 name — built from the ship blocks, with an undead or fleet template if you like.</div></div>
+      </div>
+
+      <!-- PIRATE BORG (Core Rules): Archetype Captains, fleets & Marrow Cannons -->
+      <div class="gen-panel" data-panel="pbcaptain">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Captain<select class="gen-select pb-cap-pick"><option value="">Random captain</option></select></label><label class="gen-label">Crew to send<input type="number" class="gen-select pb-num pb-cap-crew" min="0" max="20" value="4"></label><label class="gen-label">How many<select class="gen-select pb-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select></label>
+        </div>
+        <div class="gen-results pb-out" style="margin-top:10px;"><div class="gen-empty">A captain with officers, crew and a flagship from their fleet.</div></div>
+      </div>
+
+      <!-- PIRATE BORG (Core Rules): Derelict Ship generator -->
+      <div class="gen-panel" data-panel="pbwreck">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">How many<select class="gen-select pb-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select></label>
+        </div>
+        <div class="gen-results pb-out" style="margin-top:10px;"><div class="gen-empty">Where it lies, what it was, what happened, who is aboard now and what is left of the cargo.</div></div>
+      </div>
+
+      <!-- PIRATE BORG (Core Rules): Uncharted Islands -->
+      <div class="gen-panel" data-panel="pbisland">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">How many<select class="gen-select pb-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select></label>
+        </div>
+        <div class="gen-results pb-out" style="margin-top:10px;"><div class="gen-empty">Size, terrain, vegetation, a feature, animals, inhabitants, where to hide treasure, a fortune, hazards, conflicts and darkness.</div></div>
+      </div>
+
+      <!-- PIRATE BORG (Core Rules): Treasure Maps, riddles & buried treasure -->
+      <div class="gen-panel" data-panel="pbmap">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Roll<select class="gen-select pb-map-kind"><option value="map">Treasure map + riddle</option><option value="both">Map, riddle &amp; buried treasure</option><option value="treasure">Buried treasure only (d100)</option></select></label><label class="gen-label">How many<select class="gen-select pb-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select></label>
+        </div>
+        <div class="gen-results pb-out" style="margin-top:10px;"><div class="gen-empty">A treasure map with its riddle filled in from the icon, marker and direction tables.</div></div>
+      </div>
+
+      <!-- PIRATE BORG (Core Rules): Cargo + market rates -->
+      <div class="gen-panel" data-panel="pbcargo">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Cargo slots<input type="number" class="gen-select pb-num pb-cargo-slots" min="1" max="20" value="2"></label><label class="pb-ck"><input type="checkbox" class="pb-cargo-qm"> Veteran Quartermaster</label><label class="pb-ck"><input type="checkbox" class="pb-cargo-twist"> Plot twist</label><label class="gen-label">How many<select class="gen-select pb-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select></label>
+        </div>
+        <div class="gen-results pb-out" style="margin-top:10px;"><div class="gen-empty">d12 per cargo slot (12 = special cargo), with this port's price (±50%).</div></div>
+      </div>
+
+      <!-- PIRATE BORG (Core Rules): ASH market & effects -->
+      <div class="gen-panel" data-panel="pbash">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Ports<input type="number" class="gen-select pb-num pb-ash-ports" min="1" max="12" value="3"></label><label class="pb-ck"><input type="checkbox" class="pb-ash-effect"> + effect of consuming it</label><label class="gen-label">How many<select class="gen-select pb-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select></label>
+        </div>
+        <div class="gen-results pb-out" style="margin-top:10px;"><div class="gen-empty">The Current ASH Market (2d6) port by port, each change applied to the last rate, from 50s a dose.</div></div>
+      </div>
+
+      <!-- PIRATE BORG (Core Rules): Jobs & Quests -->
+      <div class="gen-panel" data-panel="pbjob">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Faction<select class="gen-select pb-job-faction"><option value="">No faction</option><option value="random">Random faction</option></select></label><label class="gen-label">How many<select class="gen-select pb-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select></label>
+        </div>
+        <div class="gen-results pb-out" style="margin-top:10px;"><div class="gen-empty">Hook, patron, requirement, time restraint and complication.</div></div>
+      </div>
+
+      <!-- PIRATE BORG (Core Rules): Rumors & history -->
+      <div class="gen-panel" data-panel="pbrumor">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Table<select class="gen-select pb-rumor-kind"><option value="">Rumors (d20)</option><option value="history">A General History (d66)</option><option value="spTownRumors">Coral Town rumors (2d6)</option><option value="spSwampRumors">Swamp rumors (d6)</option></select></label><label class="gen-label">How many<select class="gen-select pb-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select></label>
+        </div>
+        <div class="gen-results pb-out" style="margin-top:10px;"><div class="gen-empty">A rumor overheard in a tavern — or an event from the history of the Dark Caribbean.</div></div>
+      </div>
+
+      <!-- PIRATE BORG (Core Rules): Maritime Travel Events -->
+      <div class="gen-panel" data-panel="pbtravel">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Table<select class="gen-select pb-travel-kind"><option value="any">Any (random table)</option><option value="flotsam">Flotsam &amp; Jetsam (d12)</option><option value="encounters">Encounters at Sea (d20)</option><option value="events">Events at Sea (d20)</option></select></label><label class="gen-label">How many<select class="gen-select pb-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select></label>
+        </div>
+        <div class="gen-results pb-out" style="margin-top:10px;"><div class="gen-empty">Flotsam, encounters and events while sailing — the ships and creatures they name come with stat lines.</div></div>
+      </div>
+
+      <!-- PIRATE BORG (Core Rules): Alchemy Potion Generator -->
+      <div class="gen-panel" data-panel="pbalchemy">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Method<select class="gen-select pb-alc-method"><option value="fast">Fast (1d20 across)</option><option value="random">Random (6d20)</option></select></label><label class="gen-label">How many<select class="gen-select pb-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select></label>
+        </div>
+        <div class="gen-results pb-out" style="margin-top:10px;"><div class="gen-empty">Ingredients, color, delivery, DR and effect — results are never guaranteed.</div></div>
+      </div>
+
+      <!-- PIRATE BORG (Core Rules): NPC motivation -->
+      <div class="gen-panel" data-panel="pbmotive">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">How many<select class="gen-select pb-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select></label>
+        </div>
+        <div class="gen-results pb-out" style="margin-top:10px;"><div class="gen-empty">What drives this NPC (d20), a quick name (d12) and their reaction.</div></div>
+      </div>
+
+      <!-- PIRATE BORG (Core Rules): Carousing -->
+      <div class="gen-panel" data-panel="pbcarouse">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">How many<select class="gen-select pb-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select></label>
+        </div>
+        <div class="gen-results pb-out" style="margin-top:10px;"><div class="gen-empty">4d20: a night out, read one die per column; hungover for the lowest die in hours; the sum is silver spent (4-49) or won (50+).</div></div>
+      </div>
+
+      <!-- PIRATE BORG (Core Rules): Loot the Body -->
+      <div class="gen-panel" data-panel="pbloot">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">How many<select class="gen-select pb-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select></label>
+        </div>
+        <div class="gen-results pb-out" style="margin-top:10px;"><div class="gen-empty">d100 on the body — add the number rolled in silver; 00 rolls twice.</div></div>
+      </div>
       <!-- PIRATE BORG: ZOMBIE APPEARANCE d6 (Trapped in the Tropics) -->
       <div class="gen-panel" data-panel="pbzombie">
         <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
@@ -8071,7 +8226,7 @@ function wireSessionPrepLoader(root) {
       const CM = (typeof PB_CREW_MODS !== 'undefined' && Array.isArray(PB_CREW_MODS)) ? PB_CREW_MODS : [];
       let h = '';
       const J = prep.pbJob || {};
-      if(Object.keys(J).some(k => String(J[k] || '').trim())) h += card('The Job' + (J.name ? ' — ' + J.name : ''), ln('Hook', J.hook) + ln('Patron', J.patron) + ln('Prize', J.prize) + ln('Goal', J.goal) + ln('Rivals', J.rivals) + ln('Notes', J.notes));
+      if(Object.keys(J).some(k => String(J[k] || '').trim())) h += card('The Job' + (J.name ? ' — ' + J.name : ''), ln('Hook', J.hook) + ln('Patron', J.patron) + ln('Faction', J.faction) + ln('Port', J.port) + ln('Prize', J.prize) + ln('Goal', J.goal) + ln('Rivals', J.rivals) + ln('Notes', J.notes));
       const ships = prep.pbShips || [];
       (prep.pbVoyages || []).forEach(j => {
         const hx = parseInt(j.hexes, 10) || 0, sh = ships.find(s => s.name === j.ship);
@@ -8774,7 +8929,19 @@ function init_trackers(root) {
     };
     if(src === 'db') { it.dbFerocity = sum.ferocity || 1; if(m.boss) it.tone = 'var(--boss, #7b5cff)'; }
     // Pirate Borg: bosses get the boss tint; ships keep their AGILITY for individual initiative.
-    if(src === 'pb') { if(m.boss) it.tone = 'var(--boss, #7b5cff)'; if(sum.pbShip) { it.pbShip = true; it.pbAgility = parseInt(m.agility, 10) || 0; it.tone = 'var(--gold)'; } }
+    if(src === 'pb') {
+      if(m.boss) it.tone = 'var(--boss, #7b5cff)';
+      if(sum.pbShip) { it.pbShip = true; it.pbAgility = parseInt(m.agility, 10) || 0; it.tone = 'var(--gold)'; }
+      // Rolled stats ("HP 2d8", "Morale d6+6", "HP d10") are rolled when the creature joins the fight.
+      const rollExpr = e => { const mm = /^(\d*)d(\d+)\s*([+-]\s*\d+)?$/i.exec(String(e || '').replace(/[−–]/g, '-').trim()); if(!mm) return null; let t = 0; for(let i = 0; i < (+mm[1] || 1); i++) t += 1 + Math.floor(Math.random() * +mm[2]); return t + (mm[3] ? parseInt(mm[3].replace(/\s+/g, ''), 10) : 0); };
+      const hpR = rollExpr(m.hpDice);
+      if(hpR != null) { it.hpCurrent = it.hpMax = Math.max(1, hpR); it.gmon.meta = it.gmon.meta.concat([['HP rolled', m.hpDice + ' → ' + it.hpMax]]); }
+      const moR = rollExpr(m.moraleDice);
+      if(moR != null) {
+        it.gmon.stats = it.gmon.stats.map(st => st.label === 'Morale' ? Object.assign({}, st, { val: String(moR) }) : st);
+        it.gmon.lines = it.gmon.lines.map(l => l.kind === 'pbmorale' ? Object.assign({}, l, { note: String(moR), text: '2d6 above ' + moR + ' breaks it (rolled ' + m.moraleDice + ') — d6: 1-3 flees, 4-6 surrenders' }) : l);
+      }
+    }
     return it;
   }
   const SW_WOUNDS = [['none','Unhurt'],['stunned','Stunned'],['wounded','Wounded'],['incapacitated','Incap.'],['mortal','Mortal']];
@@ -9302,7 +9469,7 @@ function init_trackers(root) {
     const q = pickerQuery.trim().toLowerCase();
     if(XS_SOURCES.indexOf(pickerSource) >= 0) {
       return xsBestiary(pickerSource).filter(m => {
-        if(pickerType && xsMonType(pickerSource, m) !== pickerType) return false;
+        if(pickerType && !xsTypeIs(pickerSource, m, pickerType)) return false;
         if(!q) return true;
         return String(m.name).toLowerCase().includes(q) || xsMonType(pickerSource, m).toLowerCase().includes(q);
       });
@@ -9330,8 +9497,11 @@ function init_trackers(root) {
 
   function pickerRowsHtml() {
     const found = pickerMatches();
-    const rows = found.slice(0, 60).map(m => {
-      const meta = XS_SOURCES.indexOf(pickerSource) >= 0
+    const cap = pickerSource === 'pb' ? 300 : 60;
+    const rows = found.slice(0, cap).map(m => {
+      const meta = pickerSource === 'pb'
+        ? escAttr([m.group, m._pbkind === 'ship' ? 'HP ' + m.hp + (m.hull ? ' · hull −' + m.hull.die : '') : 'HP ' + (m.hpText || m.hp) + ' · Morale ' + (m.morale == null ? '–' : m.morale), m.homebrew ? 'homebrew' : m.generated ? 'generated' : String(m.source || '').replace('The Curse of Skeleton Point', 'Skeleton Point').replace('Trapped in the Tropics', 'Tropics')].filter(Boolean).join(' · '))
+        : XS_SOURCES.indexOf(pickerSource) >= 0
         ? escAttr([xsMonType(pickerSource, m), pickerSource === 'nim' ? 'LV ' + m.level : '', pickerSource === 'ace' ? 'Health ' + m.health : '', pickerSource === 'sw' && m.book !== 'core' ? m.book : ''].filter(Boolean).join(' · '))
         : pickerSource === 'dcc'
         ? ('LV ' + escAttr(String(m.level != null ? m.level : '?')) + ' &middot; ' + escAttr(m.role || 'Mob') +
@@ -9343,7 +9513,7 @@ function init_trackers(root) {
       </button>`;
     }).join('');
     return (rows || (!srcHasBestiary() ? '<div class="mon-pick-empty">None Available</div>' : '<div class="mon-pick-empty">No monster matches that search.</div>')) +
-      (found.length > 60 ? `<div class="mon-pick-empty">Showing 60 of ${found.length} &mdash; keep typing to narrow it down.</div>` : '');
+      (found.length > cap ? `<div class="mon-pick-empty">Showing ${cap} of ${found.length} &mdash; keep typing to narrow it down.</div>` : '');
   }
 
   function wirePickerRows() {
@@ -9397,7 +9567,7 @@ function init_trackers(root) {
           <input type="text" class="mon-pick-search" placeholder="Search the bestiary..." value="${escAttr(pickerQuery)}">
           <select class="mon-pick-type">
             <option value="">${pickerSource === 'dcc' ? 'Any Role' : pickerSource === 'nim' ? 'Any Family' : pickerSource === 'sw' ? 'Any Group' : 'Any Type'}</option>
-            ${types.map(t => `<option value="${escAttr(t)}" ${t === pickerType ? 'selected' : ''}>${escAttr(t)}</option>`).join('')}
+            ${pickerSource === 'pb' ? pbTypeOptionsHtml(pickerType) : types.map(t => `<option value="${escAttr(t)}" ${t === pickerType ? 'selected' : ''}>${escAttr(t)}</option>`).join('')}
           </select>
         </div>
         <div class="mon-pick-list">${pickerRowsHtml()}</div>
@@ -12240,16 +12410,39 @@ function xsBestiary(src) {
 // crew-skill cards; picker group = the monster's group or category, or "Ship".
 function pbBestiary() {
   const arr = v => Array.isArray(v) ? v : [];
-  const M = arr(typeof PB_MONSTERS !== 'undefined' ? PB_MONSTERS : null).concat(arr(window.__PB_HB_MONSTERS).map(m => Object.assign({ homebrew: true }, m)));
-  const S = arr(typeof PB_SHIPS !== 'undefined' ? PB_SHIPS : null).concat(arr(window.__PB_HB_SHIPS).map(m => Object.assign({ homebrew: true }, m)));
-  const sig = M.length + '/' + S.length;
+  // PB_GM (pb-gm-tables.js) adds the captains' fleet ships, the sea monsters' Naval
+  // Combat forms and anything generated this session (pirates, enemies, ships at sea).
+  const G = window.PB_GM;
+  const M = G && G.monsters ? G.monsters() : arr(typeof PB_MONSTERS !== 'undefined' ? PB_MONSTERS : null).concat(arr(window.__PB_HB_MONSTERS).map(m => Object.assign({ homebrew: true }, m)));
+  const S = G && G.ships ? G.ships() : arr(typeof PB_SHIPS !== 'undefined' ? PB_SHIPS : null).concat(arr(window.__PB_HB_SHIPS).map(m => Object.assign({ homebrew: true }, m)));
+  const sig = M.length + '/' + S.length + '/' + arr(window.__PB_HB_MONSTERS).length + '/' + arr(window.__PB_HB_SHIPS).length + '/' + (window.__PB_GEN_SEQ || 0);
   if(pbBestiary._sig === sig) return pbBestiary._c;
   const cat = m => { const c = String(m.category || 'monster'); return c === 'npc' ? 'NPC' : c.charAt(0).toUpperCase() + c.slice(1); };
+  const shipGroup = s => s.seaMonster ? 'Sea Monster (naval)' : s.fleet ? 'Fleet Ship' : s.generated ? 'Generated Ship' : s.type === 'fortification' ? 'Fort' : 'Ship';
   pbBestiary._c = [].concat(
-    M.map(m => Object.assign({}, m, { _pbkind: 'monster', group: m.group || cat(m) })),
-    S.map(s => Object.assign({}, s, { _pbkind: 'ship', group: 'Ship' })));
+    M.map(m => Object.assign({}, m, { _pbkind: 'monster', group: m.generated ? 'Generated' : (m.group || cat(m)) })),
+    S.map(s => Object.assign({}, s, { _pbkind: 'ship', group: shipGroup(s), category: 'ship' })));
   pbBestiary._sig = sig;
   return pbBestiary._c;
+}
+// Pirate Borg picker facets: the group (gallery, captain, Skeleton Point NPCs…),
+// plus "cat:" (category) and "src:" (book) filters in the same select.
+function pbTypeOptionsHtml(cur) {
+  const B = pbBestiary(), e = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const uniq = a => [...new Set(a.filter(Boolean))];
+  const grp = uniq(B.map(m => m.group)), cats = uniq(B.map(m => m.category ? String(m.category) : '')), srcs = uniq(B.map(m => m.homebrew ? 'Homebrew' : m.generated ? 'Generated' : m.source));
+  const o = (v, l) => '<option value="' + e(v) + '"' + (v === cur ? ' selected' : '') + '>' + e(l) + '</option>';
+  return '<optgroup label="Group">' + grp.map(g => o(g, g)).join('') + '</optgroup>'
+    + '<optgroup label="Category">' + cats.map(c => o('cat:' + c, c === 'npc' ? 'NPC' : c.charAt(0).toUpperCase() + c.slice(1))).join('') + '</optgroup>'
+    + '<optgroup label="Book">' + srcs.map(x => o('src:' + x, x)).join('') + '</optgroup>';
+}
+function xsTypeIs(src, m, type) {
+  if(!type) return true;
+  if(src === 'pb') {
+    if(type.indexOf('cat:') === 0) return String(m.category || '') === type.slice(4);
+    if(type.indexOf('src:') === 0) { const b = type.slice(4); return b === 'Homebrew' ? !!m.homebrew : b === 'Generated' ? !!m.generated : (m.source === b || (Array.isArray(m.sources) && m.sources.some(x => x.source === b))); }
+  }
+  return xsMonType(src, m) === type;
 }
 // "d10 & d6" → ["1d10", "1d6"]; "d4+1" → ["1d4+1"].
 function pbDmgParts(d) { return String(d || '').split(/\s*(?:&|\band\b)\s*/i).map(x => x.trim()).filter(x => /\d*d\d+/i.test(x)).map(x => x.replace(/\s+/g, '').replace(/^d/i, '1d')); }
@@ -12369,16 +12562,37 @@ function xsMonSummary(src, m) {
       const dr = (m.dr && m.dr.attack) ? m.dr.attack : 12;
       if(ag != null) out.lines.push({ label: 'Ship initiative', text: 'd6 + AGILITY each round; PC ships win ties', roll: '1d6' + (ag ? (ag > 0 ? '+' : '') + ag : '') });
       if(sk != null) out.lines.push({ label: 'Crew action', text: 'd20 + CREW SKILL (+ a PC\'s ability) vs DR12', roll: String(sk), kind: 'pbtest', note: '12' });
+      // A sea monster's Naval Combat block: its attacks hit ships (subtract the hull die).
+      (Array.isArray(m.navalAttacks) ? m.navalAttacks : []).forEach(a => {
+        const dm = a.damage && /\d*d\d+/i.test(a.damage) ? String(a.damage).replace(/^d/i, '1d') : '';
+        out.lines.push({ label: a.name || 'Attack', text: [a.damage, a.notes].filter(Boolean).join(' · ') + (dm ? ' — against a ship: subtract its hull die' : ''), dmg: dm, note: dm ? 'ship damage' : '' });
+      });
+      if(m.seaMonster) {
+        const mv = m.morale == null ? null : parseInt(m.morale, 10);
+        out.stats.push({ label: 'Morale', val: mv == null ? '–' : String(mv) });
+        if(mv != null) out.lines.push({ label: 'Morale', text: '2d6 above ' + mv + ' breaks it — d6: 1-3 flees, 4-6 surrenders', roll: '2d6', kind: 'pbmorale', note: String(mv) });
+      }
       [['broadsides', 'broadsidesAttacks', 'Broadsides'], ['smallArms', 'smallArmsAttacks', 'Small arms'], ['ram', null, 'Ram']].forEach(([k, nk, l]) => {
         if(!m[k]) return; const n = nk && m[nk] > 1 ? m[nk] : 1;
         out.lines.push({ label: l + (n > 1 ? ' ×' + n : ''), text: m[k] + (k === 'ram' ? ' +1 per hex moved — all ships in a ram roll it' : ' — a hit subtracts the target\'s hull die; crit doubles and drops the hull a tier') + (dr !== 12 && k !== 'ram' ? ' · DR' + dr + ' to hit it' : ''), dmg: m[k].replace(/^d/i, '1d'), note: k === 'ram' ? 'ram damage' : 'ship damage (×5 vs people)' });
       });
       if(sk != null) out.lines.push({ label: 'Crew morale', text: '2d6 + crew skill; under 4 = surrender or mutiny', roll: '2d6', kind: 'pbshipmorale', note: String(sk) });
-      out.lines.push({ label: 'Derelict', text: 'At 0 HP or less: speed 0, no crew actions; roll d8 each time it takes more damage', roll: '1d8', kind: 'pbderelict' });
+      // Template traits (ghost ship, ship of bone, vessel from the deep, captains' fleets).
+      (Array.isArray(m.traits) ? m.traits : []).forEach(tr => {
+        if(tr.cheatDeath) out.lines.push({ label: tr.name, text: tr.text + ' (d20 vs DR' + (tr.cheatDeath.dr || 12) + ')', roll: '0', kind: 'pbtest', note: String(tr.cheatDeath.dr || 12) });
+        else if(tr.heal) out.lines.push({ label: tr.name, text: tr.text, roll: '1' + String(tr.heal).replace(/^1?d/i, 'd') });
+        else if(tr.summon && Array.isArray(tr.summon.rows)) out.lines.push({ label: tr.name, text: tr.text, roll: '1' + tr.summon.die.replace(/^1?d/i, 'd'), kind: 'pbrolltbl', table: tr.summon.rows.map(r => ({ rolls: Array.isArray(r.roll) ? r.roll : [+r.roll, +r.roll], name: r.text })) });
+        else out.lines.push({ label: tr.name, text: tr.text });
+      });
+      if(!m.seaMonster) out.lines.push({ label: 'Derelict', text: 'At 0 HP or less: speed 0, no crew actions; roll d8 each time it takes more damage', roll: '1d8', kind: 'pbderelict' });
       if(m.crew) out.meta.push(['Crew', m.crew.min + '–' + m.crew.max]);
       if(m.cargo != null) out.meta.push(['Cargo', String(m.cargo)]);
-      if(m.special) out.notes.push(m.special);
+      if(m.aboard != null) out.meta.push(['Aboard', String(m.aboard)]);
+      if(m.crewQuality) out.meta.push(['Crew', m.crewQuality]);
+      if(m.armament) out.meta.push(['Armament', m.armament]);
+      if(m.traits ? m.baseSpecial : m.special) out.notes.push(m.traits ? m.baseSpecial : m.special);
       if(m.text) out.notes.push(m.text);
+      out.notes.push(m.homebrew ? 'Homebrew' : m.generated ? 'Generated' : (m.source || '') + (m.page ? ' p.' + m.page : ''));
       out.pbShip = true;
       out.hp = parseInt(m.hp, 10) || 1;
       return out;
@@ -12386,7 +12600,7 @@ function xsMonSummary(src, m) {
     const dr = m.dr || {}, defW = m.defendWith && m.defendWith !== 'AGILITY' ? m.defendWith : 'AGILITY', defDR = dr.defend || 12;
     const mor = m.morale == null || m.morale === '' ? null : (parseInt(m.morale, 10) || 0);
     out.stats.push({ label: 'Armor', val: m.armor && m.armor.die ? '−' + String(m.armor.die).replace(/^[-−]/, '') : 'none' }, { label: 'Morale', val: mor == null ? '–' : String(mor) },
-      { label: 'To hit', val: 'DR' + (dr.attack || 12) }, { label: 'Defend', val: (defW === 'AGILITY' ? '' : ({ STRENGTH: 'STR', PRESENCE: 'PRE', TOUGHNESS: 'TOU', SPIRIT: 'SPI' }[defW] || defW.slice(0, 3)) + ' ') + 'DR' + defDR }, { label: 'HP', val: String(m.hp ?? '') });
+      { label: 'To hit', val: 'DR' + (dr.attack || 12) }, { label: 'Defend', val: (defW === 'AGILITY' ? '' : ({ STRENGTH: 'STR', PRESENCE: 'PRE', TOUGHNESS: 'TOU', SPIRIT: 'SPI' }[defW] || defW.slice(0, 3)) + ' ') + 'DR' + defDR }, { label: 'HP', val: m.hpText ? String(m.hpText) : String(m.hp ?? ''), roll: m.hpDice ? String(m.hpDice).replace(/^d/i, '1d') : '' });
     // The roll button reads "AGL DR12 · 1d6" (the PC's defense, then the damage); the
     // line text spells it out, with black powder / ignores-armor riders.
     const AB3 = { STRENGTH: 'STR', AGILITY: 'AGL', PRESENCE: 'PRE', TOUGHNESS: 'TOU', SPIRIT: 'SPI' };
@@ -12406,13 +12620,24 @@ function xsMonSummary(src, m) {
       else out.lines.push({ label: a.name || 'Attack', text: (txt || '—') + (parts[0] ? ' — ' + defText : ''), dmg: parts[0] || '', note: parts[0] ? defNote : '' });
     });
     (m.specials || []).forEach(sp => out.lines.push({ label: sp.name || 'Special', text: sp.text || '' }));
+    // In-block roll tables (belly of a seagull, albatross omen, despair…) — not attacks.
+    ['lootTable', 'omenTable', 'effectTable'].forEach(k => {
+      const t = m[k]; if(!t || !Array.isArray(t.rows) || !t.rows.length) return;
+      out.lines.push({ label: t.name || 'Table', text: (t.note && t.note !== t.name ? t.note + ' — ' : '') + t.rows.length + ' results', roll: String(t.die || 'd6').replace(/^d/i, '1d'), kind: 'pbrolltbl',
+        table: t.rows.map(r => ({ rolls: Array.isArray(r.roll) ? r.roll : [+r.roll, +r.roll], name: r.text || r.name || '' })) });
+    });
+    // A big sea creature's Naval Combat block (it also joins the naval panel and the bestiary as "(naval)").
+    if(m.naval) { const nv = m.naval; out.lines.push({ label: 'Naval Combat', text: 'HP ' + nv.hp + ' · Morale ' + (nv.morale == null ? '–' : nv.morale) + ' · ' + (nv.armor ? (nv.armor.name || 'Armor') + ' −' + nv.armor.die : 'no armor') + ' · Speed ' + nv.speed + ' · AGL ' + sg(nv.agility || 0) + ' — ' + (nv.attacks || []).map(a => a.name + (a.damage ? ' ' + a.damage : '') + (a.notes ? ' (' + a.notes + ')' : '')).join(', ') }); }
     if(m.attacksPerRound && m.attacksPerRound !== 1) out.meta.push(['Attacks', m.attacksPerRound + ' a round']);
-    if(m.attackChoice) out.meta.push(['Attacks', 'one of these each round']);
+    if(m.attackChoice) out.meta.push(['Attacks', m.attackChoice === 'pick 1-2' ? 'armed with 1 or 2 of these' : 'one of these each round']);
+    if(m.moraleText && String(m.moraleText) !== String(m.morale)) out.meta.push(['Morale', String(m.moraleText)]);
+    if(m.drNote) out.notes.push(m.drNote);
+    if(m.armorNote) out.notes.push(m.armorNote);
     if(m.count) out.meta.push(['Appears', String(m.count)]);
     if(Array.isArray(m.loot) && m.loot.length) out.meta.push(['Loot', m.loot.map(l => l.name + (l.value ? ' ' + l.value : '')).join(', ')]);
     if(m.armor && m.armor.name) out.meta.push(['Armor', m.armor.name + ' −' + m.armor.die]);
     if(m.text) out.notes.push(m.text);
-    out.notes.push(m.homebrew ? 'Homebrew' : (m.source || '') + (m.page ? ' p.' + m.page : ''));
+    out.notes.push(m.homebrew ? 'Homebrew' : m.generated ? 'Generated' : (m.source || '') + (m.page ? ' p.' + m.page : ''));
     out.hp = parseInt(m.hp, 10) || 1;
   } else if(src === 'db') {
     // Dragonbane. Monsters: Ferocity (initiative cards a round) + a D6 attack table
@@ -12880,7 +13105,7 @@ function prepStatblockToItem(sb, sys, id) {
 }
 window.prepStatblockToItem = prepStatblockToItem;
 // The tracker (a separate script) uses these too.
-window.xsBestiary = xsBestiary; window.xsMonType = xsMonType; window.xsMonTypes = xsMonTypes; window.xsMonSummary = xsMonSummary;
+window.xsBestiary = xsBestiary; window.xsMonType = xsMonType; window.xsMonTypes = xsMonTypes; window.xsMonSummary = xsMonSummary; window.xsTypeIs = xsTypeIs; window.pbTypeOptionsHtml = pbTypeOptionsHtml;
 function xsMonGenCard(src, m, opts) {
   const sum = xsMonSummary(src, m);
   const stats = sum.stats.map(st => monsterStat(st.label, st.val)).join('');
@@ -12900,7 +13125,7 @@ function lotrCrBand(cr, band) {
   return band === 'low' ? v <= 1 : band === 'mid' ? (v >= 2 && v <= 3) : band === 'high' ? v >= 4 : true;
 }
 function genXsMonster(src, type, band) {
-  const pool = xsBestiary(src).filter(m => (!type || xsMonType(src, m) === type) && (!band || (src === 'lotr' ? lotrCrBand(m.cr, band) : dccLevelMatch({ level: String(m.level || '0').includes('/') ? 0 : m.level }, band))));
+  const pool = xsBestiary(src).filter(m => xsTypeIs(src, m, type) && (!band || (src === 'lotr' ? lotrCrBand(m.cr, band) : dccLevelMatch({ level: String(m.level || '0').includes('/') ? 0 : m.level }, band))));
   if(!pool.length) return card('<div class="gen-empty">No entry matches those filters.</div>');
   return xsMonGenCard(src, pool[Math.floor(Math.random() * pool.length)], { send: true });
 }
@@ -14673,7 +14898,7 @@ window.init_gen = function(root) {
   const DB_TABLE_GENS = ['dbnpc', 'dbadventure', 'dbjourney', 'dbattack', 'dbfear', 'dbinjury', 'dbmishap', 'dbdemon', 'dbtrap', 'dbleaving'];
   try { if(typeof window.dbPrimePanels === 'function') window.dbPrimePanels(root); } catch(e) {}
   // Pirate Borg GM suite (public/tools-data/pb-gm-tables.js → window.pbGenPanel).
-  const PB_TABLE_GENS = ['pbnpc', 'pbnaval', 'pbrules', 'pbmorale', 'pbreaction', 'pbmaritime', 'pbweather', 'pbplunder', 'pbtrap', 'pbbroken', 'pbmisfire', 'pbdead', 'pbrelic', 'pbritual', 'pbmishap', 'pbjoker', 'pbshanty', 'pbderelict', 'pbzombie'];
+  const PB_TABLE_GENS = ['pbnpc', 'pbnaval', 'pbrules', 'pbmorale', 'pbreaction', 'pbmaritime', 'pbweather', 'pbplunder', 'pbtrap', 'pbbroken', 'pbmisfire', 'pbdead', 'pbrelic', 'pbritual', 'pbmishap', 'pbjoker', 'pbshanty', 'pbderelict', 'pbzombie', 'pbtables', 'pbpirate', 'pbenemy', 'pbshipsea', 'pbcaptain', 'pbwreck', 'pbisland', 'pbmap', 'pbcargo', 'pbash', 'pbjob', 'pbrumor', 'pbtravel', 'pbalchemy', 'pbmotive', 'pbcarouse', 'pbloot'];
   try { if(typeof window.pbPrimePanels === 'function') window.pbPrimePanels(root); } catch(e) {}
   // Homebrew ships / creatures land after the panels exist — refill the pickers then.
   setTimeout(() => { try { if(typeof window.pbPrimePanels === 'function') window.pbPrimePanels(root); } catch(e) {} }, 2500);
@@ -14689,6 +14914,7 @@ window.init_gen = function(root) {
   // Type facets for the ACE / Nimble / SW / D&D monster generators come from the data.
   [['ace','#gen-acemon-type'],['nim','#gen-nimmon-family'],['sw','#gen-swmon-group'],['dnd','#gen-dndmon-group'],['d62e','#gen-d62emon-kind'],['icrpg','#gen-icrpgmon-tier'],['mmrpg','#gen-mmrpgmon-kind'],['yze','#gen-yzemon-group'],['twd','#gen-twdmon-group'],['vae','#gen-vaemon-group'],['myz','#gen-myzmon-group'],['lotr','#gen-lotrmon-group'],['db','#gen-dbmon-group'],['pb','#gen-pbmon-group']].forEach(([src, id]) => {
     const sel = root.querySelector(id); if(!sel) return;
+    if(src === 'pb') { sel.innerHTML = sel.options[0].outerHTML + pbTypeOptionsHtml(''); return; }
     sel.innerHTML = sel.options[0].outerHTML + xsMonTypes(src).map(t => '<option value="' + dccSendAttr(t) + '">' + esc(t) + '</option>').join('');
   });
   function showGenPanel(name) {
@@ -17929,6 +18155,13 @@ function init_dice(root) {
       const r = 1 + Math.floor(Math.random() * 8), T = (typeof PB_GM_TABLES !== 'undefined' && PB_GM_TABLES && PB_GM_TABLES.derelict) ? PB_GM_TABLES.derelict : null;
       const row = T ? T.rows.find(x => Array.isArray(x.roll) ? r >= x.roll[0] && r <= x.roll[1] : +x.roll === r) : null;
       return gmLog(label, r + ' · ' + (row ? row.text : ''), 'd8(' + r + ') · derelict takes more damage', r >= 3 ? 'fumble' : '');
+    }
+    if(kind === 'pbrolltbl' && Array.isArray(spec.table) && spec.table.length) {
+      // An in-block table (dN): roll the die and read the row.
+      const mm = /^(\d*)d(\d+)$/i.exec(String(expr || '1d6')); const sides = mm ? +mm[2] : 6, n = mm ? (+mm[1] || 1) : 1;
+      let v = 0; const parts = []; for(let i = 0; i < n; i++) { const x = 1 + Math.floor(Math.random() * sides); parts.push(x); v += x; }
+      const t = spec.table.find(x => { const g = x.rolls || [x.roll, x.roll]; return v >= g[0] && v <= g[1]; }) || spec.table[0];
+      return gmLog(label, v + ' · ' + (t.name || '—'), (n > 1 ? n : '') + 'd' + sides + '(' + parts.join(',') + ') · ' + (t.name || ''), '');
     }
     if(kind === 'pbtable' && Array.isArray(spec.table) && spec.table.length) {
       const v = d6(), t = spec.table.find(x => { const g = x.rolls || [x.roll, x.roll]; return v >= g[0] && v <= g[1]; }) || spec.table[0];

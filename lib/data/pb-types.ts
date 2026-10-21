@@ -11,7 +11,7 @@
 
 export type PbAbilityId = "STRENGTH" | "AGILITY" | "PRESENCE" | "TOUGHNESS" | "SPIRIT";
 export type PbAbilityMods = Record<PbAbilityId, number>;
-export type PbSourceName = "Player's Guidebook" | "Trapped in the Tropics" | "Homebrew" | string;
+export type PbSourceName = "Player's Guidebook" | "Core Rules" | "The Curse of Skeleton Point" | "Trapped in the Tropics" | "Homebrew" | string;
 /** A die roll result or inclusive range, e.g. 4 or [1, 20]. */
 export type PbRoll = number | [number, number];
 
@@ -176,4 +176,86 @@ export interface PbShip {
   skill: number | null; skillNote?: string; broadsides: string | null; smallArms: string | null; ram: string | null;
   crew: { min: number; max: number } | null; cargo: number | null; special: string | null;
   text: string; source: PbSourceName; page: number; homebrew: boolean; [k: string]: unknown;
+}
+
+// ---- Core Rules additions (pg. 2-3, 8-25, 70-71, 79-127, 128-161) ------------------------------------
+// Sources now include "Core Rules" and "The Curse of Skeleton Point" (the module inside the Core Rules).
+// PbMonster entries may also carry (all optional, already allowed by its index signature):
+//   sources?: { source, page, note? }[]  — every book the block appears in (primary = `source`/`page`)
+//   group?: string; roll?: number         — gallery/table the creature belongs to (e.g. "Dark Fauna: Aquatic", d7 roll)
+//   hpText?, hpDice?, moraleText?, moraleDice? — rolled or non-numeric stats ("2d8", "d6+6", "4 each", "N/A")
+//   attackChoice?: "one of" | "pick 1-2"; attacksPerRound?; count?   — customisable minions and group sizes
+//   naval?: PbMonsterNaval                — sea monster's Naval Combat block
+//   loot?: { name, value, note? }[]; lootTable? / omenTable? / effectTable?: { die, name, note, rows }  — NOT attacks
+//   drNote?, armorNote?, captain?, hazard?, boss?, named?, spells?
+export interface PbSourceRef { source: PbSourceName; page: number; note?: string }
+export interface PbMonsterNaval { hp: number; morale: number | null; armor: PbArmor | null; speed: number; agility: number; attacks: PbAttack[] }
+export interface PbGenerator { page: number; source: PbSourceName; note?: string; tables: Record<string, PbTable>; [k: string]: unknown }
+
+export interface PbAsh {
+  page: number; source: PbSourceName; text: string; dose: { text: string; standardRate: number }; marketNote: string;
+  market: PbTable; effects: PbTable & { duration: string }; notes: string[];
+}
+export interface PbAlchemyRow {
+  roll: number; ingredientA: string; ingredientB: string; color: string; delivery: "Inhalation" | "Touch Skin" | "Enter Bloodstream" | "Ingestion";
+  dr: number; effect: string; [k: string]: unknown;
+}
+export interface PbAlchemy {
+  page: number; source: PbSourceName; methods: { id: string; name: string; text: string }[]; notes: string[];
+  cost: string; resistAbility: PbAbilityId; craftAbility: PbAbilityId;
+  deliveryBands: { roll: [number, number]; name: string }[]; drBands: { roll: [number, number]; dr: number }[]; rows: PbAlchemyRow[];
+}
+export interface PbTravelEvents { page: number; source: PbSourceName; note: string; flotsam: PbTable; encounters: PbTable; events: PbTable }
+export interface PbShipsAtSea {
+  page: number; source: PbSourceName; note: string;
+  vesselClass: PbTable; armament: PbTable; crewQuantity: PbTable; crewQuality: PbTable; name: PbTable;
+}
+export interface PbCargo {
+  page: number; source: PbSourceName; note: string; marketSwing: number;
+  mundane: PbTable; special: PbTable; plotTwist: PbTable; marketRates: { ashStandardRate: number; text: string };
+}
+export interface PbTreasureMaps extends PbGenerator { riddles: PbTable }
+export interface PbPirateGen {
+  page: number; source: PbSourceName; note: string;
+  procedure: { dice: string; morale: string; hp: string; mightyHp: string; armorByHighestTable: Record<"A" | "B" | "C", PbArmor | null>; silver: string };
+  tableA: PbTable; tableB: PbTable; tableC: PbTable; names: string;
+}
+export interface PbPlace { id: string; name: string; page: number; faction?: string; text: string }
+export interface PbSetting {
+  page: number; source: PbSourceName; name: string; summary: string; scourge: string; ash: string;
+  map: { page: number; places: string[]; scale: string }; places: PbPlace[];
+}
+export interface PbFaction { id: string; name: string; aka?: string[]; page: number; seat: string; source: PbSourceName; text: string }
+export interface PbCaptain {
+  id: string; name: string; page: number; source: PbSourceName; faction?: string; text: string;
+  /** PB_MONSTERS ids */ captain: string; officers: string[]; crew: string[];
+  /** PB_SHIP_TEMPLATES id */ ships: string; /** PB_SHIPS ids */ vessels: string[]; aboard: string;
+}
+export interface PbShipTrait { name: string; text: string; [k: string]: unknown }
+/** "Use the base stats of another vessel": a modifier applied on top of a PB_SHIPS entry. */
+export interface PbShipTemplate {
+  id: string; name: string; page: number; source: PbSourceName; text: string; traits: PbShipTrait[];
+  undead?: boolean; captain?: string; baseShips?: string[]; template?: string;
+}
+export interface PbMarrowCannons { page: number; source: PbSourceName; author: string; text: string; monsters: string[] }
+export interface PbEnemyBuilder {
+  page: number; source: PbSourceName; note: string; procedure: ("hp" | "morale" | "armor" | "damage" | "special")[];
+  tables: Record<"hp" | "morale" | "armor" | "damage" | "special", PbTable>;
+  variants: Record<string, { page?: number; ids: string[]; rule?: string; note?: string; appearanceTable?: string }>;
+}
+export interface PbModuleNpc {
+  id: string; name: string; role: string; page: number; source: PbSourceName; monster: string;
+  wants?: string; doing?: { die: string; rows: PbRollEntry[] };
+}
+export interface PbModuleLocation {
+  id: string; num?: number; name: string; page: number; text: string; areas?: string[];
+  levels?: { name: string; page: number; areas: string[] }[];
+}
+export interface PbShopItem { name: string; cost?: number; costText?: string; [k: string]: unknown }
+export interface PbModule {
+  id: string; name: string; page: number; source: PbSourceName; book: PbSourceName;
+  overview: string; secret: string; starts: string[]; reward: string;
+  plotHooks: PbTable; development: PbTable; npcs: PbModuleNpc[]; locations: PbModuleLocation[];
+  shop: { id: string; name: string; page: number; source: PbSourceName; note: string; relics: PbShopItem[]; rituals: PbShopItem[]; potions: PbShopItem[] };
+  tables: Record<string, PbTable>;
 }

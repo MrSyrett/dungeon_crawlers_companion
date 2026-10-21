@@ -196,7 +196,14 @@ const dbCostTxt = (d: Data): string => { const c = (d.cost ?? null) as Data | nu
 const PB_TIER_OPTS: readonly Opt[] = [["0", "Tier 0 — no protection"], ["1", "Tier 1 (light) −d2"], ["2", "Tier 2 (medium) −d4"], ["3", "Tier 3 (heavy) −d6"]];
 const PB_MON_DIE_OPTS: readonly Opt[] = [["", "No armor"], ["d2", "−d2"], ["d4", "−d4"], ["d6", "−d6"], ["d8", "−d8"], ["d10", "−d10"], ["d12", "−d12"]];
 const PB_HULL_OPTS: readonly Opt[] = [["", "None"], ["d2", "Tier 1 −d2"], ["d4", "Tier 2 −d4"], ["d6", "Tier 3 −d6"]];
-const PB_MON_CAT_OPTS: readonly Opt[] = [["npc", "NPC"], ["undead", "Undead"], ["beast", "Beast"], ["spirit", "Spirit"], ["monster", "Monster"]];
+const PB_MON_CAT_OPTS: readonly Opt[] = [["npc", "NPC"], ["undead", "Undead"], ["beast", "Beast"], ["spirit", "Spirit"], ["monster", "Monster"], ["flora", "Flora"], ["construct", "Construct"]];
+// The naval block's form fields from a stored record (empty when it has none).
+function pbNavalForm(n: Data | undefined): Data {
+  if (!n) return { navalHp: "", navalMorale: "", navalArmorName: "", navalArmorDie: "", navalSpeed: "", navalAgility: "", navalAttacks: [] };
+  const a = (n.armor ?? null) as Data | null;
+  return { navalHp: n.hp ?? "", navalMorale: n.morale == null ? "–" : String(n.morale), navalArmorName: a?.name ?? "", navalArmorDie: a?.die ?? "", navalSpeed: n.speed ?? "", navalAgility: n.agility ?? "", navalAttacks: n.attacks ?? [] };
+}
+const PB_CHOICE_OPTS: readonly Opt[] = [["", "Uses all its attacks"], ["one of", "Uses ONE of its attacks each round"], ["pick 1-2", "Choose 1 or 2 (a weapon list for minions)"]];
 const PB_ABIL_OPTS: readonly Opt[] = [["AGILITY", "AGILITY (default)"], ["STRENGTH", "STRENGTH"], ["PRESENCE", "PRESENCE"], ["TOUGHNESS", "TOUGHNESS"], ["SPIRIT", "SPIRIT"]];
 const pbSigned = (v: unknown): string => { const n = typeof v === "number" ? v : NaN; return Number.isFinite(n) ? (n > 0 ? `+${n}` : n < 0 ? `−${-n}` : "±0") : "—"; };
 
@@ -1070,14 +1077,16 @@ const SCHEMAS: Record<string, Schema> = {
       { key: "category", label: "Category", type: "select", options: PB_MON_CAT_OPTS },
       { key: "group", label: "Group", type: "text", placeholder: "Redcoats, Zombies…" },
       { key: "hp", label: "HP", type: "number", placeholder: "8" },
+      { key: "hpText", label: "HP as printed (if rolled)", type: "text", placeholder: "2d8, 4 each" },
       { key: "morale", label: "Morale (2–12, or – to never break)", type: "text", placeholder: "7" },
+      { key: "count", label: "Appears in groups of", type: "text", placeholder: "2d4" },
       { key: "armorName", label: "Armor name", type: "text", placeholder: "Leather Vest, Thick Shell" },
       { key: "armorDie", label: "Armor die", type: "select", options: PB_MON_DIE_OPTS },
       { key: "drAttack", label: "DR for PCs to hit it", type: "number", placeholder: "12" },
       { key: "drDefend", label: "DR for PCs to defend", type: "number", placeholder: "12" },
       { key: "defendWith", label: "PCs defend with", type: "select", options: PB_ABIL_OPTS },
       { key: "attacksPerRound", label: "Attacks per round", type: "text", placeholder: "1, 2, 1 per 2 PCs" },
-      { key: "attackChoice", label: "Uses ONE of its attacks each round", type: "checkbox" },
+      { key: "attackChoice", label: "Attacks", type: "select", options: PB_CHOICE_OPTS },
       { key: "blackPowder", label: "Has black powder weapons (ignore armor)", type: "checkbox" },
       { key: "ignoresArmor", label: "Its attacks ignore armor", type: "checkbox" },
       { key: "boss", label: "Boss", type: "checkbox" },
@@ -1091,11 +1100,27 @@ const SCHEMAS: Record<string, Schema> = {
         { key: "name", label: "Name", type: "text", placeholder: "Quick" },
         { key: "text", label: "Effect", type: "textarea", placeholder: "DR14 to attack and defend against." },
       ] },
+      { key: "loot", label: "Loot (sellable parts)", type: "objectList", full: true, addLabel: "+ Loot", fields: [
+        { key: "name", label: "Item", type: "text", placeholder: "Snake skin" },
+        { key: "value", label: "Value", type: "text", placeholder: "5s" },
+      ] },
+      { key: "navalHp", label: "Naval block: HP (sea monsters)", type: "number", placeholder: "40" },
+      { key: "navalMorale", label: "Naval block: Morale", type: "text", placeholder: "same as above" },
+      { key: "navalArmorName", label: "Naval block: armor name", type: "text", placeholder: "Barnacled hide" },
+      { key: "navalArmorDie", label: "Naval block: armor die", type: "select", options: PB_MON_DIE_OPTS },
+      { key: "navalSpeed", label: "Naval block: speed", type: "number", placeholder: "4" },
+      { key: "navalAgility", label: "Naval block: agility", type: "number", placeholder: "1" },
+      { key: "navalAttacks", label: "Naval block: attacks", type: "objectList", full: true, addLabel: "+ Naval attack", fields: [
+        { key: "name", label: "Name", type: "text", placeholder: "Ram" },
+        { key: "damage", label: "Damage", type: "text", placeholder: "2d8" },
+        { key: "notes", label: "Notes", type: "text", placeholder: "the ship can't move" },
+      ] },
     ],
     blank: () => ({ category: "monster", hp: 5, morale: "7", defendWith: "AGILITY", attacks: [{ name: "", damage: "d6" }], specials: [] }),
     toForm: (d) => { const a = (d.armor ?? null) as Data | null; const dr = (d.dr ?? {}) as Data;
-      return { ...d, morale: d.morale == null ? "–" : String(d.morale), armorName: a?.name ?? "", armorDie: a?.die ?? "", drAttack: dr.attack ?? "", drDefend: dr.defend ?? "", defendWith: d.defendWith ?? "AGILITY", attacksPerRound: d.attacksPerRound ?? "", attackChoice: !!d.attackChoice }; },
-    summary: (d) => `HP ${sv(d, "hp")} · Morale ${d.morale == null ? "–" : sv(d, "morale")}`,
+      return { ...d, morale: d.morale == null ? "–" : String(d.morale), armorName: a?.name ?? "", armorDie: a?.die ?? "", drAttack: dr.attack ?? "", drDefend: dr.defend ?? "", defendWith: d.defendWith ?? "AGILITY", attacksPerRound: d.attacksPerRound ?? "", attackChoice: d.attackChoice === "pick 1-2" ? "pick 1-2" : d.attackChoice ? "one of" : "",
+        hpText: d.hpText ?? "", count: d.count ?? "", loot: d.loot ?? [], ...pbNavalForm(d.naval as Data | undefined) }; },
+    summary: (d) => `HP ${sv(d, "hpText") || sv(d, "hp")} · Morale ${d.morale == null ? "–" : sv(d, "morale")}${d.naval ? " · naval block" : ""}`,
   },
   "pb-ship": {
     title: "Homebrew Ships", noun: "Ship",

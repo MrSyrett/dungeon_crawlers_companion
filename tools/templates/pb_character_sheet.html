@@ -24,6 +24,8 @@
    relics / rituals / prayers / sorcerer spells, and "Getting Better" instead of levels.
    Data: /tools-data/pb-data.js (window.PB_*). Builder: pb-sheet-builder.js (window.PBB);
    Getting Better: pb-advance.js (window.PBADV); homebrew loader: pb-homebrew.js (window.PBHB).
+   Core Rules additions: alchemy potions (pg. 70) and ASH (pg. 10) as Action-tab consumables,
+   timed effects in the Time panel, Carousing (pg. 2), Loot the Body (pg. 3) and Among the Dead.
    Palette: blood red on black (dark, default) / bone (light), over the splatter grounds.
    Fonts: JSL Blackletter (masthead + section titles), 1651 Alchemy (labels — its
    numerals are old-style and it lacks < > ^ ~ { } \, so the label face below is
@@ -376,7 +378,9 @@ body.dark .eq-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
   #wpn-tbl tbody td,#cloth-tbl tbody td{border:none;padding:2px 4px;}
   #wpn-tbl td:nth-child(1),#cloth-tbl td:nth-child(1){grid-area:p;}#wpn-tbl td:nth-child(2),#cloth-tbl td:nth-child(2){grid-area:n;}#wpn-tbl td:nth-child(3),#cloth-tbl td:nth-child(3){grid-area:d;}#wpn-tbl td:nth-child(4),#cloth-tbl td:nth-child(4){grid-area:x;text-align:right;}
   #wpn-tbl td[colspan],#cloth-tbl td[colspan]{grid-column:1/-1;}
-  #inv-tbl tbody tr{display:grid;grid-template-columns:1fr 50px 50px auto;grid-template-areas:"n q s x" "c c o o";border-bottom:1px solid var(--rule);}
+  #inv-tbl tbody tr{display:grid;grid-template-columns:minmax(0,1fr) 46px 46px 36px;grid-template-areas:"n q s x" "c o o o";border-bottom:1px solid var(--rule);}
+  #inv-tbl tbody td{min-width:0;}
+  #inv-tbl td:nth-child(5) input{min-width:0!important;width:100%!important;}
   #inv-tbl tbody td{border:none;}
   #inv-tbl td:nth-child(1){grid-area:n;}#inv-tbl td:nth-child(2){grid-area:q;}#inv-tbl td:nth-child(3){grid-area:s;}#inv-tbl td:nth-child(4){grid-area:c;}#inv-tbl td:nth-child(5){grid-area:o;}#inv-tbl td:nth-child(6){grid-area:x;}
   #inv-tbl td[colspan]{grid-column:1/-1;}
@@ -533,7 +537,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
           <table class="tbl" id="wpn-tbl"><thead><tr><th style="width:30px;"></th><th style="width:34%;">Weapon</th><th>Damage · notes</th><th style="width:88px;"></th></tr></thead><tbody id="wpn-body"></tbody></table>
           <div class="section-bar" style="margin-top:6px;"><span>Clothing &amp; Hats</span><span class="hdr-right"><span class="sb-note">● worn · don't count toward carrying</span><button class="hdr-btn" onclick="openPicker('clothing')">＋ Clothing / Hat</button></span></div>
           <table class="tbl" id="cloth-tbl"><thead><tr><th style="width:30px;"></th><th style="width:34%;">Item</th><th>Protection · penalties</th><th style="width:88px;"></th></tr></thead><tbody id="cloth-body"></tbody></table>
-          <div class="section-bar" style="margin-top:6px;"><span>Inventory</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('gear')">＋ Gear / Shop</button><button class="hdr-btn" onclick="addCustomItem()">＋ Custom</button></span></div>
+          <div class="section-bar" style="margin-top:6px;"><span>Inventory</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('gear')">＋ Gear / Shop</button><button class="hdr-btn" onclick="openAlchemy()" title="An alchemical potion: roll it on the Alchemy Potion Generator or enter it">＋ Potion</button><button class="hdr-btn" onclick="openAshAdd()" title="Doses of ASH (the dust of destroyed undead)">＋ ASH</button><button class="hdr-btn" onclick="addCustomItem()">＋ Custom</button></span></div>
           <div class="enc" id="enc"></div>
           <table class="tbl" id="inv-tbl"><thead><tr><th style="width:34%;">Item</th><th style="width:50px;">Qty</th><th style="width:50px;" title="How many of your 8 + STRENGTH carrying slots it takes">Slots</th><th style="width:22%;">Stowed in</th><th>Note / uses</th><th style="width:30px;"></th></tr></thead><tbody id="inv-body"></tbody></table>
           <div class="subhead">Silver</div>
@@ -541,6 +545,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
             <label>Silver <input type="number" id="c-silver" class="no-spin" data-nolock oninput="onSilver()"></label>
             <span class="tray-note" id="coin-note" style="color:var(--muted);"></span>
           </div>
+          <div class="section-bar" style="margin-top:6px;"><span>Plunder &amp; Shore Leave</span><span class="sb-note">found items and silver go straight into your inventory</span></div>
+          <div id="plunder"></div>
         </div>
 
         <div class="tab-panel" id="tab-background">
@@ -657,7 +663,7 @@ function blankState(){ return {
   prot:[], light:null,
   combat:{on:false, round:1, action:false, side:'', init:null, liars:null, eldritch:'', kills:0, inspire:null, reloaded:false},
   day:{ghost:false, breath:false, blood:false},
-  deck:[], subtab:'action', built:false, campaign:null }; }
+  deck:[], timed:[], subtab:'action', built:false, campaign:null }; }
 var S=blankState();
 var TR={dr:12, luckDR:false, luckMax:false, luckSoak:false};   // one-shot modifiers for the next roll
 
@@ -713,6 +719,7 @@ function tempAbil(a){ var t=[];
   if(a==='AGILITY'&&num(S.grog.drinks)>0) t.push({v:-num(S.grog.drinks),l:'grog ×'+num(S.grog.drinks)});
   if(a==='PRESENCE'&&num(S.cond.brain)>0) t.push({v:-3,l:'brain injury'});
   if(a==='TOUGHNESS'&&hasAilment('vampirism')&&S.cond.sunlight) t.push({v:-2,l:'sunlight'});
+  timedFx('abil').forEach(function(x){ var v=num(x.fx.abil[a]); if(v) t.push({v:v,l:x.name}); });
   return t; }
 function abil(a){ var v=baseAbil(a); tempAbil(a).forEach(function(t){ v+=t.v; }); return clamp(v,-3,6); }
 
@@ -721,7 +728,7 @@ function items(kind){ return S.items.filter(function(x){ return !kind||x.kind===
 function itemBy(u){ return S.items.find(function(x){ return x.uid===u; })||null; }
 function wornClothing(){ return S.items.find(function(x){ return x.kind==='clothing'&&x.equipped&&!x.ruined; })||null; }
 function wornHat(){ return S.items.find(function(x){ return x.kind==='hat'&&x.equipped&&!x.broken; })||null; }
-function armorTier(){ var c=wornClothing(); var t=c?num(c.tier):0; if(has('thick-skinned')) t=Math.max(t,1); return clamp(t,0,3); }
+function armorTier(){ var c=wornClothing(); var t=c?num(c.tier):0; if(has('thick-skinned')) t=Math.max(t,1); timedFx('armorTier').forEach(function(x){ t=Math.max(t,num(x.fx.armorTier)); }); return clamp(t,0,3); }
 function armorDie(){ return DIE_BY_TIER[armorTier()]; }
 function agilityPenalty(){ var c=wornClothing(); return c?num(c.agilityDR):0; }
 function defensePenalty(){ var c=wornClothing(); return c?num(c.defenseDR):0; }
@@ -768,6 +775,8 @@ function addRitual(id){ var d=ritualDef(id); if(!d) return null; if(!S.rituals.s
 // A weapon / clothing / hat / bomb / ammo / gear row by (any) name: the creation wizard,
 // background items and loot claims all land here.
 function addByName(name,qty,note){ qty=qty||1; var n=String(name||'').trim(); if(!n) return 'none';
+  if(/\bASH\b/.test(n)){ addAsh(qty); return 'ash'; }   // "ASH", "2 doses of ASH" (the capitalised word — not "ashes")
+  if(/\bpotion\b/i.test(n)&&!gearDef(n)){ for(var pi=0;pi<qty;pi++) S.items.push(potionByName(n,note)); return 'potion'; }
   var w=weaponDef(n); if(w){ for(var i=0;i<qty;i++) S.items.push(mkWeapon(w,{equipped:equippedWeapons().length<3,note:note||''})); if(w.blackPowder&&!ammoCount('shot')) addShot(Math.max(1,10+abil('PRESENCE'))); return 'weapon'; }
   var c=clothingDef(n); if(c){ var wear=!wornClothing(); S.items.push(mkClothing(c,{equipped:wear})); return 'clothing'; }
   var h=hatDef(n); if(h&&!h.none){ var wh=!wornHat(); S.items.push(mkHat(h,{equipped:wh})); return 'hat'; }
@@ -865,9 +874,10 @@ function renderStatus(){
   if(isMerfolk()) chip(C.underwater,'Underwater',"toggleCond('underwater')",'Merfolk: all DRs −4 underwater');
   if(hasAilment('vampirism')) chip(C.sunlight,'In sunlight',"toggleCond('sunlight')",'Vampirism: −2 TOUGHNESS in sunlight');
   chip(C.invisible,'Invisible',"toggleCond('invisible')",'Necklace of Eyeballs: attack and defend at DR6 until you attack or take damage');
+  A(S.timed).forEach(function(t){ chip(true,esc(t.name)+' · <b>'+esc(fmtLeft(t.left))+'</b>',"openTimePanel()",t.src+(t.text?': '+t.text:'')+' — click for the Time panel'); });
   if(overEnc()) cs.push('<span class="cs on" title="STRENGTH and AGILITY tests +2 DR">Over-encumbered</span>');
   $('cond-sum').innerHTML=cs.join('');
-  var n=0; ['starving','infected','stunned','underwater','sunlight','invisible'].forEach(function(k){ if(C[k]) n++; }); if(num(C.hemorrhage)) n++; if(num(C.brain)) n++; if(num(C.out)) n++;
+  var n=A(S.timed).length; ['starving','infected','stunned','underwater','sunlight','invisible'].forEach(function(k){ if(C[k]) n++; }); if(num(C.hemorrhage)) n++; if(num(C.brain)) n++; if(num(C.out)) n++;
   $('cond-count').textContent=n?n+' active':'none';
 }
 function isMerfolk(){ return S.classId==='tall-tale'&&S.origin.variant==='merfolk'; }
@@ -957,6 +967,7 @@ function renderGear(){
     var sel='<select onchange="onItem(\''+x.uid+'\',\'in\',this.value)" data-nolock><option value="">on you</option>'+conts.filter(function(k){ return k.uid!==x.uid; }).map(function(k){ return '<option value="'+k.uid+'"'+(x.in===k.uid?' selected':'')+'>'+esc(k.name)+'</option>'; }).join('')+'</select>';
     var extra=''; if(x.container){ var f=containerFill(x); extra='<span class="tag'+(x.capacity!=null&&f>x.capacity?' warn':'')+'">holds '+f+(x.capacity!=null?'/'+x.capacity:'')+'</span><label style="font-size:12px;color:var(--muted);white-space:nowrap;"><input type="checkbox" data-nolock style="width:auto;" '+(x.carried!==false?'checked':'')+' onchange="onItem(\''+x.uid+'\',\'carried\',this.checked)"> carried</label> '; }
     if(x.kind==='ammo') extra+='<span class="tag">ammo</span>'; if(x.kind==='bomb') extra+='<span class="tag">bomb '+esc(x.dmg||'')+'</span>';
+    if(x.kind==='potion') extra+='<span class="tag" title="'+esc(potionSummary(x.potion,true))+'">potion'+(x.potion&&x.potion.known?'':' · unknown')+'</span>'; if(x.kind==='ash') extra+='<span class="tag">ASH · doses</span>';
     if(x.uses!=null) extra+='<span class="desc">uses</span> <input class="num no-spin" type="number" style="width:40px;" value="'+num(x.uses)+'" data-nolock onchange="onItem(\''+x.uid+'\',\'uses\',this.value)"> ';
     inv+='<tr><td><input value="'+esc(x.name)+'" onchange="onItem(\''+x.uid+'\',\'name\',this.value)"></td><td><input class="num no-spin" type="number" value="'+num(x.qty,1)+'" data-nolock onchange="onItem(\''+x.uid+'\',\'qty\',this.value)"></td><td><input class="num" value="'+esc(x.slots==null?1:x.slots)+'" onchange="onItem(\''+x.uid+'\',\'slots\',this.value)" title="'+(stackItem(x)?'Slots for the whole stack':'Slots per item')+'"></td>'+
       '<td>'+sel+'</td><td>'+extra+'<input value="'+esc(x.note||'')+'" style="width:auto;min-width:80px;font-weight:400;font-size:13px;" onchange="onItem(\''+x.uid+'\',\'note\',this.value)"></td><td><button class="row-x" onclick="removeItem(\''+x.uid+'\')">✕</button></td></tr>'; });
@@ -964,6 +975,10 @@ function renderGear(){
   var load=carryLoad(), cap=carryCap(); var e=$('enc'); e.className='enc'+(load>cap?' over':'');
   e.innerHTML='Carrying <b>'+load+' / '+cap+'</b> <span>(8 + STRENGTH normal-sized items, max '+(2*cap)+'; worn clothing and hats are free; relics count; an uncarried sea chest or boat doesn\'t)</span>'+(load>2*cap?' <span class="tag warn">too much to carry</span>':load>cap?' <span class="tag warn">over-encumbered: STRENGTH &amp; AGILITY tests +2 DR</span>':'');
   $('c-silver').value=num(S.silver); $('coin-note').textContent='s = silver';
+  var pl=function(name,sub,btn){ return '<div class="feat" style="display:flex;gap:10px;align-items:center;"><div style="flex:1;min-width:0;"><div class="feat-name">'+name+'</div><div class="feat-text" style="color:var(--muted);">'+sub+'</div></div>'+btn+'</div>'; };
+  $('plunder').innerHTML=pl('Loot the Body','d100 on a fallen foe: a relic, a trinket, silver, doubloons… plus the number rolled in silver.','<button class="small-btn" data-nolock onclick="lootTheBody()">Roll d100</button>')+
+    pl('Among the Dead','d6 when searching the dead: nothing, a weapon, 3d10 silver, a relic or a ritual.','<button class="small-btn" data-nolock onclick="amongTheDead()">Roll d6</button>')+
+    pl('Carousing','A night ashore: 4d20, one per column (or 1d20 read across). Silver, hangover and the morning after.','<span style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;"><button class="small-btn" data-nolock onclick="carouse(false)">Roll 4d20</button><button class="small-btn ghost" data-nolock onclick="carouse(true)">1d20</button></span>');
 }
 function repairCost(x){ if(x.ruined||x.tier>=x.origTier||x.tier<1) return 0; var r=A((D('PB_ARMOR_REPAIR')||{}).rows).find(function(z){ return z.from===x.tier; }); return r?r.cost:0; }
 function renderBackground(){
@@ -1026,7 +1041,7 @@ function autoMods(o){ var m=[]; var a=o.ability;
   if((a==='STRENGTH'||a==='AGILITY')&&overEnc()) m.push({v:2,l:'over-encumbered'});
   if(a==='AGILITY'){ if(o.kind==='defense'){ if(defensePenalty()) m.push({v:defensePenalty(),l:wornClothing().name}); } else if(agilityPenalty()) m.push({v:agilityPenalty(),l:wornClothing().name}); }
   if(isMerfolk()&&S.cond.underwater) m.push({v:-4,l:'underwater'});
-  return m; }
+  return m.concat(timedMods(o)); }
 var _last=null;
 function critOn(o){ if((o.kind==='attack'||o.kind==='defense')&&has('calculating-cutthroat')) return 19; return 20; }
 // o: {label, ability|null, dr, kind, mods:[{v,l}], twice?, raw?, noTray?, confirm?, onRes(res), buttons(res)}
@@ -1178,8 +1193,8 @@ function openRestPanel(){
   openDlg('Rest',body,[]); }
 function doRest(kind){
   var C=S.cond; var parts=[]; var heal=0;
-  if(kind==='short'){ closeDlg(); if(noRestHeal()||C.starving){ addLog('Short rest','+0 HP',noRestHeal()?'Vampirism: rest doesn\'t heal you':'Starving: no HP restored','normal'); return; } var r=rollExpr('d4'); healHp(r.total,'Short rest ('+r.text+')'); return; }
-  var dawn=$('rs-dawn').checked, six=$('rs-6h').checked, fed=$('rs-food').checked; closeDlg();
+  if(kind==='short'){ closeDlg(); tickTime(RND_MIN*10); if(noRestHeal()||C.starving){ addLog('Short rest','+0 HP',noRestHeal()?'Vampirism: rest doesn\'t heal you':'Starving: no HP restored','normal'); return; } var r=rollExpr('d4'); healHp(r.total,'Short rest ('+r.text+')'); return; }
+  var dawn=$('rs-dawn').checked, six=$('rs-6h').checked, fed=$('rs-food').checked; closeDlg(); tickTime(RND_HOUR*8);
   if(!fed){ C.starving=true; C.starveDays=num(C.starveDays)+1; } else { C.starving=false; C.starveDays=0; }
   if(C.infected&&!immuneSick()){ var inf=rollExpr('d6'); parts.push('infection −'+inf.total+' ('+inf.text+')'); takeDamage(inf.total,{label:'Infection (morning)',raw:true,noLuck:true}); }
   else if(C.starving){ parts.push('starving: no HP restored'); if(num(C.starveDays)>2){ var st=rollExpr('d4'); takeDamage(st.total,{label:'Starvation',raw:true,noLuck:true}); } }
@@ -1193,7 +1208,9 @@ function doRest(kind){
   if(dawn){ newDawn(true); sunset(true); }
   changed(); }
 function openTimePanel(){
-  var body='<p class="m-hint">Grog wears off one drink an hour, lights burn down, hourly limits (Grog Breath, blood feeding) reset.</p><div class="m-row"><button class="m-btn" onclick="passHour()">An hour passes</button><button class="m-btn ghost" onclick="closeDlg();newDawn()">Dawn</button><button class="m-btn ghost" onclick="closeDlg();sunset()">Sunset</button></div>'+
+  var tl=A(S.timed);
+  var body='<p class="m-hint">Grog wears off one drink an hour, lights burn down, hourly limits (Grog Breath, blood feeding) reset. Timed effects (ASH, potions, a hangover) count down here and with each combat round.</p><div class="m-row"><button class="m-btn ghost" onclick="passMinutes(1)">A minute</button><button class="m-btn ghost" onclick="passMinutes(10)">10 minutes</button><button class="m-btn" onclick="passHour()">An hour passes</button><button class="m-btn ghost" onclick="closeDlg();newDawn()">Dawn</button><button class="m-btn ghost" onclick="closeDlg();sunset()">Sunset</button></div>'+
+    '<div class="m-lbl">Running effects</div>'+(tl.length?tl.map(function(t){ return '<div class="m-check" style="cursor:default;"><span style="flex:1;"><b>'+esc(t.name)+'</b> <span style="font-family:var(--f-num);color:#f0c56a;">'+esc(fmtLeft(t.left))+' left</span><small>'+esc(t.src)+(t.text?' · '+esc(t.text):'')+'</small></span><button class="m-btn ghost" style="padding:4px 10px;min-height:0;" onclick="endTimedNow(\''+t.uid+'\')" title="It ends now (cured, dispelled, or the GM says so)">End</button></div>'; }).join(''):'<p class="m-hint">Nothing running.</p>')+
     '<div class="res-box"><b>Dawn</b>: roll today\'s prayers (d2 + SPIRIT) and rituals (d4 + SPIRIT); failed rituals and spent relics are usable again'+(hasAilment('conduit')?'; the spirits bring a new ritual (unused yesterday\'s costs d2 HP)':'')+(has('grog-brewer')?'; brew d4 servings of grog':'')+(animalDef()&&animalDef().luckDaily?'; Lucky Parrot rolls d6 Luck':'')+'.<br><b>Sunset</b>: roll today\'s spells (d2 + SPIRIT).</div>';
   openDlg('Time',body,[]); }
 function passHour(){ var p=[];
@@ -1202,7 +1219,8 @@ function passHour(){ var p=[];
   S.prot=S.prot.filter(function(x){ if(x.hours!=null){ x.hours--; if(x.hours<=0){ p.push(x.label+' ends'); return false; } } return true; });
   if(num(S.cond.hemorrhage)===1){ p.push('hemorrhage: last hour!'); S.cond.hemorrhage=2; }
   S.day.breath=false; S.day.blood=false;
-  closeDlg(); addLog('An hour passes','⌛',p.join(' · ')||'Nothing changes','normal'); changed(); }
+  closeDlg(); addLog('An hour passes','⌛',p.join(' · ')||'Nothing changes','normal'); tickTime(RND_HOUR); changed(); }
+function passMinutes(m){ closeDlg(); addLog(m===1?'A minute passes':m+' minutes pass','⌛',A(S.timed).length?'':'Nothing is running','normal'); tickTime(RND_MIN*m); changed(); }
 function rollDaily(kind,quiet){ var r;
   if(kind==='prayers'){ r=rollExpr('d2+SPIRIT'); S.prayerUses={left:Math.max(0,r.total),max:Math.max(0,r.total)}; if(!quiet) addLog('Prayers today',String(S.prayerUses.max),r.text+' (d2 + SPIRIT)','normal'); }
   if(kind==='rituals'){ r=rollExpr('d4+SPIRIT'); S.ritualCasts={left:Math.max(0,r.total),max:Math.max(0,r.total)}; if(!quiet) addLog('Rituals today',String(S.ritualCasts.max),r.text+' (d4 + SPIRIT)','normal'); }
@@ -1252,19 +1270,21 @@ function finish(o){ o.done=true; closeDlg(true); renderTray(); }
 // attacks. Nothing is restricted until you start combat.
 var DX={dmg:'',dr:12,bp:false,luck:false,sac:false,holy:false,breath:0};   // the Defend subtab's form (not saved)
 function inCombat(){ return !!S.combat.on; }
-function incapacitated(){ return S.dead||num(S.cond.out)>0||S.hp<0; }
+function incapacitated(){ return S.dead||num(S.cond.out)>0||S.hp<0||timedHas('paralyzed'); }
 function canAct(){ if(incapacitated()) return false; if(!inCombat()) return true; return !S.combat.action; }
-function useAction(){ if(!inCombat()) return; S.combat.action=true; }
+// ASH 12 (time slows) gives two actions a round while it lasts.
+function actsMax(){ return timedHas('acts')?2:1; }
+function useAction(){ if(!inCombat()) return; S.combat.acts=num(S.combat.acts)+1; if(S.combat.acts>=actsMax()) S.combat.action=true; }
 function setSubtab(t){ S.subtab=t; renderTurn(); scheduleAutosave(); }
 function startCombat(){ var n=d(6); var side=n<=3?'Enemies act first':'PCs act first'; var ind=d(6), iv=ind+abil('AGILITY');
-  S.combat=Object.assign({},S.combat,{on:true,round:1,action:false,side:side,init:iv,liars:null,eldritch:'',inspire:null,reloaded:false,pistols:0,extra:0,bayonet:false,knave:0,shotAt:false,kills:0});
+  S.combat=Object.assign({},S.combat,{on:true,round:1,action:false,acts:0,side:side,init:iv,liars:null,eldritch:'',inspire:null,reloaded:false,pistols:0,extra:0,bayonet:false,knave:0,shotAt:false,kills:0});
   addLog('Initiative',side,'d6('+n+') · individual (optional): d6('+ind+') '+sgn(abil('AGILITY'))+' AGL = '+iv,'normal');
   if(has('liars-dice')) rollLiars(true);
   if(hasAilment('eldritch-mind')) eldritchTest();
   changed(); }
-function newRound(){ S.combat.round=num(S.combat.round,1)+1; S.combat.action=false; S.combat.reloaded=false; S.combat.pistols=0; S.combat.bayonet=false; S.combat.knave=0;
+function newRound(){ S.combat.round=num(S.combat.round,1)+1; S.combat.action=false; S.combat.acts=0; S.combat.reloaded=false; S.combat.pistols=0; S.combat.bayonet=false; S.combat.knave=0;
   if(num(S.cond.out)>0) S.cond.out--; if(S.cond.stunned) S.cond.stunned=false;
-  addLog('New round','Round '+S.combat.round,'','normal'); changed(); }
+  addLog('New round','Round '+S.combat.round,'','normal'); tickTime(1); changed(); }
 function endCombat(){ S.combat={on:false,round:1,action:false,side:'',init:null,liars:null,eldritch:'',kills:0,inspire:null,reloaded:false}; addLog('Combat over','✓','Blood Frenzy and once-per-combat abilities reset','normal'); changed(); }
 function rollLiars(quiet){ var r=rollExpr('5d6'); S.combat.liars=r.total%2===0; addLog("Liar's Dice",String(r.total),r.text+(S.combat.liars?' · even: melee attacks −2 DR, defense +2 DR':' · odd: no effect'),'normal'); if(!quiet) changed(); }
 function eldritchTest(){ test({label:'Eldritch Mind (combat starts)',ability:'PRESENCE',dr:12,kind:'test',noTray:true,onRes:function(res){ S.combat.eldritch=res.ok?'harness':'panic'; renderTurn(); }}); }
@@ -1314,7 +1334,7 @@ function attackGate(w){ // why this weapon can't attack right now, or ''
   return 'no action left this round'; }
 function openAttack(u){ var w=weaponByUid(u); if(!w) return; var g=attackGate(w); if(g){ addLog('Attack · '+w.name,'—',g,'normal'); return; }
   var sit=attackSituations(w); var base=S.cond.invisible?6:12;
-  var body='<p class="m-hint">'+esc(attackAbility(w))+' '+sgn(abil(attackAbility(w)))+' · damage '+esc(weaponDamage(w))+(sit.dmgAuto.length?' '+sit.dmgAuto.map(function(x){ return x.v+' '+x.l; }).join(', '):'')+(w.blackPowder?' · black powder ignores armor':'')+(sit.auto.length?'<br>Always: '+esc(sit.auto.map(function(x){ return x.l+' '+sgn(x.v)+' DR'; }).join(', ')):'')+'</p>'+
+  var body='<p class="m-hint">'+esc(attackAbility(w))+' '+sgn(abil(attackAbility(w)))+' · damage '+esc(weaponDamage(w))+(sit.dmgAuto.length?' '+sit.dmgAuto.map(function(x){ return x.v+' '+x.l; }).join(', '):'')+(w.blackPowder?' · black powder ignores armor':'')+(sit.auto.concat(timedMods({kind:'attack',ability:attackAbility(w)})).length?'<br>Always: '+esc(sit.auto.concat(timedMods({kind:'attack',ability:attackAbility(w)})).map(function(x){ return x.l+' '+sgn(x.v)+' DR'; }).join(', ')):'')+'</p>'+
     '<div class="m-lbl">Target DR <small style="color:#a89a8a;font-family:var(--f-ui);">(12 unless its stat block says otherwise)</small></div><div class="m-row" id="at-dr">'+DRS.map(function(x){ return '<button class="chip'+(x===base?' sel':'')+'" data-v="'+x+'">'+x+'</button>'; }).join('')+'</div>';
   if(sit.opts.length) body+='<div class="m-lbl">Situation</div>'+sit.opts.map(function(x,i){ return '<label class="m-check"><input type="checkbox" id="at-o'+i+'"><span>'+esc(x.l)+(x.dr?' ('+sgn(x.dr)+' DR)':'')+(x.dmg?' (+'+esc(x.dmg)+' damage)':'')+'<small>'+esc(x.why||'')+'</small></span></label>'; }).join('');
   body+='<div class="m-lbl">Other DR modifier</div><input id="at-x" class="m-input" type="number" value="0">';
@@ -1357,6 +1377,7 @@ function attackDamage(w,o){ o=o||{}; var expr=weaponDamage(w); if(o.close) expr=
   if(o.bonus){ total+=num(o.bonus); parts.push(o.bonusLabel+' '+sgn(o.bonus)); }
   var notes=[];
   if(o.crit){ total*=2; notes.push('×2 critical · target armor −1 tier'); if(/broken mast/i.test(w.name)){ var m=rollExpr('d6',{max:max}); total+=m.total; parts.push('mast '+m.text); } }
+  if(!isRanged(w)){ var x2=timedFx('meleeX2')[0]; if(x2){ total*=2; notes.push('×2 melee damage ('+x2.name+')'); } }
   total=Math.max(0,total);
   if(w.blackPowder) notes.push('ignores armor'); if(/brass anchor/i.test(w.name)) notes.push('target armor −1 tier for this attack');
   if(/meat cleaver/i.test(w.name)&&r.dice[0]===1) notes.push('a 1: disease — the target loses d6 HP at the start of its next two turns');
@@ -1569,6 +1590,267 @@ function lightUp(u){ var x=itemBy(u); if(!x) return; if(!canAct()){ addLog('Ligh
   else { useAction(); consumeOne(x); S.light={name:x.name.replace(/s$/,''),hours:1}; addLog('Light',x.name.replace(/s$/,''),'Burns for 1 hour','normal'); }
   changed(); }
 
+// ═══ CORE RULES — timed effects, alchemy potions, ASH, carousing, loot ═══════
+// Timed effects (S.timed) count down in combat rounds (a round ≈ 6 seconds, so 10 = a
+// minute and 600 = an hour). A new round, the Time panel (a minute / 10 minutes / an
+// hour), a short rest (10 minutes) and a long rest (8 hours) wind them down; the Time
+// panel's End button stops one early. Each carries machine-readable fx the rules read:
+//   armorTier (counts as that armor tier) · acts (two actions a round) · dr [{v,l,kinds,ability}]
+//   · abil {ABILITY: n} · tempHp (removed again when it ends) · meleeX2 · paralyzed · death (on expiry).
+var RND_MIN=10, RND_HOUR=600;
+function durRounds(expr){ var s=String(expr||'').trim().replace(/−/g,'-');
+  var m=s.match(/^(\d*d\d+(?:\s*[+-]\s*\d+)?|\d+)\s*(rounds?|minutes?|mins?|hours?|days?)\b/i); if(!m) return null;
+  var r=/d/i.test(m[1])?rollExpr(m[1]):{total:num(m[1]),text:m[1]}; var u=m[2].toLowerCase();
+  var unit=/^r/.test(u)?'round':/^m/.test(u)?'minute':/^d/.test(u)?'day':'hour'; var mult={round:1,minute:RND_MIN,hour:RND_HOUR,day:24*RND_HOUR}[unit];
+  return {rounds:Math.max(1,r.total*mult),label:r.total+' '+unit+(r.total===1?'':'s')+(/d/i.test(m[1])?' ('+r.text+')':'')}; }
+function fmtLeft(r){ r=Math.max(0,num(r)); if(r<RND_MIN) return r+' round'+(r===1?'':'s'); if(r<RND_HOUR) return Math.ceil(r/RND_MIN)+' min';
+  var h=Math.floor(r/RND_HOUR), mm=Math.ceil((r%RND_HOUR)/RND_MIN); if(mm>=60){ h++; mm=0; } return h+' h'+(mm?' '+mm+' min':''); }
+function addTimed(src,name,text,dur,fx){ var t={uid:uid(),src:src,name:name,text:text||'',left:dur.rounds,total:dur.rounds,fx:fx||{}}; S.timed.push(t); return t; }
+function timedFx(k){ return A(S.timed).filter(function(t){ return t.fx&&t.fx[k]; }); }
+function timedHas(k){ return timedFx(k).length>0; }
+// DR changes from running effects, for one test: kinds limits them to attack / defense, ability to one ability.
+function timedMods(o){ var m=[]; A(S.timed).forEach(function(t){ A(t.fx&&t.fx.dr).forEach(function(x){ if(x.kinds&&x.kinds.indexOf(o.kind)<0) return; if(x.ability&&x.ability!==o.ability) return; m.push({v:num(x.v),l:x.l||t.name}); }); }); return m; }
+function endTimed(t,expired){ var i=S.timed.indexOf(t); if(i<0) return; S.timed.splice(i,1);
+  if(t.fx.tempHp){ var take=Math.min(num(S.tempHp),num(t.fx.tempHp)); S.tempHp=num(S.tempHp)-take; }
+  if(t.fx.death&&expired&&!S.dead){ addLog(t.name,'Death',t.text||'It runs its course','fumble'); S.hp=Math.min(S.hp,-1); dying({}); } }
+function tickTime(rounds){ var ended=[]; A(S.timed).slice().forEach(function(t){ t.left=num(t.left)-rounds; if(t.left<=0){ ended.push(t); } });
+  ended.forEach(function(t){ endTimed(t,true); });
+  if(ended.length) addLog('Wears off',ended.length===1?ended[0].name:ended.length+' effects',ended.map(function(t){ return t.src+': '+t.name; }).join(' · '),'normal');
+  return ended; }
+function endTimedNow(u){ var t=A(S.timed).find(function(x){ return x.uid===u; }); if(!t) return; endTimed(t,false); addLog(t.name,'Ended','Stopped early ('+fmtLeft(t.left)+' were left)','normal'); changed(); openTimePanel(); }
+function addNote(line){ S.notes=(S.notes?String(S.notes).replace(/\s+$/,'')+'\n':'')+line; }
+function permAbility(a,v,why){ var was=num(S.abilities[a]); S.abilities[a]=clamp(was+v,-3,6); return a+' '+sgn(was)+' → '+sgn(S.abilities[a])+(S.abilities[a]===was?' (already at the limit)':''); }
+
+// ── Alchemy Potion Generator (Core Rules pg. 70-71) ──
+// A potion row keeps all six columns: two ingredients, colour, delivery, DR and effect (the
+// effect's d20 number). The DR is the TOUGHNESS DR to resist it (or the PRESENCE DR to brew it).
+// Harmful effects can be resisted; healing and the like simply work. Effect 20 rolls twice more.
+var POTION_HARM={1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:1,11:1,16:1,17:1,19:1};
+var POTION_DUR={2:'d6 hours',3:'d8 hours',5:'1 hour',6:'d6 rounds',7:'d12 hours',11:'d8 rounds',12:'d8 rounds',16:'d4 hours',17:'d6 rounds',18:'d8 hours'};
+function alchemy(){ return D('PB_ALCHEMY')||{rows:[],deliveryBands:[],drBands:[]}; }
+function alchRow(n){ return A(alchemy().rows).find(function(r){ return r.roll===num(n); })||null; }
+function bandFor(list,n){ return A(list).find(function(x){ return inRoll(x.roll,n); })||null; }
+function potionVerb(del){ return {'Inhalation':'Inhale','Touch Skin':'Apply','Enter Bloodstream':'Inject','Ingestion':'Drink'}[del]||'Drink'; }
+function potionSummary(p,full){ if(!p) return ''; var bits=[]; if(p.delivery) bits.push(p.delivery);
+  if(p.known||full){ if(p.dr) bits.push('resist TOUGHNESS DR'+p.dr); bits.push(p.effectText||(p.effect?(alchRow(p.effect)||{}).effect:'')||'effect rolled when used'); }
+  else bits.push('effect unknown');
+  if(full&&(p.a||p.b)) bits.push([p.a,p.b].filter(Boolean).join(' & '));
+  return bits.join(' · '); }
+function mkPotion(p){ p=p||{}; var e=p.effect?alchRow(p.effect):null;
+  return {uid:uid(),kind:'potion',ref:'potion',name:p.name||((p.color||'Murky')+' potion'),qty:1,slots:1,note:p.note||'',
+    potion:{a:p.a||'',b:p.b||'',color:p.color||'',delivery:p.delivery||'',dr:p.dr==null||p.dr===''?null:num(p.dr),effect:p.effect?num(p.effect):null,
+      effectText:p.effectText||(e?e.effect:''),heal:p.heal||null,custom:p.custom||null,known:!!p.known}}; }
+function potionFast(n){ var r=alchRow(n); return r?{a:r.ingredientA,b:r.ingredientB,color:r.color,delivery:r.delivery,dr:r.dr,effect:r.roll}:null; }
+function potionRandom(){ var al=alchemy(), rs=[d(20),d(20),d(20),d(20),d(20),d(20)];
+  return {spec:{a:(alchRow(rs[0])||{}).ingredientA,b:(alchRow(rs[1])||{}).ingredientB,color:(alchRow(rs[2])||{}).color,delivery:(bandFor(al.deliveryBands,rs[3])||{}).name,dr:(bandFor(al.drBands,rs[4])||{}).dr,effect:rs[5]},rolls:rs}; }
+// Tela's potions (The Curse of Skeleton Point, pg. 155) as presets.
+function telaPotions(){ var shop=((D('PB_MODULE_SKELETON_POINT')||{}).shop||{}); return A(shop.potions).filter(function(x){ return !/identify/i.test(x.name); }).map(function(x){ var sp={name:x.name.replace(/\s*\(.*$/,''),cost:x.cost,label:x.name};
+  if(/healing/i.test(x.name)) Object.assign(sp,{delivery:'Enter Bloodstream',heal:x.heal||'d6',effectText:'Heal '+(x.heal||'d6')+'.',custom:'heal',known:true,name:'Healing potion'});
+  else if(/paralysis/i.test(x.name)) Object.assign(sp,{delivery:'Ingestion',dr:10,effect:3,known:true,name:'Paralysis potion'});
+  else if(/random/i.test(x.name)) Object.assign(sp,{known:false,name:'Random potion'});
+  else if(/love/i.test(x.name)) Object.assign(sp,{custom:'love',effectText:'Whoever takes it falls in love'+(/permanent/i.test(x.name)?' for good.':' for a day.'),known:true,name:/permanent/i.test(x.name)?'Love potion (permanent)':'Love potion (1 day)'});
+  return sp; }); }
+// A potion that arrives by name (GM loot, a background item): Tela's by name, otherwise unknown.
+function potionByName(n,note){ var t=telaPotions().find(function(x){ return low(x.name)===low(n)||low(x.label)===low(n); }); if(t) return mkPotion(Object.assign({},t,{note:note||''}));
+  if(/heal/i.test(n)) return mkPotion({name:n,custom:'heal',heal:'d6',effectText:'Heal d6.',known:true,note:note||''});
+  return mkPotion({name:n,known:false,note:note||''}); }
+function isHarm(r){ return !!(r&&!r.custom&&POTION_HARM[r.roll]); }
+// The effect rows of a potion (an unrolled one rolls d20 across first; 20 = roll twice more).
+function potionEffects(p){ var info=[];
+  if(!p.effect&&!p.custom){ var n=d(20); Object.assign(p,potionFast(n)); p.effectText=(alchRow(n)||{}).effect||''; info.push('effect rolled d20('+n+')'); }
+  if(p.custom) return {rows:[{custom:p.custom,effect:p.effectText||'It takes effect.',heal:p.heal}],info:info};
+  var r=alchRow(p.effect); if(!r) return {rows:[{custom:'text',effect:p.effectText||'It takes effect.'}],info:info};
+  if(!r.rollAgain) return {rows:[r],info:info};
+  var rows=[], rs=[]; for(var i=0;i<2;i++){ var m=d(20), g=0; while(m===20&&g++<30) m=d(20); rs.push(m); rows.push(alchRow(m)); }
+  info.push('roll again twice: d20('+rs.join(', ')+')'); return {rows:rows,info:info}; }
+function potionApply(r,lbl){ var n=r.roll, du=POTION_DUR[n]?durRounds(POTION_DUR[n]):null;
+  if(r.custom==='heal'||r.heal){ if(r.heal==='max') healHp(hpMax(),lbl+': healed to max'); else { var h=rollExpr(r.heal||'d6'); healHp(h.total,lbl+' ('+h.text+')'); } return; }
+  if(r.custom){ addLog(lbl,'Takes effect',r.effect,'normal'); return; }
+  var T=function(name,fx){ addTimed('Potion',name,r.effect,du,fx||{}); addLog(lbl,name,du.label+' · '+r.effect,fx&&(fx.death||fx.paralyzed)?'fumble':'normal'); };
+  switch(n){
+    case 1: addLog(lbl,'Horrific death',r.effect+' (on a corpse it would bring them back with 1 HP)','fumble'); S.hp=Math.min(S.hp,-1); dying({}); break;
+    case 2: T('Poisoned: death in '+du.label,{death:true}); break;
+    case 3: T('Paralyzed',{paralyzed:true}); break;
+    case 4: case 8: case 9: addLog(lbl,'Changed for good',r.effect+' · the GM describes it','fumble'); addNote('Potion: '+r.effect); break;
+    case 5: var d5=rollExpr('d6'); takeDamage(d5.total,{label:lbl+' ('+d5.text+')',raw:true,noLuck:true}); T('Blind'); break;
+    case 6: T('Berserk: ×2 melee damage',{meleeX2:true}); break;
+    case 7: T('Polymorphed into a beast'); break;
+    case 10: var d10=rollExpr('d8'); takeDamage(d10.total,{label:lbl+': acid ('+d10.text+')',raw:true,noLuck:true}); break;
+    case 11: T('Shrunk to 1 foot: AGILITY −4 DR',{dr:[{v:-4,ability:'AGILITY',l:'shrunk'}]}); break;
+    case 12: T('Huge: ×2 melee damage, AGILITY +2 DR',{meleeX2:true,dr:[{v:2,ability:'AGILITY',l:'huge'}]}); break;
+    case 16: T('Hallucinating'); break;
+    case 17: T('Fleeing in terror'); break;
+    case 18: T('All tests −4 DR',{dr:[{v:-4,l:'potion'}]}); break;
+    case 19: addLog(lbl,'Mystical Mishap',r.effect,'fumble'); mishap(null); break;
+    default: addLog(lbl,'Takes effect',r.effect,'normal'); } }
+function usePotion(u,other){ var x=itemBy(u); if(!x||!x.potion) return; if(!canAct()){ addLog(x.name,'—','No action left','normal'); return; }
+  useAction(); var p=JSON.parse(JSON.stringify(x.potion)); var lbl=x.name; consumeOne(x);
+  var res=potionEffects(p); var rows=res.rows; var verb=potionVerb(p.delivery);
+  var desc=rows.map(function(r){ return r.effect; }).join(' + ');
+  var hdr=[p.color?p.color+' potion':'',p.delivery,p.dr?'DR'+p.dr:''].concat(res.info).filter(Boolean).join(' · ');
+  if(other){ addLog(verb+' · '+lbl,'On another',hdr+' · '+desc+(p.dr&&rows.some(isHarm)?' · they test TOUGHNESS DR'+p.dr+' to resist':''),'normal'); changed(); return; }
+  addLog(verb+' · '+lbl,'Takes hold',hdr+' · '+desc,'normal');
+  var applyAll=function(resisted){ rows.forEach(function(r){ if(resisted&&isHarm(r)){ addLog(lbl,'Resisted',r.effect,'crit'); return; } potionApply(r,lbl); }); changed(); };
+  if(!rows.some(isHarm)||!p.dr){ applyAll(false); return; }
+  changed();
+  openDlg(lbl,'<p class="m-hint">'+esc(hdr)+'</p><div class="res-box">'+esc(desc)+'</div><p class="m-hint" style="margin-top:10px;">Resist it with TOUGHNESS DR'+p.dr+' — or let it work.</p>',
+    [{t:'Resist · TOUGHNESS DR'+p.dr,f:function(){ closeDlg(true); var o={label:'Resist · '+lbl,ability:'TOUGHNESS',dr:p.dr,kind:'test'};
+      o.note=function(r){ return r.ok?'You shrug it off: the harmful part does nothing.':'It takes hold.'; };
+      o.onRes=function(rr){ showResult(o,rr,function(r){ return [{t:r.ok?'Resisted':'It takes hold',cls:r.ok?'':'warn',f:function(){ finish(o); applyAll(r.ok); }}]; }); }; test(o); }},
+     {t:'Let it work',cls:'ghost',f:function(){ closeDlg(true); applyAll(false); }}],true); }
+function identifyPotion(u){ var x=itemBy(u); if(!x||!x.potion) return; var p=x.potion; if(!p.effect&&!p.custom){ var n=d(20); Object.assign(p,potionFast(n)); p.effectText=(alchRow(n)||{}).effect||''; }
+  p.known=true; addLog('Identified',x.name,potionSummary(p),'normal'); changed(); }
+var _al={spec:null,preset:null};
+function openAlchemy(){ var al=alchemy(); _al={spec:null,preset:null};
+  var opt=function(id,list,label){ return '<label class="m-lbl" style="display:block;" for="'+id+'">'+label+'</label><select id="'+id+'" class="m-input" onchange="_al.preset=null;alPreview()">'+list.map(function(o){ return '<option value="'+esc(o.v)+'">'+esc(o.t)+'</option>'; }).join('')+'</select>'; };
+  var rows=A(al.rows);
+  var body='<p class="m-hint">Roll a potion on the Alchemy Potion Generator (pg. 70) or pick each part. Its DR is the TOUGHNESS DR to resist it, or the PRESENCE DR to brew it. Results are never guaranteed; most potions cost d100s from a reliable source.</p>'+
+    '<div class="m-row"><button class="chip" onclick="alRoll(\'fast\')">Fast · d20 across</button><button class="chip" onclick="alRoll(\'random\')">Random · 6d20</button></div>'+
+    '<div class="m-lbl">Tela\'s potions <small style="color:#a89a8a;font-family:var(--f-ui);">(Death\'s Head Swamp, pg. 155)</small></div><div class="m-row">'+telaPotions().map(function(t,i){ return '<button class="chip" onclick="alPreset('+i+')">'+esc(t.label)+(t.cost?' <small>'+t.cost+'s</small>':'')+'</button>'; }).join('')+'</div>'+
+    '<div class="blk-grid" style="margin-top:4px;">'+
+      opt('al-a',rows.map(function(r){ return {v:r.ingredientA,t:r.roll+'. '+r.ingredientA}; }),'Ingredient')+opt('al-b',rows.map(function(r){ return {v:r.ingredientB,t:r.roll+'. '+r.ingredientB}; }),'Ingredient')+
+      opt('al-c',rows.map(function(r){ return {v:r.color,t:r.roll+'. '+r.color}; }),'Resulting colour')+opt('al-del',A(al.deliveryBands).map(function(b){ return {v:b.name,t:b.roll[0]+'–'+b.roll[1]+'. '+b.name}; }),'Delivery')+
+      opt('al-dr',A(al.drBands).map(function(b){ return {v:b.dr,t:b.roll[0]+'–'+b.roll[1]+'. DR'+b.dr}; }),'DR')+opt('al-eff',[{v:'',t:'Unknown — roll it when used'}].concat(rows.map(function(r){ return {v:r.roll,t:r.roll+'. '+r.effect}; })),'Effect')+
+    '</div><label class="m-check" style="margin-top:8px;"><input type="checkbox" id="al-known" onchange="alPreview()"><span>Its effect is known<small>Brewed to a recipe, sold by someone honest, or identified. Unknown potions show only their colour and delivery.</small></span></label>'+
+    '<div class="m-lbl">Name</div><input id="al-name" class="m-input" placeholder="e.g. Iridescent potion">'+
+    '<div class="res-box" id="al-prev"></div>';
+  openDlg('Alchemy Potion',body,[{t:'Brew it · PRESENCE',cls:'ghost',f:alBrew,title:'Test PRESENCE against the potion\'s DR: success puts it in your inventory (known)'},{t:'Buy · d100s',cls:'ghost',f:function(){ alAdd('buy'); },title:'Roll its price (d100s, or Tela\'s price) and pay from your purse'},{t:'Add to inventory',f:function(){ alAdd(''); }}],false,true);
+  alPreview(); }
+function alRead(){ if(_al.preset) return Object.assign({},_al.preset,{name:($('al-name').value||'').trim()||_al.preset.name});
+  var e=$('al-eff').value; return {a:$('al-a').value,b:$('al-b').value,color:$('al-c').value,delivery:$('al-del').value,dr:num($('al-dr').value),effect:e?num(e):null,known:$('al-known').checked,name:($('al-name').value||'').trim()}; }
+function alSet(sp){ $('al-a').value=sp.a; $('al-b').value=sp.b; $('al-c').value=sp.color; $('al-del').value=sp.delivery; $('al-dr').value=String(sp.dr); $('al-eff').value=sp.effect?String(sp.effect):''; }
+function alRoll(m){ _al.preset=null; if(m==='fast'){ var n=d(20); alSet(potionFast(n)); addLog('Alchemy · fast','d20: '+n,(alRow(n)||{}).text||'','normal'); }
+  else { var r=potionRandom(); alSet(r.spec); addLog('Alchemy · random','6d20',r.rolls.join(', ')+' · '+[r.spec.a,r.spec.b,r.spec.color,r.spec.delivery,'DR'+r.spec.dr].join(' · '),'normal'); }
+  $('al-known').checked=false; alPreview(); }
+function alRow(n){ return A((D('PB_ALCHEMY_TABLE')||{}).rows).find(function(r){ return r.roll===n; }); }
+function alPreset(i){ var t=telaPotions()[i]; if(!t) return; _al.preset=t; $('al-name').value=t.name; alPreview(); }
+function alPreview(){ var el=$('al-prev'); if(!el) return; var sp=alRead(); var e=sp.effect?alchRow(sp.effect):null;
+  var nm=sp.name||((sp.color||'Murky')+' potion'); if(!$('al-name').value&&!_al.preset) $('al-name').placeholder=nm;
+  el.innerHTML='<b>'+esc(nm)+'</b>'+(_al.preset?' <small style="color:#a89a8a;">('+esc(_al.preset.label)+')</small>':'')+'<br>'+esc([sp.a&&sp.b?sp.a+' & '+sp.b:'',sp.color,sp.delivery,sp.dr?'DR'+sp.dr:''].filter(Boolean).join(' · '))+'<br><span style="color:#d6c9b8;">'+esc(sp.effectText||(e?e.effect:'Effect unknown — rolled when it is used'))+'</span>'+(sp.known?'':' <small style="color:#a89a8a;">(you won\'t know until it is used or identified)</small>'); }
+function alAdd(mode,brewed){ var sp=alRead(); if(brewed) sp.known=true;
+  if(mode==='buy'){ var c=sp.cost?{total:sp.cost,text:sp.cost+'s'}:rollExpr(alchemy().cost||'d100'); if(num(S.silver)<c.total){ addLog('Alchemy','Too expensive','It costs '+c.total+'s ('+c.text+'); you have '+num(S.silver)+'s','normal'); return; } S.silver=num(S.silver)-c.total; addLog('Bought',sp.name||'Potion',c.total+'s'+(sp.cost?'':' ('+c.text+')'),'normal'); }
+  var row=mkPotion(sp); S.items.push(row); closeDlg(); if(mode!=='buy') addLog(brewed?'Brewed':'Added',row.name,potionSummary(row.potion),'normal'); changed(); }
+function alBrew(){ var sp=alRead(); var dr=num(sp.dr)||12; closeDlg(); var o={label:'Brew · '+(sp.name||((sp.color||'Murky')+' potion')),ability:'PRESENCE',dr:dr,kind:'test'};
+  o.note=function(r){ return r.ok?'The brew comes out right.':'The ingredients are wasted.'; };
+  o.onRes=function(rr){ showResult(o,rr,function(r){ return [{t:r.ok?'Bottle it':'Wasted',cls:r.ok?'':'warn',f:function(){ finish(o); if(r.ok){ var row=mkPotion(Object.assign(sp,{known:true})); S.items.push(row); addLog('Brewed',row.name,potionSummary(row.potion),'crit'); } changed(); }}]; }); };
+  test(o); }
+
+// ── ASH (Core Rules pg. 10) ──
+// One dose ≈ 5 lbs. (one per skeleton). Consuming it takes an action: d20 on the Effects of
+// Consuming ASH; most effects last 2d6 minutes. The market price is the GM's business.
+function mkAsh(q){ return {uid:uid(),kind:'ash',ref:'ash',name:'ASH',qty:Math.max(1,num(q,1)),slots:1,note:'one dose ≈ 5 lbs.'}; }
+function addAsh(q){ q=Math.max(1,num(q,1)); var ex=S.items.find(function(x){ return x.kind==='ash'; }); if(ex) ex.qty=num(ex.qty,1)+q; else S.items.push(mkAsh(q)); }
+function openAshAdd(){ var A0=D('PB_ASH')||{}; openDlg('ASH','<p class="m-hint">'+esc(A0.text||'')+'</p><div class="m-lbl">Doses</div><input id="ash-q" class="m-input" type="number" inputmode="numeric" value="1" min="1"><p class="m-hint" style="margin-top:8px;">A dose is about 5 lbs. (one per skeleton) and takes a carrying slot. What it fetches depends on the port\'s ASH market — ask the GM.</p>',
+  [{t:'Add',f:function(){ var q=Math.max(1,num($('ash-q').value,1)); closeDlg(); addAsh(q); addLog('Added','ASH ×'+q,'','normal'); changed(); }}]); }
+function ashTable(){ return ((D('PB_ASH')||{}).effects)||{rows:[],duration:'2d6 minutes'}; }
+function consumeAsh(u){ var x=itemBy(u); if(!x) return; if(!canAct()){ addLog('ASH','—','No action left','normal'); return; } useAction(); consumeOne(x);
+  var t=ashTable(); var n=d(20); var row=rowFor(t.rows,n)||{};
+  addLog('ASH','d20: '+n,row.text||'',n===1||n===4?'fumble':n>=17?'crit':'normal');
+  if(row.reroll){ var seen=[n], got=[]; for(var i=0;i<3;i++){ var m=rollExpr(row.reroll.die||'d10+10').total; if(seen.indexOf(m)>=0){ got.push(m+' (duplicate: no effect)'); continue; } seen.push(m); got.push(String(m)); ashApply(m); }
+    addLog('ASH · three more','d10+10 ×3',got.join(', '),'crit'); }
+  else ashApply(n);
+  changed(); }
+function ashApply(n){ var t=ashTable(); var row=rowFor(t.rows,n)||{}; var lbl='ASH · '+n;
+  var T=function(name,fx,dur){ var du=dur?durRounds(dur):durRounds(t.duration||'2d6 minutes'); addTimed('ASH',name,row.text,du,fx||{}); addLog(lbl,name,du.label+' · '+(row.text||''),'normal'); };
+  switch(n){
+    case 1: var o4=rollExpr('d4'); S.cond.out=Math.max(num(S.cond.out),o4.total); addLog(lbl,'Overdose','You pass out for '+o4.total+' rounds ('+o4.text+') — TOUGHNESS DR12 or die','fumble');
+      var o={label:'ASH overdose',ability:'TOUGHNESS',dr:12,kind:'test',noTray:true}; o.note=function(r){ return r.ok?'You live — and wake in '+o4.total+' rounds.':'Instant death.'; };
+      o.onRes=function(rr){ showResult(o,rr,function(r){ return [{t:r.ok?'I live':'Dead',cls:r.ok?'':'warn',f:function(){ finish(o); if(!r.ok){ S.hp=Math.min(S.hp,-1); dying({}); } changed(); }}]; }); }; test(o); break;
+    case 2: mishap(null); break;
+    case 3: var d3=rollExpr('d4'); S.cond.infected=true; takeDamage(d3.total,{label:lbl+': −HP and infected ('+d3.text+')',raw:true,noLuck:true}); break;
+    case 4: var ch=ABIL.map(function(a){ return permAbility(a,-1); }); addLog(lbl,'Permanent −1 to all abilities',ch.join(' · '),'fumble'); addNote('ASH: permanent −1 to all abilities.'); break;
+    case 5: T('The world turns gray'); break;
+    case 6: var s6=d(4); var w6=((rowFor((row.sub||{}).rows,s6)||{}).text)||''; T('Everyone looks like '+(s6===4?'undead, soldiers and sea creatures':w6)); break;
+    case 7: var s7=d(6); var an=A(D('PB_MONSTERS')).find(function(m){ return /Terrestrial/i.test(m.group||'')&&num(m.roll)===s7; }); T('You think you\'re '+(an?'a '+an.name:'an animal')+' (d6: '+s7+')'); break;
+    case 8: var s8=d(4); addLog(lbl,'A limb rots away','d4('+s8+') · permanent; a ghost limb replaces it at sunset (the GM says which limb)','fumble'); addNote('ASH: a limb (d4: '+s8+') rotted away; a ghost limb replaced it at sunset.'); break;
+    case 9: T('Fear the sun, thirst for blood'); break;
+    case 10: T('Hearing colour, seeing sound'); break;
+    case 11: T('Tier 3 armor (−d6)',{armorTier:3}); break;
+    case 12: T('Time slows: two actions a round',{acts:2}); break;
+    case 13: T('Attack & defend −4 DR',{dr:[{v:-4,kinds:['attack','defense'],l:'ASH'}]}); break;
+    case 14: var h14=rollExpr('d12'); S.tempHp=num(S.tempHp)+h14.total; T('+'+h14.total+' temporary HP',{tempHp:h14.total}); break;
+    case 15: T('Darkvision, life glows neon'); break;
+    case 16: T('Double speed (60\')'); break;
+    case 17: T('+2 STRENGTH & AGILITY',{abil:{STRENGTH:2,AGILITY:2}},row.duration||'24 hours'); break;
+    case 18: addLog(lbl,'Mental transcendence',permAbility('PRESENCE',1),'crit'); addNote('ASH: permanent +1 PRESENCE.'); break;
+    case 19: addLog(lbl,'One with the universe',permAbility('SPIRIT',1),'crit'); addNote('ASH: permanent +1 SPIRIT.'); break; } }
+
+// ── Carousing (Core Rules pg. 2): 4d20, one per column — or 1d20 read across ──
+// Hungover for the lowest die in hours; the dice summed: 4-49 silver spent or lost, 50+ won or
+// stolen. "And now you are…" results the book makes concrete are applied (−1 to all abilities,
+// only d4 HP left, debt, riches, experience); the night's story goes to the log and your notes.
+function carouse(one){ var C=D('PB_CAROUSING'); if(!C) return; var cols=A(C.columns); var dice=one?[d(20)]:[d(20),d(20),d(20),d(20)];
+  var pick=function(i){ return dice[one?0:i]; }; var v=cols.map(function(c,i){ return c.values[pick(i)-1]||''; });
+  var sum=dice.reduce(function(a,b){ return a+b; },0), lowD=Math.min.apply(null,dice); var out=[];
+  var cut=num((C.silver||{}).spentBelow,50);
+  if(sum>=cut){ S.silver=num(S.silver)+sum; out.push('won or stole '+sum+'s'); }
+  else { var paid=Math.min(num(S.silver),sum); S.silver=num(S.silver)-paid; out.push('spent or lost '+sum+'s'+(paid<sum?' (you only had '+paid+'s)':'')); }
+  addTimed('Carousing','Hungover','The lowest die in hours',{rounds:lowD*RND_HOUR,label:lowD+' hours'},{}); out.push('hungover '+lowD+' hour'+(lowD===1?'':'s'));
+  var n4=pick(3), xp=false, extra='';
+  if(n4===2){ out.push('dead or dying — the GM decides which'); }
+  if(n4===4){ out.push('−1 to all abilities: '+ABIL.map(function(a){ return permAbility(a,-1); }).join(', ')); }
+  if(n4===5){ var r5=rollExpr('d4'); var was=S.hp; if(S.hp>r5.total) S.hp=r5.total; out.push('only '+r5.total+' HP left ('+r5.text+')'+(was<=r5.total?' — you already had less':'')); }
+  if(n4===8){ var r8=rollExpr('3d10'); extra='in debt '+(r8.total*10)+'s'; out.push('in debt: you owe '+(r8.total*10)+'s ('+r8.text+' ×10)'); }
+  if(n4===16){ var r16=rollExpr('3d10'); S.silver=num(S.silver)+r16.total*10; out.push('rich: +'+(r16.total*10)+'s ('+r16.text+' ×10)'); }
+  if(n4===19){ xp=true; out.push('you get better (experience)'); }
+  if(n4===20){ S.silver=num(S.silver)+1000; out.push('filthy rich: +1000s'); }
+  var story='Last night you '+v[0]+' '+v[1]+' You wake up '+v[2]+', and now you are '+v[3];
+  addLog('Carousing',(one?'d20 ':'4d20 ')+'= '+sum,(one?'d20('+dice[0]+')':'d20('+dice.join(', ')+')')+' · '+story+' · '+out.join(' · '),sum>=cut?'crit':'normal');
+  addNote('Carousing: '+story+(extra?' ('+extra+')':''));
+  changed();
+  openDlg('Carousing','<div class="res-big" style="font-size:24px;">'+(one?'d20 '+dice[0]:dice.join(' · '))+' <small style="font-size:15px;color:#a89a8a;font-weight:400;">= '+sum+'</small></div><div class="res-box">'+esc(story)+'</div><div class="res-box">'+out.map(esc).join('<br>')+'</div><p class="m-hint" style="margin-top:8px;">Written to your notes. The rest is yours and the GM\'s to play out.</p>',
+    xp?[{t:'Get better now',f:function(){ closeDlg(); if(window.PBADV) PBADV.open(); }}]:[]); }
+
+// ── Loot the Body (Core Rules pg. 3, d100) and Among the Dead (pg. 33, d6) ──
+// Both roll first and show what you find; "Take it" puts the items, relics, rituals and silver
+// on your sheet. Parts the book prints in italics (not obvious at first) are told to the log.
+function lootRow(t,n){ return rowFor(t.rows,n)||{}; }
+function lootFinds(n,depth,f){ var t=D('PB_LOOT_THE_BODY')||{rows:[]}; var row=lootRow(t,n); f=f||{rolls:[],lines:[],items:[],silver:0,extra:0,hidden:[]}; f.rolls.push(n);
+  if(row.rollAgain&&depth<4){ f.lines.push('00: roll again twice'); lootFinds(d(100),depth+1,f); lootFinds(d(100),depth+1,f); return f; }
+  if(t.addRollAsSilver&&!row.silver) f.extra+=n;
+  var text=String(row.text||'').replace(/\.$/,''); var hid=row.hidden||'';
+  var qtyOf=function(s){ var m=s.match(/\bd(\d+)\b/); if(!m) return {s:s,q:1}; var r=d(num(m[1])); return {s:s.replace(m[0],String(r)),q:r,die:m[0]+'('+r+')'}; };
+  if(row.table==='relics'){ var rel=rowFor(D('PB_RELICS'),n); if(rel){ f.items.push({relic:rel.id}); f.lines.push(n+': ancient relic — '+rel.name); } }
+  else if(row.table==='bombs'){ var bn=d(6); var b=rowFor(D('PB_BOMBS'),bn); if(b){ f.items.push({byName:b.name}); f.lines.push(n+': '+b.name+' (d6: '+bn+')'); } }
+  else if(row.table==='things'){ var tn=d(100); var th=rowFor(D('PB_THINGS'),tn); var nm=th?th.text:'A thing of importance'; f.items.push({name:nm,qty:1,note:'thing of importance'}); f.lines.push(n+': '+nm+' (d100: '+tn+')'); }
+  else if(row.table==='shanties'){ var sh=A(D('PB_SHANTIES')); var sr=sh.length?sh[d(sh.length)-1]:null; f.items.push({name:'Leather journal',qty:1,note:sr?'shanty: '+sr.name:''}); f.lines.push(n+': '+text); if(sr) f.hidden.push('the journal holds the shanty "'+sr.name+'"'); hid=''; }
+  else if(row.silver){ f.silver+=n; f.lines.push(n+': '+n+' silver'); }
+  else if(n===22){ f.items.push({weapon:{id:'loot-knife',name:'Nasty-looking knife',damage:'d6',type:'melee'}}); f.lines.push(n+': '+text); }
+  else if(n===61){ f.items.push({weapon:Object.assign({},weaponDef('flintlock-pistol')||{id:'flintlock-pistol',damage:'2d4',type:'ranged',blackPowder:true,reload:2},{name:'Flintlock pistol with tally marks'})}); f.lines.push(n+': '+text+' (no shot with it)'); }
+  else if(n===74){ f.items.push({weapon:{id:'loot-hilt',name:'Broken cutlass hilt',damage:'d4',type:'melee'}}); f.lines.push(n+': '+text); }
+  else if(n===75){ f.items.push({weapon:{id:'loot-glass-dagger',name:'Glass dagger',damage:'3d4',type:'melee',special:'Breaks after one use'}}); f.lines.push(n+': '+text); }
+  else { var q=qtyOf(text), item=q.s, qty=1;
+    if(/^\d+\s/.test(item)){ qty=q.q; item=item.replace(/^\d+\s+/,'').replace(/^./,function(c){ return c.toUpperCase(); }); }
+    if(n>=80&&n<=89){ hid='worth '+n+' silver in all'; }
+    var cut=item.indexOf('. '), rest=''; if(cut>0){ rest=item.slice(cut+2); item=item.slice(0,cut); }
+    f.items.push({name:item,qty:qty,note:[rest,n>=80&&n<=89?'worth '+n+'s':(n===48?'worth 100s':'')].filter(Boolean).join(' · ')}); f.lines.push(n+': '+q.s+(q.die?' — '+q.die:'')); }
+  if(hid) f.hidden.push(hid);
+  return f; }
+function takeFinds(f,withExtra){ var got=[];
+  A(f.items).forEach(function(it){
+    if(it.relic){ var d0=addRelic(it.relic); if(d0) got.push('relic '+d0.name); }
+    else if(it.ritual){ var r0=addRitual(it.ritual); if(r0) got.push('ritual '+r0.name); }
+    else if(it.weapon){ S.items.push(mkWeapon(it.weapon,{equipped:equippedWeapons().length<3})); got.push(it.weapon.name); }
+    else if(it.byName){ addByName(it.byName,1,it.note||''); got.push(it.byName); }
+    else { S.items.push({uid:uid(),kind:'gear',ref:'',name:it.name,qty:it.qty||1,slots:1,note:it.note||''}); got.push(it.name+(num(it.qty,1)>1?' ×'+it.qty:'')); } });
+  var sv=num(f.silver)+(withExtra?num(f.extra):0); if(sv){ S.silver=num(S.silver)+sv; got.push(sv+' silver'); }
+  return got; }
+function findsDlg(title,head,f,src){ var extra=num(f.extra);
+  var body='<div class="res-big" style="font-size:24px;">'+esc(head)+'</div><div class="res-box">'+(f.lines.length?f.lines.map(esc).join('<br>'):'Nothing.')+(extra?'<br><span style="color:#f0c56a;">+ '+extra+' silver of extra loot (the number rolled)</span>':'')+'</div>'+
+    (f.hidden.length?'<p class="m-hint" style="margin-top:8px;"><b>Not obvious at first</b> (the GM may keep it quiet): '+esc(f.hidden.join(' · '))+'</p>':'');
+  var take=function(withExtra){ closeDlg(); var got=takeFinds(f,withExtra); addLog(src,'Taken',got.join(' · ')||'nothing','normal'); changed(); };
+  var btns=[];
+  if(f.items.length||f.silver||extra){ btns.push({t:'Take it',f:function(){ take(true); }}); if(extra) btns.push({t:'Take it, no extra silver',cls:'ghost',f:function(){ take(false); }}); }
+  openDlg(title,body,btns,false); }
+function lootTheBody(){ var n=d(100); var f=lootFinds(n,0); addLog('Loot the Body','d100: '+(n===100?'00':n),f.lines.join(' · ')+(f.extra?' · +'+f.extra+'s extra':'')+(f.hidden.length?' · (not obvious: '+f.hidden.join(' · ')+')':''),'normal'); findsDlg('Loot the Body','d100 · '+(n===100?'00':n),f,'Loot the Body'); }
+function amongTheDead(){ var t=((D('PB_RULES')||{}).experience||{}).amongTheDead||{rows:[]}; var n=d(6); var row=rowFor(t.rows,n)||{}; var f={rolls:[n],lines:[],items:[],silver:0,extra:0,hidden:[]};
+  if(row.table==='startingWeapons'){ var sw=D('PB_STARTING_WEAPONS')||{rows:[]}; var m=d(10); var wr=A(sw.rows).find(function(x){ return x.roll===m; })||{}; var id=wr.choice?wr.choice[d(2)-1]:wr.weapon; var w=weaponDef(id); if(w){ f.items.push({weapon:w}); f.lines.push('a weapon: '+w.name+' (d10: '+m+')'+(w.blackPowder?' — no shot with it':'')); } }
+  else if(row.silver){ var s=rollExpr(row.silver); f.silver=s.total; f.lines.push(s.total+' silver ('+s.text+')'); }
+  else if(row.table==='relics'){ var rn=d(20); var rel=rowFor(D('PB_RELICS'),rn); if(rel){ f.items.push({relic:rel.id}); f.lines.push('the relic '+rel.name+' (d20: '+rn+')'); } }
+  else if(row.table==='rituals'){ var tn=d(20); var rit=rowFor(D('PB_RITUALS'),tn); if(rit){ f.items.push({ritual:rit.id}); f.lines.push('the ritual '+rit.name+' (d20: '+tn+')'+(restrictions().rituals?'':' — your class can\'t use rituals')); } }
+  if(!f.lines.length) f.lines.push(row.text||'Nothing.');
+  addLog('Among the Dead','d6: '+n,f.lines.join(' · '),n>=3?'crit':'normal'); findsDlg('Among the Dead','d6 · '+n,f,'Among the Dead'); }
+
 // ── render ──
 var _tcol={}; try{ _tcol=JSON.parse(localStorage.getItem('pb_turn_collapsed')||'{}')||{}; }catch(e){}
 function tsec(id,title,body,count){ var col=!!_tcol[id]; return '<div class="pb-sec'+(col?' collapsed':'')+'" id="ts-'+id+'"><div class="pb-sec-hd" onclick="toggleTSec(\''+id+'\')"><span class="pb-caret">▼</span><span class="pb-title">'+title+'</span>'+(count!=null?'<span class="pb-count">'+count+'</span>':'')+'</div><div class="pb-sec-body">'+body+'</div></div>'; }
@@ -1580,7 +1862,7 @@ function renderTurn(){
   var el=$('pb-turn'); if(!el) return; var c=S.combat; var act=canAct();
   var h='<div class="pb-top"><div class="pb-row1">';
   if(!c.on) h+='<span class="pb-init-lbl">Out of combat</span><div class="pb-econ">'+tbtn('Start combat','startCombat()','','Roll initiative (d6: 1–3 enemies first, 4–6 PCs first)')+'</div>';
-  else { h+='<span class="pb-round"><b>'+num(c.round,1)+'</b><small>round</small></span><div class="pb-econ"><span class="pb-pip'+(c.action?' used':'')+'" title="One action a round">Action</span>'+(num(c.extra)>0?'<span class="pb-pip extra">+'+num(c.extra)+' free attack</span>':'')+'<span class="pb-side">'+esc(c.side||'')+(c.init!=null?' · d6+AGL '+c.init:'')+'</span></div>'+tbtn('New round','newRound()','end')+'<button class="pb-x" title="End combat" onclick="endCombat()">✕</button>'; }
+  else { h+='<span class="pb-round"><b>'+num(c.round,1)+'</b><small>round</small></span><div class="pb-econ">'+(actsMax()>1?[0,1].map(function(i){ return '<span class="pb-pip'+(num(c.acts)>i||c.action?' used':'')+'" title="Time slows: two actions or attacks this round">Action '+(i+1)+'</span>'; }).join(''):'<span class="pb-pip'+(c.action?' used':'')+'" title="One action a round">Action</span>')+(num(c.extra)>0?'<span class="pb-pip extra">+'+num(c.extra)+' free attack</span>':'')+'<span class="pb-side">'+esc(c.side||'')+(c.init!=null?' · d6+AGL '+c.init:'')+'</span></div>'+tbtn('New round','newRound()','end')+'<button class="pb-x" title="End combat" onclick="endCombat()">✕</button>'; }
   h+='</div><div class="pb-badges">';
   if(S.dead) h+='<span class="pb-badge warn">Dead</span>'; else if(S.hp===0) h+='<span class="pb-badge warn">Broken</span>';
   if(num(S.cond.out)) h+='<span class="pb-badge warn">Out '+num(S.cond.out)+' rounds</span>'; if(S.cond.stunned) h+='<span class="pb-badge warn">Stunned</span>';
@@ -1588,6 +1870,7 @@ function renderTurn(){
   if(overEnc()) h+='<span class="pb-badge warn">Over-encumbered</span>'; if(num(S.grog.drinks)) h+='<span class="pb-badge">Grog ×'+num(S.grog.drinks)+'</span>';
   if(c.liars===true) h+='<span class="pb-badge">Liar\'s Dice: even</span>'; if(c.eldritch) h+='<span class="pb-badge'+(c.eldritch==='panic'?' warn':'')+'">Eldritch Mind: '+(c.eldritch==='panic'?'panic (+4 DR, 2 attacks)':'harnessed (−2 DR)')+'</span>';
   if(c.inspire!=null) h+='<span class="pb-badge">Inspiring Leader ±'+c.inspire+'</span>'; if(DX.holy) h+='<span class="pb-badge">Holy Protection</span>';
+  A(S.timed).forEach(function(t){ h+='<span class="pb-badge'+(t.fx.death||t.fx.paralyzed?' warn':'')+'" title="'+esc(t.src+(t.text?': '+t.text:''))+'">'+esc(t.name)+' · '+esc(fmtLeft(t.left))+'</span>'; });
   if(S.light) h+='<span class="pb-badge">'+esc(S.light.name)+' lit</span>'; if(S.cond.invisible) h+='<span class="pb-badge">Invisible</span>';
   if(TR.luckMax) h+='<span class="pb-badge luck">Luck: max damage armed</span>'; if(TR.luckDR) h+='<span class="pb-badge luck">Luck: −4 DR armed</span>'; if(TR.luckSoak) h+='<span class="pb-badge luck">Luck: −d6 armed</span>';
   h+='</div><div class="pb-subtabs"><button class="pb-st'+(S.subtab!=='defend'?' on':'')+'" onclick="setSubtab(\'action\')">Action</button><button class="pb-st'+(S.subtab==='defend'?' on':'')+'" onclick="setSubtab(\'defend\')">Defend</button></div></div>';
@@ -1601,7 +1884,7 @@ function renderActionTab(act){ var h='';
   var a=''; var list=attackList();
   if(num(S.combat.extra)>0) a+='<div class="pb-note good">Defense critical: one free attack, even if you have acted.</div>';
   if(has('flintlock-fanatic')) a+='<div class="pb-note">Flintlock Fanatic: up to three pistol attacks in one action'+(num(S.combat.pistols)?' ('+num(S.combat.pistols)+' fired)':'')+'.</div>';
-  list.forEach(function(w){ var g=attackGate(w); var sit=attackSituations(w); var dr=(S.cond.invisible?6:12)+drSum(sit.auto); var ab=attackAbility(w);
+  list.forEach(function(w){ var g=attackGate(w); var sit=attackSituations(w); var ab=attackAbility(w); var dr=(S.cond.invisible?6:12)+drSum(sit.auto)+drSum(timedMods({kind:'attack',ability:ab}));
     var sub=esc(ab)+' '+sgn(abil(ab))+' vs <b>DR'+dr+'</b> · '+esc(weaponDamage(w))+(sit.dmgAuto.length?' '+sit.dmgAuto.map(function(x){ return x.v; }).join(' '):'')+(w.reach?' · '+w.reach+'\' reach':'')+(w.range?' · '+w.range+'\'':'')+(w.blackPowder?' · ignores armor · shot '+ammoCount('shot'):'')+(w.trusted?' · trusted':'')+(w.poisoned?' · grog-poisoned':'')+(g?' · <span style="color:var(--red);">'+esc(g)+'</span>':'');
     var btns=tbtn('Attack','doAttack(\''+w.uid+'\',{})','',g)+tbtn('⋯','openAttack(\''+w.uid+'\')','ghost','Target DR, situation, Devil\'s Luck');
     if(w.blackPowder&&!w.loaded) btns=tbtn('Reload'+(num(w.prog)?' '+(num(w.prog)+1)+'/'+reloadRounds(w):''),'reloadWeapon(\''+w.uid+'\')','','Reload '+reloadRounds(w)+' round'+(reloadRounds(w)>1?'s':''),!act)+btns;
@@ -1633,7 +1916,9 @@ function renderActionTab(act){ var h='';
   // equipment: consumables with a set effect, used up when used
   var eq='';
   S.items.forEach(function(x){
-    if(x.ref==='medical-kit'&&num(x.uses)>0) eq+=tcard(esc(x.name)+' <span class="pb-qty">'+num(x.uses)+' uses</span>','Action: heal d6 HP and stop bleeding, poison or infection',tbtn('Use','useMedKit(\''+x.uid+'\')'),!act);
+    if(x.kind==='potion'&&x.potion&&num(x.qty,1)>0){ var pp=x.potion; eq+=tcard(esc(x.name)+(num(x.qty,1)>1?' <span class="pb-qty">×'+num(x.qty,1)+'</span>':'')+' <span class="tag">'+(pp.known?'potion':'unknown potion')+'</span>',esc(potionSummary(pp))+' · an action, used up',tbtn(potionVerb(pp.delivery),'usePotion(\''+x.uid+'\')','','Use it on yourself')+tbtn('On another','usePotion(\''+x.uid+'\',true)','ghost','Give, splash or inject it into someone else: the effect is logged for them')+(pp.known?'':tbtn('Identify','identifyPotion(\''+x.uid+'\')','ghost','Someone who knows (Tela charges 25s) names its effect')),!act); }
+    else if(x.kind==='ash'&&num(x.qty,1)>0) eq+=tcard('ASH <span class="pb-qty">×'+num(x.qty,1)+' dose'+(num(x.qty,1)===1?'':'s')+'</span>','Eat, snort or smoke a dose: d20 on the Effects of Consuming ASH · most effects last 2d6 minutes · an action',tbtn('Consume','consumeAsh(\''+x.uid+'\')'),!act);
+    else if(x.ref==='medical-kit'&&num(x.uses)>0) eq+=tcard(esc(x.name)+' <span class="pb-qty">'+num(x.uses)+' uses</span>','Action: heal d6 HP and stop bleeding, poison or infection',tbtn('Use','useMedKit(\''+x.uid+'\')'),!act);
     else if(x.drink&&num(x.qty,1)>0) eq+=tcard(esc(x.name)+' <span class="pb-qty">×'+num(x.qty,1)+'</span>','Drink: TOUGHNESS DR'+(8+num(S.grog.drinks))+' → heal d4 (fail: vomit d2 rounds) · AGILITY −1 for an hour',tbtn('Drink','drink(\''+x.uid+'\')'),!act);
     else if(isMeat(x)&&num(x.qty,1)>0) eq+=tcard(esc(x.name)+' <span class="pb-qty">×'+num(x.qty,1)+'</span>','Buccan Cook: eat one to heal '+(picks('buccan-cook')>=2?'d6':'d4')+' HP',tbtn('Eat','eatMeat(\''+x.uid+'\')'),!act);
     else if(x.kind==='bomb'&&num(x.qty,1)>0) eq+=tcard(esc(x.name)+' <span class="pb-qty">×'+num(x.qty,1)+'</span>','Throw: AGILITY DR'+(12-(has('black-powder-poet')?2:0))+(x.dmg?' · '+esc(x.dmg):'')+(x.effect?' · '+esc(x.effect):'')+' · 5\' blast',tbtn('Throw','throwBomb(\''+x.uid+'\')'),!act);
@@ -1758,6 +2043,7 @@ function openRules(){
   h+='<h4>Devil\'s Luck</h4><ul><li>Spend 1 to: deal maximum damage, reroll any die, lower a test\'s DR by 4, reduce damage dealt to you by d6, or neutralize a crit or fumble.</li><li>It recharges only when empty: after at least 6 hours of rest roll your class die.</li></ul>';
   h+='<h4>Hit points</h4><ul><li>At exactly 0 HP you are <b>Broken</b> — roll d6: 1 death, 2 hemorrhage (tests DR16/DR18, death in d2 hours unless treated), 3 brain injury (PRESENCE −3 for d8 days), 4 limb or eye (out d4 rounds, up with d4 HP), 5 out d4 rounds (1 HP, 0 Luck), 6 out d2 rounds (d4 HP, d2 Luck).</li><li>Below 0 HP you are dead.</li><li>Short rest d4 HP, long rest d8. Starving: no healing, after two days −d4 a day. Infected, sick, bleeding or poisoned: −d6 every morning.</li><li>Grog or rum: TOUGHNESS DR8 + drinks this hour → heal d4 (fail: vomit d2 rounds); AGILITY −1 per drink for an hour.</li></ul>';
   h+='<h4>Magic</h4><ul><li>Relics: use your action, then test SPIRIT DR12 — fail: stunned and the relic is spent until dawn; fumble: it is destroyed and you lose d2 HP.</li><li>Rituals: d4 + SPIRIT casts each dawn; SPIRIT DR12. Fail: roll a mystical mishap, and that ritual is locked until dawn. Under duress +2 DR, 1 minute −2, 1 hour −4, several casters roll twice, blood −1 DR per HP.</li><li>Relics and rituals almost never work in tier 2–3 armor or with cold iron (Zealots and Sorcerers can manage tier 2). Brutes can\'t use rituals.</li><li>Zealot prayers: d2 + SPIRIT a day. Sorcerer spells: d2 + SPIRIT a day, reset at sunset.</li></ul>';
+  h+='<h4>ASH, potions &amp; shore leave</h4><ul><li>ASH is the dust of destroyed undead and the black-market currency of the Dark Caribbean (a dose ≈ 5 lbs., 50s standard rate, swinging with each port\'s market). Consuming a dose takes an action: roll d20 on its effects — most last 2d6 minutes; a few are permanent, and a 1 is an overdose (TOUGHNESS DR12 or die).</li><li>Alchemical potions: ingredients, colour, delivery (inhaled, on the skin, into the blood, swallowed), a DR and an effect. Resist a harmful one with TOUGHNESS against its DR; brewing one is a PRESENCE test at the same DR. Most cost d100s.</li><li>Carousing: roll 4d20 (or 1d20 read across). Hungover for the lowest die in hours; the total is silver spent or lost (4–49) or won or stolen (50+).</li><li>Loot the Body (d100) on a fallen foe; add the number rolled in silver for extra loot.</li></ul>';
   h+='<h4>Getting better</h4><p>When the GM says so: roll d6 for each ability (−3…+1 rise unless the die shows 1; +2 and up rise if the die is equal or higher, otherwise fall), +d6 max HP, a class feature, and d6 among the dead.</p>';
   $('rules-body').innerHTML=h; $('rules-overlay').classList.add('open'); }
 function closeRules(){ $('rules-overlay').classList.remove('open'); }
@@ -1810,14 +2096,14 @@ function collectSheet(){ var d0=JSON.parse(JSON.stringify(S)); d0.system='PB'; d
     var cn=[]; if(S.dead) cn.push('Dead'); if(S.broken&&!S.dead) cn.push('Broken'+(S.broken.name?': '+S.broken.name:''));
     if(num(C0.hemorrhage)) cn.push('Hemorrhage ('+(num(C0.hemorrhage)===2?'last hour, DR18':'DR16')+')'); if(num(C0.brain)) cn.push('Brain injury ('+num(C0.brain)+' days, PRESENCE −3)'); if(num(C0.out)) cn.push('Unconscious ('+num(C0.out)+' rounds)');
     if(C0.infected) cn.push('Infected'); if(C0.starving) cn.push('Starving'+(num(C0.starveDays)?' ('+num(C0.starveDays)+' days)':'')); if(C0.stunned) cn.push('Stunned'); if(C0.underwater) cn.push('Underwater'); if(C0.invisible) cn.push('Invisible'); if(C0.sunlight&&hasAilment('vampirism')) cn.push('In sunlight');
-    if(overEnc()) cn.push('Over-encumbered'); Dv.conditions=cn;
+    if(overEnc()) cn.push('Over-encumbered'); A(S.timed).forEach(function(t){ cn.push(t.name+' ('+fmtLeft(t.left)+')'); }); Dv.conditions=cn;
     Dv.uses={prayers:S.prayerUses,spells:S.spellCasts,rituals:S.ritualCasts};
   }catch(e){}
   d0.campaign=(typeof _campaign!=='undefined'&&_campaign)?{id:_campaign.id,code:_campaign.code,name:_campaign.name}:null; return d0; }
 function applySheet(d0){
   d0=d0||{}; var b=blankState(); S=Object.assign(b,d0);
   ['origin','abilities','prayerUses','spellCasts','ritualCasts','conduit','cond','grog','combat','day'].forEach(function(k){ S[k]=Object.assign({},b[k],(d0[k]&&typeof d0[k]==='object'&&!Array.isArray(d0[k]))?d0[k]:{}); });
-  ['features','prayers','spells','rituals','relics','mishaps','items','prot','deck'].forEach(function(k){ if(!Array.isArray(S[k])) S[k]=[]; });
+  ['features','prayers','spells','rituals','relics','mishaps','items','prot','deck','timed'].forEach(function(k){ if(!Array.isArray(S[k])) S[k]=[]; });
   S.items.forEach(function(x){ if(!x.uid) x.uid=uid(); }); S.relics.forEach(function(x){ if(!x.uid) x.uid=uid(); });
   delete S.derived; S.system='PB';
   if(typeof campaignRestore==='function') campaignRestore(d0.campaign);
@@ -2123,6 +2409,7 @@ body.sheet-locked .lk-hide{display:none;}
   .pb-do{padding:9px 12px;font-size:14px;}
   .pb-card{flex-wrap:wrap;}
   .pb-btns{margin-left:auto;max-width:100%;}
+  .pb-card:has(.pb-btns>.pb-do:nth-child(3)) .pb-main{flex-basis:100%;}   /* three or more buttons: text on its own line */
   .pb-frow>label{min-width:0;width:100%;}
   .pb-in{max-width:none;}
 }

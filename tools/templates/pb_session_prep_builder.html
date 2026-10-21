@@ -809,6 +809,7 @@ body.flow-mode .page + .page {
       <div class="section-divider">Secrets & Clues</div>
       <div id="clues-list" class="entity-list"></div>
       <button class="btn-add" onclick="addClue()">+ Add Clue</button>
+      <div style="display:flex;gap:6px;"><button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbAddRumor('')" title="Rumors d20 (Core Rules pg. 127)">🎲 Rumor</button><button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbAddRumor('history')" title="A General History of the Dark Caribbean d66 (pg. 25)">🎲 History</button></div>
       <div class="section-divider" style="border-left-color:var(--accent);">Roll Tables</div>
       <div id="rolltables-list" class="entity-list"></div>
       <button class="btn-add" onclick="addRollTable()">+ Add Roll Table</button>
@@ -821,7 +822,12 @@ body.flow-mode .page + .page {
     <!-- THE JOB -->
     <div class="tab-panel" id="tab-job">
       <div class="section-divider">The Job</div>
-      <div class="pb-hint">What pulls the crew in: a rumoured prize, a patron with silver, a debt, a curse. The Player's Guidebook has no adventure tables, so this is yours to write.</div>
+      <div class="pb-hint">What pulls the crew in: a rumoured prize, a patron with silver, a debt, a curse. Write your own, or roll the Core Rules' Jobs &amp; Quests tables (hook, patron, requirement, time restraint, complication).</div>
+      <div class="pb-row field-group">
+        <div style="flex:1;min-width:0"><label class="field-label">Faction</label><select id="f-j-faction" onchange="autosave()"><option value="">—</option></select></div>
+        <div style="flex:1;min-width:0"><label class="field-label">Port</label><select id="f-j-port" onchange="autosave()"><option value="">—</option></select></div>
+      </div>
+      <button class="btn-add btn-roll" onclick="pbRollJob()">🎲 Roll a job (Jobs &amp; Quests)</button>
       <div class="field-group"><label class="field-label accent">Job name</label><input type="text" id="f-j-name" placeholder="e.g. The Bell Beneath Port Maw" oninput="autosave()"></div>
       <div class="field-group"><label class="field-label">The hook</label><textarea id="f-j-hook" class="short" placeholder="Read aloud — how the crew hears of it..." oninput="autosave()"></textarea></div>
       <div class="pb-row field-group">
@@ -845,7 +851,7 @@ body.flow-mode .page + .page {
     <!-- VOYAGE -->
     <div class="tab-panel" id="tab-voyage">
       <div class="section-divider">Voyage Legs</div>
-      <div class="pb-hint">A ship travels up to its speed in 50-mile hexes a day; sailing northeast, east or southeast in the Dark Caribbean costs 1 hex a day (minimum 1). Roll a maritime event once a leg, or 2-in-6 per hex or per 4-hour watch.</div>
+      <div class="pb-hint">A ship travels up to its speed in 50-mile hexes a day; sailing northeast, east or southeast in the Dark Caribbean costs 1 hex a day (minimum 1). Roll a maritime event once a leg, or 2-in-6 per hex or per 4-hour watch: the Core Rules' events, encounters and flotsam (d20 / d20 / d12) or Trapped in the Tropics' d12.</div>
       <button class="btn-add btn-roll" onclick="pbRollVoyage()">🎲 Roll a leg (weather · winds · event)</button>
       <div id="voyages-list" class="entity-list"></div>
       <button class="btn-add" onclick="addPbVoyage()">+ Add Voyage Leg</button>
@@ -854,12 +860,14 @@ body.flow-mode .page + .page {
     <!-- SHIPS -->
     <div class="tab-panel" id="tab-ships">
       <div class="section-divider">Ships</div>
-      <div class="pb-hint">The crew's ship and the ones they meet. Ships come from Trapped in the Tropics and your homebrew (pb-ship); every number stays editable. Crew skill modifiers, specialty crew and known shanties are tracked per ship.</div>
+      <div class="pb-hint">The crew's ship and the ones they meet. Ships come from the Core Rules (raft to ship of the line, forts), Trapped in the Tropics and your homebrew (pb-ship); a template turns one into a ghost ship, a ship of bone, a vessel from the deep or a captain's fleet ship. Every number stays editable. Crew skill modifiers, specialty crew and known shanties are tracked per ship.</div>
       <div class="pb-row field-group">
         <select id="ship-pick" style="flex:1.4" title="Ship type"></select>
         <select id="ship-role" style="flex:1" title="Whose ship"><option value="party">Party ship</option><option value="foe" selected>Encountered</option></select>
       </div>
+      <div class="pb-row field-group"><select id="ship-tpl" style="flex:1" title="Lay a template over the base ship (undead vessels, captains' fleets)"><option value="">No template</option></select></div>
       <div style="display:flex;gap:6px;"><button class="btn-add" style="flex:1" onclick="pbShipAdd()">+ Add this ship</button><button class="btn-add" style="flex:1" onclick="addPbShip({role:'party'})">+ Blank ship</button></div>
+      <button class="btn-add btn-roll" onclick="pbShipAtSea()" title="Ships at Sea (Core Rules pg. 114): vessel class, armament, crew, d66 name — with the template above, if any">🎲 Ships at sea</button>
       <div id="ships-list" class="entity-list" style="margin-top:6px;"></div>
     </div>
 
@@ -868,6 +876,7 @@ body.flow-mode .page + .page {
       <div class="section-divider">Islands, Ports &amp; Scenes</div>
       <div id="locations-list" class="entity-list"></div>
       <button class="btn-add" onclick="addLocation()">+ Add Place / Scene</button>
+      <div style="display:flex;gap:6px;"><button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbAddIsland()" title="Uncharted Islands (Core Rules pg. 122)">🎲 Uncharted island</button><button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbAddWreck()" title="Derelict Ship generator (pg. 116)">🎲 Derelict ship</button></div>
 
       <div class="section-divider">Traps</div>
       <div class="pb-hint">It's a Trap! (Trapped in the Tropics): roll the d12 trap alone for speed, or across trap, bait, trigger, state and complication (5d12). Adapt what doesn't fit.</div>
@@ -892,6 +901,12 @@ body.flow-mode .page + .page {
         <button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbTreasureRelic()" title="Ancient Relics d20">🎲 Relic</button>
         <button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbTreasureRitual()" title="Arcane Rituals d20 (a scroll)">🎲 Ritual</button>
         <button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbTreasureDead()" title="Among the Dead You Find d6">🎲 The dead</button>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+        <button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbTreasureMap()" title="Treasure Maps + Riddles (Core Rules pg. 119-121)">🎲 Treasure map</button>
+        <button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbTreasureBuried()" title="Buried Treasure d100 (pg. 118)">🎲 Buried</button>
+        <button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbTreasureCargo()" title="Cargo d12 (Core Rules pg. 115), with this port's price">🎲 Core cargo</button>
+        <button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbTreasureLoot()" title="Loot the Body d100 (endpapers)">🎲 Loot body</button>
       </div>
       <div id="rewards-list" class="entity-list"></div>
       <button class="btn-add" onclick="addReward()">+ Add Treasure</button>
@@ -956,6 +971,14 @@ body.flow-mode .page + .page {
         <button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbRollNpc()">🎲 Pirate NPC</button>
         <button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbRollZombie()" title="Zombie Appearance d6 — added as a Zombie block">🎲 Zombie look</button>
       </div>
+      <div style="display:flex;gap:6px;margin-top:6px;">
+        <button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbRollPirate()" title="Pirate Generator 3d12 (Core Rules pg. 124)">🎲 Pirate (3d12)</button>
+        <button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbRollEnemy()" title="Make Your Own Enemies (pg. 91)">🎲 Enemy builder</button>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:6px;">
+        <select id="cap-pick" style="flex:1.4;min-width:0" title="Archetype Captain (pg. 110-113)"><option value="">Archetype captain…</option></select>
+        <button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbAddCaptain()" title="Adds the captain, an officer and a crew block (and the flagship on the Ships tab)">+ Captain &amp; crew</button>
+      </div>
       <div class="pb-calc" id="m-note"></div>
       <div id="statblocks-list" class="entity-list"></div>
       <button class="btn-add" onclick="addStatBlock()">+ Add Stat Block</button>
@@ -967,7 +990,7 @@ body.flow-mode .page + .page {
     <label for="f-import" class="btn-secondary" style="flex:1; text-align:center; cursor:pointer; padding:8px; font-family:var(--font-display); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em;">Import</label>
     <button class="btn-primary" onclick="exportHTML()" style="flex:1;">Export</button>
     <button class="btn-secondary" onclick="savePDF()" id="pdf-btn" style="flex:1;">PDF</button>
-    <input type="file" id="f-import" accept=".html" style="display:none" onchange="importHTML(this)">
+    <input type="file" id="f-import" accept=".html,.json" style="display:none" onchange="importHTML(this)">
   </div>
   <button class="sidebar-tab" onclick="toggleSidebar()" aria-label="Toggle controls"><span class="sidebar-tab-arrow">▼</span></button>
 </div>
@@ -1069,7 +1092,7 @@ const DEFAULT_STATE = {
   overview:'', mappath:'', maps:[],
   clues:[], rewards:[], rollTables:[], hooks:[], notes:'', strongopen:[], locations:[], statblocks:[],
   // ── Pirate Borg prep sections ──
-  pbJob:{ name:'', hook:'', patron:'', prize:'', goal:'', rivals:'', notes:'' },
+  pbJob:{ name:'', hook:'', patron:'', prize:'', goal:'', rivals:'', notes:'', faction:'', port:'' },
   pbVoyages:[], pbShips:[], pbTraps:[]
 };
 let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
@@ -1790,7 +1813,7 @@ function addReward(data={}) {
 }
 
 // ── Roll Tables ─────────────────────────────────────────────────────────
-const RT_DICE=['d4','d6','d8','d10','d12','d20','d100'];
+const RT_DICE=['d4','d6','d8','d10','d12','d20','d100','2d6','3d6','d66'];
 function rtRowEl(r={}) {
   const d=document.createElement('div'); d.className='rt-row';
   d.style.cssText='display:flex;gap:6px;margin-bottom:4px;align-items:center;';
@@ -2107,11 +2130,19 @@ function pbMobToCard(m) {
   const extra = [];
   if (m.attacksPerRound && m.attacksPerRound !== 1) extra.push('Attacks: ' + m.attacksPerRound + ' a round' + (m.attackTable && m.attackTable.note ? ' — ' + m.attackTable.note : ''));
   else if (m.attackTable && m.attackTable.note) extra.push('Attacks: ' + m.attackTable.note);
-  if (m.attackChoice) extra.push('Attacks: one of the following each round');
+  if (m.attackChoice) extra.push(m.attackChoice === 'pick 1-2' ? 'Attacks: armed with 1 or 2 of the following' : 'Attacks: one of the following each round');
+  if (m.hpText && String(m.hpText) !== String(m.hp)) extra.push('HP: ' + m.hpText + (m.hpDice ? ' (roll when it appears; ~' + m.hp + ')' : ''));
+  if (m.moraleText && String(m.moraleText) !== String(m.morale)) extra.push('Morale: ' + m.moraleText);
   if (m.blackPowder) extra.push('Black powder: its guns ignore armor');
   if (m.ignoresArmor) extra.push('Ignores armor: its damage ignores the target\'s armor');
   if (m.count) extra.push('Appears: ' + m.count);
   if (Array.isArray(m.loot) && m.loot.length) extra.push('Loot: ' + m.loot.map(l => l.name + (l.value ? ' ' + l.value : '')).join(', '));
+  // In-block tables (belly of a seagull, omens, despair…) and a sea monster's Naval Combat block.
+  const tables = ['lootTable', 'omenTable', 'effectTable'].map(k => m[k]).filter(t => t && Array.isArray(t.rows) && t.rows.length)
+    .map(t => (t.name || 'Table') + ' (' + (t.die || 'd6') + '): ' + t.rows.map(r => (Array.isArray(r.roll) ? r.roll[0] + '-' + r.roll[1] : r.roll) + ' ' + String(r.text || r.name || '').replace(/\.$/, '')).join(' · '));
+  const nv = m.naval;
+  const naval = nv ? ['Naval Combat: HP ' + nv.hp + ' · Morale ' + pbMorale(nv.morale) + ' · ' + (nv.armor ? (nv.armor.name || 'Armor') + ' −' + nv.armor.die : 'no armor') + ' · Speed ' + nv.speed + ' · AGL ' + (nv.agility >= 0 ? '+' : '−') + Math.abs(nv.agility || 0) + ' — ' + (nv.attacks || []).map(a => a.name + (a.damage ? ' ' + a.damage : '') + (a.notes ? ' (' + a.notes + ')' : '')).join(', ')] : [];
+  const notes = [m.drNote, m.armorNote].filter(Boolean).map(x => 'Note: ' + x);
   const defWith = m.defendWith && m.defendWith !== 'AGILITY' ? m.defendWith + ' ' : '';
   return {
     sbtype: m.boss ? 'boss' : (m.named && m.category === 'npc') ? 'npc' : 'mob', name: m.name || '',
@@ -2119,7 +2150,7 @@ function pbMobToCard(m) {
     flavor: m.text || '',
     hp: String(m.hp ?? ''), morale: pbMorale(m.morale), armor: m.armor && m.armor.die ? pbArmorTxt(m.armor) + (m.armor.name ? ' ' + m.armor.name : '') : '—',
     atkdr: 'DR' + (dr.attack || 12), defdr: defWith + 'DR' + (dr.defend || 12),
-    abilities: extra.concat(atk, tbl, (m.specials || []).map(s => (s.name ? s.name + ': ' : '') + (s.text || ''))).join('\n')
+    abilities: extra.concat(atk, tbl, (m.specials || []).map(s => (s.name ? s.name + ': ' : '') + (s.text || '')), tables, naval, notes).join('\n')
   };
 }
 /* SB_CONFIG_END */
@@ -2156,12 +2187,22 @@ function sbFieldValues(card) {
 function mobPool() { return SB_CONFIG.mobs ? SB_CONFIG.mobs.pool() : []; }
 // Pirate Borg: the picker filters by type (Redcoats, Zombies, NPC, Beast, Undead, Spirit, Monster…).
 function mobGroup() { const g = document.getElementById('mobpick-group'); return g ? g.value : ''; }
-function mobFiltered() { const g = mobGroup(); const p = mobPool(); return g ? p.filter(m => String(m.group||'') === g) : p; }
+// Filter values: a group name, "cat:<category>" or "src:<book>".
+function mobMatch(m, g) {
+  if(!g) return true;
+  if(g.indexOf('cat:') === 0) return String(m.category || '') === g.slice(4);
+  if(g.indexOf('src:') === 0) { const b = g.slice(4); return b === 'Homebrew' ? !!m.homebrew : (m.source === b || (Array.isArray(m.sources) && m.sources.some(x => x.source === b))); }
+  return String(m.group || '') === g;
+}
+function mobFiltered() { const g = mobGroup(); const p = mobPool(); return g ? p.filter(m => mobMatch(m, g)) : p; }
 function mobFillGroups() {
   const sel = document.getElementById('mobpick-group'); if(!sel) return;
-  const cur = sel.value;
-  const groups = [...new Set(mobPool().map(m => m.group).filter(Boolean))];
-  sel.innerHTML = '<option value="">All types</option>' + groups.map(g => '<option'+(g===cur?' selected':'')+'>'+escH(g)+'</option>').join('');
+  const cur = sel.value, P = mobPool(), uniq = a => [...new Set(a.filter(Boolean))];
+  const o = (v, l) => '<option value="' + escA(v) + '"' + (v === cur ? ' selected' : '') + '>' + escH(l) + '</option>';
+  sel.innerHTML = '<option value="">All types (' + P.length + ')</option>'
+    + '<optgroup label="Group">' + uniq(P.map(m => m.group)).map(g => o(g, g)).join('') + '</optgroup>'
+    + '<optgroup label="Category">' + uniq(P.map(m => m.category)).map(c => o('cat:' + c, c === 'npc' ? 'NPC' : dcap(c))).join('') + '</optgroup>'
+    + '<optgroup label="Book">' + uniq(P.map(m => m.homebrew ? 'Homebrew' : m.source)).map(b => o('src:' + b, b)).join('') + '</optgroup>';
 }
 function mobRandom() {
   const p = mobFiltered(); if(!p.length) return;
@@ -2173,7 +2214,7 @@ function mobSearch() {
   if(!box || !list || !SB_CONFIG.mobs) return;
   const q = box.value.trim().toLowerCase();
   const pool = mobFiltered();
-  const hits = (q ? pool.filter(m => (m.name||'').toLowerCase().includes(q)) : pool).slice(0, 80);
+  const hits = (q ? pool.filter(m => (m.name||'').toLowerCase().includes(q)) : pool).slice(0, 150);
   if(!hits.length) { list.innerHTML = '<div class="mob-pick-empty">No match.</div>'; list.classList.add('show'); return; }
   list.innerHTML = hits.map(m =>
     '<button type="button" class="mob-pick-item" data-mon="'+escA(m.name)+'" onclick="mobAdd(this.dataset.mon)">'+
@@ -2627,7 +2668,10 @@ function importHTML(input) {
   const reader=new FileReader();
   reader.onload=(e)=>{
     const html=e.target.result;
-    const match=html.match(/data-spb="([^"]+)"/);
+    // A .json file holds the same blob the HTML export embeds ({chapters:[…], active} or one flat chapter).
+    let jsonBlob=null;
+    if(/^\s*[{\[]/.test(html)) { try { jsonBlob=JSON.parse(html); } catch(err) { jsonBlob=null; } }
+    const match=jsonBlob ? ['', btoa(unescape(encodeURIComponent(JSON.stringify(jsonBlob))))] : html.match(/data-spb="([^"]+)"/);
     if(!match){
       alert("This HTML file does not contain Adventure Prep Builder data.\n\nOnly files exported from this builder can be imported.");
       input.value="";
@@ -2651,6 +2695,7 @@ function importHTML(input) {
         const s = {...DEFAULT_STATE, ...ch};
         ['maps','clues','rewards','rollTables','hooks','strongopen','locations','statblocks','pbVoyages','pbShips','pbTraps'].forEach(k=>{ if(!Array.isArray(s[k])) s[k]=[]; });
         if(!s.pbJob || typeof s.pbJob !== 'object') s.pbJob = { ...DEFAULT_STATE.pbJob };
+        else s.pbJob = { ...DEFAULT_STATE.pbJob, ...s.pbJob };
         return s;
       };
       chapters = incoming.map(norm);
@@ -2896,9 +2941,20 @@ function pbBody(row){ const G = PG(); return G ? G.body(row) : String((row && ro
 
 // ── Pickers (ships, NPC stat templates) ──
 function pbShipPool() { return parr(typeof PB_SHIPS !== 'undefined' ? PB_SHIPS : null).concat(_hbShips); }
+function pbTemplates() { return parr(typeof PB_SHIP_TEMPLATES !== 'undefined' ? PB_SHIP_TEMPLATES : null); }
+function pbFactions() { return parr(typeof PB_FACTIONS !== 'undefined' ? PB_FACTIONS : null); }
+function pbPorts() { const S = (typeof PB_SETTING !== 'undefined' && PB_SETTING) ? PB_SETTING : null; if(!S) return []; const names = parr(S.places).map(p => p.name); parr(S.map && S.map.places).forEach(n => { if(!names.some(x => x.indexOf(n) === 0)) names.push(n); }); return names; }
 function pbFillPickers() {
   const sp = document.getElementById('ship-pick');
   if(sp) { const cur = sp.value; sp.innerHTML = pbShipPool().map(s => '<option' + (s.name === cur ? ' selected' : '') + '>' + escH(s.name) + '</option>').join('') || '<option value="">No ships loaded</option>'; if(!cur) { const sl = pbShipPool().find(s => s.id === 'sloop'); if(sl) sp.value = sl.name; } }
+  const st = document.getElementById('ship-tpl');
+  if(st && st.options.length <= 1) st.insertAdjacentHTML('beforeend', pbTemplates().map(t => '<option value="' + escA(t.id) + '">' + escH(t.name) + (t.baseShips ? ' — ' + t.baseShips.length + ' base ships' : '') + '</option>').join(''));
+  const cp = document.getElementById('cap-pick');
+  if(cp && cp.options.length <= 1) cp.insertAdjacentHTML('beforeend', parr(typeof PB_CAPTAINS !== 'undefined' ? PB_CAPTAINS : null).map(c => '<option value="' + escA(c.id) + '">' + escH(c.name) + '</option>').join(''));
+  const jf = document.getElementById('f-j-faction');
+  if(jf && jf.options.length <= 1) { const cur = (state.pbJob || {}).faction || ''; jf.insertAdjacentHTML('beforeend', pbFactions().map(f => '<option value="' + escA(f.name) + '">' + escH(f.name) + '</option>').join('')); jf.value = cur; }
+  const jp = document.getElementById('f-j-port');
+  if(jp && jp.options.length <= 1) { const cur = (state.pbJob || {}).port || ''; jp.insertAdjacentHTML('beforeend', pbPorts().map(n => '<option>' + escH(n) + '</option>').join('')); jp.value = cur; }
   const sa = document.getElementById('npc-statsas');
   if(sa) { const cur = sa.value; sa.innerHTML = '<option value="">No stats (social)</option>' + pbMobPool().filter(m => m.category === 'npc').map(m => '<option' + (m.name === cur ? ' selected' : '') + '>' + escH(m.name) + '</option>').join(''); }
 }
@@ -2943,7 +2999,7 @@ function addPbVoyage(data={}) {
     + `<div style="display:flex;gap:6px;"><button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbVoyRoll(this,'weather')">🎲 Foul weather 2d6</button><button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbVoyRoll(this,'winds')">🎲 Winds 2d6 + d6</button></div>`
     + dfg('Winds', din('vy-winds', data.winds, 'e.g. Fair — wind from the SE'))
     + dfg('Events & encounters', dta('vy-events', data.events, 'One per line...'))
-    + `<button class="btn-add btn-mini btn-roll" onclick="pbVoyRoll(this,'event')">🎲 Maritime event (d12)</button>`
+    + `<div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbVoyRoll(this,'seaEvents')" title="Events at Sea d20 (Core Rules pg. 79)">🎲 Event d20</button><button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbVoyRoll(this,'seaEncounters')" title="Encounters at Sea d20 (pg. 79)">🎲 Encounter d20</button><button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbVoyRoll(this,'flotsam')" title="Flotsam &amp; Jetsam d12 (pg. 79)">🎲 Flotsam d12</button><button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbVoyRoll(this,'event')" title="Maritime Events &amp; Encounters d12 (Trapped in the Tropics)">🎲 Tropics d12</button></div>`
     + dfg('Notes', dta('vy-notes', data.notes, 'Landmarks, deadlines, who is following...'))
     + `<div class="pb-calc vy-calc"></div>`);
   return card;
@@ -2961,6 +3017,18 @@ function pbVoyRoll(btn, kind) {
   const G = PG(); const c = btn.closest('.entity-card'); if(!G || !c) return;
   if(kind === 'weather') { const x = G.rollTable(PT('foulWeather')); if(x) { c.querySelector('.vy-weather').value = x.row.text.replace(/\.$/, '') + ' (2d6 ' + x.roll + ')'; autosave(); } }
   else if(kind === 'winds') { const x = G.rollTable(PT('changingWinds')), d = G.windDir(); if(x) { c.querySelector('.vy-winds').value = x.row.name + ' — ' + pbBody(x.row).replace(/\.$/, '') + '; wind from the ' + d.dir + ' (2d6 ' + x.roll + ', d6 ' + d.roll + ')'; autosave(); } }
+  else if(kind === 'seaEvents' || kind === 'seaEncounters' || kind === 'flotsam') {
+    const t = PT(kind); const x = t && G.rollTable(t); if(!x) return;
+    let line = t.name + ' ' + x.die + ' ' + x.roll + ': ' + G.rollInline(G.rollBrackets(x.row.text));
+    const hints = [];
+    if(x.row.monster) { const m = pbMobPool().find(z => z.id === x.row.monster); if(m) hints.push('creature: ' + m.name + ' — add it on the Foes tab'); }
+    (x.row.ships || (x.row.ship ? [x.row.ship] : [])).forEach(id => { const s = pbShipPool().find(z => z.id === id) || pbTemplates().find(z => z.id === id); if(s) hints.push('ship: ' + s.name + ' — add it on the Ships tab'); });
+    if(x.row.test && x.row.test.ability) hints.push(x.row.test.ability + ' DR' + x.row.test.dr);
+    if(x.row.table === 'cargo') hints.push('cargo: roll Core cargo on the Plunder tab');
+    if(x.row.table === 'derelictShip') hints.push('derelict: roll one on the Places tab');
+    if(hints.length) line += ' [' + hints.join('; ') + ']';
+    appendLine(c.querySelector('.vy-events'), line);
+  }
   else if(kind === 'event') {
     const x = G.rollTable(PT('maritimeEvents')); if(!x) return;
     let line = 'd12 ' + x.roll + ' ' + x.row.name + ': ' + pbBody(x.row);
@@ -2971,7 +3039,7 @@ function pbVoyRoll(btn, kind) {
 function pbRollVoyage() {
   const card = addPbVoyage({ name: 'Leg ' + (document.querySelectorAll('#voyages-list > .entity-card').length + 1) });
   if(!card) return;
-  ['weather', 'winds', 'event'].forEach(k => pbVoyRoll(card.querySelector('[onclick*="\'' + k + '\'"]'), k));
+  ['weather', 'winds', 'seaEvents'].forEach(k => pbVoyRoll(card.querySelector('[onclick*="\'' + k + '\'"]'), k));
   autosave(); switchTab('voyage');
 }
 
@@ -2981,11 +3049,25 @@ function pbShipToCard(s, role) {
     hull: s.hull ? s.hull.die : '', agility: s.agility == null ? '' : String(s.agility), speed: String(s.speed ?? ''), skill: s.skill == null ? '' : String(s.skill),
     broadsides: s.broadsides ? ((s.broadsidesAttacks > 1 ? s.broadsidesAttacks + ' × ' : '') + s.broadsides) : '', smallArms: s.smallArms ? ((s.smallArmsAttacks > 1 ? s.smallArmsAttacks + ' × ' : '') + s.smallArms) : '', ram: s.ram || '',
     crewMin: s.crew ? String(s.crew.min) : '', crewMax: s.crew ? String(s.crew.max) : '', crew: '', cargoSlots: s.cargo == null ? '' : String(s.cargo), cargo: '',
-    special: [s.special, s.skillNote && s.skill == null ? '' : ''].filter(Boolean).join(' '), notes: '', specialty: [], mods: {}, shanties: [] };
+    special: [s.special, s.skillNote && s.skill == null ? '' : ''].filter(Boolean).join(' '), notes: s.text && s.template ? s.text : '', specialty: [], mods: {}, shanties: [] };
 }
 function pbShipAdd() {
-  const s = pbShipPool().find(x => x.name === v('ship-pick')); if(!s) return;
+  let s = pbShipPool().find(x => x.name === v('ship-pick')); if(!s) return;
+  const G = PG(), tpl = pbTemplates().find(t => t.id === v('ship-tpl'));
+  if(tpl && G && G.applyTemplate) s = G.applyTemplate(s, tpl);
   addPbShip(pbShipToCard(s, v('ship-role') || 'foe')); autosave();
+}
+// Ships at Sea (Core Rules pg. 114): vessel class d10, armament d6, crew d6 / 2d6, d66 name.
+function pbShipAtSea() {
+  const G = PG(); if(!G || !G.shipAtSea) return;
+  const x = G.shipAtSea({ template: v('ship-tpl') }); if(!x) return;
+  const s = x.ship, R = x.rolls;
+  const card = pbShipToCard(s, v('ship-role') || 'foe');
+  card.name = s.shipName; card.base = x.base.name + (x.tpl ? ' (' + x.tpl.name + ')' : '');
+  if(s.aboard != null) card.crew = String(s.aboard);
+  card.notes = ['Ships at sea: d10 ' + R.vc.roll + ' ' + x.base.name, 'armament d6 ' + R.arm.roll + ' — ' + R.arm.row.text, 'crew d6 ' + R.cq.roll + ' — ' + R.cq.row.text, 'quality 2d6 ' + R.ql.roll + ' — ' + R.ql.row.text, 'name d66 ' + R.nm.code].join('; ');
+  addPbShip(card); autosave();
+  pbNote('m-note', '');
 }
 const PB_HULLS = [['', 'none'], ['d2', '−d2'], ['d4', '−d4'], ['d6', '−d6']];
 function addPbShip(data={}) {
@@ -3118,12 +3200,112 @@ document.addEventListener('click', e => {
   list.classList.remove('show');
 });
 
+// ── Core Rules generators → prep cards ──
+function pbRT(t){ const G = PG(); return G && t ? G.rollTable(t) : null; }
+function pbTxt(x){ const G = PG(); return G ? G.rollInline(G.rollBrackets(x)) : String(x || ''); }
+// Rumors d20 / History d66 → a clue on the Basics tab.
+function pbAddRumor(kind){
+  const t = kind === 'history' ? (typeof PB_HISTORY !== 'undefined' ? PB_HISTORY : null) : (typeof PB_RUMORS !== 'undefined' ? PB_RUMORS : null);
+  const x = pbRT(t); if(!x) return;
+  addClue(kind === 'history' ? { header: 'History (d66 ' + x.code + '): ' + x.row.storyline + ', ch. ' + x.row.chapter, text: pbTxt(x.row.text) } : { header: 'Rumor (d20 ' + x.roll + ')', text: pbTxt(x.row.text) });
+  autosave(); switchTab('basics');
+}
+// Jobs & Quests (pg. 126) → the Job tab's fields (a re-roll replaces name, goal, patron and rivals; the rolls are appended to the notes).
+function pbRollJob(){
+  const G = PG(); const j = G && G.job && G.job(''); if(!j) return;
+  const R = j.rolls, put = (id, val, force) => { const el = document.getElementById(id); if(el && (force || !el.value.trim())) el.value = val; };
+  const tx = k => pbTxt(R[k].row.text);
+  put('f-j-name', tx('hook').replace(/\.$/, ''), true);
+  put('f-j-goal', tx('hook') + ' Requirement: ' + tx('requirement') + ' Deadline: ' + tx('timeRestraint'), true);
+  put('f-j-patron', tx('patron').replace(/\.$/, ''), true);
+  put('f-j-rivals', tx('complication'), true);
+  const nt = document.getElementById('f-j-notes');
+  if(nt) appendLine(nt, 'Jobs & Quests: hook d20 ' + R.hook.roll + ' · patron d10 ' + R.patron.roll + ' · requirement d6 ' + R.requirement.roll + ' · time d6 ' + R.timeRestraint.roll + ' · complication d6 ' + R.complication.roll);
+  const jf = document.getElementById('f-j-faction'); if(jf && !jf.value) { const f = dpick(pbFactions()); if(f) jf.value = f.name; }
+  autosave();
+}
+// Uncharted Islands (pg. 122) / Derelict Ship (pg. 116) → a place card.
+function pbGenTables(obj){ return Object.keys((obj && obj.tables) || {}).map(k => { const t = obj.tables[k], x = pbRT(t); return x ? { key: k, name: t.name, die: x.die, roll: x.roll, row: x.row, text: pbTxt(x.row.text) } : null; }).filter(Boolean); }
+function pbAddIsland(){
+  const I = typeof PB_ISLANDS !== 'undefined' ? PB_ISLANDS : null; const L = pbGenTables(I); if(!L.length) return;
+  const by = k => (L.find(x => x.key === k) || {}).text || '';
+  const nm = pbRT(PT('shipName'));
+  addLocation({ name: 'Uncharted island' + (nm ? ' — ' + nm.row.text + ' Isle' : ''), type: 'exploration',
+    tag: by('size').replace(/\.$/, '') + ' island: ' + by('terrain').replace(/\.$/, '').toLowerCase() + ', ' + by('vegetation').replace(/\.$/, '').toLowerCase(),
+    readaloud: '',
+    desc: ['naturalFeature', 'animals', 'inhabitants', 'hideTreasure', 'fortune'].map(k => { const x = L.find(y => y.key === k); return x ? x.name + ': ' + x.text : ''; }).filter(Boolean).join('\n'),
+    consequences: ['hazards', 'conflicts', 'darkness'].map(k => { const x = L.find(y => y.key === k); return x ? x.name + ': ' + x.text : ''; }).filter(Boolean).join('\n'),
+    notes: 'Uncharted Islands: ' + L.map(x => x.name + ' ' + x.die + ' ' + x.roll).join(' · ') });
+  autosave(); switchTab('places');
+}
+function pbAddWreck(){
+  const D = typeof PB_DERELICT_GEN !== 'undefined' ? PB_DERELICT_GEN : null; const L = pbGenTables(D); if(!L.length) return;
+  const by = k => L.find(x => x.key === k) || { text: '', row: {} };
+  const sub = r => (r.sub && r.sub.rows) ? (() => { const s = pbRT(r.sub); return s ? ' (' + r.sub.die + ' ' + s.roll + ': ' + s.row.text + ')' : ''; })() : '';
+  const occ = by('currentOccupant'), m = occ.row.monster ? pbMobPool().find(z => z.id === occ.row.monster) : null;
+  const cond = by('condition');
+  addLocation({ name: 'Derelict ' + by('typeOfShip').text.replace(/\.$/, ''), type: m ? 'combat' : 'exploration',
+    tag: 'Found ' + by('whereIsIt').text.replace(/\.$/, '') + ' — ' + by('whatHappened').text.replace(/\.$/, ''),
+    desc: ['In one of the rooms: ' + by('inOneOfTheRooms').text + sub(by('inOneOfTheRooms').row), 'Odd feature: ' + by('oddFeature').text, 'Current occupant: ' + occ.text + (m ? ' [' + m.name + ' — on the Foes tab]' : ''),
+      'Original cargo: ' + by('originalCargo').text + ' — ' + cond.text + (cond.row.valueMultiplier != null ? ' (×' + cond.row.valueMultiplier + ' value)' : '')].join('\n'),
+    consequences: 'Development: ' + by('development').text,
+    notes: 'Derelict Ship: ' + L.map(x => x.name + ' ' + x.die + ' ' + x.roll).join(' · ') });
+  if(m) addStatBlock(SB_CONFIG.mobs.toCard(m));
+  autosave(); switchTab('places');
+}
+// Treasure map + riddle / buried treasure / core cargo / loot the body → the rewards list.
+function pbTreasureMap(){
+  const G = PG(); const m = G && G.treasureMap && G.treasureMap(); if(!m) return;
+  const X = m.x;
+  addReward({ name: 'Treasure map (' + X.type.row.name + ') — ' + X.material.row.text.replace(/\.$/, ''),
+    flavor: m.text,
+    stats: [X.geography.row.text.replace(/\.$/, ''), 'starts ' + X.itStarts.row.text.replace(/\.$/, ''), 'ink revealed ' + X.invisibleInk.row.text.replace(/\.$/, ''), 'icons: ' + m.icons.map(i => i.row.text).join(' → '), 'marker: ' + m.markers[0].row.text, 'heading ' + X.direction.row.text, 'clue: ' + X.clueContainer.row.text.replace(/\.$/, ''), 'complication: ' + X.complication.row.text.replace(/\.$/, ''), 'GM: ' + m.answer].join(' · ') });
+  autosave();
+}
+function pbTreasureBuried(){ const G = PG(); const b = G && G.buried && G.buried(); if(!b) return; addReward({ name: 'Buried treasure', flavor: b.text, stats: 'Buried Treasure d100 ' + b.roll }); autosave(); }
+function pbTreasureCargo(){
+  const G = PG(); const c = G && G.cargoSlot && G.cargoSlot(); if(!c) return;
+  const sw = G.marketSwing(), v = c.value != null ? Math.round(c.value * sw) : null;
+  let what = String(c.row.text).replace(/,\s*\d[\d,]*s$/, '').replace(/,\s*\d+d\d+.*$/, ''); if(c.count != null) what = what.replace(/\bd\d+\b/, c.count);
+  addReward({ name: dcap(what), flavor: c.extra || (c.ash ? 'ASH sells by the dose (50s standard), times the Current ASH Market.' : ''),
+    stats: 'Cargo d12 ' + c.mundane.roll + (c.special ? ' → special d12 ' + c.special.roll : '') + (c.value != null ? ' · ' + c.value.toLocaleString() + 's suggested (±50% by port) → here ' + v.toLocaleString() + 's' : '') });
+  autosave();
+}
+function pbTreasureLoot(){
+  const G = PG(); const L = G && G.lootRoll && G.lootRoll(0); if(!L || !L.length) return;
+  L.filter(e => !e.again).forEach(e => addReward({ name: /result in silver/i.test(e.text) && e.extra ? e.extra : e.text.replace(/\.$/, ''), flavor: [e.hidden, e.sub ? e.sub.html.replace(/<[^>]+>/g, '') : ''].filter(Boolean).join(' — '), stats: 'Loot the Body d100 ' + e.roll + (e.extra ? ' · ' + e.extra : '') + ' · +' + e.roll + 's' }));
+  autosave();
+}
+// Pirate Generator / Make Your Own Enemies / Archetype Captains → stat blocks.
+function pbRollPirate(){
+  const G = PG(); const p = G && G.pirate && G.pirate({ gender: v('npc-gender') }); if(!p) return;
+  const c = pbMobToCard(p.mon);
+  addStatBlock(Object.assign(c, { sbtype: 'mob', type: 'NPC // PIRATE // PIRATE GENERATOR', flavor: p.desc, inventory: p.silver + 's', isnpc: false,
+    abilities: c.abilities + '\nRolled: 3d12 ' + p.dice.join(', ') + ' — Morale = highest, HP = lowest + 2, armor from Table ' + p.hiT }));
+  pbNote('m-note', 'Added <b>' + escH(p.mon.name) + '</b>: ' + escH(p.desc)); autosave();
+}
+function pbRollEnemy(){
+  const G = PG(); const e = G && G.enemy && G.enemy({ specials: 1 }); if(!e) return;
+  const R = e.rolls, c = pbMobToCard(e.mon);
+  addStatBlock(Object.assign(c, { name: 'New enemy', type: 'ENEMY // MAKE YOUR OWN', flavor: e.mon.text,
+    abilities: c.abilities + '\nRolled: HP d10 ' + R.hp.roll + ' · Morale 2d6 ' + R.morale.roll + ' · Armor d4 ' + R.armor.roll + ' · Damage d12 ' + R.damage.roll + ' · Special d10 ' + e.sp.map(x => x.roll).join('/') }));
+  pbNote('m-note', 'Added a built enemy — rename it and describe it.'); autosave();
+}
+function pbAddCaptain(){
+  const G = PG(); const C = parr(typeof PB_CAPTAINS !== 'undefined' ? PB_CAPTAINS : null); const c = C.find(x => x.id === v('cap-pick')) || dpick(C); if(!c || !G) return;
+  const ids = [c.captain].concat(c.officers.slice(0, 1), c.crew.slice(0, 1));
+  ids.forEach(id => { const m = pbMobPool().find(z => z.id === id); if(m) addStatBlock(Object.assign(pbMobToCard(m), id === c.captain ? { notes: c.aboard, isnpc: true } : {})); });
+  const vid = dpick(c.vessels), tpl = pbTemplates().find(t => t.id === c.ships), base = pbShipPool().find(s => s.id === vid);
+  if(tpl && base) { const s = G.applyTemplate(base, tpl), card = pbShipToCard(s, 'foe'); card.name = c.name.replace(/^The /, '') + "'s " + base.name; card.notes = c.aboard; addPbShip(card); }
+  pbNote('m-note', 'Added <b>' + escH(c.name) + '</b>, an officer and a crew block' + (base ? ', and a ' + escH(base.name) + ' on the Ships tab' : '') + '.'); autosave();
+}
+
 // ── One-time sidebar furniture ──
 function pbInitStatic() { mobFillGroups(); pbFillPickers(); }
 
 // ── Read / build ──
 function pbReadFields() {
-  state.pbJob = { name: v('f-j-name'), hook: v('f-j-hook'), patron: v('f-j-patron'), prize: v('f-j-prize'), goal: v('f-j-goal'), rivals: v('f-j-rivals'), notes: v('f-j-notes') };
+  state.pbJob = { name: v('f-j-name'), hook: v('f-j-hook'), patron: v('f-j-patron'), prize: v('f-j-prize'), goal: v('f-j-goal'), rivals: v('f-j-rivals'), notes: v('f-j-notes'), faction: v('f-j-faction'), port: v('f-j-port') };
   const cards = id => [...document.querySelectorAll('#' + id + ' > .entity-card')];
   state.pbShips = cards('ships-list').map(c => {
     const s = pbShipRead(c), k = pbShipCalc(s), el = c.querySelector('.sh-calc');
@@ -3147,6 +3329,7 @@ function pbReadFields() {
 function pbBuildSidebar() {
   const J = state.pbJob || {};
   ['name','hook','patron','prize','goal','rivals','notes'].forEach(k => setVal('f-j-' + k, J[k]));
+  ['faction','port'].forEach(k => { const el = document.getElementById('f-j-' + k); if(!el) return; if(J[k] && ![...el.options].some(o => o.value === J[k])) el.insertAdjacentHTML('beforeend', '<option>' + escH(J[k]) + '</option>'); el.value = J[k] || ''; });
   const clear = id => { const el = document.getElementById(id); if(el) el.innerHTML = ''; };
   clear('ships-list'); (state.pbShips || []).forEach(s => addPbShip(s));
   clear('voyages-list'); (state.pbVoyages || []).forEach(j => addPbVoyage(j));
@@ -3162,10 +3345,10 @@ function dbadge(l, v, cls) { return (v === '' || v == null) ? '' : '<span class=
 function dline(l, v) { return (v && String(v).trim()) ? '<p class="loc-desc"><strong class="loc-lbl">' + escH(l) + ':</strong> ' + fmtText(v) + '</p>' : ''; }
 function pbPreviewPre() {
   const out = [], J = state.pbJob || {};
-  if(['name','hook','patron','prize','goal','rivals','notes'].some(k => J[k])) {
+  if(['name','hook','patron','prize','goal','rivals','notes','faction','port'].some(k => J[k])) {
     out.push(dsec('The Job' + (J.name ? ' — ' + escH(J.name) : ''), '<div class="pb-box pb-job-box">'
       + (J.hook ? '<div class="read-aloud"><p>' + fmtText(J.hook) + '</p></div>' : '')
-      + '<div class="pb-badges">' + dbadge('Patron', J.patron) + dbadge('Prize', J.prize, 'red') + '</div>'
+      + '<div class="pb-badges">' + dbadge('Patron', J.patron) + dbadge('Faction', J.faction) + dbadge('Port', J.port) + dbadge('Prize', J.prize, 'red') + '</div>'
       + dline('Goal', J.goal) + dline('Rivals & complications', J.rivals) + dline('Notes', J.notes) + '</div>'));
   }
   return out;

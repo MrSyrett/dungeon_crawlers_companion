@@ -118,6 +118,689 @@ var PB_ABILITY_TABLE = [
  }
 ];
 window.PB_ABILITY_TABLE = PB_ABILITY_TABLE;
+var PB_ALCHEMY = {
+ "page": 70,
+ "source": "Core Rules",
+ "methods": [
+  {
+   "id": "fast",
+   "name": "Fast",
+   "text": "Roll 1d20 and read straight across."
+  },
+  {
+   "id": "random",
+   "name": "Random",
+   "text": "Roll 6d20 (one per column) and let fate decide. Add extra ingredients to taste."
+  },
+  {
+   "id": "precise",
+   "name": "Precise",
+   "text": "Pick and choose like the true alchemist you are."
+  }
+ ],
+ "notes": [
+  "Results are never guaranteed.",
+  "Most potions cost d100 silver pieces of eight from a reliable source — good luck finding one.",
+  "Side quest hook: finding potion ingredients.",
+  "The DR can be used as the TOUGHNESS DR to resist the potion, or the PRESENCE DR to craft it."
+ ],
+ "cost": "d100",
+ "resistAbility": "TOUGHNESS",
+ "craftAbility": "PRESENCE",
+ "deliveryBands": [
+  {
+   "roll": [
+    1,
+    5
+   ],
+   "name": "Inhalation"
+  },
+  {
+   "roll": [
+    6,
+    10
+   ],
+   "name": "Touch Skin"
+  },
+  {
+   "roll": [
+    11,
+    15
+   ],
+   "name": "Enter Bloodstream"
+  },
+  {
+   "roll": [
+    16,
+    20
+   ],
+   "name": "Ingestion"
+  }
+ ],
+ "drBands": [
+  {
+   "roll": [
+    1,
+    3
+   ],
+   "dr": 8
+  },
+  {
+   "roll": [
+    4,
+    6
+   ],
+   "dr": 10
+  },
+  {
+   "roll": [
+    7,
+    9
+   ],
+   "dr": 12
+  },
+  {
+   "roll": [
+    10,
+    12
+   ],
+   "dr": 14
+  },
+  {
+   "roll": [
+    13,
+    15
+   ],
+   "dr": 16
+  },
+  {
+   "roll": [
+    16,
+    18
+   ],
+   "dr": 18
+  },
+  {
+   "roll": [
+    19,
+    20
+   ],
+   "dr": 20
+  }
+ ],
+ "rows": [
+  {
+   "roll": 1,
+   "ingredientA": "Rum",
+   "ingredientB": "Wild Flowers",
+   "color": "Black",
+   "delivery": "Inhalation",
+   "dr": 8,
+   "effect": "Instant, horrific death or after subject is killed, resurrect with 1 HP."
+  },
+  {
+   "roll": 2,
+   "ingredientA": "Sugar",
+   "ingredientB": "Ashes",
+   "color": "Blue",
+   "delivery": "Inhalation",
+   "dr": 8,
+   "effect": "Death in d6 hours.",
+   "duration": "d6 hours"
+  },
+  {
+   "roll": 3,
+   "ingredientA": "Tobacco",
+   "ingredientB": "Black Powder",
+   "color": "Green",
+   "delivery": "Inhalation",
+   "dr": 8,
+   "effect": "Paralysis (d8 hours).",
+   "duration": "d8 hours"
+  },
+  {
+   "roll": 4,
+   "ingredientA": "Chicken Flesh",
+   "ingredientB": "Raisins",
+   "color": "Red",
+   "delivery": "Inhalation",
+   "dr": 10,
+   "effect": "Subject becomes a ghost."
+  },
+  {
+   "roll": 5,
+   "ingredientA": "Oxtail",
+   "ingredientB": "Tree Bark",
+   "color": "Purple",
+   "delivery": "Inhalation",
+   "dr": 10,
+   "effect": "d6 damage and blind for 1 hour.",
+   "damage": "d6"
+  },
+  {
+   "roll": 6,
+   "ingredientA": "Candy",
+   "ingredientB": "Bone Powder",
+   "color": "Yellow",
+   "delivery": "Touch Skin",
+   "dr": 10,
+   "effect": "Berserk: Deal x2 melee damage, must attack closest creature. d6 rounds.",
+   "duration": "d6 rounds"
+  },
+  {
+   "roll": 7,
+   "ingredientA": "Flour",
+   "ingredientB": "Graveyard Dirt",
+   "color": "Orange",
+   "delivery": "Touch Skin",
+   "dr": 12,
+   "effect": "Polymorph into a random beast (d12 hour)."
+  },
+  {
+   "roll": 8,
+   "ingredientA": "Sassafras Root",
+   "ingredientB": "Jaguar Claw",
+   "color": "White",
+   "delivery": "Touch Skin",
+   "dr": 12,
+   "effect": "Polymorph into a random beast (permanent)."
+  },
+  {
+   "roll": 9,
+   "ingredientA": "Hyla Tree Frog",
+   "ingredientB": "Bat Wing",
+   "color": "Metallic",
+   "delivery": "Touch Skin",
+   "dr": 12,
+   "effect": "Polymorph into a horrific monster (permanent)."
+  },
+  {
+   "roll": 10,
+   "ingredientA": "Polychaete Worm",
+   "ingredientB": "Cow's Tongue",
+   "color": "Clear",
+   "delivery": "Touch Skin",
+   "dr": 14,
+   "effect": "d8 acidic damage.",
+   "damage": "d8"
+  },
+  {
+   "roll": 11,
+   "ingredientA": "Large Toad",
+   "ingredientB": "Crow's Foot",
+   "color": "Glows in the Dark",
+   "delivery": "Enter Bloodstream",
+   "dr": 14,
+   "effect": "Shrink to 1 foot tall (d8 rounds), AGILITY -4 DR."
+  },
+  {
+   "roll": 12,
+   "ingredientA": "Pufferfish",
+   "ingredientB": "Cacao Seeds",
+   "color": "Pearlescent",
+   "delivery": "Enter Bloodstream",
+   "dr": 14,
+   "effect": "Grow to huge size (d8 rounds). x2 melee damage, AGILITY +2 DR."
+  },
+  {
+   "roll": 13,
+   "ingredientA": "Psilocybin Mushroom",
+   "ingredientB": "Tamarind Leaves",
+   "color": "Iridescent",
+   "delivery": "Enter Bloodstream",
+   "dr": 16,
+   "effect": "Heal d6.",
+   "heal": "d6"
+  },
+  {
+   "roll": 14,
+   "ingredientA": "Pig Blood",
+   "ingredientB": "Castor Oil",
+   "color": "Brown",
+   "delivery": "Enter Bloodstream",
+   "dr": 16,
+   "effect": "Heal d8.",
+   "heal": "d8"
+  },
+  {
+   "roll": 15,
+   "ingredientA": "Human Blood",
+   "ingredientB": "Maggots",
+   "color": "Gray",
+   "delivery": "Enter Bloodstream",
+   "dr": 16,
+   "effect": "Heal to max HP.",
+   "heal": "max"
+  },
+  {
+   "roll": 16,
+   "ingredientA": "Whale Blubber",
+   "ingredientB": "Bush Rat",
+   "color": "Space-Like",
+   "delivery": "Ingestion",
+   "dr": 18,
+   "effect": "Strange hallucinations (d4 hours)."
+  },
+  {
+   "roll": 17,
+   "ingredientA": "Monkey Paw",
+   "ingredientB": "Kola Nut",
+   "color": "Pink",
+   "delivery": "Ingestion",
+   "dr": 18,
+   "effect": "Run away in terror (lasts d6 rounds)."
+  },
+  {
+   "roll": 18,
+   "ingredientA": "Chicken Head",
+   "ingredientB": "Coconut",
+   "color": "Turquoise",
+   "delivery": "Ingestion",
+   "dr": 18,
+   "effect": "All tests are DR -4 for d8 hours."
+  },
+  {
+   "roll": 19,
+   "ingredientA": "Crocodile Tooth",
+   "ingredientB": "Sage",
+   "color": "Opalescent",
+   "delivery": "Ingestion",
+   "dr": 20,
+   "effect": "A random result from the Mystical Mishaps table (pg. 66).",
+   "table": "mishaps"
+  },
+  {
+   "roll": 20,
+   "ingredientA": "Human Remains",
+   "ingredientB": "Banana Peel",
+   "color": "Sanguine",
+   "delivery": "Ingestion",
+   "dr": 20,
+   "effect": "Roll again twice.",
+   "rollAgain": 2
+  }
+ ]
+};
+window.PB_ALCHEMY = PB_ALCHEMY;
+var PB_ALCHEMY_TABLE = {
+ "id": "alchemy",
+ "name": "Alchemy Potion Generator",
+ "die": "d20",
+ "page": 70,
+ "source": "Core Rules",
+ "note": "Fast: roll 1d20 and read across. Random: roll 6d20, one per column. Precise: pick. The DR is the TOUGHNESS DR to resist or the PRESENCE DR to craft. Most potions cost d100s. Results are never guaranteed.",
+ "columns": [
+  {
+   "die": "d20",
+   "name": "Ingredient",
+   "values": [
+    "Rum",
+    "Sugar",
+    "Tobacco",
+    "Chicken Flesh",
+    "Oxtail",
+    "Candy",
+    "Flour",
+    "Sassafras Root",
+    "Hyla Tree Frog",
+    "Polychaete Worm",
+    "Large Toad",
+    "Pufferfish",
+    "Psilocybin Mushroom",
+    "Pig Blood",
+    "Human Blood",
+    "Whale Blubber",
+    "Monkey Paw",
+    "Chicken Head",
+    "Crocodile Tooth",
+    "Human Remains"
+   ]
+  },
+  {
+   "die": "d20",
+   "name": "Ingredient",
+   "values": [
+    "Wild Flowers",
+    "Ashes",
+    "Black Powder",
+    "Raisins",
+    "Tree Bark",
+    "Bone Powder",
+    "Graveyard Dirt",
+    "Jaguar Claw",
+    "Bat Wing",
+    "Cow's Tongue",
+    "Crow's Foot",
+    "Cacao Seeds",
+    "Tamarind Leaves",
+    "Castor Oil",
+    "Maggots",
+    "Bush Rat",
+    "Kola Nut",
+    "Coconut",
+    "Sage",
+    "Banana Peel"
+   ]
+  },
+  {
+   "die": "d20",
+   "name": "Resulting Color",
+   "values": [
+    "Black",
+    "Blue",
+    "Green",
+    "Red",
+    "Purple",
+    "Yellow",
+    "Orange",
+    "White",
+    "Metallic",
+    "Clear",
+    "Glows in the Dark",
+    "Pearlescent",
+    "Iridescent",
+    "Brown",
+    "Gray",
+    "Space-Like",
+    "Pink",
+    "Turquoise",
+    "Opalescent",
+    "Sanguine"
+   ]
+  },
+  {
+   "die": "d20",
+   "name": "Delivery Method",
+   "values": [
+    "Inhalation",
+    "Inhalation",
+    "Inhalation",
+    "Inhalation",
+    "Inhalation",
+    "Touch Skin",
+    "Touch Skin",
+    "Touch Skin",
+    "Touch Skin",
+    "Touch Skin",
+    "Enter Bloodstream",
+    "Enter Bloodstream",
+    "Enter Bloodstream",
+    "Enter Bloodstream",
+    "Enter Bloodstream",
+    "Ingestion",
+    "Ingestion",
+    "Ingestion",
+    "Ingestion",
+    "Ingestion"
+   ]
+  },
+  {
+   "die": "d20",
+   "name": "DR",
+   "values": [
+    "DR8",
+    "DR8",
+    "DR8",
+    "DR10",
+    "DR10",
+    "DR10",
+    "DR12",
+    "DR12",
+    "DR12",
+    "DR14",
+    "DR14",
+    "DR14",
+    "DR16",
+    "DR16",
+    "DR16",
+    "DR18",
+    "DR18",
+    "DR18",
+    "DR20",
+    "DR20"
+   ]
+  },
+  {
+   "die": "d20",
+   "name": "Effect",
+   "values": [
+    "Instant, horrific death or after subject is killed, resurrect with 1 HP.",
+    "Death in d6 hours.",
+    "Paralysis (d8 hours).",
+    "Subject becomes a ghost.",
+    "d6 damage and blind for 1 hour.",
+    "Berserk: Deal x2 melee damage, must attack closest creature. d6 rounds.",
+    "Polymorph into a random beast (d12 hour).",
+    "Polymorph into a random beast (permanent).",
+    "Polymorph into a horrific monster (permanent).",
+    "d8 acidic damage.",
+    "Shrink to 1 foot tall (d8 rounds), AGILITY -4 DR.",
+    "Grow to huge size (d8 rounds). x2 melee damage, AGILITY +2 DR.",
+    "Heal d6.",
+    "Heal d8.",
+    "Heal to max HP.",
+    "Strange hallucinations (d4 hours).",
+    "Run away in terror (lasts d6 rounds).",
+    "All tests are DR -4 for d8 hours.",
+    "A random result from the Mystical Mishaps table (pg. 66).",
+    "Roll again twice."
+   ]
+  }
+ ],
+ "rows": [
+  {
+   "roll": 1,
+   "ingredientA": "Rum",
+   "ingredientB": "Wild Flowers",
+   "color": "Black",
+   "delivery": "Inhalation",
+   "dr": 8,
+   "effect": "Instant, horrific death or after subject is killed, resurrect with 1 HP.",
+   "text": "Black potion of Rum & Wild Flowers (Inhalation, DR8): Instant, horrific death or after subject is killed, resurrect with 1 HP."
+  },
+  {
+   "roll": 2,
+   "ingredientA": "Sugar",
+   "ingredientB": "Ashes",
+   "color": "Blue",
+   "delivery": "Inhalation",
+   "dr": 8,
+   "effect": "Death in d6 hours.",
+   "duration": "d6 hours",
+   "text": "Blue potion of Sugar & Ashes (Inhalation, DR8): Death in d6 hours."
+  },
+  {
+   "roll": 3,
+   "ingredientA": "Tobacco",
+   "ingredientB": "Black Powder",
+   "color": "Green",
+   "delivery": "Inhalation",
+   "dr": 8,
+   "effect": "Paralysis (d8 hours).",
+   "duration": "d8 hours",
+   "text": "Green potion of Tobacco & Black Powder (Inhalation, DR8): Paralysis (d8 hours)."
+  },
+  {
+   "roll": 4,
+   "ingredientA": "Chicken Flesh",
+   "ingredientB": "Raisins",
+   "color": "Red",
+   "delivery": "Inhalation",
+   "dr": 10,
+   "effect": "Subject becomes a ghost.",
+   "text": "Red potion of Chicken Flesh & Raisins (Inhalation, DR10): Subject becomes a ghost."
+  },
+  {
+   "roll": 5,
+   "ingredientA": "Oxtail",
+   "ingredientB": "Tree Bark",
+   "color": "Purple",
+   "delivery": "Inhalation",
+   "dr": 10,
+   "effect": "d6 damage and blind for 1 hour.",
+   "damage": "d6",
+   "text": "Purple potion of Oxtail & Tree Bark (Inhalation, DR10): d6 damage and blind for 1 hour."
+  },
+  {
+   "roll": 6,
+   "ingredientA": "Candy",
+   "ingredientB": "Bone Powder",
+   "color": "Yellow",
+   "delivery": "Touch Skin",
+   "dr": 10,
+   "effect": "Berserk: Deal x2 melee damage, must attack closest creature. d6 rounds.",
+   "duration": "d6 rounds",
+   "text": "Yellow potion of Candy & Bone Powder (Touch Skin, DR10): Berserk: Deal x2 melee damage, must attack closest creature. d6 rounds."
+  },
+  {
+   "roll": 7,
+   "ingredientA": "Flour",
+   "ingredientB": "Graveyard Dirt",
+   "color": "Orange",
+   "delivery": "Touch Skin",
+   "dr": 12,
+   "effect": "Polymorph into a random beast (d12 hour).",
+   "text": "Orange potion of Flour & Graveyard Dirt (Touch Skin, DR12): Polymorph into a random beast (d12 hour)."
+  },
+  {
+   "roll": 8,
+   "ingredientA": "Sassafras Root",
+   "ingredientB": "Jaguar Claw",
+   "color": "White",
+   "delivery": "Touch Skin",
+   "dr": 12,
+   "effect": "Polymorph into a random beast (permanent).",
+   "text": "White potion of Sassafras Root & Jaguar Claw (Touch Skin, DR12): Polymorph into a random beast (permanent)."
+  },
+  {
+   "roll": 9,
+   "ingredientA": "Hyla Tree Frog",
+   "ingredientB": "Bat Wing",
+   "color": "Metallic",
+   "delivery": "Touch Skin",
+   "dr": 12,
+   "effect": "Polymorph into a horrific monster (permanent).",
+   "text": "Metallic potion of Hyla Tree Frog & Bat Wing (Touch Skin, DR12): Polymorph into a horrific monster (permanent)."
+  },
+  {
+   "roll": 10,
+   "ingredientA": "Polychaete Worm",
+   "ingredientB": "Cow's Tongue",
+   "color": "Clear",
+   "delivery": "Touch Skin",
+   "dr": 14,
+   "effect": "d8 acidic damage.",
+   "damage": "d8",
+   "text": "Clear potion of Polychaete Worm & Cow's Tongue (Touch Skin, DR14): d8 acidic damage."
+  },
+  {
+   "roll": 11,
+   "ingredientA": "Large Toad",
+   "ingredientB": "Crow's Foot",
+   "color": "Glows in the Dark",
+   "delivery": "Enter Bloodstream",
+   "dr": 14,
+   "effect": "Shrink to 1 foot tall (d8 rounds), AGILITY -4 DR.",
+   "text": "Glows in the Dark potion of Large Toad & Crow's Foot (Enter Bloodstream, DR14): Shrink to 1 foot tall (d8 rounds), AGILITY -4 DR."
+  },
+  {
+   "roll": 12,
+   "ingredientA": "Pufferfish",
+   "ingredientB": "Cacao Seeds",
+   "color": "Pearlescent",
+   "delivery": "Enter Bloodstream",
+   "dr": 14,
+   "effect": "Grow to huge size (d8 rounds). x2 melee damage, AGILITY +2 DR.",
+   "text": "Pearlescent potion of Pufferfish & Cacao Seeds (Enter Bloodstream, DR14): Grow to huge size (d8 rounds). x2 melee damage, AGILITY +2 DR."
+  },
+  {
+   "roll": 13,
+   "ingredientA": "Psilocybin Mushroom",
+   "ingredientB": "Tamarind Leaves",
+   "color": "Iridescent",
+   "delivery": "Enter Bloodstream",
+   "dr": 16,
+   "effect": "Heal d6.",
+   "heal": "d6",
+   "text": "Iridescent potion of Psilocybin Mushroom & Tamarind Leaves (Enter Bloodstream, DR16): Heal d6."
+  },
+  {
+   "roll": 14,
+   "ingredientA": "Pig Blood",
+   "ingredientB": "Castor Oil",
+   "color": "Brown",
+   "delivery": "Enter Bloodstream",
+   "dr": 16,
+   "effect": "Heal d8.",
+   "heal": "d8",
+   "text": "Brown potion of Pig Blood & Castor Oil (Enter Bloodstream, DR16): Heal d8."
+  },
+  {
+   "roll": 15,
+   "ingredientA": "Human Blood",
+   "ingredientB": "Maggots",
+   "color": "Gray",
+   "delivery": "Enter Bloodstream",
+   "dr": 16,
+   "effect": "Heal to max HP.",
+   "heal": "max",
+   "text": "Gray potion of Human Blood & Maggots (Enter Bloodstream, DR16): Heal to max HP."
+  },
+  {
+   "roll": 16,
+   "ingredientA": "Whale Blubber",
+   "ingredientB": "Bush Rat",
+   "color": "Space-Like",
+   "delivery": "Ingestion",
+   "dr": 18,
+   "effect": "Strange hallucinations (d4 hours).",
+   "text": "Space-Like potion of Whale Blubber & Bush Rat (Ingestion, DR18): Strange hallucinations (d4 hours)."
+  },
+  {
+   "roll": 17,
+   "ingredientA": "Monkey Paw",
+   "ingredientB": "Kola Nut",
+   "color": "Pink",
+   "delivery": "Ingestion",
+   "dr": 18,
+   "effect": "Run away in terror (lasts d6 rounds).",
+   "text": "Pink potion of Monkey Paw & Kola Nut (Ingestion, DR18): Run away in terror (lasts d6 rounds)."
+  },
+  {
+   "roll": 18,
+   "ingredientA": "Chicken Head",
+   "ingredientB": "Coconut",
+   "color": "Turquoise",
+   "delivery": "Ingestion",
+   "dr": 18,
+   "effect": "All tests are DR -4 for d8 hours.",
+   "text": "Turquoise potion of Chicken Head & Coconut (Ingestion, DR18): All tests are DR -4 for d8 hours."
+  },
+  {
+   "roll": 19,
+   "ingredientA": "Crocodile Tooth",
+   "ingredientB": "Sage",
+   "color": "Opalescent",
+   "delivery": "Ingestion",
+   "dr": 20,
+   "effect": "A random result from the Mystical Mishaps table (pg. 66).",
+   "table": "mishaps",
+   "text": "Opalescent potion of Crocodile Tooth & Sage (Ingestion, DR20): A random result from the Mystical Mishaps table (pg. 66)."
+  },
+  {
+   "roll": 20,
+   "ingredientA": "Human Remains",
+   "ingredientB": "Banana Peel",
+   "color": "Sanguine",
+   "delivery": "Ingestion",
+   "dr": 20,
+   "effect": "Roll again twice.",
+   "rollAgain": 2,
+   "text": "Sanguine potion of Human Remains & Banana Peel (Ingestion, DR20): Roll again twice."
+  }
+ ]
+};
+window.PB_ALCHEMY_TABLE = PB_ALCHEMY_TABLE;
 var PB_AMMO = [
  {
   "id": "shot",
@@ -193,6 +876,270 @@ var PB_ARMOR_REPAIR = {
  "note": "Armor can't be repaired to a tier higher than its original. Armor reduced below tier 1 is ruined and can't be repaired."
 };
 window.PB_ARMOR_REPAIR = PB_ARMOR_REPAIR;
+var PB_ASH = {
+ "page": 10,
+ "source": "Core Rules",
+ "text": "ASH is the dust left by destroyed undead, first found in the Dark Caribbean. Eaten, snorted or smoked it has physiological and psychedelic effects; it is extremely valuable and drives conflicts, trade disputes and black markets. Addicts show sunken eye sockets, darkened lips and faintly glowing bones.",
+ "dose": {
+  "text": "~5 lbs., or one per skeleton",
+  "standardRate": 50
+ },
+ "marketNote": "The standard rate per dose is 50s. Roll in each new port or each day.",
+ "market": {
+  "id": "ashMarket",
+  "name": "Current ASH Market",
+  "die": "2d6",
+  "page": 10,
+  "source": "Core Rules",
+  "note": "Standard rate 50s per dose (~5 lbs., or one per skeleton). Roll in each new port or each day; changes apply to the last rate.",
+  "rows": [
+   {
+    "roll": 2,
+    "name": "Buyer's market",
+    "text": "Buyer's market (can't give it away).",
+    "multiplier": 0
+   },
+   {
+    "roll": 3,
+    "name": "Flooded",
+    "text": "Flooded: half the rate.",
+    "multiplier": 0.5
+   },
+   {
+    "roll": [
+     4,
+     5
+    ],
+    "name": "Surplus",
+    "text": "Surplus: lower last rate by 20%.",
+    "multiplier": 0.8
+   },
+   {
+    "roll": [
+     6,
+     8
+    ],
+    "name": "Holding steady",
+    "text": "Holding steady.",
+    "multiplier": 1
+   },
+   {
+    "roll": [
+     9,
+     10
+    ],
+    "name": "In demand",
+    "text": "In demand: raise rate by 20%.",
+    "multiplier": 1.2
+   },
+   {
+    "roll": 11,
+    "name": "Rare",
+    "text": "Rare: double the last rate.",
+    "multiplier": 2
+   },
+   {
+    "roll": 12,
+    "name": "Seller's market",
+    "text": "Seller's market (name your price).",
+    "multiplier": null
+   }
+  ]
+ },
+ "effects": {
+  "id": "ashEffects",
+  "name": "Effects of Consuming ASH",
+  "die": "d20",
+  "page": 10,
+  "source": "Core Rules",
+  "duration": "2d6 minutes",
+  "note": "Most effects last for 2d6 minutes.",
+  "rows": [
+   {
+    "roll": 1,
+    "name": "Overdose",
+    "text": "Overdose. Pass out for d4 rounds. Test TOUGHNESS DR12 or instant death.",
+    "test": {
+     "ability": "TOUGHNESS",
+     "dr": 12
+    },
+    "death": true
+   },
+   {
+    "roll": 2,
+    "text": "Roll a Mystical Mishap (pg. 66).",
+    "table": "mishaps"
+   },
+   {
+    "roll": 3,
+    "text": "Lose d4 HP and become infected.",
+    "damage": "d4",
+    "condition": "infected"
+   },
+   {
+    "roll": 4,
+    "text": "Permanent -1 to all abilities.",
+    "permanent": true,
+    "abilities": {
+     "all": -1
+    }
+   },
+   {
+    "roll": 5,
+    "text": "The world turns gray and lifeless. You no longer see the joy in living. All seems dead."
+   },
+   {
+    "roll": 6,
+    "text": "Everyone around you appears to be (d4): 1. undead 2. soldiers 3. sea creatures. 4. all 3.",
+    "sub": {
+     "die": "d4",
+     "rows": [
+      {
+       "roll": 1,
+       "text": "undead"
+      },
+      {
+       "roll": 2,
+       "text": "soldiers"
+      },
+      {
+       "roll": 3,
+       "text": "sea creatures"
+      },
+      {
+       "roll": 4,
+       "text": "all 3"
+      }
+     ]
+    }
+   },
+   {
+    "roll": 7,
+    "text": "You think you're an animal (d6, pg. 86).",
+    "table": "darkFaunaTerrestrial"
+   },
+   {
+    "roll": 8,
+    "text": "One of your limbs (d4) rots away permanently. It is replaced by a ghost limb at sunset.",
+    "permanent": true
+   },
+   {
+    "roll": 9,
+    "text": "You fear the sun and thirst for blood, brains, or both."
+   },
+   {
+    "roll": 10,
+    "text": "You hear color, see sound, and feel taste."
+   },
+   {
+    "roll": 11,
+    "text": "Gain the effects of tier 3 armor.",
+    "effects": [
+     {
+      "type": "armor",
+      "value": 3
+     }
+    ]
+   },
+   {
+    "roll": 12,
+    "text": "Time slows down. Take 2 actions or attacks each round.",
+    "effects": [
+     {
+      "type": "attacks",
+      "value": 2
+     }
+    ]
+   },
+   {
+    "roll": 13,
+    "text": "Attack and defend at -4 DR.",
+    "effects": [
+     {
+      "type": "dr",
+      "value": -4,
+      "applies": [
+       "attack",
+       "defense"
+      ]
+     }
+    ]
+   },
+   {
+    "roll": 14,
+    "text": "Gain d12 temporary hit points.",
+    "tempHp": "d12"
+   },
+   {
+    "roll": 15,
+    "text": "You can see in the dark. Everything that has ever lived glows neon colors.",
+    "effects": [
+     {
+      "type": "sense",
+      "value": "darkvision"
+     }
+    ]
+   },
+   {
+    "roll": 16,
+    "text": "Move double your speed (up to 60'/turn).",
+    "effects": [
+     {
+      "type": "movement",
+      "value": 60
+     }
+    ]
+   },
+   {
+    "roll": 17,
+    "text": "+2 to STRENGTH and AGILITY for 24 hours.",
+    "duration": "24 hours",
+    "effects": [
+     {
+      "type": "ability",
+      "applies": [
+       "STRENGTH",
+       "AGILITY"
+      ],
+      "value": 2
+     }
+    ]
+   },
+   {
+    "roll": 18,
+    "name": "Mental transcendence",
+    "text": "Mental transcendence. Permanent +1 to PRESENCE.",
+    "permanent": true,
+    "abilities": {
+     "PRESENCE": 1
+    }
+   },
+   {
+    "roll": 19,
+    "name": "One with the universe",
+    "text": "You are one with the universe. Permanent +1 to SPIRIT.",
+    "permanent": true,
+    "abilities": {
+     "SPIRIT": 1
+    }
+   },
+   {
+    "roll": 20,
+    "text": "Roll d10+10 three times on this table (duplicate results have no effect).",
+    "reroll": {
+     "die": "d10+10",
+     "times": 3
+    }
+   }
+  ]
+ },
+ "notes": [
+  "Cargo: d20 crates of ASH is a Special Cargo result (pg. 115).",
+  "Skeletons that fail a morale test without a Cap'n or Warlock crumble into ASH (pg. 93).",
+  "Jars of cremated sacrifices in the Sanctum count as ASH (pg. 151)."
+ ]
+};
+window.PB_ASH = PB_ASH;
 var PB_BACKGROUNDS = [
  {
   "id": "sailor",
@@ -983,6 +1930,520 @@ var PB_BOMB_RULES = {
  "text": "Light the fuse and throw: test AGILITY DR12 to hit an area. Creatures within 5' of it test AGILITY DR12 or take the damage. Crit: double damage. Fumble: it hits you and/or d4 allies instead."
 };
 window.PB_BOMB_RULES = PB_BOMB_RULES;
+var PB_BURIED_TREASURE = {
+ "id": "buriedTreasure",
+ "name": "Buried Treasure",
+ "die": "d100",
+ "page": 118,
+ "source": "Core Rules",
+ "note": "Roll d100 for what lies in the chest.",
+ "rows": [
+  {
+   "roll": 1,
+   "text": "The Black Spot on a folded piece of paper. Whoever unfolds it dies in d8 days (unless they find a way to lift the curse)."
+  },
+  {
+   "roll": 2,
+   "text": "A Spanish gold treasure hoard worth 50,000s. They want it back NOW."
+  },
+  {
+   "roll": 3,
+   "text": "3 flags: British, Spanish, French. One torn, one blood spattered, one outdated."
+  },
+  {
+   "roll": 4,
+   "text": "Freshly decapitated head. It looks exactly like one of the PCs. In its mouth is a pearl the size of a plum."
+  },
+  {
+   "roll": 5,
+   "text": "Emerald the size of a coconut."
+  },
+  {
+   "roll": 6,
+   "text": "6 stylized animal heads carved from wood, one on top of the next."
+  },
+  {
+   "roll": 7,
+   "text": "7 rare gold coins worth d100 silver each."
+  },
+  {
+   "roll": 8,
+   "text": "Each player rolls all of the dice they have with them: the total in silver.",
+   "silver": "all dice"
+  },
+  {
+   "roll": 9,
+   "text": "An enormous dinosaur bone."
+  },
+  {
+   "roll": 10,
+   "text": "2 black flintlocks, the name \"Blackwood\" engraved on both. DR -1 to hit."
+  },
+  {
+   "roll": 11,
+   "text": "A bag of marbles."
+  },
+  {
+   "roll": 12,
+   "text": "Thick leather belt, an iron kraken buckle. Wearer gets +1 STRENGTH."
+  },
+  {
+   "roll": 13,
+   "text": "A pure white flintlock pistol. It crits on 18+ but shatters on a fumble."
+  },
+  {
+   "roll": 14,
+   "text": "Half of a metal medallion."
+  },
+  {
+   "roll": 15,
+   "text": "15 dead men on a dead man's chest. The crew learns 1 random Shanty (pg. 68).",
+   "table": "shanties"
+  },
+  {
+   "roll": 16,
+   "text": "An elaborate brass anchor."
+  },
+  {
+   "roll": 17,
+   "text": "An ancient circular stone calendar. Its last entry is the day after tomorrow..."
+  },
+  {
+   "roll": 18,
+   "text": "5,000 gold coins (they are painted wood)."
+  },
+  {
+   "roll": 19,
+   "text": "D6 black candles. Burning them makes all other light sources dim by half."
+  },
+  {
+   "roll": 20,
+   "text": "D20 silver bars (50s each)."
+  },
+  {
+   "roll": 21,
+   "text": "8' marble statue of a sea monster with rubies for eyes."
+  },
+  {
+   "roll": 22,
+   "text": "Detailed journal with drawings and descriptions of the local flora and fauna."
+  },
+  {
+   "roll": 23,
+   "text": "Golden crown and scepter."
+  },
+  {
+   "roll": 24,
+   "text": "A flute carved from a femur."
+  },
+  {
+   "roll": 25,
+   "text": "D6 bladders from some sea creature. Each contains a potion (pg. 70).",
+   "table": "alchemy",
+   "count": "d6"
+  },
+  {
+   "roll": 26,
+   "text": "Jet black sphere."
+  },
+  {
+   "roll": 27,
+   "text": "Mother of pearl-encrusted lobster shell."
+  },
+  {
+   "roll": 28,
+   "text": "Black cannon in the shape of a dragon. A ship with it always deals +1 damage."
+  },
+  {
+   "roll": 29,
+   "text": "Book written in an ancient script. It contains the best recipes known to man."
+  },
+  {
+   "roll": 30,
+   "text": "300 dead monkeys."
+  },
+  {
+   "roll": 31,
+   "text": "Dead pirate captain. There is a 2,000s reward for his head."
+  },
+  {
+   "roll": 32,
+   "text": "32 golden teeth and a set of silver pliers."
+  },
+  {
+   "roll": 33,
+   "text": "Skeleton of a small animal."
+  },
+  {
+   "roll": 34,
+   "text": "Single golden arrow."
+  },
+  {
+   "roll": 35,
+   "text": "35' of hempen rope that will (almost) never break."
+  },
+  {
+   "roll": 36,
+   "text": "Small sandstone pyramid. Smashing it reveals a black diamond worth 2,000s."
+  },
+  {
+   "roll": 37,
+   "text": "Mesoan coin on a necklace."
+  },
+  {
+   "roll": 38,
+   "text": "703 pieces of eight in a wooden crate."
+  },
+  {
+   "roll": 39,
+   "text": "Dark gemstones. Looking into them reveals an underwater location."
+  },
+  {
+   "roll": 40,
+   "text": "Ornate model frigate inside a bottle."
+  },
+  {
+   "roll": 41,
+   "text": "Large fang the size of a femur."
+  },
+  {
+   "roll": 42,
+   "text": "A fine wooden armoire. Inside are d12 outfits fit for royalty."
+  },
+  {
+   "roll": 43,
+   "text": "Iron scarab. On sand it explodes for d6 damage, underwater it swims to treasure."
+  },
+  {
+   "roll": 44,
+   "text": "Large jar filled with 2d20 dried seahorses. Eating one recovers 1 HP. Don't eat too many..."
+  },
+  {
+   "roll": 45,
+   "text": "Pair of finely crafted boots. +1 AGILITY."
+  },
+  {
+   "roll": 46,
+   "text": "Bloody leather bag with 3 silver rings, 7 stone rings, and 9 iron rings."
+  },
+  {
+   "roll": 47,
+   "text": "Polished obsidian disc. If you look at the sun through it you immediately gain experience, then it shatters.",
+   "experience": true
+  },
+  {
+   "roll": 48,
+   "text": "4' x 8' stone slab covered in glyphs. It depicts a woman entering a portal."
+  },
+  {
+   "roll": 49,
+   "text": "Carved ivory sailing ship."
+  },
+  {
+   "roll": 50,
+   "text": "Sarcophagus (5,000s). Inside is a scepter that turns human ashes into silver dust."
+  },
+  {
+   "roll": 51,
+   "text": "Dark green cloak. +1 PRESENCE."
+  },
+  {
+   "roll": 52,
+   "text": "D20 bottles of the finest rum ever made."
+  },
+  {
+   "roll": 53,
+   "text": "Barrel-sized egg. The inside stirs..."
+  },
+  {
+   "roll": 54,
+   "text": "Taxidermy dog. In its belly is a severed hand holding a set of keys."
+  },
+  {
+   "roll": 55,
+   "text": "Severed finger. If rested on a map it will point to a lost city of gold."
+  },
+  {
+   "roll": 56,
+   "text": "D4 barrels filled with blood."
+  },
+  {
+   "roll": 57,
+   "text": "Smoking pipe shaped like a galleon."
+  },
+  {
+   "roll": 58,
+   "text": "Hollow cannonball. Inside: a map."
+  },
+  {
+   "roll": 59,
+   "text": "Clay dagger with glyphs carved in the blade. Read them: learn one random ritual (pg. 64) then it crumbles.",
+   "table": "rituals"
+  },
+  {
+   "roll": 60,
+   "text": "Chest with 4 different colored vials."
+  },
+  {
+   "roll": 61,
+   "text": "A figurehead of a gorgeous woman. If attached to a ship, it comes alive and screams in terror."
+  },
+  {
+   "roll": 62,
+   "text": "Clay jar filled with 13 snakes."
+  },
+  {
+   "roll": 63,
+   "text": "A skeleton key, pg. 63.",
+   "relic": "skeleton-key"
+  },
+  {
+   "roll": 64,
+   "text": "Locked iron box. Inside is a rotten head that can speak. It knows the way to Hell."
+  },
+  {
+   "roll": 65,
+   "text": "Set of 6 jade goblets."
+  },
+  {
+   "roll": 66,
+   "text": "Everything within 66' dies immediately. (Optional: all PCs gain the Haunted Soul: Skeleton class until the treasure is reburied.)"
+  },
+  {
+   "roll": 67,
+   "text": "Silver bracelet of a snake eating its tail."
+  },
+  {
+   "roll": 68,
+   "text": "Handheld crystal mirror."
+  },
+  {
+   "roll": 69,
+   "text": "3d20 large pearls."
+  },
+  {
+   "roll": 70,
+   "text": "Collection of exotic bird feathers (300s)."
+  },
+  {
+   "roll": 71,
+   "text": "Shriveled heart. It starts beating if submerged in sea water."
+  },
+  {
+   "roll": 72,
+   "text": "Wood coffin. Inside is (d4): 1 a skeleton 2 a mummy 3 a vampire 4 1,000s."
+  },
+  {
+   "roll": 73,
+   "text": "Map of the Dark Caribbean. A trail of blood appears along your path."
+  },
+  {
+   "roll": 74,
+   "text": "Jaguar skull made of diamond."
+  },
+  {
+   "roll": 75,
+   "text": "Key made of water. Glows if submerged."
+  },
+  {
+   "roll": 76,
+   "text": "Jade gecko wrapped around a coconut sized granite globe."
+  },
+  {
+   "roll": 77,
+   "text": "Vial of water. Drinking it secretly gives d100 HP."
+  },
+  {
+   "roll": 78,
+   "text": "Satchel of hauntingly poetic love letters."
+  },
+  {
+   "roll": 79,
+   "text": "Chess set carved from onyx and jade."
+  },
+  {
+   "roll": 80,
+   "text": "Wood tube with d6 scrolls, each with a different Ritual (pg. 64). They always succeed but burn up once used.",
+   "table": "rituals",
+   "count": "d6"
+  },
+  {
+   "roll": 81,
+   "text": "Stone tankard, covered with Mesoan glyphs. It never runs out of ale."
+  },
+  {
+   "roll": 82,
+   "text": "Golden peg leg."
+  },
+  {
+   "roll": 83,
+   "text": "Gold ship's bell. Ringing it changes the winds direction."
+  },
+  {
+   "roll": 84,
+   "text": "Plain gold ring with no signs of wear (in fire it projects a clue, pg. 121).",
+   "table": "riddles"
+  },
+  {
+   "roll": 85,
+   "text": "A chest inside a chest. Roll again.",
+   "rollAgain": 1
+  },
+  {
+   "roll": 86,
+   "text": "Necklace of bones, each with a different engraved rune. +1 TOUGHNESS."
+  },
+  {
+   "roll": 87,
+   "text": "Gray, pointy hat. Wearer gets +1 SPIRIT."
+  },
+  {
+   "roll": 88,
+   "text": "Trident etched with antediluvian runes."
+  },
+  {
+   "roll": 89,
+   "text": "Bronze skull with d2 gems for eyes."
+  },
+  {
+   "roll": 90,
+   "text": "Bullwhip. Hits on DR8, d6 dmg, 10' range."
+  },
+  {
+   "roll": 91,
+   "text": "Amulet of the Sun. Elaborately carved, Ancient, and extremely valuable."
+  },
+  {
+   "roll": 92,
+   "text": "A large crate. d100 skulls are inside."
+  },
+  {
+   "roll": 93,
+   "text": "Volcanic glass sculpture of an island. Holding it to the sun reveals a small ruby inside. It's a map."
+  },
+  {
+   "roll": 94,
+   "text": "Spyglass. It seems broken, but actually peers 24 hours into the past."
+  },
+  {
+   "roll": 95,
+   "text": "Book of 7 maps in 7 different languages. Each is of a different small island."
+  },
+  {
+   "roll": 96,
+   "text": "3 turtles shells of different colors. Each is filled with gems worth d100 silver."
+  },
+  {
+   "roll": 97,
+   "text": "Go. A bag of black stones, a bag of white stones, and a bamboo game board."
+  },
+  {
+   "roll": 98,
+   "text": "Oil lamp. (The genie inside will grant one wish, but in the worst way possible)."
+  },
+  {
+   "roll": 99,
+   "text": "A wooden box with 24 stacks of 20 gold coins (500s each) and 6 loaded flintlocks."
+  },
+  {
+   "roll": 100,
+   "text": "1 million pieces of eight. Good luck."
+  }
+ ]
+};
+window.PB_BURIED_TREASURE = PB_BURIED_TREASURE;
+var PB_CAPTAINS = [
+ {
+  "id": "naval-mastermind",
+  "name": "The Naval Mastermind",
+  "page": 110,
+  "source": "Core Rules",
+  "faction": "english-crown",
+  "text": "Tactical geniuses from naval academies, hunting pirates, treasure fleets and enemies of the Crown.",
+  "captain": "the-naval-mastermind",
+  "officers": [
+   "naval-officer"
+  ],
+  "crew": [
+   "naval-crew"
+  ],
+  "ships": "navy-ships",
+  "vessels": [
+   "frigate",
+   "man-of-war",
+   "ship-of-the-line"
+  ],
+  "aboard": "That ship's attacks are −2 DR to hit, and it may take 1 extra crew action each turn."
+ },
+ {
+  "id": "inquisitor",
+  "name": "The Inquisitor",
+  "page": 111,
+  "source": "Core Rules",
+  "faction": "inquisition",
+  "text": "Tyrannical zealots commanding armored conquistadors and devoted priests to hunt heretics.",
+  "captain": "the-inquisitor",
+  "officers": [
+   "purge-priest"
+  ],
+  "crew": [
+   "conquistador"
+  ],
+  "ships": "inquisitor-ships",
+  "vessels": [
+   "galleon",
+   "fluyt"
+  ],
+  "aboard": "Spend a crew action and test DR14 to change the wind direction (one hex face) and speed (±1)."
+ },
+ {
+  "id": "necromancer",
+  "name": "The Necromancer",
+  "page": 112,
+  "source": "Core Rules",
+  "text": "Former captains consumed by dark sorcery who drain the life from the living.",
+  "captain": "the-necromancer",
+  "officers": [
+   "living-thralls"
+  ],
+  "crew": [
+   "skeleton-crew"
+  ],
+  "ships": "ship-of-bone-fleet",
+  "vessels": [
+   "brigantine",
+   "fluyt",
+   "frigate",
+   "galleon",
+   "galley"
+  ],
+  "aboard": "Bones fired from its cannons onto an enemy ship can be animated with the Necromancer's action; it can spend a crew action to recover d8 ship HP."
+ },
+ {
+  "id": "sunken-one",
+  "name": "The Sunken One",
+  "page": 113,
+  "source": "Core Rules",
+  "faction": "the-wretched",
+  "text": "Wretched cult leaders bound to the Old Ones: shipwrecked captains who prayed to the Abyss and became abominations anchored to the sea.",
+  "captain": "the-sunken-one",
+  "officers": [
+   "thing-from-below"
+  ],
+  "crew": [
+   "lost-sailor"
+  ],
+  "ships": "vessel-from-the-deep-fleet",
+  "vessels": [
+   "galleon",
+   "fluyt",
+   "man-of-war",
+   "ship-of-the-line"
+  ],
+  "aboard": "Wave Call: d8 damage to another ship and push it 1 hex (recharges after 4 rounds). Spend 2d4 consecutive crew actions to summon (d6) sharks, a whale, the Kraken, Davy Jones, the Leviathan or a maelstrom."
+ }
+];
+window.PB_CAPTAINS = PB_CAPTAINS;
 var PB_CARD_DECK = {
  "cards": 54,
  "black": 26,
@@ -997,6 +2458,398 @@ var PB_CARD_DECK = {
  "note": "Ace counts 1 and J/Q/K count 11/12/13; \"9+\" means a rank of 9 or higher."
 };
 window.PB_CARD_DECK = PB_CARD_DECK;
+var PB_CARGO = {
+ "page": 115,
+ "source": "Core Rules",
+ "note": "Roll once for each cargo slot, or pick what is appropriate. Values are only suggestions and can fluctuate ±50% from port to port.",
+ "marketSwing": 0.5,
+ "mundane": {
+  "id": "cargoMundane",
+  "name": "Mundane Cargo",
+  "die": "d12",
+  "page": 115,
+  "source": "Core Rules",
+  "note": "Values in silver; ±50% from port to port. 12 = roll Special Cargo.",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "food or crops, 250s",
+    "value": 250
+   },
+   {
+    "roll": 2,
+    "text": "spices or oils, 350s",
+    "value": 350
+   },
+   {
+    "roll": 3,
+    "text": "trade goods, 400s",
+    "value": 400
+   },
+   {
+    "roll": 4,
+    "text": "livestock, 400s",
+    "value": 400
+   },
+   {
+    "roll": 5,
+    "text": "sugar, 500s",
+    "value": 500
+   },
+   {
+    "roll": 6,
+    "text": "rum, 1000s",
+    "value": 1000
+   },
+   {
+    "roll": 7,
+    "text": "munitions, 2000s",
+    "value": 2000
+   },
+   {
+    "roll": 8,
+    "text": "tobacco, 1000s",
+    "value": 1000
+   },
+   {
+    "roll": 9,
+    "text": "wine, 2000s",
+    "value": 2000
+   },
+   {
+    "roll": 10,
+    "text": "antiques, 2000s",
+    "value": 2000
+   },
+   {
+    "roll": 11,
+    "text": "lumber, 1000s",
+    "value": 1000
+   },
+   {
+    "roll": 12,
+    "text": "special cargo",
+    "table": "cargoSpecial"
+   }
+  ]
+ },
+ "special": {
+  "id": "cargoSpecial",
+  "name": "Special Cargo",
+  "die": "d12",
+  "page": 115,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "raw silver ore, 5000s",
+    "value": 5000
+   },
+   {
+    "roll": 2,
+    "text": "golden coins and treasures, 10000s",
+    "value": 10000
+   },
+   {
+    "roll": 3,
+    "text": "religious leader(s)"
+   },
+   {
+    "roll": 4,
+    "text": "important prisoner(s)"
+   },
+   {
+    "roll": 5,
+    "text": "political or military figure(s)"
+   },
+   {
+    "roll": 6,
+    "text": "relics or a rare artifact, 4000s",
+    "value": 4000
+   },
+   {
+    "roll": 7,
+    "text": "sea monster bones, 2500s",
+    "value": 2500
+   },
+   {
+    "roll": 8,
+    "text": "exotic animals, 2000s",
+    "value": 2000
+   },
+   {
+    "roll": 9,
+    "text": "d10 locked chests, 2d8 x 100s each",
+    "value": "2d8 × 100s each",
+    "count": "d10"
+   },
+   {
+    "roll": 10,
+    "text": "d20 crates of ASH, see pg. 10",
+    "count": "d20",
+    "ash": true
+   },
+   {
+    "roll": 11,
+    "text": "imprisoned undead"
+   },
+   {
+    "roll": 12,
+    "text": "a sorcerer with a tome of d4 Arcane Rituals (pg. 64)",
+    "table": "rituals"
+   }
+  ]
+ },
+ "plotTwist": {
+  "id": "cargoPlotTwist",
+  "name": "Optional Plot Twist",
+  "die": "d8",
+  "page": 115,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Deadly disease on board."
+   },
+   {
+    "roll": 2,
+    "text": "Crew are impostors."
+   },
+   {
+    "roll": 3,
+    "text": "Crew is mute."
+   },
+   {
+    "roll": 4,
+    "text": "The PCs know this crew."
+   },
+   {
+    "roll": 5,
+    "text": "Everyone on board was thought to be dead."
+   },
+   {
+    "roll": 6,
+    "text": "Ghost ship."
+   },
+   {
+    "roll": 7,
+    "text": "They're all zombies."
+   },
+   {
+    "roll": 8,
+    "text": "Someone on board is related to a PC's backstory."
+   }
+  ]
+ },
+ "marketRates": {
+  "ashStandardRate": 50,
+  "text": "Cargo values are suggestions that swing ±50% between ports. ASH sells at a standard 50s per dose, adjusted by the Current ASH Market roll (pg. 10). A Veteran Quartermaster sells cargo for 50% more (pg. 76)."
+ }
+};
+window.PB_CARGO = PB_CARGO;
+var PB_CAROUSING = {
+ "id": "carousing",
+ "name": "Carousing",
+ "die": "d20",
+ "dice": "4d20",
+ "page": 2,
+ "source": "Core Rules",
+ "note": "Roll 4d20 (or 1d20 and read across). You are hungover for the lowest die in hours. Add the dice together: 4-49 is how much silver you spent or lost; 50+ is how much you won or stole. Read each die on its own column: Last night you… [who?] — You wake up… — and now you are…",
+ "hangover": "lowest die in hours",
+ "silver": {
+  "spentBelow": 50,
+  "text": "4-49 spent/lost in silver, 50+ won/stole in silver"
+ },
+ "columns": [
+  {
+   "die": "d20",
+   "name": "Last night you…",
+   "values": [
+    "??? (you don't remember)",
+    "got lucky with",
+    "went swimming with",
+    "made enemies with",
+    "did some ASH with",
+    "got in a fight with",
+    "started a riot with",
+    "stole from",
+    "had a debate with",
+    "became friends with",
+    "played cards with",
+    "spent the night with",
+    "gambled with",
+    "got drunk with",
+    "fell in love with",
+    "had a run-in with",
+    "killed",
+    "married",
+    "saw the sunrise with",
+    "had dinner with"
+   ]
+  },
+  {
+   "die": "d20",
+   "name": "[who?]",
+   "values": [
+    "??? (you don't know).",
+    "an enemy.",
+    "a pig.",
+    "a stranger.",
+    "a crewmate.",
+    "a monkey.",
+    "a priest.",
+    "your crew.",
+    "a ghost.",
+    "a skeleton.",
+    "a barmaid/barkeep.",
+    "some wenches.",
+    "some soldiers.",
+    "yourself.",
+    "a beautiful person.",
+    "the Devil.",
+    "the captain.",
+    "a VIP.",
+    "a parrot.",
+    "a VIP's adult progeny."
+   ]
+  },
+  {
+   "die": "d20",
+   "name": "You wake up…",
+   "values": [
+    "??? (you're blind/it's dark)",
+    "tied to a spit over a fire",
+    "in your bunk or cabin",
+    "in a gibbet cage",
+    "in the hold of a ship",
+    "deep in the jungle",
+    "tied to a stake",
+    "swinging from a mast",
+    "in a dark cave",
+    "in a coffin",
+    "with a noose around your neck",
+    "in a brothel or tavern",
+    "locked in a cell",
+    "on a tavern floor",
+    "on the beach",
+    "naked in the street",
+    "in a captain's cabin",
+    "in a church",
+    "floating in water",
+    "in a mansion"
+   ]
+  },
+  {
+   "die": "d20",
+   "name": "and now you are…",
+   "values": [
+    "??? (confused).",
+    "dead or dying.",
+    "missing a limb.",
+    "terrible (-1 to all stats).",
+    "haggard (only d4 HP left).",
+    "missing a digit or eye.",
+    "on a wanted poster.",
+    "in debt (3d10 x10 silver).",
+    "haunted.",
+    "really sad.",
+    "ravenously hungry.",
+    "soon to be a parent.",
+    "in pain from a new tattoo.",
+    "a year older.",
+    "in love.",
+    "rich (3d10 x 10 silver).",
+    "the Captain now.",
+    "the owner of a ship.",
+    "amazing (gain experience).",
+    "filthy rich (+1k silver)."
+   ]
+  }
+ ],
+ "rows": [
+  {
+   "roll": 1,
+   "text": "??? (you don't remember) · ??? (you don't know). · ??? (you're blind/it's dark) · ??? (confused)."
+  },
+  {
+   "roll": 2,
+   "text": "got lucky with · an enemy. · tied to a spit over a fire · dead or dying."
+  },
+  {
+   "roll": 3,
+   "text": "went swimming with · a pig. · in your bunk or cabin · missing a limb."
+  },
+  {
+   "roll": 4,
+   "text": "made enemies with · a stranger. · in a gibbet cage · terrible (-1 to all stats)."
+  },
+  {
+   "roll": 5,
+   "text": "did some ASH with · a crewmate. · in the hold of a ship · haggard (only d4 HP left)."
+  },
+  {
+   "roll": 6,
+   "text": "got in a fight with · a monkey. · deep in the jungle · missing a digit or eye."
+  },
+  {
+   "roll": 7,
+   "text": "started a riot with · a priest. · tied to a stake · on a wanted poster."
+  },
+  {
+   "roll": 8,
+   "text": "stole from · your crew. · swinging from a mast · in debt (3d10 x10 silver)."
+  },
+  {
+   "roll": 9,
+   "text": "had a debate with · a ghost. · in a dark cave · haunted."
+  },
+  {
+   "roll": 10,
+   "text": "became friends with · a skeleton. · in a coffin · really sad."
+  },
+  {
+   "roll": 11,
+   "text": "played cards with · a barmaid/barkeep. · with a noose around your neck · ravenously hungry."
+  },
+  {
+   "roll": 12,
+   "text": "spent the night with · some wenches. · in a brothel or tavern · soon to be a parent."
+  },
+  {
+   "roll": 13,
+   "text": "gambled with · some soldiers. · locked in a cell · in pain from a new tattoo."
+  },
+  {
+   "roll": 14,
+   "text": "got drunk with · yourself. · on a tavern floor · a year older."
+  },
+  {
+   "roll": 15,
+   "text": "fell in love with · a beautiful person. · on the beach · in love."
+  },
+  {
+   "roll": 16,
+   "text": "had a run-in with · the Devil. · naked in the street · rich (3d10 x 10 silver)."
+  },
+  {
+   "roll": 17,
+   "text": "killed · the captain. · in a captain's cabin · the Captain now."
+  },
+  {
+   "roll": 18,
+   "text": "married · a VIP. · in a church · the owner of a ship."
+  },
+  {
+   "roll": 19,
+   "text": "saw the sunrise with · a parrot. · floating in water · amazing (gain experience)."
+  },
+  {
+   "roll": 20,
+   "text": "had dinner with · a VIP's adult progeny. · in a mansion · filthy rich (+1k silver)."
+  }
+ ]
+};
+window.PB_CAROUSING = PB_CAROUSING;
 var PB_CHANGING_WINDS = [
  {
   "roll": 2,
@@ -3320,6 +5173,539 @@ var PB_DERELICT = [
  }
 ];
 window.PB_DERELICT = PB_DERELICT;
+var PB_DERELICT_GEN = {
+ "page": 116,
+ "source": "Core Rules",
+ "note": "Roll on each table to build a derelict ship to explore.",
+ "tables": {
+  "whereIsIt": {
+   "id": "derelictWhere",
+   "name": "Where Is It?",
+   "die": "d12",
+   "page": 116,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "shallow waters (submerged at high tide)"
+    },
+    {
+     "roll": 2,
+     "text": "suspended on shoals (half underwater)"
+    },
+    {
+     "roll": 3,
+     "text": "beach wrecked"
+    },
+    {
+     "roll": 4,
+     "text": "adrift at sea"
+    },
+    {
+     "roll": 5,
+     "text": "anchored off the coast"
+    },
+    {
+     "roll": 6,
+     "text": "suspended on rocks or a coastal cliff"
+    },
+    {
+     "roll": 7,
+     "text": "up a dried-up riverbed"
+    },
+    {
+     "roll": 8,
+     "text": "in the middle of the jungle, forest, or desert"
+    },
+    {
+     "roll": 9,
+     "text": "drifting into port"
+    },
+    {
+     "roll": 10,
+     "text": "orbiting a maelstrom"
+    },
+    {
+     "roll": 11,
+     "text": "floating the waters that lead to the underworld"
+    },
+    {
+     "roll": 12,
+     "text": "in the nightmares of cursed sailors"
+    }
+   ]
+  },
+  "typeOfShip": {
+   "id": "derelictType",
+   "name": "Type of Ship",
+   "die": "d12",
+   "page": 116,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "several ships fastened together (roll d2 more times)",
+     "rollAgain": "d2"
+    },
+    {
+     "roll": 2,
+     "text": "sloop",
+     "ship": "sloop"
+    },
+    {
+     "roll": 3,
+     "text": "tartane",
+     "ship": "tartane"
+    },
+    {
+     "roll": 4,
+     "text": "giant jury-rigged raft",
+     "ship": "raft"
+    },
+    {
+     "roll": 5,
+     "text": "brigantine",
+     "ship": "brigantine"
+    },
+    {
+     "roll": 6,
+     "text": "frigate",
+     "ship": "frigate"
+    },
+    {
+     "roll": 7,
+     "text": "ancient vessel",
+     "ship": "galley"
+    },
+    {
+     "roll": 8,
+     "text": "galleon",
+     "ship": "galleon"
+    },
+    {
+     "roll": 9,
+     "text": "fluyt",
+     "ship": "fluyt"
+    },
+    {
+     "roll": 10,
+     "text": "man-of-war",
+     "ship": "man-of-war"
+    },
+    {
+     "roll": 11,
+     "text": "ship of the line",
+     "ship": "ship-of-the-line"
+    },
+    {
+     "roll": 12,
+     "text": "otherworldly"
+    }
+   ]
+  },
+  "whatHappened": {
+   "id": "derelictWhatHappened",
+   "name": "What Happened Here?",
+   "die": "d8",
+   "page": 116,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "demolished during a storm or hurricane"
+    },
+    {
+     "roll": 2,
+     "text": "abandoned for an unknown reason, mostly intact"
+    },
+    {
+     "roll": 3,
+     "text": "ripped in two by a monster from the deep"
+    },
+    {
+     "roll": 4,
+     "text": "run aground or scrapped some shoals"
+    },
+    {
+     "roll": 5,
+     "text": "raided by blood-thirsty undead"
+    },
+    {
+     "roll": 6,
+     "text": "destroyed in naval combat"
+    },
+    {
+     "roll": 7,
+     "text": "wrecked in foggy conditions"
+    },
+    {
+     "roll": 8,
+     "text": "mutiny fueled blood bath"
+    }
+   ]
+  },
+  "inOneOfTheRooms": {
+   "id": "derelictRoom",
+   "name": "In One of the Rooms",
+   "die": "d8",
+   "page": 116,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "filled with large eggs"
+    },
+    {
+     "roll": 2,
+     "text": "bodies of former crew, freshly dead, terror on their faces"
+    },
+    {
+     "roll": 3,
+     "text": "indecipherable glyphs carved into the wood beams"
+    },
+    {
+     "roll": 4,
+     "text": "water damaged books and letters"
+    },
+    {
+     "roll": 5,
+     "text": "hundreds of eyeballs hanging from strings"
+    },
+    {
+     "roll": 6,
+     "text": "a gaping hole in the hull"
+    },
+    {
+     "roll": 7,
+     "text": "rotting food and animal corpses"
+    },
+    {
+     "roll": 8,
+     "text": "glass bottles filled with [d6]: 1 rum, 2 potions (pg. 70), 3 fortified wine, 4 blood, 5 holy water, 6 excrement (human?)",
+     "sub": {
+      "die": "d6",
+      "rows": [
+       {
+        "roll": 1,
+        "text": "rum"
+       },
+       {
+        "roll": 2,
+        "text": "potions (pg. 70)",
+        "table": "alchemy"
+       },
+       {
+        "roll": 3,
+        "text": "fortified wine"
+       },
+       {
+        "roll": 4,
+        "text": "blood"
+       },
+       {
+        "roll": 5,
+        "text": "holy water"
+       },
+       {
+        "roll": 6,
+        "text": "excrement (human?)"
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "oddFeature": {
+   "id": "derelictOddFeature",
+   "name": "Odd Feature",
+   "die": "d12",
+   "page": 117,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "walls and floor covered in coral and barnacles"
+    },
+    {
+     "roll": 2,
+     "text": "piles of bleached white bones throughout"
+    },
+    {
+     "roll": 3,
+     "text": "hundreds of small crab's nests"
+    },
+    {
+     "roll": 4,
+     "text": "cargo hold is filled with 6\" of blood"
+    },
+    {
+     "roll": 5,
+     "text": "charred wood and fire damage"
+    },
+    {
+     "roll": 6,
+     "text": "faintly glows in the dark"
+    },
+    {
+     "roll": 7,
+     "text": "mysterious slime covers most surfaces"
+    },
+    {
+     "roll": 8,
+     "text": "ornately decorated in gold leaf and velvet"
+    },
+    {
+     "roll": 9,
+     "text": "a thick layer of ash coats everything"
+    },
+    {
+     "roll": 10,
+     "text": "gravity behaves as if underwater"
+    },
+    {
+     "roll": 11,
+     "text": "signs of torture, sacrifice, and blood-letting"
+    },
+    {
+     "roll": 12,
+     "text": "bioluminescent plants bloom from hull at night"
+    }
+   ]
+  },
+  "development": {
+   "id": "derelictDevelopment",
+   "name": "Development",
+   "die": "d8",
+   "page": 117,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "Sails! Ship spotted."
+    },
+    {
+     "roll": 2,
+     "text": "Derelict starts to sink or collapse."
+    },
+    {
+     "roll": 3,
+     "text": "Adversaries arrive: other pirates, monsters, the military."
+    },
+    {
+     "roll": 4,
+     "text": "Explosion or fire."
+    },
+    {
+     "roll": 5,
+     "text": "Extreme weather."
+    },
+    {
+     "roll": 6,
+     "text": "Thing from the deep complicates things."
+    },
+    {
+     "roll": 7,
+     "text": "Undead floating nearby."
+    },
+    {
+     "roll": 8,
+     "text": "A stowaway emerges."
+    }
+   ]
+  },
+  "currentOccupant": {
+   "id": "derelictOccupant",
+   "name": "Current Occupant",
+   "die": "d12",
+   "page": 117,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "Ghosts of dead sailors. Their speech sounds like whale song.",
+     "monster": "ghost-crew"
+    },
+    {
+     "roll": 2,
+     "text": "Poisonous necro-plague rats, their mother the size of a wolf.",
+     "monster": "bilge-rat"
+    },
+    {
+     "roll": 3,
+     "text": "Dormant zombies waiting for fresh brains, their smell detectable for miles.",
+     "monster": "bilge-rat-zombie"
+    },
+    {
+     "roll": 4,
+     "text": "A starving crew of pirate-turned-cannibals, some with freshly missing limbs."
+    },
+    {
+     "roll": 5,
+     "text": "Skeleton marauders celebrating a recent raid. The captain is an asshole.",
+     "monster": "skeleton-capn"
+    },
+    {
+     "roll": 6,
+     "text": "Cultists, chanting, summoning Great Old Ones via human sacrifice.",
+     "monster": "cultists"
+    },
+    {
+     "roll": 7,
+     "text": "3 beautiful sirens. They lust for pearls and have a hoard hidden nearby.",
+     "monster": "siren"
+    },
+    {
+     "roll": 8,
+     "text": "A tribe of intelligent goblin-like monkeys. They love shiny things and rum."
+    },
+    {
+     "roll": 9,
+     "text": "A necromancer living in exile with a pet undead jaguar or shark.",
+     "monster": "the-necromancer"
+    },
+    {
+     "roll": 10,
+     "text": "Deep Ones, lead by a shaman, scouting for valuables. Her magic requires water.",
+     "monster": "deep-ones"
+    },
+    {
+     "roll": 11,
+     "text": "Hundreds of carrion gulls, feasting on a corpse hanging from a mast.",
+     "monster": "carrion-gull"
+    },
+    {
+     "roll": 12,
+     "text": "Dozens of blood drained corpses. A weakened vampire hides below deck."
+    }
+   ]
+  },
+  "originalCargo": {
+   "id": "derelictCargo",
+   "name": "Original Cargo",
+   "die": "d20",
+   "page": 117,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "tea leaves or spices"
+    },
+    {
+     "roll": 2,
+     "text": "art or antiques"
+    },
+    {
+     "roll": 3,
+     "text": "coffee beans"
+    },
+    {
+     "roll": 4,
+     "text": "sugar or sugar cane"
+    },
+    {
+     "roll": 5,
+     "text": "rum or wine"
+    },
+    {
+     "roll": 6,
+     "text": "weapons and ammo"
+    },
+    {
+     "roll": 7,
+     "text": "tobacco or cocoa"
+    },
+    {
+     "roll": 8,
+     "text": "exotic creatures"
+    },
+    {
+     "roll": 9,
+     "text": "rice or crops"
+    },
+    {
+     "roll": 10,
+     "text": "black powder [d100 barrels]"
+    },
+    {
+     "roll": 11,
+     "text": "contraband"
+    },
+    {
+     "roll": 12,
+     "text": "textiles"
+    },
+    {
+     "roll": 13,
+     "text": "sacrificial victims"
+    },
+    {
+     "roll": 14,
+     "text": "prisoners"
+    },
+    {
+     "roll": 15,
+     "text": "lumber"
+    },
+    {
+     "roll": 16,
+     "text": "livestock"
+    },
+    {
+     "roll": 17,
+     "text": "a large statue"
+    },
+    {
+     "roll": 18,
+     "text": "hoards of treasure"
+    },
+    {
+     "roll": 19,
+     "text": "native medicine"
+    },
+    {
+     "roll": 20,
+     "text": "a cursed relic"
+    }
+   ]
+  },
+  "condition": {
+   "id": "derelictCondition",
+   "name": "Cargo Condition",
+   "die": "d6",
+   "page": 117,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "missing or ruined",
+     "valueMultiplier": 0
+    },
+    {
+     "roll": [
+      2,
+      3
+     ],
+     "text": "salvageable (x1/2)",
+     "valueMultiplier": 0.5
+    },
+    {
+     "roll": [
+      4,
+      5
+     ],
+     "text": "good (x1)",
+     "valueMultiplier": 1
+    },
+    {
+     "roll": 6,
+     "text": "rare and valuable (x2)",
+     "valueMultiplier": 2
+    }
+   ]
+  }
+ }
+};
+window.PB_DERELICT_GEN = PB_DERELICT_GEN;
 var PB_DR = [
  {
   "dr": 6,
@@ -3359,6 +5745,494 @@ var PB_DR = [
  }
 ];
 window.PB_DR = PB_DR;
+var PB_ENEMY_BUILDER = {
+ "page": 91,
+ "source": "Core Rules",
+ "note": "A crash course in designing enemies — or just roll some dice. Most of the horror comes from your description.",
+ "procedure": [
+  "hp",
+  "morale",
+  "armor",
+  "damage",
+  "special"
+ ],
+ "tables": {
+  "hp": {
+   "id": "enemyHp",
+   "name": "HP",
+   "die": "d10",
+   "page": 91,
+   "source": "Core Rules",
+   "note": "How tough or big is it?",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "HP 1-3: Barely worth fighting.",
+     "hp": [
+      1,
+      3
+     ]
+    },
+    {
+     "roll": 2,
+     "text": "HP 4-6: A weak human.",
+     "hp": [
+      4,
+      6
+     ]
+    },
+    {
+     "roll": 3,
+     "text": "HP 7-9: An average human.",
+     "hp": [
+      7,
+      9
+     ]
+    },
+    {
+     "roll": 4,
+     "text": "HP 10-12: A tough human or animal.",
+     "hp": [
+      10,
+      12
+     ]
+    },
+    {
+     "roll": 5,
+     "text": "HP 13-15: A challenge to new PCs.",
+     "hp": [
+      13,
+      15
+     ]
+    },
+    {
+     "roll": 6,
+     "text": "HP 16-19: A serious threat to new PCs.",
+     "hp": [
+      16,
+      19
+     ]
+    },
+    {
+     "roll": 7,
+     "text": "HP 20-24: A low level boss.",
+     "hp": [
+      20,
+      24
+     ]
+    },
+    {
+     "roll": 8,
+     "text": "HP 25-29: A regional boss.",
+     "hp": [
+      25,
+      29
+     ]
+    },
+    {
+     "roll": 9,
+     "text": "HP 30-39: Huge or legendary.",
+     "hp": [
+      30,
+      39
+     ]
+    },
+    {
+     "roll": 10,
+     "text": "HP 40+: Naval threat, TPK zone.",
+     "hp": [
+      40,
+      null
+     ]
+    }
+   ]
+  },
+  "morale": {
+   "id": "enemyMorale",
+   "name": "Morale",
+   "die": "2d6",
+   "page": 91,
+   "source": "Core Rules",
+   "note": "How much courage does it have?",
+   "rows": [
+    {
+     "roll": 2,
+     "text": "Morale 2: Easily scared, likely to flee.",
+     "morale": 2
+    },
+    {
+     "roll": 3,
+     "text": "Morale 3: Bottom of the food chain.",
+     "morale": 3
+    },
+    {
+     "roll": 4,
+     "text": "Morale 4: Runs when danger is sensed.",
+     "morale": 4
+    },
+    {
+     "roll": 5,
+     "text": "Morale 5: Fearful, but willing to fight.",
+     "morale": 5
+    },
+    {
+     "roll": 6,
+     "text": "Morale 6: Untrained, average human.",
+     "morale": 6
+    },
+    {
+     "roll": 7,
+     "text": "Morale 7: Combat experience.",
+     "morale": 7
+    },
+    {
+     "roll": 8,
+     "text": "Morale 8: Military training.",
+     "morale": 8
+    },
+    {
+     "roll": 9,
+     "text": "Morale 9: A brave leader.",
+     "morale": 9
+    },
+    {
+     "roll": 10,
+     "text": "Morale 10: Unwise in their courage.",
+     "morale": 10
+    },
+    {
+     "roll": 11,
+     "text": "Morale 11: Insane, heroic, or both.",
+     "morale": 11
+    },
+    {
+     "roll": 12,
+     "text": "Morale –: Unintelligent, fights to the death, or compelled by an external force.",
+     "morale": null
+    }
+   ]
+  },
+  "armor": {
+   "id": "enemyArmor",
+   "name": "Armor",
+   "die": "d4",
+   "page": 91,
+   "source": "Core Rules",
+   "note": "Traditional armor does not stop bullets.",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "Tier 0 (−0): No armor. Skin or flesh.",
+     "armor": null
+    },
+    {
+     "roll": 2,
+     "text": "Tier 1 (−d2): Leather, thick fur, scales.",
+     "armor": {
+      "name": "Armor",
+      "die": "d2",
+      "tier": 1
+     }
+    },
+    {
+     "roll": 3,
+     "text": "Tier 2 (−d4): Chain mail, thick hide, blessed.",
+     "armor": {
+      "name": "Armor",
+      "die": "d4",
+      "tier": 2
+     }
+    },
+    {
+     "roll": 4,
+     "text": "Tier 3 (−d6): Plate, armor, or blubber.",
+     "armor": {
+      "name": "Armor",
+      "die": "d6",
+      "tier": 3
+     }
+    }
+   ]
+  },
+  "damage": {
+   "id": "enemyDamage",
+   "name": "Damage",
+   "die": "d12",
+   "page": 91,
+   "source": "Core Rules",
+   "note": "How deadly is it? Black powder weapons roll double damage but take 2 actions to reload.",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "d2: A broken bottle, fist, weak claw, weak bite, harsh language.",
+     "damage": "d2"
+    },
+    {
+     "roll": 2,
+     "text": "d4: Knife, hook, claw, improvised weapon, club.",
+     "damage": "d4"
+    },
+    {
+     "roll": 3,
+     "text": "d6: Cutlass, axe, animal bite, tentacles slam.",
+     "damage": "d6"
+    },
+    {
+     "roll": 4,
+     "text": "d8: Fine rapier, big sword, claw from a large beast.",
+     "damage": "d8"
+    },
+    {
+     "roll": 5,
+     "text": "d10: Two-handed weapon, monster's bite, anchor.",
+     "damage": "d10"
+    },
+    {
+     "roll": 6,
+     "text": "d12: Executioner's axe, kraken's maw.",
+     "damage": "d12"
+    },
+    {
+     "roll": 7,
+     "text": "2d4: Flintlock pistol.",
+     "damage": "2d4",
+     "blackPowder": true
+    },
+    {
+     "roll": 8,
+     "text": "2d6: Standard black powder musket.",
+     "damage": "2d6",
+     "blackPowder": true
+    },
+    {
+     "roll": 9,
+     "text": "2d8: Buccaneer musket.",
+     "damage": "2d8",
+     "blackPowder": true
+    },
+    {
+     "roll": 10,
+     "text": "2d10: Mounted swivel gun.",
+     "damage": "2d10",
+     "blackPowder": true
+    },
+    {
+     "roll": 11,
+     "text": "2d12: Cannon shot in melee.",
+     "damage": "2d12",
+     "blackPowder": true
+    },
+    {
+     "roll": 12,
+     "text": "3d6: Some form of arcana.",
+     "damage": "3d6"
+    }
+   ]
+  },
+  "special": {
+   "id": "enemySpecial",
+   "name": "Special",
+   "die": "d10",
+   "page": 91,
+   "source": "Core Rules",
+   "note": "What makes it unique? Mix and match for thematic adversaries.",
+   "rows": [
+    {
+     "roll": 1,
+     "name": "Quick/small/guarded",
+     "text": "Quick/small/guarded: DR14 to attack/defend.",
+     "dr": {
+      "attack": 14,
+      "defend": 14
+     }
+    },
+    {
+     "roll": 2,
+     "name": "Slow/big/reckless",
+     "text": "Slow/big/reckless: DR10 to attack/defend.",
+     "dr": {
+      "attack": 10,
+      "defend": 10
+     }
+    },
+    {
+     "roll": 3,
+     "name": "Poisonous",
+     "text": "Poisonous: Test TOUGHNESS DR12 or become infected.",
+     "test": {
+      "ability": "TOUGHNESS",
+      "dr": 12
+     }
+    },
+    {
+     "roll": 4,
+     "name": "Combatant",
+     "text": "Combatant: Takes 2 attacks each round.",
+     "attacksPerRound": 2
+    },
+    {
+     "roll": 5,
+     "name": "Arcane/willpower",
+     "text": "Arcane/willpower: Test SPIRIT DR12 or STRENGTH/AGILITY are −2 for the combat.",
+     "test": {
+      "ability": "SPIRIT",
+      "dr": 12
+     }
+    },
+    {
+     "roll": 6,
+     "name": "Outsmart/stun",
+     "text": "Outsmart/stun: Test PRESENCE DR12 or skip the next d2 turns.",
+     "test": {
+      "ability": "PRESENCE",
+      "dr": 12
+     }
+    },
+    {
+     "roll": 7,
+     "name": "Terrifying",
+     "text": "Terrifying: Test SPIRIT DR12 or must run away for d2 rounds. Or force NPCs to make MORALE tests.",
+     "test": {
+      "ability": "SPIRIT",
+      "dr": 12
+     }
+    },
+    {
+     "roll": 8,
+     "name": "Leadership",
+     "text": "Leadership: Nearby allies are +2 DR to attack/defend."
+    },
+    {
+     "roll": 9,
+     "name": "Relic",
+     "text": "Relic: They have d2 from pg. 62.",
+     "table": "relics"
+    },
+    {
+     "roll": 10,
+     "name": "Ritual",
+     "text": "Ritual: They know 1 from pg. 64.",
+     "table": "rituals"
+    }
+   ]
+  }
+ },
+ "variants": {
+  "skeletons": {
+   "page": 92,
+   "ids": [
+    "skeleton-lookout",
+    "skeleton-rank-and-vile",
+    "skeleton-dead-eye",
+    "skeleton-hulk",
+    "skeleton-bosun",
+    "skeleton-warlock",
+    "skeleton-capn"
+   ],
+   "rule": "Any skeleton that takes more than 5 damage (after armor) at once tumbles into a pile of bones. Without a Cap'n or Warlock, skeletons that fail a morale test crumble into ASH."
+  },
+  "zombies": {
+   "page": 94,
+   "ids": [
+    "bilge-rat-zombie",
+    "deck-ghoul-zombie",
+    "grog-barrel-zombie",
+    "zombie-the-admiral"
+   ],
+   "appearanceTable": "zombieAppearance",
+   "rule": "Zombies don't breathe air. A bite means TOUGHNESS DR8 or death within two days and rising as a zombie. A zombie that eats flesh recovers d4 HP (d8 for a brain)."
+  },
+  "ghosts": {
+   "page": 96,
+   "ids": [
+    "ghost-monkey",
+    "ghost-crew",
+    "ghost-quartermaster",
+    "ghost-captain"
+   ],
+   "rule": "Anyone seeing ghosts for the first time tests SPIRIT DR12 or flees in terror (test again each turn). Ghosts love grog and rum, especially with black powder in it; some plant roots harm them."
+  },
+  "customisable": {
+   "note": "Blocks marked \"Choose 1 or 2\" (attackChoice: \"pick 1-2\") let the GM arm each minion from its weapon list.",
+   "ids": [
+    "skeleton-rank-and-vile",
+    "deep-ones",
+    "naval-crew",
+    "conquistador",
+    "skeleton-crew",
+    "living-thralls",
+    "thing-from-below",
+    "lost-sailor"
+   ]
+  }
+ }
+};
+window.PB_ENEMY_BUILDER = PB_ENEMY_BUILDER;
+var PB_FACTIONS = [
+ {
+  "id": "brethren",
+  "name": "Brethren of the Coast",
+  "aka": [
+   "Republic of Pirates"
+  ],
+  "page": 12,
+  "seat": "Nassau",
+  "source": "Core Rules",
+  "text": "An outcast band of rebels, thieves and vagabonds whose lust for riches and debauchery is matched only by their demand for freedom; they wait in Nassau for the call of the sea."
+ },
+ {
+  "id": "english-crown",
+  "name": "The English Crown & West India Co.",
+  "aka": [
+   "British Empire",
+   "West India Company"
+  ],
+  "page": 14,
+  "seat": "Port Royal, Jamaica",
+  "source": "Core Rules",
+  "text": "An empire bled dry by war. The few ports still flying the Union Jack bow to Lord Hamilton, the scheming governor of Jamaica, who hires a fleet of shadowy privateers to stave off ruin."
+ },
+ {
+  "id": "french-indies",
+  "name": "The French Indies",
+  "page": 16,
+  "seat": "Petit-Goâve & Guadeloupe",
+  "source": "Core Rules",
+  "text": "Revolution brews in Petit-Goâve under a distracted king, while Guadeloupe's hedonistic aristocrats ignore their bloated, incompetent military."
+ },
+ {
+  "id": "new-spain",
+  "name": "Viceroyalty of New Spain",
+  "aka": [
+   "Spain",
+   "Havana"
+  ],
+  "page": 18,
+  "seat": "Havana",
+  "source": "Core Rules",
+  "text": "A dying kingdom run on intrigue and propaganda from Havana, guarding an impenetrable harbor where the treasure fleets gather."
+ },
+ {
+  "id": "inquisition",
+  "name": "The Inquisition",
+  "aka": [
+   "The Citadel"
+  ],
+  "page": 19,
+  "seat": "Maracaibo",
+  "source": "Core Rules",
+  "text": "Religious hunters of heresy weaving their web from the citadel and dungeons at Maracaibo. Their captains appear as the Inquisitor archetype (pg. 111)."
+ },
+ {
+  "id": "the-wretched",
+  "name": "The Wretched",
+  "page": 20,
+  "seat": "hidden; The Abyss",
+  "source": "Core Rules",
+  "text": "A secret cult with eldritch ambitions hidden among sailors and townsfolk. Each solstice their prophet, The Sunken One, sinks into the shallows and returns with omens from the Great Old Ones, written into the Necronomicon. Their altar is The Abyss; their prayer is for what once was to return from the deep."
+ }
+];
+window.PB_FACTIONS = PB_FACTIONS;
 var PB_FANCY_GEAR = [
  {
   "roll": 1,
@@ -4629,6 +7503,7 @@ var PB_GM_TABLES = {
   "name": "Pirate Name Generator",
   "die": "d66",
   "page": 79,
+  "corePage": 125,
   "source": "Player's Guidebook",
   "note": "Roll d66 × 4: a first name (either column), a surname and two nicknames. Mix and match to taste.",
   "columns": [
@@ -5748,6 +8623,6345 @@ var PB_GM_TABLES = {
     ]
    }
   ]
+ },
+ "carousing": {
+  "id": "carousing",
+  "name": "Carousing",
+  "die": "d20",
+  "dice": "4d20",
+  "page": 2,
+  "source": "Core Rules",
+  "note": "Roll 4d20 (or 1d20 and read across). You are hungover for the lowest die in hours. Add the dice together: 4-49 is how much silver you spent or lost; 50+ is how much you won or stole. Read each die on its own column: Last night you… [who?] — You wake up… — and now you are…",
+  "hangover": "lowest die in hours",
+  "silver": {
+   "spentBelow": 50,
+   "text": "4-49 spent/lost in silver, 50+ won/stole in silver"
+  },
+  "columns": [
+   {
+    "die": "d20",
+    "name": "Last night you…",
+    "values": [
+     "??? (you don't remember)",
+     "got lucky with",
+     "went swimming with",
+     "made enemies with",
+     "did some ASH with",
+     "got in a fight with",
+     "started a riot with",
+     "stole from",
+     "had a debate with",
+     "became friends with",
+     "played cards with",
+     "spent the night with",
+     "gambled with",
+     "got drunk with",
+     "fell in love with",
+     "had a run-in with",
+     "killed",
+     "married",
+     "saw the sunrise with",
+     "had dinner with"
+    ]
+   },
+   {
+    "die": "d20",
+    "name": "[who?]",
+    "values": [
+     "??? (you don't know).",
+     "an enemy.",
+     "a pig.",
+     "a stranger.",
+     "a crewmate.",
+     "a monkey.",
+     "a priest.",
+     "your crew.",
+     "a ghost.",
+     "a skeleton.",
+     "a barmaid/barkeep.",
+     "some wenches.",
+     "some soldiers.",
+     "yourself.",
+     "a beautiful person.",
+     "the Devil.",
+     "the captain.",
+     "a VIP.",
+     "a parrot.",
+     "a VIP's adult progeny."
+    ]
+   },
+   {
+    "die": "d20",
+    "name": "You wake up…",
+    "values": [
+     "??? (you're blind/it's dark)",
+     "tied to a spit over a fire",
+     "in your bunk or cabin",
+     "in a gibbet cage",
+     "in the hold of a ship",
+     "deep in the jungle",
+     "tied to a stake",
+     "swinging from a mast",
+     "in a dark cave",
+     "in a coffin",
+     "with a noose around your neck",
+     "in a brothel or tavern",
+     "locked in a cell",
+     "on a tavern floor",
+     "on the beach",
+     "naked in the street",
+     "in a captain's cabin",
+     "in a church",
+     "floating in water",
+     "in a mansion"
+    ]
+   },
+   {
+    "die": "d20",
+    "name": "and now you are…",
+    "values": [
+     "??? (confused).",
+     "dead or dying.",
+     "missing a limb.",
+     "terrible (-1 to all stats).",
+     "haggard (only d4 HP left).",
+     "missing a digit or eye.",
+     "on a wanted poster.",
+     "in debt (3d10 x10 silver).",
+     "haunted.",
+     "really sad.",
+     "ravenously hungry.",
+     "soon to be a parent.",
+     "in pain from a new tattoo.",
+     "a year older.",
+     "in love.",
+     "rich (3d10 x 10 silver).",
+     "the Captain now.",
+     "the owner of a ship.",
+     "amazing (gain experience).",
+     "filthy rich (+1k silver)."
+    ]
+   }
+  ],
+  "rows": [
+   {
+    "roll": 1,
+    "text": "??? (you don't remember) · ??? (you don't know). · ??? (you're blind/it's dark) · ??? (confused)."
+   },
+   {
+    "roll": 2,
+    "text": "got lucky with · an enemy. · tied to a spit over a fire · dead or dying."
+   },
+   {
+    "roll": 3,
+    "text": "went swimming with · a pig. · in your bunk or cabin · missing a limb."
+   },
+   {
+    "roll": 4,
+    "text": "made enemies with · a stranger. · in a gibbet cage · terrible (-1 to all stats)."
+   },
+   {
+    "roll": 5,
+    "text": "did some ASH with · a crewmate. · in the hold of a ship · haggard (only d4 HP left)."
+   },
+   {
+    "roll": 6,
+    "text": "got in a fight with · a monkey. · deep in the jungle · missing a digit or eye."
+   },
+   {
+    "roll": 7,
+    "text": "started a riot with · a priest. · tied to a stake · on a wanted poster."
+   },
+   {
+    "roll": 8,
+    "text": "stole from · your crew. · swinging from a mast · in debt (3d10 x10 silver)."
+   },
+   {
+    "roll": 9,
+    "text": "had a debate with · a ghost. · in a dark cave · haunted."
+   },
+   {
+    "roll": 10,
+    "text": "became friends with · a skeleton. · in a coffin · really sad."
+   },
+   {
+    "roll": 11,
+    "text": "played cards with · a barmaid/barkeep. · with a noose around your neck · ravenously hungry."
+   },
+   {
+    "roll": 12,
+    "text": "spent the night with · some wenches. · in a brothel or tavern · soon to be a parent."
+   },
+   {
+    "roll": 13,
+    "text": "gambled with · some soldiers. · locked in a cell · in pain from a new tattoo."
+   },
+   {
+    "roll": 14,
+    "text": "got drunk with · yourself. · on a tavern floor · a year older."
+   },
+   {
+    "roll": 15,
+    "text": "fell in love with · a beautiful person. · on the beach · in love."
+   },
+   {
+    "roll": 16,
+    "text": "had a run-in with · the Devil. · naked in the street · rich (3d10 x 10 silver)."
+   },
+   {
+    "roll": 17,
+    "text": "killed · the captain. · in a captain's cabin · the Captain now."
+   },
+   {
+    "roll": 18,
+    "text": "married · a VIP. · in a church · the owner of a ship."
+   },
+   {
+    "roll": 19,
+    "text": "saw the sunrise with · a parrot. · floating in water · amazing (gain experience)."
+   },
+   {
+    "roll": 20,
+    "text": "had dinner with · a VIP's adult progeny. · in a mansion · filthy rich (+1k silver)."
+   }
+  ],
+  "group": "Carousing & Taverns"
+ },
+ "namesD12": {
+  "id": "namesD12",
+  "name": "What's in a Name?",
+  "die": "d12",
+  "page": 2,
+  "source": "Core Rules",
+  "note": "Quick names: roll d12 on any column.",
+  "columns": [
+   {
+    "die": "d12",
+    "name": "Name",
+    "values": [
+     "Ed(mund)",
+     "Roger(s)",
+     "Jack",
+     "David",
+     "Pete(r)",
+     "Angelica",
+     "Sam(uel)",
+     "Morgan",
+     "Diego",
+     "Ed(ward)",
+     "Isabel(la)",
+     "Charles"
+    ]
+   },
+   {
+    "die": "d12",
+    "name": "Name",
+    "values": [
+     "James",
+     "Chris(topher)",
+     "Robert(s)",
+     "Francois",
+     "Juan",
+     "John(athan)",
+     "Butch(er)",
+     "(Old) Ben",
+     "Will(iam)",
+     "Louis",
+     "Jean",
+     "Stede"
+    ]
+   },
+   {
+    "die": "d12",
+    "name": "Name",
+    "values": [
+     "Meathook",
+     "Jose",
+     "Fernando",
+     "Henry",
+     "Mary",
+     "Anne",
+     "Philip",
+     "Scraggs",
+     "Eliza(beth)",
+     "Hector",
+     "Genny",
+     "Thom(as)"
+    ]
+   }
+  ],
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Ed(mund) / James / Meathook"
+   },
+   {
+    "roll": 2,
+    "text": "Roger(s) / Chris(topher) / Jose"
+   },
+   {
+    "roll": 3,
+    "text": "Jack / Robert(s) / Fernando"
+   },
+   {
+    "roll": 4,
+    "text": "David / Francois / Henry"
+   },
+   {
+    "roll": 5,
+    "text": "Pete(r) / Juan / Mary"
+   },
+   {
+    "roll": 6,
+    "text": "Angelica / John(athan) / Anne"
+   },
+   {
+    "roll": 7,
+    "text": "Sam(uel) / Butch(er) / Philip"
+   },
+   {
+    "roll": 8,
+    "text": "Morgan / (Old) Ben / Scraggs"
+   },
+   {
+    "roll": 9,
+    "text": "Diego / Will(iam) / Eliza(beth)"
+   },
+   {
+    "roll": 10,
+    "text": "Ed(ward) / Louis / Hector"
+   },
+   {
+    "roll": 11,
+    "text": "Isabel(la) / Jean / Genny"
+   },
+   {
+    "roll": 12,
+    "text": "Charles / Stede / Thom(as)"
+   }
+  ],
+  "group": "Names"
+ },
+ "npcMotivation": {
+  "id": "npcMotivation",
+  "name": "NPC Motivation",
+  "die": "d20",
+  "page": 3,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "escape"
+   },
+   {
+    "roll": 2,
+    "text": "happiness"
+   },
+   {
+    "roll": 3,
+    "text": "recovery"
+   },
+   {
+    "roll": 4,
+    "text": "pleasure"
+   },
+   {
+    "roll": 5,
+    "text": "exploration"
+   },
+   {
+    "roll": 6,
+    "text": "love or sex"
+   },
+   {
+    "roll": 7,
+    "text": "revenge"
+   },
+   {
+    "roll": 8,
+    "text": "fear"
+   },
+   {
+    "roll": 9,
+    "text": "wealth"
+   },
+   {
+    "roll": 10,
+    "text": "hunger"
+   },
+   {
+    "roll": 11,
+    "text": "reputation"
+   },
+   {
+    "roll": 12,
+    "text": "aggression"
+   },
+   {
+    "roll": 13,
+    "text": "adventure"
+   },
+   {
+    "roll": 14,
+    "text": "guilt"
+   },
+   {
+    "roll": 15,
+    "text": "leisure"
+   },
+   {
+    "roll": 16,
+    "text": "protection"
+   },
+   {
+    "roll": 17,
+    "text": "intoxication"
+   },
+   {
+    "roll": 18,
+    "text": "family"
+   },
+   {
+    "roll": 19,
+    "text": "religion"
+   },
+   {
+    "roll": 20,
+    "text": "occult"
+   }
+  ],
+  "group": "NPCs"
+ },
+ "lootTheBody": {
+  "id": "lootTheBody",
+  "name": "Loot the Body",
+  "die": "d100",
+  "page": 3,
+  "source": "Core Rules",
+  "note": "Text in the `hidden` part is not immediately obvious. Add the number rolled in silver for extra loot. 00 (100) = roll again twice.",
+  "addRollAsSilver": true,
+  "rows": [
+   {
+    "roll": [
+     1,
+     20
+    ],
+    "text": "The result on the Ancient Relics table (pg. 62).",
+    "table": "relics"
+   },
+   {
+    "roll": 21,
+    "text": "Skull with glowing green sockets."
+   },
+   {
+    "roll": 22,
+    "text": "A nasty-looking knife (d6).",
+    "damage": "d6"
+   },
+   {
+    "roll": 23,
+    "text": "Wanted poster with a picture of one of the PCs on it."
+   },
+   {
+    "roll": 24,
+    "text": "Black candle.",
+    "hidden": "When lit its purple flame forms a skull."
+   },
+   {
+    "roll": 25,
+    "text": "Single golden manacle with 5 links."
+   },
+   {
+    "roll": 26,
+    "text": "A leather journal.",
+    "hidden": "Contains 1 sea shanty (pg. 68).",
+    "table": "shanties"
+   },
+   {
+    "roll": 27,
+    "text": "Oil lantern filled with dark green liquid.",
+    "hidden": "It burns a pale green light for 5', but never runs out."
+   },
+   {
+    "roll": 28,
+    "text": "Fine metal flask."
+   },
+   {
+    "roll": 29,
+    "text": "Bag of white powder."
+   },
+   {
+    "roll": 30,
+    "text": "Small box with d12 black pearls",
+    "hidden": "worth a fortune."
+   },
+   {
+    "roll": 31,
+    "text": "Sea shell lined with mother of pearl."
+   },
+   {
+    "roll": 32,
+    "text": "Pipe carved out of whale bone.",
+    "hidden": "A mysterious map is carved in the bowl."
+   },
+   {
+    "roll": 33,
+    "text": "Dead rat."
+   },
+   {
+    "roll": 34,
+    "text": "Jewel encrusted egg.",
+    "hidden": "AGILITY DR18 to open or it breaks. Clockwork inside, worth 500s."
+   },
+   {
+    "roll": 35,
+    "text": "d8 crab claws.",
+    "hidden": "Throwing them before casting a ritual lowers the DR by 1."
+   },
+   {
+    "roll": 36,
+    "text": "Stone ring with an engraved rune."
+   },
+   {
+    "roll": 37,
+    "text": "Deep blue gemstone.",
+    "hidden": "It sparkles in the moonlight."
+   },
+   {
+    "roll": 38,
+    "text": "Obsidian figurine of a kraken.",
+    "hidden": "The Kraken won't attack you."
+   },
+   {
+    "roll": 39,
+    "text": "Parrot feather.",
+    "hidden": "+1 Devil's Luck each dawn."
+   },
+   {
+    "roll": 40,
+    "text": "Some rotten dried fruit."
+   },
+   {
+    "roll": 41,
+    "text": "Recipe for turtle stew.",
+    "hidden": "If made, everyone who can smell it passes out. At sea, the crew awakes with their ship drifting near a mysterious island."
+   },
+   {
+    "roll": 42,
+    "text": "Small book on tying sailor knots."
+   },
+   {
+    "roll": 43,
+    "text": "Deck of playing cards.",
+    "hidden": "The queens are mermaids."
+   },
+   {
+    "roll": 44,
+    "text": "Random bomb (pg. 53).",
+    "table": "bombs"
+   },
+   {
+    "roll": 45,
+    "text": "Jar of d10 eyeballs preserved in white rum. They still see."
+   },
+   {
+    "roll": 46,
+    "text": "Set of lock picks."
+   },
+   {
+    "roll": 47,
+    "text": "Paper doll painted with blood."
+   },
+   {
+    "roll": 48,
+    "text": "Deep green gemstone",
+    "hidden": "worth 100s."
+   },
+   {
+    "roll": 49,
+    "text": "Small wood flute."
+   },
+   {
+    "roll": [
+     50,
+     59
+    ],
+    "text": "The result in silver.",
+    "silver": "roll"
+   },
+   {
+    "roll": 60,
+    "text": "Leather eye patch.",
+    "hidden": "That eye can see in the dark."
+   },
+   {
+    "roll": 61,
+    "text": "Flintlock pistol with tally marks."
+   },
+   {
+    "roll": 62,
+    "text": "d4 gold teeth."
+   },
+   {
+    "roll": 63,
+    "text": "Letter from a bonnie lass."
+   },
+   {
+    "roll": 64,
+    "text": "A ship's schedule",
+    "hidden": "with details of a treasure ship."
+   },
+   {
+    "roll": 65,
+    "text": "Jar of black sand."
+   },
+   {
+    "roll": 66,
+    "text": "Book of dark rituals.",
+    "hidden": "Test SPIRIT DR14 to learn one random ritual (pg. 64) or else permanently lose 1 SPIRIT."
+   },
+   {
+    "roll": 67,
+    "text": "Handwritten collection of ghost stories."
+   },
+   {
+    "roll": 68,
+    "text": "Book: A Guide to Sailor Tattoos."
+   },
+   {
+    "roll": 69,
+    "text": "A live rat."
+   },
+   {
+    "roll": 70,
+    "text": "d4 dead fish."
+   },
+   {
+    "roll": 71,
+    "text": "Vial of blowfish poison.",
+    "hidden": "Test TOUGHNESS DR12 or take d10 damage."
+   },
+   {
+    "roll": 72,
+    "text": "Treasure map (pg. 119).",
+    "table": "treasureMaps"
+   },
+   {
+    "roll": 73,
+    "text": "A glass eye",
+    "hidden": "that always looks West."
+   },
+   {
+    "roll": 74,
+    "text": "Broken cutlass hilt (d4)."
+   },
+   {
+    "roll": 75,
+    "text": "Glass dagger.",
+    "hidden": "(3d4), breaks after 1 use."
+   },
+   {
+    "roll": 76,
+    "text": "Book: The Secret Art of Fencing in the Age of Gunpowder.",
+    "hidden": "Test PRESENCE DR12 to permanently gain +1 STRENGTH. It only works once."
+   },
+   {
+    "roll": 77,
+    "text": "Bottle filled with iridescent dust."
+   },
+   {
+    "roll": 78,
+    "text": "Lint.",
+    "hidden": "Flammable."
+   },
+   {
+    "roll": 79,
+    "text": "Golden idol.",
+    "hidden": "Priceless, belongs in a museum."
+   },
+   {
+    "roll": [
+     80,
+     89
+    ],
+    "text": "d8 gold doubloons",
+    "hidden": "worth the result in silver."
+   },
+   {
+    "roll": [
+     90,
+     99
+    ],
+    "text": "Random Thing of Importance (pg. 60).",
+    "table": "things"
+   },
+   {
+    "roll": 100,
+    "text": "Roll again twice (00).",
+    "rollAgain": 2
+   }
+  ],
+  "group": "Loot & Treasure"
+ },
+ "ashMarket": {
+  "id": "ashMarket",
+  "name": "Current ASH Market",
+  "die": "2d6",
+  "page": 10,
+  "source": "Core Rules",
+  "note": "Standard rate 50s per dose (~5 lbs., or one per skeleton). Roll in each new port or each day; changes apply to the last rate.",
+  "rows": [
+   {
+    "roll": 2,
+    "name": "Buyer's market",
+    "text": "Buyer's market (can't give it away).",
+    "multiplier": 0
+   },
+   {
+    "roll": 3,
+    "name": "Flooded",
+    "text": "Flooded: half the rate.",
+    "multiplier": 0.5
+   },
+   {
+    "roll": [
+     4,
+     5
+    ],
+    "name": "Surplus",
+    "text": "Surplus: lower last rate by 20%.",
+    "multiplier": 0.8
+   },
+   {
+    "roll": [
+     6,
+     8
+    ],
+    "name": "Holding steady",
+    "text": "Holding steady.",
+    "multiplier": 1
+   },
+   {
+    "roll": [
+     9,
+     10
+    ],
+    "name": "In demand",
+    "text": "In demand: raise rate by 20%.",
+    "multiplier": 1.2
+   },
+   {
+    "roll": 11,
+    "name": "Rare",
+    "text": "Rare: double the last rate.",
+    "multiplier": 2
+   },
+   {
+    "roll": 12,
+    "name": "Seller's market",
+    "text": "Seller's market (name your price).",
+    "multiplier": null
+   }
+  ],
+  "group": "ASH"
+ },
+ "ashEffects": {
+  "id": "ashEffects",
+  "name": "Effects of Consuming ASH",
+  "die": "d20",
+  "page": 10,
+  "source": "Core Rules",
+  "duration": "2d6 minutes",
+  "note": "Most effects last for 2d6 minutes.",
+  "rows": [
+   {
+    "roll": 1,
+    "name": "Overdose",
+    "text": "Overdose. Pass out for d4 rounds. Test TOUGHNESS DR12 or instant death.",
+    "test": {
+     "ability": "TOUGHNESS",
+     "dr": 12
+    },
+    "death": true
+   },
+   {
+    "roll": 2,
+    "text": "Roll a Mystical Mishap (pg. 66).",
+    "table": "mishaps"
+   },
+   {
+    "roll": 3,
+    "text": "Lose d4 HP and become infected.",
+    "damage": "d4",
+    "condition": "infected"
+   },
+   {
+    "roll": 4,
+    "text": "Permanent -1 to all abilities.",
+    "permanent": true,
+    "abilities": {
+     "all": -1
+    }
+   },
+   {
+    "roll": 5,
+    "text": "The world turns gray and lifeless. You no longer see the joy in living. All seems dead."
+   },
+   {
+    "roll": 6,
+    "text": "Everyone around you appears to be (d4): 1. undead 2. soldiers 3. sea creatures. 4. all 3.",
+    "sub": {
+     "die": "d4",
+     "rows": [
+      {
+       "roll": 1,
+       "text": "undead"
+      },
+      {
+       "roll": 2,
+       "text": "soldiers"
+      },
+      {
+       "roll": 3,
+       "text": "sea creatures"
+      },
+      {
+       "roll": 4,
+       "text": "all 3"
+      }
+     ]
+    }
+   },
+   {
+    "roll": 7,
+    "text": "You think you're an animal (d6, pg. 86).",
+    "table": "darkFaunaTerrestrial"
+   },
+   {
+    "roll": 8,
+    "text": "One of your limbs (d4) rots away permanently. It is replaced by a ghost limb at sunset.",
+    "permanent": true
+   },
+   {
+    "roll": 9,
+    "text": "You fear the sun and thirst for blood, brains, or both."
+   },
+   {
+    "roll": 10,
+    "text": "You hear color, see sound, and feel taste."
+   },
+   {
+    "roll": 11,
+    "text": "Gain the effects of tier 3 armor.",
+    "effects": [
+     {
+      "type": "armor",
+      "value": 3
+     }
+    ]
+   },
+   {
+    "roll": 12,
+    "text": "Time slows down. Take 2 actions or attacks each round.",
+    "effects": [
+     {
+      "type": "attacks",
+      "value": 2
+     }
+    ]
+   },
+   {
+    "roll": 13,
+    "text": "Attack and defend at -4 DR.",
+    "effects": [
+     {
+      "type": "dr",
+      "value": -4,
+      "applies": [
+       "attack",
+       "defense"
+      ]
+     }
+    ]
+   },
+   {
+    "roll": 14,
+    "text": "Gain d12 temporary hit points.",
+    "tempHp": "d12"
+   },
+   {
+    "roll": 15,
+    "text": "You can see in the dark. Everything that has ever lived glows neon colors.",
+    "effects": [
+     {
+      "type": "sense",
+      "value": "darkvision"
+     }
+    ]
+   },
+   {
+    "roll": 16,
+    "text": "Move double your speed (up to 60'/turn).",
+    "effects": [
+     {
+      "type": "movement",
+      "value": 60
+     }
+    ]
+   },
+   {
+    "roll": 17,
+    "text": "+2 to STRENGTH and AGILITY for 24 hours.",
+    "duration": "24 hours",
+    "effects": [
+     {
+      "type": "ability",
+      "applies": [
+       "STRENGTH",
+       "AGILITY"
+      ],
+      "value": 2
+     }
+    ]
+   },
+   {
+    "roll": 18,
+    "name": "Mental transcendence",
+    "text": "Mental transcendence. Permanent +1 to PRESENCE.",
+    "permanent": true,
+    "abilities": {
+     "PRESENCE": 1
+    }
+   },
+   {
+    "roll": 19,
+    "name": "One with the universe",
+    "text": "You are one with the universe. Permanent +1 to SPIRIT.",
+    "permanent": true,
+    "abilities": {
+     "SPIRIT": 1
+    }
+   },
+   {
+    "roll": 20,
+    "text": "Roll d10+10 three times on this table (duplicate results have no effect).",
+    "reroll": {
+     "die": "d10+10",
+     "times": 3
+    }
+   }
+  ],
+  "group": "ASH"
+ },
+ "history": {
+  "id": "history",
+  "name": "A General History of the Dark Caribbean",
+  "die": "d66",
+  "page": 25,
+  "source": "Core Rules",
+  "note": "Six storylines (columns) told over six chapters (rows), ending in Armageddon. Use the events as records, rumors, plot hooks or current events; reveal them in order or roll d66 for a random one (first die = storyline, second die = chapter — the book doesn't specify the order).",
+  "storylines": [
+   "The Greater Antilles War",
+   "The Rise and Fall of Nassau",
+   "The Scourge of the New World",
+   "The Ashes of Tortuga",
+   "And The Wretched Exalted",
+   "Eldritch Tides of Doom"
+  ],
+  "columns": [
+   {
+    "die": "d6",
+    "name": "The Greater Antilles War",
+    "values": [
+     "Spain and England are at war; both recruit privateers and pay in advance.",
+     "Constant war: the battle for the Greater Antilles rages on with no end in sight.",
+     "A Spanish treasure fleet wrecks off Florida; nations and pirates race to it.",
+     "A region-wide cease fire as nations deal with tragedy; hundreds of warships are abandoned.",
+     "Derelict ships litter the sea; salvagers get rich and reset the status quo.",
+     "The skies shift from smoke-gray to crimson and putrid orange; sunlight becomes a myth."
+    ]
+   },
+   {
+    "die": "d6",
+    "name": "The Rise and Fall of Nassau",
+    "values": [
+     "Port Royal is destroyed in an earthquake; thousands dead, more homeless.",
+     "Nassau is sacked; the \"Republic of Pirates\", the region's first true democracy, is founded.",
+     "Famous pirates are executed and hung in gibbet cages; their cursed corpses scream at passers-by.",
+     "Edward \"Blackbeard\" Thatch goes on a killing spree and is slain in a skirmish with the Royal Navy.",
+     "Blackbeard, a sorcerer, returns from the grave with an army of the dead; the living fight back.",
+     "Nassau falls to The Scourge; escapees border on insanity and fear becomes currency."
+    ]
+   },
+   {
+    "die": "d6",
+    "name": "The Scourge of the New World",
+    "values": [
+     "Horrifying screams from the sea are reported region-wide, source unknown.",
+     "They walk again! The dead rise from grave and sea — a few at first, then hordes.",
+     "The undead, now called \"The Scourge\", ravage settlements; a state of emergency is declared.",
+     "Freshly killed fish and livestock animate and writhe at sunset; no one seems to mind anymore.",
+     "A mass exodus of birds and beasts; no wildlife is seen for weeks.",
+     "All marine life dies and washes ashore; the fishing industry collapses into famine."
+    ]
+   },
+   {
+    "die": "d6",
+    "name": "The Ashes of Tortuga",
+    "values": [
+     "ASH, the dust of destroyed undead, is found to have physiological and psychedelic properties.",
+     "A black market grows around ASH; Tortuga becomes its epicenter.",
+     "Tortuga decays from a buccaneer bastion into a cesspool of thieves; not even pirates are safe there.",
+     "Revolution! Citizens take to the streets of Hispaniola and the government is overthrown.",
+     "Thousands flee for safety; Havana, Jamaica and Guadeloupe explode in population.",
+     "Everyone who ever used ASH becomes Scourge; rum turns to water and escapism evaporates."
+    ]
+   },
+   {
+    "die": "d6",
+    "name": "And The Wretched Exalted",
+    "values": [
+     "Religious fanatics take over the Old Stone Church in Havana; occult influence is suspected.",
+     "Mysterious ruins are found in the Yucatán; an expedition sets out and none return alive.",
+     "A lone figure with abyss-black eyes emerges from the jungle, terrible to behold.",
+     "Ships of bone and flesh rise from the sea; their skeletal crews terrorize the shipping lanes.",
+     "Havana burns in a fire rumored to have started at the Old Stone Church — which still stands.",
+     "An ominous tempest settles permanently over Cuba, leaving a wasteland."
+    ]
+   },
+   {
+    "die": "d6",
+    "name": "Eldritch Tides of Doom",
+    "values": [
+     "The climate shifts: darkened skies, raging storms and an omnipresent foul mist.",
+     "\"The Abyss\" opens south of Cuba: the ocean pours into a 6-mile-long fissure.",
+     "The Kraken attacks! Over 500 ships are lost at sea; large rewards go uncollected.",
+     "The ruins of Atlantis rise in the Devil's Triangle; humanoid sea creatures attack.",
+     "Otherworldly monstrosities spew from the sea, devouring whole vessels.",
+     "A maelstrom forms around The Abyss; earthquakes crumble islands into the sea."
+    ]
+   }
+  ],
+  "rows": [
+   {
+    "roll": 11,
+    "storyline": "The Greater Antilles War",
+    "chapter": 1,
+    "text": "Spain and England are at war; both recruit privateers and pay in advance."
+   },
+   {
+    "roll": 12,
+    "storyline": "The Greater Antilles War",
+    "chapter": 2,
+    "text": "Constant war: the battle for the Greater Antilles rages on with no end in sight."
+   },
+   {
+    "roll": 13,
+    "storyline": "The Greater Antilles War",
+    "chapter": 3,
+    "text": "A Spanish treasure fleet wrecks off Florida; nations and pirates race to it."
+   },
+   {
+    "roll": 14,
+    "storyline": "The Greater Antilles War",
+    "chapter": 4,
+    "text": "A region-wide cease fire as nations deal with tragedy; hundreds of warships are abandoned."
+   },
+   {
+    "roll": 15,
+    "storyline": "The Greater Antilles War",
+    "chapter": 5,
+    "text": "Derelict ships litter the sea; salvagers get rich and reset the status quo."
+   },
+   {
+    "roll": 16,
+    "storyline": "The Greater Antilles War",
+    "chapter": 6,
+    "text": "The skies shift from smoke-gray to crimson and putrid orange; sunlight becomes a myth."
+   },
+   {
+    "roll": 21,
+    "storyline": "The Rise and Fall of Nassau",
+    "chapter": 1,
+    "text": "Port Royal is destroyed in an earthquake; thousands dead, more homeless."
+   },
+   {
+    "roll": 22,
+    "storyline": "The Rise and Fall of Nassau",
+    "chapter": 2,
+    "text": "Nassau is sacked; the \"Republic of Pirates\", the region's first true democracy, is founded."
+   },
+   {
+    "roll": 23,
+    "storyline": "The Rise and Fall of Nassau",
+    "chapter": 3,
+    "text": "Famous pirates are executed and hung in gibbet cages; their cursed corpses scream at passers-by."
+   },
+   {
+    "roll": 24,
+    "storyline": "The Rise and Fall of Nassau",
+    "chapter": 4,
+    "text": "Edward \"Blackbeard\" Thatch goes on a killing spree and is slain in a skirmish with the Royal Navy."
+   },
+   {
+    "roll": 25,
+    "storyline": "The Rise and Fall of Nassau",
+    "chapter": 5,
+    "text": "Blackbeard, a sorcerer, returns from the grave with an army of the dead; the living fight back."
+   },
+   {
+    "roll": 26,
+    "storyline": "The Rise and Fall of Nassau",
+    "chapter": 6,
+    "text": "Nassau falls to The Scourge; escapees border on insanity and fear becomes currency."
+   },
+   {
+    "roll": 31,
+    "storyline": "The Scourge of the New World",
+    "chapter": 1,
+    "text": "Horrifying screams from the sea are reported region-wide, source unknown."
+   },
+   {
+    "roll": 32,
+    "storyline": "The Scourge of the New World",
+    "chapter": 2,
+    "text": "They walk again! The dead rise from grave and sea — a few at first, then hordes."
+   },
+   {
+    "roll": 33,
+    "storyline": "The Scourge of the New World",
+    "chapter": 3,
+    "text": "The undead, now called \"The Scourge\", ravage settlements; a state of emergency is declared."
+   },
+   {
+    "roll": 34,
+    "storyline": "The Scourge of the New World",
+    "chapter": 4,
+    "text": "Freshly killed fish and livestock animate and writhe at sunset; no one seems to mind anymore."
+   },
+   {
+    "roll": 35,
+    "storyline": "The Scourge of the New World",
+    "chapter": 5,
+    "text": "A mass exodus of birds and beasts; no wildlife is seen for weeks."
+   },
+   {
+    "roll": 36,
+    "storyline": "The Scourge of the New World",
+    "chapter": 6,
+    "text": "All marine life dies and washes ashore; the fishing industry collapses into famine."
+   },
+   {
+    "roll": 41,
+    "storyline": "The Ashes of Tortuga",
+    "chapter": 1,
+    "text": "ASH, the dust of destroyed undead, is found to have physiological and psychedelic properties."
+   },
+   {
+    "roll": 42,
+    "storyline": "The Ashes of Tortuga",
+    "chapter": 2,
+    "text": "A black market grows around ASH; Tortuga becomes its epicenter."
+   },
+   {
+    "roll": 43,
+    "storyline": "The Ashes of Tortuga",
+    "chapter": 3,
+    "text": "Tortuga decays from a buccaneer bastion into a cesspool of thieves; not even pirates are safe there."
+   },
+   {
+    "roll": 44,
+    "storyline": "The Ashes of Tortuga",
+    "chapter": 4,
+    "text": "Revolution! Citizens take to the streets of Hispaniola and the government is overthrown."
+   },
+   {
+    "roll": 45,
+    "storyline": "The Ashes of Tortuga",
+    "chapter": 5,
+    "text": "Thousands flee for safety; Havana, Jamaica and Guadeloupe explode in population."
+   },
+   {
+    "roll": 46,
+    "storyline": "The Ashes of Tortuga",
+    "chapter": 6,
+    "text": "Everyone who ever used ASH becomes Scourge; rum turns to water and escapism evaporates."
+   },
+   {
+    "roll": 51,
+    "storyline": "And The Wretched Exalted",
+    "chapter": 1,
+    "text": "Religious fanatics take over the Old Stone Church in Havana; occult influence is suspected."
+   },
+   {
+    "roll": 52,
+    "storyline": "And The Wretched Exalted",
+    "chapter": 2,
+    "text": "Mysterious ruins are found in the Yucatán; an expedition sets out and none return alive."
+   },
+   {
+    "roll": 53,
+    "storyline": "And The Wretched Exalted",
+    "chapter": 3,
+    "text": "A lone figure with abyss-black eyes emerges from the jungle, terrible to behold."
+   },
+   {
+    "roll": 54,
+    "storyline": "And The Wretched Exalted",
+    "chapter": 4,
+    "text": "Ships of bone and flesh rise from the sea; their skeletal crews terrorize the shipping lanes."
+   },
+   {
+    "roll": 55,
+    "storyline": "And The Wretched Exalted",
+    "chapter": 5,
+    "text": "Havana burns in a fire rumored to have started at the Old Stone Church — which still stands."
+   },
+   {
+    "roll": 56,
+    "storyline": "And The Wretched Exalted",
+    "chapter": 6,
+    "text": "An ominous tempest settles permanently over Cuba, leaving a wasteland."
+   },
+   {
+    "roll": 61,
+    "storyline": "Eldritch Tides of Doom",
+    "chapter": 1,
+    "text": "The climate shifts: darkened skies, raging storms and an omnipresent foul mist."
+   },
+   {
+    "roll": 62,
+    "storyline": "Eldritch Tides of Doom",
+    "chapter": 2,
+    "text": "\"The Abyss\" opens south of Cuba: the ocean pours into a 6-mile-long fissure."
+   },
+   {
+    "roll": 63,
+    "storyline": "Eldritch Tides of Doom",
+    "chapter": 3,
+    "text": "The Kraken attacks! Over 500 ships are lost at sea; large rewards go uncollected."
+   },
+   {
+    "roll": 64,
+    "storyline": "Eldritch Tides of Doom",
+    "chapter": 4,
+    "text": "The ruins of Atlantis rise in the Devil's Triangle; humanoid sea creatures attack."
+   },
+   {
+    "roll": 65,
+    "storyline": "Eldritch Tides of Doom",
+    "chapter": 5,
+    "text": "Otherworldly monstrosities spew from the sea, devouring whole vessels."
+   },
+   {
+    "roll": 66,
+    "storyline": "Eldritch Tides of Doom",
+    "chapter": 6,
+    "text": "A maelstrom forms around The Abyss; earthquakes crumble islands into the sea."
+   }
+  ],
+  "group": "Setting"
+ },
+ "alchemy": {
+  "id": "alchemy",
+  "name": "Alchemy Potion Generator",
+  "die": "d20",
+  "page": 70,
+  "source": "Core Rules",
+  "note": "Fast: roll 1d20 and read across. Random: roll 6d20, one per column. Precise: pick. The DR is the TOUGHNESS DR to resist or the PRESENCE DR to craft. Most potions cost d100s. Results are never guaranteed.",
+  "columns": [
+   {
+    "die": "d20",
+    "name": "Ingredient",
+    "values": [
+     "Rum",
+     "Sugar",
+     "Tobacco",
+     "Chicken Flesh",
+     "Oxtail",
+     "Candy",
+     "Flour",
+     "Sassafras Root",
+     "Hyla Tree Frog",
+     "Polychaete Worm",
+     "Large Toad",
+     "Pufferfish",
+     "Psilocybin Mushroom",
+     "Pig Blood",
+     "Human Blood",
+     "Whale Blubber",
+     "Monkey Paw",
+     "Chicken Head",
+     "Crocodile Tooth",
+     "Human Remains"
+    ]
+   },
+   {
+    "die": "d20",
+    "name": "Ingredient",
+    "values": [
+     "Wild Flowers",
+     "Ashes",
+     "Black Powder",
+     "Raisins",
+     "Tree Bark",
+     "Bone Powder",
+     "Graveyard Dirt",
+     "Jaguar Claw",
+     "Bat Wing",
+     "Cow's Tongue",
+     "Crow's Foot",
+     "Cacao Seeds",
+     "Tamarind Leaves",
+     "Castor Oil",
+     "Maggots",
+     "Bush Rat",
+     "Kola Nut",
+     "Coconut",
+     "Sage",
+     "Banana Peel"
+    ]
+   },
+   {
+    "die": "d20",
+    "name": "Resulting Color",
+    "values": [
+     "Black",
+     "Blue",
+     "Green",
+     "Red",
+     "Purple",
+     "Yellow",
+     "Orange",
+     "White",
+     "Metallic",
+     "Clear",
+     "Glows in the Dark",
+     "Pearlescent",
+     "Iridescent",
+     "Brown",
+     "Gray",
+     "Space-Like",
+     "Pink",
+     "Turquoise",
+     "Opalescent",
+     "Sanguine"
+    ]
+   },
+   {
+    "die": "d20",
+    "name": "Delivery Method",
+    "values": [
+     "Inhalation",
+     "Inhalation",
+     "Inhalation",
+     "Inhalation",
+     "Inhalation",
+     "Touch Skin",
+     "Touch Skin",
+     "Touch Skin",
+     "Touch Skin",
+     "Touch Skin",
+     "Enter Bloodstream",
+     "Enter Bloodstream",
+     "Enter Bloodstream",
+     "Enter Bloodstream",
+     "Enter Bloodstream",
+     "Ingestion",
+     "Ingestion",
+     "Ingestion",
+     "Ingestion",
+     "Ingestion"
+    ]
+   },
+   {
+    "die": "d20",
+    "name": "DR",
+    "values": [
+     "DR8",
+     "DR8",
+     "DR8",
+     "DR10",
+     "DR10",
+     "DR10",
+     "DR12",
+     "DR12",
+     "DR12",
+     "DR14",
+     "DR14",
+     "DR14",
+     "DR16",
+     "DR16",
+     "DR16",
+     "DR18",
+     "DR18",
+     "DR18",
+     "DR20",
+     "DR20"
+    ]
+   },
+   {
+    "die": "d20",
+    "name": "Effect",
+    "values": [
+     "Instant, horrific death or after subject is killed, resurrect with 1 HP.",
+     "Death in d6 hours.",
+     "Paralysis (d8 hours).",
+     "Subject becomes a ghost.",
+     "d6 damage and blind for 1 hour.",
+     "Berserk: Deal x2 melee damage, must attack closest creature. d6 rounds.",
+     "Polymorph into a random beast (d12 hour).",
+     "Polymorph into a random beast (permanent).",
+     "Polymorph into a horrific monster (permanent).",
+     "d8 acidic damage.",
+     "Shrink to 1 foot tall (d8 rounds), AGILITY -4 DR.",
+     "Grow to huge size (d8 rounds). x2 melee damage, AGILITY +2 DR.",
+     "Heal d6.",
+     "Heal d8.",
+     "Heal to max HP.",
+     "Strange hallucinations (d4 hours).",
+     "Run away in terror (lasts d6 rounds).",
+     "All tests are DR -4 for d8 hours.",
+     "A random result from the Mystical Mishaps table (pg. 66).",
+     "Roll again twice."
+    ]
+   }
+  ],
+  "rows": [
+   {
+    "roll": 1,
+    "ingredientA": "Rum",
+    "ingredientB": "Wild Flowers",
+    "color": "Black",
+    "delivery": "Inhalation",
+    "dr": 8,
+    "effect": "Instant, horrific death or after subject is killed, resurrect with 1 HP.",
+    "text": "Black potion of Rum & Wild Flowers (Inhalation, DR8): Instant, horrific death or after subject is killed, resurrect with 1 HP."
+   },
+   {
+    "roll": 2,
+    "ingredientA": "Sugar",
+    "ingredientB": "Ashes",
+    "color": "Blue",
+    "delivery": "Inhalation",
+    "dr": 8,
+    "effect": "Death in d6 hours.",
+    "duration": "d6 hours",
+    "text": "Blue potion of Sugar & Ashes (Inhalation, DR8): Death in d6 hours."
+   },
+   {
+    "roll": 3,
+    "ingredientA": "Tobacco",
+    "ingredientB": "Black Powder",
+    "color": "Green",
+    "delivery": "Inhalation",
+    "dr": 8,
+    "effect": "Paralysis (d8 hours).",
+    "duration": "d8 hours",
+    "text": "Green potion of Tobacco & Black Powder (Inhalation, DR8): Paralysis (d8 hours)."
+   },
+   {
+    "roll": 4,
+    "ingredientA": "Chicken Flesh",
+    "ingredientB": "Raisins",
+    "color": "Red",
+    "delivery": "Inhalation",
+    "dr": 10,
+    "effect": "Subject becomes a ghost.",
+    "text": "Red potion of Chicken Flesh & Raisins (Inhalation, DR10): Subject becomes a ghost."
+   },
+   {
+    "roll": 5,
+    "ingredientA": "Oxtail",
+    "ingredientB": "Tree Bark",
+    "color": "Purple",
+    "delivery": "Inhalation",
+    "dr": 10,
+    "effect": "d6 damage and blind for 1 hour.",
+    "damage": "d6",
+    "text": "Purple potion of Oxtail & Tree Bark (Inhalation, DR10): d6 damage and blind for 1 hour."
+   },
+   {
+    "roll": 6,
+    "ingredientA": "Candy",
+    "ingredientB": "Bone Powder",
+    "color": "Yellow",
+    "delivery": "Touch Skin",
+    "dr": 10,
+    "effect": "Berserk: Deal x2 melee damage, must attack closest creature. d6 rounds.",
+    "duration": "d6 rounds",
+    "text": "Yellow potion of Candy & Bone Powder (Touch Skin, DR10): Berserk: Deal x2 melee damage, must attack closest creature. d6 rounds."
+   },
+   {
+    "roll": 7,
+    "ingredientA": "Flour",
+    "ingredientB": "Graveyard Dirt",
+    "color": "Orange",
+    "delivery": "Touch Skin",
+    "dr": 12,
+    "effect": "Polymorph into a random beast (d12 hour).",
+    "text": "Orange potion of Flour & Graveyard Dirt (Touch Skin, DR12): Polymorph into a random beast (d12 hour)."
+   },
+   {
+    "roll": 8,
+    "ingredientA": "Sassafras Root",
+    "ingredientB": "Jaguar Claw",
+    "color": "White",
+    "delivery": "Touch Skin",
+    "dr": 12,
+    "effect": "Polymorph into a random beast (permanent).",
+    "text": "White potion of Sassafras Root & Jaguar Claw (Touch Skin, DR12): Polymorph into a random beast (permanent)."
+   },
+   {
+    "roll": 9,
+    "ingredientA": "Hyla Tree Frog",
+    "ingredientB": "Bat Wing",
+    "color": "Metallic",
+    "delivery": "Touch Skin",
+    "dr": 12,
+    "effect": "Polymorph into a horrific monster (permanent).",
+    "text": "Metallic potion of Hyla Tree Frog & Bat Wing (Touch Skin, DR12): Polymorph into a horrific monster (permanent)."
+   },
+   {
+    "roll": 10,
+    "ingredientA": "Polychaete Worm",
+    "ingredientB": "Cow's Tongue",
+    "color": "Clear",
+    "delivery": "Touch Skin",
+    "dr": 14,
+    "effect": "d8 acidic damage.",
+    "damage": "d8",
+    "text": "Clear potion of Polychaete Worm & Cow's Tongue (Touch Skin, DR14): d8 acidic damage."
+   },
+   {
+    "roll": 11,
+    "ingredientA": "Large Toad",
+    "ingredientB": "Crow's Foot",
+    "color": "Glows in the Dark",
+    "delivery": "Enter Bloodstream",
+    "dr": 14,
+    "effect": "Shrink to 1 foot tall (d8 rounds), AGILITY -4 DR.",
+    "text": "Glows in the Dark potion of Large Toad & Crow's Foot (Enter Bloodstream, DR14): Shrink to 1 foot tall (d8 rounds), AGILITY -4 DR."
+   },
+   {
+    "roll": 12,
+    "ingredientA": "Pufferfish",
+    "ingredientB": "Cacao Seeds",
+    "color": "Pearlescent",
+    "delivery": "Enter Bloodstream",
+    "dr": 14,
+    "effect": "Grow to huge size (d8 rounds). x2 melee damage, AGILITY +2 DR.",
+    "text": "Pearlescent potion of Pufferfish & Cacao Seeds (Enter Bloodstream, DR14): Grow to huge size (d8 rounds). x2 melee damage, AGILITY +2 DR."
+   },
+   {
+    "roll": 13,
+    "ingredientA": "Psilocybin Mushroom",
+    "ingredientB": "Tamarind Leaves",
+    "color": "Iridescent",
+    "delivery": "Enter Bloodstream",
+    "dr": 16,
+    "effect": "Heal d6.",
+    "heal": "d6",
+    "text": "Iridescent potion of Psilocybin Mushroom & Tamarind Leaves (Enter Bloodstream, DR16): Heal d6."
+   },
+   {
+    "roll": 14,
+    "ingredientA": "Pig Blood",
+    "ingredientB": "Castor Oil",
+    "color": "Brown",
+    "delivery": "Enter Bloodstream",
+    "dr": 16,
+    "effect": "Heal d8.",
+    "heal": "d8",
+    "text": "Brown potion of Pig Blood & Castor Oil (Enter Bloodstream, DR16): Heal d8."
+   },
+   {
+    "roll": 15,
+    "ingredientA": "Human Blood",
+    "ingredientB": "Maggots",
+    "color": "Gray",
+    "delivery": "Enter Bloodstream",
+    "dr": 16,
+    "effect": "Heal to max HP.",
+    "heal": "max",
+    "text": "Gray potion of Human Blood & Maggots (Enter Bloodstream, DR16): Heal to max HP."
+   },
+   {
+    "roll": 16,
+    "ingredientA": "Whale Blubber",
+    "ingredientB": "Bush Rat",
+    "color": "Space-Like",
+    "delivery": "Ingestion",
+    "dr": 18,
+    "effect": "Strange hallucinations (d4 hours).",
+    "text": "Space-Like potion of Whale Blubber & Bush Rat (Ingestion, DR18): Strange hallucinations (d4 hours)."
+   },
+   {
+    "roll": 17,
+    "ingredientA": "Monkey Paw",
+    "ingredientB": "Kola Nut",
+    "color": "Pink",
+    "delivery": "Ingestion",
+    "dr": 18,
+    "effect": "Run away in terror (lasts d6 rounds).",
+    "text": "Pink potion of Monkey Paw & Kola Nut (Ingestion, DR18): Run away in terror (lasts d6 rounds)."
+   },
+   {
+    "roll": 18,
+    "ingredientA": "Chicken Head",
+    "ingredientB": "Coconut",
+    "color": "Turquoise",
+    "delivery": "Ingestion",
+    "dr": 18,
+    "effect": "All tests are DR -4 for d8 hours.",
+    "text": "Turquoise potion of Chicken Head & Coconut (Ingestion, DR18): All tests are DR -4 for d8 hours."
+   },
+   {
+    "roll": 19,
+    "ingredientA": "Crocodile Tooth",
+    "ingredientB": "Sage",
+    "color": "Opalescent",
+    "delivery": "Ingestion",
+    "dr": 20,
+    "effect": "A random result from the Mystical Mishaps table (pg. 66).",
+    "table": "mishaps",
+    "text": "Opalescent potion of Crocodile Tooth & Sage (Ingestion, DR20): A random result from the Mystical Mishaps table (pg. 66)."
+   },
+   {
+    "roll": 20,
+    "ingredientA": "Human Remains",
+    "ingredientB": "Banana Peel",
+    "color": "Sanguine",
+    "delivery": "Ingestion",
+    "dr": 20,
+    "effect": "Roll again twice.",
+    "rollAgain": 2,
+    "text": "Sanguine potion of Human Remains & Banana Peel (Ingestion, DR20): Roll again twice."
+   }
+  ],
+  "group": "Alchemy"
+ },
+ "flotsam": {
+  "id": "flotsam",
+  "name": "Flotsam & Jetsam",
+  "die": "d12",
+  "page": 79,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Message in a bottle."
+   },
+   {
+    "roll": 2,
+    "text": "2d10 crates (pg. 115).",
+    "table": "cargo"
+   },
+   {
+    "roll": 3,
+    "text": "d4 adrift sailors."
+   },
+   {
+    "roll": 4,
+    "text": "Large, locked sea chest."
+   },
+   {
+    "roll": 5,
+    "text": "Green sea turtle, a map carved in its shell."
+   },
+   {
+    "roll": 6,
+    "text": "A coffin, nailed shut."
+   },
+   {
+    "roll": 7,
+    "text": "Sentient ship's figurehead."
+   },
+   {
+    "roll": 8,
+    "text": "Massive dead blue whale, something living inside."
+   },
+   {
+    "roll": 9,
+    "text": "A tentacle, d100 feet long."
+   },
+   {
+    "roll": 10,
+    "text": "d8 x 100 glowing jellyfish."
+   },
+   {
+    "roll": 11,
+    "text": "Dinghy filled with treasure."
+   },
+   {
+    "roll": 12,
+    "text": "Derelict ship (pg. 116).",
+    "table": "derelictShip"
+   }
+  ],
+  "group": "Maritime Travel Events"
+ },
+ "seaEncounters": {
+  "id": "seaEncounters",
+  "name": "Encounters at Sea",
+  "die": "d20",
+  "page": 79,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "The Kraken.",
+    "monster": "the-kraken"
+   },
+   {
+    "roll": 2,
+    "text": "Navy Ship of the Line.",
+    "ship": "ship-of-the-line",
+    "captain": "naval-mastermind"
+   },
+   {
+    "roll": 3,
+    "text": "Privateers: d2 sloops & 1 frigate.",
+    "ships": [
+     "sloop",
+     "frigate"
+    ]
+   },
+   {
+    "roll": 4,
+    "text": "2d4 canoes.",
+    "ship": "canoe"
+   },
+   {
+    "roll": 5,
+    "text": "No-talent pirates in a tartane.",
+    "ship": "tartane"
+   },
+   {
+    "roll": 6,
+    "text": "Sloop of rookie pirates.",
+    "ship": "sloop"
+   },
+   {
+    "roll": 7,
+    "text": "Fugitives in a ship's boat.",
+    "ship": "longboat"
+   },
+   {
+    "roll": 8,
+    "text": "Raft with d6 dying passengers.",
+    "ship": "raft"
+   },
+   {
+    "roll": 9,
+    "text": "d2 people in a dinghy.",
+    "ship": "dinghy"
+   },
+   {
+    "roll": 10,
+    "text": "Old galleon crewed by monkeys.",
+    "ship": "galleon"
+   },
+   {
+    "roll": 11,
+    "text": "Merchantman with lots of goods.",
+    "ship": "fluyt"
+   },
+   {
+    "roll": 12,
+    "text": "2d20 zombies on floating debris."
+   },
+   {
+    "roll": 13,
+    "text": "Man-of-War, famous pirate.",
+    "ship": "man-of-war"
+   },
+   {
+    "roll": 14,
+    "text": "3d6 war canoes, en route to raid.",
+    "ship": "canoe"
+   },
+   {
+    "roll": 15,
+    "text": "Blood drenched Ship of the Dead.",
+    "ship": "ghost-ship"
+   },
+   {
+    "roll": 16,
+    "text": "Treasure galleon & d4 sloops.",
+    "ships": [
+     "galleon",
+     "sloop"
+    ]
+   },
+   {
+    "roll": 17,
+    "text": "d2 undead megalodons.",
+    "monster": "undead-megalodon"
+   },
+   {
+    "roll": 18,
+    "text": "d6 fluyts preparing for battle.",
+    "ship": "fluyt"
+   },
+   {
+    "roll": 19,
+    "text": "A flotilla: pirate lords are meeting."
+   },
+   {
+    "roll": 20,
+    "text": "Ornate galleon: a floating brothel.",
+    "ship": "galleon"
+   }
+  ],
+  "group": "Maritime Travel Events"
+ },
+ "seaEvents": {
+  "id": "seaEvents",
+  "name": "Events at Sea",
+  "die": "d20",
+  "page": 79,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "A huge shark or sea monster harasses the hull. DR12 AGILITY tests or overboard!",
+    "test": {
+     "ability": "AGILITY",
+     "dr": 12
+    }
+   },
+   {
+    "roll": 2,
+    "text": "A corpse floats by the ship. If rescued, it comes to life after d10 minutes."
+   },
+   {
+    "roll": 3,
+    "text": "Shipworms or barnacles infect the hull. Ship: -1 speed each week until careened.",
+    "shipSpeed": -1
+   },
+   {
+    "roll": 4,
+    "text": "d4 sirens on rocks or a desert island beckon the crew with serene melodies.",
+    "monster": "siren"
+   },
+   {
+    "roll": 5,
+    "text": "The rum is gone! The culprit is at large."
+   },
+   {
+    "roll": 6,
+    "text": "Man overboard! d6 rounds to solve."
+   },
+   {
+    "roll": 7,
+    "text": "Mutiny! Roll reactions for all of the crew (pg. 31).",
+    "table": "reaction"
+   },
+   {
+    "roll": 8,
+    "text": "Maggots have infested the bread. Resting at sea requires a DR10 TOUGHNESS test.",
+    "test": {
+     "ability": "TOUGHNESS",
+     "dr": 10
+    }
+   },
+   {
+    "roll": 9,
+    "text": "A crew member is gravely wounded while performing their duties around the ship."
+   },
+   {
+    "roll": 10,
+    "text": "An NPC knows something troubling related to a PC's background or unfortunate incident."
+   },
+   {
+    "roll": 11,
+    "text": "A slimy ghost is spotted eating the food in the galley."
+   },
+   {
+    "roll": 12,
+    "text": "A maelstrom (whirlpool) opens nearby. Eminent danger."
+   },
+   {
+    "roll": 13,
+    "text": "Everyone is haunted by eldritch or stygian dreams. The Great Old One calls..."
+   },
+   {
+    "roll": 14,
+    "text": "d4 of the crew are quarreling. Fisticuffs?"
+   },
+   {
+    "roll": 15,
+    "text": "Things are missing: there is a stowaway."
+   },
+   {
+    "roll": 16,
+    "text": "Unexpected shoals and coral require precision navigation and piloting."
+   },
+   {
+    "roll": 17,
+    "text": "Something gruesome and terrible is found in the cargo hold."
+   },
+   {
+    "roll": 18,
+    "text": "d2 mermaids visit the ship. Secretly roll reaction (pg. 31) to know their intent.",
+    "table": "reaction"
+   },
+   {
+    "roll": 19,
+    "text": "A mysterious, uncharted island is spotted. See pg. 122.",
+    "table": "islands"
+   },
+   {
+    "roll": 20,
+    "text": "An albatross is spotted flying with the sails. Everyone gains 1 Devil's Luck point.",
+    "luck": 1
+   }
+  ],
+  "group": "Maritime Travel Events"
+ },
+ "enemyHp": {
+  "id": "enemyHp",
+  "name": "HP",
+  "die": "d10",
+  "page": 91,
+  "source": "Core Rules",
+  "note": "How tough or big is it?",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "HP 1-3: Barely worth fighting.",
+    "hp": [
+     1,
+     3
+    ]
+   },
+   {
+    "roll": 2,
+    "text": "HP 4-6: A weak human.",
+    "hp": [
+     4,
+     6
+    ]
+   },
+   {
+    "roll": 3,
+    "text": "HP 7-9: An average human.",
+    "hp": [
+     7,
+     9
+    ]
+   },
+   {
+    "roll": 4,
+    "text": "HP 10-12: A tough human or animal.",
+    "hp": [
+     10,
+     12
+    ]
+   },
+   {
+    "roll": 5,
+    "text": "HP 13-15: A challenge to new PCs.",
+    "hp": [
+     13,
+     15
+    ]
+   },
+   {
+    "roll": 6,
+    "text": "HP 16-19: A serious threat to new PCs.",
+    "hp": [
+     16,
+     19
+    ]
+   },
+   {
+    "roll": 7,
+    "text": "HP 20-24: A low level boss.",
+    "hp": [
+     20,
+     24
+    ]
+   },
+   {
+    "roll": 8,
+    "text": "HP 25-29: A regional boss.",
+    "hp": [
+     25,
+     29
+    ]
+   },
+   {
+    "roll": 9,
+    "text": "HP 30-39: Huge or legendary.",
+    "hp": [
+     30,
+     39
+    ]
+   },
+   {
+    "roll": 10,
+    "text": "HP 40+: Naval threat, TPK zone.",
+    "hp": [
+     40,
+     null
+    ]
+   }
+  ],
+  "group": "Enemy Builder"
+ },
+ "enemyMorale": {
+  "id": "enemyMorale",
+  "name": "Morale",
+  "die": "2d6",
+  "page": 91,
+  "source": "Core Rules",
+  "note": "How much courage does it have?",
+  "rows": [
+   {
+    "roll": 2,
+    "text": "Morale 2: Easily scared, likely to flee.",
+    "morale": 2
+   },
+   {
+    "roll": 3,
+    "text": "Morale 3: Bottom of the food chain.",
+    "morale": 3
+   },
+   {
+    "roll": 4,
+    "text": "Morale 4: Runs when danger is sensed.",
+    "morale": 4
+   },
+   {
+    "roll": 5,
+    "text": "Morale 5: Fearful, but willing to fight.",
+    "morale": 5
+   },
+   {
+    "roll": 6,
+    "text": "Morale 6: Untrained, average human.",
+    "morale": 6
+   },
+   {
+    "roll": 7,
+    "text": "Morale 7: Combat experience.",
+    "morale": 7
+   },
+   {
+    "roll": 8,
+    "text": "Morale 8: Military training.",
+    "morale": 8
+   },
+   {
+    "roll": 9,
+    "text": "Morale 9: A brave leader.",
+    "morale": 9
+   },
+   {
+    "roll": 10,
+    "text": "Morale 10: Unwise in their courage.",
+    "morale": 10
+   },
+   {
+    "roll": 11,
+    "text": "Morale 11: Insane, heroic, or both.",
+    "morale": 11
+   },
+   {
+    "roll": 12,
+    "text": "Morale –: Unintelligent, fights to the death, or compelled by an external force.",
+    "morale": null
+   }
+  ],
+  "group": "Enemy Builder"
+ },
+ "enemyArmor": {
+  "id": "enemyArmor",
+  "name": "Armor",
+  "die": "d4",
+  "page": 91,
+  "source": "Core Rules",
+  "note": "Traditional armor does not stop bullets.",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Tier 0 (−0): No armor. Skin or flesh.",
+    "armor": null
+   },
+   {
+    "roll": 2,
+    "text": "Tier 1 (−d2): Leather, thick fur, scales.",
+    "armor": {
+     "name": "Armor",
+     "die": "d2",
+     "tier": 1
+    }
+   },
+   {
+    "roll": 3,
+    "text": "Tier 2 (−d4): Chain mail, thick hide, blessed.",
+    "armor": {
+     "name": "Armor",
+     "die": "d4",
+     "tier": 2
+    }
+   },
+   {
+    "roll": 4,
+    "text": "Tier 3 (−d6): Plate, armor, or blubber.",
+    "armor": {
+     "name": "Armor",
+     "die": "d6",
+     "tier": 3
+    }
+   }
+  ],
+  "group": "Enemy Builder"
+ },
+ "enemyDamage": {
+  "id": "enemyDamage",
+  "name": "Damage",
+  "die": "d12",
+  "page": 91,
+  "source": "Core Rules",
+  "note": "How deadly is it? Black powder weapons roll double damage but take 2 actions to reload.",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "d2: A broken bottle, fist, weak claw, weak bite, harsh language.",
+    "damage": "d2"
+   },
+   {
+    "roll": 2,
+    "text": "d4: Knife, hook, claw, improvised weapon, club.",
+    "damage": "d4"
+   },
+   {
+    "roll": 3,
+    "text": "d6: Cutlass, axe, animal bite, tentacles slam.",
+    "damage": "d6"
+   },
+   {
+    "roll": 4,
+    "text": "d8: Fine rapier, big sword, claw from a large beast.",
+    "damage": "d8"
+   },
+   {
+    "roll": 5,
+    "text": "d10: Two-handed weapon, monster's bite, anchor.",
+    "damage": "d10"
+   },
+   {
+    "roll": 6,
+    "text": "d12: Executioner's axe, kraken's maw.",
+    "damage": "d12"
+   },
+   {
+    "roll": 7,
+    "text": "2d4: Flintlock pistol.",
+    "damage": "2d4",
+    "blackPowder": true
+   },
+   {
+    "roll": 8,
+    "text": "2d6: Standard black powder musket.",
+    "damage": "2d6",
+    "blackPowder": true
+   },
+   {
+    "roll": 9,
+    "text": "2d8: Buccaneer musket.",
+    "damage": "2d8",
+    "blackPowder": true
+   },
+   {
+    "roll": 10,
+    "text": "2d10: Mounted swivel gun.",
+    "damage": "2d10",
+    "blackPowder": true
+   },
+   {
+    "roll": 11,
+    "text": "2d12: Cannon shot in melee.",
+    "damage": "2d12",
+    "blackPowder": true
+   },
+   {
+    "roll": 12,
+    "text": "3d6: Some form of arcana.",
+    "damage": "3d6"
+   }
+  ],
+  "group": "Enemy Builder"
+ },
+ "enemySpecial": {
+  "id": "enemySpecial",
+  "name": "Special",
+  "die": "d10",
+  "page": 91,
+  "source": "Core Rules",
+  "note": "What makes it unique? Mix and match for thematic adversaries.",
+  "rows": [
+   {
+    "roll": 1,
+    "name": "Quick/small/guarded",
+    "text": "Quick/small/guarded: DR14 to attack/defend.",
+    "dr": {
+     "attack": 14,
+     "defend": 14
+    }
+   },
+   {
+    "roll": 2,
+    "name": "Slow/big/reckless",
+    "text": "Slow/big/reckless: DR10 to attack/defend.",
+    "dr": {
+     "attack": 10,
+     "defend": 10
+    }
+   },
+   {
+    "roll": 3,
+    "name": "Poisonous",
+    "text": "Poisonous: Test TOUGHNESS DR12 or become infected.",
+    "test": {
+     "ability": "TOUGHNESS",
+     "dr": 12
+    }
+   },
+   {
+    "roll": 4,
+    "name": "Combatant",
+    "text": "Combatant: Takes 2 attacks each round.",
+    "attacksPerRound": 2
+   },
+   {
+    "roll": 5,
+    "name": "Arcane/willpower",
+    "text": "Arcane/willpower: Test SPIRIT DR12 or STRENGTH/AGILITY are −2 for the combat.",
+    "test": {
+     "ability": "SPIRIT",
+     "dr": 12
+    }
+   },
+   {
+    "roll": 6,
+    "name": "Outsmart/stun",
+    "text": "Outsmart/stun: Test PRESENCE DR12 or skip the next d2 turns.",
+    "test": {
+     "ability": "PRESENCE",
+     "dr": 12
+    }
+   },
+   {
+    "roll": 7,
+    "name": "Terrifying",
+    "text": "Terrifying: Test SPIRIT DR12 or must run away for d2 rounds. Or force NPCs to make MORALE tests.",
+    "test": {
+     "ability": "SPIRIT",
+     "dr": 12
+    }
+   },
+   {
+    "roll": 8,
+    "name": "Leadership",
+    "text": "Leadership: Nearby allies are +2 DR to attack/defend."
+   },
+   {
+    "roll": 9,
+    "name": "Relic",
+    "text": "Relic: They have d2 from pg. 62.",
+    "table": "relics"
+   },
+   {
+    "roll": 10,
+    "name": "Ritual",
+    "text": "Ritual: They know 1 from pg. 64.",
+    "table": "rituals"
+   }
+  ],
+  "group": "Enemy Builder"
+ },
+ "vesselClass": {
+  "id": "vesselClass",
+  "name": "Vessel Class",
+  "die": "d10",
+  "page": 114,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "raft",
+    "ship": "raft"
+   },
+   {
+    "roll": 2,
+    "text": "longboat",
+    "ship": "longboat"
+   },
+   {
+    "roll": 3,
+    "text": "tartane",
+    "ship": "tartane"
+   },
+   {
+    "roll": 4,
+    "text": "sloop",
+    "ship": "sloop"
+   },
+   {
+    "roll": 5,
+    "text": "brigantine",
+    "ship": "brigantine"
+   },
+   {
+    "roll": 6,
+    "text": "fluyt",
+    "ship": "fluyt"
+   },
+   {
+    "roll": 7,
+    "text": "frigate",
+    "ship": "frigate"
+   },
+   {
+    "roll": 8,
+    "text": "galleon",
+    "ship": "galleon"
+   },
+   {
+    "roll": 9,
+    "text": "man-of-war",
+    "ship": "man-of-war"
+   },
+   {
+    "roll": 10,
+    "text": "ship of the line",
+    "ship": "ship-of-the-line"
+   }
+  ],
+  "group": "Ships at Sea"
+ },
+ "armament": {
+  "id": "armament",
+  "name": "Armament",
+  "die": "d6",
+  "page": 114,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Merchant: No weapons.",
+    "weapons": "none"
+   },
+   {
+    "roll": 2,
+    "text": "Lightly armed: reduce damage die size by one.",
+    "attackDieStep": -1
+   },
+   {
+    "roll": [
+     3,
+     5
+    ],
+    "text": "Normal armament."
+   },
+   {
+    "roll": 6,
+    "text": "Warship: Double broadsides.",
+    "broadsidesMultiplier": 2
+   }
+  ],
+  "group": "Ships at Sea"
+ },
+ "crewQuantity": {
+  "id": "crewQuantity",
+  "name": "Crew Quantity",
+  "die": "d6",
+  "page": 114,
+  "source": "Core Rules",
+  "note": "Modify DRs where appropriate.",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Short-handed: half as many.",
+    "crewMultiplier": 0.5
+   },
+   {
+    "roll": [
+     2,
+     3
+    ],
+    "text": "Standard crew.",
+    "crewMultiplier": 1
+   },
+   {
+    "roll": [
+     4,
+     5
+    ],
+    "text": "Ready for war: twice as many.",
+    "crewMultiplier": 2
+   },
+   {
+    "roll": 6,
+    "text": "Ready to raid: as many as possible.",
+    "crewMultiplier": "max"
+   }
+  ],
+  "group": "Ships at Sea"
+ },
+ "crewQuality": {
+  "id": "crewQuality",
+  "name": "Crew Quality",
+  "die": "2d6",
+  "page": 114,
+  "source": "Core Rules",
+  "note": "Modify DRs where appropriate.",
+  "rows": [
+   {
+    "roll": [
+     2,
+     3
+    ],
+    "text": "Near mutiny and/or untrained."
+   },
+   {
+    "roll": [
+     4,
+     6
+    ],
+    "text": "Miserable and/or novice."
+   },
+   {
+    "roll": [
+     7,
+     8
+    ],
+    "text": "Average."
+   },
+   {
+    "roll": [
+     9,
+     10
+    ],
+    "text": "Fresh from shore leave and/or experienced."
+   },
+   {
+    "roll": [
+     11,
+     12
+    ],
+    "text": "Prosperous/loyal and/or military training."
+   }
+  ],
+  "group": "Ships at Sea"
+ },
+ "shipName": {
+  "id": "shipName",
+  "name": "Ship Name",
+  "die": "d66",
+  "page": 114,
+  "source": "Core Rules",
+  "columns": [
+   {
+    "die": "d66",
+    "name": "Name",
+    "values": [
+     "Banshee's Wail",
+     "Revenant",
+     "Void Ripper",
+     "Mermaid's Tear",
+     "Carrion Crow",
+     "Executioner's Hand",
+     "Poseidon's Rage",
+     "Adventure's Ghost",
+     "Widow's Revenge",
+     "Blood Moon",
+     "Devil's Scorn",
+     "Gilded Parrot",
+     "Monolith",
+     "Black Tide",
+     "Raven's Wrath",
+     "Coral Corsair",
+     "Hellspire",
+     "Vendetta",
+     "Crimson Tempest",
+     "Royal Tomb",
+     "Guillotine",
+     "Neptune's Maiden",
+     "Cadaver's Call",
+     "Heart of the Sea",
+     "Demonwake",
+     "Bride of the Abyss",
+     "Annihilation",
+     "Golden Glaive",
+     "Necrobile",
+     "Grave Witch",
+     "Loa's Lament",
+     "Hunsi Kanzo",
+     "Dragon from the Deep",
+     "Leviathan's Flood",
+     "Kraken's Maw",
+     "Harlequin's Curse"
+    ]
+   }
+  ],
+  "rows": [
+   {
+    "roll": 11,
+    "text": "Banshee's Wail"
+   },
+   {
+    "roll": 12,
+    "text": "Revenant"
+   },
+   {
+    "roll": 13,
+    "text": "Void Ripper"
+   },
+   {
+    "roll": 14,
+    "text": "Mermaid's Tear"
+   },
+   {
+    "roll": 15,
+    "text": "Carrion Crow"
+   },
+   {
+    "roll": 16,
+    "text": "Executioner's Hand"
+   },
+   {
+    "roll": 21,
+    "text": "Poseidon's Rage"
+   },
+   {
+    "roll": 22,
+    "text": "Adventure's Ghost"
+   },
+   {
+    "roll": 23,
+    "text": "Widow's Revenge"
+   },
+   {
+    "roll": 24,
+    "text": "Blood Moon"
+   },
+   {
+    "roll": 25,
+    "text": "Devil's Scorn"
+   },
+   {
+    "roll": 26,
+    "text": "Gilded Parrot"
+   },
+   {
+    "roll": 31,
+    "text": "Monolith"
+   },
+   {
+    "roll": 32,
+    "text": "Black Tide"
+   },
+   {
+    "roll": 33,
+    "text": "Raven's Wrath"
+   },
+   {
+    "roll": 34,
+    "text": "Coral Corsair"
+   },
+   {
+    "roll": 35,
+    "text": "Hellspire"
+   },
+   {
+    "roll": 36,
+    "text": "Vendetta"
+   },
+   {
+    "roll": 41,
+    "text": "Crimson Tempest"
+   },
+   {
+    "roll": 42,
+    "text": "Royal Tomb"
+   },
+   {
+    "roll": 43,
+    "text": "Guillotine"
+   },
+   {
+    "roll": 44,
+    "text": "Neptune's Maiden"
+   },
+   {
+    "roll": 45,
+    "text": "Cadaver's Call"
+   },
+   {
+    "roll": 46,
+    "text": "Heart of the Sea"
+   },
+   {
+    "roll": 51,
+    "text": "Demonwake"
+   },
+   {
+    "roll": 52,
+    "text": "Bride of the Abyss"
+   },
+   {
+    "roll": 53,
+    "text": "Annihilation"
+   },
+   {
+    "roll": 54,
+    "text": "Golden Glaive"
+   },
+   {
+    "roll": 55,
+    "text": "Necrobile"
+   },
+   {
+    "roll": 56,
+    "text": "Grave Witch"
+   },
+   {
+    "roll": 61,
+    "text": "Loa's Lament"
+   },
+   {
+    "roll": 62,
+    "text": "Hunsi Kanzo"
+   },
+   {
+    "roll": 63,
+    "text": "Dragon from the Deep"
+   },
+   {
+    "roll": 64,
+    "text": "Leviathan's Flood"
+   },
+   {
+    "roll": 65,
+    "text": "Kraken's Maw"
+   },
+   {
+    "roll": 66,
+    "text": "Harlequin's Curse"
+   }
+  ],
+  "group": "Ships at Sea"
+ },
+ "cargoMundane": {
+  "id": "cargoMundane",
+  "name": "Mundane Cargo",
+  "die": "d12",
+  "page": 115,
+  "source": "Core Rules",
+  "note": "Values in silver; ±50% from port to port. 12 = roll Special Cargo.",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "food or crops, 250s",
+    "value": 250
+   },
+   {
+    "roll": 2,
+    "text": "spices or oils, 350s",
+    "value": 350
+   },
+   {
+    "roll": 3,
+    "text": "trade goods, 400s",
+    "value": 400
+   },
+   {
+    "roll": 4,
+    "text": "livestock, 400s",
+    "value": 400
+   },
+   {
+    "roll": 5,
+    "text": "sugar, 500s",
+    "value": 500
+   },
+   {
+    "roll": 6,
+    "text": "rum, 1000s",
+    "value": 1000
+   },
+   {
+    "roll": 7,
+    "text": "munitions, 2000s",
+    "value": 2000
+   },
+   {
+    "roll": 8,
+    "text": "tobacco, 1000s",
+    "value": 1000
+   },
+   {
+    "roll": 9,
+    "text": "wine, 2000s",
+    "value": 2000
+   },
+   {
+    "roll": 10,
+    "text": "antiques, 2000s",
+    "value": 2000
+   },
+   {
+    "roll": 11,
+    "text": "lumber, 1000s",
+    "value": 1000
+   },
+   {
+    "roll": 12,
+    "text": "special cargo",
+    "table": "cargoSpecial"
+   }
+  ],
+  "group": "Cargo"
+ },
+ "cargoSpecial": {
+  "id": "cargoSpecial",
+  "name": "Special Cargo",
+  "die": "d12",
+  "page": 115,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "raw silver ore, 5000s",
+    "value": 5000
+   },
+   {
+    "roll": 2,
+    "text": "golden coins and treasures, 10000s",
+    "value": 10000
+   },
+   {
+    "roll": 3,
+    "text": "religious leader(s)"
+   },
+   {
+    "roll": 4,
+    "text": "important prisoner(s)"
+   },
+   {
+    "roll": 5,
+    "text": "political or military figure(s)"
+   },
+   {
+    "roll": 6,
+    "text": "relics or a rare artifact, 4000s",
+    "value": 4000
+   },
+   {
+    "roll": 7,
+    "text": "sea monster bones, 2500s",
+    "value": 2500
+   },
+   {
+    "roll": 8,
+    "text": "exotic animals, 2000s",
+    "value": 2000
+   },
+   {
+    "roll": 9,
+    "text": "d10 locked chests, 2d8 x 100s each",
+    "value": "2d8 × 100s each",
+    "count": "d10"
+   },
+   {
+    "roll": 10,
+    "text": "d20 crates of ASH, see pg. 10",
+    "count": "d20",
+    "ash": true
+   },
+   {
+    "roll": 11,
+    "text": "imprisoned undead"
+   },
+   {
+    "roll": 12,
+    "text": "a sorcerer with a tome of d4 Arcane Rituals (pg. 64)",
+    "table": "rituals"
+   }
+  ],
+  "group": "Cargo"
+ },
+ "cargoPlotTwist": {
+  "id": "cargoPlotTwist",
+  "name": "Optional Plot Twist",
+  "die": "d8",
+  "page": 115,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Deadly disease on board."
+   },
+   {
+    "roll": 2,
+    "text": "Crew are impostors."
+   },
+   {
+    "roll": 3,
+    "text": "Crew is mute."
+   },
+   {
+    "roll": 4,
+    "text": "The PCs know this crew."
+   },
+   {
+    "roll": 5,
+    "text": "Everyone on board was thought to be dead."
+   },
+   {
+    "roll": 6,
+    "text": "Ghost ship."
+   },
+   {
+    "roll": 7,
+    "text": "They're all zombies."
+   },
+   {
+    "roll": 8,
+    "text": "Someone on board is related to a PC's backstory."
+   }
+  ],
+  "group": "Cargo"
+ },
+ "derelictWhere": {
+  "id": "derelictWhere",
+  "name": "Where Is It?",
+  "die": "d12",
+  "page": 116,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "shallow waters (submerged at high tide)"
+   },
+   {
+    "roll": 2,
+    "text": "suspended on shoals (half underwater)"
+   },
+   {
+    "roll": 3,
+    "text": "beach wrecked"
+   },
+   {
+    "roll": 4,
+    "text": "adrift at sea"
+   },
+   {
+    "roll": 5,
+    "text": "anchored off the coast"
+   },
+   {
+    "roll": 6,
+    "text": "suspended on rocks or a coastal cliff"
+   },
+   {
+    "roll": 7,
+    "text": "up a dried-up riverbed"
+   },
+   {
+    "roll": 8,
+    "text": "in the middle of the jungle, forest, or desert"
+   },
+   {
+    "roll": 9,
+    "text": "drifting into port"
+   },
+   {
+    "roll": 10,
+    "text": "orbiting a maelstrom"
+   },
+   {
+    "roll": 11,
+    "text": "floating the waters that lead to the underworld"
+   },
+   {
+    "roll": 12,
+    "text": "in the nightmares of cursed sailors"
+   }
+  ],
+  "group": "Derelict Ship"
+ },
+ "derelictType": {
+  "id": "derelictType",
+  "name": "Type of Ship",
+  "die": "d12",
+  "page": 116,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "several ships fastened together (roll d2 more times)",
+    "rollAgain": "d2"
+   },
+   {
+    "roll": 2,
+    "text": "sloop",
+    "ship": "sloop"
+   },
+   {
+    "roll": 3,
+    "text": "tartane",
+    "ship": "tartane"
+   },
+   {
+    "roll": 4,
+    "text": "giant jury-rigged raft",
+    "ship": "raft"
+   },
+   {
+    "roll": 5,
+    "text": "brigantine",
+    "ship": "brigantine"
+   },
+   {
+    "roll": 6,
+    "text": "frigate",
+    "ship": "frigate"
+   },
+   {
+    "roll": 7,
+    "text": "ancient vessel",
+    "ship": "galley"
+   },
+   {
+    "roll": 8,
+    "text": "galleon",
+    "ship": "galleon"
+   },
+   {
+    "roll": 9,
+    "text": "fluyt",
+    "ship": "fluyt"
+   },
+   {
+    "roll": 10,
+    "text": "man-of-war",
+    "ship": "man-of-war"
+   },
+   {
+    "roll": 11,
+    "text": "ship of the line",
+    "ship": "ship-of-the-line"
+   },
+   {
+    "roll": 12,
+    "text": "otherworldly"
+   }
+  ],
+  "group": "Derelict Ship"
+ },
+ "derelictWhatHappened": {
+  "id": "derelictWhatHappened",
+  "name": "What Happened Here?",
+  "die": "d8",
+  "page": 116,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "demolished during a storm or hurricane"
+   },
+   {
+    "roll": 2,
+    "text": "abandoned for an unknown reason, mostly intact"
+   },
+   {
+    "roll": 3,
+    "text": "ripped in two by a monster from the deep"
+   },
+   {
+    "roll": 4,
+    "text": "run aground or scrapped some shoals"
+   },
+   {
+    "roll": 5,
+    "text": "raided by blood-thirsty undead"
+   },
+   {
+    "roll": 6,
+    "text": "destroyed in naval combat"
+   },
+   {
+    "roll": 7,
+    "text": "wrecked in foggy conditions"
+   },
+   {
+    "roll": 8,
+    "text": "mutiny fueled blood bath"
+   }
+  ],
+  "group": "Derelict Ship"
+ },
+ "derelictRoom": {
+  "id": "derelictRoom",
+  "name": "In One of the Rooms",
+  "die": "d8",
+  "page": 116,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "filled with large eggs"
+   },
+   {
+    "roll": 2,
+    "text": "bodies of former crew, freshly dead, terror on their faces"
+   },
+   {
+    "roll": 3,
+    "text": "indecipherable glyphs carved into the wood beams"
+   },
+   {
+    "roll": 4,
+    "text": "water damaged books and letters"
+   },
+   {
+    "roll": 5,
+    "text": "hundreds of eyeballs hanging from strings"
+   },
+   {
+    "roll": 6,
+    "text": "a gaping hole in the hull"
+   },
+   {
+    "roll": 7,
+    "text": "rotting food and animal corpses"
+   },
+   {
+    "roll": 8,
+    "text": "glass bottles filled with [d6]: 1 rum, 2 potions (pg. 70), 3 fortified wine, 4 blood, 5 holy water, 6 excrement (human?)",
+    "sub": {
+     "die": "d6",
+     "rows": [
+      {
+       "roll": 1,
+       "text": "rum"
+      },
+      {
+       "roll": 2,
+       "text": "potions (pg. 70)",
+       "table": "alchemy"
+      },
+      {
+       "roll": 3,
+       "text": "fortified wine"
+      },
+      {
+       "roll": 4,
+       "text": "blood"
+      },
+      {
+       "roll": 5,
+       "text": "holy water"
+      },
+      {
+       "roll": 6,
+       "text": "excrement (human?)"
+      }
+     ]
+    }
+   }
+  ],
+  "group": "Derelict Ship"
+ },
+ "derelictOddFeature": {
+  "id": "derelictOddFeature",
+  "name": "Odd Feature",
+  "die": "d12",
+  "page": 117,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "walls and floor covered in coral and barnacles"
+   },
+   {
+    "roll": 2,
+    "text": "piles of bleached white bones throughout"
+   },
+   {
+    "roll": 3,
+    "text": "hundreds of small crab's nests"
+   },
+   {
+    "roll": 4,
+    "text": "cargo hold is filled with 6\" of blood"
+   },
+   {
+    "roll": 5,
+    "text": "charred wood and fire damage"
+   },
+   {
+    "roll": 6,
+    "text": "faintly glows in the dark"
+   },
+   {
+    "roll": 7,
+    "text": "mysterious slime covers most surfaces"
+   },
+   {
+    "roll": 8,
+    "text": "ornately decorated in gold leaf and velvet"
+   },
+   {
+    "roll": 9,
+    "text": "a thick layer of ash coats everything"
+   },
+   {
+    "roll": 10,
+    "text": "gravity behaves as if underwater"
+   },
+   {
+    "roll": 11,
+    "text": "signs of torture, sacrifice, and blood-letting"
+   },
+   {
+    "roll": 12,
+    "text": "bioluminescent plants bloom from hull at night"
+   }
+  ],
+  "group": "Derelict Ship"
+ },
+ "derelictDevelopment": {
+  "id": "derelictDevelopment",
+  "name": "Development",
+  "die": "d8",
+  "page": 117,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Sails! Ship spotted."
+   },
+   {
+    "roll": 2,
+    "text": "Derelict starts to sink or collapse."
+   },
+   {
+    "roll": 3,
+    "text": "Adversaries arrive: other pirates, monsters, the military."
+   },
+   {
+    "roll": 4,
+    "text": "Explosion or fire."
+   },
+   {
+    "roll": 5,
+    "text": "Extreme weather."
+   },
+   {
+    "roll": 6,
+    "text": "Thing from the deep complicates things."
+   },
+   {
+    "roll": 7,
+    "text": "Undead floating nearby."
+   },
+   {
+    "roll": 8,
+    "text": "A stowaway emerges."
+   }
+  ],
+  "group": "Derelict Ship"
+ },
+ "derelictOccupant": {
+  "id": "derelictOccupant",
+  "name": "Current Occupant",
+  "die": "d12",
+  "page": 117,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Ghosts of dead sailors. Their speech sounds like whale song.",
+    "monster": "ghost-crew"
+   },
+   {
+    "roll": 2,
+    "text": "Poisonous necro-plague rats, their mother the size of a wolf.",
+    "monster": "bilge-rat"
+   },
+   {
+    "roll": 3,
+    "text": "Dormant zombies waiting for fresh brains, their smell detectable for miles.",
+    "monster": "bilge-rat-zombie"
+   },
+   {
+    "roll": 4,
+    "text": "A starving crew of pirate-turned-cannibals, some with freshly missing limbs."
+   },
+   {
+    "roll": 5,
+    "text": "Skeleton marauders celebrating a recent raid. The captain is an asshole.",
+    "monster": "skeleton-capn"
+   },
+   {
+    "roll": 6,
+    "text": "Cultists, chanting, summoning Great Old Ones via human sacrifice.",
+    "monster": "cultists"
+   },
+   {
+    "roll": 7,
+    "text": "3 beautiful sirens. They lust for pearls and have a hoard hidden nearby.",
+    "monster": "siren"
+   },
+   {
+    "roll": 8,
+    "text": "A tribe of intelligent goblin-like monkeys. They love shiny things and rum."
+   },
+   {
+    "roll": 9,
+    "text": "A necromancer living in exile with a pet undead jaguar or shark.",
+    "monster": "the-necromancer"
+   },
+   {
+    "roll": 10,
+    "text": "Deep Ones, lead by a shaman, scouting for valuables. Her magic requires water.",
+    "monster": "deep-ones"
+   },
+   {
+    "roll": 11,
+    "text": "Hundreds of carrion gulls, feasting on a corpse hanging from a mast.",
+    "monster": "carrion-gull"
+   },
+   {
+    "roll": 12,
+    "text": "Dozens of blood drained corpses. A weakened vampire hides below deck."
+   }
+  ],
+  "group": "Derelict Ship"
+ },
+ "derelictCargo": {
+  "id": "derelictCargo",
+  "name": "Original Cargo",
+  "die": "d20",
+  "page": 117,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "tea leaves or spices"
+   },
+   {
+    "roll": 2,
+    "text": "art or antiques"
+   },
+   {
+    "roll": 3,
+    "text": "coffee beans"
+   },
+   {
+    "roll": 4,
+    "text": "sugar or sugar cane"
+   },
+   {
+    "roll": 5,
+    "text": "rum or wine"
+   },
+   {
+    "roll": 6,
+    "text": "weapons and ammo"
+   },
+   {
+    "roll": 7,
+    "text": "tobacco or cocoa"
+   },
+   {
+    "roll": 8,
+    "text": "exotic creatures"
+   },
+   {
+    "roll": 9,
+    "text": "rice or crops"
+   },
+   {
+    "roll": 10,
+    "text": "black powder [d100 barrels]"
+   },
+   {
+    "roll": 11,
+    "text": "contraband"
+   },
+   {
+    "roll": 12,
+    "text": "textiles"
+   },
+   {
+    "roll": 13,
+    "text": "sacrificial victims"
+   },
+   {
+    "roll": 14,
+    "text": "prisoners"
+   },
+   {
+    "roll": 15,
+    "text": "lumber"
+   },
+   {
+    "roll": 16,
+    "text": "livestock"
+   },
+   {
+    "roll": 17,
+    "text": "a large statue"
+   },
+   {
+    "roll": 18,
+    "text": "hoards of treasure"
+   },
+   {
+    "roll": 19,
+    "text": "native medicine"
+   },
+   {
+    "roll": 20,
+    "text": "a cursed relic"
+   }
+  ],
+  "group": "Derelict Ship"
+ },
+ "derelictCondition": {
+  "id": "derelictCondition",
+  "name": "Cargo Condition",
+  "die": "d6",
+  "page": 117,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "missing or ruined",
+    "valueMultiplier": 0
+   },
+   {
+    "roll": [
+     2,
+     3
+    ],
+    "text": "salvageable (x1/2)",
+    "valueMultiplier": 0.5
+   },
+   {
+    "roll": [
+     4,
+     5
+    ],
+    "text": "good (x1)",
+    "valueMultiplier": 1
+   },
+   {
+    "roll": 6,
+    "text": "rare and valuable (x2)",
+    "valueMultiplier": 2
+   }
+  ],
+  "group": "Derelict Ship"
+ },
+ "buriedTreasure": {
+  "id": "buriedTreasure",
+  "name": "Buried Treasure",
+  "die": "d100",
+  "page": 118,
+  "source": "Core Rules",
+  "note": "Roll d100 for what lies in the chest.",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "The Black Spot on a folded piece of paper. Whoever unfolds it dies in d8 days (unless they find a way to lift the curse)."
+   },
+   {
+    "roll": 2,
+    "text": "A Spanish gold treasure hoard worth 50,000s. They want it back NOW."
+   },
+   {
+    "roll": 3,
+    "text": "3 flags: British, Spanish, French. One torn, one blood spattered, one outdated."
+   },
+   {
+    "roll": 4,
+    "text": "Freshly decapitated head. It looks exactly like one of the PCs. In its mouth is a pearl the size of a plum."
+   },
+   {
+    "roll": 5,
+    "text": "Emerald the size of a coconut."
+   },
+   {
+    "roll": 6,
+    "text": "6 stylized animal heads carved from wood, one on top of the next."
+   },
+   {
+    "roll": 7,
+    "text": "7 rare gold coins worth d100 silver each."
+   },
+   {
+    "roll": 8,
+    "text": "Each player rolls all of the dice they have with them: the total in silver.",
+    "silver": "all dice"
+   },
+   {
+    "roll": 9,
+    "text": "An enormous dinosaur bone."
+   },
+   {
+    "roll": 10,
+    "text": "2 black flintlocks, the name \"Blackwood\" engraved on both. DR -1 to hit."
+   },
+   {
+    "roll": 11,
+    "text": "A bag of marbles."
+   },
+   {
+    "roll": 12,
+    "text": "Thick leather belt, an iron kraken buckle. Wearer gets +1 STRENGTH."
+   },
+   {
+    "roll": 13,
+    "text": "A pure white flintlock pistol. It crits on 18+ but shatters on a fumble."
+   },
+   {
+    "roll": 14,
+    "text": "Half of a metal medallion."
+   },
+   {
+    "roll": 15,
+    "text": "15 dead men on a dead man's chest. The crew learns 1 random Shanty (pg. 68).",
+    "table": "shanties"
+   },
+   {
+    "roll": 16,
+    "text": "An elaborate brass anchor."
+   },
+   {
+    "roll": 17,
+    "text": "An ancient circular stone calendar. Its last entry is the day after tomorrow..."
+   },
+   {
+    "roll": 18,
+    "text": "5,000 gold coins (they are painted wood)."
+   },
+   {
+    "roll": 19,
+    "text": "D6 black candles. Burning them makes all other light sources dim by half."
+   },
+   {
+    "roll": 20,
+    "text": "D20 silver bars (50s each)."
+   },
+   {
+    "roll": 21,
+    "text": "8' marble statue of a sea monster with rubies for eyes."
+   },
+   {
+    "roll": 22,
+    "text": "Detailed journal with drawings and descriptions of the local flora and fauna."
+   },
+   {
+    "roll": 23,
+    "text": "Golden crown and scepter."
+   },
+   {
+    "roll": 24,
+    "text": "A flute carved from a femur."
+   },
+   {
+    "roll": 25,
+    "text": "D6 bladders from some sea creature. Each contains a potion (pg. 70).",
+    "table": "alchemy",
+    "count": "d6"
+   },
+   {
+    "roll": 26,
+    "text": "Jet black sphere."
+   },
+   {
+    "roll": 27,
+    "text": "Mother of pearl-encrusted lobster shell."
+   },
+   {
+    "roll": 28,
+    "text": "Black cannon in the shape of a dragon. A ship with it always deals +1 damage."
+   },
+   {
+    "roll": 29,
+    "text": "Book written in an ancient script. It contains the best recipes known to man."
+   },
+   {
+    "roll": 30,
+    "text": "300 dead monkeys."
+   },
+   {
+    "roll": 31,
+    "text": "Dead pirate captain. There is a 2,000s reward for his head."
+   },
+   {
+    "roll": 32,
+    "text": "32 golden teeth and a set of silver pliers."
+   },
+   {
+    "roll": 33,
+    "text": "Skeleton of a small animal."
+   },
+   {
+    "roll": 34,
+    "text": "Single golden arrow."
+   },
+   {
+    "roll": 35,
+    "text": "35' of hempen rope that will (almost) never break."
+   },
+   {
+    "roll": 36,
+    "text": "Small sandstone pyramid. Smashing it reveals a black diamond worth 2,000s."
+   },
+   {
+    "roll": 37,
+    "text": "Mesoan coin on a necklace."
+   },
+   {
+    "roll": 38,
+    "text": "703 pieces of eight in a wooden crate."
+   },
+   {
+    "roll": 39,
+    "text": "Dark gemstones. Looking into them reveals an underwater location."
+   },
+   {
+    "roll": 40,
+    "text": "Ornate model frigate inside a bottle."
+   },
+   {
+    "roll": 41,
+    "text": "Large fang the size of a femur."
+   },
+   {
+    "roll": 42,
+    "text": "A fine wooden armoire. Inside are d12 outfits fit for royalty."
+   },
+   {
+    "roll": 43,
+    "text": "Iron scarab. On sand it explodes for d6 damage, underwater it swims to treasure."
+   },
+   {
+    "roll": 44,
+    "text": "Large jar filled with 2d20 dried seahorses. Eating one recovers 1 HP. Don't eat too many..."
+   },
+   {
+    "roll": 45,
+    "text": "Pair of finely crafted boots. +1 AGILITY."
+   },
+   {
+    "roll": 46,
+    "text": "Bloody leather bag with 3 silver rings, 7 stone rings, and 9 iron rings."
+   },
+   {
+    "roll": 47,
+    "text": "Polished obsidian disc. If you look at the sun through it you immediately gain experience, then it shatters.",
+    "experience": true
+   },
+   {
+    "roll": 48,
+    "text": "4' x 8' stone slab covered in glyphs. It depicts a woman entering a portal."
+   },
+   {
+    "roll": 49,
+    "text": "Carved ivory sailing ship."
+   },
+   {
+    "roll": 50,
+    "text": "Sarcophagus (5,000s). Inside is a scepter that turns human ashes into silver dust."
+   },
+   {
+    "roll": 51,
+    "text": "Dark green cloak. +1 PRESENCE."
+   },
+   {
+    "roll": 52,
+    "text": "D20 bottles of the finest rum ever made."
+   },
+   {
+    "roll": 53,
+    "text": "Barrel-sized egg. The inside stirs..."
+   },
+   {
+    "roll": 54,
+    "text": "Taxidermy dog. In its belly is a severed hand holding a set of keys."
+   },
+   {
+    "roll": 55,
+    "text": "Severed finger. If rested on a map it will point to a lost city of gold."
+   },
+   {
+    "roll": 56,
+    "text": "D4 barrels filled with blood."
+   },
+   {
+    "roll": 57,
+    "text": "Smoking pipe shaped like a galleon."
+   },
+   {
+    "roll": 58,
+    "text": "Hollow cannonball. Inside: a map."
+   },
+   {
+    "roll": 59,
+    "text": "Clay dagger with glyphs carved in the blade. Read them: learn one random ritual (pg. 64) then it crumbles.",
+    "table": "rituals"
+   },
+   {
+    "roll": 60,
+    "text": "Chest with 4 different colored vials."
+   },
+   {
+    "roll": 61,
+    "text": "A figurehead of a gorgeous woman. If attached to a ship, it comes alive and screams in terror."
+   },
+   {
+    "roll": 62,
+    "text": "Clay jar filled with 13 snakes."
+   },
+   {
+    "roll": 63,
+    "text": "A skeleton key, pg. 63.",
+    "relic": "skeleton-key"
+   },
+   {
+    "roll": 64,
+    "text": "Locked iron box. Inside is a rotten head that can speak. It knows the way to Hell."
+   },
+   {
+    "roll": 65,
+    "text": "Set of 6 jade goblets."
+   },
+   {
+    "roll": 66,
+    "text": "Everything within 66' dies immediately. (Optional: all PCs gain the Haunted Soul: Skeleton class until the treasure is reburied.)"
+   },
+   {
+    "roll": 67,
+    "text": "Silver bracelet of a snake eating its tail."
+   },
+   {
+    "roll": 68,
+    "text": "Handheld crystal mirror."
+   },
+   {
+    "roll": 69,
+    "text": "3d20 large pearls."
+   },
+   {
+    "roll": 70,
+    "text": "Collection of exotic bird feathers (300s)."
+   },
+   {
+    "roll": 71,
+    "text": "Shriveled heart. It starts beating if submerged in sea water."
+   },
+   {
+    "roll": 72,
+    "text": "Wood coffin. Inside is (d4): 1 a skeleton 2 a mummy 3 a vampire 4 1,000s."
+   },
+   {
+    "roll": 73,
+    "text": "Map of the Dark Caribbean. A trail of blood appears along your path."
+   },
+   {
+    "roll": 74,
+    "text": "Jaguar skull made of diamond."
+   },
+   {
+    "roll": 75,
+    "text": "Key made of water. Glows if submerged."
+   },
+   {
+    "roll": 76,
+    "text": "Jade gecko wrapped around a coconut sized granite globe."
+   },
+   {
+    "roll": 77,
+    "text": "Vial of water. Drinking it secretly gives d100 HP."
+   },
+   {
+    "roll": 78,
+    "text": "Satchel of hauntingly poetic love letters."
+   },
+   {
+    "roll": 79,
+    "text": "Chess set carved from onyx and jade."
+   },
+   {
+    "roll": 80,
+    "text": "Wood tube with d6 scrolls, each with a different Ritual (pg. 64). They always succeed but burn up once used.",
+    "table": "rituals",
+    "count": "d6"
+   },
+   {
+    "roll": 81,
+    "text": "Stone tankard, covered with Mesoan glyphs. It never runs out of ale."
+   },
+   {
+    "roll": 82,
+    "text": "Golden peg leg."
+   },
+   {
+    "roll": 83,
+    "text": "Gold ship's bell. Ringing it changes the winds direction."
+   },
+   {
+    "roll": 84,
+    "text": "Plain gold ring with no signs of wear (in fire it projects a clue, pg. 121).",
+    "table": "riddles"
+   },
+   {
+    "roll": 85,
+    "text": "A chest inside a chest. Roll again.",
+    "rollAgain": 1
+   },
+   {
+    "roll": 86,
+    "text": "Necklace of bones, each with a different engraved rune. +1 TOUGHNESS."
+   },
+   {
+    "roll": 87,
+    "text": "Gray, pointy hat. Wearer gets +1 SPIRIT."
+   },
+   {
+    "roll": 88,
+    "text": "Trident etched with antediluvian runes."
+   },
+   {
+    "roll": 89,
+    "text": "Bronze skull with d2 gems for eyes."
+   },
+   {
+    "roll": 90,
+    "text": "Bullwhip. Hits on DR8, d6 dmg, 10' range."
+   },
+   {
+    "roll": 91,
+    "text": "Amulet of the Sun. Elaborately carved, Ancient, and extremely valuable."
+   },
+   {
+    "roll": 92,
+    "text": "A large crate. d100 skulls are inside."
+   },
+   {
+    "roll": 93,
+    "text": "Volcanic glass sculpture of an island. Holding it to the sun reveals a small ruby inside. It's a map."
+   },
+   {
+    "roll": 94,
+    "text": "Spyglass. It seems broken, but actually peers 24 hours into the past."
+   },
+   {
+    "roll": 95,
+    "text": "Book of 7 maps in 7 different languages. Each is of a different small island."
+   },
+   {
+    "roll": 96,
+    "text": "3 turtles shells of different colors. Each is filled with gems worth d100 silver."
+   },
+   {
+    "roll": 97,
+    "text": "Go. A bag of black stones, a bag of white stones, and a bamboo game board."
+   },
+   {
+    "roll": 98,
+    "text": "Oil lamp. (The genie inside will grant one wish, but in the worst way possible)."
+   },
+   {
+    "roll": 99,
+    "text": "A wooden box with 24 stacks of 20 gold coins (500s each) and 6 loaded flintlocks."
+   },
+   {
+    "roll": 100,
+    "text": "1 million pieces of eight. Good luck."
+   }
+  ],
+  "group": "Loot & Treasure"
+ },
+ "mapType": {
+  "id": "mapType",
+  "name": "Type of Map",
+  "die": "d4",
+  "page": 119,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "name": "Simple",
+    "text": "Simple. A geographic area, X marks the spot."
+   },
+   {
+    "roll": 2,
+    "name": "Point Crawl",
+    "text": "Point Crawl. The map shows several icons (pg. 120), but they must be traveled to sequentially to find the next one."
+   },
+   {
+    "roll": 3,
+    "name": "Scavenger Hunt",
+    "text": "Scavenger Hunt. The map has only one point of interest or one clue, but finding it reveals more maps or clues."
+   },
+   {
+    "roll": 4,
+    "name": "Arcane",
+    "text": "Arcane. The map only reveals the next step when the previous one is completed."
+   }
+  ],
+  "group": "Treasure Maps"
+ },
+ "mapMaterial": {
+  "id": "mapMaterial",
+  "name": "Material",
+  "die": "d12",
+  "page": 119,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": [
+     1,
+     4
+    ],
+    "text": "Parchment paper."
+   },
+   {
+    "roll": 5,
+    "text": "In an old book."
+   },
+   {
+    "roll": 6,
+    "text": "Only in someone's mind or memories."
+   },
+   {
+    "roll": 7,
+    "text": "Burnt into leather."
+   },
+   {
+    "roll": 8,
+    "text": "Whittled into a bone or skull."
+   },
+   {
+    "roll": 9,
+    "text": "Minted on a unique coin."
+   },
+   {
+    "roll": 10,
+    "text": "Embossed into a sea turtle shell."
+   },
+   {
+    "roll": 11,
+    "text": "Scratched into driftwood."
+   },
+   {
+    "roll": 12,
+    "text": "Etched into a glass bottle."
+   }
+  ],
+  "group": "Treasure Maps"
+ },
+ "mapGeography": {
+  "id": "mapGeography",
+  "name": "Geography",
+  "die": "d8",
+  "page": 119,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Island"
+   },
+   {
+    "roll": 2,
+    "text": "Coast"
+   },
+   {
+    "roll": 3,
+    "text": "Peninsula"
+   },
+   {
+    "roll": 4,
+    "text": "Cove"
+   },
+   {
+    "roll": 5,
+    "text": "Archipelago"
+   },
+   {
+    "roll": 6,
+    "text": "River"
+   },
+   {
+    "roll": 7,
+    "text": "Lake"
+   },
+   {
+    "roll": 8,
+    "text": "Inland"
+   }
+  ],
+  "group": "Treasure Maps"
+ },
+ "mapStarts": {
+  "id": "mapStarts",
+  "name": "It Starts…",
+  "die": "d6",
+  "page": 119,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "at a totally unknown location."
+   },
+   {
+    "roll": 2,
+    "text": "nearby."
+   },
+   {
+    "roll": 3,
+    "text": "within a mile."
+   },
+   {
+    "roll": 4,
+    "text": "a day's walk away."
+   },
+   {
+    "roll": 5,
+    "text": "a day's sail away."
+   },
+   {
+    "roll": 6,
+    "text": "near a well known place."
+   }
+  ],
+  "group": "Treasure Maps"
+ },
+ "mapInvisibleInk": {
+  "id": "mapInvisibleInk",
+  "name": "The Invisible Ink Is Revealed…",
+  "die": "d10",
+  "page": 119,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "with heat or fire."
+   },
+   {
+    "roll": 2,
+    "text": "under star or moon light."
+   },
+   {
+    "roll": 3,
+    "text": "during an eclipse."
+   },
+   {
+    "roll": 4,
+    "text": "when underwater."
+   },
+   {
+    "roll": 5,
+    "text": "if soaked in alcohol."
+   },
+   {
+    "roll": 6,
+    "text": "with magic or a ritual."
+   },
+   {
+    "roll": 7,
+    "text": "when you speak the password."
+   },
+   {
+    "roll": 8,
+    "text": "when near a key location or object."
+   },
+   {
+    "roll": 9,
+    "text": "during the solstice or equinox."
+   },
+   {
+    "roll": 10,
+    "text": "at a certain time of day."
+   }
+  ],
+  "group": "Treasure Maps"
+ },
+ "mapComplication": {
+  "id": "mapComplication",
+  "name": "Complication",
+  "die": "d8",
+  "page": 119,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Another crew is there when the PCs arrive."
+   },
+   {
+    "roll": 2,
+    "text": "Monsters guard it."
+   },
+   {
+    "roll": 3,
+    "text": "It has already been found or is missing."
+   },
+   {
+    "roll": 4,
+    "text": "It's cursed."
+   },
+   {
+    "roll": 5,
+    "text": "There are hundreds of corpses."
+   },
+   {
+    "roll": 6,
+    "text": "The PCs become incredibly lost on the way."
+   },
+   {
+    "roll": 7,
+    "text": "The whole thing is a setup."
+   },
+   {
+    "roll": 8,
+    "text": "There is so much treasure everyone becomes murderously paranoid."
+   }
+  ],
+  "group": "Treasure Maps"
+ },
+ "mapIcons": {
+  "id": "mapIcons",
+  "name": "Icons",
+  "die": "d20",
+  "page": 120,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "rope bridge"
+   },
+   {
+    "roll": 2,
+    "text": "waterfall"
+   },
+   {
+    "roll": 3,
+    "text": "volcano caldera"
+   },
+   {
+    "roll": 4,
+    "text": "skull rock"
+   },
+   {
+    "roll": 5,
+    "text": "wicked tree"
+   },
+   {
+    "roll": 6,
+    "text": "jungle"
+   },
+   {
+    "roll": 7,
+    "text": "beach caves"
+   },
+   {
+    "roll": 8,
+    "text": "whale graveyard"
+   },
+   {
+    "roll": 9,
+    "text": "white sand beach"
+   },
+   {
+    "roll": 10,
+    "text": "lagoon"
+   },
+   {
+    "roll": 11,
+    "text": "ancient ruins"
+   },
+   {
+    "roll": 12,
+    "text": "burnt down cabin"
+   },
+   {
+    "roll": 13,
+    "text": "swamp"
+   },
+   {
+    "roll": 14,
+    "text": "shipwreck"
+   },
+   {
+    "roll": 15,
+    "text": "cliff side"
+   },
+   {
+    "roll": 16,
+    "text": "large hill"
+   },
+   {
+    "roll": 17,
+    "text": "quicksand"
+   },
+   {
+    "roll": 18,
+    "text": "mountain's peak"
+   },
+   {
+    "roll": 19,
+    "text": "highest point"
+   },
+   {
+    "roll": 20,
+    "text": "lowest point"
+   }
+  ],
+  "group": "Treasure Maps"
+ },
+ "mapClueContainer": {
+  "id": "mapClueContainer",
+  "name": "Clue Container",
+  "die": "d10",
+  "page": 120,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Note in a scroll case."
+   },
+   {
+    "roll": 2,
+    "text": "Small stone, instructions carved underneath."
+   },
+   {
+    "roll": 3,
+    "text": "Coconut shell."
+   },
+   {
+    "roll": 4,
+    "text": "Message in a bottle."
+   },
+   {
+    "roll": 5,
+    "text": "Metal plaque."
+   },
+   {
+    "roll": 6,
+    "text": "Letter in a small box."
+   },
+   {
+    "roll": 7,
+    "text": "Etched cannon ball."
+   },
+   {
+    "roll": 8,
+    "text": "Burnt or carved into wood."
+   },
+   {
+    "roll": 9,
+    "text": "Dried blood on a skull."
+   },
+   {
+    "roll": 10,
+    "text": "A potion. The drinker \"knows\" the next clue, but TOUGHNESS DR12 or becomes poisoned.",
+    "test": {
+     "ability": "TOUGHNESS",
+     "dr": 12
+    }
+   }
+  ],
+  "group": "Treasure Maps"
+ },
+ "mapDirection": {
+  "id": "mapDirection",
+  "name": "Direction",
+  "die": "d8",
+  "page": 120,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "north"
+   },
+   {
+    "roll": 2,
+    "text": "northeast"
+   },
+   {
+    "roll": 3,
+    "text": "east"
+   },
+   {
+    "roll": 4,
+    "text": "southeast"
+   },
+   {
+    "roll": 5,
+    "text": "south"
+   },
+   {
+    "roll": 6,
+    "text": "southwest"
+   },
+   {
+    "roll": 7,
+    "text": "west"
+   },
+   {
+    "roll": 8,
+    "text": "northwest"
+   }
+  ],
+  "group": "Treasure Maps"
+ },
+ "mapMarkers": {
+  "id": "mapMarkers",
+  "name": "Markers",
+  "die": "d20",
+  "page": 120,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "large boulder"
+   },
+   {
+    "roll": 2,
+    "text": "dead man's bones"
+   },
+   {
+    "roll": 3,
+    "text": "makeshift grave"
+   },
+   {
+    "roll": 4,
+    "text": "old anchor"
+   },
+   {
+    "roll": 5,
+    "text": "ruined rowboat"
+   },
+   {
+    "roll": 6,
+    "text": "lone palm tree"
+   },
+   {
+    "roll": 7,
+    "text": "ship's wheel"
+   },
+   {
+    "roll": 8,
+    "text": "painted rock"
+   },
+   {
+    "roll": 9,
+    "text": "cannonball"
+   },
+   {
+    "roll": 10,
+    "text": "pile of skulls"
+   },
+   {
+    "roll": 11,
+    "text": "volcanic glass"
+   },
+   {
+    "roll": 12,
+    "text": "rusty cutlass"
+   },
+   {
+    "roll": 13,
+    "text": "broken oar"
+   },
+   {
+    "roll": 14,
+    "text": "broken barrel"
+   },
+   {
+    "roll": 15,
+    "text": "ruined cannon"
+   },
+   {
+    "roll": 16,
+    "text": "tallest tree"
+   },
+   {
+    "roll": 17,
+    "text": "strange sea shell"
+   },
+   {
+    "roll": 18,
+    "text": "rotting crate"
+   },
+   {
+    "roll": 19,
+    "text": "stone statue"
+   },
+   {
+    "roll": 20,
+    "text": "tombstone"
+   }
+  ],
+  "group": "Treasure Maps"
+ },
+ "riddles": {
+  "id": "riddles",
+  "name": "Riddles",
+  "die": "d12",
+  "page": 121,
+  "source": "Core Rules",
+  "note": "Fill [icon], [marker] and [direction] from the tables on pg. 120. The `answer` is the GM's explanation.",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Arrive at the [icon] but you won't see the [marker] in the light, travel [2d6] paces to the [direction] and wait until day turns to night.",
+    "answer": "The marker only appears in the dark."
+   },
+   {
+    "roll": 2,
+    "text": "Set your course for the [icon] and ready a shanty, for singing near the [marker] will turn \"none\" into \"plenty\".",
+    "answer": "The treasure or clue appears once music is played."
+   },
+   {
+    "roll": 3,
+    "text": "Find the [marker] by the [icon], ye soothsayers and witches, for only magic or prayers can lead to these riches.",
+    "answer": "Using a Relic, Ritual, Spell, or Prayer magically reveals the clue or treasure."
+   },
+   {
+    "roll": 4,
+    "text": "Look not high for salvation, but low for an X, crossed trees you will find, but beware of the hex.",
+    "answer": "Two fallen trees cover the clue or treasure; it's booby trapped."
+   },
+   {
+    "roll": 5,
+    "text": "In shallow waters near [icon] the [marker] rests under waves, it points in the direction of nearby caves.",
+    "answer": "The marker has a carved or painted arrow that points to a nearby cave with the clue/treasure."
+   },
+   {
+    "roll": 6,
+    "text": "Head [d8 x 10] paces [direction] of the [icon] then dig a hole, under the [marker] lies the key to your goal.",
+    "answer": "Dig for the clue/treasure."
+   },
+   {
+    "roll": 7,
+    "text": "Make for the [icon] before the sun hits the sea, the secret lies between the [marker] and a tree.",
+    "answer": "Can't be found during the night."
+   },
+   {
+    "roll": 8,
+    "text": "Only dead men know this hidden locale, for of all who've seen the [marker] by the [icon] none have lived to tell.",
+    "answer": "Tragedy, a trap, or both haunt this location."
+   },
+   {
+    "roll": 9,
+    "text": "Near [icon] at midnight the dead rise from their graves, but the one near the [marker] is a crooked-nosed knave.",
+    "answer": "Harmless ghosts rise here at midnight, but one near the marker knows the location of the clue/treasure. He will only reveal it if his body, hanging from a nearby noose, is laid to rest."
+   },
+   {
+    "roll": 10,
+    "text": "Travel [direction] for 2d2 miles, find the [icon] then rest, only candlelight will reveal the [marker] over the chest.",
+    "answer": "The marker only appears in candle light. The clue/treasure is under it."
+   },
+   {
+    "roll": 11,
+    "text": "From the [icon] at low tide you will be able to see, the [marker] just [direction] of a large fruit tree.",
+    "answer": "The clue/treasure is buried in the shadow of the tree."
+   },
+   {
+    "roll": 12,
+    "text": "[Direction] of the [icon] you will find a sight rarely seen, find the [marker] that's hidden under a blanket of green.",
+    "answer": "The marker is hidden under foliage, moss, or grass growing in an odd place."
+   }
+  ],
+  "group": "Treasure Maps"
+ },
+ "islandSize": {
+  "id": "islandSize",
+  "name": "Size",
+  "die": "d6",
+  "page": 122,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Tiny."
+   },
+   {
+    "roll": 2,
+    "text": "Small."
+   },
+   {
+    "roll": 3,
+    "text": "Medium."
+   },
+   {
+    "roll": 4,
+    "text": "Large."
+   },
+   {
+    "roll": 5,
+    "text": "Large."
+   },
+   {
+    "roll": 6,
+    "text": "Huge."
+   }
+  ],
+  "group": "Uncharted Islands"
+ },
+ "islandTerrain": {
+  "id": "islandTerrain",
+  "name": "Terrain",
+  "die": "2d6",
+  "page": 122,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 2,
+    "text": "An atoll."
+   },
+   {
+    "roll": 3,
+    "text": "It's two islands."
+   },
+   {
+    "roll": 4,
+    "text": "Gentle hills."
+   },
+   {
+    "roll": 5,
+    "text": "Flat with a mountainous ridge."
+   },
+   {
+    "roll": 6,
+    "text": "Mostly flat."
+   },
+   {
+    "roll": 7,
+    "text": "Mostly flat."
+   },
+   {
+    "roll": 8,
+    "text": "Mostly flat."
+   },
+   {
+    "roll": 9,
+    "text": "Flat with one prominent hill."
+   },
+   {
+    "roll": 10,
+    "text": "Gentle hills."
+   },
+   {
+    "roll": 11,
+    "text": "A single mountain."
+   },
+   {
+    "roll": 12,
+    "text": "Mountainous and rugged."
+   }
+  ],
+  "group": "Uncharted Islands"
+ },
+ "islandVegetation": {
+  "id": "islandVegetation",
+  "name": "Vegetation",
+  "die": "2d6",
+  "page": 122,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 2,
+    "text": "One single palm tree."
+   },
+   {
+    "roll": 3,
+    "text": "Barren: rocks."
+   },
+   {
+    "roll": 4,
+    "text": "Swampy grasslands."
+   },
+   {
+    "roll": 5,
+    "text": "Thorny scrub."
+   },
+   {
+    "roll": 6,
+    "text": "Sand and meadows."
+   },
+   {
+    "roll": 7,
+    "text": "Fertile grasslands."
+   },
+   {
+    "roll": 8,
+    "text": "Fertile grasslands."
+   },
+   {
+    "roll": 9,
+    "text": "Fields and woods."
+   },
+   {
+    "roll": 10,
+    "text": "Small pine forests."
+   },
+   {
+    "roll": 11,
+    "text": "Forests and meadows."
+   },
+   {
+    "roll": 12,
+    "text": "Rainforest."
+   }
+  ],
+  "group": "Uncharted Islands"
+ },
+ "islandFeature": {
+  "id": "islandFeature",
+  "name": "Prominent Natural Feature",
+  "die": "2d6",
+  "page": 122,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 2,
+    "text": "Volcanic."
+   },
+   {
+    "roll": 3,
+    "text": "Huge sand dunes."
+   },
+   {
+    "roll": 4,
+    "text": "Numerous sea stacks."
+   },
+   {
+    "roll": 5,
+    "text": "Black sand beaches."
+   },
+   {
+    "roll": 6,
+    "text": "Lagoon."
+   },
+   {
+    "roll": 7,
+    "text": "Azure water, white sand."
+   },
+   {
+    "roll": 8,
+    "text": "Waterfall(s)."
+   },
+   {
+    "roll": 9,
+    "text": "Fruit trees."
+   },
+   {
+    "roll": 10,
+    "text": "Mangrove forest."
+   },
+   {
+    "roll": 11,
+    "text": "Sea cliffs."
+   },
+   {
+    "roll": 12,
+    "text": "A huge skull-shaped rock."
+   }
+  ],
+  "group": "Uncharted Islands"
+ },
+ "islandAnimals": {
+  "id": "islandAnimals",
+  "name": "Notable Animal Inhabitants",
+  "die": "2d6",
+  "page": 122,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 2,
+    "text": "Sharks. So many sharks."
+   },
+   {
+    "roll": 3,
+    "text": "Glowing jellyfish swarms."
+   },
+   {
+    "roll": 4,
+    "text": "Monkeys."
+   },
+   {
+    "roll": 5,
+    "text": "Fist sized orange beetles."
+   },
+   {
+    "roll": 6,
+    "text": "Sleek black seals."
+   },
+   {
+    "roll": 7,
+    "text": "Nothing to write home about."
+   },
+   {
+    "roll": 8,
+    "text": "Pigs and boars (large)."
+   },
+   {
+    "roll": 9,
+    "text": "Dog-sized lizards."
+   },
+   {
+    "roll": 10,
+    "text": "Large seabird colony."
+   },
+   {
+    "roll": 11,
+    "text": "Large flightless birds."
+   },
+   {
+    "roll": 12,
+    "text": "Dancing jewel-colored birds."
+   }
+  ],
+  "group": "Uncharted Islands"
+ },
+ "islandInhabitants": {
+  "id": "islandInhabitants",
+  "name": "Inhabitants",
+  "die": "2d6",
+  "page": 122,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 2,
+    "text": "A witch."
+   },
+   {
+    "roll": 3,
+    "text": "Pearl divers."
+   },
+   {
+    "roll": 4,
+    "text": "A robust but primitive city."
+   },
+   {
+    "roll": 5,
+    "text": "Small primitive village."
+   },
+   {
+    "roll": 6,
+    "text": "Recently struck camps."
+   },
+   {
+    "roll": 7,
+    "text": "Uninhabited."
+   },
+   {
+    "roll": 8,
+    "text": "Don't know, but they're all dead."
+   },
+   {
+    "roll": 9,
+    "text": "Religious adherents."
+   },
+   {
+    "roll": 10,
+    "text": "Farming settlers."
+   },
+   {
+    "roll": 11,
+    "text": "Military."
+   },
+   {
+    "roll": 12,
+    "text": "A hidden pirate town."
+   }
+  ],
+  "group": "Uncharted Islands"
+ },
+ "islandHideTreasure": {
+  "id": "islandHideTreasure",
+  "name": "Best Place on the Island to Hide Treasure?",
+  "die": "2d6",
+  "page": 123,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 2,
+    "text": "Old ruins."
+   },
+   {
+    "roll": 3,
+    "text": "A large rock shaped like a ship."
+   },
+   {
+    "roll": 4,
+    "text": "Under a huge lightning scarred oak."
+   },
+   {
+    "roll": 5,
+    "text": "A large natural rock arch."
+   },
+   {
+    "roll": 6,
+    "text": "An old lava tunnel."
+   },
+   {
+    "roll": 7,
+    "text": "Somewhere else."
+   },
+   {
+    "roll": 8,
+    "text": "Two palm trees cross in an X."
+   },
+   {
+    "roll": 9,
+    "text": "A large rock resembling a monkey."
+   },
+   {
+    "roll": 10,
+    "text": "A sink hole."
+   },
+   {
+    "roll": 11,
+    "text": "Near the strange ancient statues."
+   },
+   {
+    "roll": 12,
+    "text": "In the sea caves."
+   }
+  ],
+  "group": "Uncharted Islands"
+ },
+ "islandFortune": {
+  "id": "islandFortune",
+  "name": "Anything Here Worth a Fortune?",
+  "die": "2d6",
+  "page": 123,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 2,
+    "text": "Wealthy shipwreck survivors."
+   },
+   {
+    "roll": 3,
+    "text": "Rare poisons."
+   },
+   {
+    "roll": 4,
+    "text": "Oysters here make red pearls."
+   },
+   {
+    "roll": 5,
+    "text": "Buried treasure... somewhere."
+   },
+   {
+    "roll": 6,
+    "text": "An excellent natural harbor. Build a town!"
+   },
+   {
+    "roll": 7,
+    "text": "Not really. Good fishing though."
+   },
+   {
+    "roll": 8,
+    "text": "Not exactly, but there's a rich trade route nearby."
+   },
+   {
+    "roll": 9,
+    "text": "Caves of bat guano."
+   },
+   {
+    "roll": 10,
+    "text": "Wild horses."
+   },
+   {
+    "roll": 11,
+    "text": "Whale spawning grounds."
+   },
+   {
+    "roll": 12,
+    "text": "A naturally hidden, excellent harbor."
+   }
+  ],
+  "group": "Uncharted Islands"
+ },
+ "islandHazards": {
+  "id": "islandHazards",
+  "name": "Natural Hazards",
+  "die": "2d6",
+  "page": 123,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 2,
+    "text": "Manchineel trees. Everywhere."
+   },
+   {
+    "roll": 3,
+    "text": "Large whirlpools frequently form."
+   },
+   {
+    "roll": 4,
+    "text": "Quicksand."
+   },
+   {
+    "roll": 5,
+    "text": "Low lying areas flood. Frequently."
+   },
+   {
+    "roll": 6,
+    "text": "Coral reefs."
+   },
+   {
+    "roll": 7,
+    "text": "None."
+   },
+   {
+    "roll": 8,
+    "text": "Dangerous rocky shallows."
+   },
+   {
+    "roll": 9,
+    "text": "Dangerous currents."
+   },
+   {
+    "roll": 10,
+    "text": "Frequent earthquakes."
+   },
+   {
+    "roll": 11,
+    "text": "Animals infect humans with hemorrhagic fever."
+   },
+   {
+    "roll": 12,
+    "text": "A new volcano is about to erupt."
+   }
+  ],
+  "group": "Uncharted Islands"
+ },
+ "islandConflicts": {
+  "id": "islandConflicts",
+  "name": "Current Conflicts",
+  "die": "2d6",
+  "page": 123,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 2,
+    "text": "10 pirate ships here for a secret meeting."
+   },
+   {
+    "roll": 3,
+    "text": "Imperial fleet firing upon inhabitants."
+   },
+   {
+    "roll": 4,
+    "text": "Imperial military building an outpost."
+   },
+   {
+    "roll": 5,
+    "text": "Pirates just raided, or are about to."
+   },
+   {
+    "roll": 6,
+    "text": "Explorers hunting animals to extinction."
+   },
+   {
+    "roll": 7,
+    "text": "None."
+   },
+   {
+    "roll": 8,
+    "text": "Recent shipwreck. Survivors stranded."
+   },
+   {
+    "roll": 9,
+    "text": "Current inhabitants diseased."
+   },
+   {
+    "roll": 10,
+    "text": "Religious order building a mission."
+   },
+   {
+    "roll": 11,
+    "text": "A party of 6 ruthless treasure hunters is here (not including you...)."
+   },
+   {
+    "roll": 12,
+    "text": "Rebels."
+   }
+  ],
+  "group": "Uncharted Islands"
+ },
+ "islandDarkness": {
+  "id": "islandDarkness",
+  "name": "Darkness",
+  "die": "2d6",
+  "page": 123,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 2,
+    "text": "A kraken dwells here."
+   },
+   {
+    "roll": 3,
+    "text": "Cultists."
+   },
+   {
+    "roll": 4,
+    "text": "An ancient graveyard full of ghosts."
+   },
+   {
+    "roll": 5,
+    "text": "A ghost ship haunts its waters."
+   },
+   {
+    "roll": 6,
+    "text": "Ancient rock altar of sacrifice. Well used."
+   },
+   {
+    "roll": 7,
+    "text": "Nothing to speak of."
+   },
+   {
+    "roll": 8,
+    "text": "Unspeakable monstrosities wash up on shore often."
+   },
+   {
+    "roll": 9,
+    "text": "Animals that die here don't stay dead."
+   },
+   {
+    "roll": 10,
+    "text": "Zombies walk at night."
+   },
+   {
+    "roll": 11,
+    "text": "Blood spilled here animates."
+   },
+   {
+    "roll": 12,
+    "text": "If you eat the food or drink the water here you can never leave."
+   }
+  ],
+  "group": "Uncharted Islands"
+ },
+ "pirateA": {
+  "id": "pirateA",
+  "name": "Table A — A…",
+  "die": "d12",
+  "page": 124,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "rugged individual"
+   },
+   {
+    "roll": 2,
+    "text": "shady vagabond"
+   },
+   {
+    "roll": 3,
+    "text": "scurvy gutter worm"
+   },
+   {
+    "roll": 4,
+    "text": "famous captain"
+   },
+   {
+    "roll": 5,
+    "text": "escaped prisoner"
+   },
+   {
+    "roll": 6,
+    "text": "wanted cutthroat"
+   },
+   {
+    "roll": 7,
+    "text": "notorious privateer"
+   },
+   {
+    "roll": 8,
+    "text": "cloaked figure"
+   },
+   {
+    "roll": 9,
+    "text": "rum-drunk goon"
+   },
+   {
+    "roll": 10,
+    "text": "horrific wretch"
+   },
+   {
+    "roll": 11,
+    "text": "cocky explorer"
+   },
+   {
+    "roll": 12,
+    "text": "dread pirate lord"
+   }
+  ],
+  "group": "Pirate Generator",
+  "note": "Roll 3d12 and read Tables A to C (save the dice): \"A [A] with [B] wielding a [C]\". The greatest die is its Morale; the lowest die +2 is its HP (double it for a mighty pirate). Whichever table rolled highest sets its armor: A no armor, B −d2, C −d4. Then roll d66 ×4 on the name table; they carry the highest result in silver."
+ },
+ "pirateB": {
+  "id": "pirateB",
+  "name": "Table B — with…",
+  "die": "d12",
+  "page": 124,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "horrible breath"
+   },
+   {
+    "roll": 2,
+    "text": "unmatched beauty"
+   },
+   {
+    "roll": 3,
+    "text": "a hook for a hand"
+   },
+   {
+    "roll": 4,
+    "text": "a fancy hat"
+   },
+   {
+    "roll": 5,
+    "text": "a makeshift peg leg"
+   },
+   {
+    "roll": 6,
+    "text": "barnacle covered skin"
+   },
+   {
+    "roll": 7,
+    "text": "calico clothing"
+   },
+   {
+    "roll": 8,
+    "text": "filthy rags"
+   },
+   {
+    "roll": 9,
+    "text": "weather-worn doublet"
+   },
+   {
+    "roll": 10,
+    "text": "natty hair"
+   },
+   {
+    "roll": 11,
+    "text": "a pet bird"
+   },
+   {
+    "roll": 12,
+    "text": "bloody bandages"
+   }
+  ],
+  "group": "Pirate Generator",
+  "note": "Roll 3d12 and read Tables A to C (save the dice): \"A [A] with [B] wielding a [C]\". The greatest die is its Morale; the lowest die +2 is its HP (double it for a mighty pirate). Whichever table rolled highest sets its armor: A no armor, B −d2, C −d4. Then roll d66 ×4 on the name table; they carry the highest result in silver."
+ },
+ "pirateC": {
+  "id": "pirateC",
+  "name": "Table C — wielding a…",
+  "die": "d12",
+  "page": 124,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "pair of fists [d2]",
+    "damage": "d2"
+   },
+   {
+    "roll": 2,
+    "text": "broken bottle [d2]",
+    "damage": "d2"
+   },
+   {
+    "roll": 3,
+    "text": "bullwhip [d4]",
+    "damage": "d4"
+   },
+   {
+    "roll": 4,
+    "text": "hook [d4]",
+    "damage": "d4"
+   },
+   {
+    "roll": 5,
+    "text": "rusty knife [d4]",
+    "damage": "d4"
+   },
+   {
+    "roll": 6,
+    "text": "evil cutlass [d6]",
+    "damage": "d6"
+   },
+   {
+    "roll": 7,
+    "text": "ornate scimitar [d6]",
+    "damage": "d6"
+   },
+   {
+    "roll": 8,
+    "text": "officer's rapier [d8]",
+    "damage": "d8"
+   },
+   {
+    "roll": 9,
+    "text": "ancient crossbow [d8]",
+    "damage": "d8"
+   },
+   {
+    "roll": 10,
+    "text": "flintlock pistol [2d4]",
+    "damage": "2d4",
+    "blackPowder": true
+   },
+   {
+    "roll": 11,
+    "text": "musket [2d6]",
+    "damage": "2d6",
+    "blackPowder": true
+   },
+   {
+    "roll": 12,
+    "text": "blunderbuss [d4/d10]",
+    "damage": "d4",
+    "closeDamage": "d10",
+    "blackPowder": true
+   }
+  ],
+  "group": "Pirate Generator",
+  "note": "Roll 3d12 and read Tables A to C (save the dice): \"A [A] with [B] wielding a [C]\". The greatest die is its Morale; the lowest die +2 is its HP (double it for a mighty pirate). Whichever table rolled highest sets its armor: A no armor, B −d2, C −d4. Then roll d66 ×4 on the name table; they carry the highest result in silver."
+ },
+ "jobHook": {
+  "id": "jobHook",
+  "name": "Hook",
+  "die": "d20",
+  "page": 126,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Capture a prize."
+   },
+   {
+    "roll": 2,
+    "text": "Raid a port."
+   },
+   {
+    "roll": 3,
+    "text": "Treasure hunt."
+   },
+   {
+    "roll": 4,
+    "text": "Find someone/something."
+   },
+   {
+    "roll": 5,
+    "text": "Capture, interrogate, or kill someone."
+   },
+   {
+    "roll": 6,
+    "text": "Establish a new safe house, base, or hideout."
+   },
+   {
+    "roll": 7,
+    "text": "Sink a ship."
+   },
+   {
+    "roll": 8,
+    "text": "Steal an item."
+   },
+   {
+    "roll": 9,
+    "text": "Spy on someone."
+   },
+   {
+    "roll": 10,
+    "text": "Scavenge a wreck."
+   },
+   {
+    "roll": 11,
+    "text": "Explore or defend a location."
+   },
+   {
+    "roll": 12,
+    "text": "Sneak into somewhere."
+   },
+   {
+    "roll": 13,
+    "text": "Steal something."
+   },
+   {
+    "roll": 14,
+    "text": "Meet someone."
+   },
+   {
+    "roll": 15,
+    "text": "Establish trading or fencing relations with someone."
+   },
+   {
+    "roll": 16,
+    "text": "Free or rescue a person or group from a location."
+   },
+   {
+    "roll": 17,
+    "text": "Sabotage something."
+   },
+   {
+    "roll": 18,
+    "text": "Defend a location."
+   },
+   {
+    "roll": 19,
+    "text": "Free captives or prisoners."
+   },
+   {
+    "roll": 20,
+    "text": "Escape."
+   }
+  ],
+  "group": "Jobs & Quests"
+ },
+ "jobPatron": {
+  "id": "jobPatron",
+  "name": "Patron or Key NPC",
+  "die": "d10",
+  "page": 126,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "A government leader."
+   },
+   {
+    "roll": 2,
+    "text": "A famous pirate captain."
+   },
+   {
+    "roll": 3,
+    "text": "The governor's daughter or son."
+   },
+   {
+    "roll": 4,
+    "text": "The local drunk."
+   },
+   {
+    "roll": 5,
+    "text": "A shady figure."
+   },
+   {
+    "roll": 6,
+    "text": "Some cultists."
+   },
+   {
+    "roll": 7,
+    "text": "An old friend."
+   },
+   {
+    "roll": 8,
+    "text": "Important looking pirates."
+   },
+   {
+    "roll": 9,
+    "text": "A love interest."
+   },
+   {
+    "roll": 10,
+    "text": "A mermaid."
+   }
+  ],
+  "group": "Jobs & Quests"
+ },
+ "jobRequirement": {
+  "id": "jobRequirement",
+  "name": "Requirement",
+  "die": "d6",
+  "page": 126,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Stay out of combat."
+   },
+   {
+    "roll": 2,
+    "text": "Kill only one person."
+   },
+   {
+    "roll": 3,
+    "text": "Kill everyone."
+   },
+   {
+    "roll": 4,
+    "text": "Make it look like someone else did it."
+   },
+   {
+    "roll": 5,
+    "text": "Bring a hostage back alive."
+   },
+   {
+    "roll": 6,
+    "text": "Vital information must be obtained."
+   }
+  ],
+  "group": "Jobs & Quests"
+ },
+ "jobTime": {
+  "id": "jobTime",
+  "name": "Time Restraint",
+  "die": "d6",
+  "page": 126,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Immediately!"
+   },
+   {
+    "roll": 2,
+    "text": "Within the hour."
+   },
+   {
+    "roll": 3,
+    "text": "By tonight."
+   },
+   {
+    "roll": 4,
+    "text": "By tomorrow."
+   },
+   {
+    "roll": 5,
+    "text": "Next week."
+   },
+   {
+    "roll": 6,
+    "text": "This month."
+   }
+  ],
+  "group": "Jobs & Quests"
+ },
+ "jobComplication": {
+  "id": "jobComplication",
+  "name": "Complication",
+  "die": "d6",
+  "page": 126,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "It's a setup."
+   },
+   {
+    "roll": 2,
+    "text": "The intel is wrong."
+   },
+   {
+    "roll": 3,
+    "text": "Another crew is already on the job."
+   },
+   {
+    "roll": 4,
+    "text": "Some who's not supposed to be there is."
+   },
+   {
+    "roll": 5,
+    "text": "The reward is suspiciously big."
+   },
+   {
+    "roll": 6,
+    "text": "Everything is proceeding as planned."
+   }
+  ],
+  "group": "Jobs & Quests"
+ },
+ "rumors": {
+  "id": "rumors",
+  "name": "Rumors",
+  "die": "d20",
+  "page": 127,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "A nation's navy is coming in 3d6 days. Everyone is on edge."
+   },
+   {
+    "roll": 2,
+    "text": "A rich group of merchants are hiring mercenaries to escort them."
+   },
+   {
+    "roll": 3,
+    "text": "A treasure fleet is rumored to be departing soon."
+   },
+   {
+    "roll": 4,
+    "text": "An important NPC is recruiting people to explore or scout an area."
+   },
+   {
+    "roll": 5,
+    "text": "A group of leaders is meeting soon. The PCs have been summoned."
+   },
+   {
+    "roll": 6,
+    "text": "Someone the PCs know has been killed or captured."
+   },
+   {
+    "roll": 7,
+    "text": "2d12 pirates are in town spending the earnings from their latest prize."
+   },
+   {
+    "roll": 8,
+    "text": "Pirates, marines, or revolutionaries are planning to raid a port."
+   },
+   {
+    "roll": 9,
+    "text": "There are rumors of a rich prize nearby. Crews are recruiting."
+   },
+   {
+    "roll": 10,
+    "text": "Someone uncovered a clue or map to a fabled treasure and need brains, muscle, or both."
+   },
+   {
+    "roll": 11,
+    "text": "A corpse has been found in an alley or on the beach. Everyone is suspicious."
+   },
+   {
+    "roll": 12,
+    "text": "A ship with valuable cargo wrecked nearby."
+   },
+   {
+    "roll": 13,
+    "text": "A lonely widow (20+d50 years old) is looking for a date to the Governor's Ball."
+   },
+   {
+    "roll": 14,
+    "text": "It is not safe here at night. The reasons given sound like tall tales or ghost stories."
+   },
+   {
+    "roll": 15,
+    "text": "A recent fire destroyed a ship, a port, or a farmstead."
+   },
+   {
+    "roll": 16,
+    "text": "Two allied factions are now at war."
+   },
+   {
+    "roll": 17,
+    "text": "There is a party tonight to honor a deceased NPC."
+   },
+   {
+    "roll": 18,
+    "text": "The governor's adult daughter/son is the most beautiful person ever seen."
+   },
+   {
+    "roll": 19,
+    "text": "A group of cultists have been up to some unusual activity recently."
+   },
+   {
+    "roll": 20,
+    "text": "Undead have destroyed yet another settlement."
+   }
+  ],
+  "group": "Rumors"
+ },
+ "spDay": {
+  "id": "spDay",
+  "name": "Black Coral Bay: Daytime Encounters",
+  "die": "2d6",
+  "page": 135,
+  "source": "The Curse of Skeleton Point",
+  "note": "Roll when changing locations; skip if the action is moving.",
+  "rows": [
+   {
+    "roll": 2,
+    "text": "1 confused Deep One named S'pht'Gl'Koo. He doesn't speak \"human.\"",
+    "monster": "deep-ones"
+   },
+   {
+    "roll": 3,
+    "text": "2d12 bilge rats (pg. 86).",
+    "monster": "bilge-rat"
+   },
+   {
+    "roll": 4,
+    "text": "1d4 new zombies (pg. 94). They are hungry.",
+    "monster": "bilge-rat-zombie"
+   },
+   {
+    "roll": 5,
+    "text": "d2 rabid jaguars (pg. 86) hunting for their cubs.",
+    "monster": "rabid-jaguar"
+   },
+   {
+    "roll": 6,
+    "text": "The Three-Headed Monkey (pg. 86) that lives in the shipwreck on the castle (pg. 158).",
+    "monster": "three-headed-monkey"
+   },
+   {
+    "roll": 7,
+    "text": "1d6 pirates (pg. 124) looking for trouble.",
+    "table": "pirateGenerator"
+   },
+   {
+    "roll": 8,
+    "text": "3d4 carrion gulls (pg. 87).",
+    "monster": "carrion-gull"
+   },
+   {
+    "roll": 9,
+    "text": "Captain Davies and d12 of his men: moving cargo, patrolling, carousing, or chasing another NPC.",
+    "monster": "captain-davies"
+   },
+   {
+    "roll": 10,
+    "text": "Tela Fafane gathering ingredients for a ritual or potion.",
+    "monster": "tela-fafane"
+   },
+   {
+    "roll": 11,
+    "text": "An old man named Clayborn. He lives in a tree house and knows a lot about the island."
+   },
+   {
+    "roll": 12,
+    "text": "Veronique Barlette painting a landscape. She does not trust people she does not know.",
+    "monster": "veronique-barlette"
+   }
+  ],
+  "group": "The Curse of Skeleton Point"
+ },
+ "spNight": {
+  "id": "spNight",
+  "name": "Black Coral Bay: Nighttime Encounters",
+  "die": "2d6",
+  "page": 135,
+  "source": "The Curse of Skeleton Point",
+  "rows": [
+   {
+    "roll": 2,
+    "text": "Governor Barlette huddled over a fire pit mid-ritual, 2d4 sea wraiths circling him. He pretends he is under attack.",
+    "monster": "claude-barlette"
+   },
+   {
+    "roll": [
+     3,
+     4
+    ],
+    "text": "d100 fireflies glowing pale blue."
+   },
+   {
+    "roll": [
+     5,
+     6
+    ],
+    "text": "3d6 weak zombies (pg. 94): starving but slow, 1 HP each.",
+    "monster": "bilge-rat-zombie"
+   },
+   {
+    "roll": [
+     7,
+     8
+    ],
+    "text": "2d4 skeletons (pg. 92) looking for trouble.",
+    "monster": "skeleton-rank-and-vile"
+   },
+   {
+    "roll": 9,
+    "text": "d4 of The Drowned (pg. 100), wandering inland from Carcass Beach.",
+    "monster": "the-drowned"
+   },
+   {
+    "roll": 10,
+    "text": "The Three-Headed Monkey (pg. 158).",
+    "monster": "three-headed-monkey"
+   },
+   {
+    "roll": 11,
+    "text": "The Baron \"hunting\" the living.",
+    "monster": "the-baron"
+   },
+   {
+    "roll": 12,
+    "text": "The grim reaper points at a PC and vanishes. A spot appears on their body."
+   }
+  ],
+  "group": "The Curse of Skeleton Point"
+ },
+ "spShipsDocked": {
+  "id": "spShipsDocked",
+  "name": "Coral Town: Ships Docked",
+  "die": "d12",
+  "page": 139,
+  "source": "The Curse of Skeleton Point",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "The Dark Diamond — small, fast sloop of smugglers (rum, sugar, prisoners of war).",
+    "ship": "sloop"
+   },
+   {
+    "roll": 2,
+    "text": "Jade Rebellion — a strange ship from a distant land selling spices and stranger stories; chests of carved jade in the hold."
+   },
+   {
+    "roll": 3,
+    "text": "The Ranger — brigantine with a small, loyal crew and a batshit-crazy captain.",
+    "ship": "brigantine"
+   },
+   {
+    "roll": 4,
+    "text": "Mist Walker — tartane with two big triangle sails; a fence vessel for stolen pirate cargo.",
+    "ship": "tartane"
+   },
+   {
+    "roll": 5,
+    "text": "The Tyrant — an outrigger canoe with one small sail, a fearsome reputation and a mysterious owner.",
+    "ship": "canoe"
+   },
+   {
+    "roll": 6,
+    "text": "Gilded Raven — fast frigate, well-trained crew of deserter marines, black sails.",
+    "ship": "frigate"
+   },
+   {
+    "roll": 7,
+    "text": "The Royal Dragon — large decorated fluyt stolen from nobles; the figurehead talks; recruiting for a raid.",
+    "ship": "fluyt"
+   },
+   {
+    "roll": 8,
+    "text": "King of Spires — an old, ruined galleon that hasn't left the docks in years.",
+    "ship": "galleon"
+   },
+   {
+    "roll": 9,
+    "text": "The Sea Bat — small jet-black sloop; its 4-person crew could become friends… or rivals.",
+    "ship": "sloop"
+   },
+   {
+    "roll": 10,
+    "text": "Storm's End — a sloop with an old, wise captain and his pet owl.",
+    "ship": "sloop"
+   },
+   {
+    "roll": 11,
+    "text": "Queen Isabella's Malice — frigate with a hotshot crew nobody likes.",
+    "ship": "frigate"
+   },
+   {
+    "roll": 12,
+    "text": "Scorn of the West — a very old, well-maintained war vessel."
+   }
+  ],
+  "group": "The Curse of Skeleton Point"
+ },
+ "spTownRumors": {
+  "id": "spTownRumors",
+  "name": "Coral Town Rumors",
+  "die": "2d6",
+  "page": 139,
+  "source": "The Curse of Skeleton Point",
+  "rows": [
+   {
+    "roll": 2,
+    "text": "Without his perfume the Governor smells like bilge water."
+   },
+   {
+    "roll": 3,
+    "text": "Strange lights, chanting and roaring fires deep in the jungle at night."
+   },
+   {
+    "roll": 4,
+    "text": "Veronique is beautiful, but something is off about her paintings."
+   },
+   {
+    "roll": 5,
+    "text": "Dead things don't stay dead here."
+   },
+   {
+    "roll": 6,
+    "text": "Stay inside at night — the island is cursed!"
+   },
+   {
+    "roll": 7,
+    "text": "The Governor's daughter is missing and he pays over 1,000s for information."
+   },
+   {
+    "roll": 8,
+    "text": "A 30' skeleton lives in the castle."
+   },
+   {
+    "roll": 9,
+    "text": "The castle's treasure hoard is guarded by the ghost of a sea serpent."
+   },
+   {
+    "roll": 10,
+    "text": "The witch in the swamp is responsible for the curse."
+   },
+   {
+    "roll": 11,
+    "text": "The broken lighthouse sometimes still lights up at night."
+   },
+   {
+    "roll": 12,
+    "text": "There are secret tunnels under the graveyard."
+   }
+  ],
+  "group": "The Curse of Skeleton Point"
+ },
+ "spCarcassBeach": {
+  "id": "spCarcassBeach",
+  "name": "Carcass Beach: What's Happening Now?",
+  "die": "3d6",
+  "page": 143,
+  "source": "The Curse of Skeleton Point",
+  "rows": [
+   {
+    "roll": 3,
+    "text": "A Spanish treasure galleon has wrecked near Florida; everyone scrambles to set sail."
+   },
+   {
+    "roll": 4,
+    "text": "3d6 Deep Ones, d4 Gorilla Crabs and a Deep One Shaman are in a standoff with the pirates.",
+    "monster": "deep-ones"
+   },
+   {
+    "roll": 5,
+    "text": "A pirate has betrayed the code; Captain Davies presides over a tribunal."
+   },
+   {
+    "roll": 6,
+    "text": "The caves are deserted."
+   },
+   {
+    "roll": 7,
+    "text": "All calm: some pirates fish, others are passed out on the beach."
+   },
+   {
+    "roll": 8,
+    "text": "A mob of 2d4 Drowned have wandered into the caves.",
+    "monster": "the-drowned"
+   },
+   {
+    "roll": 9,
+    "text": "The pirates are fighting amongst themselves."
+   },
+   {
+    "roll": 10,
+    "text": "The pirates are drunk."
+   },
+   {
+    "roll": 11,
+    "text": "Davies is recruiting crew for smuggling and pirating."
+   },
+   {
+    "roll": 12,
+    "text": "A captured merchantman full of fresh food means a huge feast soon."
+   },
+   {
+    "roll": 13,
+    "text": "The pirates are distracted by visiting courtesans from the Treasured Chest."
+   },
+   {
+    "roll": 14,
+    "text": "The musical group Ship of Fools are performing (tonight/soon/now)."
+   },
+   {
+    "roll": 15,
+    "text": "Sir Francis Drake's ghost should appear tonight in the Cagafuego wreck."
+   },
+   {
+    "roll": 16,
+    "text": "The Brethren are meeting in Nassau to plan a massive raid in d12 days."
+   },
+   {
+    "roll": 17,
+    "text": "\"Scuttles\", a young pirate, went missing near the cenote."
+   },
+   {
+    "roll": 18,
+    "text": "Pirate hunters are attacking. Blood is everywhere."
+   }
+  ],
+  "group": "The Curse of Skeleton Point"
+ },
+ "spJungle": {
+  "id": "spJungle",
+  "name": "The Jungle: Points of Interest",
+  "die": "d20",
+  "page": 144,
+  "source": "The Curse of Skeleton Point",
+  "note": "Fast: 1d20 and read across. Random: 4d20, one per column (plus Encounters). Custom: choose.",
+  "columns": [
+   {
+    "die": "d20",
+    "name": "Terrain",
+    "values": [
+     "dense underbrush",
+     "grove of coconut trees",
+     "grove of banana trees",
+     "calm, sun or moon lit clearing",
+     "small, moss filled cave",
+     "larges, ancient deciduous trees",
+     "granite cliff with a climbable crack",
+     "serene lagoon with turquoise water",
+     "swamp, water lilies, mangrove trees",
+     "a clearing circled by palm trees",
+     "shoulder-high grass",
+     "thick tangle of vines and brambles",
+     "waterfall, dropping from 50' up",
+     "high point with a great view",
+     "sandstone rock formation",
+     "small babbling creek",
+     "shady ferns and lush foliage",
+     "large tree (with a tree house)",
+     "pine forest with low branches",
+     "sinkhole (to the Nameless Temple)"
+    ]
+   },
+   {
+    "die": "d20",
+    "name": "Contents",
+    "values": [
+     "a 10' tall carved stone idol",
+     "a skeleton",
+     "a recently buried corpse",
+     "colorful wild flowers",
+     "hundreds of mushrooms",
+     "a dinghy, hidden under fronds",
+     "a head impaled on a spike",
+     "a small wrecked ship",
+     "lanterns hanging from stakes",
+     "ruins from an ancient civilization",
+     "the nest of a carnivorous animal",
+     "a large, bloody pile of bones",
+     "a secret cache of cargo",
+     "a large volcanic rock",
+     "a large, wooden crate",
+     "a corpse hanging from noose",
+     "an abandoned campsite",
+     "a fresh water spring",
+     "a colony of d100 macaws",
+     "blood dripped on to foliage"
+    ]
+   },
+   {
+    "die": "d20",
+    "name": "Environment",
+    "values": [
+     "blistering heat",
+     "buzzing flies carrying disease",
+     "extremely loud insects",
+     "eerie fog",
+     "abnormally cold",
+     "huge insects that bite",
+     "calm, sea breeze",
+     "absolute bliss fills the air",
+     "distant sound of chanting",
+     "a large bonfire and spit",
+     "growling sounds",
+     "feeling of being watched",
+     "vultures circle above",
+     "distant sound of cannon fire",
+     "large fire ant mound",
+     "intensely putrid death smell",
+     "quicksand",
+     "500+ butterflies or fireflies",
+     "fast, howling winds",
+     "a faint green glow"
+    ]
+   },
+   {
+    "die": "d20",
+    "name": "Encounters",
+    "values": [
+     "mundane jungle mammals",
+     "skeletons (pg. 92), sauntering",
+     "Governor Barlette (pg. 132)",
+     "Dark Fauna: Terrestrial (pg. 86)",
+     "zombies (pg. 94), skulking",
+     "Dark Flora (pg. 90)",
+     "Dark Fauna: Avian (pg. 87)",
+     "d2+1 (romantic) pirates",
+     "Tela Fafane (pg. 133), gathering",
+     "small undead animals",
+     "a terrified pirate, fleeing",
+     "dangerous jungle mammals",
+     "jungle birds, singing",
+     "Veronique (pg. 132), painting",
+     "Pedro (pg. 147) & d8 riflemen",
+     "Xoth (pg. 147), stalking",
+     "Catherwood (pg. 147), searching",
+     "Clayborn, annoyed and curious",
+     "Beatrice (pg. 147) and d4+1 crew",
+     "Clementius (pg. 147), 23 followers"
+    ]
+   }
+  ],
+  "group": "The Curse of Skeleton Point"
+ },
+ "spTempleHooks": {
+  "id": "spTempleHooks",
+  "name": "Nameless Temple: Plot Hooks",
+  "die": "d6",
+  "page": 146,
+  "source": "The Curse of Skeleton Point",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Catherwood haunts the Green Kraken searching for the temple from his late wife's journal; he shares discoveries with helpers."
+   },
+   {
+    "roll": 2,
+    "text": "A PC dreams of the Omega Stone; each morning they wake knowing which way the entrance lies."
+   },
+   {
+    "roll": 3,
+    "text": "Father Wallace has seen hooded figures land by night and walk into the jungle; fewer return each morning."
+   },
+   {
+    "roll": 4,
+    "text": "Tela Fafane pays 1,000s to anyone who captures Xoth for her studies."
+   },
+   {
+    "roll": 5,
+    "text": "Pirates swap stories of treasure-filled temples — and one on this island; the last group to look never came back."
+   },
+   {
+    "roll": 6,
+    "text": "Searchers for Veronique or jungle explorers stumble into the entrance, fall under the tree, or swim deep into the Carcass Beach cenote."
+   }
+  ],
+  "group": "The Curse of Skeleton Point"
+ },
+ "spShrine": {
+  "id": "spShrine",
+  "name": "Shrine of the Nameless Skull: Encounters",
+  "die": "d6",
+  "page": 149,
+  "source": "The Curse of Skeleton Point",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "3 pirates (HP 5, Morale 8, Cutlass d6) who found the shrine an hour ago — greedy, stupid, reeking of grog and sweat.",
+    "monster": "shrine-pirates"
+   },
+   {
+    "roll": 2,
+    "text": "Hans (from #7), scratching symbols into the walls and/or speaking in tongues."
+   },
+   {
+    "roll": 3,
+    "text": "A palm viper protecting her nest of 2d10 neonates (HP 1, Morale 6, Bite d2).",
+    "monster": "palm-viper"
+   },
+   {
+    "roll": 4,
+    "text": "d4 hive vines slowly wrap around one PC's legs.",
+    "monster": "hive-vines"
+   },
+   {
+    "roll": 5,
+    "text": "2 psychedelic macaws courting; they ignore those who ignore them.",
+    "monster": "psychedelic-macaw"
+   },
+   {
+    "roll": 6,
+    "text": "1 necro-swine (see #8).",
+    "monster": "necro-swine"
+   }
+  ],
+  "group": "The Curse of Skeleton Point"
+ },
+ "spSanctum": {
+  "id": "spSanctum",
+  "name": "Sanctum of Nameless Blood: Encounters",
+  "die": "d6",
+  "page": 151,
+  "source": "The Curse of Skeleton Point",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Trained guard dogs (HP 7, Morale 6, Bite d6) — mangy, starving; roll reactions for each.",
+    "monster": "guard-dogs"
+   },
+   {
+    "roll": 2,
+    "text": "Selena, a frantic prisoner in shock, bloody and filthy, carrying an arm."
+   },
+   {
+    "roll": 3,
+    "text": "A pile of bloody body parts — leftovers from Xoth's latest meal."
+   },
+   {
+    "roll": 4,
+    "text": "d4 cultists (HP 3, Morale 7, Dagger d4) and a priest (HP 8, Morale 9, Dark hex spell d8, 50').",
+    "monster": "cultists"
+   },
+   {
+    "roll": 5,
+    "text": "Clementius, on his way to the Omega Chamber.",
+    "monster": "high-wizard-clementius"
+   },
+   {
+    "roll": 6,
+    "text": "Xoth, crawling the walls and ceilings, hunting for food.",
+    "monster": "xoth-the-imp"
+   }
+  ],
+  "group": "The Curse of Skeleton Point"
+ },
+ "spLake": {
+  "id": "spLake",
+  "name": "Lake of the Nameless One: Encounters",
+  "die": "d6",
+  "page": 153,
+  "source": "The Curse of Skeleton Point",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Accursed, maddening silence."
+   },
+   {
+    "roll": 2,
+    "text": "A drop of water falls, rippling the lake's surface."
+   },
+   {
+    "roll": 3,
+    "text": "An icy, terrifying chill washes over you."
+   },
+   {
+    "roll": 4,
+    "text": "d8 swarms of bats (HP 1, Morale 5, Bite 1) swarm, then flee via the Omega Stone opening.",
+    "monster": "swarm-of-bats"
+   },
+   {
+    "roll": 5,
+    "text": "d2 eldritch eels disturb the surface like glossy tentacles.",
+    "monster": "eldritch-eel"
+   },
+   {
+    "roll": 6,
+    "text": "The Nameless One awakens. All will end soon.",
+    "monster": "the-nameless-one"
+   }
+  ],
+  "group": "The Curse of Skeleton Point"
+ },
+ "spSwamp": {
+  "id": "spSwamp",
+  "name": "Death's Head Swamp: Encounters",
+  "die": "d10",
+  "page": 154,
+  "source": "The Curse of Skeleton Point",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Fat, twisted trees hung with Spanish moss; their faces sing in sleepers' dreams."
+   },
+   {
+    "roll": 2,
+    "text": "A bubbling, putrid bog; mud-caked logs (and zombies) drift slowly past."
+   },
+   {
+    "roll": 3,
+    "text": "Giant water lilies; frogs feasting on dragonflies croak so loud it's hard to think."
+   },
+   {
+    "roll": 4,
+    "text": "Red and yellow mushrooms: poisonous spore clouds when touched, but delicious, and +1 TOUGHNESS for a while."
+   },
+   {
+    "roll": 5,
+    "text": "An abandoned, moss-covered campsite and skeleton with a humming aquamarine crystal the size of a cannonball."
+   },
+   {
+    "roll": 6,
+    "text": "A waterlogged boat with a rusty knife and a map; a dire crocodile suns here in clear weather.",
+    "monster": "dire-crocodile"
+   },
+   {
+    "roll": 7,
+    "text": "2d10 candle-lit human skulls hang from vines, leading to a stone altar in the muck."
+   },
+   {
+    "roll": 8,
+    "text": "d10 bone-and-feather effigies forming a ½-mile perimeter around Tela's cabin (they keep the undead out)."
+   },
+   {
+    "roll": 9,
+    "text": "Strange orbs of light bobbing through the air like fishing lures."
+   },
+   {
+    "roll": 10,
+    "text": "A spike-fenced camp of muddy tents: the eccentric musicians called the Ship of Fools."
+   }
+  ],
+  "group": "The Curse of Skeleton Point"
+ },
+ "spSwampRumors": {
+  "id": "spSwampRumors",
+  "name": "Death's Head Swamp: Rumors",
+  "die": "d6",
+  "page": 154,
+  "source": "The Curse of Skeleton Point",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "A cannibalistic witch lives in a hut deep in the swamp."
+   },
+   {
+    "roll": 2,
+    "text": "Nomadic musicians camp in the swamp — bad singers, great for dancing."
+   },
+   {
+    "roll": 3,
+    "text": "A beautiful nymph wanders the reeds at night."
+   },
+   {
+    "roll": 4,
+    "text": "A 30' man-eating crocodile lives near an old boat."
+   },
+   {
+    "roll": 5,
+    "text": "Fist-sized insects there eat eyes."
+   },
+   {
+    "roll": 6,
+    "text": "A red and yellow flower growing outside caves has powerful medicinal effects."
+   }
+  ],
+  "group": "The Curse of Skeleton Point"
+ },
+ "spReef": {
+  "id": "spReef",
+  "name": "Black Coral Reef: Encounters",
+  "die": "d6",
+  "page": 156,
+  "source": "The Curse of Skeleton Point",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "d4 fishermen in a small boat."
+   },
+   {
+    "roll": 2,
+    "text": "d6 mermaids, scared of humans but curious."
+   },
+   {
+    "roll": 3,
+    "text": "d3 sirens; one of them doesn't eat \"human\".",
+    "monster": "siren"
+   },
+   {
+    "roll": 4,
+    "text": "d6 black coral crabs.",
+    "monster": "black-coral-crab"
+   },
+   {
+    "roll": 5,
+    "text": "4d20 black coral crabs.",
+    "monster": "black-coral-crab"
+   },
+   {
+    "roll": 6,
+    "text": "d2 acid jellyfish, with 3d6 more arriving gradually.",
+    "monster": "acid-jellyfish"
+   }
+  ],
+  "group": "The Curse of Skeleton Point"
+ },
+ "spCastleDay": {
+  "id": "spCastleDay",
+  "name": "Skeleton Point: Random Encounters (Day)",
+  "die": "d10",
+  "page": 159,
+  "source": "The Curse of Skeleton Point",
+  "note": "1-in-6 chance of an encounter in each room.",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "The corpse of a once-famous pirate, with loot and an invisible-ink treasure map."
+   },
+   {
+    "roll": 2,
+    "text": "A grove of carnivorous plants.",
+    "monster": "carnivorous-plant"
+   },
+   {
+    "roll": 3,
+    "text": "d100 bilge rats chewing on something disgusting.",
+    "monster": "bilge-rat"
+   },
+   {
+    "roll": [
+     4,
+     6
+    ],
+    "text": "The Baron (ghost): sad, haunting, cold.",
+    "monster": "the-baron"
+   },
+   {
+    "roll": 7,
+    "text": "3 rooks (use carrion gulls): curious, stupid and fat.",
+    "monster": "carrion-gull"
+   },
+   {
+    "roll": 8,
+    "text": "The Three-Headed Monkey; he's hungry.",
+    "monster": "three-headed-monkey"
+   },
+   {
+    "roll": 9,
+    "text": "A crew of d10 pirates looking for treasure.",
+    "table": "pirateGenerator"
+   },
+   {
+    "roll": 10,
+    "text": "Veronique, irritated at the intrusion.",
+    "monster": "veronique-barlette"
+   }
+  ],
+  "group": "The Curse of Skeleton Point"
+ },
+ "spCastleNight": {
+  "id": "spCastleNight",
+  "name": "Skeleton Point: Random Encounters (Night)",
+  "die": "d10",
+  "page": 161,
+  "source": "The Curse of Skeleton Point",
+  "note": "1-in-6 chance of an encounter in each room.",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "The ghost of a once-famous pirate who knows the trick to reveal the map on his corpse (pg. 119)."
+   },
+   {
+    "roll": [
+     2,
+     4
+    ],
+    "text": "d6 skeletons: mindless, fast, terrifying — only 1 HP each.",
+    "monster": "skeleton-rank-and-vile"
+   },
+   {
+    "roll": [
+     5,
+     6
+    ],
+    "text": "3 Ghost Crew trying to be scary, looking for a fight, stench of death.",
+    "monster": "ghost-crew"
+   },
+   {
+    "roll": [
+     7,
+     8
+    ],
+    "text": "The Baron (skeleton), furious and hostile, with d4 ghostly fossil sharks swimming through the air.",
+    "monster": "the-baron"
+   },
+   {
+    "roll": 9,
+    "text": "d10 pirate corpses, savagely murdered."
+   },
+   {
+    "roll": 10,
+    "text": "Veronique in black nightclothes, terrified of the intrusion.",
+    "monster": "veronique-barlette"
+   }
+  ],
+  "group": "The Curse of Skeleton Point"
+ },
+ "spPlotHooks": {
+  "id": "spPlotHooks",
+  "name": "Plot Hooks",
+  "die": "d6",
+  "page": 131,
+  "source": "The Curse of Skeleton Point",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "News and rumors can be bought at the Treasured Chest; ask for Madame Dubois."
+   },
+   {
+    "roll": 2,
+    "text": "The Governor's daughter is missing and he'll pay a hefty reward for her return."
+   },
+   {
+    "roll": 3,
+    "text": "Every tavern tells of a treasure hoard in the castle at Skeleton Point — none who entered have returned."
+   },
+   {
+    "roll": 4,
+    "text": "Father Wallace is gathering anyone willing to help exorcise the castle's spirits."
+   },
+   {
+    "roll": 5,
+    "text": "Rumors of an evil witch in the swamp — is she behind the curse, or does she sell potions?"
+   },
+   {
+    "roll": 6,
+    "text": "Captain Davies is recruiting pirates for a raid at the Green Kraken."
+   }
+  ],
+  "group": "The Curse of Skeleton Point"
+ },
+ "spDevelopment": {
+  "id": "spDevelopment",
+  "name": "If the Players Do Nothing",
+  "die": "d6",
+  "page": 131,
+  "source": "The Curse of Skeleton Point",
+  "note": "Use in order (one per session) or when the PCs leave for a long time.",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "The Governor raises his reward by 100s a day until someone investigates the castle."
+   },
+   {
+    "roll": 2,
+    "text": "Father Wallace tries to exorcise the castle alone and is killed; the church falls further into ruin."
+   },
+   {
+    "roll": 3,
+    "text": "Davies dies in a skirmish with the Royal Navy; after a huge beach wake a power vacuum opens, and his ghost ship haunts the surrounding waters."
+   },
+   {
+    "roll": 4,
+    "text": "A returning search party reveals Veronique left willingly; the furious Governor hires every pirate to drag her back."
+   },
+   {
+    "roll": 5,
+    "text": "The pirates storm the castle and Veronique dies; the Governor's rage razes the island and the dead rise as undead."
+   },
+   {
+    "roll": 6,
+    "text": "Tela Fafane strikes back with her own zombie horde; the Governor is defeated, the curse lifts and pirates return."
+   }
+  ],
+  "group": "The Curse of Skeleton Point"
  }
 };
 window.PB_GM_TABLES = PB_GM_TABLES;
@@ -5819,6 +15033,315 @@ var PB_HATS = [
  }
 ];
 window.PB_HATS = PB_HATS;
+var PB_HISTORY = {
+ "id": "history",
+ "name": "A General History of the Dark Caribbean",
+ "die": "d66",
+ "page": 25,
+ "source": "Core Rules",
+ "note": "Six storylines (columns) told over six chapters (rows), ending in Armageddon. Use the events as records, rumors, plot hooks or current events; reveal them in order or roll d66 for a random one (first die = storyline, second die = chapter — the book doesn't specify the order).",
+ "storylines": [
+  "The Greater Antilles War",
+  "The Rise and Fall of Nassau",
+  "The Scourge of the New World",
+  "The Ashes of Tortuga",
+  "And The Wretched Exalted",
+  "Eldritch Tides of Doom"
+ ],
+ "columns": [
+  {
+   "die": "d6",
+   "name": "The Greater Antilles War",
+   "values": [
+    "Spain and England are at war; both recruit privateers and pay in advance.",
+    "Constant war: the battle for the Greater Antilles rages on with no end in sight.",
+    "A Spanish treasure fleet wrecks off Florida; nations and pirates race to it.",
+    "A region-wide cease fire as nations deal with tragedy; hundreds of warships are abandoned.",
+    "Derelict ships litter the sea; salvagers get rich and reset the status quo.",
+    "The skies shift from smoke-gray to crimson and putrid orange; sunlight becomes a myth."
+   ]
+  },
+  {
+   "die": "d6",
+   "name": "The Rise and Fall of Nassau",
+   "values": [
+    "Port Royal is destroyed in an earthquake; thousands dead, more homeless.",
+    "Nassau is sacked; the \"Republic of Pirates\", the region's first true democracy, is founded.",
+    "Famous pirates are executed and hung in gibbet cages; their cursed corpses scream at passers-by.",
+    "Edward \"Blackbeard\" Thatch goes on a killing spree and is slain in a skirmish with the Royal Navy.",
+    "Blackbeard, a sorcerer, returns from the grave with an army of the dead; the living fight back.",
+    "Nassau falls to The Scourge; escapees border on insanity and fear becomes currency."
+   ]
+  },
+  {
+   "die": "d6",
+   "name": "The Scourge of the New World",
+   "values": [
+    "Horrifying screams from the sea are reported region-wide, source unknown.",
+    "They walk again! The dead rise from grave and sea — a few at first, then hordes.",
+    "The undead, now called \"The Scourge\", ravage settlements; a state of emergency is declared.",
+    "Freshly killed fish and livestock animate and writhe at sunset; no one seems to mind anymore.",
+    "A mass exodus of birds and beasts; no wildlife is seen for weeks.",
+    "All marine life dies and washes ashore; the fishing industry collapses into famine."
+   ]
+  },
+  {
+   "die": "d6",
+   "name": "The Ashes of Tortuga",
+   "values": [
+    "ASH, the dust of destroyed undead, is found to have physiological and psychedelic properties.",
+    "A black market grows around ASH; Tortuga becomes its epicenter.",
+    "Tortuga decays from a buccaneer bastion into a cesspool of thieves; not even pirates are safe there.",
+    "Revolution! Citizens take to the streets of Hispaniola and the government is overthrown.",
+    "Thousands flee for safety; Havana, Jamaica and Guadeloupe explode in population.",
+    "Everyone who ever used ASH becomes Scourge; rum turns to water and escapism evaporates."
+   ]
+  },
+  {
+   "die": "d6",
+   "name": "And The Wretched Exalted",
+   "values": [
+    "Religious fanatics take over the Old Stone Church in Havana; occult influence is suspected.",
+    "Mysterious ruins are found in the Yucatán; an expedition sets out and none return alive.",
+    "A lone figure with abyss-black eyes emerges from the jungle, terrible to behold.",
+    "Ships of bone and flesh rise from the sea; their skeletal crews terrorize the shipping lanes.",
+    "Havana burns in a fire rumored to have started at the Old Stone Church — which still stands.",
+    "An ominous tempest settles permanently over Cuba, leaving a wasteland."
+   ]
+  },
+  {
+   "die": "d6",
+   "name": "Eldritch Tides of Doom",
+   "values": [
+    "The climate shifts: darkened skies, raging storms and an omnipresent foul mist.",
+    "\"The Abyss\" opens south of Cuba: the ocean pours into a 6-mile-long fissure.",
+    "The Kraken attacks! Over 500 ships are lost at sea; large rewards go uncollected.",
+    "The ruins of Atlantis rise in the Devil's Triangle; humanoid sea creatures attack.",
+    "Otherworldly monstrosities spew from the sea, devouring whole vessels.",
+    "A maelstrom forms around The Abyss; earthquakes crumble islands into the sea."
+   ]
+  }
+ ],
+ "rows": [
+  {
+   "roll": 11,
+   "storyline": "The Greater Antilles War",
+   "chapter": 1,
+   "text": "Spain and England are at war; both recruit privateers and pay in advance."
+  },
+  {
+   "roll": 12,
+   "storyline": "The Greater Antilles War",
+   "chapter": 2,
+   "text": "Constant war: the battle for the Greater Antilles rages on with no end in sight."
+  },
+  {
+   "roll": 13,
+   "storyline": "The Greater Antilles War",
+   "chapter": 3,
+   "text": "A Spanish treasure fleet wrecks off Florida; nations and pirates race to it."
+  },
+  {
+   "roll": 14,
+   "storyline": "The Greater Antilles War",
+   "chapter": 4,
+   "text": "A region-wide cease fire as nations deal with tragedy; hundreds of warships are abandoned."
+  },
+  {
+   "roll": 15,
+   "storyline": "The Greater Antilles War",
+   "chapter": 5,
+   "text": "Derelict ships litter the sea; salvagers get rich and reset the status quo."
+  },
+  {
+   "roll": 16,
+   "storyline": "The Greater Antilles War",
+   "chapter": 6,
+   "text": "The skies shift from smoke-gray to crimson and putrid orange; sunlight becomes a myth."
+  },
+  {
+   "roll": 21,
+   "storyline": "The Rise and Fall of Nassau",
+   "chapter": 1,
+   "text": "Port Royal is destroyed in an earthquake; thousands dead, more homeless."
+  },
+  {
+   "roll": 22,
+   "storyline": "The Rise and Fall of Nassau",
+   "chapter": 2,
+   "text": "Nassau is sacked; the \"Republic of Pirates\", the region's first true democracy, is founded."
+  },
+  {
+   "roll": 23,
+   "storyline": "The Rise and Fall of Nassau",
+   "chapter": 3,
+   "text": "Famous pirates are executed and hung in gibbet cages; their cursed corpses scream at passers-by."
+  },
+  {
+   "roll": 24,
+   "storyline": "The Rise and Fall of Nassau",
+   "chapter": 4,
+   "text": "Edward \"Blackbeard\" Thatch goes on a killing spree and is slain in a skirmish with the Royal Navy."
+  },
+  {
+   "roll": 25,
+   "storyline": "The Rise and Fall of Nassau",
+   "chapter": 5,
+   "text": "Blackbeard, a sorcerer, returns from the grave with an army of the dead; the living fight back."
+  },
+  {
+   "roll": 26,
+   "storyline": "The Rise and Fall of Nassau",
+   "chapter": 6,
+   "text": "Nassau falls to The Scourge; escapees border on insanity and fear becomes currency."
+  },
+  {
+   "roll": 31,
+   "storyline": "The Scourge of the New World",
+   "chapter": 1,
+   "text": "Horrifying screams from the sea are reported region-wide, source unknown."
+  },
+  {
+   "roll": 32,
+   "storyline": "The Scourge of the New World",
+   "chapter": 2,
+   "text": "They walk again! The dead rise from grave and sea — a few at first, then hordes."
+  },
+  {
+   "roll": 33,
+   "storyline": "The Scourge of the New World",
+   "chapter": 3,
+   "text": "The undead, now called \"The Scourge\", ravage settlements; a state of emergency is declared."
+  },
+  {
+   "roll": 34,
+   "storyline": "The Scourge of the New World",
+   "chapter": 4,
+   "text": "Freshly killed fish and livestock animate and writhe at sunset; no one seems to mind anymore."
+  },
+  {
+   "roll": 35,
+   "storyline": "The Scourge of the New World",
+   "chapter": 5,
+   "text": "A mass exodus of birds and beasts; no wildlife is seen for weeks."
+  },
+  {
+   "roll": 36,
+   "storyline": "The Scourge of the New World",
+   "chapter": 6,
+   "text": "All marine life dies and washes ashore; the fishing industry collapses into famine."
+  },
+  {
+   "roll": 41,
+   "storyline": "The Ashes of Tortuga",
+   "chapter": 1,
+   "text": "ASH, the dust of destroyed undead, is found to have physiological and psychedelic properties."
+  },
+  {
+   "roll": 42,
+   "storyline": "The Ashes of Tortuga",
+   "chapter": 2,
+   "text": "A black market grows around ASH; Tortuga becomes its epicenter."
+  },
+  {
+   "roll": 43,
+   "storyline": "The Ashes of Tortuga",
+   "chapter": 3,
+   "text": "Tortuga decays from a buccaneer bastion into a cesspool of thieves; not even pirates are safe there."
+  },
+  {
+   "roll": 44,
+   "storyline": "The Ashes of Tortuga",
+   "chapter": 4,
+   "text": "Revolution! Citizens take to the streets of Hispaniola and the government is overthrown."
+  },
+  {
+   "roll": 45,
+   "storyline": "The Ashes of Tortuga",
+   "chapter": 5,
+   "text": "Thousands flee for safety; Havana, Jamaica and Guadeloupe explode in population."
+  },
+  {
+   "roll": 46,
+   "storyline": "The Ashes of Tortuga",
+   "chapter": 6,
+   "text": "Everyone who ever used ASH becomes Scourge; rum turns to water and escapism evaporates."
+  },
+  {
+   "roll": 51,
+   "storyline": "And The Wretched Exalted",
+   "chapter": 1,
+   "text": "Religious fanatics take over the Old Stone Church in Havana; occult influence is suspected."
+  },
+  {
+   "roll": 52,
+   "storyline": "And The Wretched Exalted",
+   "chapter": 2,
+   "text": "Mysterious ruins are found in the Yucatán; an expedition sets out and none return alive."
+  },
+  {
+   "roll": 53,
+   "storyline": "And The Wretched Exalted",
+   "chapter": 3,
+   "text": "A lone figure with abyss-black eyes emerges from the jungle, terrible to behold."
+  },
+  {
+   "roll": 54,
+   "storyline": "And The Wretched Exalted",
+   "chapter": 4,
+   "text": "Ships of bone and flesh rise from the sea; their skeletal crews terrorize the shipping lanes."
+  },
+  {
+   "roll": 55,
+   "storyline": "And The Wretched Exalted",
+   "chapter": 5,
+   "text": "Havana burns in a fire rumored to have started at the Old Stone Church — which still stands."
+  },
+  {
+   "roll": 56,
+   "storyline": "And The Wretched Exalted",
+   "chapter": 6,
+   "text": "An ominous tempest settles permanently over Cuba, leaving a wasteland."
+  },
+  {
+   "roll": 61,
+   "storyline": "Eldritch Tides of Doom",
+   "chapter": 1,
+   "text": "The climate shifts: darkened skies, raging storms and an omnipresent foul mist."
+  },
+  {
+   "roll": 62,
+   "storyline": "Eldritch Tides of Doom",
+   "chapter": 2,
+   "text": "\"The Abyss\" opens south of Cuba: the ocean pours into a 6-mile-long fissure."
+  },
+  {
+   "roll": 63,
+   "storyline": "Eldritch Tides of Doom",
+   "chapter": 3,
+   "text": "The Kraken attacks! Over 500 ships are lost at sea; large rewards go uncollected."
+  },
+  {
+   "roll": 64,
+   "storyline": "Eldritch Tides of Doom",
+   "chapter": 4,
+   "text": "The ruins of Atlantis rise in the Devil's Triangle; humanoid sea creatures attack."
+  },
+  {
+   "roll": 65,
+   "storyline": "Eldritch Tides of Doom",
+   "chapter": 5,
+   "text": "Otherworldly monstrosities spew from the sea, devouring whole vessels."
+  },
+  {
+   "roll": 66,
+   "storyline": "Eldritch Tides of Doom",
+   "chapter": 6,
+   "text": "A maelstrom forms around The Abyss; earthquakes crumble islands into the sea."
+  }
+ ]
+};
+window.PB_HISTORY = PB_HISTORY;
 var PB_HOSPITALITY = [
  {
   "name": "Night at an inn",
@@ -6091,6 +15614,822 @@ var PB_INSTRUMENTS = [
  }
 ];
 window.PB_INSTRUMENTS = PB_INSTRUMENTS;
+var PB_ISLANDS = {
+ "page": 122,
+ "source": "Core Rules",
+ "note": "Roll on each table to build an uncharted island. Written by Jacob Hurst of Swordfish Islands.",
+ "tables": {
+  "size": {
+   "id": "islandSize",
+   "name": "Size",
+   "die": "d6",
+   "page": 122,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "Tiny."
+    },
+    {
+     "roll": 2,
+     "text": "Small."
+    },
+    {
+     "roll": 3,
+     "text": "Medium."
+    },
+    {
+     "roll": 4,
+     "text": "Large."
+    },
+    {
+     "roll": 5,
+     "text": "Large."
+    },
+    {
+     "roll": 6,
+     "text": "Huge."
+    }
+   ]
+  },
+  "terrain": {
+   "id": "islandTerrain",
+   "name": "Terrain",
+   "die": "2d6",
+   "page": 122,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 2,
+     "text": "An atoll."
+    },
+    {
+     "roll": 3,
+     "text": "It's two islands."
+    },
+    {
+     "roll": 4,
+     "text": "Gentle hills."
+    },
+    {
+     "roll": 5,
+     "text": "Flat with a mountainous ridge."
+    },
+    {
+     "roll": 6,
+     "text": "Mostly flat."
+    },
+    {
+     "roll": 7,
+     "text": "Mostly flat."
+    },
+    {
+     "roll": 8,
+     "text": "Mostly flat."
+    },
+    {
+     "roll": 9,
+     "text": "Flat with one prominent hill."
+    },
+    {
+     "roll": 10,
+     "text": "Gentle hills."
+    },
+    {
+     "roll": 11,
+     "text": "A single mountain."
+    },
+    {
+     "roll": 12,
+     "text": "Mountainous and rugged."
+    }
+   ]
+  },
+  "vegetation": {
+   "id": "islandVegetation",
+   "name": "Vegetation",
+   "die": "2d6",
+   "page": 122,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 2,
+     "text": "One single palm tree."
+    },
+    {
+     "roll": 3,
+     "text": "Barren: rocks."
+    },
+    {
+     "roll": 4,
+     "text": "Swampy grasslands."
+    },
+    {
+     "roll": 5,
+     "text": "Thorny scrub."
+    },
+    {
+     "roll": 6,
+     "text": "Sand and meadows."
+    },
+    {
+     "roll": 7,
+     "text": "Fertile grasslands."
+    },
+    {
+     "roll": 8,
+     "text": "Fertile grasslands."
+    },
+    {
+     "roll": 9,
+     "text": "Fields and woods."
+    },
+    {
+     "roll": 10,
+     "text": "Small pine forests."
+    },
+    {
+     "roll": 11,
+     "text": "Forests and meadows."
+    },
+    {
+     "roll": 12,
+     "text": "Rainforest."
+    }
+   ]
+  },
+  "naturalFeature": {
+   "id": "islandFeature",
+   "name": "Prominent Natural Feature",
+   "die": "2d6",
+   "page": 122,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 2,
+     "text": "Volcanic."
+    },
+    {
+     "roll": 3,
+     "text": "Huge sand dunes."
+    },
+    {
+     "roll": 4,
+     "text": "Numerous sea stacks."
+    },
+    {
+     "roll": 5,
+     "text": "Black sand beaches."
+    },
+    {
+     "roll": 6,
+     "text": "Lagoon."
+    },
+    {
+     "roll": 7,
+     "text": "Azure water, white sand."
+    },
+    {
+     "roll": 8,
+     "text": "Waterfall(s)."
+    },
+    {
+     "roll": 9,
+     "text": "Fruit trees."
+    },
+    {
+     "roll": 10,
+     "text": "Mangrove forest."
+    },
+    {
+     "roll": 11,
+     "text": "Sea cliffs."
+    },
+    {
+     "roll": 12,
+     "text": "A huge skull-shaped rock."
+    }
+   ]
+  },
+  "animals": {
+   "id": "islandAnimals",
+   "name": "Notable Animal Inhabitants",
+   "die": "2d6",
+   "page": 122,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 2,
+     "text": "Sharks. So many sharks."
+    },
+    {
+     "roll": 3,
+     "text": "Glowing jellyfish swarms."
+    },
+    {
+     "roll": 4,
+     "text": "Monkeys."
+    },
+    {
+     "roll": 5,
+     "text": "Fist sized orange beetles."
+    },
+    {
+     "roll": 6,
+     "text": "Sleek black seals."
+    },
+    {
+     "roll": 7,
+     "text": "Nothing to write home about."
+    },
+    {
+     "roll": 8,
+     "text": "Pigs and boars (large)."
+    },
+    {
+     "roll": 9,
+     "text": "Dog-sized lizards."
+    },
+    {
+     "roll": 10,
+     "text": "Large seabird colony."
+    },
+    {
+     "roll": 11,
+     "text": "Large flightless birds."
+    },
+    {
+     "roll": 12,
+     "text": "Dancing jewel-colored birds."
+    }
+   ]
+  },
+  "inhabitants": {
+   "id": "islandInhabitants",
+   "name": "Inhabitants",
+   "die": "2d6",
+   "page": 122,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 2,
+     "text": "A witch."
+    },
+    {
+     "roll": 3,
+     "text": "Pearl divers."
+    },
+    {
+     "roll": 4,
+     "text": "A robust but primitive city."
+    },
+    {
+     "roll": 5,
+     "text": "Small primitive village."
+    },
+    {
+     "roll": 6,
+     "text": "Recently struck camps."
+    },
+    {
+     "roll": 7,
+     "text": "Uninhabited."
+    },
+    {
+     "roll": 8,
+     "text": "Don't know, but they're all dead."
+    },
+    {
+     "roll": 9,
+     "text": "Religious adherents."
+    },
+    {
+     "roll": 10,
+     "text": "Farming settlers."
+    },
+    {
+     "roll": 11,
+     "text": "Military."
+    },
+    {
+     "roll": 12,
+     "text": "A hidden pirate town."
+    }
+   ]
+  },
+  "hideTreasure": {
+   "id": "islandHideTreasure",
+   "name": "Best Place on the Island to Hide Treasure?",
+   "die": "2d6",
+   "page": 123,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 2,
+     "text": "Old ruins."
+    },
+    {
+     "roll": 3,
+     "text": "A large rock shaped like a ship."
+    },
+    {
+     "roll": 4,
+     "text": "Under a huge lightning scarred oak."
+    },
+    {
+     "roll": 5,
+     "text": "A large natural rock arch."
+    },
+    {
+     "roll": 6,
+     "text": "An old lava tunnel."
+    },
+    {
+     "roll": 7,
+     "text": "Somewhere else."
+    },
+    {
+     "roll": 8,
+     "text": "Two palm trees cross in an X."
+    },
+    {
+     "roll": 9,
+     "text": "A large rock resembling a monkey."
+    },
+    {
+     "roll": 10,
+     "text": "A sink hole."
+    },
+    {
+     "roll": 11,
+     "text": "Near the strange ancient statues."
+    },
+    {
+     "roll": 12,
+     "text": "In the sea caves."
+    }
+   ]
+  },
+  "fortune": {
+   "id": "islandFortune",
+   "name": "Anything Here Worth a Fortune?",
+   "die": "2d6",
+   "page": 123,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 2,
+     "text": "Wealthy shipwreck survivors."
+    },
+    {
+     "roll": 3,
+     "text": "Rare poisons."
+    },
+    {
+     "roll": 4,
+     "text": "Oysters here make red pearls."
+    },
+    {
+     "roll": 5,
+     "text": "Buried treasure... somewhere."
+    },
+    {
+     "roll": 6,
+     "text": "An excellent natural harbor. Build a town!"
+    },
+    {
+     "roll": 7,
+     "text": "Not really. Good fishing though."
+    },
+    {
+     "roll": 8,
+     "text": "Not exactly, but there's a rich trade route nearby."
+    },
+    {
+     "roll": 9,
+     "text": "Caves of bat guano."
+    },
+    {
+     "roll": 10,
+     "text": "Wild horses."
+    },
+    {
+     "roll": 11,
+     "text": "Whale spawning grounds."
+    },
+    {
+     "roll": 12,
+     "text": "A naturally hidden, excellent harbor."
+    }
+   ]
+  },
+  "hazards": {
+   "id": "islandHazards",
+   "name": "Natural Hazards",
+   "die": "2d6",
+   "page": 123,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 2,
+     "text": "Manchineel trees. Everywhere."
+    },
+    {
+     "roll": 3,
+     "text": "Large whirlpools frequently form."
+    },
+    {
+     "roll": 4,
+     "text": "Quicksand."
+    },
+    {
+     "roll": 5,
+     "text": "Low lying areas flood. Frequently."
+    },
+    {
+     "roll": 6,
+     "text": "Coral reefs."
+    },
+    {
+     "roll": 7,
+     "text": "None."
+    },
+    {
+     "roll": 8,
+     "text": "Dangerous rocky shallows."
+    },
+    {
+     "roll": 9,
+     "text": "Dangerous currents."
+    },
+    {
+     "roll": 10,
+     "text": "Frequent earthquakes."
+    },
+    {
+     "roll": 11,
+     "text": "Animals infect humans with hemorrhagic fever."
+    },
+    {
+     "roll": 12,
+     "text": "A new volcano is about to erupt."
+    }
+   ]
+  },
+  "conflicts": {
+   "id": "islandConflicts",
+   "name": "Current Conflicts",
+   "die": "2d6",
+   "page": 123,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 2,
+     "text": "10 pirate ships here for a secret meeting."
+    },
+    {
+     "roll": 3,
+     "text": "Imperial fleet firing upon inhabitants."
+    },
+    {
+     "roll": 4,
+     "text": "Imperial military building an outpost."
+    },
+    {
+     "roll": 5,
+     "text": "Pirates just raided, or are about to."
+    },
+    {
+     "roll": 6,
+     "text": "Explorers hunting animals to extinction."
+    },
+    {
+     "roll": 7,
+     "text": "None."
+    },
+    {
+     "roll": 8,
+     "text": "Recent shipwreck. Survivors stranded."
+    },
+    {
+     "roll": 9,
+     "text": "Current inhabitants diseased."
+    },
+    {
+     "roll": 10,
+     "text": "Religious order building a mission."
+    },
+    {
+     "roll": 11,
+     "text": "A party of 6 ruthless treasure hunters is here (not including you...)."
+    },
+    {
+     "roll": 12,
+     "text": "Rebels."
+    }
+   ]
+  },
+  "darkness": {
+   "id": "islandDarkness",
+   "name": "Darkness",
+   "die": "2d6",
+   "page": 123,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 2,
+     "text": "A kraken dwells here."
+    },
+    {
+     "roll": 3,
+     "text": "Cultists."
+    },
+    {
+     "roll": 4,
+     "text": "An ancient graveyard full of ghosts."
+    },
+    {
+     "roll": 5,
+     "text": "A ghost ship haunts its waters."
+    },
+    {
+     "roll": 6,
+     "text": "Ancient rock altar of sacrifice. Well used."
+    },
+    {
+     "roll": 7,
+     "text": "Nothing to speak of."
+    },
+    {
+     "roll": 8,
+     "text": "Unspeakable monstrosities wash up on shore often."
+    },
+    {
+     "roll": 9,
+     "text": "Animals that die here don't stay dead."
+    },
+    {
+     "roll": 10,
+     "text": "Zombies walk at night."
+    },
+    {
+     "roll": 11,
+     "text": "Blood spilled here animates."
+    },
+    {
+     "roll": 12,
+     "text": "If you eat the food or drink the water here you can never leave."
+    }
+   ]
+  }
+ }
+};
+window.PB_ISLANDS = PB_ISLANDS;
+var PB_JOBS = {
+ "page": 126,
+ "source": "Core Rules",
+ "note": "Roll on each table to build a job: Hook, Patron or Key NPC, Requirement, Time Restraint and Complication.",
+ "tables": {
+  "hook": {
+   "id": "jobHook",
+   "name": "Hook",
+   "die": "d20",
+   "page": 126,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "Capture a prize."
+    },
+    {
+     "roll": 2,
+     "text": "Raid a port."
+    },
+    {
+     "roll": 3,
+     "text": "Treasure hunt."
+    },
+    {
+     "roll": 4,
+     "text": "Find someone/something."
+    },
+    {
+     "roll": 5,
+     "text": "Capture, interrogate, or kill someone."
+    },
+    {
+     "roll": 6,
+     "text": "Establish a new safe house, base, or hideout."
+    },
+    {
+     "roll": 7,
+     "text": "Sink a ship."
+    },
+    {
+     "roll": 8,
+     "text": "Steal an item."
+    },
+    {
+     "roll": 9,
+     "text": "Spy on someone."
+    },
+    {
+     "roll": 10,
+     "text": "Scavenge a wreck."
+    },
+    {
+     "roll": 11,
+     "text": "Explore or defend a location."
+    },
+    {
+     "roll": 12,
+     "text": "Sneak into somewhere."
+    },
+    {
+     "roll": 13,
+     "text": "Steal something."
+    },
+    {
+     "roll": 14,
+     "text": "Meet someone."
+    },
+    {
+     "roll": 15,
+     "text": "Establish trading or fencing relations with someone."
+    },
+    {
+     "roll": 16,
+     "text": "Free or rescue a person or group from a location."
+    },
+    {
+     "roll": 17,
+     "text": "Sabotage something."
+    },
+    {
+     "roll": 18,
+     "text": "Defend a location."
+    },
+    {
+     "roll": 19,
+     "text": "Free captives or prisoners."
+    },
+    {
+     "roll": 20,
+     "text": "Escape."
+    }
+   ]
+  },
+  "patron": {
+   "id": "jobPatron",
+   "name": "Patron or Key NPC",
+   "die": "d10",
+   "page": 126,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "A government leader."
+    },
+    {
+     "roll": 2,
+     "text": "A famous pirate captain."
+    },
+    {
+     "roll": 3,
+     "text": "The governor's daughter or son."
+    },
+    {
+     "roll": 4,
+     "text": "The local drunk."
+    },
+    {
+     "roll": 5,
+     "text": "A shady figure."
+    },
+    {
+     "roll": 6,
+     "text": "Some cultists."
+    },
+    {
+     "roll": 7,
+     "text": "An old friend."
+    },
+    {
+     "roll": 8,
+     "text": "Important looking pirates."
+    },
+    {
+     "roll": 9,
+     "text": "A love interest."
+    },
+    {
+     "roll": 10,
+     "text": "A mermaid."
+    }
+   ]
+  },
+  "requirement": {
+   "id": "jobRequirement",
+   "name": "Requirement",
+   "die": "d6",
+   "page": 126,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "Stay out of combat."
+    },
+    {
+     "roll": 2,
+     "text": "Kill only one person."
+    },
+    {
+     "roll": 3,
+     "text": "Kill everyone."
+    },
+    {
+     "roll": 4,
+     "text": "Make it look like someone else did it."
+    },
+    {
+     "roll": 5,
+     "text": "Bring a hostage back alive."
+    },
+    {
+     "roll": 6,
+     "text": "Vital information must be obtained."
+    }
+   ]
+  },
+  "timeRestraint": {
+   "id": "jobTime",
+   "name": "Time Restraint",
+   "die": "d6",
+   "page": 126,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "Immediately!"
+    },
+    {
+     "roll": 2,
+     "text": "Within the hour."
+    },
+    {
+     "roll": 3,
+     "text": "By tonight."
+    },
+    {
+     "roll": 4,
+     "text": "By tomorrow."
+    },
+    {
+     "roll": 5,
+     "text": "Next week."
+    },
+    {
+     "roll": 6,
+     "text": "This month."
+    }
+   ]
+  },
+  "complication": {
+   "id": "jobComplication",
+   "name": "Complication",
+   "die": "d6",
+   "page": 126,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "It's a setup."
+    },
+    {
+     "roll": 2,
+     "text": "The intel is wrong."
+    },
+    {
+     "roll": 3,
+     "text": "Another crew is already on the job."
+    },
+    {
+     "roll": 4,
+     "text": "Some who's not supposed to be there is."
+    },
+    {
+     "roll": 5,
+     "text": "The reward is suspiciously big."
+    },
+    {
+     "roll": 6,
+     "text": "Everything is proceeding as planned."
+    }
+   ]
+  }
+ }
+};
+window.PB_JOBS = PB_JOBS;
 var PB_JOKER_TABLE = {
  "id": "joker",
  "name": "Joker Table",
@@ -6159,6 +16498,289 @@ var PB_LANDLUBBER = {
  "tables": []
 };
 window.PB_LANDLUBBER = PB_LANDLUBBER;
+var PB_LOOT_THE_BODY = {
+ "id": "lootTheBody",
+ "name": "Loot the Body",
+ "die": "d100",
+ "page": 3,
+ "source": "Core Rules",
+ "note": "Text in the `hidden` part is not immediately obvious. Add the number rolled in silver for extra loot. 00 (100) = roll again twice.",
+ "addRollAsSilver": true,
+ "rows": [
+  {
+   "roll": [
+    1,
+    20
+   ],
+   "text": "The result on the Ancient Relics table (pg. 62).",
+   "table": "relics"
+  },
+  {
+   "roll": 21,
+   "text": "Skull with glowing green sockets."
+  },
+  {
+   "roll": 22,
+   "text": "A nasty-looking knife (d6).",
+   "damage": "d6"
+  },
+  {
+   "roll": 23,
+   "text": "Wanted poster with a picture of one of the PCs on it."
+  },
+  {
+   "roll": 24,
+   "text": "Black candle.",
+   "hidden": "When lit its purple flame forms a skull."
+  },
+  {
+   "roll": 25,
+   "text": "Single golden manacle with 5 links."
+  },
+  {
+   "roll": 26,
+   "text": "A leather journal.",
+   "hidden": "Contains 1 sea shanty (pg. 68).",
+   "table": "shanties"
+  },
+  {
+   "roll": 27,
+   "text": "Oil lantern filled with dark green liquid.",
+   "hidden": "It burns a pale green light for 5', but never runs out."
+  },
+  {
+   "roll": 28,
+   "text": "Fine metal flask."
+  },
+  {
+   "roll": 29,
+   "text": "Bag of white powder."
+  },
+  {
+   "roll": 30,
+   "text": "Small box with d12 black pearls",
+   "hidden": "worth a fortune."
+  },
+  {
+   "roll": 31,
+   "text": "Sea shell lined with mother of pearl."
+  },
+  {
+   "roll": 32,
+   "text": "Pipe carved out of whale bone.",
+   "hidden": "A mysterious map is carved in the bowl."
+  },
+  {
+   "roll": 33,
+   "text": "Dead rat."
+  },
+  {
+   "roll": 34,
+   "text": "Jewel encrusted egg.",
+   "hidden": "AGILITY DR18 to open or it breaks. Clockwork inside, worth 500s."
+  },
+  {
+   "roll": 35,
+   "text": "d8 crab claws.",
+   "hidden": "Throwing them before casting a ritual lowers the DR by 1."
+  },
+  {
+   "roll": 36,
+   "text": "Stone ring with an engraved rune."
+  },
+  {
+   "roll": 37,
+   "text": "Deep blue gemstone.",
+   "hidden": "It sparkles in the moonlight."
+  },
+  {
+   "roll": 38,
+   "text": "Obsidian figurine of a kraken.",
+   "hidden": "The Kraken won't attack you."
+  },
+  {
+   "roll": 39,
+   "text": "Parrot feather.",
+   "hidden": "+1 Devil's Luck each dawn."
+  },
+  {
+   "roll": 40,
+   "text": "Some rotten dried fruit."
+  },
+  {
+   "roll": 41,
+   "text": "Recipe for turtle stew.",
+   "hidden": "If made, everyone who can smell it passes out. At sea, the crew awakes with their ship drifting near a mysterious island."
+  },
+  {
+   "roll": 42,
+   "text": "Small book on tying sailor knots."
+  },
+  {
+   "roll": 43,
+   "text": "Deck of playing cards.",
+   "hidden": "The queens are mermaids."
+  },
+  {
+   "roll": 44,
+   "text": "Random bomb (pg. 53).",
+   "table": "bombs"
+  },
+  {
+   "roll": 45,
+   "text": "Jar of d10 eyeballs preserved in white rum. They still see."
+  },
+  {
+   "roll": 46,
+   "text": "Set of lock picks."
+  },
+  {
+   "roll": 47,
+   "text": "Paper doll painted with blood."
+  },
+  {
+   "roll": 48,
+   "text": "Deep green gemstone",
+   "hidden": "worth 100s."
+  },
+  {
+   "roll": 49,
+   "text": "Small wood flute."
+  },
+  {
+   "roll": [
+    50,
+    59
+   ],
+   "text": "The result in silver.",
+   "silver": "roll"
+  },
+  {
+   "roll": 60,
+   "text": "Leather eye patch.",
+   "hidden": "That eye can see in the dark."
+  },
+  {
+   "roll": 61,
+   "text": "Flintlock pistol with tally marks."
+  },
+  {
+   "roll": 62,
+   "text": "d4 gold teeth."
+  },
+  {
+   "roll": 63,
+   "text": "Letter from a bonnie lass."
+  },
+  {
+   "roll": 64,
+   "text": "A ship's schedule",
+   "hidden": "with details of a treasure ship."
+  },
+  {
+   "roll": 65,
+   "text": "Jar of black sand."
+  },
+  {
+   "roll": 66,
+   "text": "Book of dark rituals.",
+   "hidden": "Test SPIRIT DR14 to learn one random ritual (pg. 64) or else permanently lose 1 SPIRIT."
+  },
+  {
+   "roll": 67,
+   "text": "Handwritten collection of ghost stories."
+  },
+  {
+   "roll": 68,
+   "text": "Book: A Guide to Sailor Tattoos."
+  },
+  {
+   "roll": 69,
+   "text": "A live rat."
+  },
+  {
+   "roll": 70,
+   "text": "d4 dead fish."
+  },
+  {
+   "roll": 71,
+   "text": "Vial of blowfish poison.",
+   "hidden": "Test TOUGHNESS DR12 or take d10 damage."
+  },
+  {
+   "roll": 72,
+   "text": "Treasure map (pg. 119).",
+   "table": "treasureMaps"
+  },
+  {
+   "roll": 73,
+   "text": "A glass eye",
+   "hidden": "that always looks West."
+  },
+  {
+   "roll": 74,
+   "text": "Broken cutlass hilt (d4)."
+  },
+  {
+   "roll": 75,
+   "text": "Glass dagger.",
+   "hidden": "(3d4), breaks after 1 use."
+  },
+  {
+   "roll": 76,
+   "text": "Book: The Secret Art of Fencing in the Age of Gunpowder.",
+   "hidden": "Test PRESENCE DR12 to permanently gain +1 STRENGTH. It only works once."
+  },
+  {
+   "roll": 77,
+   "text": "Bottle filled with iridescent dust."
+  },
+  {
+   "roll": 78,
+   "text": "Lint.",
+   "hidden": "Flammable."
+  },
+  {
+   "roll": 79,
+   "text": "Golden idol.",
+   "hidden": "Priceless, belongs in a museum."
+  },
+  {
+   "roll": [
+    80,
+    89
+   ],
+   "text": "d8 gold doubloons",
+   "hidden": "worth the result in silver."
+  },
+  {
+   "roll": [
+    90,
+    99
+   ],
+   "text": "Random Thing of Importance (pg. 60).",
+   "table": "things"
+  },
+  {
+   "roll": 100,
+   "text": "Roll again twice (00).",
+   "rollAgain": 2
+  }
+ ]
+};
+window.PB_LOOT_THE_BODY = PB_LOOT_THE_BODY;
+var PB_MARROW_CANNONS = {
+ "page": 108,
+ "source": "Core Rules",
+ "author": "Christian Eichhorn",
+ "text": "Sentient undead cannons built by necrosmiths from human, livestock and fish remains plundered from graveyards and battlefields. The mightiest have smoothbore whalebone barrels and are named after the first city they reduced to rubble. They fight as creatures in melee and as weapons in naval combat; Ships of Bone carry them (pg. 85).",
+ "monsters": [
+  "marrow-carronade",
+  "marrow-mortar",
+  "bane-of-barbados"
+ ]
+};
+window.PB_MARROW_CANNONS = PB_MARROW_CANNONS;
 var PB_MISHAPS = [
  {
   "roll": 1,
@@ -6265,6 +16887,1435 @@ var PB_MISHAPS = [
  }
 ];
 window.PB_MISHAPS = PB_MISHAPS;
+var PB_MODULE_SKELETON_POINT = {
+ "id": "curse-of-skeleton-point",
+ "name": "The Curse of Skeleton Point",
+ "page": 128,
+ "source": "The Curse of Skeleton Point",
+ "book": "Core Rules",
+ "overview": "A sandbox location guide, NPC dossier and dungeon crawl on Black Coral Bay, a gloomy, cursed tropical island of ~1,500 people. Coral Town is a run-down pirate haven ruled by Governor Claude Barlette — secretly a 150-year-old necromancer who keeps the island cursed. On the islet of Skeleton Point stands an old castle (a shipwreck impaled on one turret) that is serene by day and deadly by night, haunted by The Baron. The Governor's daughter Veronique is missing: she has run away to live with The Baron, with whom she is in love.",
+ "secret": "Anything that dies on the island rises as a zombie the next sunset. The Governor maintains the curse with monthly rituals; if The Baron is destroyed he reforms in the castle crypt. Not even Father Wallace suspects; the witch Tela Fafane might, if convinced to care.",
+ "starts": [
+  "Campaign: the PCs arrive on the docks and explore — Captain Davies teaches sailing and naval combat, the Green Kraken has rumors and jobs, and the Governor or Father Wallace point them at the castle.",
+  "Short arc or one-shot: start aboard a sloop with a simple naval combat, meet the Governor on docking and head for the castle quickly.",
+  "Locations and NPCs can be lifted into any setting."
+ ],
+ "reward": "The Governor pays 1,000s (rising 100s a day) for information leading to Veronique's return.",
+ "plotHooks": {
+  "id": "spPlotHooks",
+  "name": "Plot Hooks",
+  "die": "d6",
+  "page": 131,
+  "source": "The Curse of Skeleton Point",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "News and rumors can be bought at the Treasured Chest; ask for Madame Dubois."
+   },
+   {
+    "roll": 2,
+    "text": "The Governor's daughter is missing and he'll pay a hefty reward for her return."
+   },
+   {
+    "roll": 3,
+    "text": "Every tavern tells of a treasure hoard in the castle at Skeleton Point — none who entered have returned."
+   },
+   {
+    "roll": 4,
+    "text": "Father Wallace is gathering anyone willing to help exorcise the castle's spirits."
+   },
+   {
+    "roll": 5,
+    "text": "Rumors of an evil witch in the swamp — is she behind the curse, or does she sell potions?"
+   },
+   {
+    "roll": 6,
+    "text": "Captain Davies is recruiting pirates for a raid at the Green Kraken."
+   }
+  ]
+ },
+ "development": {
+  "id": "spDevelopment",
+  "name": "If the Players Do Nothing",
+  "die": "d6",
+  "page": 131,
+  "source": "The Curse of Skeleton Point",
+  "note": "Use in order (one per session) or when the PCs leave for a long time.",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "The Governor raises his reward by 100s a day until someone investigates the castle."
+   },
+   {
+    "roll": 2,
+    "text": "Father Wallace tries to exorcise the castle alone and is killed; the church falls further into ruin."
+   },
+   {
+    "roll": 3,
+    "text": "Davies dies in a skirmish with the Royal Navy; after a huge beach wake a power vacuum opens, and his ghost ship haunts the surrounding waters."
+   },
+   {
+    "roll": 4,
+    "text": "A returning search party reveals Veronique left willingly; the furious Governor hires every pirate to drag her back."
+   },
+   {
+    "roll": 5,
+    "text": "The pirates storm the castle and Veronique dies; the Governor's rage razes the island and the dead rise as undead."
+   },
+   {
+    "roll": 6,
+    "text": "Tela Fafane strikes back with her own zombie horde; the Governor is defeated, the curse lifts and pirates return."
+   }
+  ]
+ },
+ "npcs": [
+  {
+   "source": "The Curse of Skeleton Point",
+   "id": "claude-barlette",
+   "name": "Claude Barlette",
+   "role": "The Governor (secret necromancer)",
+   "page": 132,
+   "monster": "claude-barlette",
+   "wants": "Seems to want his daughter back, the 'ghost problem' gone and taxes; really wants his daughter, control of the island and his secret kept.",
+   "doing": {
+    "die": "d10",
+    "rows": [
+     {
+      "roll": [
+       0,
+       2
+      ],
+      "text": "Counting taxes, overindulging or sleeping in his mansion."
+     },
+     {
+      "roll": [
+       3,
+       5
+      ],
+      "text": "About town."
+     },
+     {
+      "roll": [
+       6,
+       8
+      ],
+      "text": "In meetings about his daughter."
+     },
+     {
+      "roll": 9,
+      "text": "Conducting a blood ritual in the lighthouse basement."
+     }
+    ]
+   }
+  },
+  {
+   "source": "The Curse of Skeleton Point",
+   "id": "veronique-barlette",
+   "name": "Veronique Barlette",
+   "role": "The Governor's daughter",
+   "page": 132,
+   "monster": "veronique-barlette",
+   "wants": "To marry the Baron (not if he becomes human), to paint his portrait, freedom from her father, painting supplies (pays up to 100s).",
+   "doing": {
+    "die": "d10",
+    "rows": [
+     {
+      "roll": 0,
+      "text": "With the Baron."
+     },
+     {
+      "roll": [
+       1,
+       3
+      ],
+      "text": "Painting storm clouds on the castle terrace."
+     },
+     {
+      "roll": [
+       4,
+       6
+      ],
+      "text": "Gathering supplies or painting in the jungle."
+     },
+     {
+      "roll": [
+       7,
+       8
+      ],
+      "text": "Wandering or reading in the castle."
+     },
+     {
+      "roll": 9,
+      "text": "Sleeping in the Baron's chambers."
+     }
+    ]
+   }
+  },
+  {
+   "source": "The Curse of Skeleton Point",
+   "id": "the-baron",
+   "name": "The Baron",
+   "role": "The monster",
+   "page": 132,
+   "monster": "the-baron",
+   "wants": "Death to intruders, Veronique's happiness, to remember his past — and, if he learns of it, the curse lifted and revenge on its caster.",
+   "doing": {
+    "die": "d10",
+    "rows": [
+     {
+      "roll": 0,
+      "text": "With Veronique."
+     },
+     {
+      "roll": [
+       1,
+       2
+      ],
+      "text": "Patrolling the nearby jungle."
+     },
+     {
+      "roll": [
+       3,
+       4
+      ],
+      "text": "Torturing a prisoner in the dungeon."
+     },
+     {
+      "roll": [
+       5,
+       6
+      ],
+      "text": "Training new skeletons in swordplay."
+     },
+     {
+      "roll": [
+       7,
+       8
+      ],
+      "text": "Patrolling the castle (d20 for the room, pg. 158)."
+     },
+     {
+      "roll": 9,
+      "text": "Staring vacantly out to sea: \"Who am I?\""
+     }
+    ]
+   }
+  },
+  {
+   "source": "The Curse of Skeleton Point",
+   "id": "tela-fafane",
+   "name": "Tela Fafane",
+   "role": "The \"witch\"",
+   "page": 133,
+   "monster": "tela-fafane",
+   "wants": "A modest living from her concoctions, to scare the villagers, rare ingredients and antiquities. Sells relics, rituals and potions (pg. 155).",
+   "doing": {
+    "die": "d10",
+    "rows": [
+     {
+      "roll": 0,
+      "text": "Conducting a candlelight ritual."
+     },
+     {
+      "roll": [
+       1,
+       4
+      ],
+      "text": "In her swamp cabin."
+     },
+     {
+      "roll": [
+       5,
+       6
+      ],
+      "text": "Feeding her chickens."
+     },
+     {
+      "roll": [
+       7,
+       8
+      ],
+      "text": "Gathering ingredients in the swamp or jungle."
+     },
+     {
+      "roll": 9,
+      "text": "In disguise in Coral Town's market."
+     }
+    ]
+   }
+  },
+  {
+   "source": "The Curse of Skeleton Point",
+   "id": "father-wallace",
+   "name": "Father Wallace",
+   "role": "The abbot",
+   "page": 133,
+   "monster": "father-wallace",
+   "wants": "To exorcise the castle, recruit followers, and see his altar boy Rupert take over the church.",
+   "doing": {
+    "die": "d10",
+    "rows": [
+     {
+      "roll": 0,
+      "text": "Praying at the castle bridge, turning back unprepared adventurers."
+     },
+     {
+      "roll": [
+       1,
+       4
+      ],
+      "text": "Conducting mass or taking confessions."
+     },
+     {
+      "roll": [
+       5,
+       8
+      ],
+      "text": "Reading, writing or teaching Rupert in the church."
+     },
+     {
+      "roll": 9,
+      "text": "Sleeping in his Shanty Town tent (night only)."
+     }
+    ]
+   }
+  },
+  {
+   "source": "The Curse of Skeleton Point",
+   "id": "captain-davies",
+   "name": "Captain Davies",
+   "role": "The pirate boss, captain of The Eye of Chaos",
+   "page": 133,
+   "monster": "captain-davies",
+   "wants": "Profit from smuggling, plunder or gambling — and intimate attention, preferably while drunk.",
+   "doing": {
+    "die": "d10",
+    "rows": [
+     {
+      "roll": [
+       0,
+       1
+      ],
+      "text": "About town, surveying the docks."
+     },
+     {
+      "roll": [
+       2,
+       3
+      ],
+      "text": "Counting supplies with pirates in the Carcass Beach caves."
+     },
+     {
+      "roll": [
+       4,
+       6
+      ],
+      "text": "Carousing, holding court or playing cards at the Green Kraken or aboard The Eye of Chaos."
+     },
+     {
+      "roll": 7,
+      "text": "Trading with Tela Fafane."
+     },
+     {
+      "roll": [
+       8,
+       9
+      ],
+      "text": "Away at sea."
+     }
+    ]
+   }
+  },
+  {
+   "source": "The Curse of Skeleton Point",
+   "id": "beatrice-boivin",
+   "name": "Beatrice Boivin",
+   "role": "French privateer (Le Mercure)",
+   "page": 147,
+   "monster": "beatrice-boivin"
+  },
+  {
+   "source": "The Curse of Skeleton Point",
+   "id": "pedro-de-balboa",
+   "name": "Pedro de Balboa",
+   "role": "Spanish conquistador, Church enforcer",
+   "page": 147,
+   "monster": "pedro-de-balboa"
+  },
+  {
+   "source": "The Curse of Skeleton Point",
+   "id": "john-lloyd-catherwood",
+   "name": "John Lloyd Catherwood",
+   "role": "English artist and cartographer",
+   "page": 147,
+   "monster": "john-lloyd-catherwood"
+  },
+  {
+   "source": "The Curse of Skeleton Point",
+   "id": "high-wizard-clementius",
+   "name": "High Wizard Clementius",
+   "role": "Sect leader of The Wretched",
+   "page": 147,
+   "monster": "high-wizard-clementius"
+  },
+  {
+   "source": "The Curse of Skeleton Point",
+   "id": "xoth",
+   "name": "Xoth, Imp from the Dark Shore",
+   "role": "Clementius's demon pet",
+   "page": 147,
+   "monster": "xoth-the-imp"
+  },
+  {
+   "source": "The Curse of Skeleton Point",
+   "id": "the-nameless-one",
+   "name": "The Nameless One",
+   "role": "Sealed deep-sea horror",
+   "page": 147,
+   "monster": "the-nameless-one"
+  }
+ ],
+ "locations": [
+  {
+   "id": "coral-town",
+   "num": 1,
+   "name": "Coral Town",
+   "page": 138,
+   "text": "Run-down port full of pirates and miscreants: docks, shanty town, taverns, brothels and an old church. Use the Job & Quest Generator (pg. 126) whenever someone might have work.",
+   "areas": [
+    "The Docks (d12 vessels in port)",
+    "The Green Kraken tavern (barkeep Jonesy; Davies's booth)",
+    "The Shipwright (Helga; standard shipwright prices, pg. 77)",
+    "The Eye of Chaos (Davies's restored galleon)",
+    "Shanty Town & Marketplace (most items under 40s)",
+    "The Treasured Chest (Madam Dubois; rumors 10s each)",
+    "Governor's Mansion (masquerade ball every 3 months)",
+    "The Old Church (Father Wallace, altar boy Rupert; crypt with secret passage)",
+    "The Graveyard (tunnels to the church; good spot for a dungeon crawl)"
+   ]
+  },
+  {
+   "id": "lighthouse",
+   "num": 2,
+   "name": "The Old Lighthouse",
+   "page": 140,
+   "text": "Ruined lighthouse haunted at night by the ghost of keeper Cornelius Willem, who longs to make amends with his daughter Famke (now a widowed sailmaker in town). A hidden ritual chamber in the cellar is the Governor's.",
+   "areas": [
+    "1 Keeper's Quarters",
+    "2 Lower Tower",
+    "3 Mid Tower",
+    "4 Upper Tower",
+    "5 Cellar",
+    "6 Ritual Chamber (casting here at night: +5 to the roll, auto-pass with human blood, once a night; failure summons a Shadow Demon instead of a Mishap)"
+   ]
+  },
+  {
+   "id": "carcass-beach",
+   "num": 3,
+   "name": "Carcass Beach",
+   "page": 142,
+   "text": "Bone-sand beach and sea caves where Davies runs his smuggling operation; the bow of the Cagafuego lies wrecked here.",
+   "areas": [
+    "1 The Beach",
+    "2 Bow of the Cagafuego (Drake's ghost holds court each full moon)",
+    "3 The Store Room",
+    "4 Rocky Passage",
+    "5 Cenote (to the reef and underground lake)",
+    "6 The Meeting Hall",
+    "7 Captain's Quarters"
+   ]
+  },
+  {
+   "id": "skeleton-point",
+   "num": 4,
+   "name": "Skeleton Point",
+   "page": 158,
+   "text": "The Baron's seaside castle with a galleon wedged in a turret: calm by day, haunted by night.",
+   "areas": [
+    "1 Portcullis & Courtyard",
+    "2 Foyer",
+    "3 Dining Hall",
+    "4 Rookery",
+    "5 Galleon",
+    "6 Captain's Cabin (Three-Headed Monkey)",
+    "7 Library",
+    "8 The Baron's Chambers",
+    "9 Studio",
+    "10 Laboratory",
+    "11 Kitchen",
+    "12 Butler's Chambers",
+    "13 Servant's Quarters",
+    "14 Locked Door",
+    "15 Treasure Vault",
+    "16 Storage Chamber",
+    "17 Crypt",
+    "18 Mausoleum",
+    "19 Dungeon",
+    "20 Secret Cave"
+   ]
+  },
+  {
+   "id": "the-jungle",
+   "num": 5,
+   "name": "The Jungle",
+   "page": 144,
+   "text": "Dense jungle full of hungry predators by day and hungry undead by night. The Nameless Temple lies hidden beneath a great tree.",
+   "areas": [
+    "Clayborn's Tree House",
+    "The Temple Entrance",
+    "Cultists Glow (night)"
+   ]
+  },
+  {
+   "id": "nameless-temple",
+   "name": "The Nameless Temple",
+   "page": 146,
+   "text": "Three layered locations built over an underground healing lake where a Mesoan shaman's summoned horror, The Nameless One, was sealed behind the Omega Stone. The Wretched now sacrifice there to wake it.",
+   "levels": [
+    {
+     "name": "Shrine of the Nameless Skull",
+     "page": 148,
+     "areas": [
+      "1 Main Chamber",
+      "2 Circular Carving",
+      "3 Storage Chamber",
+      "4 Entrance Chamber",
+      "5 Entrance Corridor",
+      "6 Rotting Room",
+      "7 Round Room (Hans)",
+      "8 Cave-in Room",
+      "9 Well Room"
+     ]
+    },
+    {
+     "name": "Sanctum of Nameless Blood",
+     "page": 150,
+     "areas": [
+      "1 Entrance Chamber",
+      "2 Paneled Room",
+      "3 Hidden Tomb",
+      "4 Encampment",
+      "5 Dungeon",
+      "6 Room of Bone",
+      "7 Mine Tunnel",
+      "8 Ceremonial Hall",
+      "9 Blood Pool",
+      "10 Ziggurat Chamber",
+      "11 Omega Chamber"
+     ]
+    },
+    {
+     "name": "The Lake of the Nameless One",
+     "page": 152,
+     "areas": [
+      "1 Ledge, Scaffold, Steps",
+      "2 Landing",
+      "3 Bone Pile",
+      "4 Stepping Stones",
+      "5 The Island",
+      "6 The Lake",
+      "7 The Wreck",
+      "8 Cavern Lair",
+      "9 Cenote Entrance",
+      "10 Cenote"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "deaths-head-swamp",
+   "num": 6,
+   "name": "Death's Head Swamp",
+   "page": 154,
+   "text": "Dark, muddy and depressing; home of Tela Fafane, who can teach Arcane Rituals or brew Alchemy Potions for a price. Beware crocodiles and the musicians called the Ship of Fools."
+  },
+  {
+   "id": "black-coral-reef",
+   "num": 7,
+   "name": "Black Coral Reef",
+   "page": 156,
+   "text": "A reef turned black by millions of black coral crabs, with giant pearls (500s-5,000s) in 3' darkpoint oysters and drifting acid jellyfish.",
+   "areas": [
+    "1 Lagoon",
+    "2 Shipwreck (stern of the Cagafuego; eel-fighting club)",
+    "3 Kelp Forest",
+    "4 Sea Caves (a hibernating Coral Shoggoth)",
+    "5 Sunken Ruins",
+    "6 Escarpment"
+   ]
+  }
+ ],
+ "shop": {
+  "id": "telasPrices",
+  "name": "Tela's Prices",
+  "page": 155,
+  "source": "The Curse of Skeleton Point",
+  "note": "Prices may swing from 50% to 300% depending on ingredients, supply, demand and Tela's mood. Potions are 50% off if the buyer provides a needed ingredient (roll or pick on pg. 70).",
+  "relics": [
+   {
+    "name": "Undead Bird",
+    "cost": 25,
+    "relic": "undead-bird"
+   },
+   {
+    "name": "Will-o'-the-Wisp Lantern",
+    "cost": 50,
+    "relic": "will-o-the-wisp-lantern"
+   },
+   {
+    "name": "Mummified Monkey Head",
+    "cost": 75,
+    "relic": "mummified-monkey-head"
+   }
+  ],
+  "rituals": [
+   {
+    "name": "Divination",
+    "cost": 50,
+    "costText": "50s per question (the first is free)",
+    "ritual": "divination"
+   },
+   {
+    "name": "Return From The Locker",
+    "cost": 1000,
+    "ritual": "return-from-the-locker"
+   },
+   {
+    "name": "Weathercraft",
+    "cost": 150,
+    "ritual": "weathercraft"
+   },
+   {
+    "name": "Learn one of the above (3-day course)",
+    "costText": "×10",
+    "multiplier": 10
+   }
+  ],
+  "potions": [
+   {
+    "name": "Love potion (lasts 1 day)",
+    "cost": 50
+   },
+   {
+    "name": "Love potion (permanent)",
+    "cost": 1000
+   },
+   {
+    "name": "Healing potion (injection, heal d6)",
+    "cost": 50,
+    "heal": "d6"
+   },
+   {
+    "name": "Paralysis (ingestion, DR10, d8 hours)",
+    "cost": 40
+   },
+   {
+    "name": "Random potion",
+    "cost": 100,
+    "table": "alchemy"
+   },
+   {
+    "name": "Identify the effect of a potion",
+    "cost": 25
+   }
+  ]
+ },
+ "tables": {
+  "dayEncounters": {
+   "id": "spDay",
+   "name": "Black Coral Bay: Daytime Encounters",
+   "die": "2d6",
+   "page": 135,
+   "source": "The Curse of Skeleton Point",
+   "note": "Roll when changing locations; skip if the action is moving.",
+   "rows": [
+    {
+     "roll": 2,
+     "text": "1 confused Deep One named S'pht'Gl'Koo. He doesn't speak \"human.\"",
+     "monster": "deep-ones"
+    },
+    {
+     "roll": 3,
+     "text": "2d12 bilge rats (pg. 86).",
+     "monster": "bilge-rat"
+    },
+    {
+     "roll": 4,
+     "text": "1d4 new zombies (pg. 94). They are hungry.",
+     "monster": "bilge-rat-zombie"
+    },
+    {
+     "roll": 5,
+     "text": "d2 rabid jaguars (pg. 86) hunting for their cubs.",
+     "monster": "rabid-jaguar"
+    },
+    {
+     "roll": 6,
+     "text": "The Three-Headed Monkey (pg. 86) that lives in the shipwreck on the castle (pg. 158).",
+     "monster": "three-headed-monkey"
+    },
+    {
+     "roll": 7,
+     "text": "1d6 pirates (pg. 124) looking for trouble.",
+     "table": "pirateGenerator"
+    },
+    {
+     "roll": 8,
+     "text": "3d4 carrion gulls (pg. 87).",
+     "monster": "carrion-gull"
+    },
+    {
+     "roll": 9,
+     "text": "Captain Davies and d12 of his men: moving cargo, patrolling, carousing, or chasing another NPC.",
+     "monster": "captain-davies"
+    },
+    {
+     "roll": 10,
+     "text": "Tela Fafane gathering ingredients for a ritual or potion.",
+     "monster": "tela-fafane"
+    },
+    {
+     "roll": 11,
+     "text": "An old man named Clayborn. He lives in a tree house and knows a lot about the island."
+    },
+    {
+     "roll": 12,
+     "text": "Veronique Barlette painting a landscape. She does not trust people she does not know.",
+     "monster": "veronique-barlette"
+    }
+   ]
+  },
+  "nightEncounters": {
+   "id": "spNight",
+   "name": "Black Coral Bay: Nighttime Encounters",
+   "die": "2d6",
+   "page": 135,
+   "source": "The Curse of Skeleton Point",
+   "rows": [
+    {
+     "roll": 2,
+     "text": "Governor Barlette huddled over a fire pit mid-ritual, 2d4 sea wraiths circling him. He pretends he is under attack.",
+     "monster": "claude-barlette"
+    },
+    {
+     "roll": [
+      3,
+      4
+     ],
+     "text": "d100 fireflies glowing pale blue."
+    },
+    {
+     "roll": [
+      5,
+      6
+     ],
+     "text": "3d6 weak zombies (pg. 94): starving but slow, 1 HP each.",
+     "monster": "bilge-rat-zombie"
+    },
+    {
+     "roll": [
+      7,
+      8
+     ],
+     "text": "2d4 skeletons (pg. 92) looking for trouble.",
+     "monster": "skeleton-rank-and-vile"
+    },
+    {
+     "roll": 9,
+     "text": "d4 of The Drowned (pg. 100), wandering inland from Carcass Beach.",
+     "monster": "the-drowned"
+    },
+    {
+     "roll": 10,
+     "text": "The Three-Headed Monkey (pg. 158).",
+     "monster": "three-headed-monkey"
+    },
+    {
+     "roll": 11,
+     "text": "The Baron \"hunting\" the living.",
+     "monster": "the-baron"
+    },
+    {
+     "roll": 12,
+     "text": "The grim reaper points at a PC and vanishes. A spot appears on their body."
+    }
+   ]
+  },
+  "shipsDocked": {
+   "id": "spShipsDocked",
+   "name": "Coral Town: Ships Docked",
+   "die": "d12",
+   "page": 139,
+   "source": "The Curse of Skeleton Point",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "The Dark Diamond — small, fast sloop of smugglers (rum, sugar, prisoners of war).",
+     "ship": "sloop"
+    },
+    {
+     "roll": 2,
+     "text": "Jade Rebellion — a strange ship from a distant land selling spices and stranger stories; chests of carved jade in the hold."
+    },
+    {
+     "roll": 3,
+     "text": "The Ranger — brigantine with a small, loyal crew and a batshit-crazy captain.",
+     "ship": "brigantine"
+    },
+    {
+     "roll": 4,
+     "text": "Mist Walker — tartane with two big triangle sails; a fence vessel for stolen pirate cargo.",
+     "ship": "tartane"
+    },
+    {
+     "roll": 5,
+     "text": "The Tyrant — an outrigger canoe with one small sail, a fearsome reputation and a mysterious owner.",
+     "ship": "canoe"
+    },
+    {
+     "roll": 6,
+     "text": "Gilded Raven — fast frigate, well-trained crew of deserter marines, black sails.",
+     "ship": "frigate"
+    },
+    {
+     "roll": 7,
+     "text": "The Royal Dragon — large decorated fluyt stolen from nobles; the figurehead talks; recruiting for a raid.",
+     "ship": "fluyt"
+    },
+    {
+     "roll": 8,
+     "text": "King of Spires — an old, ruined galleon that hasn't left the docks in years.",
+     "ship": "galleon"
+    },
+    {
+     "roll": 9,
+     "text": "The Sea Bat — small jet-black sloop; its 4-person crew could become friends… or rivals.",
+     "ship": "sloop"
+    },
+    {
+     "roll": 10,
+     "text": "Storm's End — a sloop with an old, wise captain and his pet owl.",
+     "ship": "sloop"
+    },
+    {
+     "roll": 11,
+     "text": "Queen Isabella's Malice — frigate with a hotshot crew nobody likes.",
+     "ship": "frigate"
+    },
+    {
+     "roll": 12,
+     "text": "Scorn of the West — a very old, well-maintained war vessel."
+    }
+   ]
+  },
+  "townRumors": {
+   "id": "spTownRumors",
+   "name": "Coral Town Rumors",
+   "die": "2d6",
+   "page": 139,
+   "source": "The Curse of Skeleton Point",
+   "rows": [
+    {
+     "roll": 2,
+     "text": "Without his perfume the Governor smells like bilge water."
+    },
+    {
+     "roll": 3,
+     "text": "Strange lights, chanting and roaring fires deep in the jungle at night."
+    },
+    {
+     "roll": 4,
+     "text": "Veronique is beautiful, but something is off about her paintings."
+    },
+    {
+     "roll": 5,
+     "text": "Dead things don't stay dead here."
+    },
+    {
+     "roll": 6,
+     "text": "Stay inside at night — the island is cursed!"
+    },
+    {
+     "roll": 7,
+     "text": "The Governor's daughter is missing and he pays over 1,000s for information."
+    },
+    {
+     "roll": 8,
+     "text": "A 30' skeleton lives in the castle."
+    },
+    {
+     "roll": 9,
+     "text": "The castle's treasure hoard is guarded by the ghost of a sea serpent."
+    },
+    {
+     "roll": 10,
+     "text": "The witch in the swamp is responsible for the curse."
+    },
+    {
+     "roll": 11,
+     "text": "The broken lighthouse sometimes still lights up at night."
+    },
+    {
+     "roll": 12,
+     "text": "There are secret tunnels under the graveyard."
+    }
+   ]
+  },
+  "carcassBeachNow": {
+   "id": "spCarcassBeach",
+   "name": "Carcass Beach: What's Happening Now?",
+   "die": "3d6",
+   "page": 143,
+   "source": "The Curse of Skeleton Point",
+   "rows": [
+    {
+     "roll": 3,
+     "text": "A Spanish treasure galleon has wrecked near Florida; everyone scrambles to set sail."
+    },
+    {
+     "roll": 4,
+     "text": "3d6 Deep Ones, d4 Gorilla Crabs and a Deep One Shaman are in a standoff with the pirates.",
+     "monster": "deep-ones"
+    },
+    {
+     "roll": 5,
+     "text": "A pirate has betrayed the code; Captain Davies presides over a tribunal."
+    },
+    {
+     "roll": 6,
+     "text": "The caves are deserted."
+    },
+    {
+     "roll": 7,
+     "text": "All calm: some pirates fish, others are passed out on the beach."
+    },
+    {
+     "roll": 8,
+     "text": "A mob of 2d4 Drowned have wandered into the caves.",
+     "monster": "the-drowned"
+    },
+    {
+     "roll": 9,
+     "text": "The pirates are fighting amongst themselves."
+    },
+    {
+     "roll": 10,
+     "text": "The pirates are drunk."
+    },
+    {
+     "roll": 11,
+     "text": "Davies is recruiting crew for smuggling and pirating."
+    },
+    {
+     "roll": 12,
+     "text": "A captured merchantman full of fresh food means a huge feast soon."
+    },
+    {
+     "roll": 13,
+     "text": "The pirates are distracted by visiting courtesans from the Treasured Chest."
+    },
+    {
+     "roll": 14,
+     "text": "The musical group Ship of Fools are performing (tonight/soon/now)."
+    },
+    {
+     "roll": 15,
+     "text": "Sir Francis Drake's ghost should appear tonight in the Cagafuego wreck."
+    },
+    {
+     "roll": 16,
+     "text": "The Brethren are meeting in Nassau to plan a massive raid in d12 days."
+    },
+    {
+     "roll": 17,
+     "text": "\"Scuttles\", a young pirate, went missing near the cenote."
+    },
+    {
+     "roll": 18,
+     "text": "Pirate hunters are attacking. Blood is everywhere."
+    }
+   ]
+  },
+  "junglePoints": {
+   "id": "spJungle",
+   "name": "The Jungle: Points of Interest",
+   "die": "d20",
+   "page": 144,
+   "source": "The Curse of Skeleton Point",
+   "note": "Fast: 1d20 and read across. Random: 4d20, one per column (plus Encounters). Custom: choose.",
+   "columns": [
+    {
+     "die": "d20",
+     "name": "Terrain",
+     "values": [
+      "dense underbrush",
+      "grove of coconut trees",
+      "grove of banana trees",
+      "calm, sun or moon lit clearing",
+      "small, moss filled cave",
+      "larges, ancient deciduous trees",
+      "granite cliff with a climbable crack",
+      "serene lagoon with turquoise water",
+      "swamp, water lilies, mangrove trees",
+      "a clearing circled by palm trees",
+      "shoulder-high grass",
+      "thick tangle of vines and brambles",
+      "waterfall, dropping from 50' up",
+      "high point with a great view",
+      "sandstone rock formation",
+      "small babbling creek",
+      "shady ferns and lush foliage",
+      "large tree (with a tree house)",
+      "pine forest with low branches",
+      "sinkhole (to the Nameless Temple)"
+     ]
+    },
+    {
+     "die": "d20",
+     "name": "Contents",
+     "values": [
+      "a 10' tall carved stone idol",
+      "a skeleton",
+      "a recently buried corpse",
+      "colorful wild flowers",
+      "hundreds of mushrooms",
+      "a dinghy, hidden under fronds",
+      "a head impaled on a spike",
+      "a small wrecked ship",
+      "lanterns hanging from stakes",
+      "ruins from an ancient civilization",
+      "the nest of a carnivorous animal",
+      "a large, bloody pile of bones",
+      "a secret cache of cargo",
+      "a large volcanic rock",
+      "a large, wooden crate",
+      "a corpse hanging from noose",
+      "an abandoned campsite",
+      "a fresh water spring",
+      "a colony of d100 macaws",
+      "blood dripped on to foliage"
+     ]
+    },
+    {
+     "die": "d20",
+     "name": "Environment",
+     "values": [
+      "blistering heat",
+      "buzzing flies carrying disease",
+      "extremely loud insects",
+      "eerie fog",
+      "abnormally cold",
+      "huge insects that bite",
+      "calm, sea breeze",
+      "absolute bliss fills the air",
+      "distant sound of chanting",
+      "a large bonfire and spit",
+      "growling sounds",
+      "feeling of being watched",
+      "vultures circle above",
+      "distant sound of cannon fire",
+      "large fire ant mound",
+      "intensely putrid death smell",
+      "quicksand",
+      "500+ butterflies or fireflies",
+      "fast, howling winds",
+      "a faint green glow"
+     ]
+    },
+    {
+     "die": "d20",
+     "name": "Encounters",
+     "values": [
+      "mundane jungle mammals",
+      "skeletons (pg. 92), sauntering",
+      "Governor Barlette (pg. 132)",
+      "Dark Fauna: Terrestrial (pg. 86)",
+      "zombies (pg. 94), skulking",
+      "Dark Flora (pg. 90)",
+      "Dark Fauna: Avian (pg. 87)",
+      "d2+1 (romantic) pirates",
+      "Tela Fafane (pg. 133), gathering",
+      "small undead animals",
+      "a terrified pirate, fleeing",
+      "dangerous jungle mammals",
+      "jungle birds, singing",
+      "Veronique (pg. 132), painting",
+      "Pedro (pg. 147) & d8 riflemen",
+      "Xoth (pg. 147), stalking",
+      "Catherwood (pg. 147), searching",
+      "Clayborn, annoyed and curious",
+      "Beatrice (pg. 147) and d4+1 crew",
+      "Clementius (pg. 147), 23 followers"
+     ]
+    }
+   ]
+  },
+  "templeHooks": {
+   "id": "spTempleHooks",
+   "name": "Nameless Temple: Plot Hooks",
+   "die": "d6",
+   "page": 146,
+   "source": "The Curse of Skeleton Point",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "Catherwood haunts the Green Kraken searching for the temple from his late wife's journal; he shares discoveries with helpers."
+    },
+    {
+     "roll": 2,
+     "text": "A PC dreams of the Omega Stone; each morning they wake knowing which way the entrance lies."
+    },
+    {
+     "roll": 3,
+     "text": "Father Wallace has seen hooded figures land by night and walk into the jungle; fewer return each morning."
+    },
+    {
+     "roll": 4,
+     "text": "Tela Fafane pays 1,000s to anyone who captures Xoth for her studies."
+    },
+    {
+     "roll": 5,
+     "text": "Pirates swap stories of treasure-filled temples — and one on this island; the last group to look never came back."
+    },
+    {
+     "roll": 6,
+     "text": "Searchers for Veronique or jungle explorers stumble into the entrance, fall under the tree, or swim deep into the Carcass Beach cenote."
+    }
+   ]
+  },
+  "shrineEncounters": {
+   "id": "spShrine",
+   "name": "Shrine of the Nameless Skull: Encounters",
+   "die": "d6",
+   "page": 149,
+   "source": "The Curse of Skeleton Point",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "3 pirates (HP 5, Morale 8, Cutlass d6) who found the shrine an hour ago — greedy, stupid, reeking of grog and sweat.",
+     "monster": "shrine-pirates"
+    },
+    {
+     "roll": 2,
+     "text": "Hans (from #7), scratching symbols into the walls and/or speaking in tongues."
+    },
+    {
+     "roll": 3,
+     "text": "A palm viper protecting her nest of 2d10 neonates (HP 1, Morale 6, Bite d2).",
+     "monster": "palm-viper"
+    },
+    {
+     "roll": 4,
+     "text": "d4 hive vines slowly wrap around one PC's legs.",
+     "monster": "hive-vines"
+    },
+    {
+     "roll": 5,
+     "text": "2 psychedelic macaws courting; they ignore those who ignore them.",
+     "monster": "psychedelic-macaw"
+    },
+    {
+     "roll": 6,
+     "text": "1 necro-swine (see #8).",
+     "monster": "necro-swine"
+    }
+   ]
+  },
+  "sanctumEncounters": {
+   "id": "spSanctum",
+   "name": "Sanctum of Nameless Blood: Encounters",
+   "die": "d6",
+   "page": 151,
+   "source": "The Curse of Skeleton Point",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "Trained guard dogs (HP 7, Morale 6, Bite d6) — mangy, starving; roll reactions for each.",
+     "monster": "guard-dogs"
+    },
+    {
+     "roll": 2,
+     "text": "Selena, a frantic prisoner in shock, bloody and filthy, carrying an arm."
+    },
+    {
+     "roll": 3,
+     "text": "A pile of bloody body parts — leftovers from Xoth's latest meal."
+    },
+    {
+     "roll": 4,
+     "text": "d4 cultists (HP 3, Morale 7, Dagger d4) and a priest (HP 8, Morale 9, Dark hex spell d8, 50').",
+     "monster": "cultists"
+    },
+    {
+     "roll": 5,
+     "text": "Clementius, on his way to the Omega Chamber.",
+     "monster": "high-wizard-clementius"
+    },
+    {
+     "roll": 6,
+     "text": "Xoth, crawling the walls and ceilings, hunting for food.",
+     "monster": "xoth-the-imp"
+    }
+   ]
+  },
+  "lakeEncounters": {
+   "id": "spLake",
+   "name": "Lake of the Nameless One: Encounters",
+   "die": "d6",
+   "page": 153,
+   "source": "The Curse of Skeleton Point",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "Accursed, maddening silence."
+    },
+    {
+     "roll": 2,
+     "text": "A drop of water falls, rippling the lake's surface."
+    },
+    {
+     "roll": 3,
+     "text": "An icy, terrifying chill washes over you."
+    },
+    {
+     "roll": 4,
+     "text": "d8 swarms of bats (HP 1, Morale 5, Bite 1) swarm, then flee via the Omega Stone opening.",
+     "monster": "swarm-of-bats"
+    },
+    {
+     "roll": 5,
+     "text": "d2 eldritch eels disturb the surface like glossy tentacles.",
+     "monster": "eldritch-eel"
+    },
+    {
+     "roll": 6,
+     "text": "The Nameless One awakens. All will end soon.",
+     "monster": "the-nameless-one"
+    }
+   ]
+  },
+  "swampEncounters": {
+   "id": "spSwamp",
+   "name": "Death's Head Swamp: Encounters",
+   "die": "d10",
+   "page": 154,
+   "source": "The Curse of Skeleton Point",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "Fat, twisted trees hung with Spanish moss; their faces sing in sleepers' dreams."
+    },
+    {
+     "roll": 2,
+     "text": "A bubbling, putrid bog; mud-caked logs (and zombies) drift slowly past."
+    },
+    {
+     "roll": 3,
+     "text": "Giant water lilies; frogs feasting on dragonflies croak so loud it's hard to think."
+    },
+    {
+     "roll": 4,
+     "text": "Red and yellow mushrooms: poisonous spore clouds when touched, but delicious, and +1 TOUGHNESS for a while."
+    },
+    {
+     "roll": 5,
+     "text": "An abandoned, moss-covered campsite and skeleton with a humming aquamarine crystal the size of a cannonball."
+    },
+    {
+     "roll": 6,
+     "text": "A waterlogged boat with a rusty knife and a map; a dire crocodile suns here in clear weather.",
+     "monster": "dire-crocodile"
+    },
+    {
+     "roll": 7,
+     "text": "2d10 candle-lit human skulls hang from vines, leading to a stone altar in the muck."
+    },
+    {
+     "roll": 8,
+     "text": "d10 bone-and-feather effigies forming a ½-mile perimeter around Tela's cabin (they keep the undead out)."
+    },
+    {
+     "roll": 9,
+     "text": "Strange orbs of light bobbing through the air like fishing lures."
+    },
+    {
+     "roll": 10,
+     "text": "A spike-fenced camp of muddy tents: the eccentric musicians called the Ship of Fools."
+    }
+   ]
+  },
+  "swampRumors": {
+   "id": "spSwampRumors",
+   "name": "Death's Head Swamp: Rumors",
+   "die": "d6",
+   "page": 154,
+   "source": "The Curse of Skeleton Point",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "A cannibalistic witch lives in a hut deep in the swamp."
+    },
+    {
+     "roll": 2,
+     "text": "Nomadic musicians camp in the swamp — bad singers, great for dancing."
+    },
+    {
+     "roll": 3,
+     "text": "A beautiful nymph wanders the reeds at night."
+    },
+    {
+     "roll": 4,
+     "text": "A 30' man-eating crocodile lives near an old boat."
+    },
+    {
+     "roll": 5,
+     "text": "Fist-sized insects there eat eyes."
+    },
+    {
+     "roll": 6,
+     "text": "A red and yellow flower growing outside caves has powerful medicinal effects."
+    }
+   ]
+  },
+  "reefEncounters": {
+   "id": "spReef",
+   "name": "Black Coral Reef: Encounters",
+   "die": "d6",
+   "page": 156,
+   "source": "The Curse of Skeleton Point",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "d4 fishermen in a small boat."
+    },
+    {
+     "roll": 2,
+     "text": "d6 mermaids, scared of humans but curious."
+    },
+    {
+     "roll": 3,
+     "text": "d3 sirens; one of them doesn't eat \"human\".",
+     "monster": "siren"
+    },
+    {
+     "roll": 4,
+     "text": "d6 black coral crabs.",
+     "monster": "black-coral-crab"
+    },
+    {
+     "roll": 5,
+     "text": "4d20 black coral crabs.",
+     "monster": "black-coral-crab"
+    },
+    {
+     "roll": 6,
+     "text": "d2 acid jellyfish, with 3d6 more arriving gradually.",
+     "monster": "acid-jellyfish"
+    }
+   ]
+  },
+  "castleDay": {
+   "id": "spCastleDay",
+   "name": "Skeleton Point: Random Encounters (Day)",
+   "die": "d10",
+   "page": 159,
+   "source": "The Curse of Skeleton Point",
+   "note": "1-in-6 chance of an encounter in each room.",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "The corpse of a once-famous pirate, with loot and an invisible-ink treasure map."
+    },
+    {
+     "roll": 2,
+     "text": "A grove of carnivorous plants.",
+     "monster": "carnivorous-plant"
+    },
+    {
+     "roll": 3,
+     "text": "d100 bilge rats chewing on something disgusting.",
+     "monster": "bilge-rat"
+    },
+    {
+     "roll": [
+      4,
+      6
+     ],
+     "text": "The Baron (ghost): sad, haunting, cold.",
+     "monster": "the-baron"
+    },
+    {
+     "roll": 7,
+     "text": "3 rooks (use carrion gulls): curious, stupid and fat.",
+     "monster": "carrion-gull"
+    },
+    {
+     "roll": 8,
+     "text": "The Three-Headed Monkey; he's hungry.",
+     "monster": "three-headed-monkey"
+    },
+    {
+     "roll": 9,
+     "text": "A crew of d10 pirates looking for treasure.",
+     "table": "pirateGenerator"
+    },
+    {
+     "roll": 10,
+     "text": "Veronique, irritated at the intrusion.",
+     "monster": "veronique-barlette"
+    }
+   ]
+  },
+  "castleNight": {
+   "id": "spCastleNight",
+   "name": "Skeleton Point: Random Encounters (Night)",
+   "die": "d10",
+   "page": 161,
+   "source": "The Curse of Skeleton Point",
+   "note": "1-in-6 chance of an encounter in each room.",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "The ghost of a once-famous pirate who knows the trick to reveal the map on his corpse (pg. 119)."
+    },
+    {
+     "roll": [
+      2,
+      4
+     ],
+     "text": "d6 skeletons: mindless, fast, terrifying — only 1 HP each.",
+     "monster": "skeleton-rank-and-vile"
+    },
+    {
+     "roll": [
+      5,
+      6
+     ],
+     "text": "3 Ghost Crew trying to be scary, looking for a fight, stench of death.",
+     "monster": "ghost-crew"
+    },
+    {
+     "roll": [
+      7,
+      8
+     ],
+     "text": "The Baron (skeleton), furious and hostile, with d4 ghostly fossil sharks swimming through the air.",
+     "monster": "the-baron"
+    },
+    {
+     "roll": 9,
+     "text": "d10 pirate corpses, savagely murdered."
+    },
+    {
+     "roll": 10,
+     "text": "Veronique in black nightclothes, terrified of the intrusion.",
+     "monster": "veronique-barlette"
+    }
+   ]
+  }
+ }
+};
+window.PB_MODULE_SKELETON_POINT = PB_MODULE_SKELETON_POINT;
 var PB_MONSTERS = [
  {
   "homebrew": false,
@@ -6374,8 +18425,18 @@ var PB_MONSTERS = [
    }
   ],
   "text": "A shambling, brain-hungry zombie.",
-  "source": "Trapped in the Tropics",
-  "page": 27
+  "source": "Core Rules",
+  "page": 94,
+  "sources": [
+   {
+    "source": "Core Rules",
+    "page": 94
+   },
+   {
+    "source": "Trapped in the Tropics",
+    "page": 27
+   }
+  ]
  },
  {
   "homebrew": false,
@@ -6412,8 +18473,18 @@ var PB_MONSTERS = [
    "defend": 14
   },
   "text": "Fast sprinters. Great climbers.",
-  "source": "Trapped in the Tropics",
-  "page": 15
+  "source": "Core Rules",
+  "page": 94,
+  "sources": [
+   {
+    "source": "Core Rules",
+    "page": 94
+   },
+   {
+    "source": "Trapped in the Tropics",
+    "page": 15
+   }
+  ]
  },
  {
   "homebrew": false,
@@ -6454,8 +18525,18 @@ var PB_MONSTERS = [
    "attack": 10
   },
   "text": "A bloated, barrel-bellied zombie.",
-  "source": "Trapped in the Tropics",
-  "page": 15
+  "source": "Core Rules",
+  "page": 95,
+  "sources": [
+   {
+    "source": "Core Rules",
+    "page": 95
+   },
+   {
+    "source": "Trapped in the Tropics",
+    "page": 15
+   }
+  ]
  },
  {
   "homebrew": false,
@@ -6645,6 +18726,8 @@ var PB_MONSTERS = [
   "id": "infernal-pelican",
   "name": "Infernal Pelican",
   "category": "beast",
+  "group": "Dark Fauna: Avian",
+  "roll": 4,
   "hp": 4,
   "morale": 6,
   "armor": null,
@@ -6669,8 +18752,18 @@ var PB_MONSTERS = [
    }
   ],
   "text": "Fishing birds that flew too far and visited the shores of the Netherworld; soot-singed feathers glowing molten orange from within. Often seen in flocks (d6 × 10).",
-  "source": "Trapped in the Tropics",
-  "page": 48
+  "source": "Core Rules",
+  "page": 87,
+  "sources": [
+   {
+    "source": "Core Rules",
+    "page": 87
+   },
+   {
+    "source": "Trapped in the Tropics",
+    "page": 48
+   }
+  ]
  },
  {
   "homebrew": false,
@@ -6904,8 +18997,18 @@ var PB_MONSTERS = [
    }
   ],
   "text": "Raised from nearby corpses by the Sorcerer's Raise the Dead spell.",
-  "source": "Player's Guidebook",
-  "page": 45
+  "source": "Core Rules",
+  "page": 45,
+  "sources": [
+   {
+    "source": "Core Rules",
+    "page": 45
+   },
+   {
+    "source": "Player's Guidebook",
+    "page": 45
+   }
+  ]
  },
  {
   "homebrew": false,
@@ -6933,8 +19036,18 @@ var PB_MONSTERS = [
    }
   ],
   "text": "Summoned by the arcane ritual Phantasmal Fauna.",
-  "source": "Player's Guidebook",
-  "page": 65
+  "source": "Core Rules",
+  "page": 65,
+  "sources": [
+   {
+    "source": "Core Rules",
+    "page": 65
+   },
+   {
+    "source": "Player's Guidebook",
+    "page": 65
+   }
+  ]
  },
  {
   "homebrew": false,
@@ -6959,8 +19072,3703 @@ var PB_MONSTERS = [
    }
   ],
   "text": "A swarm of d12 birds called up by Mystical Mishap 8.",
-  "source": "Player's Guidebook",
-  "page": 67
+  "source": "Core Rules",
+  "page": 67,
+  "sources": [
+   {
+    "source": "Core Rules",
+    "page": 67
+   },
+   {
+    "source": "Player's Guidebook",
+    "page": 67
+   }
+  ]
+ },
+ {
+  "homebrew": false,
+  "id": "bilge-rat",
+  "name": "Bilge Rat",
+  "category": "beast",
+  "group": "Dark Fauna: Terrestrial",
+  "roll": 1,
+  "hp": 1,
+  "morale": 4,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Bite",
+    "damage": "1",
+    "notes": "+ Disease"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Disease",
+    "text": "Test TOUGHNESS DR8 or become infected."
+   },
+   {
+    "name": "Swarm",
+    "text": "When several rats attack the same target, add their damage into one sum; the target tests only once for disease."
+   }
+  ],
+  "text": "Disgusting vermin that breed in the foul bilge water of cargo holds; carriers of countless diseases.",
+  "source": "Core Rules",
+  "page": 86
+ },
+ {
+  "homebrew": false,
+  "id": "dire-crocodile",
+  "name": "Dire Crocodile",
+  "category": "beast",
+  "group": "Dark Fauna: Terrestrial",
+  "roll": 2,
+  "hp": 15,
+  "morale": 9,
+  "armor": {
+   "name": "Reptile Skin",
+   "die": "d6",
+   "tier": 3
+  },
+  "attacks": [
+   {
+    "name": "Bite",
+    "damage": "d10"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Water Lurker",
+    "text": "PRESENCE DR16 to spot."
+   }
+  ],
+  "loot": [
+   {
+    "name": "Hide",
+    "value": "50s"
+   },
+   {
+    "name": "Teeth",
+    "value": "1s"
+   }
+  ],
+  "text": "Overgrown, ancient predators with thick leathery hides that stalk murky shallows. Fast swimmers, slow on land, and so far impossible to wipe out.",
+  "source": "Core Rules",
+  "page": 86
+ },
+ {
+  "homebrew": false,
+  "id": "necro-swine",
+  "name": "Necro-Swine",
+  "category": "beast",
+  "group": "Dark Fauna: Terrestrial",
+  "roll": 3,
+  "hp": 6,
+  "morale": null,
+  "armor": {
+   "name": "Hog-bristle",
+   "die": "d2",
+   "tier": 1
+  },
+  "attacks": [
+   {
+    "name": "Tusks",
+    "damage": "d6"
+   },
+   {
+    "name": "Bite",
+    "damage": "d8"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Necro-steam",
+    "text": "Anyone breathing the steam for more than a few minutes tests SPIRIT DR12. Fail: +4 STRENGTH and AGILITY for d2 hours; when it wears off, lose d8 HP. Anything killed this way becomes undead and emits the steam too."
+   }
+  ],
+  "loot": [
+   {
+    "name": "Swine skin",
+    "value": "25s"
+   },
+   {
+    "name": "Necro-steam",
+    "value": "150s/jar"
+   }
+  ],
+  "text": "Pigs once; now a foul cyan steam drifts from their mouths and eyes and slowly fills the air where they graze. If you see \"the glow\" it's already too late.",
+  "source": "Core Rules",
+  "page": 86
+ },
+ {
+  "homebrew": false,
+  "id": "palm-viper",
+  "name": "Palm Viper",
+  "category": "beast",
+  "group": "Dark Fauna: Terrestrial",
+  "roll": 4,
+  "hp": 4,
+  "morale": 6,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Bite",
+    "damage": "d2",
+    "notes": "+ Venom"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Venom",
+    "text": "d10 rounds after the bite the target is completely paralyzed for d6 × 10 minutes and experiences (d6): 1-5 complete euphoria, 6 a hellish nightmare."
+   }
+  ],
+  "loot": [
+   {
+    "name": "Snake skin",
+    "value": "5s"
+   },
+   {
+    "name": "Fang",
+    "value": "2s"
+   },
+   {
+    "name": "Venom",
+    "value": "75s/dose"
+   }
+  ],
+  "text": "Dark green and brown serpents hiding in sand, around fallen coconuts and in banana trees.",
+  "source": "Core Rules",
+  "page": 86
+ },
+ {
+  "homebrew": false,
+  "id": "rabid-jaguar",
+  "name": "Rabid Jaguar",
+  "category": "beast",
+  "group": "Dark Fauna: Terrestrial",
+  "roll": 5,
+  "hp": 14,
+  "morale": 7,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Bite",
+    "damage": "d6",
+    "notes": "+ TOUGHNESS DR12 or become infected"
+   },
+   {
+    "name": "Claw",
+    "damage": "d4",
+    "notes": "makes 2 attacks"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Fast",
+    "text": "Attacks and defense against it are DR14."
+   }
+  ],
+  "dr": {
+   "attack": 14,
+   "defend": 14
+  },
+  "loot": [
+   {
+    "name": "Spotted pelt",
+    "value": "20s"
+   },
+   {
+    "name": "Black pelt",
+    "value": "30s"
+   },
+   {
+    "name": "White pelt",
+    "value": "50s"
+   },
+   {
+    "name": "Iridescent pelt",
+    "value": "200s"
+   }
+  ],
+  "text": "Fast, ferocious, disease-stricken jungle cats and excellent climbers; some rare kinds have exotic fur.",
+  "source": "Core Rules",
+  "page": 86
+ },
+ {
+  "homebrew": false,
+  "id": "three-headed-monkey",
+  "name": "Three-Headed Monkey",
+  "category": "beast",
+  "group": "Dark Fauna: Terrestrial",
+  "roll": 6,
+  "hp": 8,
+  "morale": 6,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Bite/Claws",
+    "damage": "d6",
+    "notes": "+ Monkey Head"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Monkey Head",
+    "text": "One of its 3 heads curses a nearby creature (d4): 1 See — SPIRIT DR12 or blind for d2 rounds; 2 Hear — SPIRIT DR12 or deaf for d2 rounds; 3 Speak — SPIRIT DR12 or mute for d2 rounds; 4 All three — SPIRIT DR12 or all three."
+   }
+  ],
+  "effectTable": {
+   "die": "d4",
+   "name": "Monkey Head Curse",
+   "note": "Monkey Head curse (one nearby creature, SPIRIT DR12 to resist, lasts d2 rounds).",
+   "rows": [
+    {
+     "roll": 1,
+     "name": "See",
+     "text": "SPIRIT DR12 or blind for d2 rounds.",
+     "test": {
+      "ability": "SPIRIT",
+      "dr": 12
+     }
+    },
+    {
+     "roll": 2,
+     "name": "Hear",
+     "text": "SPIRIT DR12 or deaf for d2 rounds.",
+     "test": {
+      "ability": "SPIRIT",
+      "dr": 12
+     }
+    },
+    {
+     "roll": 3,
+     "name": "Speak",
+     "text": "SPIRIT DR12 or mute for d2 rounds.",
+     "test": {
+      "ability": "SPIRIT",
+      "dr": 12
+     }
+    },
+    {
+     "roll": 4,
+     "name": "All three",
+     "text": "SPIRIT DR12 or blind, deaf and mute for d2 rounds.",
+     "test": {
+      "ability": "SPIRIT",
+      "dr": 12
+     }
+    }
+   ]
+  },
+  "text": "Mythical creatures said to reveal secrets and hidden treasure to those who bring them gifts.",
+  "source": "Core Rules",
+  "page": 86
+ },
+ {
+  "homebrew": false,
+  "id": "carrion-gull",
+  "name": "Carrion Gull",
+  "category": "beast",
+  "group": "Dark Fauna: Avian",
+  "roll": 1,
+  "hp": 2,
+  "morale": 5,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Beak",
+    "damage": "d4"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Flock",
+    "text": "They circle in flocks and attack in swarms if any of them are killed."
+   }
+  ],
+  "loot": [
+   {
+    "name": "Carcass",
+    "value": "1 disgusting ration"
+   }
+  ],
+  "text": "Possessive seabirds grown fond of the region's plentiful dead flesh, often stained blood red from feasting.",
+  "source": "Core Rules",
+  "page": 87
+ },
+ {
+  "homebrew": false,
+  "id": "harbinger-albatross",
+  "name": "Harbinger Albatross",
+  "category": "beast",
+  "group": "Dark Fauna: Avian",
+  "roll": 2,
+  "hp": 8,
+  "morale": 10,
+  "armor": {
+   "name": "Evil Luck",
+   "die": "d6",
+   "tier": 3
+  },
+  "attacks": [
+   {
+    "name": "Beak",
+    "damage": "d6"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Omen",
+    "text": "If it gets more than 1 mile away from the PCs, roll d6: 1 all PCs lose all Devil's Luck; 2 trigger a Dark Caribbean historical event (pg. 25); 3 FIRE!; 4 SAILS! (pg. 114) or d8 random pirates (pg. 124), or both; 5 ominous foul weather moves in abruptly (pg. 78); 6 one random person dies instantly."
+   },
+   {
+    "name": "Captured alive",
+    "text": "All rolls are +1 while it is near."
+   },
+   {
+    "name": "Killed",
+    "text": "The killer gains d4 Devil's Luck (can exceed the normal maximum)."
+   }
+  ],
+  "omenTable": {
+   "die": "d6",
+   "name": "Albatross Omen",
+   "note": "Rolled if the albatross gets more than 1 mile away from the PCs.",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "All PCs lose all Devil's Luck."
+    },
+    {
+     "roll": 2,
+     "text": "Trigger a Dark Caribbean historical event (pg. 25)."
+    },
+    {
+     "roll": 3,
+     "text": "FIRE!"
+    },
+    {
+     "roll": 4,
+     "text": "SAILS! (pg. 114) or d8 random pirates (pg. 124)… or both."
+    },
+    {
+     "roll": 5,
+     "text": "Ominous, foul weather moves in abruptly (pg. 78)."
+    },
+    {
+     "roll": 6,
+     "text": "One random person dies instantly."
+    }
+   ]
+  },
+  "text": "A massive black seabird with a 15' wingspan and deep red eyes. Once a herald of good luck, now it only foreshadows doom. Travels alone.",
+  "source": "Core Rules",
+  "page": 87
+ },
+ {
+  "homebrew": false,
+  "id": "hex-chicken",
+  "name": "Hex Chicken",
+  "category": "beast",
+  "group": "Dark Fauna: Avian",
+  "roll": 3,
+  "hp": 1,
+  "morale": 2,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Beak",
+    "damage": "d2"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Plague Repository",
+    "text": "Holding a hex chicken for an hour cures infection, but eating one causes it."
+   }
+  ],
+  "text": "Some sorcerers cure disease and infection by transferring it into chickens. Don't eat one.",
+  "source": "Core Rules",
+  "page": 87
+ },
+ {
+  "homebrew": false,
+  "id": "psychedelic-macaw",
+  "name": "Psychedelic Macaw",
+  "category": "beast",
+  "group": "Dark Fauna: Avian",
+  "roll": 5,
+  "hp": 3,
+  "morale": 5,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Beak",
+    "damage": "d4"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Cosmic Fractals",
+    "text": "Test morale when a macaw is frightened. On a failure cosmic fractals radiate in all directions: spectators go blind for d6 rounds and test SPIRIT DR12 or lose their mind for d8 hours (GM controls them). When they \"return\" they immediately gain experience (pg. 33) and learn 1 random ritual (pg. 64)."
+   }
+  ],
+  "loot": [
+   {
+    "name": "Feather",
+    "value": "10s"
+   },
+   {
+    "name": "Alive",
+    "value": "200s"
+   },
+   {
+    "name": "Its friendship",
+    "value": "Priceless"
+   }
+  ],
+  "text": "Brightly colored, naturally intelligent parrots that glow faintly in the dark.",
+  "source": "Core Rules",
+  "page": 87
+ },
+ {
+  "homebrew": false,
+  "id": "peregrim-falcon",
+  "name": "Peregrim Falcon",
+  "category": "beast",
+  "group": "Dark Fauna: Avian",
+  "roll": 6,
+  "hp": 6,
+  "morale": 9,
+  "armor": {
+   "name": "Killer Instincts",
+   "die": "d2",
+   "tier": 1
+  },
+  "attacks": [
+   {
+    "name": "Claws",
+    "damage": "d8"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Fast",
+    "text": "DR16 to attack and defend against."
+   }
+  ],
+  "dr": {
+   "attack": 16,
+   "defend": 16
+  },
+  "loot": [
+   {
+    "name": "Claw",
+    "value": "15s"
+   },
+   {
+    "name": "Body",
+    "value": "—",
+    "note": "turns to ashes when killed"
+   }
+  ],
+  "text": "Fierce birds of prey with a taste for dead flesh.",
+  "source": "Core Rules",
+  "page": 87
+ },
+ {
+  "homebrew": false,
+  "id": "acid-jellyfish",
+  "name": "Acid Jellyfish",
+  "category": "beast",
+  "group": "Dark Fauna: Aquatic",
+  "roll": 1,
+  "hp": 5,
+  "morale": null,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Acid Tendrils",
+    "damage": "d4",
+    "notes": "+ special"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Tendrils",
+    "text": "Tendrils wrap around a limb, restraining the victim. On the victim's turn: STRENGTH DR12 to escape, or −4 to AGILITY and armor is reduced 1 tier."
+   }
+  ],
+  "loot": [
+   {
+    "name": "Tendril",
+    "value": "5s each"
+   },
+   {
+    "name": "Body",
+    "value": "20s"
+   }
+  ],
+  "text": "Bizarre gelatinous oddities that emit acid to aid digestion.",
+  "source": "Core Rules",
+  "page": 88
+ },
+ {
+  "homebrew": false,
+  "id": "brine-piranha",
+  "name": "Brine Piranha",
+  "category": "beast",
+  "group": "Dark Fauna: Aquatic",
+  "roll": 2,
+  "hp": 5,
+  "morale": 7,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Bite",
+    "damage": "d8"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Blood-rich Meat",
+    "text": "Eating it gives +1 to using rituals and relics for d4 hours."
+   }
+  ],
+  "loot": [
+   {
+    "name": "Piranha meat",
+    "value": "5s/fish"
+   }
+  ],
+  "text": "Huge, carnivorous saltwater fish.",
+  "source": "Core Rules",
+  "page": 88
+ },
+ {
+  "homebrew": false,
+  "id": "chthonic-octopus",
+  "name": "Chthonic Octopus",
+  "category": "beast",
+  "group": "Dark Fauna: Aquatic",
+  "roll": 3,
+  "hp": 9,
+  "morale": 7,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Bite",
+    "damage": "d6",
+    "notes": "+ brain feast"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Brain Feast",
+    "text": "Test AGILITY DR12 or it attaches to its prey's skull. The prey is under its control and auto-fails its defense until it passes a DR12 PRESENCE test (tested at the start of each of the prey's turns)."
+   }
+  ],
+  "loot": [
+   {
+    "name": "Tentacle",
+    "value": "10s"
+   },
+   {
+    "name": "Alive",
+    "value": "50s",
+    "note": "×10 to a scientist"
+   }
+  ],
+  "text": "Alien in origin; naturally green but often camouflaged. They feed on mammal brains and control their prey while they feast.",
+  "source": "Core Rules",
+  "page": 88
+ },
+ {
+  "homebrew": false,
+  "id": "eldritch-eel",
+  "name": "Eldritch Eel",
+  "category": "beast",
+  "group": "Dark Fauna: Aquatic",
+  "roll": 4,
+  "hp": 2,
+  "morale": 6,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Bite",
+    "damage": "d6",
+    "notes": "+ Eldritch Shock"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Eldritch Shock",
+    "text": "Any creature that touches it tests TOUGHNESS DR12 or is paralyzed for the next turn."
+   }
+  ],
+  "loot": [
+   {
+    "name": "Glowing bones",
+    "value": "20s/skeleton"
+   }
+  ],
+  "text": "Translucent pack hunters of reefs, kelp forests and shipwrecks; their bones glow from within, even after death.",
+  "source": "Core Rules",
+  "page": 88
+ },
+ {
+  "homebrew": false,
+  "id": "primeval-lurker",
+  "name": "Primeval Lurker",
+  "category": "beast",
+  "group": "Dark Fauna: Aquatic",
+  "roll": 5,
+  "hp": 20,
+  "morale": 8,
+  "armor": {
+   "name": "Hide",
+   "die": "d4",
+   "tier": 2
+  },
+  "attacks": [
+   {
+    "name": "Bite",
+    "damage": "d10"
+   },
+   {
+    "name": "Tail",
+    "damage": "d6",
+    "notes": "2 attacks"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Primeval Shriek",
+    "text": "It echoes into the deep: everything underwater within 100 miles can hear it."
+   }
+  ],
+  "loot": [
+   {
+    "name": "Bones",
+    "value": "200s/set"
+   },
+   {
+    "name": "Alive",
+    "value": "1,000s"
+   }
+  ],
+  "text": "Ancient reptiles from before mankind, lurking in the deep.",
+  "source": "Core Rules",
+  "page": 88
+ },
+ {
+  "homebrew": false,
+  "id": "squid-of-despair",
+  "name": "Squid of Despair",
+  "category": "beast",
+  "group": "Dark Fauna: Aquatic",
+  "roll": 6,
+  "hp": 12,
+  "morale": 8,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Tentacle Slam",
+    "damage": "d4"
+   },
+   {
+    "name": "Ink of Despair",
+    "damage": null,
+    "notes": "squirts ink in a 30 sq ft cloud underwater or a 30' line above water"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Ink of Despair",
+    "text": "Anyone near the ink tests AGILITY DR12 or is stricken with despair. At the start of each of their turns they roll 2d6 + SPIRIT: ≤4 Self-destructive thoughts (inflict d2 damage on themselves); 5-7 Sad (skip their action this turn); 8-10 Melancholy (skip this turn but return to normal next turn); 11+ Right as rain (return to normal)."
+   }
+  ],
+  "effectTable": {
+   "die": "2d6 + SPIRIT",
+   "name": "Despair",
+   "note": "Rolled by a creature stricken with despair at the start of each of its turns.",
+   "rows": [
+    {
+     "roll": [
+      2,
+      4
+     ],
+     "name": "Self-destructive thoughts",
+     "text": "Inflict d2 damage on themselves.",
+     "damage": "d2",
+     "orLess": true
+    },
+    {
+     "roll": [
+      5,
+      7
+     ],
+     "name": "Sad",
+     "text": "Skip their action this turn."
+    },
+    {
+     "roll": [
+      8,
+      10
+     ],
+     "name": "Melancholy",
+     "text": "Skip this turn but return to normal next turn."
+    },
+    {
+     "roll": [
+      11,
+      12
+     ],
+     "name": "Right as rain",
+     "text": "Return to normal.",
+     "orMore": true
+    }
+   ]
+  },
+  "loot": [
+   {
+    "name": "Carcass",
+    "value": "10s"
+   },
+   {
+    "name": "Ink",
+    "value": "150s a sack"
+   }
+  ],
+  "armorNote": "The block prints \"No armor –\"; the Creature Index (pg. 164) lists −d2.",
+  "text": "Cold-water mollusks with sad eyes and gray, depressing skin, often stranded ashore by deep currents; they poison would-be predators' thoughts with psychotropic ink.",
+  "source": "Core Rules",
+  "page": 88
+ },
+ {
+  "homebrew": false,
+  "id": "zombie-sea-turtle",
+  "name": "Zombie Sea Turtle",
+  "category": "undead",
+  "group": "Dark Fauna: Aquatic",
+  "roll": 7,
+  "hp": 1,
+  "morale": null,
+  "armor": {
+   "name": "Shell",
+   "die": "d6",
+   "tier": 3
+  },
+  "attacks": [
+   {
+    "name": "Bite",
+    "damage": "d6"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Undead",
+    "text": "1-in-4 chance it reanimates when killed."
+   }
+  ],
+  "loot": [
+   {
+    "name": "Skull",
+    "value": "10s"
+   },
+   {
+    "name": "Shell",
+    "value": "75s",
+    "note": "1-in-10 chance its symbols are a treasure map, pg. 119"
+   }
+  ],
+  "text": "Marine creatures given horrible new life by some evil force; their shells are covered in strange symbols and glyphs.",
+  "source": "Core Rules",
+  "page": 88
+ },
+ {
+  "homebrew": false,
+  "id": "fossil-shark",
+  "name": "Fossil Shark",
+  "category": "undead",
+  "group": "Dark Fauna: Aquatic (big)",
+  "roll": 1,
+  "hp": 10,
+  "morale": null,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Bite",
+    "damage": "d10"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Fast",
+    "text": "DR14 to attack and defend against."
+   },
+   {
+    "name": "Undead Fortitude",
+    "text": "If killed, roll d6: on 1 or 2 it reassembles with 1 HP."
+   }
+  ],
+  "dr": {
+   "attack": 14,
+   "defend": 14
+  },
+  "naval": {
+   "hp": 2,
+   "morale": null,
+   "armor": null,
+   "speed": 5,
+   "agility": 3,
+   "attacks": [
+    {
+     "name": "Puncture",
+     "damage": "1"
+    }
+   ]
+  },
+  "text": "Fossilized bones of fast, deadly predators, given new life by some unnatural force.",
+  "source": "Core Rules",
+  "page": 89
+ },
+ {
+  "homebrew": false,
+  "id": "hammer-drones",
+  "name": "Hammer Drones",
+  "category": "beast",
+  "group": "Dark Fauna: Aquatic (big)",
+  "roll": 2,
+  "hp": 15,
+  "morale": 8,
+  "armor": {
+   "name": "Shark Skin",
+   "die": "d2",
+   "tier": 1
+  },
+  "attacks": [
+   {
+    "name": "Bite",
+    "damage": "d8"
+   }
+  ],
+  "specials": [],
+  "naval": {
+   "hp": 3,
+   "morale": 8,
+   "armor": null,
+   "speed": 5,
+   "agility": 3,
+   "attacks": [
+    {
+     "name": "Ram",
+     "damage": "d4"
+    }
+   ]
+  },
+  "text": "Sharks that swim in schools so thick they turn the water black and blot out the sun.",
+  "source": "Core Rules",
+  "page": 89
+ },
+ {
+  "homebrew": false,
+  "id": "the-mouth-of-a-thousand-corpses",
+  "name": "The Mouth of a Thousand Corpses",
+  "category": "monster",
+  "group": "Dark Fauna: Aquatic (big)",
+  "roll": 3,
+  "boss": true,
+  "hp": 75,
+  "morale": 10,
+  "armor": {
+   "name": "Runes",
+   "die": "d4",
+   "tier": 2
+  },
+  "attacks": [
+   {
+    "name": "Bite",
+    "damage": "d12"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Unholy Strength",
+    "text": "Recovers d10 HP every time it eats someone."
+   }
+  ],
+  "naval": {
+   "hp": 15,
+   "morale": 10,
+   "armor": {
+    "name": "Runes",
+    "die": "d2",
+    "tier": 1
+   },
+   "speed": 4,
+   "agility": 2,
+   "attacks": [
+    {
+     "name": "Ram",
+     "damage": "2d8"
+    }
+   ]
+  },
+  "text": "An ancient great white shark corrupted by the Dark Caribbean's necrotic energy; its hundreds of scars have become glowing runes of some unknown civilization.",
+  "source": "Core Rules",
+  "page": 89
+ },
+ {
+  "homebrew": false,
+  "id": "cursed-orca",
+  "name": "Cursed Orca",
+  "category": "beast",
+  "group": "Dark Fauna: Aquatic (big)",
+  "roll": 4,
+  "hp": 27,
+  "morale": 9,
+  "armor": {
+   "name": "Blubber",
+   "die": "d2",
+   "tier": 1
+  },
+  "attacks": [
+   {
+    "name": "Bite",
+    "damage": "d12"
+   }
+  ],
+  "specials": [],
+  "naval": {
+   "hp": 5,
+   "morale": 9,
+   "armor": null,
+   "speed": 4,
+   "agility": 3,
+   "attacks": [
+    {
+     "name": "Ram",
+     "damage": "d8"
+    }
+   ]
+  },
+  "text": "Intelligent hunters hexed by foul magic, used by their masters to track targets, patrol, and deliver supplies or messages.",
+  "source": "Core Rules",
+  "page": 89
+ },
+ {
+  "homebrew": false,
+  "id": "barnacled-humpback",
+  "name": "Barnacled Humpback",
+  "category": "beast",
+  "group": "Dark Fauna: Aquatic (big)",
+  "roll": 5,
+  "hp": 50,
+  "morale": null,
+  "armor": {
+   "name": "Barnacle Infestation",
+   "die": "d6",
+   "tier": 3
+  },
+  "attacks": [
+   {
+    "name": "Slam & Scrape",
+    "damage": "d8",
+    "notes": "+ special"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Crush",
+    "text": "If between the whale and a solid object (ship, rocks), test STRENGTH DR12 or take d8 more damage."
+   }
+  ],
+  "naval": {
+   "hp": 10,
+   "morale": null,
+   "armor": null,
+   "speed": 3,
+   "agility": 2,
+   "attacks": [
+    {
+     "name": "Slam & Scrape",
+     "damage": "2d8",
+     "notes": "+ everyone on board tests AGILITY DR8 or is thrown overboard"
+    }
+   ]
+  },
+  "text": "Once-docile whales driven to primal rage by carnivorous barnacles, scraping against anything that might ease the pain.",
+  "source": "Core Rules",
+  "page": 89
+ },
+ {
+  "homebrew": false,
+  "id": "the-black-whale",
+  "name": "The Black Whale",
+  "category": "monster",
+  "group": "Dark Fauna: Aquatic (big)",
+  "roll": 6,
+  "boss": true,
+  "hp": 150,
+  "morale": 11,
+  "armor": {
+   "name": "Blubber",
+   "die": "d4",
+   "tier": 2
+  },
+  "attacks": [
+   {
+    "name": "Bite",
+    "damage": "d20",
+    "notes": "DR8 to defend"
+   },
+   {
+    "name": "Swallow",
+    "damage": null,
+    "notes": "AGILITY DR8 to dodge or be consumed"
+   }
+  ],
+  "dr": {
+   "defend": 8
+  },
+  "specials": [],
+  "naval": {
+   "hp": 30,
+   "morale": 11,
+   "armor": {
+    "name": "Blubber",
+    "die": "d4",
+    "tier": 2
+   },
+   "speed": 3,
+   "agility": 1,
+   "attacks": [
+    {
+     "name": "Ram",
+     "damage": "3d8"
+    }
+   ]
+  },
+  "text": "A massive, obsidian-skinned sperm whale with a taste for human flesh; some say a colony of sailors lives in its belly.",
+  "source": "Core Rules",
+  "page": 89
+ },
+ {
+  "homebrew": false,
+  "id": "sargasso-entity",
+  "name": "Sargasso Entity",
+  "category": "flora",
+  "group": "Dark Flora",
+  "roll": 1,
+  "hp": 18,
+  "morale": 9,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Sargassum Whip",
+    "damage": "d6",
+    "notes": "15' range"
+   },
+   {
+    "name": "Horrific Vision",
+    "damage": null,
+    "notes": "one creature tests SPIRIT DR12 or suffers visions of cosmic horrors: all its DRs are +4 for d6 rounds"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Eat Sargasso Seaweed",
+    "text": "Recovers d2 HP."
+   }
+  ],
+  "text": "Spawned from the mire of seaweed drifting in the Devil's Triangle.",
+  "source": "Core Rules",
+  "page": 90
+ },
+ {
+  "homebrew": false,
+  "id": "carnivorous-plant",
+  "name": "Carnivorous Plant",
+  "category": "flora",
+  "group": "Dark Flora",
+  "roll": 2,
+  "hp": 18,
+  "morale": null,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Tendrils",
+    "damage": "d4",
+    "notes": "up to 4"
+   },
+   {
+    "name": "Bite",
+    "damage": "d8"
+   }
+  ],
+  "attacksPerRound": 5,
+  "specials": [],
+  "loot": [
+   {
+    "name": "Tendril",
+    "value": "2s"
+   },
+   {
+    "name": "Head",
+    "value": "25s"
+   },
+   {
+    "name": "Gem heart",
+    "value": "200s"
+   }
+  ],
+  "text": "Mutated by undead energy, they lurk in swamps and jungles waiting for small animals to fall into their traps.",
+  "source": "Core Rules",
+  "page": 90
+ },
+ {
+  "homebrew": false,
+  "id": "electric-coral",
+  "name": "Electric Coral",
+  "category": "flora",
+  "group": "Dark Flora",
+  "roll": 3,
+  "hazard": true,
+  "hp": 5,
+  "hpText": "d10",
+  "hpDice": "d10",
+  "morale": null,
+  "armor": {
+   "name": "Exoskeleton",
+   "die": "d4",
+   "tier": 2
+  },
+  "attacks": [
+   {
+    "name": "Shock",
+    "damage": "2d8",
+    "notes": "when threatened: everything within 50' loses 2d8 HP (ignores armor, double if wearing metal); recharges in an hour"
+   }
+  ],
+  "specials": [],
+  "loot": [
+   {
+    "name": "Reward",
+    "value": "d20 × 50s a pound"
+   }
+  ],
+  "text": "Bright, colorful, valuable and deadly: it shocks predators with a powerful electric surge.",
+  "source": "Core Rules",
+  "page": 90
+ },
+ {
+  "homebrew": false,
+  "id": "sentient-fungus",
+  "name": "Sentient Fungus",
+  "category": "flora",
+  "group": "Dark Flora",
+  "roll": 4,
+  "hp": 11,
+  "morale": 6,
+  "armor": {
+   "name": "Thick Epidermis",
+   "die": "d2",
+   "tier": 1
+  },
+  "attacks": [
+   {
+    "name": "Slam",
+    "damage": "d8"
+   },
+   {
+    "name": "Spore Gas",
+    "damage": null,
+    "notes": "TOUGHNESS DR12 or become infected and lose d4 HP (ignores armor)"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Slow",
+    "text": "DR8 to attack and dodge."
+   }
+  ],
+  "dr": {
+   "attack": 8,
+   "defend": 8
+  },
+  "loot": [
+   {
+    "name": "Young spore",
+    "value": "1s/cap"
+   },
+   {
+    "name": "Mature",
+    "value": "50s/cap"
+   }
+  ],
+  "text": "Grog-barrel-sized spores that grow limbs when mature and mimic slow wildlife, masquerading as tree trunks, sea chests and small mammals.",
+  "source": "Core Rules",
+  "page": 90
+ },
+ {
+  "homebrew": false,
+  "id": "kelp-forest",
+  "name": "Kelp Forest",
+  "category": "flora",
+  "group": "Dark Flora",
+  "roll": 5,
+  "hazard": true,
+  "hp": 0,
+  "hpText": "N/A",
+  "morale": null,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Mental Lure",
+    "damage": null,
+    "notes": "weak-minded creatures (negative PRESENCE or SPIRIT) that see the kelp test the weaker of the two at DR8; fail: jump overboard and swim to \"join them\""
+   }
+  ],
+  "specials": [
+   {
+    "name": "Harmless?",
+    "text": "Harmless, except for the voice sailors hear urging them to \"join us\". The Drowned (pg. 100) must be close."
+   }
+  ],
+  "text": "A drifting forest of kelp that calls sailors overboard.",
+  "source": "Core Rules",
+  "page": 90,
+  "sources": [
+   {
+    "source": "Core Rules",
+    "page": 90
+   },
+   {
+    "source": "The Curse of Skeleton Point",
+    "page": 157,
+    "note": "Black Coral Reef, area 3"
+   }
+  ]
+ },
+ {
+  "homebrew": false,
+  "id": "hive-vines",
+  "name": "Hive Vines",
+  "category": "flora",
+  "group": "Dark Flora",
+  "roll": 6,
+  "hp": 4,
+  "hpText": "4 each",
+  "morale": 4,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Entangled",
+    "damage": null,
+    "notes": "AGILITY DR12 or entangled in vines; STRENGTH DR14 to escape"
+   },
+   {
+    "name": "Strangle",
+    "damage": "d4",
+    "notes": "entangled creatures only; auto-hit"
+   }
+  ],
+  "specials": [],
+  "loot": [
+   {
+    "name": "Vines",
+    "value": "1s per 10'"
+   },
+   {
+    "name": "Made into rope",
+    "value": "1s/ft"
+   }
+  ],
+  "text": "Said to be among the largest organisms in the Dark Caribbean: networks of fast-moving vines that entangle and juice their prey.",
+  "source": "Core Rules",
+  "page": 90
+ },
+ {
+  "homebrew": false,
+  "id": "death-bloom",
+  "name": "Death Bloom",
+  "category": "flora",
+  "group": "Dark Flora",
+  "roll": 7,
+  "hazard": true,
+  "hp": 1,
+  "morale": null,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Pollinate",
+    "damage": null,
+    "notes": "when touched it discharges pollen: TOUGHNESS DR12 or become infected"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Additional Infection Effects",
+    "text": "Every morning and evening the infected tests TOUGHNESS DR x, where x = days since infection + 1. Fail: overcome by the urge to travel deep into the jungle NOW. Fumble: as fail, but on reaching the jungle plant growth explodes through their veins, killing them instantly. Crit: cured of the pollen."
+   }
+  ],
+  "loot": [
+   {
+    "name": "Pollen",
+    "value": "20s/gram"
+   },
+   {
+    "name": "Flower",
+    "value": "d12 × 10s"
+   }
+  ],
+  "text": "Jungle flowers that look like treasure; when touched they explode with mind-controlling pollen that gestates inside the host.",
+  "source": "Core Rules",
+  "page": 90
+ },
+ {
+  "homebrew": false,
+  "id": "skeleton-lookout",
+  "name": "Skeleton: Lookout",
+  "category": "undead",
+  "group": "Skeletons",
+  "hp": 4,
+  "morale": 6,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Musket",
+    "damage": "2d6",
+    "notes": "Reload 1"
+   },
+   {
+    "name": "Bayonet",
+    "damage": "d4"
+   }
+  ],
+  "blackPowder": true,
+  "specials": [
+   {
+    "name": "Watchful",
+    "text": "DR8 to notice things when on watch."
+   },
+   {
+    "name": "Skeleton",
+    "text": "Any skeleton that takes more than 5 damage (after armor) at once tumbles into a pile of bones. Without a Cap'n or Warlock nearby, skeletons that fail a morale test crumble into ASH."
+   }
+  ],
+  "text": "Cowards. Easily distracted.",
+  "source": "Core Rules",
+  "page": 92
+ },
+ {
+  "homebrew": false,
+  "id": "skeleton-rank-and-vile",
+  "name": "Skeleton: Rank & Vile",
+  "category": "undead",
+  "group": "Skeletons",
+  "hp": 5,
+  "morale": 8,
+  "armor": null,
+  "attackChoice": "pick 1-2",
+  "attacks": [
+   {
+    "name": "Grave Breath",
+    "damage": "d2"
+   },
+   {
+    "name": "Knife",
+    "damage": "d4"
+   },
+   {
+    "name": "Dagger",
+    "damage": "d4"
+   },
+   {
+    "name": "Scimitar",
+    "damage": "d6"
+   },
+   {
+    "name": "Small Axe",
+    "damage": "d6"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Skeleton",
+    "text": "Any skeleton that takes more than 5 damage (after armor) at once tumbles into a pile of bones. Without a Cap'n or Warlock nearby, skeletons that fail a morale test crumble into ASH."
+   }
+  ],
+  "text": "Rotten, undead scallywags.",
+  "source": "Core Rules",
+  "page": 92
+ },
+ {
+  "homebrew": false,
+  "id": "skeleton-dead-eye",
+  "name": "Skeleton: Dead Eye",
+  "category": "undead",
+  "group": "Skeletons",
+  "hp": 7,
+  "morale": 8,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Flintlocks",
+    "damage": "2d4",
+    "notes": "ranged"
+   },
+   {
+    "name": "Claw",
+    "damage": "d2"
+   }
+  ],
+  "blackPowder": true,
+  "specials": [
+   {
+    "name": "Pistol Brace",
+    "text": "Carries d4 flintlock pistols and fires them all before stopping to reload; can reload 2 flintlocks as a single action."
+   },
+   {
+    "name": "Skeleton",
+    "text": "Any skeleton that takes more than 5 damage (after armor) at once tumbles into a pile of bones. Without a Cap'n or Warlock nearby, skeletons that fail a morale test crumble into ASH."
+   }
+  ],
+  "text": "Wily. Shifty. Quick.",
+  "source": "Core Rules",
+  "page": 92
+ },
+ {
+  "homebrew": false,
+  "id": "skeleton-hulk",
+  "name": "Skeleton: Hulk",
+  "category": "undead",
+  "group": "Skeletons",
+  "hp": 12,
+  "morale": 8,
+  "armor": {
+   "name": "Thick Bones",
+   "die": "d4",
+   "tier": 2
+  },
+  "attacks": [
+   {
+    "name": "Harpoon",
+    "damage": "d6"
+   },
+   {
+    "name": "Mast",
+    "damage": "d8"
+   }
+  ],
+  "attackChoice": "one of",
+  "specials": [
+   {
+    "name": "Huge",
+    "text": "DR10 to attack and defend against."
+   },
+   {
+    "name": "Fishing",
+    "text": "The harpoon is tied to a broken mast and can be used to \"fish\" for targets and reel the skewered in."
+   },
+   {
+    "name": "Skeleton",
+    "text": "Any skeleton that takes more than 5 damage (after armor) at once tumbles into a pile of bones. Without a Cap'n or Warlock nearby, skeletons that fail a morale test crumble into ASH."
+   }
+  ],
+  "dr": {
+   "attack": 10,
+   "defend": 10
+  },
+  "text": "Huge. Slow. Strong.",
+  "source": "Core Rules",
+  "page": 92
+ },
+ {
+  "homebrew": false,
+  "id": "skeleton-bosun",
+  "name": "Skeleton: Bosun",
+  "category": "undead",
+  "group": "Skeletons",
+  "hp": 11,
+  "morale": 9,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Smallsword",
+    "damage": "d6"
+   },
+   {
+    "name": "Cat o' Nine Tails",
+    "damage": "d4"
+   }
+  ],
+  "attacksPerRound": 2,
+  "specials": [
+   {
+    "name": "Two Weapons",
+    "text": "Can attack with both weapons each turn."
+   },
+   {
+    "name": "Bossy",
+    "text": "Skeletons within 20' automatically pass morale tests."
+   },
+   {
+    "name": "Skeleton",
+    "text": "Any skeleton that takes more than 5 damage (after armor) at once tumbles into a pile of bones. Without a Cap'n or Warlock nearby, skeletons that fail a morale test crumble into ASH."
+   }
+  ],
+  "text": "Loud. Bossy. Cruel. Alert.",
+  "source": "Core Rules",
+  "page": 93
+ },
+ {
+  "homebrew": false,
+  "id": "skeleton-warlock",
+  "name": "Skeleton: Warlock",
+  "category": "undead",
+  "group": "Skeletons",
+  "hp": 6,
+  "morale": 9,
+  "armor": {
+   "name": "Arcane Shield",
+   "die": "d4",
+   "tier": 2
+  },
+  "attacks": [
+   {
+    "name": "Oar Staff",
+    "damage": "d4"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Sorcery",
+    "text": "Can cast one spell per turn: Reanimate (a dead skeleton rebuilds itself and recovers d6 HP); Weathercraft (the wind blows a desired direction); Necro-Gust (one creature it can see tests TOUGHNESS DR14 or takes d8 damage); Crow Sight (sees through its crow's eyes)."
+   },
+   {
+    "name": "Crow",
+    "text": "Accompanied by a crow: HP 2, Morale –, no armor, Beak d2 or Claws d2."
+   },
+   {
+    "name": "Skeleton",
+    "text": "Any skeleton that takes more than 5 damage (after armor) at once tumbles into a pile of bones. Without a Cap'n or Warlock nearby, skeletons that fail a morale test crumble into ASH."
+   }
+  ],
+  "spells": [
+   {
+    "name": "Reanimate",
+    "text": "A dead skeleton rebuilds itself and recovers d6 HP.",
+    "heal": "d6"
+   },
+   {
+    "name": "Weathercraft",
+    "text": "The wind blows a desired direction."
+   },
+   {
+    "name": "Necro-Gust",
+    "text": "One creature it can see tests TOUGHNESS DR14 or takes d8 damage.",
+    "test": {
+     "ability": "TOUGHNESS",
+     "dr": 14
+    },
+    "damage": "d8"
+   },
+   {
+    "name": "Crow Sight",
+    "text": "See from the crow's eyes."
+   }
+  ],
+  "text": "Vile. Maniacal. Cunning.",
+  "source": "Core Rules",
+  "page": 93
+ },
+ {
+  "homebrew": false,
+  "id": "crow",
+  "name": "Crow",
+  "category": "beast",
+  "group": "Skeletons",
+  "hp": 2,
+  "morale": null,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Beak",
+    "damage": "d2"
+   },
+   {
+    "name": "Claws",
+    "damage": "d2"
+   }
+  ],
+  "attackChoice": "one of",
+  "specials": [],
+  "text": "The Skeleton Warlock's familiar; the warlock can see through its eyes.",
+  "source": "Core Rules",
+  "page": 93
+ },
+ {
+  "homebrew": false,
+  "id": "skeleton-capn",
+  "name": "Skeleton: Cap'n",
+  "category": "undead",
+  "group": "Skeletons",
+  "hp": 10,
+  "morale": 10,
+  "armor": {
+   "name": "Leather Coat",
+   "die": "d2",
+   "tier": 1
+  },
+  "attacks": [
+   {
+    "name": "Cutlass",
+    "damage": "d6"
+   },
+   {
+    "name": "Hook",
+    "damage": "d4"
+   },
+   {
+    "name": "Flintlock",
+    "damage": "2d4",
+    "notes": "Reload 2"
+   }
+  ],
+  "blackPowder": true,
+  "specials": [
+   {
+    "name": "Unnatural Leader",
+    "text": "Other skeletons within 20' are DR +2 to defend against."
+   },
+   {
+    "name": "Horror of Nature",
+    "text": "At the start of combat PCs test SPIRIT DR12 or are frozen in fear for d4 rounds; they may test again each round."
+   },
+   {
+    "name": "Skeleton",
+    "text": "Any skeleton that takes more than 5 damage (after armor) at once tumbles into a pile of bones. Without a Cap'n or Warlock nearby, skeletons that fail a morale test crumble into ASH."
+   }
+  ],
+  "text": "Terrifying and extremely intelligent: they remember all their naval skills from life and are ferocious leaders.",
+  "source": "Core Rules",
+  "page": 93
+ },
+ {
+  "homebrew": false,
+  "id": "zombie-the-admiral",
+  "name": "Zombie: \"The Admiral\"",
+  "category": "undead",
+  "group": "Zombies",
+  "hp": 20,
+  "morale": 10,
+  "armor": {
+   "name": "Ghostly Aura",
+   "die": "d4",
+   "tier": 2
+  },
+  "attacks": [
+   {
+    "name": "Death-gaze",
+    "damage": "d6",
+    "notes": "300' range"
+   },
+   {
+    "name": "Cutlass",
+    "damage": "d8"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Rise!",
+    "text": "d6 destroyed undead rise with 1 HP."
+   },
+   {
+    "name": "Black Firestorm",
+    "text": "d4 creatures test AGILITY DR10 or each take d6 damage."
+   },
+   {
+    "name": "Spirit-siphon",
+    "text": "One creature tests SPIRIT DR12 or permanently loses 1 STRENGTH, and \"The Admiral\" recovers d8 HP."
+   }
+  ],
+  "text": "Not truly a zombie: a sorcerer turned to wicked necromancy, now undead. Intelligent commanders who lurk unseen; many keep soul crypts deep underwater or in ruined jungle temples.",
+  "source": "Core Rules",
+  "page": 95
+ },
+ {
+  "homebrew": false,
+  "id": "ghost-monkey",
+  "name": "Ghost Monkey",
+  "category": "spirit",
+  "group": "Ghosts",
+  "hp": 4,
+  "morale": 6,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Claws/bite",
+    "damage": "d4"
+   },
+   {
+    "name": "Monkey See, Monkey Poo",
+    "damage": null,
+    "notes": "test AGILITY DR12 or become poisoned"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Ethereal",
+    "text": "Can be invisible until it attacks, then it is DR16 to hit."
+   },
+   {
+    "name": "Ghostly Terror",
+    "text": "Anyone seeing ghosts for the first time tests SPIRIT DR12 or flees in terror; they may test again at the start of each turn. Ghosts love grog and rum (especially with black powder in it), and some plant roots are dangerous to them."
+   }
+  ],
+  "dr": {
+   "attack": 16
+  },
+  "text": "Excellent climbers and pickpockets that eat everything in sight. They love coconuts; bananas upset their stomachs (and bowels).",
+  "source": "Core Rules",
+  "page": 96
+ },
+ {
+  "homebrew": false,
+  "id": "ghost-crew",
+  "name": "Ghost Crew",
+  "category": "spirit",
+  "group": "Ghosts",
+  "hp": 7,
+  "morale": 7,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Cutlass",
+    "damage": "d6"
+   },
+   {
+    "name": "Harpoon",
+    "damage": "d8",
+    "notes": "can be thrown 30'"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Ethereal",
+    "text": "Can be invisible until it attacks, then it is DR14 to hit."
+   },
+   {
+    "name": "Ghostly Terror",
+    "text": "Anyone seeing ghosts for the first time tests SPIRIT DR12 or flees in terror; they may test again at the start of each turn. Ghosts love grog and rum (especially with black powder in it), and some plant roots are dangerous to them."
+   }
+  ],
+  "dr": {
+   "attack": 14
+  },
+  "text": "Sailors and pirates lost at sea, forever bound to carry out their captain's orders… and to search for grog.",
+  "source": "Core Rules",
+  "page": 96
+ },
+ {
+  "homebrew": false,
+  "id": "ghost-quartermaster",
+  "name": "Ghost Quartermaster",
+  "category": "spirit",
+  "group": "Ghosts",
+  "hp": 10,
+  "morale": 9,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Scimitar",
+    "damage": "d8"
+   },
+   {
+    "name": "Flintlock",
+    "damage": "2d4"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Vicious Leader",
+    "text": "All Ghost Crew within 10' are DR14 to defend against, and only make morale tests if the Quartermaster or Captain is destroyed."
+   },
+   {
+    "name": "Ethereal",
+    "text": "Hidden until it attacks. Attacks against it are DR14."
+   },
+   {
+    "name": "Ghostly Terror",
+    "text": "Anyone seeing ghosts for the first time tests SPIRIT DR12 or flees in terror; they may test again at the start of each turn. Ghosts love grog and rum (especially with black powder in it), and some plant roots are dangerous to them."
+   }
+  ],
+  "dr": {
+   "attack": 14
+  },
+  "text": "Mean, foul second-in-command. In life they punished the crew; in death they punish everyone.",
+  "source": "Core Rules",
+  "page": 97
+ },
+ {
+  "homebrew": false,
+  "id": "ghost-captain",
+  "name": "Ghost Captain",
+  "category": "spirit",
+  "group": "Ghosts",
+  "hp": 15,
+  "morale": 10,
+  "armor": {
+   "name": "Gibbet Cage",
+   "die": "d4",
+   "tier": 2
+  },
+  "attacks": [
+   {
+    "name": "Chain Whip",
+    "damage": "d8",
+    "notes": "10' reach"
+   },
+   {
+    "name": "Spectral Cutlass",
+    "damage": "d8",
+    "notes": "+ Life Drain"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Life Drain",
+    "text": "Test SPIRIT DR12 or the captain drains all abilities by 1 until the next dawn and recovers d6 HP."
+   },
+   {
+    "name": "Ethereal",
+    "text": "Hidden until it attacks. DR14 to hit."
+   },
+   {
+    "name": "Hover",
+    "text": "Can fly up to 50' each turn."
+   },
+   {
+    "name": "Ghostly Terror",
+    "text": "Anyone seeing ghosts for the first time tests SPIRIT DR12 or flees in terror; they may test again at the start of each turn. Ghosts love grog and rum (especially with black powder in it), and some plant roots are dangerous to them."
+   }
+  ],
+  "dr": {
+   "attack": 14
+  },
+  "text": "Hanged for their crimes at sea, these full-body apparitions are horrifying to behold.",
+  "source": "Core Rules",
+  "page": 97
+ },
+ {
+  "homebrew": false,
+  "id": "scavenging-seagull",
+  "name": "Scavenging Seagull",
+  "category": "beast",
+  "hp": 4,
+  "morale": 6,
+  "moraleText": "6*",
+  "armor": {
+   "name": "Metallic Feathers",
+   "die": "d2",
+   "tier": 1
+  },
+  "count": "2d4",
+  "attacks": [
+   {
+    "name": "Claws",
+    "damage": "d4"
+   },
+   {
+    "name": "Bite",
+    "damage": "d4",
+    "notes": "1-in-4 risk of infection"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Flock",
+    "text": "Only test Morale when a seagull is left alone; they wreak havoc in flocks of 2d4."
+   },
+   {
+    "name": "Metal Eaters",
+    "text": "Drawn to anything that glitters; the metal they eat becomes part of their bodies."
+   }
+  ],
+  "lootTable": {
+   "die": "d10",
+   "name": "In the Belly of a Seagull",
+   "note": "In the belly of a seagull.",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "A coin with an engraved map."
+    },
+    {
+     "roll": 2,
+     "text": "An unbreakable thread (1' long)."
+    },
+    {
+     "roll": 3,
+     "text": "A dozen rusty nails."
+    },
+    {
+     "roll": 4,
+     "text": "A black dagger."
+    },
+    {
+     "roll": 5,
+     "text": "Two dozen silver."
+    },
+    {
+     "roll": 6,
+     "text": "A shimmering necklace of skull pieces."
+    },
+    {
+     "roll": 7,
+     "text": "Three fingers."
+    },
+    {
+     "roll": 8,
+     "text": "Blackened sludge."
+    },
+    {
+     "roll": 9,
+     "text": "A miniature metal statue."
+    },
+    {
+     "roll": 10,
+     "text": "Two poisonous needles."
+    }
+   ]
+  },
+  "text": "When the sea lies still as a painting, these terrible birds can shatter the silence with a cacophony of screams. Written by Pelle Nilsson.",
+  "source": "Core Rules",
+  "page": 98
+ },
+ {
+  "homebrew": false,
+  "id": "obscure-oyster-cult",
+  "name": "Obscure Oyster Cult",
+  "category": "beast",
+  "hp": 6,
+  "morale": 7,
+  "armor": {
+   "name": "Ornamented Shell",
+   "die": "d6",
+   "tier": 3
+  },
+  "count": "d4+2",
+  "attacks": [
+   {
+    "name": "Crash",
+    "damage": "d4"
+   },
+   {
+    "name": "Snatch",
+    "damage": "d6",
+    "notes": "1-in-6: lose a finger"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Cult Name",
+    "text": "Roll d4 twice: 1 Molluscan / Depth, 2 Silent / Streams, 3 Waving / Entity, 4 Endless / Deadbeats."
+   },
+   {
+    "name": "Charge",
+    "text": "On land they tend to run at their prey and crash into it."
+   }
+  ],
+  "cultName": {
+   "die": "d4",
+   "first": [
+    "Molluscan",
+    "Silent",
+    "Waving",
+    "Endless"
+   ],
+   "second": [
+    "Depth",
+    "Streams",
+    "Entity",
+    "Deadbeats"
+   ]
+  },
+  "text": "Huge (for an oyster) mollusks that hum and meditate peacefully at sea, but crawl ashore on crooked limbs hunting blood and flesh for their enlightenment rituals. Always found in groups of d4+2, each shell ornamented with otherworldly symbols. Written by Pelle Nilsson.",
+  "source": "Core Rules",
+  "page": 99
+ },
+ {
+  "homebrew": false,
+  "id": "deep-ones",
+  "name": "Deep Ones",
+  "category": "monster",
+  "hp": 11,
+  "morale": 8,
+  "armor": {
+   "name": "Scales",
+   "die": "d2",
+   "tier": 1
+  },
+  "attackChoice": "pick 1-2",
+  "attacks": [
+   {
+    "name": "Mollusk Shell Spear",
+    "damage": "d8",
+    "notes": "thrown or 10' reach"
+   },
+   {
+    "name": "Shark Tooth Blade",
+    "damage": "d6"
+   },
+   {
+    "name": "Coral Staff",
+    "damage": "d4",
+    "notes": "or the effect of one Ancient Relic (pg. 62)"
+   },
+   {
+    "name": "Ritual (pg. 64)",
+    "damage": null,
+    "notes": "takes d4 rounds to cast (DR10)"
+   }
+  ],
+  "specials": [],
+  "text": "Fishfolk humanoids once thought a myth: excellent swimmers, somewhat intelligent; their shamans know sea magic.",
+  "source": "Core Rules",
+  "page": 100
+ },
+ {
+  "homebrew": false,
+  "id": "the-drowned",
+  "name": "The Drowned",
+  "category": "undead",
+  "hp": 9,
+  "morale": 9,
+  "armor": {
+   "name": "Kelp Shroud",
+   "die": "d2",
+   "tier": 1
+  },
+  "attacks": [
+   {
+    "name": "Claws and Seaweed Snare",
+    "damage": "d4",
+    "notes": "+ AGILITY DR12 or Entangled: can't move; STRENGTH DR12 (an action) to break free"
+   },
+   {
+    "name": "Submerge",
+    "damage": null,
+    "notes": "pulls an entangled victim underwater; see Holding Your Breath (pg. 28)"
+   }
+  ],
+  "specials": [],
+  "text": "Mariners lost to the dark tide: waterlogged ghouls drifting in kelp forests waiting for sailors to pass.",
+  "source": "Core Rules",
+  "page": 100
+ },
+ {
+  "homebrew": false,
+  "id": "gorilla-crab",
+  "name": "Gorilla Crab",
+  "category": "beast",
+  "hp": 12,
+  "morale": 7,
+  "armor": {
+   "name": "Shell",
+   "die": "d6",
+   "tier": 3
+  },
+  "attacks": [
+   {
+    "name": "Big Claw",
+    "damage": "d8"
+   },
+   {
+    "name": "Little Claw",
+    "damage": "d2"
+   }
+  ],
+  "attacksPerRound": 2,
+  "specials": [
+   {
+    "name": "Combatant",
+    "text": "Makes two attacks, one with each claw."
+   },
+   {
+    "name": "Climber",
+    "text": "Can climb and hide in trees."
+   }
+  ],
+  "text": "Large, territorial crustaceans of coral reefs and coastal jungles, named for the way they move; known to charge when threatened.",
+  "source": "Core Rules",
+  "page": 101
+ },
+ {
+  "homebrew": false,
+  "id": "sea-wraith",
+  "name": "Sea Wraith",
+  "category": "spirit",
+  "hp": 16,
+  "morale": null,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Cutlass",
+    "damage": "d6"
+   },
+   {
+    "name": "Blood Freeze",
+    "damage": "d2",
+    "notes": "+ TOUGHNESS DR14 or Frozen: no movement or actions; take d2 at the start of your turn, then test again"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Ethereal",
+    "text": "DR14 to hit."
+   }
+  ],
+  "dr": {
+   "attack": 14
+  },
+  "text": "Ghosts of captains lost at sea, bound to the world by unfinished business. They float in water and air.",
+  "source": "Core Rules",
+  "page": 101
+ },
+ {
+  "homebrew": false,
+  "id": "siren",
+  "name": "Siren",
+  "category": "monster",
+  "hp": 12,
+  "morale": 8,
+  "armor": {
+   "name": "Scales",
+   "die": "d2",
+   "tier": 1
+  },
+  "attacks": [
+   {
+    "name": "Claw",
+    "damage": "d4"
+   },
+   {
+    "name": "Tentacles",
+    "damage": null,
+    "notes": "AGILITY DR12 or grappled in a tentacle; may test again at the end of each turn"
+   },
+   {
+    "name": "Consume",
+    "damage": null,
+    "notes": "sucks the soul of a creature caught in its tentacles: TOUGHNESS DR12 or lose d12 HP"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Siren's Song",
+    "text": "Each turn, a creature that can hear a siren singing tests SPIRIT DR12 or spends its turn moving closer to a siren and defending it."
+   }
+  ],
+  "text": "They often form covens of three. Out of water their hypnotic song draws sailors from miles away; underwater they sound like tormented banshees.",
+  "source": "Core Rules",
+  "page": 102
+ },
+ {
+  "homebrew": false,
+  "id": "black-coral-crab",
+  "name": "Black Coral Crab",
+  "category": "beast",
+  "hp": 1,
+  "morale": 5,
+  "armor": {
+   "name": "Shell",
+   "die": "d4",
+   "tier": 2
+  },
+  "attacks": [
+   {
+    "name": "Claws",
+    "damage": "d2"
+   },
+   {
+    "name": "Spikes",
+    "damage": "d2"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Soft Belly",
+    "text": "Unarmored from beneath."
+   }
+  ],
+  "text": "Invasive, spiky crustaceans that feast on coral, swarming so thickly that whole reefs look like black, shifting masses.",
+  "source": "Core Rules",
+  "page": 102
+ },
+ {
+  "homebrew": false,
+  "id": "coral-shoggoth",
+  "name": "Coral Shoggoth",
+  "category": "monster",
+  "boss": true,
+  "hp": 50,
+  "morale": 8,
+  "armor": {
+   "name": "Coral",
+   "die": "d4",
+   "tier": 2
+  },
+  "attacks": [
+   {
+    "name": "Hydrothermal Breath",
+    "damage": "d10",
+    "notes": "10'"
+   },
+   {
+    "name": "Stomp (land)",
+    "damage": null,
+    "notes": "shock waves ripple 25' out: STRENGTH DR12 or fall prone for the next turn"
+   },
+   {
+    "name": "Coral Spike Bash",
+    "damage": "d8",
+    "notes": "creatures in its path test AGILITY DR10 or take d8 each"
+   }
+  ],
+  "specials": [],
+  "text": "Extremely intelligent abominations from a forgotten age that have grown to resemble their surroundings.",
+  "source": "Core Rules",
+  "page": 103
+ },
+ {
+  "homebrew": false,
+  "id": "undead-megalodon",
+  "name": "Undead Megalodon",
+  "category": "monster",
+  "boss": true,
+  "hp": 40,
+  "morale": null,
+  "armor": {
+   "name": "Shark Skin",
+   "die": "d6",
+   "tier": 3
+  },
+  "attacks": [
+   {
+    "name": "Zombie Vomit",
+    "damage": null,
+    "notes": "d4 zombies emerge"
+   },
+   {
+    "name": "Bite",
+    "damage": "d12",
+    "notes": "DR8 to dodge"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Fearless",
+    "text": "Only scared of bigger fish."
+   },
+   {
+    "name": "Elusive",
+    "text": "DR16 to hit when underwater (if it can even be seen), DR8 when surfacing."
+   },
+   {
+    "name": "Undying",
+    "text": "If reduced to 0 HP or less, it tests DR12 to drop to 1 HP instead."
+   },
+   {
+    "name": "Sea Monster",
+    "text": "In Naval Combat sea monsters aren't affected by wind and can move up to their speed in any direction."
+   }
+  ],
+  "dr": {
+   "attack": 16,
+   "defend": 8
+  },
+  "drNote": "DR16 to hit underwater (if it can even be seen), DR8 when surfacing; its bite is DR8 to dodge.",
+  "naval": {
+   "hp": 8,
+   "morale": null,
+   "armor": null,
+   "speed": 6,
+   "agility": 3,
+   "attacks": [
+    {
+     "name": "Spike Ram",
+     "damage": "d12"
+    }
+   ]
+  },
+  "text": "A colossal undead shark.",
+  "source": "Core Rules",
+  "page": 104
+ },
+ {
+  "homebrew": false,
+  "id": "the-kraken",
+  "name": "The Kraken",
+  "category": "monster",
+  "boss": true,
+  "hp": 200,
+  "morale": 9,
+  "armor": {
+   "name": "Rubbery Skin",
+   "die": "d4",
+   "tier": 2
+  },
+  "attacks": [
+   {
+    "name": "Tentacle Slam",
+    "damage": "d6",
+    "notes": "4 per turn"
+   },
+   {
+    "name": "Grab",
+    "damage": null,
+    "notes": "AGILITY DR12 to dodge"
+   },
+   {
+    "name": "Eat",
+    "damage": null,
+    "notes": "death to one grabbed creature"
+   }
+  ],
+  "attacksPerRound": 4,
+  "specials": [
+   {
+    "name": "Huge",
+    "text": "DR8 to hit."
+   },
+   {
+    "name": "Optional",
+    "text": "Its 8 tentacles have 25 HP each."
+   },
+   {
+    "name": "Sea Monster",
+    "text": "In Naval Combat sea monsters aren't affected by wind and can move up to their speed in any direction."
+   }
+  ],
+  "dr": {
+   "attack": 8
+  },
+  "naval": {
+   "hp": 40,
+   "morale": 9,
+   "armor": null,
+   "speed": 4,
+   "agility": 1,
+   "attacks": [
+    {
+     "name": "Tentacles",
+     "damage": "d6",
+     "notes": "up to 4 per turn"
+    },
+    {
+     "name": "Entangle",
+     "damage": null,
+     "notes": "the ship can't move, but attacks against the Kraken are DR6"
+    }
+   ]
+  },
+  "text": "The legendary many-armed terror of the deep.",
+  "source": "Core Rules",
+  "page": 105
+ },
+ {
+  "homebrew": false,
+  "id": "davy-jones",
+  "name": "Davy Jones",
+  "category": "monster",
+  "boss": true,
+  "hp": 200,
+  "morale": 10,
+  "armor": {
+   "name": "Shell",
+   "die": "d6",
+   "tier": 3
+  },
+  "attacks": [
+   {
+    "name": "Bite",
+    "damage": "3d12"
+   },
+   {
+    "name": "Fin Spikes",
+    "damage": "2d8"
+   },
+   {
+    "name": "Soul Rend",
+    "damage": null,
+    "notes": "test PRESENCE DR12 or go mad; test again each turn; fail three times: permanent insanity"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Telepathic",
+    "text": "Highly intelligent, but communicates only telepathically."
+   },
+   {
+    "name": "Sea Monster",
+    "text": "In Naval Combat sea monsters aren't affected by wind and can move up to their speed in any direction."
+   }
+  ],
+  "naval": {
+   "hp": 40,
+   "morale": 10,
+   "armor": {
+    "name": "Shell",
+    "die": "d4",
+    "tier": 2
+   },
+   "speed": 6,
+   "agility": 3,
+   "attacks": [
+    {
+     "name": "Spike Ram",
+     "damage": "d12"
+    }
+   ]
+  },
+  "text": "A legendary monster often mistaken for a small island, eyes swirling like a maelstrom. Some call him the god who guides the dead to their watery graves; others say he was once a man who dabbled in dark sorcery.",
+  "source": "Core Rules",
+  "page": 106
+ },
+ {
+  "homebrew": false,
+  "id": "the-leviathan",
+  "name": "The Leviathan",
+  "category": "monster",
+  "boss": true,
+  "hp": 400,
+  "morale": 8,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Bite",
+    "damage": "3d12"
+   },
+   {
+    "name": "Tentacles",
+    "damage": "2d8"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Terrifying",
+    "text": "Creatures seeing the Leviathan for the first time test PRESENCE or SPIRIT DR12 (PC's choice) or flee in terror; they may test again at the start of each turn."
+   },
+   {
+    "name": "Sea Monster",
+    "text": "In Naval Combat sea monsters aren't affected by wind and can move up to their speed in any direction."
+   }
+  ],
+  "naval": {
+   "hp": 80,
+   "morale": 8,
+   "armor": null,
+   "speed": 3,
+   "agility": 1,
+   "attacks": [
+    {
+     "name": "Tentacles",
+     "damage": "d12"
+    }
+   ]
+  },
+  "text": "An antediluvian creature lurking in the darkest abyss, waiting to devour the world.",
+  "source": "Core Rules",
+  "page": 107
+ },
+ {
+  "homebrew": false,
+  "id": "marrow-carronade",
+  "name": "Marrow Carronade",
+  "category": "construct",
+  "group": "Marrow Cannons",
+  "hp": 24,
+  "morale": 6,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Round Shot",
+    "damage": "d8",
+    "notes": "melee & naval combat"
+   },
+   {
+    "name": "Canister Shot",
+    "damage": "d4",
+    "notes": "once per turn roll d6: on a 6 it fires canister shot, d4 to every creature in a small cone in front of it"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Marrow Cannon",
+    "text": "A sentient undead cannon built by necrosmiths from human, livestock and fish remains. Usable in melee and naval combat."
+   }
+  ],
+  "text": "A squat bone cannon on a wheeled carriage.",
+  "source": "Core Rules",
+  "page": 108
+ },
+ {
+  "homebrew": false,
+  "id": "marrow-mortar",
+  "name": "Marrow Mortar",
+  "category": "construct",
+  "group": "Marrow Cannons",
+  "hp": 12,
+  "morale": 5,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Indirect Fire",
+    "damage": "2d6",
+    "notes": "shells a creature an ally attacked since the mortar's last turn: AGILITY DR14 or take 2d6"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Marrow Cannon",
+    "text": "A sentient undead cannon built by necrosmiths from human, livestock and fish remains."
+   }
+  ],
+  "text": "A wide-mouthed mortar riding on a cart of ribs and skulls.",
+  "source": "Core Rules",
+  "page": 109
+ },
+ {
+  "homebrew": false,
+  "id": "bane-of-barbados",
+  "name": "Bane of Barbados",
+  "category": "construct",
+  "group": "Marrow Cannons",
+  "named": true,
+  "hp": 48,
+  "morale": 10,
+  "armor": {
+   "name": "Steel Plating",
+   "die": "d4",
+   "tier": 2
+  },
+  "attacks": [
+   {
+    "name": "Round Shot",
+    "damage": "d12",
+    "notes": "melee & naval combat"
+   },
+   {
+    "name": "Explosive Shot",
+    "damage": "3d6",
+    "notes": "creatures in a 10' radius test AGILITY DR14: fail 3d6 damage, pass half"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Marrow Cannon",
+    "text": "The mightiest marrow cannons have smoothbore whalebone barrels and are named after the cities they first reduced to rubble."
+   }
+  ],
+  "text": "A great whalebone-barreled marrow cannon.",
+  "source": "Core Rules",
+  "page": 109
+ },
+ {
+  "homebrew": false,
+  "id": "vessel-from-the-deep-claw",
+  "name": "Vessel from the Deep: Claw",
+  "category": "monster",
+  "group": "Vessel from the Deep",
+  "hp": 10,
+  "morale": null,
+  "armor": {
+   "name": "Shell",
+   "die": "d6",
+   "tier": 3
+  },
+  "count": 2,
+  "attacks": [
+   {
+    "name": "Pinch",
+    "damage": "d12"
+   }
+  ],
+  "specials": [],
+  "text": "One of the two great claws of a Vessel from the Deep, fought in melee.",
+  "source": "Core Rules",
+  "page": 85
+ },
+ {
+  "homebrew": false,
+  "id": "vessel-from-the-deep-tentacle",
+  "name": "Vessel from the Deep: Tentacle",
+  "category": "monster",
+  "group": "Vessel from the Deep",
+  "hp": 2,
+  "morale": null,
+  "armor": null,
+  "count": 8,
+  "attacks": [
+   {
+    "name": "Slam",
+    "damage": "d4",
+    "notes": "+ AGILITY DR12 or entangled; STRENGTH DR12 to escape each round"
+   }
+  ],
+  "specials": [],
+  "text": "One of the eight tentacles of a Vessel from the Deep, fought in melee.",
+  "source": "Core Rules",
+  "page": 85
+ },
+ {
+  "homebrew": false,
+  "id": "the-naval-mastermind",
+  "name": "The Naval Mastermind",
+  "category": "npc",
+  "group": "Archetype Captain: Naval Mastermind",
+  "captain": "naval-mastermind",
+  "boss": true,
+  "hp": 13,
+  "morale": 9,
+  "armor": {
+   "name": "Leather Doublet",
+   "die": "d2",
+   "tier": 1
+  },
+  "attacks": [
+   {
+    "name": "Captain's Cutlass",
+    "damage": "d8",
+    "notes": "DR +2 to attack & defend"
+   },
+   {
+    "name": "Dueling Pistol",
+    "damage": "2d4",
+    "notes": "DR16 to defend if aimed for 1 turn; Reload 2"
+   }
+  ],
+  "blackPowder": true,
+  "specials": [
+   {
+    "name": "When aboard a ship",
+    "text": "That ship's attacks are −2 DR to hit, and it may take 1 extra crew action each turn."
+   }
+  ],
+  "dr": {
+   "attack": 14,
+   "defend": 14
+  },
+  "drNote": "DR +2 applies while he fights with the Captain's Cutlass; once he has aimed the Dueling Pistol for 1 turn it is DR16 to defend.",
+  "text": "Tactical geniuses shaped by naval academies and decades at sea, hunting pirates, treasure fleets and enemies of the Crown.",
+  "source": "Core Rules",
+  "page": 110
+ },
+ {
+  "homebrew": false,
+  "id": "naval-officer",
+  "name": "Naval Officer",
+  "category": "npc",
+  "group": "Archetype Captain: Naval Mastermind",
+  "captain": "naval-mastermind",
+  "hp": 8,
+  "morale": 8,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Cutlass",
+    "damage": "d6"
+   },
+   {
+    "name": "Flintlock",
+    "damage": "2d4",
+    "notes": "Reload 2 actions"
+   },
+   {
+    "name": "Issue Command",
+    "damage": null,
+    "notes": "attacks/defense for one nearby ally are DR16 for one turn"
+   }
+  ],
+  "blackPowder": true,
+  "specials": [
+   {
+    "name": "Nearby Crew",
+    "text": "Nearby crew are DR14 to defend against and +3 Morale."
+   }
+  ],
+  "text": "Lieutenants, midshipmen, mates, bosuns and quartermasters: soldiers who are weapons of war.",
+  "source": "Core Rules",
+  "page": 110
+ },
+ {
+  "homebrew": false,
+  "id": "naval-crew",
+  "name": "Naval Crew",
+  "category": "npc",
+  "group": "Archetype Captain: Naval Mastermind",
+  "captain": "naval-mastermind",
+  "hp": 4,
+  "morale": 5,
+  "armor": null,
+  "attackChoice": "pick 1-2",
+  "attacks": [
+   {
+    "name": "Cutlass",
+    "damage": "d6"
+   },
+   {
+    "name": "Cudgel",
+    "damage": "d4"
+   },
+   {
+    "name": "Flintlock",
+    "damage": "2d4"
+   },
+   {
+    "name": "Musket",
+    "damage": "2d6"
+   }
+  ],
+  "blackPowder": true,
+  "specials": [],
+  "text": "Enlisted men, sailors and press-ganged drunks living short, harsh lives.",
+  "source": "Core Rules",
+  "page": 110
+ },
+ {
+  "homebrew": false,
+  "id": "the-inquisitor",
+  "name": "The Inquisitor",
+  "category": "npc",
+  "group": "Archetype Captain: Inquisitor",
+  "captain": "inquisitor",
+  "boss": true,
+  "hp": 15,
+  "morale": 8,
+  "armor": {
+   "name": "Plate",
+   "die": "d6",
+   "tier": 3
+  },
+  "attacks": [
+   {
+    "name": "Blessed Rapier",
+    "damage": "d8",
+    "notes": "+2 DR to defend"
+   },
+   {
+    "name": "Banner Pole",
+    "damage": "d6",
+    "notes": "STRENGTH DR10 or knocked over (can't move next turn)"
+   },
+   {
+    "name": "The Power of the Holy Spirit",
+    "damage": null,
+    "notes": "one creature is stunned for one turn"
+   },
+   {
+    "name": "Revel in the Sacrament",
+    "damage": null,
+    "notes": "d6 of its allies recover d4 HP"
+   },
+   {
+    "name": "Holy Flame",
+    "damage": "d10",
+    "notes": "one creature tests SPIRIT DR10 or loses d10 HP"
+   }
+  ],
+  "specials": [
+   {
+    "name": "When aboard a ship",
+    "text": "The Inquisitor can spend a crew action and test DR14 to change the wind direction (one hex face) and speed (±1 speed)."
+   }
+  ],
+  "dr": {
+   "defend": 14
+  },
+  "text": "Religious, tyrannical, patriarchal commanders of armored conquistadors and devoted priests, hunting down anyone they deem a heretic.",
+  "source": "Core Rules",
+  "page": 111
+ },
+ {
+  "homebrew": false,
+  "id": "conquistador",
+  "name": "Conquistador",
+  "category": "npc",
+  "group": "Archetype Captain: Inquisitor",
+  "captain": "inquisitor",
+  "hp": 9,
+  "morale": 8,
+  "armor": {
+   "name": "Plate",
+   "die": "d6",
+   "tier": 3
+  },
+  "attackChoice": "pick 1-2",
+  "attacks": [
+   {
+    "name": "Rapier",
+    "damage": "d8"
+   },
+   {
+    "name": "Pike",
+    "damage": "d10",
+    "notes": "2 hands"
+   },
+   {
+    "name": "Crossbow",
+    "damage": "d8",
+    "notes": "Reload 1"
+   },
+   {
+    "name": "Musket",
+    "damage": "2d6",
+    "notes": "Reload 2"
+   }
+  ],
+  "blackPowder": true,
+  "specials": [],
+  "text": "Strong, arrogant, heavily armored paladins.",
+  "source": "Core Rules",
+  "page": 111
+ },
+ {
+  "homebrew": false,
+  "id": "purge-priest",
+  "name": "Purge Priest",
+  "category": "npc",
+  "group": "Archetype Captain: Inquisitor",
+  "captain": "inquisitor",
+  "hp": 4,
+  "morale": 6,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Fisticuffs",
+    "damage": "d2+1"
+   },
+   {
+    "name": "Touch of God",
+    "damage": null,
+    "notes": "touch one creature to heal it d4 HP"
+   }
+  ],
+  "specials": [],
+  "text": "Corrupted, maniacal and devout.",
+  "source": "Core Rules",
+  "page": 111
+ },
+ {
+  "homebrew": false,
+  "id": "the-necromancer",
+  "name": "The Necromancer",
+  "category": "undead",
+  "group": "Archetype Captain: Necromancer",
+  "captain": "necromancer",
+  "boss": true,
+  "hp": 20,
+  "morale": 10,
+  "armor": {
+   "name": "Lich-like",
+   "die": "d2",
+   "tier": 1
+  },
+  "armorNote": "−d4 against non-iron weapons",
+  "attacks": [
+   {
+    "name": "Legendary Cutlass",
+    "damage": "d10"
+   },
+   {
+    "name": "Necro Blast",
+    "damage": "2d6",
+    "notes": "50' range, recharge 1"
+   },
+   {
+    "name": "Reanimate",
+    "damage": null,
+    "notes": "d4 dead creatures or piles of bone animate as Skeleton Crew"
+   },
+   {
+    "name": "Soul Harvest",
+    "damage": null,
+    "notes": "touch a recently killed human to recover d8 HP"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Unholy",
+    "text": "\"Healing\" magic damages it, bypassing armor."
+   },
+   {
+    "name": "When aboard a ship",
+    "text": "Bones can be fired from its cannons onto an enemy ship; the Necromancer can spend its action to animate them."
+   }
+  ],
+  "text": "Less human than human: once captains, now consumed by dark sorcery and compelled to drain the life from the living.",
+  "source": "Core Rules",
+  "page": 112
+ },
+ {
+  "homebrew": false,
+  "id": "skeleton-crew",
+  "name": "Skeleton Crew",
+  "category": "undead",
+  "group": "Archetype Captain: Necromancer",
+  "captain": "necromancer",
+  "hp": 4,
+  "morale": null,
+  "armor": null,
+  "attackChoice": "pick 1-2",
+  "attacks": [
+   {
+    "name": "Scimitar",
+    "damage": "d6"
+   },
+   {
+    "name": "Claws",
+    "damage": "d4"
+   },
+   {
+    "name": "Femur Club",
+    "damage": "d6"
+   },
+   {
+    "name": "Ghost Chains",
+    "damage": "d4",
+    "notes": "10' range, hits 2 targets"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Skeleton",
+    "text": "Any skeleton that takes more than 5 damage (after armor) at once tumbles into a pile of bones. Without a Cap'n or Warlock nearby, skeletons that fail a morale test crumble into ASH."
+   }
+  ],
+  "text": "Crew of the dead, driven by eldritch ambition: they remember their sailing and combat skills from life, but none of the desire to live.",
+  "source": "Core Rules",
+  "page": 112
+ },
+ {
+  "homebrew": false,
+  "id": "living-thralls",
+  "name": "Living Thralls",
+  "category": "npc",
+  "group": "Archetype Captain: Necromancer",
+  "captain": "necromancer",
+  "hp": 6,
+  "morale": 7,
+  "armor": null,
+  "attackChoice": "pick 1-2",
+  "attacks": [
+   {
+    "name": "Cutlass",
+    "damage": "d6"
+   },
+   {
+    "name": "Knife",
+    "damage": "d6"
+   },
+   {
+    "name": "Flintlock",
+    "damage": "2d4",
+    "notes": "Reload 2"
+   },
+   {
+    "name": "Exploding Bone Grenades",
+    "damage": "d6",
+    "notes": "d4 creatures test AGILITY DR10 or take d6 each"
+   }
+  ],
+  "blackPowder": true,
+  "specials": [],
+  "text": "Servants and students of the dark captain.",
+  "source": "Core Rules",
+  "page": 112
+ },
+ {
+  "homebrew": false,
+  "id": "the-sunken-one",
+  "name": "The Sunken One",
+  "category": "monster",
+  "group": "Archetype Captain: Sunken One",
+  "captain": "sunken-one",
+  "boss": true,
+  "hp": 24,
+  "morale": 10,
+  "armor": {
+   "name": "Crustacean Carapace",
+   "die": "d4",
+   "tier": 2
+  },
+  "attacks": [
+   {
+    "name": "Claw",
+    "damage": "d12"
+   },
+   {
+    "name": "Leg Stab",
+    "damage": "d6",
+    "notes": "2 targets"
+   },
+   {
+    "name": "Trident",
+    "damage": "d10",
+    "notes": "10' range, can be thrown"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Wave Call (aboard a ship)",
+    "text": "Deal d8 damage to another ship and push it 1 hex in any direction. Recharges after 4 rounds."
+   }
+  ],
+  "text": "Wretched cult leaders bound by a pact with The Old Ones: shipwrecked captains who prayed to the Abyss for salvation, now abominations anchored to the sea.",
+  "source": "Core Rules",
+  "page": 113
+ },
+ {
+  "homebrew": false,
+  "id": "thing-from-below",
+  "name": "Thing from Below",
+  "category": "monster",
+  "group": "Archetype Captain: Sunken One",
+  "captain": "sunken-one",
+  "hp": 9,
+  "hpText": "2d8",
+  "hpDice": "2d8",
+  "morale": 9,
+  "moraleText": "d6+6",
+  "moraleDice": "d6+6",
+  "armor": {
+   "name": "Scaly Skin",
+   "die": "d2",
+   "tier": 1
+  },
+  "attackChoice": "pick 1-2",
+  "attacks": [
+   {
+    "name": "Claws",
+    "damage": "d4"
+   },
+   {
+    "name": "Bite",
+    "damage": "d6"
+   },
+   {
+    "name": "Stinger",
+    "damage": "d6"
+   },
+   {
+    "name": "Tentacles",
+    "damage": "d6",
+    "notes": "2 targets"
+   },
+   {
+    "name": "Urchin Flail",
+    "damage": "d8"
+   },
+   {
+    "name": "Squid Ink Sack Spray",
+    "damage": null,
+    "notes": "d4 nearby targets test AGILITY DR12 or are blind for 1 round"
+   }
+  ],
+  "specials": [],
+  "text": "Aquatic mutants corrupted by years under water.",
+  "source": "Core Rules",
+  "page": 113
+ },
+ {
+  "homebrew": false,
+  "id": "lost-sailor",
+  "name": "Lost Sailor",
+  "category": "npc",
+  "group": "Archetype Captain: Sunken One",
+  "captain": "sunken-one",
+  "hp": 6,
+  "morale": 5,
+  "armor": null,
+  "attackChoice": "pick 1-2",
+  "attacks": [
+   {
+    "name": "Sea Shell",
+    "damage": "d4"
+   },
+   {
+    "name": "Cutlass",
+    "damage": "d6"
+   },
+   {
+    "name": "Harpoon",
+    "damage": "d8"
+   },
+   {
+    "name": "Anchor",
+    "damage": "d10"
+   },
+   {
+    "name": "Fishhook Mace",
+    "damage": "d8"
+   },
+   {
+    "name": "Cargo Net",
+    "damage": null,
+    "notes": "AGILITY DR12 or trapped; test again at the end of each turn"
+   }
+  ],
+  "specials": [],
+  "text": "Mariners lost at sea who now serve The Deep.",
+  "source": "Core Rules",
+  "page": 113
+ },
+ {
+  "homebrew": false,
+  "id": "claude-barlette",
+  "name": "Claude Barlette",
+  "category": "npc",
+  "named": true,
+  "boss": true,
+  "group": "Skeleton Point NPCs",
+  "hp": 25,
+  "morale": 11,
+  "armor": {
+   "name": "Necro-aura",
+   "die": "d4",
+   "tier": 2
+  },
+  "attacks": [
+   {
+    "name": "Death Touch",
+    "damage": "d10",
+    "notes": "+ Shriveling Spell"
+   },
+   {
+    "name": "Shriveling Spell",
+    "damage": null,
+    "notes": "touch drains all stats by 1 for d20 hours; he regains d6 HP"
+   },
+   {
+    "name": "Levitate",
+    "damage": null,
+    "notes": "fly 60' a turn"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Anti-magic",
+    "text": "Any PC trying to use a Relic or Ritual against him must first test SPIRIT DR16."
+   }
+  ],
+  "text": "The Governor: a short, fat aristocrat, a terrible leader frantic about his missing daughter — and secretly a 150-year-old necromancer who keeps the island cursed with monthly rituals.",
+  "source": "The Curse of Skeleton Point",
+  "page": 132
+ },
+ {
+  "homebrew": false,
+  "id": "veronique-barlette",
+  "name": "Veronique Barlette",
+  "category": "npc",
+  "named": true,
+  "group": "Skeleton Point NPCs",
+  "hp": 5,
+  "morale": 9,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Teenage Insults",
+    "damage": "d2"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Tragic Paintings",
+    "text": "Her paintings are tragically beautiful; many weep after gazing at them for any length of time."
+   }
+  ],
+  "text": "The Governor's daughter: a pale, dark landscape painter who fell in love with The Baron and ran away to live with him.",
+  "source": "The Curse of Skeleton Point",
+  "page": 132
+ },
+ {
+  "homebrew": false,
+  "id": "the-baron",
+  "name": "The Baron",
+  "category": "undead",
+  "named": true,
+  "boss": true,
+  "group": "Skeleton Point NPCs",
+  "hp": 20,
+  "morale": null,
+  "armor": {
+   "name": "Plate",
+   "die": "d6",
+   "tier": 3
+  },
+  "attacks": [
+   {
+    "name": "Expert Rapier",
+    "damage": "d10"
+   },
+   {
+    "name": "Scream of Death",
+    "damage": "d6",
+    "notes": "all who hear it test PRESENCE DR12 or take d6"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Cursed",
+    "text": "If killed, he reforms at dawn in the crypt (at sunset in the mausoleum per pg. 160) while the curse holds."
+   },
+   {
+    "name": "Incorporeal",
+    "text": "Incorporeal during the day: a ghostly apparition by day, a 10' armored skeleton by night."
+   }
+  ],
+  "text": "Once a powerful conquistador whose family built the castle on Skeleton Point; his name long forgotten, he kills all who disturb the castle at night — except Veronique.",
+  "source": "The Curse of Skeleton Point",
+  "page": 132
+ },
+ {
+  "homebrew": false,
+  "id": "tela-fafane",
+  "name": "Tela Fafane",
+  "category": "npc",
+  "named": true,
+  "group": "Skeleton Point NPCs",
+  "hp": 15,
+  "morale": 11,
+  "armor": {
+   "name": "Spirits",
+   "die": "d2",
+   "tier": 1
+  },
+  "attacks": [
+   {
+    "name": "Unarmed",
+    "damage": "d2"
+   },
+   {
+    "name": "Acid Potion",
+    "damage": "d8",
+    "notes": "thrown; reduces armor 1 tier"
+   },
+   {
+    "name": "Ritual Magic",
+    "damage": null,
+    "notes": "knows many Rituals and casts them as needed — or for the right price (pg. 154)"
+   }
+  ],
+  "specials": [],
+  "text": "The \"witch\" of Death's Head Swamp: a kind-hearted, cryptic young green witch who sells potions and rituals and mostly hates people.",
+  "source": "The Curse of Skeleton Point",
+  "page": 133
+ },
+ {
+  "homebrew": false,
+  "id": "father-wallace",
+  "name": "Father Wallace",
+  "category": "npc",
+  "named": true,
+  "group": "Skeleton Point NPCs",
+  "hp": 6,
+  "morale": 7,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Unarmed",
+    "damage": "d2"
+   },
+   {
+    "name": "Holy Prayer",
+    "damage": null,
+    "notes": "heal a creature d4"
+   },
+   {
+    "name": "Divine Summons",
+    "damage": "4d8",
+    "notes": "calls lightning on one creature: it loses 4d8 HP (ignores armor); once a week"
+   }
+  ],
+  "specials": [],
+  "text": "The abbot: an old, robed wizard of a man running a broke, empty church while secretly living in a tent in Shanty Town.",
+  "source": "The Curse of Skeleton Point",
+  "page": 133
+ },
+ {
+  "homebrew": false,
+  "id": "captain-davies",
+  "name": "Captain Davies",
+  "category": "npc",
+  "named": true,
+  "group": "Skeleton Point NPCs",
+  "hp": 9,
+  "morale": 9,
+  "armor": {
+   "name": "Leather",
+   "die": "d2",
+   "tier": 1
+  },
+  "attacks": [
+   {
+    "name": "Cutlass",
+    "damage": "d6"
+   },
+   {
+    "name": "Flintlock (x2)",
+    "damage": "2d4",
+    "notes": "Reload 2 actions"
+   }
+  ],
+  "blackPowder": true,
+  "specials": [],
+  "text": "The pirate boss: sardonic, sea-worn captain of The Eye of Chaos, running a smuggling operation from the sea caves of Carcass Beach. Recruitable — or a double-crosser. Probably both.",
+  "source": "The Curse of Skeleton Point",
+  "page": 133
+ },
+ {
+  "homebrew": false,
+  "id": "shadow-demon",
+  "name": "Shadow Demon",
+  "category": "spirit",
+  "group": "Skeleton Point",
+  "hp": 15,
+  "morale": null,
+  "armor": {
+   "name": "Immaterial",
+   "die": "d4",
+   "tier": 2
+  },
+  "attacks": [
+   {
+    "name": "Claws",
+    "damage": "d8"
+   },
+   {
+    "name": "Screech",
+    "damage": "d10",
+    "notes": "2-in-6 chance"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Hunter",
+    "text": "Appears in the caster's shape when a ritual in the lighthouse chamber fails; it never stops hunting its maker."
+   }
+  ],
+  "text": "A shadow in the shape of a failed ritual-caster.",
+  "source": "The Curse of Skeleton Point",
+  "page": 141
+ },
+ {
+  "homebrew": false,
+  "id": "beatrice-boivin",
+  "name": "Beatrice Boivin",
+  "category": "npc",
+  "named": true,
+  "group": "Skeleton Point NPCs",
+  "hp": 15,
+  "morale": 8,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Cutlass",
+    "damage": "d6"
+   },
+   {
+    "name": "Flintlock (x2)",
+    "damage": "2d4"
+   }
+  ],
+  "blackPowder": true,
+  "specials": [],
+  "text": "French privateer of Le Mercure hunting pirates and her kidnapped lover Mélanie.",
+  "source": "The Curse of Skeleton Point",
+  "page": 147
+ },
+ {
+  "homebrew": false,
+  "id": "pedro-de-balboa",
+  "name": "Pedro de Balboa",
+  "category": "npc",
+  "named": true,
+  "group": "Skeleton Point NPCs",
+  "hp": 10,
+  "morale": 9,
+  "armor": {
+   "name": "Plate",
+   "die": "d6",
+   "tier": 3
+  },
+  "attacks": [
+   {
+    "name": "Fine Rapier",
+    "damage": "d8"
+   },
+   {
+    "name": "Crossbow",
+    "damage": "d6"
+   }
+  ],
+  "specials": [],
+  "text": "Spanish conquistador and Church enforcer famous for hunting heretics; hires pirates when he needs muscle.",
+  "source": "The Curse of Skeleton Point",
+  "page": 147
+ },
+ {
+  "homebrew": false,
+  "id": "john-lloyd-catherwood",
+  "name": "John Lloyd Catherwood",
+  "category": "npc",
+  "named": true,
+  "group": "Skeleton Point NPCs",
+  "hp": 5,
+  "morale": 7,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Knife",
+    "damage": "d4"
+   },
+   {
+    "name": "Musket",
+    "damage": "2d6"
+   }
+  ],
+  "blackPowder": true,
+  "specials": [],
+  "text": "An English artist and cartographer searching for the temple described in his late wife's journal.",
+  "source": "The Curse of Skeleton Point",
+  "page": 147
+ },
+ {
+  "homebrew": false,
+  "id": "high-wizard-clementius",
+  "name": "High Wizard Clementius",
+  "category": "npc",
+  "named": true,
+  "boss": true,
+  "group": "Skeleton Point NPCs",
+  "hp": 12,
+  "morale": 10,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Dagger",
+    "damage": "d4"
+   },
+   {
+    "name": "Soul-harvest",
+    "damage": "d8",
+    "notes": "d2 creatures test SPIRIT DR14 or lose d8 HP; he regains half the total"
+   },
+   {
+    "name": "Mind Cloud",
+    "damage": null,
+    "notes": "d4 creatures test SPIRIT DR10 or lose their next turn"
+   }
+  ],
+  "specials": [],
+  "text": "Sect leader of The Wretched, convinced The Nameless One can be made to serve.",
+  "source": "The Curse of Skeleton Point",
+  "page": 147
+ },
+ {
+  "homebrew": false,
+  "id": "xoth-the-imp",
+  "name": "Xoth, the Imp",
+  "category": "monster",
+  "named": true,
+  "group": "Skeleton Point NPCs",
+  "hp": 20,
+  "morale": null,
+  "armor": {
+   "name": "Rocky Skin",
+   "die": "d2",
+   "tier": 1
+  },
+  "attacks": [
+   {
+    "name": "Claws/bite",
+    "damage": "d8"
+   },
+   {
+    "name": "Hell-blast",
+    "damage": "d4",
+    "notes": "100' range"
+   }
+  ],
+  "specials": [
+   {
+    "name": "Wall Crawler",
+    "text": "Crawls all over the walls."
+   }
+  ],
+  "text": "Xoth, Imp from the Dark Shore: a four-armed, one-eyed demon summoned by The Wretched, kept as Clementius's pet.",
+  "source": "The Curse of Skeleton Point",
+  "page": 147
+ },
+ {
+  "homebrew": false,
+  "id": "the-nameless-one",
+  "name": "The Nameless One",
+  "category": "monster",
+  "named": true,
+  "boss": true,
+  "group": "Skeleton Point NPCs",
+  "hp": 200,
+  "morale": null,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Tentacle (x4)",
+    "damage": "d6"
+   },
+   {
+    "name": "Bite",
+    "damage": "3d6"
+   },
+   {
+    "name": "Ink Blast",
+    "damage": null,
+    "notes": "in and out of water: d6 targets test AGILITY DR12 or are blind for d4 rounds"
+   }
+  ],
+  "attacksPerRound": 5,
+  "specials": [],
+  "text": "A horrible deep-sea monster called from The Abyss by a shaman, sealed beneath the Omega Stone: glowing eyes, countless tentacles, teeth everywhere.",
+  "source": "The Curse of Skeleton Point",
+  "page": 147
+ },
+ {
+  "homebrew": false,
+  "id": "neonates-baby-snakes",
+  "name": "Neonates (Baby Snakes)",
+  "category": "beast",
+  "group": "Skeleton Point",
+  "hp": 1,
+  "morale": 6,
+  "armor": null,
+  "count": "2d10",
+  "attacks": [
+   {
+    "name": "Bite",
+    "damage": "d2"
+   }
+  ],
+  "specials": [],
+  "text": "A palm viper's nest of newborn snakes.",
+  "source": "The Curse of Skeleton Point",
+  "page": 149
+ },
+ {
+  "homebrew": false,
+  "id": "cultists",
+  "name": "Cultists",
+  "category": "npc",
+  "group": "Skeleton Point",
+  "hp": 3,
+  "morale": 7,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Dagger",
+    "damage": "d4"
+   }
+  ],
+  "specials": [],
+  "text": "Hooded members of The Wretched serving in the Sanctum of Nameless Blood.",
+  "source": "The Curse of Skeleton Point",
+  "page": 150
+ },
+ {
+  "homebrew": false,
+  "id": "priest",
+  "name": "Priest",
+  "category": "npc",
+  "group": "Skeleton Point",
+  "hp": 8,
+  "morale": 9,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Dark Hex Spell",
+    "damage": "d8",
+    "notes": "50'"
+   }
+  ],
+  "specials": [],
+  "text": "A priest of The Wretched leading cultists in the Sanctum.",
+  "source": "The Curse of Skeleton Point",
+  "page": 151
+ },
+ {
+  "homebrew": false,
+  "id": "shrine-pirates",
+  "name": "Shrine Pirates",
+  "category": "npc",
+  "group": "Skeleton Point",
+  "hp": 5,
+  "morale": 8,
+  "armor": null,
+  "count": 3,
+  "attacks": [
+   {
+    "name": "Cutlass",
+    "damage": "d6"
+   }
+  ],
+  "specials": [],
+  "text": "Greedy, stupid pirates who found the Shrine of the Nameless Skull an hour ago, reeking of grog and sweat.",
+  "source": "The Curse of Skeleton Point",
+  "page": 149
+ },
+ {
+  "homebrew": false,
+  "id": "swarm-of-bats",
+  "name": "Swarm of Bats",
+  "category": "beast",
+  "group": "Skeleton Point",
+  "hp": 1,
+  "morale": 5,
+  "armor": null,
+  "count": "d8",
+  "attacks": [
+   {
+    "name": "Bite",
+    "damage": "1"
+   }
+  ],
+  "specials": [],
+  "text": "Bat swarms of the underground lake; they swarm, then flee through the Omega Stone opening.",
+  "source": "The Curse of Skeleton Point",
+  "page": 153
+ },
+ {
+  "homebrew": false,
+  "id": "guard-dogs",
+  "name": "Guard Dogs",
+  "category": "beast",
+  "group": "Skeleton Point",
+  "hp": 7,
+  "morale": 6,
+  "armor": null,
+  "attacks": [
+   {
+    "name": "Bite",
+    "damage": "d6"
+   }
+  ],
+  "specials": [],
+  "text": "Trained, mangy, starving guard dogs; roll reactions for each.",
+  "source": "The Curse of Skeleton Point",
+  "page": 151
  }
 ];
 window.PB_MONSTERS = PB_MONSTERS;
@@ -7219,6 +23027,121 @@ var PB_NAMES = [
  }
 ];
 window.PB_NAMES = PB_NAMES;
+var PB_NAMES_D12 = {
+ "id": "namesD12",
+ "name": "What's in a Name?",
+ "die": "d12",
+ "page": 2,
+ "source": "Core Rules",
+ "note": "Quick names: roll d12 on any column.",
+ "columns": [
+  {
+   "die": "d12",
+   "name": "Name",
+   "values": [
+    "Ed(mund)",
+    "Roger(s)",
+    "Jack",
+    "David",
+    "Pete(r)",
+    "Angelica",
+    "Sam(uel)",
+    "Morgan",
+    "Diego",
+    "Ed(ward)",
+    "Isabel(la)",
+    "Charles"
+   ]
+  },
+  {
+   "die": "d12",
+   "name": "Name",
+   "values": [
+    "James",
+    "Chris(topher)",
+    "Robert(s)",
+    "Francois",
+    "Juan",
+    "John(athan)",
+    "Butch(er)",
+    "(Old) Ben",
+    "Will(iam)",
+    "Louis",
+    "Jean",
+    "Stede"
+   ]
+  },
+  {
+   "die": "d12",
+   "name": "Name",
+   "values": [
+    "Meathook",
+    "Jose",
+    "Fernando",
+    "Henry",
+    "Mary",
+    "Anne",
+    "Philip",
+    "Scraggs",
+    "Eliza(beth)",
+    "Hector",
+    "Genny",
+    "Thom(as)"
+   ]
+  }
+ ],
+ "rows": [
+  {
+   "roll": 1,
+   "text": "Ed(mund) / James / Meathook"
+  },
+  {
+   "roll": 2,
+   "text": "Roger(s) / Chris(topher) / Jose"
+  },
+  {
+   "roll": 3,
+   "text": "Jack / Robert(s) / Fernando"
+  },
+  {
+   "roll": 4,
+   "text": "David / Francois / Henry"
+  },
+  {
+   "roll": 5,
+   "text": "Pete(r) / Juan / Mary"
+  },
+  {
+   "roll": 6,
+   "text": "Angelica / John(athan) / Anne"
+  },
+  {
+   "roll": 7,
+   "text": "Sam(uel) / Butch(er) / Philip"
+  },
+  {
+   "roll": 8,
+   "text": "Morgan / (Old) Ben / Scraggs"
+  },
+  {
+   "roll": 9,
+   "text": "Diego / Will(iam) / Eliza(beth)"
+  },
+  {
+   "roll": 10,
+   "text": "Ed(ward) / Louis / Hector"
+  },
+  {
+   "roll": 11,
+   "text": "Isabel(la) / Jean / Genny"
+  },
+  {
+   "roll": 12,
+   "text": "Charles / Stede / Thom(as)"
+  }
+ ]
+};
+window.PB_NAMES_D12 = PB_NAMES_D12;
 var PB_NAVAL_RULES = {
  "page": 73,
  "crew": "Ships without enough crew can take only one crew action, however many PCs are aboard. Ships can carry double their max crew for short trips (less than a day).",
@@ -7308,6 +23231,96 @@ var PB_NAVAL_RULES = {
  "payingCrew": "Pirates don't pay wages: they divide the plunder equally, though the captain and officers often take larger shares."
 };
 window.PB_NAVAL_RULES = PB_NAVAL_RULES;
+var PB_NPC_MOTIVATION = {
+ "id": "npcMotivation",
+ "name": "NPC Motivation",
+ "die": "d20",
+ "page": 3,
+ "source": "Core Rules",
+ "rows": [
+  {
+   "roll": 1,
+   "text": "escape"
+  },
+  {
+   "roll": 2,
+   "text": "happiness"
+  },
+  {
+   "roll": 3,
+   "text": "recovery"
+  },
+  {
+   "roll": 4,
+   "text": "pleasure"
+  },
+  {
+   "roll": 5,
+   "text": "exploration"
+  },
+  {
+   "roll": 6,
+   "text": "love or sex"
+  },
+  {
+   "roll": 7,
+   "text": "revenge"
+  },
+  {
+   "roll": 8,
+   "text": "fear"
+  },
+  {
+   "roll": 9,
+   "text": "wealth"
+  },
+  {
+   "roll": 10,
+   "text": "hunger"
+  },
+  {
+   "roll": 11,
+   "text": "reputation"
+  },
+  {
+   "roll": 12,
+   "text": "aggression"
+  },
+  {
+   "roll": 13,
+   "text": "adventure"
+  },
+  {
+   "roll": 14,
+   "text": "guilt"
+  },
+  {
+   "roll": 15,
+   "text": "leisure"
+  },
+  {
+   "roll": 16,
+   "text": "protection"
+  },
+  {
+   "roll": 17,
+   "text": "intoxication"
+  },
+  {
+   "roll": 18,
+   "text": "family"
+  },
+  {
+   "roll": 19,
+   "text": "religion"
+  },
+  {
+   "roll": 20,
+   "text": "occult"
+  }
+ ]
+};
+window.PB_NPC_MOTIVATION = PB_NPC_MOTIVATION;
 var PB_PETS = [
  {
   "roll": 1,
@@ -7351,6 +23364,220 @@ var PB_PETS = [
  }
 ];
 window.PB_PETS = PB_PETS;
+var PB_PIRATE_GEN = {
+ "page": 124,
+ "source": "Core Rules",
+ "note": "Roll 3d12 and read Tables A to C (save the dice): \"A [A] with [B] wielding a [C]\". The greatest die is its Morale; the lowest die +2 is its HP (double it for a mighty pirate). Whichever table rolled highest sets its armor: A no armor, B −d2, C −d4. Then roll d66 ×4 on the name table; they carry the highest result in silver.",
+ "procedure": {
+  "dice": "3d12",
+  "morale": "highest die",
+  "hp": "lowest die + 2",
+  "mightyHp": "× 2",
+  "armorByHighestTable": {
+   "A": null,
+   "B": {
+    "name": "Armor",
+    "die": "d2",
+    "tier": 1
+   },
+   "C": {
+    "name": "Armor",
+    "die": "d4",
+    "tier": 2
+   }
+  },
+  "silver": "highest name d66 result"
+ },
+ "tableA": {
+  "id": "pirateA",
+  "name": "Table A — A…",
+  "die": "d12",
+  "page": 124,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "rugged individual"
+   },
+   {
+    "roll": 2,
+    "text": "shady vagabond"
+   },
+   {
+    "roll": 3,
+    "text": "scurvy gutter worm"
+   },
+   {
+    "roll": 4,
+    "text": "famous captain"
+   },
+   {
+    "roll": 5,
+    "text": "escaped prisoner"
+   },
+   {
+    "roll": 6,
+    "text": "wanted cutthroat"
+   },
+   {
+    "roll": 7,
+    "text": "notorious privateer"
+   },
+   {
+    "roll": 8,
+    "text": "cloaked figure"
+   },
+   {
+    "roll": 9,
+    "text": "rum-drunk goon"
+   },
+   {
+    "roll": 10,
+    "text": "horrific wretch"
+   },
+   {
+    "roll": 11,
+    "text": "cocky explorer"
+   },
+   {
+    "roll": 12,
+    "text": "dread pirate lord"
+   }
+  ]
+ },
+ "tableB": {
+  "id": "pirateB",
+  "name": "Table B — with…",
+  "die": "d12",
+  "page": 124,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "horrible breath"
+   },
+   {
+    "roll": 2,
+    "text": "unmatched beauty"
+   },
+   {
+    "roll": 3,
+    "text": "a hook for a hand"
+   },
+   {
+    "roll": 4,
+    "text": "a fancy hat"
+   },
+   {
+    "roll": 5,
+    "text": "a makeshift peg leg"
+   },
+   {
+    "roll": 6,
+    "text": "barnacle covered skin"
+   },
+   {
+    "roll": 7,
+    "text": "calico clothing"
+   },
+   {
+    "roll": 8,
+    "text": "filthy rags"
+   },
+   {
+    "roll": 9,
+    "text": "weather-worn doublet"
+   },
+   {
+    "roll": 10,
+    "text": "natty hair"
+   },
+   {
+    "roll": 11,
+    "text": "a pet bird"
+   },
+   {
+    "roll": 12,
+    "text": "bloody bandages"
+   }
+  ]
+ },
+ "tableC": {
+  "id": "pirateC",
+  "name": "Table C — wielding a…",
+  "die": "d12",
+  "page": 124,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "pair of fists [d2]",
+    "damage": "d2"
+   },
+   {
+    "roll": 2,
+    "text": "broken bottle [d2]",
+    "damage": "d2"
+   },
+   {
+    "roll": 3,
+    "text": "bullwhip [d4]",
+    "damage": "d4"
+   },
+   {
+    "roll": 4,
+    "text": "hook [d4]",
+    "damage": "d4"
+   },
+   {
+    "roll": 5,
+    "text": "rusty knife [d4]",
+    "damage": "d4"
+   },
+   {
+    "roll": 6,
+    "text": "evil cutlass [d6]",
+    "damage": "d6"
+   },
+   {
+    "roll": 7,
+    "text": "ornate scimitar [d6]",
+    "damage": "d6"
+   },
+   {
+    "roll": 8,
+    "text": "officer's rapier [d8]",
+    "damage": "d8"
+   },
+   {
+    "roll": 9,
+    "text": "ancient crossbow [d8]",
+    "damage": "d8"
+   },
+   {
+    "roll": 10,
+    "text": "flintlock pistol [2d4]",
+    "damage": "2d4",
+    "blackPowder": true
+   },
+   {
+    "roll": 11,
+    "text": "musket [2d6]",
+    "damage": "2d6",
+    "blackPowder": true
+   },
+   {
+    "roll": 12,
+    "text": "blunderbuss [d4/d10]",
+    "damage": "d4",
+    "closeDamage": "d10",
+    "blackPowder": true
+   }
+  ]
+ },
+ "names": "names"
+};
+window.PB_PIRATE_GEN = PB_PIRATE_GEN;
 var PB_POINT_OF_SAIL = [
  {
   "id": "with",
@@ -8430,6 +24657,192 @@ var PB_RULES = {
  }
 };
 window.PB_RULES = PB_RULES;
+var PB_RUMORS = {
+ "id": "rumors",
+ "name": "Rumors",
+ "die": "d20",
+ "page": 127,
+ "source": "Core Rules",
+ "rows": [
+  {
+   "roll": 1,
+   "text": "A nation's navy is coming in 3d6 days. Everyone is on edge."
+  },
+  {
+   "roll": 2,
+   "text": "A rich group of merchants are hiring mercenaries to escort them."
+  },
+  {
+   "roll": 3,
+   "text": "A treasure fleet is rumored to be departing soon."
+  },
+  {
+   "roll": 4,
+   "text": "An important NPC is recruiting people to explore or scout an area."
+  },
+  {
+   "roll": 5,
+   "text": "A group of leaders is meeting soon. The PCs have been summoned."
+  },
+  {
+   "roll": 6,
+   "text": "Someone the PCs know has been killed or captured."
+  },
+  {
+   "roll": 7,
+   "text": "2d12 pirates are in town spending the earnings from their latest prize."
+  },
+  {
+   "roll": 8,
+   "text": "Pirates, marines, or revolutionaries are planning to raid a port."
+  },
+  {
+   "roll": 9,
+   "text": "There are rumors of a rich prize nearby. Crews are recruiting."
+  },
+  {
+   "roll": 10,
+   "text": "Someone uncovered a clue or map to a fabled treasure and need brains, muscle, or both."
+  },
+  {
+   "roll": 11,
+   "text": "A corpse has been found in an alley or on the beach. Everyone is suspicious."
+  },
+  {
+   "roll": 12,
+   "text": "A ship with valuable cargo wrecked nearby."
+  },
+  {
+   "roll": 13,
+   "text": "A lonely widow (20+d50 years old) is looking for a date to the Governor's Ball."
+  },
+  {
+   "roll": 14,
+   "text": "It is not safe here at night. The reasons given sound like tall tales or ghost stories."
+  },
+  {
+   "roll": 15,
+   "text": "A recent fire destroyed a ship, a port, or a farmstead."
+  },
+  {
+   "roll": 16,
+   "text": "Two allied factions are now at war."
+  },
+  {
+   "roll": 17,
+   "text": "There is a party tonight to honor a deceased NPC."
+  },
+  {
+   "roll": 18,
+   "text": "The governor's adult daughter/son is the most beautiful person ever seen."
+  },
+  {
+   "roll": 19,
+   "text": "A group of cultists have been up to some unusual activity recently."
+  },
+  {
+   "roll": 20,
+   "text": "Undead have destroyed yet another settlement."
+  }
+ ]
+};
+window.PB_RUMORS = PB_RUMORS;
+var PB_SETTING = {
+ "page": 8,
+ "source": "Core Rules",
+ "name": "The Dark Caribbean",
+ "summary": "Settlers came to the islands expecting paradise. On a solstice the undead began crawling out of the black sea — drowned sailors, displaced ghosts, seaweed-wrapped skeletons and worse — and hordes soon overran settlements; the dead who were buried rose again at dusk. Survivors fortified their cities, and the discovery of ASH (the dust of destroyed undead) set a new, grim status quo.",
+ "scourge": "The Scourge: the undead hordes that rose from the sea and the grave across the Dark Caribbean (pg. 8-9).",
+ "ash": "ASH — see PB_ASH (pg. 10): the remnants of destroyed undead, a valuable psychedelic drug and the region's primary black-market commodity.",
+ "map": {
+  "page": 6,
+  "places": [
+   "Havana",
+   "Nassau",
+   "Black Coral Bay",
+   "The Abyss",
+   "The Dark Yucatán",
+   "Port Royal",
+   "Tortuga",
+   "Petit-Goâve",
+   "Guadeloupe",
+   "Barbados",
+   "Maracaibo"
+  ],
+  "scale": "hex map, 50-mile hexes"
+ },
+ "places": [
+  {
+   "id": "nassau",
+   "name": "Nassau",
+   "page": 12,
+   "faction": "brethren",
+   "text": "Ruins of an imperial colony on New Providence, now a sprawl of driftwood shacks and tents. Home of the Brethren of the Coast and a bastion against law and order beneath a crumbling seaside fort."
+  },
+  {
+   "id": "tortuga",
+   "name": "Tortuga",
+   "page": 12,
+   "faction": "brethren",
+   "text": "A small pirate outpost to the south that has rotted into a cesspool of vagrants; the epicenter of the ASH trade, with taverns, brothels, gambling and ASH dens."
+  },
+  {
+   "id": "port-royal",
+   "name": "Port Royal",
+   "page": 14,
+   "faction": "english-crown",
+   "text": "Jamaica's port, being rebuilt after a preternatural earthquake while its governor hires privateers."
+  },
+  {
+   "id": "petit-goave",
+   "name": "Petit-Goâve",
+   "page": 17,
+   "faction": "french-indies",
+   "text": "A festering French colony on western Hispaniola, a rotting figurehead of the monarchy where spies, assassins, crime syndicates and cultists flourish."
+  },
+  {
+   "id": "guadeloupe",
+   "name": "Guadeloupe",
+   "page": 17,
+   "faction": "french-indies",
+   "text": "Opulent palace and gaudy forts above impoverished slums in the Lesser Antilles; everything is for sale — munitions, letters of marque, agents, ASH, sanctuary."
+  },
+  {
+   "id": "havana",
+   "name": "Havana",
+   "page": 18,
+   "faction": "new-spain",
+   "text": "Capital of the Viceroyalty of New Spain on western Cuba: an overcrowded, corrupt metropolis behind cannon-studded fortresses, where treasure fleets of silver, gold and ASH gather before sailing east."
+  },
+  {
+   "id": "maracaibo",
+   "name": "Maracaibo (The Citadel)",
+   "page": 19,
+   "faction": "inquisition",
+   "text": "A coral-sharp citadel at the mouth of Lake Maracaibo; the Inquisition's nest, with endless dungeons for heretics. Sailors flee the 'banshee' — the screams of the damned."
+  },
+  {
+   "id": "the-abyss",
+   "name": "The Abyss",
+   "page": 20,
+   "faction": "the-wretched",
+   "text": "A vast fissure south of Cuba into which the ocean falls; the altar of The Wretched."
+  },
+  {
+   "id": "dark-yucatan",
+   "name": "The Dark Yucatán",
+   "page": 22,
+   "text": "Far to the west: a rotting jungle labyrinth of rumored golden cities and temples. None who venture in return."
+  },
+  {
+   "id": "black-coral-bay",
+   "name": "Black Coral Bay",
+   "page": 134,
+   "text": "The cursed island of the module The Curse of Skeleton Point."
+  }
+ ]
+};
+window.PB_SETTING = PB_SETTING;
 var PB_SHANTIES = [
  {
   "id": "fifteen-men-on-a-dead-mans-chest",
@@ -8546,8 +24959,18 @@ var PB_SHIPS = [
   "special": "Use passengers' stats. Not affected by wind.",
   "windImmune": true,
   "text": "A utility rowboat towed behind medium ships or stored on the deck of larger ones. The perfect espionage vessel.",
-  "source": "Trapped in the Tropics",
-  "page": 34,
+  "source": "Core Rules",
+  "page": 80,
+  "sources": [
+   {
+    "source": "Core Rules",
+    "page": 80
+   },
+   {
+    "source": "Trapped in the Tropics",
+    "page": 34
+   }
+  ],
   "cost": 250
  },
  {
@@ -8572,8 +24995,18 @@ var PB_SHIPS = [
   "special": "Use passengers' stats. Not affected by wind.",
   "windImmune": true,
   "text": "Watercraft often used to ferry crew from larger ships to land; some have small collapsible sails. Often used for fishing.",
-  "source": "Trapped in the Tropics",
-  "page": 34,
+  "source": "Core Rules",
+  "page": 81,
+  "sources": [
+   {
+    "source": "Core Rules",
+    "page": 81
+   },
+   {
+    "source": "Trapped in the Tropics",
+    "page": 34
+   }
+  ],
   "cost": 500
  },
  {
@@ -8600,8 +25033,18 @@ var PB_SHIPS = [
   "special": "Can travel at full speed when Close to the Wind.",
   "closeToWindFullSpeed": true,
   "text": "A small, single-masted vessel — the \"perfect\" pirate ship thanks to its speed, shallow draft and maneuverability.",
-  "source": "Trapped in the Tropics",
-  "page": 35
+  "source": "Core Rules",
+  "page": 82,
+  "sources": [
+   {
+    "source": "Core Rules",
+    "page": 82
+   },
+   {
+    "source": "Trapped in the Tropics",
+    "page": 35
+   }
+  ]
  },
  {
   "homebrew": false,
@@ -8626,8 +25069,18 @@ var PB_SHIPS = [
   "cargo": 5,
   "special": null,
   "text": "A slow, high-sided merchant vessel. Not ideal for piracy, but good for carrying cargo, troops and treasure.",
-  "source": "Trapped in the Tropics",
-  "page": 35
+  "source": "Core Rules",
+  "page": 82,
+  "sources": [
+   {
+    "source": "Core Rules",
+    "page": 82
+   },
+   {
+    "source": "Trapped in the Tropics",
+    "page": 35
+   }
+  ]
  },
  {
   "homebrew": false,
@@ -8660,9 +25113,735 @@ var PB_SHIPS = [
   "text": "Hilltop fort guarding Gibbet Town on St. Martin: three cannon-lined bastions and ~75 Redcoat soldiers.",
   "source": "Trapped in the Tropics",
   "page": 42
+ },
+ {
+  "homebrew": false,
+  "id": "raft",
+  "name": "Raft",
+  "type": "boat",
+  "hp": 2,
+  "hull": null,
+  "agility": -1,
+  "speed": 1,
+  "skill": null,
+  "skillNote": "Use passengers' stats.",
+  "broadsides": null,
+  "smallArms": null,
+  "ram": null,
+  "crew": {
+   "min": 1,
+   "max": 3
+  },
+  "cargo": 0,
+  "special": "Use passengers' stats.",
+  "text": "A makeshift raft, often jury-rigged by those marooned on desert islands.",
+  "source": "Core Rules",
+  "page": 80
+ },
+ {
+  "homebrew": false,
+  "id": "canoe",
+  "name": "Canoe",
+  "type": "boat",
+  "hp": 3,
+  "hull": null,
+  "agility": 3,
+  "speed": 3,
+  "skill": null,
+  "skillNote": "Use passengers' stats.",
+  "broadsides": null,
+  "smallArms": "d2",
+  "ram": null,
+  "crew": {
+   "min": 1,
+   "max": 3
+  },
+  "cargo": 0,
+  "special": "Use passengers' stats. Not affected by wind.",
+  "windImmune": true,
+  "text": "Carved from a single log: fast, maneuverable boats perfect for swamps and streams.",
+  "source": "Core Rules",
+  "page": 80
+ },
+ {
+  "homebrew": false,
+  "id": "piragua",
+  "name": "Piragua",
+  "type": "boat",
+  "hp": 10,
+  "hull": null,
+  "agility": 3,
+  "speed": 3,
+  "skill": null,
+  "skillNote": "Use passengers' stats.",
+  "broadsides": null,
+  "smallArms": "d6",
+  "ram": null,
+  "crew": {
+   "min": 2,
+   "max": 20
+  },
+  "cargo": 0,
+  "special": "Use passengers' stats.",
+  "text": "Dugout boats made from tree trunks; simple construction and a big crew capacity make them a swashbuckler favorite.",
+  "source": "Core Rules",
+  "page": 81
+ },
+ {
+  "homebrew": false,
+  "id": "tartane",
+  "name": "Tartane",
+  "type": "ship",
+  "hp": 20,
+  "hull": {
+   "tier": 1,
+   "die": "d2"
+  },
+  "agility": 2,
+  "speed": 5,
+  "skill": -1,
+  "broadsides": "d4",
+  "smallArms": "d4",
+  "ram": "d4",
+  "crew": {
+   "min": 3,
+   "max": 9
+  },
+  "cargo": 1,
+  "special": "Can travel at full speed when Close to the Wind.",
+  "closeToWindFullSpeed": true,
+  "text": "A small ship used for fishing, trading and rum running; triangular sails and rigging make it very nimble.",
+  "source": "Core Rules",
+  "page": 81
+ },
+ {
+  "homebrew": false,
+  "id": "brigantine",
+  "name": "Brigantine",
+  "type": "ship",
+  "hp": 40,
+  "hull": {
+   "tier": 2,
+   "die": "d4"
+  },
+  "agility": 1,
+  "speed": 4,
+  "skill": 0,
+  "broadsides": "d8",
+  "smallArms": "d4",
+  "ram": "d6",
+  "crew": {
+   "min": 15,
+   "max": 30
+  },
+  "cargo": 3,
+  "special": null,
+  "text": "A nimble, square-rigged two-masted vessel suited to medium crews; common as a merchant ship.",
+  "source": "Core Rules",
+  "page": 82
+ },
+ {
+  "homebrew": false,
+  "id": "galley",
+  "name": "Galley",
+  "type": "ship",
+  "hp": 60,
+  "hull": {
+   "tier": 2,
+   "die": "d4"
+  },
+  "agility": 1,
+  "speed": 5,
+  "skill": 2,
+  "broadsides": null,
+  "smallArms": "d10",
+  "ram": "d10",
+  "crew": {
+   "min": 80,
+   "max": 120
+  },
+  "cargo": 3,
+  "special": "May always move 3\" regardless of wind.",
+  "windMinMove": 3,
+  "text": "A relic of a bygone era propelled by sails or oars, often crewed by undead from distant lands.",
+  "source": "Core Rules",
+  "page": 83
+ },
+ {
+  "homebrew": false,
+  "id": "frigate",
+  "name": "Frigate",
+  "type": "ship",
+  "hp": 60,
+  "hull": {
+   "tier": 2,
+   "die": "d4"
+  },
+  "agility": 0,
+  "speed": 4,
+  "skill": 1,
+  "broadsides": "d8",
+  "broadsidesAttacks": 2,
+  "statText": {
+   "broadsides": "2 @ d8"
+  },
+  "smallArms": "d6",
+  "ram": "d6",
+  "crew": {
+   "min": 24,
+   "max": 48
+  },
+  "cargo": 4,
+  "special": "Makes 2 broadsides when over half HP.",
+  "multiAttackAboveHalfHp": true,
+  "text": "Not as nimble as a sloop, but fast; their size and armament make decent pirate flagships.",
+  "source": "Core Rules",
+  "page": 83
+ },
+ {
+  "homebrew": false,
+  "id": "galleon",
+  "name": "Galleon",
+  "type": "ship",
+  "hp": 65,
+  "hull": {
+   "tier": 3,
+   "die": "d6"
+  },
+  "agility": -3,
+  "speed": 2,
+  "skill": 1,
+  "broadsides": "d10",
+  "broadsidesAttacks": 2,
+  "statText": {
+   "broadsides": "2 @ d10"
+  },
+  "smallArms": "d6",
+  "ram": "d8",
+  "crew": {
+   "min": 30,
+   "max": 60
+  },
+  "cargo": 6,
+  "special": "Makes 2 broadsides when over half HP.",
+  "multiAttackAboveHalfHp": true,
+  "text": "Heavily armed, slow vessels of a previous age, often used to carry cargo… and treasure hoards.",
+  "source": "Core Rules",
+  "page": 83
+ },
+ {
+  "homebrew": false,
+  "id": "man-of-war",
+  "name": "Man-of-War",
+  "type": "ship",
+  "hp": 75,
+  "hull": {
+   "tier": 3,
+   "die": "d6"
+  },
+  "agility": -2,
+  "speed": 3,
+  "skill": 2,
+  "broadsides": "d8",
+  "broadsidesAttacks": 3,
+  "statText": {
+   "broadsides": "3 @ d8"
+  },
+  "smallArms": "d8",
+  "ram": "d8",
+  "crew": {
+   "min": 50,
+   "max": 150
+  },
+  "cargo": 4,
+  "special": "Makes 3 broadsides when > 2/3 HP; 2 > 1/3 HP.",
+  "attackScaling": {
+   "broadsides": [
+    {
+     "above": 0.6666666666666666,
+     "attacks": 3
+    },
+    {
+     "above": 0.3333333333333333,
+     "attacks": 2
+    },
+    {
+     "above": 0,
+     "attacks": 1
+    }
+   ]
+  },
+  "text": "Built for naval combat but needing a large, trained crew; used almost exclusively by navies.",
+  "source": "Core Rules",
+  "page": 84
+ },
+ {
+  "homebrew": false,
+  "id": "ship-of-the-line",
+  "name": "Ship of the Line",
+  "type": "ship",
+  "hp": 95,
+  "hull": {
+   "tier": 3,
+   "die": "d6"
+  },
+  "agility": -3,
+  "speed": 3,
+  "skill": 3,
+  "broadsides": "d10",
+  "broadsidesAttacks": 3,
+  "smallArms": "d8",
+  "smallArmsAttacks": 2,
+  "statText": {
+   "broadsides": "3 @ d10",
+   "smallArms": "2 @ d8"
+  },
+  "ram": "d8",
+  "crew": {
+   "min": 150,
+   "max": 350
+  },
+  "cargo": 4,
+  "special": "Makes 3 broadsides when > 2/3 HP; 2 > 1/3 HP. Makes 2 small arms attacks when > 1/2 HP.",
+  "attackScaling": {
+   "broadsides": [
+    {
+     "above": 0.6666666666666666,
+     "attacks": 3
+    },
+    {
+     "above": 0.3333333333333333,
+     "attacks": 2
+    },
+    {
+     "above": 0,
+     "attacks": 1
+    }
+   ],
+   "smallArms": [
+    {
+     "above": 0.5,
+     "attacks": 2
+    },
+    {
+     "above": 0,
+     "attacks": 1
+    }
+   ]
+  },
+  "text": "A floating fortress and the flagship of any navy; in wartime several line up to make a wall of black powder death.",
+  "source": "Core Rules",
+  "page": 84
+ },
+ {
+  "homebrew": false,
+  "id": "fort",
+  "name": "Fort",
+  "type": "fortification",
+  "hp": 200,
+  "hull": null,
+  "agility": null,
+  "speed": 0,
+  "skill": 3,
+  "broadsides": "d12",
+  "broadsidesAttacks": 4,
+  "smallArms": null,
+  "ram": null,
+  "crew": null,
+  "cargo": null,
+  "special": "Stationary (DR8 to hit). Makes 1 attack for each block of 50 HP it has remaining. Customize: add one d12 attack per 50 HP; add armor for an extra challenge.",
+  "stationary": true,
+  "dr": {
+   "attack": 8
+  },
+  "attackPerHp": 50,
+  "statLabels": {
+   "hull": "Armor",
+   "broadsides": "Cannons"
+  },
+  "statText": {
+   "broadsides": "4 @ d12"
+  },
+  "text": "Seaside fortifications built to protect ports and towns.",
+  "source": "Core Rules",
+  "page": 84
  }
 ];
 window.PB_SHIPS = PB_SHIPS;
+var PB_SHIPS_AT_SEA = {
+ "page": 114,
+ "source": "Core Rules",
+ "note": "Sails! Roll for a vessel spotted at sea. *Modify DRs where appropriate (crew quantity and quality).",
+ "vesselClass": {
+  "id": "vesselClass",
+  "name": "Vessel Class",
+  "die": "d10",
+  "page": 114,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "raft",
+    "ship": "raft"
+   },
+   {
+    "roll": 2,
+    "text": "longboat",
+    "ship": "longboat"
+   },
+   {
+    "roll": 3,
+    "text": "tartane",
+    "ship": "tartane"
+   },
+   {
+    "roll": 4,
+    "text": "sloop",
+    "ship": "sloop"
+   },
+   {
+    "roll": 5,
+    "text": "brigantine",
+    "ship": "brigantine"
+   },
+   {
+    "roll": 6,
+    "text": "fluyt",
+    "ship": "fluyt"
+   },
+   {
+    "roll": 7,
+    "text": "frigate",
+    "ship": "frigate"
+   },
+   {
+    "roll": 8,
+    "text": "galleon",
+    "ship": "galleon"
+   },
+   {
+    "roll": 9,
+    "text": "man-of-war",
+    "ship": "man-of-war"
+   },
+   {
+    "roll": 10,
+    "text": "ship of the line",
+    "ship": "ship-of-the-line"
+   }
+  ]
+ },
+ "armament": {
+  "id": "armament",
+  "name": "Armament",
+  "die": "d6",
+  "page": 114,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Merchant: No weapons.",
+    "weapons": "none"
+   },
+   {
+    "roll": 2,
+    "text": "Lightly armed: reduce damage die size by one.",
+    "attackDieStep": -1
+   },
+   {
+    "roll": [
+     3,
+     5
+    ],
+    "text": "Normal armament."
+   },
+   {
+    "roll": 6,
+    "text": "Warship: Double broadsides.",
+    "broadsidesMultiplier": 2
+   }
+  ]
+ },
+ "crewQuantity": {
+  "id": "crewQuantity",
+  "name": "Crew Quantity",
+  "die": "d6",
+  "page": 114,
+  "source": "Core Rules",
+  "note": "Modify DRs where appropriate.",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Short-handed: half as many.",
+    "crewMultiplier": 0.5
+   },
+   {
+    "roll": [
+     2,
+     3
+    ],
+    "text": "Standard crew.",
+    "crewMultiplier": 1
+   },
+   {
+    "roll": [
+     4,
+     5
+    ],
+    "text": "Ready for war: twice as many.",
+    "crewMultiplier": 2
+   },
+   {
+    "roll": 6,
+    "text": "Ready to raid: as many as possible.",
+    "crewMultiplier": "max"
+   }
+  ]
+ },
+ "crewQuality": {
+  "id": "crewQuality",
+  "name": "Crew Quality",
+  "die": "2d6",
+  "page": 114,
+  "source": "Core Rules",
+  "note": "Modify DRs where appropriate.",
+  "rows": [
+   {
+    "roll": [
+     2,
+     3
+    ],
+    "text": "Near mutiny and/or untrained."
+   },
+   {
+    "roll": [
+     4,
+     6
+    ],
+    "text": "Miserable and/or novice."
+   },
+   {
+    "roll": [
+     7,
+     8
+    ],
+    "text": "Average."
+   },
+   {
+    "roll": [
+     9,
+     10
+    ],
+    "text": "Fresh from shore leave and/or experienced."
+   },
+   {
+    "roll": [
+     11,
+     12
+    ],
+    "text": "Prosperous/loyal and/or military training."
+   }
+  ]
+ },
+ "name": {
+  "id": "shipName",
+  "name": "Ship Name",
+  "die": "d66",
+  "page": 114,
+  "source": "Core Rules",
+  "columns": [
+   {
+    "die": "d66",
+    "name": "Name",
+    "values": [
+     "Banshee's Wail",
+     "Revenant",
+     "Void Ripper",
+     "Mermaid's Tear",
+     "Carrion Crow",
+     "Executioner's Hand",
+     "Poseidon's Rage",
+     "Adventure's Ghost",
+     "Widow's Revenge",
+     "Blood Moon",
+     "Devil's Scorn",
+     "Gilded Parrot",
+     "Monolith",
+     "Black Tide",
+     "Raven's Wrath",
+     "Coral Corsair",
+     "Hellspire",
+     "Vendetta",
+     "Crimson Tempest",
+     "Royal Tomb",
+     "Guillotine",
+     "Neptune's Maiden",
+     "Cadaver's Call",
+     "Heart of the Sea",
+     "Demonwake",
+     "Bride of the Abyss",
+     "Annihilation",
+     "Golden Glaive",
+     "Necrobile",
+     "Grave Witch",
+     "Loa's Lament",
+     "Hunsi Kanzo",
+     "Dragon from the Deep",
+     "Leviathan's Flood",
+     "Kraken's Maw",
+     "Harlequin's Curse"
+    ]
+   }
+  ],
+  "rows": [
+   {
+    "roll": 11,
+    "text": "Banshee's Wail"
+   },
+   {
+    "roll": 12,
+    "text": "Revenant"
+   },
+   {
+    "roll": 13,
+    "text": "Void Ripper"
+   },
+   {
+    "roll": 14,
+    "text": "Mermaid's Tear"
+   },
+   {
+    "roll": 15,
+    "text": "Carrion Crow"
+   },
+   {
+    "roll": 16,
+    "text": "Executioner's Hand"
+   },
+   {
+    "roll": 21,
+    "text": "Poseidon's Rage"
+   },
+   {
+    "roll": 22,
+    "text": "Adventure's Ghost"
+   },
+   {
+    "roll": 23,
+    "text": "Widow's Revenge"
+   },
+   {
+    "roll": 24,
+    "text": "Blood Moon"
+   },
+   {
+    "roll": 25,
+    "text": "Devil's Scorn"
+   },
+   {
+    "roll": 26,
+    "text": "Gilded Parrot"
+   },
+   {
+    "roll": 31,
+    "text": "Monolith"
+   },
+   {
+    "roll": 32,
+    "text": "Black Tide"
+   },
+   {
+    "roll": 33,
+    "text": "Raven's Wrath"
+   },
+   {
+    "roll": 34,
+    "text": "Coral Corsair"
+   },
+   {
+    "roll": 35,
+    "text": "Hellspire"
+   },
+   {
+    "roll": 36,
+    "text": "Vendetta"
+   },
+   {
+    "roll": 41,
+    "text": "Crimson Tempest"
+   },
+   {
+    "roll": 42,
+    "text": "Royal Tomb"
+   },
+   {
+    "roll": 43,
+    "text": "Guillotine"
+   },
+   {
+    "roll": 44,
+    "text": "Neptune's Maiden"
+   },
+   {
+    "roll": 45,
+    "text": "Cadaver's Call"
+   },
+   {
+    "roll": 46,
+    "text": "Heart of the Sea"
+   },
+   {
+    "roll": 51,
+    "text": "Demonwake"
+   },
+   {
+    "roll": 52,
+    "text": "Bride of the Abyss"
+   },
+   {
+    "roll": 53,
+    "text": "Annihilation"
+   },
+   {
+    "roll": 54,
+    "text": "Golden Glaive"
+   },
+   {
+    "roll": 55,
+    "text": "Necrobile"
+   },
+   {
+    "roll": 56,
+    "text": "Grave Witch"
+   },
+   {
+    "roll": 61,
+    "text": "Loa's Lament"
+   },
+   {
+    "roll": 62,
+    "text": "Hunsi Kanzo"
+   },
+   {
+    "roll": 63,
+    "text": "Dragon from the Deep"
+   },
+   {
+    "roll": 64,
+    "text": "Leviathan's Flood"
+   },
+   {
+    "roll": 65,
+    "text": "Kraken's Maw"
+   },
+   {
+    "roll": 66,
+    "text": "Harlequin's Curse"
+   }
+  ]
+ }
+};
+window.PB_SHIPS_AT_SEA = PB_SHIPS_AT_SEA;
 var PB_SHIPWRIGHT = {
  "page": 77,
  "crewRepairs": [
@@ -8844,6 +26023,212 @@ var PB_SHIP_STATS = [
  }
 ];
 window.PB_SHIP_STATS = PB_SHIP_STATS;
+var PB_SHIP_TEMPLATES = [
+ {
+  "id": "ghost-ship",
+  "name": "Ghost Ship",
+  "page": 85,
+  "source": "Core Rules",
+  "undead": true,
+  "text": "Reanimated shipwrecks piloted by ghosts and skeletons, typically seen only at night. Use the base stats of another vessel.",
+  "traits": [
+   {
+    "name": "Undead",
+    "text": "Can only be crewed by the dead, and sinks when the captain is destroyed."
+   },
+   {
+    "name": "Winds of Hell",
+    "text": "Not affected by wind conditions (can always move its full speed).",
+    "windImmune": true
+   },
+   {
+    "name": "Terrifying",
+    "text": "At the start of combat, ships and PCs can't take crew actions until they pass a Morale test.",
+    "terrifying": true
+   }
+  ]
+ },
+ {
+  "id": "ship-of-bone",
+  "name": "Ship of Bone",
+  "page": 85,
+  "source": "Core Rules",
+  "undead": true,
+  "text": "Skeletal constructs held together with flesh, leaving a sea of blood in their wake. Use the base stats of another vessel.",
+  "traits": [
+   {
+    "name": "Undead Fortitude",
+    "text": "If reduced to 0 HP or less, test DR12 to drop to 1 HP instead.",
+    "cheatDeath": {
+     "dr": 12,
+     "hp": 1
+    }
+   },
+   {
+    "name": "Marrow Cannons",
+    "text": "Armed with Marrow Cannons (pg. 108).",
+    "monsters": [
+     "marrow-carronade",
+     "marrow-mortar",
+     "bane-of-barbados"
+    ]
+   },
+   {
+    "name": "Terrifying",
+    "text": "At the start of combat, ships and PCs can't take crew actions until they pass a Morale test.",
+    "terrifying": true
+   }
+  ]
+ },
+ {
+  "id": "vessel-from-the-deep",
+  "name": "Vessel from the Deep",
+  "page": 85,
+  "source": "Core Rules",
+  "undead": true,
+  "text": "More monster than ship: recompiled shipwrecks, coral constructs and possessed vessels lost at sea. Use the base stats of another vessel.",
+  "traits": [
+   {
+    "name": "Down to the Locker!",
+    "text": "Can submerge or surface instead of attacking. Speed 3\" when underwater.",
+    "underwaterSpeed": 3
+   },
+   {
+    "name": "Melee Attacks",
+    "text": "Claws ×2 (HP 10, Shell −d6, Pinch d12). Tentacles ×8 (HP 2, no armor, Slam d4 + AGILITY DR12 or entangled; STRENGTH DR12 to escape each round).",
+    "monsters": [
+     {
+      "id": "vessel-from-the-deep-claw",
+      "count": 2
+     },
+     {
+      "id": "vessel-from-the-deep-tentacle",
+      "count": 8
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "navy-ships",
+  "name": "Navy Ships",
+  "page": 110,
+  "source": "Core Rules",
+  "captain": "naval-mastermind",
+  "baseShips": [
+   "frigate",
+   "man-of-war",
+   "ship-of-the-line"
+  ],
+  "text": "Navy fleets are sparse in the Dark Caribbean, but the ships that patrol these waters are well armed.",
+  "traits": [
+   {
+    "name": "Superior Firepower",
+    "text": "Increase attack dice by one size (e.g. d6 → d8).",
+    "attackDieStep": 1
+   }
+  ]
+ },
+ {
+  "id": "inquisitor-ships",
+  "name": "Inquisitor Ships",
+  "page": 111,
+  "source": "Core Rules",
+  "captain": "inquisitor",
+  "baseShips": [
+   "galleon",
+   "fluyt"
+  ],
+  "text": "Large, slow ships of out-of-date construction with thick hulls of old-world timber.",
+  "traits": [
+   {
+    "name": "Old World Hull",
+    "text": "Increase Hull by one tier (e.g. −d4 → −d6).",
+    "hullTier": 1
+   }
+  ]
+ },
+ {
+  "id": "ship-of-bone-fleet",
+  "name": "Ship of Bone (Necromancer)",
+  "page": 112,
+  "source": "Core Rules",
+  "captain": "necromancer",
+  "baseShips": [
+   "brigantine",
+   "fluyt",
+   "frigate",
+   "galleon",
+   "galley"
+  ],
+  "template": "ship-of-bone",
+  "text": "Some sail wooden ships decorated with bones; others have vessels built entirely from the dead.",
+  "traits": [
+   {
+    "name": "Special",
+    "text": "The Necromancer can spend a crew action to recover d8 of the ship's HP.",
+    "heal": "d8"
+   }
+  ]
+ },
+ {
+  "id": "vessel-from-the-deep-fleet",
+  "name": "Vessel from the Deep (Sunken One)",
+  "page": 113,
+  "source": "Core Rules",
+  "captain": "sunken-one",
+  "baseShips": [
+   "galleon",
+   "fluyt",
+   "man-of-war",
+   "ship-of-the-line"
+  ],
+  "template": "vessel-from-the-deep",
+  "text": "Living ships infested with coral and deep-sea parasites.",
+  "traits": [
+   {
+    "name": "Special",
+    "text": "The Sunken One can spend 2d4 consecutive crew actions to summon (d6): 1 d100 sharks (pg. 89), 2 a whale (pg. 89), 3 The Kraken (pg. 105), 4 Davy Jones (pg. 106), 5 The Leviathan (pg. 107), 6 a maelstrom.",
+    "summon": {
+     "actions": "2d4",
+     "die": "d6",
+     "rows": [
+      {
+       "roll": 1,
+       "text": "d100 sharks (pg. 89)",
+       "monster": "hammer-drones"
+      },
+      {
+       "roll": 2,
+       "text": "a whale (pg. 89)",
+       "monster": "barnacled-humpback"
+      },
+      {
+       "roll": 3,
+       "text": "The Kraken (pg. 105)",
+       "monster": "the-kraken"
+      },
+      {
+       "roll": 4,
+       "text": "Davy Jones (pg. 106)",
+       "monster": "davy-jones"
+      },
+      {
+       "roll": 5,
+       "text": "The Leviathan (pg. 107)",
+       "monster": "the-leviathan"
+      },
+      {
+       "roll": 6,
+       "text": "a maelstrom"
+      }
+     ]
+    }
+   }
+  ]
+ }
+];
+window.PB_SHIP_TEMPLATES = PB_SHIP_TEMPLATES;
 var PB_SPECIALTY_CREW = [
  {
   "id": "legendary-captain",
@@ -9651,6 +27036,879 @@ var PB_TRAVEL = {
  }
 };
 window.PB_TRAVEL = PB_TRAVEL;
+var PB_TRAVEL_EVENTS = {
+ "page": 79,
+ "source": "Core Rules",
+ "note": "Roll while traveling at sea (see Maritime Travel, pg. 76). Highlighted words are prompts; the GM decides details.",
+ "flotsam": {
+  "id": "flotsam",
+  "name": "Flotsam & Jetsam",
+  "die": "d12",
+  "page": 79,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Message in a bottle."
+   },
+   {
+    "roll": 2,
+    "text": "2d10 crates (pg. 115).",
+    "table": "cargo"
+   },
+   {
+    "roll": 3,
+    "text": "d4 adrift sailors."
+   },
+   {
+    "roll": 4,
+    "text": "Large, locked sea chest."
+   },
+   {
+    "roll": 5,
+    "text": "Green sea turtle, a map carved in its shell."
+   },
+   {
+    "roll": 6,
+    "text": "A coffin, nailed shut."
+   },
+   {
+    "roll": 7,
+    "text": "Sentient ship's figurehead."
+   },
+   {
+    "roll": 8,
+    "text": "Massive dead blue whale, something living inside."
+   },
+   {
+    "roll": 9,
+    "text": "A tentacle, d100 feet long."
+   },
+   {
+    "roll": 10,
+    "text": "d8 x 100 glowing jellyfish."
+   },
+   {
+    "roll": 11,
+    "text": "Dinghy filled with treasure."
+   },
+   {
+    "roll": 12,
+    "text": "Derelict ship (pg. 116).",
+    "table": "derelictShip"
+   }
+  ]
+ },
+ "encounters": {
+  "id": "seaEncounters",
+  "name": "Encounters at Sea",
+  "die": "d20",
+  "page": 79,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "The Kraken.",
+    "monster": "the-kraken"
+   },
+   {
+    "roll": 2,
+    "text": "Navy Ship of the Line.",
+    "ship": "ship-of-the-line",
+    "captain": "naval-mastermind"
+   },
+   {
+    "roll": 3,
+    "text": "Privateers: d2 sloops & 1 frigate.",
+    "ships": [
+     "sloop",
+     "frigate"
+    ]
+   },
+   {
+    "roll": 4,
+    "text": "2d4 canoes.",
+    "ship": "canoe"
+   },
+   {
+    "roll": 5,
+    "text": "No-talent pirates in a tartane.",
+    "ship": "tartane"
+   },
+   {
+    "roll": 6,
+    "text": "Sloop of rookie pirates.",
+    "ship": "sloop"
+   },
+   {
+    "roll": 7,
+    "text": "Fugitives in a ship's boat.",
+    "ship": "longboat"
+   },
+   {
+    "roll": 8,
+    "text": "Raft with d6 dying passengers.",
+    "ship": "raft"
+   },
+   {
+    "roll": 9,
+    "text": "d2 people in a dinghy.",
+    "ship": "dinghy"
+   },
+   {
+    "roll": 10,
+    "text": "Old galleon crewed by monkeys.",
+    "ship": "galleon"
+   },
+   {
+    "roll": 11,
+    "text": "Merchantman with lots of goods.",
+    "ship": "fluyt"
+   },
+   {
+    "roll": 12,
+    "text": "2d20 zombies on floating debris."
+   },
+   {
+    "roll": 13,
+    "text": "Man-of-War, famous pirate.",
+    "ship": "man-of-war"
+   },
+   {
+    "roll": 14,
+    "text": "3d6 war canoes, en route to raid.",
+    "ship": "canoe"
+   },
+   {
+    "roll": 15,
+    "text": "Blood drenched Ship of the Dead.",
+    "ship": "ghost-ship"
+   },
+   {
+    "roll": 16,
+    "text": "Treasure galleon & d4 sloops.",
+    "ships": [
+     "galleon",
+     "sloop"
+    ]
+   },
+   {
+    "roll": 17,
+    "text": "d2 undead megalodons.",
+    "monster": "undead-megalodon"
+   },
+   {
+    "roll": 18,
+    "text": "d6 fluyts preparing for battle.",
+    "ship": "fluyt"
+   },
+   {
+    "roll": 19,
+    "text": "A flotilla: pirate lords are meeting."
+   },
+   {
+    "roll": 20,
+    "text": "Ornate galleon: a floating brothel.",
+    "ship": "galleon"
+   }
+  ]
+ },
+ "events": {
+  "id": "seaEvents",
+  "name": "Events at Sea",
+  "die": "d20",
+  "page": 79,
+  "source": "Core Rules",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "A huge shark or sea monster harasses the hull. DR12 AGILITY tests or overboard!",
+    "test": {
+     "ability": "AGILITY",
+     "dr": 12
+    }
+   },
+   {
+    "roll": 2,
+    "text": "A corpse floats by the ship. If rescued, it comes to life after d10 minutes."
+   },
+   {
+    "roll": 3,
+    "text": "Shipworms or barnacles infect the hull. Ship: -1 speed each week until careened.",
+    "shipSpeed": -1
+   },
+   {
+    "roll": 4,
+    "text": "d4 sirens on rocks or a desert island beckon the crew with serene melodies.",
+    "monster": "siren"
+   },
+   {
+    "roll": 5,
+    "text": "The rum is gone! The culprit is at large."
+   },
+   {
+    "roll": 6,
+    "text": "Man overboard! d6 rounds to solve."
+   },
+   {
+    "roll": 7,
+    "text": "Mutiny! Roll reactions for all of the crew (pg. 31).",
+    "table": "reaction"
+   },
+   {
+    "roll": 8,
+    "text": "Maggots have infested the bread. Resting at sea requires a DR10 TOUGHNESS test.",
+    "test": {
+     "ability": "TOUGHNESS",
+     "dr": 10
+    }
+   },
+   {
+    "roll": 9,
+    "text": "A crew member is gravely wounded while performing their duties around the ship."
+   },
+   {
+    "roll": 10,
+    "text": "An NPC knows something troubling related to a PC's background or unfortunate incident."
+   },
+   {
+    "roll": 11,
+    "text": "A slimy ghost is spotted eating the food in the galley."
+   },
+   {
+    "roll": 12,
+    "text": "A maelstrom (whirlpool) opens nearby. Eminent danger."
+   },
+   {
+    "roll": 13,
+    "text": "Everyone is haunted by eldritch or stygian dreams. The Great Old One calls..."
+   },
+   {
+    "roll": 14,
+    "text": "d4 of the crew are quarreling. Fisticuffs?"
+   },
+   {
+    "roll": 15,
+    "text": "Things are missing: there is a stowaway."
+   },
+   {
+    "roll": 16,
+    "text": "Unexpected shoals and coral require precision navigation and piloting."
+   },
+   {
+    "roll": 17,
+    "text": "Something gruesome and terrible is found in the cargo hold."
+   },
+   {
+    "roll": 18,
+    "text": "d2 mermaids visit the ship. Secretly roll reaction (pg. 31) to know their intent.",
+    "table": "reaction"
+   },
+   {
+    "roll": 19,
+    "text": "A mysterious, uncharted island is spotted. See pg. 122.",
+    "table": "islands"
+   },
+   {
+    "roll": 20,
+    "text": "An albatross is spotted flying with the sails. Everyone gains 1 Devil's Luck point.",
+    "luck": 1
+   }
+  ]
+ }
+};
+window.PB_TRAVEL_EVENTS = PB_TRAVEL_EVENTS;
+var PB_TREASURE_MAPS = {
+ "page": 119,
+ "source": "Core Rules",
+ "note": "Pick and choose from these tables as needed, then grab parchment and a quill and get to work.",
+ "tables": {
+  "type": {
+   "id": "mapType",
+   "name": "Type of Map",
+   "die": "d4",
+   "page": 119,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "name": "Simple",
+     "text": "Simple. A geographic area, X marks the spot."
+    },
+    {
+     "roll": 2,
+     "name": "Point Crawl",
+     "text": "Point Crawl. The map shows several icons (pg. 120), but they must be traveled to sequentially to find the next one."
+    },
+    {
+     "roll": 3,
+     "name": "Scavenger Hunt",
+     "text": "Scavenger Hunt. The map has only one point of interest or one clue, but finding it reveals more maps or clues."
+    },
+    {
+     "roll": 4,
+     "name": "Arcane",
+     "text": "Arcane. The map only reveals the next step when the previous one is completed."
+    }
+   ]
+  },
+  "material": {
+   "id": "mapMaterial",
+   "name": "Material",
+   "die": "d12",
+   "page": 119,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": [
+      1,
+      4
+     ],
+     "text": "Parchment paper."
+    },
+    {
+     "roll": 5,
+     "text": "In an old book."
+    },
+    {
+     "roll": 6,
+     "text": "Only in someone's mind or memories."
+    },
+    {
+     "roll": 7,
+     "text": "Burnt into leather."
+    },
+    {
+     "roll": 8,
+     "text": "Whittled into a bone or skull."
+    },
+    {
+     "roll": 9,
+     "text": "Minted on a unique coin."
+    },
+    {
+     "roll": 10,
+     "text": "Embossed into a sea turtle shell."
+    },
+    {
+     "roll": 11,
+     "text": "Scratched into driftwood."
+    },
+    {
+     "roll": 12,
+     "text": "Etched into a glass bottle."
+    }
+   ]
+  },
+  "geography": {
+   "id": "mapGeography",
+   "name": "Geography",
+   "die": "d8",
+   "page": 119,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "Island"
+    },
+    {
+     "roll": 2,
+     "text": "Coast"
+    },
+    {
+     "roll": 3,
+     "text": "Peninsula"
+    },
+    {
+     "roll": 4,
+     "text": "Cove"
+    },
+    {
+     "roll": 5,
+     "text": "Archipelago"
+    },
+    {
+     "roll": 6,
+     "text": "River"
+    },
+    {
+     "roll": 7,
+     "text": "Lake"
+    },
+    {
+     "roll": 8,
+     "text": "Inland"
+    }
+   ]
+  },
+  "itStarts": {
+   "id": "mapStarts",
+   "name": "It Starts…",
+   "die": "d6",
+   "page": 119,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "at a totally unknown location."
+    },
+    {
+     "roll": 2,
+     "text": "nearby."
+    },
+    {
+     "roll": 3,
+     "text": "within a mile."
+    },
+    {
+     "roll": 4,
+     "text": "a day's walk away."
+    },
+    {
+     "roll": 5,
+     "text": "a day's sail away."
+    },
+    {
+     "roll": 6,
+     "text": "near a well known place."
+    }
+   ]
+  },
+  "invisibleInk": {
+   "id": "mapInvisibleInk",
+   "name": "The Invisible Ink Is Revealed…",
+   "die": "d10",
+   "page": 119,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "with heat or fire."
+    },
+    {
+     "roll": 2,
+     "text": "under star or moon light."
+    },
+    {
+     "roll": 3,
+     "text": "during an eclipse."
+    },
+    {
+     "roll": 4,
+     "text": "when underwater."
+    },
+    {
+     "roll": 5,
+     "text": "if soaked in alcohol."
+    },
+    {
+     "roll": 6,
+     "text": "with magic or a ritual."
+    },
+    {
+     "roll": 7,
+     "text": "when you speak the password."
+    },
+    {
+     "roll": 8,
+     "text": "when near a key location or object."
+    },
+    {
+     "roll": 9,
+     "text": "during the solstice or equinox."
+    },
+    {
+     "roll": 10,
+     "text": "at a certain time of day."
+    }
+   ]
+  },
+  "complication": {
+   "id": "mapComplication",
+   "name": "Complication",
+   "die": "d8",
+   "page": 119,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "Another crew is there when the PCs arrive."
+    },
+    {
+     "roll": 2,
+     "text": "Monsters guard it."
+    },
+    {
+     "roll": 3,
+     "text": "It has already been found or is missing."
+    },
+    {
+     "roll": 4,
+     "text": "It's cursed."
+    },
+    {
+     "roll": 5,
+     "text": "There are hundreds of corpses."
+    },
+    {
+     "roll": 6,
+     "text": "The PCs become incredibly lost on the way."
+    },
+    {
+     "roll": 7,
+     "text": "The whole thing is a setup."
+    },
+    {
+     "roll": 8,
+     "text": "There is so much treasure everyone becomes murderously paranoid."
+    }
+   ]
+  },
+  "icons": {
+   "id": "mapIcons",
+   "name": "Icons",
+   "die": "d20",
+   "page": 120,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "rope bridge"
+    },
+    {
+     "roll": 2,
+     "text": "waterfall"
+    },
+    {
+     "roll": 3,
+     "text": "volcano caldera"
+    },
+    {
+     "roll": 4,
+     "text": "skull rock"
+    },
+    {
+     "roll": 5,
+     "text": "wicked tree"
+    },
+    {
+     "roll": 6,
+     "text": "jungle"
+    },
+    {
+     "roll": 7,
+     "text": "beach caves"
+    },
+    {
+     "roll": 8,
+     "text": "whale graveyard"
+    },
+    {
+     "roll": 9,
+     "text": "white sand beach"
+    },
+    {
+     "roll": 10,
+     "text": "lagoon"
+    },
+    {
+     "roll": 11,
+     "text": "ancient ruins"
+    },
+    {
+     "roll": 12,
+     "text": "burnt down cabin"
+    },
+    {
+     "roll": 13,
+     "text": "swamp"
+    },
+    {
+     "roll": 14,
+     "text": "shipwreck"
+    },
+    {
+     "roll": 15,
+     "text": "cliff side"
+    },
+    {
+     "roll": 16,
+     "text": "large hill"
+    },
+    {
+     "roll": 17,
+     "text": "quicksand"
+    },
+    {
+     "roll": 18,
+     "text": "mountain's peak"
+    },
+    {
+     "roll": 19,
+     "text": "highest point"
+    },
+    {
+     "roll": 20,
+     "text": "lowest point"
+    }
+   ]
+  },
+  "clueContainer": {
+   "id": "mapClueContainer",
+   "name": "Clue Container",
+   "die": "d10",
+   "page": 120,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "Note in a scroll case."
+    },
+    {
+     "roll": 2,
+     "text": "Small stone, instructions carved underneath."
+    },
+    {
+     "roll": 3,
+     "text": "Coconut shell."
+    },
+    {
+     "roll": 4,
+     "text": "Message in a bottle."
+    },
+    {
+     "roll": 5,
+     "text": "Metal plaque."
+    },
+    {
+     "roll": 6,
+     "text": "Letter in a small box."
+    },
+    {
+     "roll": 7,
+     "text": "Etched cannon ball."
+    },
+    {
+     "roll": 8,
+     "text": "Burnt or carved into wood."
+    },
+    {
+     "roll": 9,
+     "text": "Dried blood on a skull."
+    },
+    {
+     "roll": 10,
+     "text": "A potion. The drinker \"knows\" the next clue, but TOUGHNESS DR12 or becomes poisoned.",
+     "test": {
+      "ability": "TOUGHNESS",
+      "dr": 12
+     }
+    }
+   ]
+  },
+  "direction": {
+   "id": "mapDirection",
+   "name": "Direction",
+   "die": "d8",
+   "page": 120,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "north"
+    },
+    {
+     "roll": 2,
+     "text": "northeast"
+    },
+    {
+     "roll": 3,
+     "text": "east"
+    },
+    {
+     "roll": 4,
+     "text": "southeast"
+    },
+    {
+     "roll": 5,
+     "text": "south"
+    },
+    {
+     "roll": 6,
+     "text": "southwest"
+    },
+    {
+     "roll": 7,
+     "text": "west"
+    },
+    {
+     "roll": 8,
+     "text": "northwest"
+    }
+   ]
+  },
+  "markers": {
+   "id": "mapMarkers",
+   "name": "Markers",
+   "die": "d20",
+   "page": 120,
+   "source": "Core Rules",
+   "rows": [
+    {
+     "roll": 1,
+     "text": "large boulder"
+    },
+    {
+     "roll": 2,
+     "text": "dead man's bones"
+    },
+    {
+     "roll": 3,
+     "text": "makeshift grave"
+    },
+    {
+     "roll": 4,
+     "text": "old anchor"
+    },
+    {
+     "roll": 5,
+     "text": "ruined rowboat"
+    },
+    {
+     "roll": 6,
+     "text": "lone palm tree"
+    },
+    {
+     "roll": 7,
+     "text": "ship's wheel"
+    },
+    {
+     "roll": 8,
+     "text": "painted rock"
+    },
+    {
+     "roll": 9,
+     "text": "cannonball"
+    },
+    {
+     "roll": 10,
+     "text": "pile of skulls"
+    },
+    {
+     "roll": 11,
+     "text": "volcanic glass"
+    },
+    {
+     "roll": 12,
+     "text": "rusty cutlass"
+    },
+    {
+     "roll": 13,
+     "text": "broken oar"
+    },
+    {
+     "roll": 14,
+     "text": "broken barrel"
+    },
+    {
+     "roll": 15,
+     "text": "ruined cannon"
+    },
+    {
+     "roll": 16,
+     "text": "tallest tree"
+    },
+    {
+     "roll": 17,
+     "text": "strange sea shell"
+    },
+    {
+     "roll": 18,
+     "text": "rotting crate"
+    },
+    {
+     "roll": 19,
+     "text": "stone statue"
+    },
+    {
+     "roll": 20,
+     "text": "tombstone"
+    }
+   ]
+  }
+ },
+ "riddles": {
+  "id": "riddles",
+  "name": "Riddles",
+  "die": "d12",
+  "page": 121,
+  "source": "Core Rules",
+  "note": "Fill [icon], [marker] and [direction] from the tables on pg. 120. The `answer` is the GM's explanation.",
+  "rows": [
+   {
+    "roll": 1,
+    "text": "Arrive at the [icon] but you won't see the [marker] in the light, travel [2d6] paces to the [direction] and wait until day turns to night.",
+    "answer": "The marker only appears in the dark."
+   },
+   {
+    "roll": 2,
+    "text": "Set your course for the [icon] and ready a shanty, for singing near the [marker] will turn \"none\" into \"plenty\".",
+    "answer": "The treasure or clue appears once music is played."
+   },
+   {
+    "roll": 3,
+    "text": "Find the [marker] by the [icon], ye soothsayers and witches, for only magic or prayers can lead to these riches.",
+    "answer": "Using a Relic, Ritual, Spell, or Prayer magically reveals the clue or treasure."
+   },
+   {
+    "roll": 4,
+    "text": "Look not high for salvation, but low for an X, crossed trees you will find, but beware of the hex.",
+    "answer": "Two fallen trees cover the clue or treasure; it's booby trapped."
+   },
+   {
+    "roll": 5,
+    "text": "In shallow waters near [icon] the [marker] rests under waves, it points in the direction of nearby caves.",
+    "answer": "The marker has a carved or painted arrow that points to a nearby cave with the clue/treasure."
+   },
+   {
+    "roll": 6,
+    "text": "Head [d8 x 10] paces [direction] of the [icon] then dig a hole, under the [marker] lies the key to your goal.",
+    "answer": "Dig for the clue/treasure."
+   },
+   {
+    "roll": 7,
+    "text": "Make for the [icon] before the sun hits the sea, the secret lies between the [marker] and a tree.",
+    "answer": "Can't be found during the night."
+   },
+   {
+    "roll": 8,
+    "text": "Only dead men know this hidden locale, for of all who've seen the [marker] by the [icon] none have lived to tell.",
+    "answer": "Tragedy, a trap, or both haunt this location."
+   },
+   {
+    "roll": 9,
+    "text": "Near [icon] at midnight the dead rise from their graves, but the one near the [marker] is a crooked-nosed knave.",
+    "answer": "Harmless ghosts rise here at midnight, but one near the marker knows the location of the clue/treasure. He will only reveal it if his body, hanging from a nearby noose, is laid to rest."
+   },
+   {
+    "roll": 10,
+    "text": "Travel [direction] for 2d2 miles, find the [icon] then rest, only candlelight will reveal the [marker] over the chest.",
+    "answer": "The marker only appears in candle light. The clue/treasure is under it."
+   },
+   {
+    "roll": 11,
+    "text": "From the [icon] at low tide you will be able to see, the [marker] just [direction] of a large fruit tree.",
+    "answer": "The clue/treasure is buried in the shadow of the tree."
+   },
+   {
+    "roll": 12,
+    "text": "[Direction] of the [icon] you will find a sight rarely seen, find the [marker] that's hidden under a blanket of green.",
+    "answer": "The marker is hidden under foliage, moss, or grass growing in an odd place."
+   }
+  ]
+ }
+};
+window.PB_TREASURE_MAPS = PB_TREASURE_MAPS;
 var PB_WEAPONS = [
  {
   "id": "unarmed-insults",

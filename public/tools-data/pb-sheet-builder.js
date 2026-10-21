@@ -206,7 +206,7 @@
   }
   function namePage() {
     var n = A(window.PB_NAMES);
-    var h = '<p class="m-hint">Roll d66 (two d6: tens and ones) for each part on the name generator (pg. 79), or write your own.</p>';
+    var h = '<p class="m-hint">Roll d66 (two d6: tens and ones) for each part on the name generator (Player\'s Guidebook pg. 79 · Core Rules pg. 125), or write your own.</p>';
     h += '<div class="m-row" style="margin-bottom:8px;">' + chip('Any', B.sex === 'any', "PBB.set('sex','any')") + chip('Male names', B.sex === 'male', "PBB.set('sex','male')") + chip('Female names', B.sex === 'female', "PBB.set('sex','female')") + rollBtn('Roll everything', 'PBB.rollName()') + '</div>';
     h += '<div class="m-row">' + rollBtn('d66 first name', "PBB.rollPart('first')") + '<b>' + esc(B.first || '—') + '</b></div>';
     h += '<div class="m-row" style="margin-top:6px;">' + rollBtn('d66 surname', "PBB.rollPart('surname')") + '<b>' + esc(B.surname || '—') + '</b></div>';

@@ -2183,7 +2183,7 @@ function normalizeDbNpc(input: unknown): { name: string; data: Record<string, un
 // ability, armor tier/die, Morale; dice are lowercase ("2d6", "d4+1").
 const PB_ARMOR_DICE = ["d2", "d4", "d6"] as const; // tier 1 / 2 / 3
 const PB_MON_DICE = ["d2", "d4", "d6", "d8", "d10", "d12"] as const;
-const PB_MON_CATS = ["npc", "undead", "beast", "spirit", "monster"] as const;
+const PB_MON_CATS = ["npc", "undead", "beast", "spirit", "monster", "flora", "construct"] as const;
 const PB_SHIP_TYPES = ["boat", "ship", "fortification"] as const;
 const PB_GEAR_CATS = ["gear", "container", "vessel"] as const;
 const PB_ABILITY_IDS = ["STRENGTH", "AGILITY", "PRESENCE", "TOUGHNESS", "SPIRIT"] as const;
@@ -2320,7 +2320,43 @@ function normalizePbMonster(input: unknown): { name: string; data: Record<string
   if (Object.keys(dr).length) data.dr = dr;
   const per = str(o.attacksPerRound).slice(0, 30);
   if (per && per !== "1") data.attacksPerRound = /^\d+$/.test(per) ? Number(per) : per;
-  if (truthy(o.attackChoice)) data.attackChoice = "one of";
+  // "pick 1-2" = the Core Rules' "choose 1 or 2" weapon list; any other truthy value
+  // (the old checkbox) = uses ONE of its attacks.
+  if (str(o.attackChoice) === "pick 1-2") data.attackChoice = "pick 1-2";
+  else if (truthy(o.attackChoice) || str(o.attackChoice) === "one of") data.attackChoice = "one of";
+  // Rolled / non-numeric HP and Morale as printed ("2d8", "4 each", "d6+6"); `hp` /
+  // `morale` stay the numbers the trackers use.
+  const hpText = pbDice(o.hpText).slice(0, 20);
+  if (hpText && hpText !== String(data.hp)) data.hpText = hpText;
+  const moraleText = pbDice(o.moraleText).slice(0, 20);
+  if (moraleText && moraleText !== String(data.morale ?? "–")) data.moraleText = moraleText;
+  if (str(o.count)) data.count = pbDice(o.count).slice(0, 20);
+  // Sellable parts after the block ("Snake skin 5s").
+  const loot = (Array.isArray(o.loot) ? (o.loot as unknown[]) : []).slice(0, 8).map((l) => {
+    const r = (l ?? {}) as Record<string, unknown>;
+    return { name: str(r.name).slice(0, 80), value: str(r.value).slice(0, 60) };
+  }).filter((l) => l.name || l.value);
+  if (loot.length) data.loot = loot;
+  // A sea monster's second block for naval combat (HP / speed / agility / attacks).
+  const nAttacks = (Array.isArray(o.navalAttacks) ? (o.navalAttacks as unknown[]) : []).slice(0, 6).map((a) => {
+    const r = (a ?? {}) as Record<string, unknown>;
+    const out: { name: string; damage: string | null; notes?: string } = { name: str(r.name).slice(0, 80) || "Attack", damage: pbDice(r.damage) || null };
+    if (str(r.notes)) out.notes = str(r.notes).slice(0, 300);
+    return out;
+  }).filter((a) => a.name !== "Attack" || a.damage);
+  const nHp = pbInt(o.navalHp, 1, 999);
+  if (nHp != null || nAttacks.length) {
+    const nDie = str(o.navalArmorDie).replace(/^[-−]/, "").toLowerCase();
+    const nMorale = str(o.navalMorale);
+    data.naval = {
+      hp: nHp ?? 1,
+      morale: nMorale === "" ? (data.morale as number | null) : /^[–—-]$/.test(nMorale) ? null : pbInt(nMorale, 2, 12),
+      armor: (PB_MON_DICE as readonly string[]).includes(nDie) ? { name: str(o.navalArmorName).slice(0, 60) || "Armor", die: nDie } : null,
+      speed: pbInt(o.navalSpeed, 0, 20) ?? 3,
+      agility: pbInt(o.navalAgility, -5, 6) ?? 0,
+      attacks: nAttacks,
+    };
+  }
   const dw = str(o.defendWith);
   if (dw && dw !== "AGILITY" && (PB_ABILITY_IDS as readonly string[]).includes(dw)) data.defendWith = dw;
   if (str(o.group)) data.group = str(o.group).slice(0, 60);

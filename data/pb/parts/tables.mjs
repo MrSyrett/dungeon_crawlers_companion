@@ -8,9 +8,17 @@ import { PB_JOKER_TABLE } from "./classes.mjs";
 import { PB_RELICS, PB_RITUALS, PB_MISHAPS } from "./magic.mjs";
 import { PB_DERELICT, PB_CHANGING_WINDS, PB_FOUL_WEATHER, PB_SHANTIES, PB_WIND } from "./naval.mjs";
 import { PB_NAMES } from "./backgrounds.mjs";
+import {
+  PB_CAROUSING, PB_NAMES_D12, PB_NPC_MOTIVATION, PB_LOOT_THE_BODY, PB_ASH, PB_ALCHEMY_TABLE, PB_TRAVEL_EVENTS, PB_SHIPS_AT_SEA,
+  PB_CARGO, PB_DERELICT_GEN, PB_BURIED_TREASURE, PB_TREASURE_MAPS, PB_ISLANDS, PB_PIRATE_GEN, PB_JOBS, PB_RUMORS,
+} from "./core-tables.mjs";
+import { PB_HISTORY, PB_ENEMY_BUILDER, PB_MODULE_SKELETON_POINT } from "./core-setting.mjs";
 
 const PG = "Player's Guidebook";
 const TT = "Trapped in the Tropics";
+const CR = "Core Rules";
+// Flatten a generator's sub-tables into PB_GM_TABLES entries, tagging each with its generator group.
+const group = (g, tables) => Object.fromEntries(Object.values(tables).map((t) => [t.id, { ...t, group: g }]));
 const named = (rows) => rows.map((r) => ({ ...r, text: r.name && r.text ? `${r.name}: ${r.text}` : r.text || r.name }));
 const list = (arr) => arr.map((t, i) => (typeof t === "string" ? { roll: i + 1, text: t } : { roll: i + 1, ...t }));
 
@@ -32,7 +40,7 @@ export const PB_GM_TABLES = {
     rows: PB_MISHAPS.map((r) => ({ ...r, text: r.hidden ? `${r.text} ${r.hidden}` : r.text })),
   },
   names: {
-    id: "names", name: "Pirate Name Generator", die: "d66", page: 79, source: PG, note: "Roll d66 × 4: a first name (either column), a surname and two nicknames. Mix and match to taste.",
+    id: "names", name: "Pirate Name Generator", die: "d66", page: 79, corePage: 125, source: PG, note: "Roll d66 × 4: a first name (either column), a surname and two nicknames. Mix and match to taste.",
     columns: [
       { die: "d66", name: "Name (male)", values: PB_NAMES.map((n) => n.male) },
       { die: "d66", name: "Name (female)", values: PB_NAMES.map((n) => n.female) },
@@ -144,4 +152,37 @@ export const PB_GM_TABLES = {
       ] },
     ],
   },
+
+  // ---- Core Rules generators (pg. 2-3, 10, 25, 70, 79, 91, 114-127) ------------------------------
+  carousing: { ...PB_CAROUSING, group: "Carousing & Taverns" },
+  namesD12: { ...PB_NAMES_D12, group: "Names" },
+  npcMotivation: { ...PB_NPC_MOTIVATION, group: "NPCs" },
+  lootTheBody: { ...PB_LOOT_THE_BODY, group: "Loot & Treasure" },
+  ashMarket: { ...PB_ASH.market, group: "ASH" },
+  ashEffects: { ...PB_ASH.effects, group: "ASH" },
+  history: { ...PB_HISTORY, group: "Setting" },
+  alchemy: { ...PB_ALCHEMY_TABLE, group: "Alchemy" },
+  flotsam: { ...PB_TRAVEL_EVENTS.flotsam, group: "Maritime Travel Events" },
+  seaEncounters: { ...PB_TRAVEL_EVENTS.encounters, group: "Maritime Travel Events" },
+  seaEvents: { ...PB_TRAVEL_EVENTS.events, group: "Maritime Travel Events" },
+  ...group("Enemy Builder", PB_ENEMY_BUILDER.tables),
+  vesselClass: { ...PB_SHIPS_AT_SEA.vesselClass, group: "Ships at Sea" },
+  armament: { ...PB_SHIPS_AT_SEA.armament, group: "Ships at Sea" },
+  crewQuantity: { ...PB_SHIPS_AT_SEA.crewQuantity, group: "Ships at Sea" },
+  crewQuality: { ...PB_SHIPS_AT_SEA.crewQuality, group: "Ships at Sea" },
+  shipName: { ...PB_SHIPS_AT_SEA.name, group: "Ships at Sea" },
+  cargoMundane: { ...PB_CARGO.mundane, group: "Cargo" },
+  cargoSpecial: { ...PB_CARGO.special, group: "Cargo" },
+  cargoPlotTwist: { ...PB_CARGO.plotTwist, group: "Cargo" },
+  ...group("Derelict Ship", PB_DERELICT_GEN.tables),
+  buriedTreasure: { ...PB_BURIED_TREASURE, group: "Loot & Treasure" },
+  ...group("Treasure Maps", PB_TREASURE_MAPS.tables),
+  riddles: { ...PB_TREASURE_MAPS.riddles, group: "Treasure Maps" },
+  ...group("Uncharted Islands", PB_ISLANDS.tables),
+  pirateA: { ...PB_PIRATE_GEN.tableA, group: "Pirate Generator", note: PB_PIRATE_GEN.note },
+  pirateB: { ...PB_PIRATE_GEN.tableB, group: "Pirate Generator", note: PB_PIRATE_GEN.note },
+  pirateC: { ...PB_PIRATE_GEN.tableC, group: "Pirate Generator", note: PB_PIRATE_GEN.note },
+  ...group("Jobs & Quests", PB_JOBS.tables),
+  rumors: { ...PB_RUMORS, group: "Rumors" },
+  ...group("The Curse of Skeleton Point", { ...PB_MODULE_SKELETON_POINT.tables, plotHooks: PB_MODULE_SKELETON_POINT.plotHooks, development: PB_MODULE_SKELETON_POINT.development }),
 };

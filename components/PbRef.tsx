@@ -43,17 +43,37 @@ export function HbBadge({ x }: { x: object }) {
 }
 
 // ── Source filter ──────────────────────────────────────────────────────────
-// Pirate Borg content comes from the Player's Guidebook, the Trapped in the
-// Tropics adventure (the bestiary and ships) and the user's Homebrew. The Source
+// Pirate Borg content comes from the Player's Guidebook, the Core Rules (with its
+// module The Curse of Skeleton Point), the Trapped in the Tropics adventure and
+// the user's Homebrew. A record printed in several books lists them all in
+// `sources`; the Source chips match ANY of them (an array facet), so a zombie in
+// both the Core Rules and Trapped in the Tropics shows under either. The Source
 // row only appears when more than one source is present.
-const SRC_LABEL: Record<string, string> = { pg: "Player's Guidebook", tt: "Trapped in the Tropics", hb: "Homebrew" };
-export const srcKey = (source?: string): string => (source === "Homebrew" ? "hb" : source === "Trapped in the Tropics" ? "tt" : "pg");
+const SRC_ORDER = ["core", "pg", "sp", "tt", "hb"];
+const SRC_LABEL: Record<string, string> = { core: "Core Rules", pg: "Player's Guidebook", sp: "Skeleton Point", tt: "Trapped in the Tropics", hb: "Homebrew" };
+export const srcKey = (source?: string): string =>
+  source === "Homebrew" ? "hb" : source === "Trapped in the Tropics" ? "tt" : source === "Core Rules" ? "core" : source === "The Curse of Skeleton Point" ? "sp" : "pg";
+type Sourced = { source?: string; page?: number; sources?: unknown };
+/** Every book a record appears in (primary first). */
+export function sourceRefs(x: Sourced): { source: string; page: number; note?: string }[] {
+  const list = Array.isArray(x.sources) ? (x.sources as { source: string; page: number; note?: string }[]) : [];
+  return list.length ? list : [{ source: x.source ?? "", page: x.page ?? 0 }];
+}
+/** Source keys for an array facet. */
+export const srcKeys = (x: Sourced): string[] => [...new Set(sourceRefs(x).map((r) => srcKey(r.source)))];
 export function srcChips(sources: (string | undefined)[]): { key: string; label: string }[] {
   const present = new Set(sources.map(srcKey));
   if (present.size < 2) return [];
-  return ["pg", "tt", "hb"].filter((k) => present.has(k)).map((k) => ({ key: k, label: SRC_LABEL[k] }));
+  return SRC_ORDER.filter((k) => present.has(k)).map((k) => ({ key: k, label: SRC_LABEL[k] }));
+}
+/** "Core Rules pg. 94 · Trapped in the Tropics TitT 27" for a detail view. */
+export function sourcesLine(x: Sourced): string {
+  if (x.source === "Homebrew") return "Homebrew";
+  return sourceRefs(x).map((r) => `${r.source}${r.page ? `, ${r.source === "Trapped in the Tropics" ? "p." : "pg."} ${r.page}` : ""}${r.note ? ` (${r.note})` : ""}`).join(" · ");
 }
 
+/** "Name." — but "Down to the Locker!" keeps its own punctuation. */
+export const dot = (name: string): string => (/[.!?]$/.test(name) ? name : `${name}.`);
 export function withParams(base: string, current: Query, patch: Query): string {
   const next = { ...current, ...patch }; const sp = new URLSearchParams();
   for (const [k, v] of Object.entries(next)) if (v) sp.set(k, v);
@@ -167,7 +187,17 @@ export function abilityLine(a: PbAbilityMods | null | undefined): string {
 }
 
 // ── d-tables ───────────────────────────────────────────────────────────────
-type Row = { roll?: PbRoll; name?: string; text?: string; hidden?: string; sub?: { die: string; rows: PbRollEntry[] } };
+type Row = { roll?: PbRoll; name?: string; text?: string; hidden?: string; answer?: unknown; orLess?: unknown; orMore?: unknown; sub?: { die: string; rows: PbRollEntry[] } };
+/** A row's roll label: "≤4" / "11+" for open-ended rows (2d6 + SPIRIT). */
+export function rowRoll(r: Row): string {
+  if (r.roll == null) return "";
+  const lo = Array.isArray(r.roll) ? r.roll[0] : r.roll, hi = Array.isArray(r.roll) ? r.roll[1] : r.roll;
+  if (r.orLess) return `≤${hi}`;
+  if (r.orMore) return `${lo}+`;
+  return rollText(r.roll);
+}
+/** Drop a row name the text already starts with ("Flooded" + "Flooded: half the rate."). */
+const rowName = (r: Row): string => (r.name && !(r.text ?? "").toLowerCase().startsWith(r.name.toLowerCase()) ? r.name : "");
 export function DieTable({ title, die, rows, note, id, cols }: { title?: string; die?: string | null; rows: Row[]; note?: string; id?: string; cols?: 1 | 2 | 3 }) {
   const grid = cols === 3 ? "sm:grid-cols-2 lg:grid-cols-3" : cols === 2 ? "md:grid-cols-2" : "";
   return (
@@ -177,10 +207,11 @@ export function DieTable({ title, die, rows, note, id, cols }: { title?: string;
       <ol className={`mt-1.5 grid gap-x-6 gap-y-1 text-[13px] leading-relaxed text-[var(--muted)] ${grid}`}>
         {rows.map((r, i) => (
           <li key={i} className="flex gap-2 break-inside-avoid">
-            {r.roll != null ? <span className={`${rollCls} leading-[1.45rem]`}>{rollText(r.roll)}</span> : null}
+            {r.roll != null ? <span className={`${rollCls} leading-[1.45rem]`}>{rowRoll(r)}</span> : null}
             <span className="min-w-0">
-              {r.name ? <span className="font-semibold text-[var(--text)]">{r.name}{r.text ? ". " : ""}</span> : null}{r.text}
+              {rowName(r) ? <span className="font-semibold text-[var(--text)]">{rowName(r)}{r.text ? ". " : ""}</span> : null}{r.text}
               {r.hidden ? <> <em className="text-[var(--text)] opacity-80">{r.hidden}</em></> : null}
+              {typeof r.answer === "string" ? <span className="mt-0.5 block text-[12px] italic"><span className="font-semibold not-italic text-[var(--sys-link)]">Answer:</span> {r.answer}</span> : null}
               {r.sub ? (
                 <span className="mt-0.5 block text-[12.5px]"><N className="text-[var(--pb-ink)]">{r.sub.die}</N>: {r.sub.rows.map((s, j) => <span key={j}>{j ? " · " : ""}<N className="text-[var(--text)]">{rollText(s.roll)}</N> {s.text}</span>)}</span>
               ) : null}
@@ -191,6 +222,71 @@ export function DieTable({ title, die, rows, note, id, cols }: { title?: string;
     </div>
   );
 }
+// ── generic PbTable (GM tables, generators) ────────────────────────────────
+type AnyTable = { id?: string; name: string; die: string; dice?: unknown; page?: number; source?: string; note?: string; rows?: PbRollEntry[]; columns?: { die: string; name: string; values: string[] }[] };
+/** Data notes speak of fields ("the `hidden` part"); say it the way the page shows it. */
+export const cleanNote = (n?: string): string | undefined =>
+  n?.replace(/\s*Converting from another system[^.]*\.?(\s*[^.]*Hit Dice\.)?/, "").replace(/[Tt]ext in the `hidden` (part|field)/g, "Text in italics").replace(/The `answer` is the GM's explanation\./, "The answer under each riddle is for the GM.").replace(/`([^`]+)`/g, "$1");
+/** The dice to roll for a table: "4d20" for carousing, else its die. */
+export const tableDice = (t: AnyTable): string => (typeof t.dice === "string" && t.dice ? t.dice : t.die);
+/** Plain text of every row / cell, for search and the data-coverage check. */
+export function tableText(t: AnyTable): string {
+  const parts: string[] = [t.name, t.note ?? ""];
+  for (const c of t.columns ?? []) parts.push(c.name, ...c.values);
+  for (const r of t.rows ?? []) parts.push(r.name ?? "", r.text, typeof r.hidden === "string" ? r.hidden : "", typeof r.answer === "string" ? r.answer : "", ...(r.sub?.rows.map((x) => x.text) ?? []));
+  return parts.join(" ");
+}
+/** A PbTable as a d-list, or — when it has several columns — as a real grid
+ *  (carousing, names, alchemy, history d66: first die = column, second = row). */
+export function GenTable({ t, cols, bare }: { t: AnyTable; cols?: 1 | 2 | 3; bare?: boolean }) {
+  const columns = t.columns ?? [];
+  const rows = t.rows ?? [];
+  if (columns.length > 1) {
+    const n = Math.max(...columns.map((c) => c.values.length));
+    const grid66 = t.die === "d66" && columns.length === 6 && n === 6;
+    const labels = Array.from({ length: n }, (_, i) => (!grid66 && rows.length === n ? rowRoll(rows[i]) : `${i + 1}`));
+    return (
+      <div className={bare ? "" : "mt-1.5"}>
+        {t.note ? <p className="mb-1.5 text-[12.5px] italic leading-relaxed text-[var(--muted)]">{cleanNote(t.note)}</p> : null}
+        <div className="overflow-x-auto rounded border border-[var(--border)]">
+          <table className={`w-full border-collapse ${columns.length > 3 ? "min-w-[720px]" : "min-w-[480px]"}`}>
+            <thead><tr>
+              <th className={`${th} w-12`}>{grid66 ? <N>d6</N> : <N>{t.die === "d66" ? "d66" : columns[0].die}</N>}</th>
+              {columns.map((c, i) => <th key={i} className={th}>{grid66 ? <><N className="mr-1 text-[var(--pb-ink)]">{i + 1}</N></> : null}{c.name}</th>)}
+            </tr></thead>
+            <tbody>{labels.map((l, i) => (
+              <tr key={i}>
+                <td className={`${tdNum} font-semibold text-[var(--pb-ink)]`}>{l}</td>
+                {columns.map((c, j) => <td key={j} className={td}>{c.values[i] ?? ""}</td>)}
+              </tr>
+            ))}</tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
+  const list: Row[] = rows.length ? rows : (columns[0]?.values ?? []).map((v, i) => ({ roll: i + 1, text: v }));
+  const c = cols ?? (list.length > 24 ? 3 : list.length > 10 ? 2 : 1);
+  return <div className={bare ? "" : "mt-0.5"}><DieTable rows={list} note={cleanNote(t.note)} cols={c} /></div>;
+}
+/** Digits inside Alchemy-lettered text set in EB Garamond ("Broken (0 HP)"). */
+export function Numerals({ text }: { text: string }) {
+  return <>{text.split(/(\d+)/).map((p, i) => (i % 2 ? <N key={i}>{p}</N> : p))}</>;
+}
+/** A titled card around GenTable (name, dice, page). */
+export function TableCard({ t, id, cols, className = "", children }: { t: AnyTable; id?: string; cols?: 1 | 2 | 3; className?: string; children?: React.ReactNode }) {
+  return (
+    <section id={id} className={`${cardCls} min-w-0 scroll-mt-20 ${className}`}>
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h3 className="text-[19px] leading-tight text-[var(--text)]"><Numerals text={t.name} /> <N className="ml-1 text-[15px] font-semibold text-[var(--pb-ink)]">{tableDice(t)}</N></h3>
+        {t.page ? <span className={dBadge}>{pageText({ page: t.page, source: t.source })}</span> : null}
+      </div>
+      <GenTable t={t} cols={cols} />
+      {children}
+    </section>
+  );
+}
+
 /** A simple { roll, name } list (pets, instruments) rendered compactly. */
 export function MiniTable({ title, die, rows }: { title: string; die: string; rows: { roll: PbRoll; name?: string; text?: string }[] }) {
   return (
@@ -324,14 +420,36 @@ export function HatTable({ rows }: { rows: PbHat[] }) {
 }
 
 // ── monster stat block (MÖRK BORG style) ───────────────────────────────────
-const CAT_LABEL: Record<string, string> = { npc: "NPC", undead: "Undead", beast: "Beast", spirit: "Spirit", monster: "Monster" };
+export const BESTIARY = "/pirate-borg/bestiary";
+const CAT_LABEL: Record<string, string> = { npc: "NPC", undead: "Undead", beast: "Beast", spirit: "Spirit", monster: "Monster", flora: "Flora", construct: "Construct" };
 export const catLabel = (c: string): string => CAT_LABEL[c] ?? (c ? c.charAt(0).toUpperCase() + c.slice(1) : "Other");
 export const moraleText = (m: number | null | undefined): string => (m == null ? "–" : `${m}`);
+/** HP as printed: rolled ("2d8"), shared ("4 each") or "N/A" when the block says so. */
+export const hpLabel = (m: PbMonster): string => (typeof m.hpText === "string" && m.hpText ? m.hpText : `${m.hp}`);
+export const moraleLabel = (m: PbMonster): string => (typeof m.moraleText === "string" && m.moraleText ? m.moraleText : moraleText(m.morale));
 export function monsterArmor(m: PbMonster): string {
   return m.armor ? `${m.armor.name} ${armorDie(m.armor.die)}` : "No armor";
 }
+const CHOICE_LABEL: Record<string, string> = { "one of": "one of", "pick 1-2": "choose 1 or 2" };
+export const choiceLabel = (m: PbMonster): string => (typeof m.attackChoice === "string" ? CHOICE_LABEL[m.attackChoice] ?? m.attackChoice : m.attackChoice ? "one of" : "");
 export function attackLine(m: PbMonster): string {
-  return m.attacks.map((a) => `${a.name}${a.damage ? ` ${a.damage}` : ""}`).join(m.attackChoice ? " or " : ", ");
+  return m.attacks.map((a) => `${a.name}${a.damage ? ` ${a.damage}` : ""}`).join(m.attackChoice ? " / " : ", ");
+}
+type InTable = { die: string; name: string; note?: string; rows: PbRollEntry[] };
+/** The in-block roll tables (belly of a seagull, albatross omen, despair…) — never attacks. */
+export function blockTables(m: PbMonster): { key: string; t: InTable }[] {
+  return (["lootTable", "omenTable", "effectTable"] as const).flatMap((k) => (m[k] && typeof m[k] === "object" ? [{ key: k, t: m[k] as InTable }] : []));
+}
+const lc = (x: string) => x.toLowerCase().replace(/[.\s]+$/, "");
+/** Which special prints a table inline ("roll d6: 1 …; 2 …"): its enumeration is
+ *  replaced by the table, keeping the sentences that are not part of it. */
+function specialOwner(m: PbMonster, t: InTable): number {
+  const first = lc(t.rows[0]?.text ?? "").slice(0, 14);
+  return first ? m.specials.findIndex((s) => s.text.toLowerCase().includes(first)) : -1;
+}
+function specialLead(text: string, t: InTable): string {
+  const first = lc(t.rows[0]?.text ?? "").slice(0, 14);
+  return text.split(/(?<=[.!?])\s+(?=[A-Z])/).filter((x) => !x.toLowerCase().includes(first)).join(" ");
 }
 function Stat({ k, v, wide }: { k: string; v: React.ReactNode; wide?: boolean }) {
   return (
@@ -341,42 +459,68 @@ function Stat({ k, v, wide }: { k: string; v: React.ReactNode; wide?: boolean })
     </div>
   );
 }
-export function MonsterBlock({ m }: { m: PbMonster }) {
+function AttackList({ attacks }: { attacks: { name: string; damage: string | null; notes?: string }[] }) {
+  return (
+    <ul className="mt-1 flex flex-col gap-1">
+      {attacks.map((a, i) => (
+        <li key={i} className="text-[13.5px] leading-relaxed text-[var(--muted)]">
+          <span className="font-semibold text-[var(--text)]">{a.name}</span>{a.damage ? <> <N className="font-semibold text-[var(--pb-ink)]">{a.damage}</N></> : null}{a.notes ? <span> — {a.notes}</span> : null}
+        </li>
+      ))}
+    </ul>
+  );
+}
+function InBlockTable({ t }: { t: InTable }) {
+  return (
+    <div className="mt-1.5 rounded border border-[var(--border)] bg-[var(--panel-2)] p-2.5">
+      <p className="text-[12.5px] font-semibold text-[var(--text)]">{t.name} <N className="ml-1 text-[var(--pb-ink)]">{t.die}</N></p>
+      <DieTable rows={t.rows} note={t.note} />
+    </div>
+  );
+}
+export function MonsterBlock({ m, captainName }: { m: PbMonster; captainName?: string }) {
   const atk = m.dr?.attack ?? 12, def = m.dr?.defend ?? 12;
   const defendWith = typeof m.defendWith === "string" ? m.defendWith : "AGILITY";
-  const tags = [catLabel(m.category), typeof m.group === "string" ? m.group : "", m.boss ? "Boss" : "", m.named ? "Named" : "", m.summoned ? "Summoned" : ""].filter(Boolean);
+  const group = typeof m.group === "string" ? m.group : "";
+  const tags = [catLabel(m.category), m.boss ? "Boss" : "", m.named ? "Named" : "", m.summoned ? "Summoned" : "", m.hazard ? "Hazard" : ""].filter(Boolean);
   const loot = Array.isArray(m.loot) ? (m.loot as { name: string; value: string; note?: string }[]) : [];
   const per = m.attacksPerRound != null ? String(m.attacksPerRound) : "";
+  const choice = choiceLabel(m);
+  const tables = blockTables(m);
+  const owners = new Map<number, InTable>();
+  const loose: InTable[] = [];
+  for (const { t } of tables) { const i = specialOwner(m, t); if (i >= 0 && !owners.has(i)) owners.set(i, t); else loose.push(t); }
+  const naval = m.naval && typeof m.naval === "object" ? (m.naval as { hp: number; morale: number | null; armor: { name: string; die: string } | null; speed: number; agility: number; attacks: { name: string; damage: string | null; notes?: string }[] }) : null;
+  const notes = [typeof m.drNote === "string" ? m.drNote : "", typeof m.armorNote === "string" ? m.armorNote : ""].filter(Boolean);
   return (
     <div className={`${cardCls} border-l-4`} style={{ borderLeftColor: "var(--pb)" }}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <h2 className="text-4xl text-[var(--sys-link)]">{m.name} <HbBadge x={m} /></h2>
         <span className="flex flex-wrap gap-1.5">{tags.map((t) => <span key={t} className={badge}>{t}</span>)}{pageText(m) ? <span className={dBadge}>{pageText(m)}</span> : null}</span>
       </div>
+      {group ? <p className="mt-1 text-[12.5px] text-[var(--muted)]">{group}{typeof m.roll === "number" ? <> · roll <N className="text-[var(--pb-ink)]">{m.roll}</N></> : null}{typeof m.captain === "string" && captainName ? <> · <a href={`${BESTIARY}#captain-${m.captain}`} className="text-[var(--sys-link)] hover:underline">{captainName}</a></> : null}</p> : null}
       {m.text ? <p className="mt-2 text-[14px] italic leading-relaxed text-[var(--muted)]">{m.text}</p> : null}
       <div className="mt-3 grid grid-cols-3 gap-1 sm:grid-cols-5">
-        <Stat k="HP" v={`${m.hp}${m.count ? ` (×${String(m.count)})` : ""}`} />
-        <Stat k="Morale" v={moraleText(m.morale)} />
+        <Stat k="HP" v={`${hpLabel(m)}${m.count ? ` (×${String(m.count)})` : ""}`} />
+        <Stat k="Morale" v={moraleLabel(m)} />
         <Stat k="Armor" v={m.armor ? armorDie(m.armor.die) : "none"} />
         <Stat k="DR to hit" v={`DR${atk}`} />
         <Stat k="DR to defend" v={`DR${def}`} />
       </div>
+      {typeof m.hpText === "string" && /d/.test(m.hpText) ? <p className="mt-1.5 text-[12px] text-[var(--muted)]">Roll HP <N className="text-[var(--text)]">{m.hpText}</N> (about <N>{m.hp}</N>){typeof m.moraleText === "string" && /d/.test(m.moraleText) ? <> and Morale <N className="text-[var(--text)]">{m.moraleText}</N> (about <N>{moraleText(m.morale)}</N>)</> : null} for each one.</p> : null}
+      {m.count ? <p className="mt-1 text-[12px] text-[var(--muted)]">Encountered <N className="text-[var(--text)]">{/^\d+$/.test(String(m.count)) ? `×${String(m.count)}` : String(m.count)}</N> at a time.</p> : null}
       <p className="mt-2 text-[12.5px] text-[var(--muted)]">
         <span className="font-semibold text-[var(--text)]">Armor:</span> {monsterArmor(m)}{m.armor?.tier ? <> (tier <N>{m.armor.tier}</N>)</> : null}
         {defendWith !== "AGILITY" ? <> · <span className="font-semibold text-[var(--text)]">Defend with</span> {defendWith} instead of AGILITY</> : null}
         {m.ignoresArmor ? <> · its attacks ignore armor</> : null}
         {m.blackPowder ? <> · its black powder weapons ignore armor</> : null}
       </p>
+      {notes.map((n, i) => <p key={i} className="mt-1 text-[12px] italic text-[var(--muted)]">{n}</p>)}
       {m.attacks.length ? (
         <>
-          <p className={`${eyebrow} mt-4`}>Attacks{per ? <span className="ml-2 font-sans text-[12px] text-[var(--muted)]">({/^\d+$/.test(per) ? <><N>{per}</N> per round</> : per})</span> : m.attackChoice ? <span className="ml-2 font-sans text-[12px] text-[var(--muted)]">(one of)</span> : null}</p>
-          <ul className="mt-1 flex flex-col gap-1">
-            {m.attacks.map((a, i) => (
-              <li key={i} className="text-[13.5px] leading-relaxed text-[var(--muted)]">
-                <span className="font-semibold text-[var(--text)]">{a.name}</span>{a.damage ? <> <N className="font-semibold text-[var(--pb-ink)]">{a.damage}</N></> : null}{a.notes ? <span> — {a.notes}</span> : null}
-              </li>
-            ))}
-          </ul>
+          <p className={`${eyebrow} mt-4`}>Attacks{per ? <span className="ml-2 font-sans text-[12px] text-[var(--muted)]">({/^\d+$/.test(per) ? <><N>{per}</N> per round</> : per})</span> : choice ? <span className="ml-2 font-sans text-[12px] text-[var(--muted)]">({choice})</span> : null}</p>
+          {choice === "choose 1 or 2" ? <p className="text-[12px] italic text-[var(--muted)]">Arm each one with one or two of these.</p> : null}
+          <AttackList attacks={m.attacks} />
         </>
       ) : null}
       {m.attackTable ? (
@@ -386,31 +530,56 @@ export function MonsterBlock({ m }: { m: PbMonster }) {
         <>
           <p className={`${eyebrow} mt-4`}>Special</p>
           <dl className="mt-1 flex flex-col gap-1 text-[13.5px] leading-relaxed text-[var(--muted)]">
-            {m.specials.map((s, i) => <div key={i}><dt className="inline font-semibold italic text-[var(--text)]">{s.name}.</dt> <dd className="inline">{s.text}</dd></div>)}
+            {m.specials.map((s, i) => {
+              const t = owners.get(i);
+              return <div key={i}><dt className="inline font-semibold italic text-[var(--text)]">{dot(s.name)}</dt> <dd className="inline">{t ? specialLead(s.text, t) : s.text}</dd>{t ? <InBlockTable t={t} /> : null}</div>;
+            })}
           </dl>
         </>
       ) : null}
-      {loot.length ? (
-        <p className="mt-3 text-[12.5px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Loot:</span> {loot.map((l, i) => <span key={i}>{i ? " · " : ""}{l.name} <N>{l.value}</N>{l.note ? ` (${l.note})` : ""}</span>)}</p>
+      {loose.map((t, i) => <div key={i} className="mt-3"><InBlockTable t={t} /></div>)}
+      {naval ? (
+        <div className="mt-4 rounded border border-[var(--border)] bg-[var(--panel-2)] p-3">
+          <p className={eyebrow}>Naval combat</p>
+          <div className="mt-1.5 grid grid-cols-5 gap-1">
+            {[["HP", `${naval.hp}`], ["Morale", moraleText(naval.morale)], ["Armor", naval.armor ? armorDie(naval.armor.die) : "none"], ["Speed", `${naval.speed}`], ["Agility", signed(naval.agility)]].map(([k, v]) => (
+              <div key={k} className="rounded border border-[var(--border)] bg-[var(--panel)] px-0.5 py-1 text-center">
+                <div className="text-[9px] font-bold uppercase tracking-[0.08em] text-[var(--muted)]">{k}</div>
+                <div className={`${num} text-[14px] font-semibold text-[var(--text)]`}>{v}</div>
+              </div>
+            ))}
+          </div>
+          {naval.armor ? <p className="mt-1.5 text-[12px] text-[var(--muted)]">{naval.armor.name} {armorDie(naval.armor.die)}</p> : null}
+          <AttackList attacks={naval.attacks} />
+          <p className="mt-1.5 text-[11.5px] italic text-[var(--muted)]">Fights as a ship in naval combat: it ignores the wind and moves up to its speed in any direction.</p>
+        </div>
       ) : null}
-      <p className="mt-3 text-[11.5px] italic text-[var(--muted)]">Enemies never roll in combat: PCs attack at DR{atk} and defend at DR{def}{defendWith !== "AGILITY" ? ` (${defendWith})` : ""}. Morale {moraleText(m.morale)}: roll 2d6 when a trigger happens — higher than Morale and it flees or surrenders{m.morale == null ? " (– never breaks)" : ""}.</p>
+      {loot.length ? (
+        <p className="mt-3 text-[12.5px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Loot:</span> {loot.map((l, i) => <span key={i}>{i ? " · " : ""}{l.name} <N className="text-[var(--text)]">{l.value}</N>{l.note ? ` (${l.note})` : ""}</span>)}</p>
+      ) : null}
+      {!isHb(m) ? <p className="mt-2 text-[11.5px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Source:</span> {sourcesLine(m)}</p> : null}
+      <p className="mt-3 text-[11.5px] italic text-[var(--muted)]">Enemies never roll in combat: PCs attack at DR{atk} and defend at DR{def}{defendWith !== "AGILITY" ? ` (${defendWith})` : ""}. Morale {moraleLabel(m)}: roll 2d6 when a trigger happens — higher than Morale and it flees or surrenders{m.morale == null ? " (– never breaks)" : ""}.</p>
     </div>
   );
 }
 /** Compact list card for the bestiary grid. */
 export function MonsterCard({ m, href }: { m: PbMonster; href: string }) {
   const atk = m.dr?.attack, def = m.dr?.defend;
+  const group = typeof m.group === "string" ? m.group : "";
+  const extras = [blockTables(m).length ? "roll table" : "", m.naval ? "naval block" : "", Array.isArray(m.loot) && m.loot.length ? "loot" : ""].filter(Boolean);
   return (
     <a href={href} className="group block">
       <div className="flex items-start justify-between gap-2">
         <h3 className={`${nameCls} group-hover:underline`}>{m.name} <HbBadge x={m} /></h3>
         <span className={badge}>{catLabel(m.category)}</span>
       </div>
-      <p className={`mt-1 text-[13px] text-[var(--text)] ${num}`}>HP {m.hp} · Morale {moraleText(m.morale)} · {m.armor ? `${m.armor.name} ${armorDie(m.armor.die)}` : "no armor"}</p>
-      {m.attacks.length ? <p className="mt-0.5 text-[12.5px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Attacks:</span> <N>{attackLine(m)}</N></p> : m.attackTable ? <p className="mt-0.5 text-[12.5px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Attacks:</span> <N>{m.attackTable.die}</N> attack table</p> : null}
+      {group ? <p className="mt-0.5 text-[11.5px] text-[var(--muted)]">{group}{typeof m.roll === "number" ? <> · <N className="text-[var(--pb-ink)]">{m.roll}</N></> : null}</p> : null}
+      <p className={`mt-1 text-[13px] text-[var(--text)] ${num}`}>HP {hpLabel(m)}{m.count ? ` (×${String(m.count)})` : ""} · Morale {moraleLabel(m)} · {m.armor ? `${m.armor.name} ${armorDie(m.armor.die)}` : "no armor"}</p>
+      {m.attacks.length ? <p className="mt-0.5 text-[12.5px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Attacks{choiceLabel(m) === "choose 1 or 2" ? " (choose 1 or 2)" : ""}:</span> <N>{attackLine(m)}</N></p> : m.attackTable ? <p className="mt-0.5 text-[12.5px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Attacks:</span> <N>{m.attackTable.die}</N> attack table</p> : null}
       {atk || def ? <p className="mt-0.5 text-[12px] text-[var(--sys-link)]"><N>{[atk ? `DR${atk} to hit` : "", def ? `DR${def} to defend` : ""].filter(Boolean).join(" · ")}</N></p> : null}
       {m.text ? <p className="mt-1 line-clamp-2 text-[12.5px] italic leading-relaxed text-[var(--muted)]">{m.text}</p> : null}
       {m.specials.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Special:</span> {m.specials.map((s) => s.name).join(" · ")}</p> : null}
+      {extras.length ? <p className="mt-1 flex flex-wrap gap-1">{extras.map((e) => <span key={e} className={badge}>{e}</span>)}</p> : null}
     </a>
   );
 }
@@ -439,8 +608,26 @@ export function shipStats(s: PbShip): { key: string; label: string; value: strin
     { key: "cargo", label: "Cargo", value: s.cargo == null ? "—" : `${s.cargo}` },
   ];
 }
+const frac = (x: number): string => (Math.abs(x - 2 / 3) < 0.01 ? "2/3" : Math.abs(x - 1 / 3) < 0.01 ? "1/3" : Math.abs(x - 0.5) < 0.01 ? "1/2" : `${Math.round(x * 100)}%`);
+const WEAPON_LABEL: Record<string, string> = { broadsides: "Broadsides", smallArms: "Small arms" };
+/** Machine-readable ship hints as short lines: attacks that scale with HP, wind. */
+export function shipHints(s: PbShip): string[] {
+  const out: string[] = [];
+  const sp = (s.special ?? "").toLowerCase();
+  const sc = (s.attackScaling ?? null) as Record<string, { above: number; attacks: number }[]> | null;
+  if (sc) for (const [k, steps] of Object.entries(sc)) out.push(`${WEAPON_LABEL[k] ?? k}: ${steps.map((st) => st.above > 0 ? `${st.attacks} attacks above ${frac(st.above)} HP` : `${st.attacks} below`).join(", ")}`);
+  else if (s.multiAttackAboveHalfHp) out.push(`Broadsides: ${String(s.broadsidesAttacks ?? 2)} attacks above 1/2 HP, 1 below`);
+  if (typeof s.attackPerHp === "number") out.push(`1 attack per ${s.attackPerHp} HP remaining (${Math.floor(s.hp / s.attackPerHp)} at full HP)`);
+  // Wind and stationary flags only when the Special line doesn't already say so.
+  if (s.stationary && !sp.includes("stationary")) out.push("Stationary");
+  if (s.windImmune && !sp.includes("not affected by wind")) out.push("Not affected by wind");
+  if (typeof s.windMinMove === "number" && !sp.includes("regardless of wind")) out.push(`Always moves ${s.windMinMove}″ regardless of wind`);
+  if (s.closeToWindFullSpeed && !sp.includes("close to the wind")) out.push("Full speed close to the wind");
+  return out;
+}
 export function ShipBlock({ s, compact, href }: { s: PbShip; compact?: boolean; href?: string }) {
   const stats = shipStats(s);
+  const hints = shipHints(s);
   const head = compact
     ? <h3 className={`${nameCls} ${href ? "group-hover:underline" : ""}`}>{s.name} <HbBadge x={s} /></h3>
     : <h2 className="text-4xl text-[var(--sys-link)]">{s.name} <HbBadge x={s} /></h2>;
@@ -462,9 +649,10 @@ export function ShipBlock({ s, compact, href }: { s: PbShip; compact?: boolean; 
       </div>
       {s.special ? <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]"><span className="font-semibold italic text-[var(--text)]">Special.</span> {s.special}</p> : null}
       {s.skill == null && typeof s.skillNote === "string" && !(s.special ?? "").includes(s.skillNote) ? <p className="mt-1 text-[12.5px] text-[var(--muted)]">{s.skillNote}</p> : null}
+      {hints.length ? <p className="mt-1.5 flex flex-wrap gap-1">{hints.map((h) => <span key={h} className={dBadge}>{h}</span>)}</p> : null}
       {cost != null || s.dr ? <p className="mt-1 text-[12.5px] text-[var(--muted)]">{cost != null ? <>Cost <N className="text-[var(--text)]">{silver(cost)}</N></> : null}{cost != null && s.dr ? " · " : ""}{(s.dr as { attack?: number } | undefined)?.attack ? <>DR<N>{(s.dr as { attack: number }).attack}</N> to hit</> : null}</p> : null}
     </>
   );
   if (compact) return <div className={cardCls}>{href ? <a href={href} className="group block">{body}</a> : body}</div>;
-  return <div className={`${cardCls} border-l-4`} style={{ borderLeftColor: "var(--pb)" }}>{body}</div>;
+  return <div className={`${cardCls} border-l-4`} style={{ borderLeftColor: "var(--pb)" }}>{body}{!isHb(s) ? <p className="mt-2 text-[11.5px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Source:</span> {sourcesLine(s)}</p> : null}</div>;
 }

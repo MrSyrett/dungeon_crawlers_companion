@@ -15,13 +15,20 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const part = (n) => import(pathToFileURL(join(ROOT, "data", "pb", "parts", n + ".mjs")).href);
 
-const mods = await Promise.all(["core", "classes", "gear", "backgrounds", "magic", "naval", "bestiary", "tables"].map(part));
+const mods = await Promise.all(["core", "classes", "gear", "backgrounds", "magic", "naval", "bestiary", "tables",
+  "core-bestiary", "core-ships", "core-tables", "core-setting"].map(part));
 const all = Object.assign({}, ...mods);
+
+// Core Rules creatures and vessels join the existing lists (Trapped in the Tropics / Guidebook entries first).
+all.PB_MONSTERS = [...all.PB_MONSTERS, ...all.PB_CORE_MONSTERS];
+all.PB_SHIPS = [...all.PB_SHIPS, ...all.PB_CORE_SHIPS];
+delete all.PB_CORE_MONSTERS;
+delete all.PB_CORE_SHIPS;
 
 const slug = (s) => String(s).toLowerCase().replace(/&/g, "and").replace(/['’"()]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const ID_LISTS = ["PB_CLASSES", "PB_WEAPONS", "PB_AMMO", "PB_BOMBS", "PB_CLOTHING", "PB_HATS", "PB_GEAR", "PB_CONTAINERS",
   "PB_BACKGROUNDS", "PB_RELICS", "PB_RITUALS", "PB_PRAYERS", "PB_DEITIES", "PB_SPELLS", "PB_SHANTIES", "PB_SPECIALTY_CREW",
-  "PB_CREW_ACTIONS", "PB_MONSTERS", "PB_SHIPS"];
+  "PB_CREW_ACTIONS", "PB_MONSTERS", "PB_SHIPS", "PB_SHIP_TEMPLATES", "PB_CAPTAINS", "PB_FACTIONS"];
 const withIds = (k, list) => {
   const seen = new Set();
   return list.map((r) => {
@@ -62,6 +69,46 @@ for (const r of all.PB_GM_TABLES.maritimeEvents.rows) {
   if (r.ship) need(shipIds, r.ship, `maritime event ${r.roll}`);
 }
 for (const g of all.PB_GEAR) if (g.ship) need(shipIds, g.ship, `gear ${g.name}`);
+
+// Core Rules cross-references: every monster / ship / table hint in every GM table, the module, captains,
+// ship templates, marrow cannons and the enemy builder must resolve.
+const tableIds = new Set([...Object.keys(all.PB_GM_TABLES), ...TABLE_REFS,
+  // generator aliases (whole generators rather than a single table)
+  "things", "treasureMaps", "darkFaunaTerrestrial", "cargo", "derelictShip", "islands", "pirateGenerator"]);
+const templateIds = ids("PB_SHIP_TEMPLATES");
+const shipOrTemplate = new Set([...shipIds, ...templateIds]);
+const walkRows = (rows, where) => {
+  for (const r of rows || []) {
+    if (r.monster) need(monsterIds, r.monster, `${where} ${r.roll}`);
+    if (r.ship) need(shipOrTemplate, r.ship, `${where} ${r.roll}`);
+    for (const sh of r.ships || []) need(shipOrTemplate, sh, `${where} ${r.roll}`);
+    if (r.table) need(tableIds, r.table, `${where} ${r.roll} table`);
+    if (r.sub) walkRows(r.sub.rows, `${where} ${r.roll} sub`);
+  }
+};
+for (const [k, t] of Object.entries(all.PB_GM_TABLES)) walkRows(t.rows, `PB_GM_TABLES.${k}`);
+for (const m of all.PB_MONSTERS) for (const tk of ["attackTable", "lootTable", "omenTable", "effectTable"]) if (m[tk]) walkRows(m[tk].rows, `${m.id}.${tk}`);
+const SP = all.PB_MODULE_SKELETON_POINT;
+for (const n of SP.npcs) if (n.monster) need(monsterIds, n.monster, `module npc ${n.id}`);
+for (const t of Object.values(SP.tables)) walkRows(t.rows, `module ${t.id}`);
+const relicIds = ids("PB_RELICS"), ritualIds = ids("PB_RITUALS");
+for (const r of SP.shop.relics) need(relicIds, r.relic, "Tela's relics");
+for (const r of SP.shop.rituals) if (r.ritual) need(ritualIds, r.ritual, "Tela's rituals");
+for (const c of all.PB_CAPTAINS) {
+  for (const id of [c.captain, ...c.officers, ...c.crew]) need(monsterIds, id, `captain ${c.id}`);
+  need(templateIds, c.ships, `captain ${c.id} ships`);
+  for (const v of c.vessels) need(shipIds, v, `captain ${c.id} vessels`);
+}
+for (const t of all.PB_SHIP_TEMPLATES) {
+  for (const v of t.baseShips || []) need(shipIds, v, `template ${t.id}`);
+  if (t.template) need(templateIds, t.template, `template ${t.id}`);
+  for (const tr of t.traits) {
+    for (const m of tr.monsters || []) need(monsterIds, typeof m === "string" ? m : m.id, `template ${t.id}`);
+    if (tr.summon) walkRows(tr.summon.rows, `template ${t.id} summon`);
+  }
+}
+for (const id of all.PB_MARROW_CANNONS.monsters) need(monsterIds, id, "marrow cannons");
+for (const v of Object.values(all.PB_ENEMY_BUILDER.variants)) for (const id of v.ids || []) need(monsterIds, id, "enemy builder variant");
 if (missing.length) throw new Error("Unresolved references: " + missing.join("; "));
 
 // ---- table completeness ------------------------------------------------------------------
@@ -73,6 +120,19 @@ const expect = { PB_BACKGROUNDS: 100, PB_THINGS: 100, PB_FLAWS: 20, PB_TRADEMARK
 for (const [k, n] of Object.entries(expect)) if (span(all[k]) !== n) throw new Error(`${k}: covers ${span(all[k])} results, expected ${n}`);
 if (span(all.PB_STARTING_WEAPONS.rows) !== 10) throw new Error("PB_STARTING_WEAPONS: expected d10");
 for (const t of Object.values(all.PB_GM_TABLES)) if (!t.rows && !t.columns) throw new Error(`PB_GM_TABLES.${t.id}: no rows/columns`);
+// Core Rules generator tables: rows must cover the die exactly (dN → 1..N, 2d6 → 2..12, 3d6 → 3..18, d100 → 1..100, d66 → 36).
+const dieSpan = (die) => {
+  if (die === "d66") return 36;
+  const m = /^(\d*)d(\d+)$/.exec(die); if (!m) return null;
+  const n = +(m[1] || 1), f = +m[2]; return n * f - n + 1;
+};
+for (const t of Object.values(all.PB_GM_TABLES)) {
+  if (t.source !== "Core Rules" && t.source !== "The Curse of Skeleton Point") continue;
+  const want = dieSpan(t.die);
+  if (t.rows && want != null && span(t.rows) !== want) throw new Error(`PB_GM_TABLES.${t.id}: covers ${span(t.rows)} results, expected ${want} (${t.die})`);
+  for (const c of t.columns || []) if (dieSpan(c.die) != null && c.values.length !== dieSpan(c.die)) throw new Error(`PB_GM_TABLES.${t.id}.${c.name}: ${c.values.length} values`);
+}
+for (const c of all.PB_GM_TABLES.carousing.columns) if (c.values.length !== 20) throw new Error("carousing column " + c.name);
 
 // Expose spells/prayers/deities ids back into the class tables so class rows and the flat lists share ids.
 const byName = (k) => new Map(all[k].map((r) => [r.name, r]));
@@ -97,6 +157,14 @@ const TYPES = {
   PB_WIND: "PbWind", PB_POINT_OF_SAIL: "PbPointOfSail[]", PB_CHANGING_WINDS: "PbRollEntry[]", PB_FOUL_WEATHER: "PbRollEntry[]",
   PB_SHIPWRIGHT: "PbShipwright", PB_TRAVEL: "PbTravel",
   PB_MONSTERS: "PbMonster[]", PB_SHIPS: "PbShip[]", PB_GM_TABLES: "Record<string, PbTable>",
+  // Core Rules
+  PB_ASH: "PbAsh", PB_ALCHEMY: "PbAlchemy", PB_ALCHEMY_TABLE: "PbTable", PB_TRAVEL_EVENTS: "PbTravelEvents", PB_SHIPS_AT_SEA: "PbShipsAtSea",
+  PB_CARGO: "PbCargo", PB_DERELICT_GEN: "PbGenerator", PB_BURIED_TREASURE: "PbTable", PB_TREASURE_MAPS: "PbTreasureMaps",
+  PB_ISLANDS: "PbGenerator", PB_PIRATE_GEN: "PbPirateGen", PB_JOBS: "PbGenerator", PB_RUMORS: "PbTable",
+  PB_CAROUSING: "PbTable", PB_NAMES_D12: "PbTable", PB_NPC_MOTIVATION: "PbTable", PB_LOOT_THE_BODY: "PbTable",
+  PB_SETTING: "PbSetting", PB_FACTIONS: "PbFaction[]", PB_HISTORY: "PbTable", PB_CAPTAINS: "PbCaptain[]",
+  PB_SHIP_TEMPLATES: "PbShipTemplate[]", PB_MARROW_CANNONS: "PbMarrowCannons", PB_ENEMY_BUILDER: "PbEnemyBuilder",
+  PB_MODULE_SKELETON_POINT: "PbModule",
 };
 
 const names = Object.keys(all).filter((k) => k.startsWith("PB_")).sort();
