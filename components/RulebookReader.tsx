@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import {
   subscribeSystem,
@@ -34,6 +34,7 @@ type ReaderOpts = {
   showOpenInNew?: boolean;
   showDownload?: boolean;
   emptyText?: string;
+  onSpreadChange?: (on: boolean) => void;
 };
 type ReaderFactory = { create: (el: HTMLElement, opts: ReaderOpts) => ReaderInstance };
 declare global {
@@ -82,6 +83,8 @@ export default function RulebookReader({
   const hostRef = useRef<HTMLDivElement>(null);
   const readerRef = useRef<ReaderInstance | null>(null);
   const activeFileRef = useRef(active);
+  // Two-page spreads need more room than the single-page column.
+  const [spread, setSpread] = useState(false);
 
   // The selected game system (same store the dashboard toggle + grid use).
   const activeSystem = useSyncExternalStore(
@@ -111,6 +114,7 @@ export default function RulebookReader({
         showOpenInNew: true,
         showDownload: true,
         emptyText: "No rulebooks available.",
+        onSpreadChange: (on: boolean) => setSpread(on),
         onBack: () => router.push("/library"),
         backLabel: "Library",
         getStartPage: (file: string) => {
@@ -189,6 +193,7 @@ export default function RulebookReader({
   }, []);
 
   // Full height; on desktop the reader is capped to a contained column (centered,
+  // wider while two-page spreads are on,
   // with side rules) instead of spanning the whole window — matching the GM
   // Screen pane. The host has a definite height either way (parent is h-screen;
   // row-flex stretch), so the reader's fit-to-page math works.
@@ -209,7 +214,7 @@ export default function RulebookReader({
     >
       <div
         ref={hostRef}
-        className="min-h-0 w-full max-w-[1024px] border-[var(--border)] sm:border-x"
+        className={`min-h-0 w-full ${spread ? "max-w-[1800px]" : "max-w-[1024px]"} border-[var(--border)] sm:border-x`}
       />
     </div>
   );

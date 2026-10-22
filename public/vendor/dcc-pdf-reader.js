@@ -33,6 +33,11 @@
      reader.refresh();           // re-read the current document from the server
      reader.dropCache(docKey?);  // forget cached parsed docs (all if omitted)
      reader.relayout();          // re-fit after a container resize
+     reader.setSpread(on);       // two pages side by side (book spread: cover alone,
+                                 // then 2–3, 4–5…). Toolbar "2 Pages" toggles it; the
+                                 // choice is remembered (localStorage) and it falls back
+                                 // to one page while the reader is narrower than 640px.
+                                 // opts.onSpreadChange(on) tells the host (e.g. to widen).
      reader.destroy();
 */
 (function () {
@@ -58,6 +63,9 @@
       ".dccpdf-btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-width:30px;height:28px;padding:0 9px;border-radius:6px;background:var(--panel-2,#22262f);border:1px solid var(--border,#2a2f3a);color:var(--text,var(--white,#e5e7eb));font:700 12px/1 'Barlow Condensed','Montserrat',system-ui,sans-serif;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;white-space:nowrap}" +
       ".dccpdf-btn:hover{border-color:var(--accent,var(--gold,#d8b45a));color:var(--white,#fff)}" +
       ".dccpdf-btn:disabled,.dccpdf-btn.is-disabled{opacity:.4;cursor:default;pointer-events:none}" +
+      ".dccpdf-spread svg{width:15px;height:13px;flex-shrink:0}" +
+      ".dccpdf-spread.is-on{background:var(--gold,#d8b45a);color:#1a1a1a;border-color:var(--gold,#d8b45a)}" +
+      ".dccpdf-pair{color:var(--muted,#8a93a3)}" +
       ".dccpdf-toc-toggle.is-on{background:var(--gold,#d8b45a);color:#1a1a1a;border-color:var(--gold,#d8b45a)}" +
       ".dccpdf-ind{display:inline-flex;align-items:center;gap:4px;font:600 11px/1 'Share Tech Mono',monospace;color:var(--muted,#8a93a3)}" +
       ".dccpdf-inp{width:46px;height:26px;text-align:center;background:var(--panel-2,#22262f);border:1px solid var(--border,#2a2f3a);color:var(--text,var(--white,#e5e7eb));border-radius:5px;font:600 11px/1 'Share Tech Mono',monospace;outline:none}" +
@@ -150,6 +158,10 @@
     var zoomTarget = 0;         // in-flight zoom target scale (0 = none pending)
     var zoomSettle = null;      // debounce timer: crisp re-render after a zoom gesture
     var books = [], activeFile = "";   // the tab bar's book list + current book
+    var SPREAD_KEY = "dccpdf-spread", SPREAD_MIN_W = 640;
+    var spreadOn = false;       // user wants two pages side by side
+    try { spreadOn = localStorage.getItem(SPREAD_KEY) === "1"; } catch (e) {}
+    var onSpreadChange = typeof opts.onSpreadChange === "function" ? opts.onSpreadChange : null;
 
     // ── DOM ──────────────────────────────────────────────────────────────────
     container.classList.add("dccpdf");
@@ -161,11 +173,14 @@
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>' +
           esc(backLabel) + '</button>' : '') +
         '<button class="dccpdf-btn dccpdf-toc-toggle" type="button" title="Chapters" aria-label="Chapters">☰</button>' +
-        '<span class="dccpdf-ind">Page <input class="dccpdf-inp" type="text" inputmode="numeric" value="1" aria-label="Page number"> / <span class="dccpdf-tot">–</span></span>' +
+        '<span class="dccpdf-ind">Page <input class="dccpdf-inp" type="text" inputmode="numeric" value="1" aria-label="Page number"><span class="dccpdf-pair"></span> / <span class="dccpdf-tot">–</span></span>' +
         (onBack ? '<span class="dccpdf-title"></span>' : '') +
         '<span class="dccpdf-sp"></span>' +
         '<a class="dccpdf-btn dccpdf-open" target="_blank" rel="noreferrer" title="Open in a new tab" aria-label="Open in a new tab" style="display:none;text-decoration:none">New tab</a>' +
         '<a class="dccpdf-btn dccpdf-dl" title="Download the PDF" aria-label="Download the PDF" style="display:none;text-decoration:none">Download</a>' +
+        '<button class="dccpdf-btn dccpdf-spread" type="button" title="Show two pages side by side" aria-label="Show two pages side by side" aria-pressed="false">' +
+          '<svg viewBox="0 0 30 26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="12" height="22" rx="1.5"/><rect x="16" y="2" width="12" height="22" rx="1.5"/></svg>' +
+          '2 Pages</button>' +
         '<button class="dccpdf-btn dccpdf-zoomfit" type="button" title="Fit the whole page" aria-label="Fit the whole page">Fit</button>' +
       '</div>' +
       '<div class="dccpdf-body">' +
@@ -196,15 +211,53 @@
     var msg = container.querySelector(".dccpdf-msg");
     var titleEl = container.querySelector(".dccpdf-title");
     var backBtn = container.querySelector(".dccpdf-back");
+    var spreadBtn = container.querySelector(".dccpdf-spread");
+    var pairEl = container.querySelector(".dccpdf-pair");
     if (backBtn) backBtn.addEventListener("click", function () { try { onBack(); } catch (e) {} });
 
     function showMsg(text) { msg.textContent = text || ""; msg.style.display = text ? "flex" : "none"; }
     function effScale() { return userScale > 0 ? userScale : fitScale; }
     function emitPage() { if (opts.onPage) { try { opts.onPage(docKey, pageNum); } catch (e) {} } }
 
+    // ── two-page spreads ─────────────────────────────────────────────────────
+    // Book layout: page 1 (the cover) sits alone, then 2–3, 4–5, … Only used
+    // while the stage is wide enough; narrow screens stay one page at a time.
+    function spreadActive() {
+      return spreadOn && pageCount > 1 && (stage.clientWidth || 0) >= SPREAD_MIN_W;
+    }
+    function spreadLeft(n) { return n <= 1 ? 1 : (n % 2 === 0 ? n : n - 1); }
+    function spreadPages(n) {
+      var l = spreadLeft(n);
+      return (l > 1 && l + 1 <= pageCount) ? [l, l + 1] : [l];
+    }
+    function syncSpreadBtn() {
+      if (!spreadBtn) return;
+      spreadBtn.classList.toggle("is-on", spreadOn);
+      spreadBtn.setAttribute("aria-pressed", spreadOn ? "true" : "false");
+      var narrow = (stage.clientWidth || 0) > 0 && (stage.clientWidth || 0) < SPREAD_MIN_W;
+      // Hidden on narrow screens unless it's on (so it can always be turned off).
+      spreadBtn.style.display = (narrow && !spreadOn) ? "none" : "";
+      spreadBtn.title = narrow && spreadOn ? "Two pages (needs a wider window — showing one)" : "Show two pages side by side";
+    }
+    function setSpread(on) {
+      on = !!on;
+      if (on === spreadOn) { syncSpreadBtn(); return; }
+      spreadOn = on;
+      try { localStorage.setItem(SPREAD_KEY, on ? "1" : "0"); } catch (e) {}
+      syncSpreadBtn();
+      if (onSpreadChange) { try { onSpreadChange(on); } catch (e) {} }
+      if (pdfDoc) {
+        if (spreadActive()) pageNum = spreadLeft(pageNum);
+        userScale = 0; pendingScroll = "top";
+        updateNav(); highlightToc(); render(pageNum, 0); emitPage();
+      }
+    }
+
     function updateNav() {
-      pageInp.value = pageNum;
+      var pp = (pdfDoc && spreadActive()) ? spreadPages(pageNum) : [pageNum];
+      pageInp.value = pp[0];
       pageTot.textContent = pageCount || "–";
+      if (pairEl) pairEl.textContent = pp.length > 1 ? "–" + pp[1] : "";
     }
 
     function setPannable() {
@@ -235,6 +288,9 @@
     function render(n, dir) {
       if (!pdfDoc) return;
       if (rendering) { queued = n; return; }
+      syncSpreadBtn();
+      if (spreadActive()) { renderSpread(n, dir); return; }
+      updateNav();
       rendering = n;
       var myseq = renderSeq;
       pdfDoc.getPage(n).then(function (page) {
@@ -260,6 +316,13 @@
         c.style.height = Math.floor(vp.height / dpr) + "px";
         page.render({ canvasContext: c.getContext("2d"), viewport: vp }).promise.then(function () {
           if (myseq !== renderSeq) { rendering = 0; return; }
+          placeCanvas(c, n, dir, effForRender);
+        }).catch(function () { rendering = 0; });
+      }).catch(function () { rendering = 0; });
+    }
+
+    // Swap a freshly painted canvas in and restore the scroll position.
+    function placeCanvas(c, n, dir, effForRender) {
           wrap.innerHTML = "";
           wrap.appendChild(c);
           canvas = c;
@@ -287,13 +350,67 @@
           rendering = 0;
           if (queued && queued !== n) { var q = queued; queued = 0; render(q); }
           else queued = 0;
-        }).catch(function () { rendering = 0; });
+    }
+
+    // Two pages side by side, painted into ONE canvas so zoom, pan, double-tap and
+    // the live-zoom transform all work exactly as they do for a single page.
+    function renderSpread(n, dir) {
+      var pp = spreadPages(n);
+      updateNav();
+      rendering = n;
+      var myseq = renderSeq;
+      Promise.all(pp.map(function (k) { return pdfDoc.getPage(k); })).then(function (pages) {
+        if (myseq !== renderSeq) { rendering = 0; return; }
+        var dpr = window.devicePixelRatio || 1;
+        var availW = Math.max(120, (stage.clientWidth || 600) - 28);
+        var availH = Math.max(120, (stage.clientHeight || 600) - 28);
+        var bases = pages.map(function (p) { return p.getViewport({ scale: 1 }); });
+        // A lone cover is fitted as if it had a partner, so it isn't oversized.
+        var oneW = bases[0].width;
+        var totW = pages.length > 1 ? bases[0].width + bases[1].width : oneW * 2;
+        var maxH = Math.max.apply(null, bases.map(function (b) { return b.height; }));
+        fitScale = Math.min(availW / totW, availH / maxH);
+        var effForRender = (userScale > 0 ? Math.max(userScale, fitScale) : fitScale);
+        var scale = effForRender * dpr;
+        var vps = pages.map(function (p) { return p.getViewport({ scale: scale }); });
+        var parts = vps.map(function (vp) {
+          var pc = document.createElement("canvas");
+          pc.width = Math.floor(vp.width); pc.height = Math.floor(vp.height);
+          return pc;
+        });
+        return Promise.all(pages.map(function (p, i) {
+          return p.render({ canvasContext: parts[i].getContext("2d"), viewport: vps[i] }).promise;
+        })).then(function () {
+          if (myseq !== renderSeq) { rendering = 0; return; }
+          var W = parts.reduce(function (a, pc) { return a + pc.width; }, 0);
+          var H = Math.max.apply(null, parts.map(function (pc) { return pc.height; }));
+          var c = document.createElement("canvas");
+          c.className = "dccpdf-canvas";
+          c.width = W; c.height = H;
+          c.style.width = Math.floor(W / dpr) + "px";
+          c.style.height = Math.floor(H / dpr) + "px";
+          var ctx = c.getContext("2d");
+          ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, W, H);
+          var x = 0;
+          parts.forEach(function (pc) { ctx.drawImage(pc, x, Math.floor((H - pc.height) / 2)); x += pc.width; });
+          if (parts.length > 1) {
+            // A soft gutter shadow down the spine.
+            var seam = parts[0].width, gw = Math.max(6, Math.round(W * 0.012));
+            var g = ctx.createLinearGradient(seam - gw, 0, seam + gw, 0);
+            g.addColorStop(0, "rgba(0,0,0,0)");
+            g.addColorStop(0.5, "rgba(0,0,0,0.22)");
+            g.addColorStop(1, "rgba(0,0,0,0)");
+            ctx.fillStyle = g; ctx.fillRect(seam - gw, 0, gw * 2, H);
+          }
+          placeCanvas(c, n, dir, effForRender);
+        });
       }).catch(function () { rendering = 0; });
     }
 
     function setPage(n, dir, scrollTo) {
       if (!pdfDoc) return;
       n = clamp(n || 1, 1, pageCount);
+      if (spreadActive()) n = spreadLeft(n);
       pageNum = n;
       pendingScroll = scrollTo || "top";
       updateNav();
@@ -305,10 +422,17 @@
     function flip(dir) {
       var now = Date.now();
       if (now - lastFlip < 260) return;
-      if ((dir < 0 && pageNum <= 1) || (dir > 0 && pageNum >= pageCount)) return;
+      var target;
+      if (spreadActive()) {
+        var pp = spreadPages(pageNum);
+        target = dir > 0 ? pp[pp.length - 1] + 1 : spreadLeft(pageNum) - 1;
+      } else {
+        target = pageNum + dir;
+      }
+      if (target < 1 || target > pageCount) return;
       lastFlip = now;
       wheelAccum = 0;
-      setPage(pageNum + dir, dir, dir < 0 ? "bottom" : "top");
+      setPage(target, dir, dir < 0 ? "bottom" : "top");
     }
 
     function setZoom(scale) {
@@ -727,6 +851,9 @@
       if (n) setPage(n, 0, "top"); else pageInp.value = pageNum;
     });
     container.querySelector(".dccpdf-zoomfit").addEventListener("click", function () { setZoom(0); });
+    if (spreadBtn) spreadBtn.addEventListener("click", function () { setSpread(!spreadOn); });
+    syncSpreadBtn();
+    if (onSpreadChange) setTimeout(function () { try { onSpreadChange(spreadOn); } catch (e) {} }, 0);
 
     // ── wiring: keyboard ─────────────────────────────────────────────────────
     stage.addEventListener("keydown", function (e) {
@@ -909,6 +1036,7 @@
         if (mySeq !== renderSeq) return;      // switched away mid-load
         pdfDoc = doc; pageCount = doc.numPages || 1;
         pageNum = clamp(start, 1, pageCount);
+        if (spreadActive()) pageNum = spreadLeft(pageNum);
         showMsg(""); ensureCanvas(); updateNav();
         buildToc();
         pendingScroll = "top";
@@ -1009,6 +1137,8 @@
       refreshCurrent: refresh,
       dropCache: dropCache,
       relayout: function () { if (pdfDoc) render(pageNum, 0); },
+      setSpread: setSpread,
+      getSpread: function () { return spreadOn; },
       openToc: function (open) { setTocOpen(open !== false); },
       destroy: destroy,
       el: container,
