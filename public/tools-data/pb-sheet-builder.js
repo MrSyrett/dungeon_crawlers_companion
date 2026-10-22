@@ -1,7 +1,8 @@
 // Pirate Borg character creation wizard (window.PBB).
 // Walks the Player's Guidebook procedure (pg. 27) — class (d6, d8 with the optional
 // Haunted Soul and Tall Tale, or a landlubber), abilities (3d6 each → modifier;
-// landlubbers may roll 4d6 drop lowest), HP and Devil's Luck, the class's weapon /
+// landlubbers may roll 4d6 drop lowest — or, like the Shadowdark and D&D wizards, a
+// standard array, which Pirate Borg doesn't print: see ARRAY below), HP and Devil's Luck, the class's weapon /
 // clothing / hat dice, the class's starting feature rolls (with every sub-roll), the
 // container / cheap / fancy gear tables, the background tables and the d66 name
 // generator — with a "choose or roll" control at every step. Rules and tables come
@@ -24,10 +25,15 @@
   function sg(n) { n = num(n); return (n >= 0 ? '+' : '−') + Math.abs(n); }
   var ABIL = ['STRENGTH', 'AGILITY', 'PRESENCE', 'TOUGHNESS', 'SPIRIT'];
   var STEPS = ['Class', 'Abilities', 'HP & Luck', 'Weapon & Clothing', 'Class Features', 'Gear', 'Background', 'Name'];
+  // House standard array (the book has none). Each is the expected sorted result of the
+  // book's own roll for five abilities, rounded toward the player: 3d6 → +1.25, +0.44, 0,
+  // −0.44, −1.25 → [+1, +1, 0, 0, −1]; a landlubber's 4d6-drop-lowest → +1.95, +1.15,
+  // +0.55, +0.09, −0.55 → [+2, +1, +1, 0, −1]. Class modifiers apply afterwards, as for rolls.
+  var ARRAY = [1, 1, 0, 0, -1], ARRAY_LAND = [2, 1, 1, 0, -1];
   var B = null, step = 0;
 
   function fresh() { return { cls: '', optional: false, ailment: '', base: '', variant: '', ancestry: '', animal: '',
-    method: 'roll', drop4: false, rolls: {}, mods: {}, hp: null, hpTxt: '', luck: null, luckTxt: '',
+    method: 'roll', drop4: false, rolls: {}, mods: {}, order: 'order', assign: [0, 1, 2, 3, 4], pool: null, hp: null, hpTxt: '', luck: null, luckTxt: '',
     weapon: null, weaponSub: '', trustedName: '', clothing: '', hat: '', monkeyWeapon: null, monkeySub: '',
     feats: {}, deity: '', prayer: '', spell: '', extraRelics: [], extraRituals: [],
     container: '', containerAlt: '', cheap: null, pet: '', fancy: null, fancySub: null,
@@ -45,7 +51,12 @@
   function isLand() { return B.cls === 'landlubber'; }
   function classMods() { var a = animal(); if (a) return a.abilities || {}; var m = M(); return (m && m.abilities) || {}; }
   function rawMod(sum) { var r = A(window.PB_ABILITY_TABLE).find(function (x) { return inRoll(x.roll, sum); }); return r ? r.mod : 0; }
-  function baseMod(a) { if (B.method === 'manual') return B.mods[a]; var r = B.rolls[a]; return r ? rawMod(r.sum) : null; }
+  function arr() { return isLand() ? ARRAY_LAND : ARRAY; }
+  // Which slot of the rolled pool / the array an ability takes: in order, or as assigned (swaps).
+  function slotOf(a) { var i = ABIL.indexOf(a); return (B.method === 'array' || B.order === 'assign') ? B.assign[i] : i; }
+  function baseMod(a) { if (B.method === 'manual') return B.mods[a] == null ? null : B.mods[a];
+    if (B.method === 'array') return arr()[slotOf(a)];
+    if (!B.pool) return null; var r = B.pool[slotOf(a)]; return r ? rawMod(r.sum) : null; }
   function finalMod(a) { var b = baseMod(a); if (b == null) return null; var v = b + num(classMods()[a]); var an = ancestry(); if (an) A(an.effects).forEach(function (e) { if (e.type === 'ability' && e.ability === a) v += num(e.value); }); return Math.max(-3, Math.min(6, v)); }
   function hpDie() { var a = animal(); if (a) return a.hpDie; var m = M(); return (m && m.hpDie) || 'd10'; }
   function luckDie() { var a = animal(); if (a) return a.luckDie || 'd4'; var m = M(); return (m && m.luckDie) || 'd2'; }
@@ -80,7 +91,7 @@
   function allValid() { for (var i = 0; i < STEPS.length; i++) if (!valid(i)) return false; return true; }
   function render() {
     var h = '<div class="m-row" style="gap:4px;margin-bottom:12px;">' + STEPS.map(function (s, i) { return '<span style="font-family:var(--f-label);font-size:12.5px;padding:2px 8px;border-radius:12px;border:1px solid ' + (i === step ? 'var(--acc)' : '#3a2424') + ';color:' + (i === step ? '#ffd5c8' : '#a89a8a') + ';background:' + (i === step ? '#3a0f12' : 'transparent') + ';' + (i > step ? 'opacity:.5;' : '') + '"><span style="font-family:var(--f-num);">' + (i + 1) + '.</span> ' + esc(s) + '</span>'; }).join('') + '</div>';
-    h += '<div style="font-family:var(--f-disp);font-size:27px;color:#e6463a;margin-bottom:6px;">' + esc(STEPS[step]) + '</div>' + page();
+    h += '<div style="font-family:var(--f-disp);font-size:27px;color:#fff;margin-bottom:6px;">' + esc(STEPS[step]) + '</div>' + page();
     $('builder-body').innerHTML = h;
     $('builder-title').textContent = 'Create a Pirate';
     $('builder-ft').innerHTML = '<button class="m-btn ghost" onclick="PBB.back()"' + (step === 0 ? ' disabled' : '') + '>Back</button><span class="m-hint" style="margin:0;align-self:center;">' + (valid(step) ? '' : 'Finish this step to continue') + '</span>' +
@@ -122,12 +133,25 @@
     var b = B.base ? C(B.base) : null; if (b) h += box('Your abilities, HP, weapon, clothing, hat, Devil\'s Luck and features come from <b>' + esc(b.name) + '</b>: HP ' + esc(b.hpDie) + ' ± TOU, Luck ' + esc(b.luckDie) + '.'); return h; }
   function abilPage() {
     var cm = classMods();
-    var h = '<p class="m-hint">Roll 3d6 for each ability and keep only the modifier (3–4 −3, 5–6 −2, 7–8 −1, 9–12 ±0, 13–14 +1, 15–16 +2, 17–18 +3). ' + (isLand() ? 'As a landlubber you may roll 4d6 and drop the lowest die. ' : '') + 'Class modifiers then apply; nothing goes below −3 or above +6.</p>';
-    h += '<div class="m-row" style="margin-bottom:8px;">' + chip('Roll the dice', B.method === 'roll', "PBB.method('roll')") + chip('Enter modifiers', B.method === 'manual', "PBB.method('manual')") + (isLand() ? chip((B.drop4 ? '✓ ' : '') + '4d6 drop lowest', B.drop4, 'PBB.drop4()') : '') + '</div>';
-    if (B.method === 'roll') h += '<div class="m-row" style="margin-bottom:8px;">' + rollBtn('Roll all five', 'PBB.rollAll()') + '</div>';
-    h += '<table class="tbl" style="color:#ece4d4;"><tbody>' + ABIL.map(function (a) { var r = B.rolls[a]; var bm = baseMod(a), fm = finalMod(a); var cmv = num(cm[a]);
-      return '<tr><td style="font-family:var(--f-label);font-size:15px;color:#e6463a;">' + a + '</td><td style="width:42%;">' + (B.method === 'roll' ? (r ? '<span style="font-family:var(--f-num);">' + r.sum + '</span> <small style="color:#a89a8a;">(' + r.dice.join(', ') + (r.drop ? ' — dropped ' + r.drop : '') + ')</small> → <b style="font-family:var(--f-num);">' + sg(bm) + '</b> ' : '') + '<button class="chip" onclick="PBB.rollOne(\'' + a + '\')">🎲 ' + (B.drop4 && isLand() ? '4d6' : '3d6') + '</button>'
-        : '<input class="m-input" type="number" min="-3" max="3" style="width:72px;text-align:center;font-family:var(--f-num);" value="' + (bm == null ? '' : bm) + '" onchange="PBB.manual(\'' + a + '\',this.value)">') + '</td><td class="mono" style="color:#a89a8a;">' + (cmv ? 'class ' + sg(cmv) : '') + '</td><td class="mono" style="font-size:20px;font-weight:600;color:#f3e6d4;">' + (fm == null ? '—' : sg(fm)) + '</td></tr>'; }).join('') + '</tbody></table>';
+    var h = '<p class="m-hint">Roll 3d6 for each ability and keep only the modifier (3–4 −3, 5–6 −2, 7–8 −1, 9–12 ±0, 13–14 +1, 15–16 +2, 17–18 +3)' + (isLand() ? ' — as a landlubber you may roll 4d6 and drop the lowest die' : '') + ', or take the standard array. Class modifiers then apply; nothing goes below −3 or above +6.</p>';
+    h += '<div class="m-row" style="margin-bottom:8px;">' +
+      '<button class="m-btn' + (B.method === 'roll' ? '' : ' ghost') + '" style="flex:1;" onclick="PBB.rollAll()">🎲 Roll ' + (B.drop4 && isLand() ? '4d6 drop lowest' : '3d6') + ' × 5</button>' +
+      '<button class="m-btn' + (B.method === 'array' ? '' : ' ghost') + '" style="flex:1;" onclick="PBB.method(\'array\')" title="A house option: Pirate Borg has no standard array">Standard Array <small>(house)</small></button>' +
+      '<button class="m-btn' + (B.method === 'manual' ? '' : ' ghost') + '" style="flex:0 0 auto;" onclick="PBB.method(\'manual\')">Enter</button></div>';
+    if (isLand()) h += '<div class="m-row" style="margin-bottom:8px;">' + chip((B.drop4 ? '✓ ' : '') + 'Landlubber: 4d6, drop the lowest', B.drop4, 'PBB.drop4()') + '</div>';
+    if (B.method === 'roll' && B.pool) h += '<div class="m-row" style="margin-bottom:8px;">' + chip('In order (as rolled)', B.order !== 'assign', "PBB.order('order')") + chip('Assign them', B.order === 'assign', "PBB.order('assign')") + '</div>';
+    if (B.method === 'array') h += '<p class="m-hint" style="margin-bottom:6px;">Standard array <b style="font-family:var(--f-num);">' + arr().map(sg).join(' · ') + '</b> — a house option (the book has no array; this is what the ' + (isLand() ? 'landlubber\'s 4d6-drop-lowest' : '3d6') + ' roll gives on average). Pick a value for each ability: choosing one already used swaps them.</p>';
+    else if (B.method === 'roll' && B.pool && B.order === 'assign') h += '<p class="m-hint" style="margin-bottom:6px;">Rolled: <b style="font-family:var(--f-num);">' + B.pool.map(function (r) { return sg(rawMod(r.sum)); }).join(' · ') + '</b>. Pick a value for each ability: choosing one already used swaps them.</p>';
+    else if (B.method === 'roll' && !B.pool) h += '<p class="m-hint" style="margin-bottom:6px;">Roll to fill the five abilities.</p>';
+    var assignSel = function (a, labels) { var cur = slotOf(a); return '<select class="m-input" style="width:auto;min-width:84px;font-family:var(--f-num);" onchange="PBB.assign(\'' + a + '\',this.value)">' + labels.map(function (l, i) { return '<option value="' + i + '"' + (i === cur ? ' selected' : '') + '>' + esc(l) + '</option>'; }).join('') + '</select>'; };
+    h += '<table class="tbl" style="color:#ece4d4;"><tbody>' + ABIL.map(function (a) { var bm = baseMod(a), fm = finalMod(a); var cmv = num(cm[a]); var cell = '';
+      if (B.method === 'manual') cell = '<input class="m-input" type="number" min="-3" max="3" style="width:72px;text-align:center;font-family:var(--f-num);" value="' + (bm == null ? '' : bm) + '" onchange="PBB.manual(\'' + a + '\',this.value)">';
+      else if (B.method === 'array') cell = assignSel(a, arr().map(sg));
+      else if (B.pool) { var r = B.pool[slotOf(a)];
+        cell = (B.order === 'assign' ? assignSel(a, B.pool.map(function (x) { return x.sum + ' → ' + sg(rawMod(x.sum)); })) + ' ' : '<span style="font-family:var(--f-num);">' + r.sum + '</span> → <b style="font-family:var(--f-num);">' + sg(bm) + '</b> ') +
+          '<small style="color:#a89a8a;">(' + r.dice.join(', ') + (r.drop ? ' — dropped ' + r.drop : '') + ')</small>'; }
+      else cell = '<span style="color:#a89a8a;">—</span>';
+      return '<tr><td style="font-family:var(--f-label);font-size:15px;color:#fff;">' + a + '</td><td style="width:46%;">' + cell + '</td><td class="mono" style="color:#a89a8a;">' + (cmv ? 'class ' + sg(cmv) : '') + '</td><td class="mono" style="font-size:20px;font-weight:600;color:#f3e6d4;">' + (fm == null ? '—' : sg(fm)) + '</td></tr>'; }).join('') + '</tbody></table>';
     return h;
   }
   function hpPage() {
@@ -225,7 +249,7 @@
     return c.name; }
   function d66() { return d(6) * 10 + d(6); }
   function roll3(drop) { var r = [d(6), d(6), d(6)]; if (drop) r.push(d(6)); var s = r.slice().sort(function (a, b) { return a - b; }); var low = drop ? s[0] : null; var sum = drop ? s[1] + s[2] + s[3] : s[0] + s[1] + s[2]; return { sum: sum, dice: r, drop: low }; }
-  function resetAfterClass() { B.rolls = {}; B.mods = {}; B.hp = null; B.luck = null; B.hpTxt = ''; B.luckTxt = ''; B.weapon = null; B.weaponSub = ''; B.monkeyWeapon = null; B.monkeySub = ''; B.clothing = ''; B.hat = ''; B.feats = {}; B.deity = ''; B.prayer = ''; B.spell = ''; B.extraRelics = []; B.extraRituals = []; }
+  function resetAfterClass() { B.rolls = {}; B.mods = {}; B.pool = null; B.assign = [0, 1, 2, 3, 4]; B.hp = null; B.luck = null; B.hpTxt = ''; B.luckTxt = ''; B.weapon = null; B.weaponSub = ''; B.monkeyWeapon = null; B.monkeySub = ''; B.clothing = ''; B.hat = ''; B.feats = {}; B.deity = ''; B.prayer = ''; B.spell = ''; B.extraRelics = []; B.extraRituals = []; }
 
   // ── actions ──
   var api = {
@@ -233,7 +257,7 @@
     close: function () { $('builder-overlay').classList.remove('open'); },
     next: function () { if (!valid(step)) return; step = Math.min(STEPS.length - 1, step + 1); render(); $('builder-body').scrollTop = 0; },
     back: function () { step = Math.max(0, step - 1); render(); },
-    set: function (k, v) { var keepB = B[k] === v; B[k] = String(v); if (!keepB && (k === 'base' || k === 'animal' || k === 'ancestry')) { var r = B.rolls, m = B.mods; resetAfterClass(); B.rolls = r; B.mods = m; } render(); },
+    set: function (k, v) { var keepB = B[k] === v; B[k] = String(v); if (!keepB && (k === 'base' || k === 'animal' || k === 'ancestry')) { var r = B.rolls, m = B.mods, pl = B.pool, as = B.assign; resetAfterClass(); B.rolls = r; B.mods = m; B.pool = pl; B.assign = as; } render(); },
     setq: function (k, v) { B[k] = v; var ft = $('builder-ft'); if (ft) { var nb = ft.querySelector('.m-btn:last-child'); if (nb) nb.disabled = !(step === STEPS.length - 1 ? allValid() : valid(step)); } },
     setNum: function (k, v) { var n = parseInt(v, 10); B[k] = isNaN(n) ? null : Math.max(k === 'hp' ? 1 : 0, n); B[k + 'Txt'] = 'entered'; render(); },
     cls: function (id) { if (B.cls !== id) { B.cls = id; B.ailment = ''; B.base = ''; B.variant = ''; B.ancestry = ''; B.animal = ''; resetAfterClass(); if (id !== 'landlubber') B.drop4 = false; } render(); },
@@ -246,10 +270,14 @@
       if (what === 'ancestry') { n = d(8); row = rowFor(variant().table.rows, n); if (row) { api.set('ancestry', row.id); log('Aquatic ancestry', row.name, 'd8(' + n + ')'); return; } }
       if (what === 'animal') { n = d(6); row = rowFor(variant().table.rows, n); if (row) { api.set('animal', row.id); log('Sentient animal', row.name, 'd6(' + n + ')'); return; } }
       render(); },
-    method: function (m) { B.method = m; render(); },
-    drop4: function () { B.drop4 = !B.drop4; B.rolls = {}; render(); },
-    rollOne: function (a) { var r = roll3(B.drop4 && isLand()); B.rolls[a] = r; log(a, String(r.sum) + ' → ' + sg(rawMod(r.sum)), (r.dice.length + 'd6(' + r.dice.join(',') + ')') + (r.drop ? ' drop ' + r.drop : '')); render(); },
-    rollAll: function () { ABIL.forEach(function (a) { B.rolls[a] = roll3(B.drop4 && isLand()); }); log('Abilities', ABIL.map(function (a) { return a.slice(0, 3) + ' ' + sg(rawMod(B.rolls[a].sum)); }).join(' '), ABIL.map(function (a) { return B.rolls[a].dice.length + 'd6(' + B.rolls[a].dice.join(',') + ')'; }).join(' ')); render(); },
+    method: function (m) { if (m !== B.method) B.assign = [0, 1, 2, 3, 4]; B.method = m; render(); },
+    order: function (o) { B.order = o === 'assign' ? 'assign' : 'order'; B.assign = [0, 1, 2, 3, 4]; render(); },
+    // Give ability `a` the pool / array slot `idx`; whichever ability held it takes a's old slot.
+    assign: function (a, idx) { var i = ABIL.indexOf(a), v = num(idx, 0); var other = B.assign.indexOf(v); if (other >= 0 && other !== i) B.assign[other] = B.assign[i]; B.assign[i] = v; render(); },
+    drop4: function () { B.drop4 = !B.drop4; B.rolls = {}; B.pool = null; if (B.method === 'roll') B.assign = [0, 1, 2, 3, 4]; render(); },
+    rollOne: function (a) { if (!B.pool) { api.rollAll(); return; } var r = roll3(B.drop4 && isLand()); B.pool[slotOf(a)] = r; B.rolls[a] = r; B.method = 'roll'; log(a, String(r.sum) + ' → ' + sg(rawMod(r.sum)), (r.dice.length + 'd6(' + r.dice.join(',') + ')') + (r.drop ? ' drop ' + r.drop : '')); render(); },
+    rollAll: function () { B.method = 'roll'; B.pool = ABIL.map(function () { return roll3(B.drop4 && isLand()); }); B.assign = [0, 1, 2, 3, 4]; ABIL.forEach(function (a, i) { B.rolls[a] = B.pool[i]; });
+      log('Abilities', B.pool.map(function (r, i) { return ABIL[i].slice(0, 3) + ' ' + sg(rawMod(r.sum)); }).join(' '), B.pool.map(function (r) { return r.dice.length + 'd6(' + r.dice.join(',') + ')' + (r.drop ? ' drop ' + r.drop : ''); }).join(' ')); render(); },
     manual: function (a, v) { var n = parseInt(v, 10); if (isNaN(n)) delete B.mods[a]; else B.mods[a] = Math.max(-3, Math.min(3, n)); render(); },
     rollHp: function () { var n = d(sides(hpDie())); var t = finalMod('TOUGHNESS'); B.hp = Math.max(1, n + t); B.hpTxt = hpDie() + '(' + n + ') ' + sg(t); log('Hit points', String(B.hp), B.hpTxt + (n + t < 1 ? ' (minimum 1)' : '')); render(); },
     rollLuck: function () { var n = d(sides(luckDie())); B.luck = n; B.luckTxt = luckDie() + '(' + n + ')'; log("Devil's Luck", String(n), B.luckTxt); render(); },

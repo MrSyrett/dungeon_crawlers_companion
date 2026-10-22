@@ -1,8 +1,12 @@
 // Dragonbane character creation wizard (window.DBB).
-// Walks the core book's thirteen steps in order — kin, innate ability, profession,
-// age, name, attributes, derived ratings, trained skills, heroic ability (or a
+// Walks the core book's steps in order — kin (its innate abilities shown with it: they
+// aren't a choice), profession, age, name, attributes, trained skills, heroic ability (or a
 // mage's school, spells and tricks), weakness, gear, memento, appearance — with a
-// "choose or roll" control wherever the book offers a table. Rules and tables
+// "choose or roll" control wherever the book offers a table. Derived ratings (movement,
+// damage bonuses, HP, WP) simply compute on the sheet, so they have no step.
+// Attributes work the D&D / Shadowdark way: roll all six (4D6, drop the lowest) and keep
+// them in order — the book's rule, with its one swap — or assign them; take a standard
+// array (a house option); or enter scores. Rules and tables
 // come from window.DB_* (db-data.js); the finished character is handed to the
 // sheet through window.DBSHEET.applyBuild. Renders into #builder-overlay.
 (function () {
@@ -16,16 +20,25 @@
   function SH() { return window.DBSHEET; }
   function log(l, r, dt, t) { if (SH()) SH().addLog(l, r, dt, t || 'normal'); }
   var ATTRS = ['STR', 'CON', 'AGL', 'INT', 'WIL', 'CHA'];
-  var STEPS = ['Kin', 'Innate Ability', 'Profession', 'Age', 'Name', 'Attributes', 'Derived Ratings', 'Trained Skills', 'Heroic Ability', 'Weakness', 'Gear', 'Memento', 'Appearance'];
+  var STEPS = ['Kin', 'Profession', 'Age', 'Name', 'Attributes', 'Trained Skills', 'Heroic Ability', 'Weakness', 'Gear', 'Memento', 'Appearance'];
+  // House standard array (the book has none): the expected sorted result of six 4D6-drop-lowest
+  // rolls (15.7, 14.2, 13.0, 11.8, 10.4, 8.5), rounded toward the player.
+  var ARRAY = [16, 14, 13, 12, 10, 9];
   var B = null, step = 0;
 
-  function fresh() { return { kin: '', prof: '', age: '', name: '', nick: '', attrs: {}, method: 'order', pend: null, pool: [], swap: [], swapped: false,
+  function fresh() { return { kin: '', prof: '', age: '', name: '', nick: '', attrs: {}, method: 'roll', order: 'order', pool: null, assign: [0, 1, 2, 3, 4, 5], swap: [], swapped: false, man: {},
     profSkills: [], freeSkills: [], school: '', ability: '', spells: [], tricks: [], kit: -1, kitChoice: {}, food: null, silver: null, foodTxt: '', silverTxt: '',
     weakness: '', memento: '', appearance: '' }; }
   function kin() { return A(window.DB_KIN).find(function (k) { return k.name === B.kin; }) || null; }
   function prof() { return A(window.DB_PROFESSIONS).find(function (p) { return p.name === B.prof; }) || null; }
   function age() { return A(T().ages).find(function (a) { return a.id === B.age; }) || null; }
   function inRoll(r, n) { return Array.isArray(r) ? (n >= r[0] && n <= r[1]) : n === r; }
+  // The base score for an attribute: rolled pool (in order, or assigned), the array, or entered.
+  function slotOf(a) { var i = ATTRS.indexOf(a); return (B.method === 'array' || B.order === 'assign') ? B.assign[i] : i; }
+  function baseAttr(a) { if (B.method === 'manual') return B.man[a] == null ? null : B.man[a];
+    if (B.method === 'array') return ARRAY[slotOf(a)];
+    if (!B.pool) return null; var r = B.pool[slotOf(a)]; return r ? r.v : null; }
+  function syncAttrs() { B.attrs = {}; ATTRS.forEach(function (a) { var v = baseAttr(a); if (v != null) B.attrs[a] = v; }); }
   function finalAttr(a) { var v = B.attrs[a]; if (v == null) return null; var m = (age() && age().mods && age().mods[a]) || 0; return Math.max(3, Math.min(18, v + m)); }
   function base(v) { return SH() ? SH().baseChance(v) : 5; }
   function skillAttr(n) { var s = A(window.DB_SKILLS).find(function (x) { return x.name === n; }); return s ? s.attribute : 'STR'; }
@@ -38,19 +51,19 @@
   function box(h) { return '<div class="res-box">' + h + '</div>'; }
 
   function valid(i) {
-    switch (i) {
-      case 0: return !!kin(); case 2: return !!prof(); case 3: return !!age();
-      case 4: return !!String(B.name).trim();
-      case 5: return ATTRS.every(function (a) { return B.attrs[a] != null; });
-      case 7: return (!prof().mage || !!B.school) && B.profSkills.length === nProf() && B.freeSkills.length === nFree() && (!prof().mage || B.profSkills.indexOf(B.school) >= 0);
-      case 8: var p = prof(); if (p.mage) return B.spells.length === 3 && B.tricks.length === 3; return !p.heroicChoice || !!B.ability;
-      case 10: var k = A(prof().kits)[B.kit]; if (!k) return false; return k.items.every(function (it, ix) { return !it.choice || !!B.kitChoice[ix]; }) && B.food != null && B.silver != null;
+    switch (STEPS[i]) {
+      case 'Kin': return !!kin(); case 'Profession': return !!prof(); case 'Age': return !!age();
+      case 'Name': return !!String(B.name).trim();
+      case 'Attributes': return ATTRS.every(function (a) { return B.attrs[a] != null; });
+      case 'Trained Skills': return (!prof().mage || !!B.school) && B.profSkills.length === nProf() && B.freeSkills.length === nFree() && (!prof().mage || B.profSkills.indexOf(B.school) >= 0);
+      case 'Heroic Ability': var p = prof(); if (p.mage) return B.spells.length === 3 && B.tricks.length === 3; return !p.heroicChoice || !!B.ability;
+      case 'Gear': var k = A(prof().kits)[B.kit]; if (!k) return false; return k.items.every(function (it, ix) { return !it.choice || !!B.kitChoice[ix]; }) && B.food != null && B.silver != null;
       default: return true;
     }
   }
   function render() {
-    var h = '<div class="m-row" style="gap:4px;margin-bottom:12px;">' + STEPS.map(function (s, i) { return '<span class="bd-step" style="font-family:var(--f-label);font-size:11px;padding:2px 8px;border-radius:12px;border:1px solid ' + (i === step ? 'var(--acc)' : '#3d2e20') + ';color:' + (i === step ? '#ffd5c8' : '#a8987d') + ';background:' + (i === step ? '#3a1611' : 'transparent') + ';' + (i > step ? 'opacity:.5;' : '') + '">' + (i + 1) + '. ' + esc(s) + '</span>'; }).join('') + '</div>';
-    h += '<div style="font-family:var(--f-disp);font-size:24px;color:#f3dca8;margin-bottom:6px;">' + (step + 1) + '. ' + esc(STEPS[step]) + '</div>' + page();
+    var h = '<div class="m-row" style="gap:4px;margin-bottom:12px;">' + STEPS.map(function (s, i) { return '<span class="bd-step" style="font-family:var(--f-label);font-size:11px;padding:2px 8px;border-radius:12px;border:1px solid ' + (i === step ? 'var(--acc)' : '#3a3a41') + ';color:' + (i === step ? '#ffd5c8' : '#a09d96') + ';background:' + (i === step ? '#3a1611' : 'transparent') + ';' + (i > step ? 'opacity:.5;' : '') + '">' + (i + 1) + '. ' + esc(s) + '</span>'; }).join('') + '</div>';
+    h += '<div class="bd-title" style="font-family:var(--f-disp);font-size:24px;margin-bottom:6px;">' + (step + 1) + '. ' + esc(STEPS[step]) + '</div>' + page();
     $('builder-body').innerHTML = h;
     $('builder-title').textContent = 'Create a Character';
     $('builder-ft').innerHTML = '<button class="m-btn ghost" onclick="DBB.back()"' + (step === 0 ? ' disabled' : '') + '>Back</button><span class="m-hint" style="margin:0;align-self:center;">' + (valid(step) ? '' : 'Finish this step to continue') + '</span>' +
@@ -60,49 +73,41 @@
 
   function page() {
     var h = '', k = kin(), p = prof(), a = age();
-    switch (step) {
-      case 0:
+    switch (STEPS[step]) {
+      case 'Kin':
         h += '<p class="m-hint">Choose your kin, or roll a D12.</p><div class="m-row">' + A(window.DB_KIN).map(function (x) { return chip(esc(x.name) + ' <small>(' + (x.roll[0] === x.roll[1] ? x.roll[0] : x.roll.join('–')) + ')</small>', B.kin === x.name, "DBB.set('kin','" + jsq(x.name) + "')"); }).join('') + rollBtn('D12', 'DBB.rollKin()') + '</div>';
-        if (k) h += box('<b>' + esc(k.name) + '</b> — ' + esc(k.text) + '<br>Movement <b>' + k.movement + '</b>.');
+        if (k) { h += box('<b>' + esc(k.name) + '</b> — ' + esc(k.text) + '<br>Movement <b>' + k.movement + '</b>.');
+          h += '<div class="m-lbl">Innate abilit' + (A(k.abilities).length > 1 ? 'ies' : 'y') + ' — every ' + esc(k.name.toLowerCase()) + ' has ' + (A(k.abilities).length > 1 ? 'these' : 'this') + '</div>' + A(k.abilities).map(function (x) { return box('<b>' + esc(x.name) + '</b>' + (x.wp ? ' · ' + x.wp + ' WP' : '') + '<br>' + esc(x.text)); }).join(''); }
         return h;
-      case 1:
-        return '<p class="m-hint">Every kin has an innate ability.</p>' + A(k.abilities).map(function (x) { return box('<b>' + esc(x.name) + '</b>' + (x.wp ? ' · ' + x.wp + ' WP' : '') + '<br>' + esc(x.text)); }).join('');
-      case 2:
+      case 'Profession':
         h += '<p class="m-hint">Choose your profession, or roll a D10.</p><div class="m-row">' + A(window.DB_PROFESSIONS).map(function (x) { return chip(esc(x.name) + ' <small>(' + x.roll + ')</small>', B.prof === x.name, "DBB.set('prof','" + jsq(x.name) + "')"); }).join('') + rollBtn('D10', 'DBB.rollProf()') + '</div>';
         if (p) h += box('<b>' + esc(p.name) + '</b> — ' + esc(p.text) + '<br>Key attribute <b>' + p.keyAttribute + '</b>' + (p.mage ? ' · chooses a school of magic' : ' · heroic ability: ' + esc(A(p.heroicAbilities).join(p.heroicChoice ? ' / ' : ', ')) + (p.heroicChoice ? ' (choose one)' : '')));
         return h;
-      case 3:
+      case 'Age':
         h += '<p class="m-hint">Choose your age, or roll a D6. Age changes your attributes and how many skills you are trained in.</p><div class="m-row">' + A(T().ages).map(function (x) { return chip(esc(x.name) + ' <small>(' + (x.roll[0] === x.roll[1] ? x.roll[0] : x.roll.join('–')) + ')</small>', B.age === x.id, "DBB.set('age','" + x.id + "')"); }).join('') + rollBtn('D6', 'DBB.rollAge()') + '</div>';
         if (a) { var mods = Object.keys(a.mods || {}).map(function (m) { return m + ' ' + (a.mods[m] > 0 ? '+' : '') + a.mods[m]; }); h += box('<b>' + esc(a.name) + '</b> — ' + a.trainedSkills + ' trained skills (' + a.professionSkills + ' from your profession + ' + a.freeSkills + ' of your choice)' + (mods.length ? '<br>Attributes: ' + mods.join(', ') + ' (never above 18).' : '<br>No attribute changes.')); }
         return h;
-      case 4:
+      case 'Name':
         h += '<div class="m-lbl">Name</div><input class="m-input" id="bd-name" value="' + esc(B.name) + '" oninput="DBB.setq(\'name\',this.value)" placeholder="Your adventurer\'s name">';
         h += '<div class="m-row" style="margin-top:8px;">' + A(k.names).map(function (n, i) { return chip((i + 1) + '. ' + esc(n), B.name === n, "DBB.set('name','" + jsq(n) + "')"); }).join('') + rollBtn('D6 ' + esc(k.name) + ' name', 'DBB.rollName()') + '</div>';
         h += '<div class="m-lbl">Nickname (optional)</div><input class="m-input" id="bd-nick" value="' + esc(B.nick) + '" oninput="DBB.setq(\'nick\',this.value)">';
         h += '<div class="m-row" style="margin-top:8px;">' + A(p.nicknames).map(function (n, i) { return chip((i + 1) + '. ' + esc(n), B.nick === n, "DBB.set('nick','" + jsq(n) + "')"); }).join('') + rollBtn('D6 ' + esc(p.name) + ' nickname', 'DBB.rollNick()') + '</div>';
         return h;
-      case 5: return attrPage();
-      case 6:
-        var str = finalAttr('STR'), con = finalAttr('CON'), agl = finalAttr('AGL'), wil = finalAttr('WIL');
-        var dmg = function (v) { var r = A(T().damageBonus).find(function (x) { return v >= x.min && v <= x.max; }); return r && r.value ? '+' + r.value : 'none'; };
-        var mv = (function () { var r = A(T().movementAgl).find(function (x) { return agl >= x.min && agl <= x.max; }); return k.movement + (r ? r.mod : 0); })();
-        h += '<p class="m-hint">Worked out from your attributes' + (a && Object.keys(a.mods || {}).length ? ' (after the ' + esc(a.name.toLowerCase()) + ' age changes)' : '') + '.</p>';
-        h += box(ATTRS.map(function (x) { return x + ' <b>' + finalAttr(x) + '</b>'; }).join(' · ') + '<br>Movement <b>' + mv + '</b> (kin ' + k.movement + ', AGL ' + agl + ')<br>Damage bonus STR <b>' + dmg(str) + '</b> · AGL <b>' + dmg(agl) + '</b><br>Hit points <b>' + con + '</b> (CON) · Willpower points <b>' + wil + '</b> (WIL)');
-        return h;
-      case 7: return skillsPage();
-      case 8: return abilityPage();
-      case 9:
+      case 'Attributes': return attrPage();
+      case 'Trained Skills': return skillsPage();
+      case 'Heroic Ability': return abilityPage();
+      case 'Weakness':
         h += '<p class="m-hint">Optional: a weakness that gives you trouble. Giving in to it (or overcoming it) earns advancement marks.</p><div class="m-row">' + rollBtn('D20 weakness', 'DBB.rollTable(\'weakness\')') + chip('None', !B.weakness, "DBB.set('weakness','')") + '</div>';
         h += '<div class="m-lbl">Weakness</div><input class="m-input" value="' + esc(B.weakness) + '" oninput="DBB.setq(\'weakness\',this.value)">';
         h += '<div class="brow-list" style="padding:0;margin-top:8px;max-height:240px;">' + A(window.DB_WEAKNESSES).map(function (w) { return '<div class="brow-item" style="padding:5px 2px;"><div class="brow-main"><div class="brow-name" style="font-size:14px;">' + w.roll + '. ' + esc(w.name) + '</div><div class="brow-desc">' + esc(w.text) + '</div></div><button class="brow-add ghost" onclick="DBB.set(\'weakness\',\'' + jsq(w.name + ' — ' + w.text) + '\')">Pick</button></div>'; }).join('') + '</div>';
         return h;
-      case 10: return gearPage();
-      case 11:
+      case 'Gear': return gearPage();
+      case 'Memento':
         h += '<p class="m-hint">Optional: a tiny item of great sentimental value. Once per session it lets you recover an extra condition during a stretch rest.</p><div class="m-row">' + rollBtn('D20 memento', 'DBB.rollTable(\'memento\')') + chip('None', !B.memento, "DBB.set('memento','')") + '</div>';
         h += '<div class="m-lbl">Memento</div><input class="m-input" value="' + esc(B.memento) + '" oninput="DBB.setq(\'memento\',this.value)">';
         h += '<div class="m-row" style="margin-top:8px;">' + A(window.DB_MEMENTOS).map(function (m) { return chip(m.roll + '. ' + esc(m.text), B.memento === m.text, "DBB.set('memento','" + jsq(m.text) + "')"); }).join('') + '</div>';
         return h;
-      case 12:
+      case 'Appearance':
         h += '<p class="m-hint">One distinctive feature — choose or roll a D20.</p><div class="m-row">' + rollBtn('D20 appearance', 'DBB.rollTable(\'appearance\')') + '</div>';
         h += '<div class="m-lbl">Appearance</div><input class="m-input" value="' + esc(B.appearance) + '" oninput="DBB.setq(\'appearance\',this.value)">';
         h += '<div class="m-row" style="margin-top:8px;">' + A(window.DB_APPEARANCES).map(function (m) { return chip(m.roll + '. ' + esc(m.text), B.appearance === m.text, "DBB.set('appearance','" + jsq(m.text) + "')"); }).join('') + '</div>';
@@ -113,26 +118,28 @@
   }
 
   function attrPage() {
-    var h = '<p class="m-hint">Roll 4D6 and drop the lowest die for each score. ' + (B.method === 'order' ? 'Assign each score to an attribute as you roll it; once all six are placed you may swap two.' : B.method === 'pool' ? 'Roll all six, then place them where you like.' : 'Enter scores your group agreed on (3–18).') + '</p>';
-    h += '<div class="m-row" style="margin-bottom:8px;">' + chip('As rolled (book)', B.method === 'order', "DBB.method('order')") + chip('Roll six, then assign', B.method === 'pool', "DBB.method('pool')") + chip('Enter manually', B.method === 'manual', "DBB.method('manual')") + '</div>';
-    var placed = ATTRS.filter(function (a) { return B.attrs[a] != null; }).length;
-    if (B.method === 'manual') {
-      h += '<div class="m-row">' + ATTRS.map(function (a) { return '<label style="display:flex;flex-direction:column;align-items:center;gap:3px;font-family:var(--f-label);font-size:12px;">' + a + '<input class="m-input" type="number" min="3" max="18" style="width:64px;text-align:center;" value="' + (B.attrs[a] == null ? '' : B.attrs[a]) + '" onchange="DBB.manual(\'' + a + '\',this.value)"></label>'; }).join('') + '</div>';
-    } else {
-      if (B.method === 'order') {
-        if (placed < 6) {
-          if (B.pend) h += box('Rolled <b style="font-size:20px;">' + B.pend.v + '</b> <small>(' + B.pend.dice.join(', ') + ' — dropped ' + B.pend.drop + ')</small><br>Place it on:') + '<div class="m-row" style="margin-top:6px;">' + ATTRS.filter(function (a) { return B.attrs[a] == null; }).map(function (a) { return chip(a, false, "DBB.place('" + a + "')"); }).join('') + '</div>';
-          else h += '<div class="m-row">' + rollBtn('Roll 4D6 (score ' + (placed + 1) + ' of 6)', 'DBB.rollAttr()') + '</div>';
-        }
-      } else {
-        if (!B.pool.length && placed === 0) h += '<div class="m-row">' + rollBtn('Roll six scores', 'DBB.rollPool()') + '</div>';
-        if (B.pool.length) h += '<div class="m-lbl">Unplaced scores</div><div class="m-row">' + B.pool.map(function (v, i) { return chip(String(v.v), B.pend && B.pend.i === i, 'DBB.pickPool(' + i + ')', false, v.dice.join(', ')); }).join('') + '</div>' + (B.pend ? '<div class="m-lbl">Place ' + B.pend.v + ' on</div><div class="m-row">' + ATTRS.filter(function (a) { return B.attrs[a] == null; }).map(function (a) { return chip(a, false, "DBB.place('" + a + "')"); }).join('') + '</div>' : '');
-      }
-    }
-    h += '<div class="m-lbl">Your attributes</div><div class="m-row">' + ATTRS.map(function (a) { var v = B.attrs[a], f = finalAttr(a); var sel = B.swap.indexOf(a) >= 0;
-      return '<button class="chip' + (sel ? ' sel' : '') + '" style="min-width:76px;" ' + (placed === 6 && B.method !== 'manual' && !B.swapped ? 'onclick="DBB.swapPick(\'' + a + '\')"' : 'disabled') + '>' + a + ' <b>' + (v == null ? '—' : v) + '</b>' + (v != null && f !== v ? ' → ' + f : '') + '</button>'; }).join('') + '</div>';
-    if (placed === 6 && B.method !== 'manual') h += '<p class="m-hint" style="margin-top:6px;">' + (B.swapped ? 'Swapped once.' : 'Optional: click two attributes to swap their scores (once).') + ' ' + '<a href="#" style="color:#e0614f;" onclick="DBB.resetAttrs();return false;">Start over</a></p>';
-    if (age() && Object.keys(age().mods || {}).length) h += '<p class="m-hint">Age adjustments (' + esc(age().name) + ') are shown after the arrow.</p>';
+    var am = age() && Object.keys(age().mods || {}).length ? age().mods : null;
+    var h = '<p class="m-hint">Roll 4D6 for each attribute and drop the lowest die. The book has you keep them in the order rolled and swap two once you are done; you can also assign them where you like, take the standard array, or enter scores your group agreed on (3–18).' + (am ? ' Your age then adjusts them (never above 18).' : '') + '</p>';
+    h += '<div class="m-row" style="margin-bottom:8px;">' +
+      '<button class="m-btn' + (B.method === 'roll' ? '' : ' ghost') + '" style="flex:1;" onclick="DBB.rollAll()">🎲 Roll 4D6 drop lowest × 6</button>' +
+      '<button class="m-btn' + (B.method === 'array' ? '' : ' ghost') + '" style="flex:1;" onclick="DBB.method(\'array\')" title="A house option: Dragonbane has no standard array">Standard Array <small>(house)</small></button>' +
+      '<button class="m-btn' + (B.method === 'manual' ? '' : ' ghost') + '" style="flex:0 0 auto;" onclick="DBB.method(\'manual\')">Enter</button></div>';
+    if (B.method === 'roll' && B.pool) h += '<div class="m-row" style="margin-bottom:8px;">' + chip('In order (as rolled)', B.order !== 'assign', "DBB.order('order')") + chip('Assign them', B.order === 'assign', "DBB.order('assign')") + '</div>';
+    if (B.method === 'array') h += '<p class="m-hint" style="margin-bottom:6px;">Standard array <b>' + ARRAY.join(' · ') + '</b> — a house option (what 4D6-drop-lowest gives on average). Pick a value for each attribute: choosing one already used swaps them.</p>';
+    else if (B.method === 'roll' && B.pool && B.order === 'assign') h += '<p class="m-hint" style="margin-bottom:6px;">Rolled: <b>' + B.pool.map(function (r) { return r.v; }).join(' · ') + '</b>. Pick a value for each attribute: choosing one already used swaps them.</p>';
+    else if (B.method === 'roll' && B.pool) h += '<p class="m-hint" style="margin-bottom:6px;">' + (B.swapped ? 'Swapped once.' : 'Optional (the book\'s rule): click two attributes to swap their scores, once.') + '</p>';
+    else if (B.method === 'roll') h += '<p class="m-hint" style="margin-bottom:6px;">Roll to fill the six attributes.</p>';
+    var assignSel = function (a, labels) { var cur = slotOf(a); return '<select class="m-input" style="width:auto;min-width:84px;" onchange="DBB.assign(\'' + a + '\',this.value)">' + labels.map(function (l, i) { return '<option value="' + i + '"' + (i === cur ? ' selected' : '') + '>' + esc(l) + '</option>'; }).join('') + '</select>'; };
+    var FULL = { STR: 'Strength', CON: 'Constitution', AGL: 'Agility', INT: 'Intelligence', WIL: 'Willpower', CHA: 'Charisma' };
+    h += '<table class="tbl" style="color:#e9e7e3;"><tbody>' + ATTRS.map(function (a) { var bv = baseAttr(a), fv = finalAttr(a), mod = am ? (am[a] || 0) : 0, cell = '';
+      if (B.method === 'manual') cell = '<input class="m-input" type="number" min="3" max="18" style="width:72px;text-align:center;" value="' + (bv == null ? '' : bv) + '" onchange="DBB.manual(\'' + a + '\',this.value)">';
+      else if (B.method === 'array') cell = assignSel(a, ARRAY.map(String));
+      else if (B.pool) { var r = B.pool[slotOf(a)];
+        if (B.order === 'assign') cell = assignSel(a, B.pool.map(function (x) { return String(x.v); })) + ' <small style="color:#a09d96;">(' + r.dice.join(', ') + ' — dropped ' + r.drop + ')</small>';
+        else { var sel = B.swap.indexOf(a) >= 0; cell = '<button class="chip' + (sel ? ' sel' : '') + '" style="min-width:56px;font-size:16px;"' + (B.swapped ? ' disabled' : '') + ' onclick="DBB.swapPick(\'' + a + '\')" title="Click two attributes to swap them (once)">' + r.v + '</button> <small style="color:#a09d96;">(' + r.dice.join(', ') + ' — dropped ' + r.drop + ')</small>'; } }
+      else cell = '<span style="color:#a09d96;">—</span>';
+      return '<tr><td style="font-family:var(--f-label);font-size:15px;color:#fff;">' + a + ' <small style="color:#a09d96;">' + FULL[a] + '</small></td><td style="width:50%;">' + cell + '</td><td class="mono" style="color:#a09d96;">' + (mod ? 'age ' + (mod > 0 ? '+' : '') + mod : '') + '</td><td class="mono" style="font-size:20px;font-weight:600;color:#f3e6d4;">' + (fv == null ? '—' : fv) + '</td></tr>'; }).join('') + '</tbody></table>';
+    if (B.method === 'roll' && B.pool) h += '<p class="m-hint" style="margin-top:6px;"><a href="#" style="color:#e0614f;" onclick="DBB.rollAll();return false;">Roll again</a></p>';
     return h;
   }
   function skillsPage() {
@@ -176,9 +183,7 @@
     if (k) {
       k.items.forEach(function (it, ix) { if (!it.choice) return; h += '<div class="m-lbl">Choose</div><div class="m-row">' + it.choice.map(function (c) { return chip(esc(c), B.kitChoice[ix] === c, 'DBB.kitChoice(' + ix + ",'" + jsq(c) + "')"); }).join('') + '</div>'; });
       h += box('Food rations: <b>' + (B.food == null ? '—' : B.food) + '</b> ' + esc(B.foodTxt) + ' · Silver: <b>' + (B.silver == null ? '—' : B.silver) + '</b> ' + esc(B.silverTxt) + ' <button class="chip" onclick="event.stopPropagation();DBB.rollSupplies()">Re-roll</button>');
-      var w = A(window.DB_WEAPONS);
-      var weaps = kitItems(k).filter(function (x) { return w.some(function (y) { return y.name === x.name; }); });
-      if (weaps.length) h += '<p class="m-hint" style="margin-top:8px;">Weapons go to your hands (at most three); the rest to your inventory. You may go back and adjust your trained skills to fit your gear.</p>';
+      h += '<p class="m-hint" style="margin-top:8px;">Everything goes into your inventory; weapons start at hand (at most three) and armor worn — the equip pip on the Gear tab changes that. You may go back and adjust your trained skills to fit your gear.</p>';
     }
     return h;
   }
@@ -198,15 +203,17 @@
     rollAge: function () { var n = d(6); var a = A(T().ages).find(function (x) { return inRoll(x.roll, n); }); if (a) { api.set('age', a.id); log('Age', a.name, 'd6(' + n + ')'); } },
     rollName: function () { var n = d(6); var k = kin(); api.set('name', A(k.names)[n - 1]); },
     rollNick: function () { var n = d(6); api.set('nick', A(prof().nicknames)[n - 1]); },
-    method: function (m) { B.method = m; api.resetAttrs(); },
-    resetAttrs: function () { B.attrs = {}; B.pend = null; B.pool = []; B.swap = []; B.swapped = false; render(); },
-    rollAttr: function () { var r = roll4(); B.pend = r; log('Attribute roll', String(r.v), '4d6(' + r.dice.join(',') + ') drop ' + r.drop); render(); },
-    rollPool: function () { B.pool = []; for (var i = 0; i < 6; i++) B.pool.push(roll4()); log('Attribute rolls', B.pool.map(function (x) { return x.v; }).join(', '), 'six × 4D6 drop lowest'); render(); },
-    pickPool: function (i) { B.pend = Object.assign({ i: i }, B.pool[i]); render(); },
-    place: function (a) { if (!B.pend) return; B.attrs[a] = B.pend.v; if (B.method === 'pool' && B.pend.i != null) B.pool.splice(B.pend.i, 1); B.pend = null; render(); },
-    manual: function (a, v) { var n = parseInt(v, 10); B.attrs[a] = isNaN(n) ? null : Math.max(3, Math.min(18, n)); if (B.attrs[a] == null) delete B.attrs[a]; render(); },
-    swapPick: function (a) { if (B.swapped) return; var i = B.swap.indexOf(a); if (i >= 0) B.swap.splice(i, 1); else B.swap.push(a);
-      if (B.swap.length === 2) { var x = B.swap[0], y = B.swap[1], t = B.attrs[x]; B.attrs[x] = B.attrs[y]; B.attrs[y] = t; B.swap = []; B.swapped = true; log('Attributes', 'Swapped', x + ' ↔ ' + y); } render(); },
+    method: function (m) { if (m !== B.method) { B.assign = [0, 1, 2, 3, 4, 5]; B.swap = []; B.swapped = false; } B.method = m === 'order' || m === 'pool' ? 'roll' : m; if (m === 'pool') B.order = 'assign'; syncAttrs(); render(); },
+    order: function (o) { B.order = o === 'assign' ? 'assign' : 'order'; B.assign = [0, 1, 2, 3, 4, 5]; B.swap = []; B.swapped = false; syncAttrs(); render(); },
+    // Give attribute `a` the pool / array slot `idx`; whichever attribute held it takes a's old slot.
+    assign: function (a, idx) { var i = ATTRS.indexOf(a), v = parseInt(idx, 10) || 0; var other = B.assign.indexOf(v); if (other >= 0 && other !== i) B.assign[other] = B.assign[i]; B.assign[i] = v; syncAttrs(); render(); },
+    resetAttrs: function () { B.pool = null; B.assign = [0, 1, 2, 3, 4, 5]; B.swap = []; B.swapped = false; B.man = {}; syncAttrs(); render(); },
+    rollAll: function () { B.method = 'roll'; B.pool = ATTRS.map(function () { return roll4(); }); B.assign = [0, 1, 2, 3, 4, 5]; B.swap = []; B.swapped = false; syncAttrs();
+      log('Attributes', B.pool.map(function (r, i) { return ATTRS[i] + ' ' + r.v; }).join(' '), B.pool.map(function (r) { return '4d6(' + r.dice.join(',') + ') drop ' + r.drop; }).join(' · ')); render(); },
+    manual: function (a, v) { var n = parseInt(v, 10); if (isNaN(n)) delete B.man[a]; else B.man[a] = Math.max(3, Math.min(18, n)); B.method = 'manual'; syncAttrs(); render(); },
+    // In order: the book's single swap of two scores (swaps their pool slots).
+    swapPick: function (a) { if (B.swapped || !B.pool || B.order === 'assign') return; var i = B.swap.indexOf(a); if (i >= 0) B.swap.splice(i, 1); else B.swap.push(a);
+      if (B.swap.length === 2) { var x = B.swap[0], y = B.swap[1], t = B.pool[ATTRS.indexOf(x)]; B.pool[ATTRS.indexOf(x)] = B.pool[ATTRS.indexOf(y)]; B.pool[ATTRS.indexOf(y)] = t; B.swap = []; B.swapped = true; syncAttrs(); log('Attributes', 'Swapped', x + ' ↔ ' + y); } render(); },
     school: function (s) { B.school = s; B.profSkills = [s]; B.spells = []; B.tricks = []; render(); },
     toggleSkill: function (which, n) { n = String(n).replace(/&#39;/g, "'"); var list = which === 'prof' ? B.profSkills : B.freeSkills; var i = list.indexOf(n);
       if (i >= 0) list.splice(i, 1); else if (list.length < (which === 'prof' ? nProf() : nFree())) list.push(n); render(); },

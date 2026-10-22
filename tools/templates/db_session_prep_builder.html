@@ -63,22 +63,24 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    /* Dragonbane: crimson and gold on dark umber, parchment pages.
+    /* Dragonbane: crimson and gold on near-black, parchment pages.
        Sidebar --ui-* values match :root[data-themed][data-system="DB"] in
        public/tokens.css (which wins when injected); these are the fallback. */
     --ink: #2a1d14; --paper: #efe2c4; --accent: #b3261e; --accent-dark: #8a1c16;
     --accent-red: #b3261e; --accent-red-dark: #8a1c16;
     --muted: #6e5b45; --rule: #d3bf96; --box-bg: #e9dab7; --read-bg: #2a1d14;
     --read-text: #f3e7cc; --highlight: #c9a14a; --green: #4f6a2f; --blue-npc: #2f4f6f;
-    --section-hdr: #8a1c16; --table-hdr: #5a1a14; --preview-bg: #120d09;
+    --section-hdr: #8a1c16; --table-hdr: #5a1a14; --preview-bg: #0f0e0d;
     --gold: #c9a14a; --gold-lift: #e3c27a; --db: #b3261e; --db-ink: #e0614f;
+    /* The logo red: every Hideout title is lettered in it inside a --gold stroke. */
+    --db-logo: #e42a32;
     --font-display: "Hideout", "EB Garamond", Georgia, serif;
     --font-label: "Minion Pro", "EB Garamond", Georgia, serif;
     --font-body: "EB Garamond", Georgia, serif;
-    /* Masthead banner — dark umber into crimson, with the title in lifted crimson */
-    --banner-a: #1d1712; --banner-b: #4a1410; --title-color: #e0614f; --title-weight: 400; --sub-color: #e3d2ad;
-    /* UI (sidebar) — warm umber */
-    --ui-bg: #1d1712; --ui-panel: #261e17; --ui-border: #4a3a2c;
+    /* Masthead banner — near-black into crimson, with the title as the logo (red, gold outline) */
+    --banner-a: #1a1918; --banner-b: #4a1410; --title-color: #e42a32; --title-weight: 400; --sub-color: #e3d2ad;
+    /* UI (sidebar) — neutral near-black */
+    --ui-bg: #1a1918; --ui-panel: #232120; --ui-border: #3f3a35;
     --ui-text: #eee3cc; --ui-muted: #b5a68c; --ui-accent: #e0614f; --ui-highlight: #b3261e;
   }
   body { font-family: 'Barlow', sans-serif; background: var(--ui-bg); color: var(--ui-text); display: flex; height: 100vh; overflow: hidden; }
@@ -671,6 +673,12 @@ body.flow-mode .page + .page {
 .sl { font-family: var(--font-display); font-weight: 400; font-size: 14px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--section-hdr); border-bottom: 1.5px solid var(--gold); padding-bottom: 1px; }
 .entry-name, .loc-name { font-family: var(--font-label) !important; text-transform: none !important; letter-spacing: 0.03em !important; font-weight: 400 !important; }
 .sb-name { font-family: var(--font-display); text-transform: uppercase; font-weight: 400; letter-spacing: .05em; font-size: 15px; color: var(--accent-dark); }
+/* Hideout is the logo wherever it titles something: red letters inside a gold
+   outline. The stroke is painted first (paint-order), so only its outer half
+   shows and the letter keeps its weight; em-sized so it grows with the type. */
+.adventure-title, .sl, .sb-name, .sidebar-title, .section-divider,
+.page.dark-mode .sl, .page.dark-mode .sb-name { color: var(--db-logo); -webkit-text-stroke: var(--db-stroke, .11em) var(--gold); paint-order: stroke fill; }
+.adventure-title { --db-stroke: .09em; }
 .sb-type, .entry-meta, .loc-tag { color: var(--accent-dark); }
 .read-aloud, .sb-flavor { background: linear-gradient(180deg, #2a1d14, #1f150e); border-left: 4px solid var(--db); }
 .read-aloud p, .sb-flavor { color: #f3e7cc; font-size: 10px; }
@@ -706,16 +714,15 @@ body.flow-mode .page + .page {
 .db-tbl td { font-size: 9.6px !important; }
 .db-dmg { font-family: var(--font-display); font-size: 9px; color: #fff; background: var(--db); border-radius: 3px; padding: 0 4px; }
 .db-src { color: var(--muted); font-size: 9px; }
-/* Dark page: deep umber, cream text */
-.page.dark-mode { background: radial-gradient(120% 90% at 50% 40%, #2a1f17 0%, #211810 70%, #170f0a 100%); }
+/* Dark page: neutral near-black, cream text */
+.page.dark-mode { background: radial-gradient(120% 90% at 50% 40%, #222120 0%, #1a1918 70%, #121110 100%); }
 .page.dark-mode .p-text, .page.dark-mode .loc-desc, .page.dark-mode .entry-desc, .page.dark-mode .sb-ability, .page.dark-mode .columns { color: #e9dcc0; }
-.page.dark-mode .entry-name, .page.dark-mode .sb-name { color: #f0d9a8; }
-.page.dark-mode .sl { color: var(--db-ink); }
-.page.dark-mode .stat-block, .page.dark-mode .npc-block, .page.dark-mode .mob-block { background: #2c2118; }
-.page.dark-mode .sb-table td { background: #241a12; color: #e9dcc0; }
-.page.dark-mode .clue-item { background: #2c2118; color: #e9dcc0; }
-.page.dark-mode .db-box { background: rgba(20,12,8,.55); border-color: #4a3a2c; }
-.page.dark-mode .db-badge { background: #2c2118; color: #eee3cc; border-color: #6a5236; }
+.page.dark-mode .entry-name { color: #f0d9a8; }
+.page.dark-mode .stat-block, .page.dark-mode .npc-block, .page.dark-mode .mob-block { background: #262422; }
+.page.dark-mode .sb-table td { background: #1e1c1a; color: #e9dcc0; }
+.page.dark-mode .clue-item { background: #262422; color: #e9dcc0; }
+.page.dark-mode .db-box { background: rgba(10,10,9,.55); border-color: #3f3a35; }
+.page.dark-mode .db-badge { background: #262422; color: #eee3cc; border-color: #5a5248; }
 .page.dark-mode .db-badge > span, .page.dark-mode .db-route, .page.dark-mode .sb-ability.sb-matk strong { color: var(--gold-lift); }
 .page.dark-mode .db-badge.gold { background: #3a2e15; border-color: var(--gold); }
 .page.dark-mode .db-note { color: #e2a27a; } .page.dark-mode .db-note.dim, .page.dark-mode .db-src { color: #b5a68c; }

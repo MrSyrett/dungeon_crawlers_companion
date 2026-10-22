@@ -6,7 +6,8 @@ import type { PbRoll, PbRollEntry, PbFeature, PbClassTable, PbWeapon, PbClothing
 // Same pieces as DbRef/LotrRef (header, chips, search, count line, empty state,
 // cards, d-tables) in blood red on black. Borders and hovers take the brand blood
 // var(--pb); text accents take var(--sys-link) (the lifted --pb-ink, readable on
-// the near-black panels). Eyebrow labels use 1651 Alchemy (--sys-label) in bone.
+// the near-black panels). Blackletter titles and section heads are WHITE
+// (--sys-head). Eyebrow labels use 1651 Alchemy (--sys-label) in bone.
 //
 // Numerals: 1651 Alchemy has old-style figures (and no < > ^ ~ { } \ glyphs), so
 // every roll, die, DR and stat value is set in EB Garamond with lining figures via
@@ -26,8 +27,8 @@ export const badge = `rounded border border-[var(--border)] px-1.5 py-0.5 text-[
 export const dBadge = `rounded border border-[var(--border)] px-1.5 py-0.5 text-[11px] font-semibold tracking-[0.04em] text-[var(--muted)] ${num}`;
 export const hbBadge = "rounded border border-[var(--pb)] px-1.5 py-0.5 align-middle font-sans text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--sys-link)]";
 export const eyebrow = "font-label text-[14px] tracking-[0.04em] text-[var(--sys-sub)]";
-// Section heading inside a page (JSL Blackletter via the h2 theme rule).
-export const sectionH = "mb-3 text-2xl text-[var(--sys-link)]";
+// Section heading inside a page (JSL Blackletter via the h2 theme rule), in white.
+export const sectionH = "mb-3 text-2xl text-[var(--sys-head)]";
 export const accent = "var(--sys-link)";
 export const rollCls = `${num} w-12 shrink-0 text-[13px] font-semibold text-[var(--pb-ink)]`;
 // An inline roll / numeral in front of an entry name.
@@ -495,7 +496,7 @@ export function MonsterBlock({ m, captainName }: { m: PbMonster; captainName?: s
   return (
     <div className={`${cardCls} border-l-4`} style={{ borderLeftColor: "var(--pb)" }}>
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <h2 className="text-4xl text-[var(--sys-link)]">{m.name} <HbBadge x={m} /></h2>
+        <h2 className="text-4xl text-[var(--sys-head)]">{m.name} <HbBadge x={m} /></h2>
         <span className="flex flex-wrap gap-1.5">{tags.map((t) => <span key={t} className={badge}>{t}</span>)}{pageText(m) ? <span className={dBadge}>{pageText(m)}</span> : null}</span>
       </div>
       {group ? <p className="mt-1 text-[12.5px] text-[var(--muted)]">{group}{typeof m.roll === "number" ? <> · roll <N className="text-[var(--pb-ink)]">{m.roll}</N></> : null}{typeof m.captain === "string" && captainName ? <> · <a href={`${BESTIARY}#captain-${m.captain}`} className="text-[var(--sys-link)] hover:underline">{captainName}</a></> : null}</p> : null}
@@ -630,7 +631,7 @@ export function ShipBlock({ s, compact, href }: { s: PbShip; compact?: boolean; 
   const hints = shipHints(s);
   const head = compact
     ? <h3 className={`${nameCls} ${href ? "group-hover:underline" : ""}`}>{s.name} <HbBadge x={s} /></h3>
-    : <h2 className="text-4xl text-[var(--sys-link)]">{s.name} <HbBadge x={s} /></h2>;
+    : <h2 className="text-4xl text-[var(--sys-head)]">{s.name} <HbBadge x={s} /></h2>;
   const cost = typeof s.cost === "number" ? s.cost : null;
   const body = (
     <>

@@ -309,6 +309,11 @@
   --db: #b3261e;
   --db-ink: #e0614f;
   --db-gold: #c9a14a;
+  /* The cover wordmark's red (sampled from the core book's logo, #ec2c38),
+     pulled a touch deeper so the gold outline round it still separates. Hideout
+     is always lettered in this, inside a --db-gold stroke (the DB theme block,
+     the home tile / roster / navbar title rules, tokens.css for the tools). */
+  --db-logo: #e42a32;
   /* Pirate Borg — blood red on black. --pb is the brand blood (rules, borders,
      fills, buttons); --pb-ink is lifted for small text on the near-black panels (4.7:1 on
      #161212, 5.0:1 on #0d0b0b);
@@ -1427,29 +1432,32 @@ body {
 }
 
 /* --- Dragonbane: dragon-crimson on dark parchment --------------------------
-   Hideout letters the titles in crimson; Minion Pro takes the labels in old
+   Hideout letters the titles as the logo does — red inside a gold outline; Minion Pro takes the labels in old
    gold; EB Garamond carries the reading. The ground is an original aged-parchment
-   texture darkened for dark mode (public/themes/db-parchment.webp), under a low
-   ember glow from above. */
+   texture taken down to near-black for dark mode (public/themes/db-parchment.webp,
+   neutral, not umber), under a faint ember glow from above. */
 :root[data-system="DB"]:not([data-chrome]) body {
-  --sys-head: var(--db-ink);
+  --sys-head: var(--db-logo);
   --sys-sub: var(--db-gold);
   --sys-link: var(--db-ink);
   --sys-hilite: var(--db);
   --sys-action: var(--db);
-  --panel: #1d1712;
-  --panel-2: #261e17;
-  --border: #4a3a2c;
+  /* Neutral near-black, not umber: the panels used to be #1d1712 / #261e17 on a
+     #4a3a2c rule, which read red-brown under the crimson. Text contrast on
+     --panel-2: --text 13.6:1, --muted 7.3:1, --db-ink 4.6:1. */
+  --panel: #1a1918;
+  --panel-2: #232120;
+  --border: #3f3a35;
   --text: #eee3cc;
   --muted: #b5a68c;
   --gold: var(--db-gold);
   --sys-display: "Hideout";
   --sys-text: var(--font-garamond);
   --sys-label: "Minion Pro";
-  background-color: #120d09;
+  background-color: #0f0e0d;
   background-image:
     radial-gradient(130% 98% at 50% 42%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.66) 100%),
-    radial-gradient(70% 46% at 50% 0%, rgba(179, 38, 30, 0.14) 0%, rgba(179, 38, 30, 0) 70%),
+    radial-gradient(70% 46% at 50% 0%, rgba(179, 38, 30, 0.06) 0%, rgba(179, 38, 30, 0) 70%),
     url("/themes/db-parchment.webp");
   background-attachment: fixed;
   background-position: center;
@@ -1467,15 +1475,36 @@ body {
   font-weight: 400;
   letter-spacing: 0.02em;
 }
+/* HIDEOUT IS ALWAYS THE LOGO: red letters inside a gold outline, wherever the
+   face appears (headings, card names, anything set .font-display) — over any
+   colour class at the usage site, which is why this is unlayered and names the
+   colour itself. paint-order draws the stroke first, so only its outer half
+   shows and the letter keeps its full weight; the stroke is in em so it grows
+   with the type — about 1px of gold on a card name, 1.5px on a page title.
+   Same recipe as the home tile / roster / navbar title rules further down, the
+   standalone prep builder and the GM screen. Not inside the navbar chrome. */
+:root[data-system="DB"]:not([data-chrome]) body :is(h1, h2, h3, [data-dash-head], .font-display):not(.dcc-chrome *) {
+  color: var(--db-logo);
+  -webkit-text-stroke: var(--db-stroke, 0.09em) var(--db-gold);
+  paint-order: stroke fill;
+}
+:root[data-system="DB"]:not([data-chrome]) body h1 { --db-stroke: 0.1em; }
+:root[data-system="DB"]:not([data-chrome]) body :is(h3, .font-display) { --db-stroke: 0.11em; }
+/* A heading's inline extras (an HB badge, a die) are not the wordmark. */
+:root[data-system="DB"]:not([data-chrome]) body :is(h1, h2, h3, [data-dash-head], .font-display) :is(span, small, a)[class*="border"] {
+  -webkit-text-stroke: 0;
+}
 
 /* --- Pirate Borg: blood on black -------------------------------------------
-   JSL Blackletter letters the titles in blood red; 1651 Alchemy takes the
+   JSL Blackletter letters the titles in white; 1651 Alchemy takes the
    labels and section eyebrows in bone; EB Garamond carries the reading. The
    ground is the splatter texture recoloured — black field, blood-red spatter
    (public/themes/pb-splatter.webp) — under a scrim that keeps the middle of the
    page, where the panels sit, dark. */
 :root[data-system="PB"]:not([data-chrome]) body {
-  --sys-head: var(--pb-ink);
+  /* The blackletter is white: titles and section heads are lettered like the
+     book's own headings. Red stays on links, rules, numbers and card names. */
+  --sys-head: #ffffff;
   --sys-sub: var(--pb-bone);
   --sys-link: var(--pb-ink);
   --sys-hilite: var(--pb);
@@ -1507,6 +1536,11 @@ body {
   font-family: "JSL Blackletter", var(--font-garamond), Georgia, serif;
   font-weight: 400;
   letter-spacing: 0.01em;
+}
+/* White over any colour class at the usage site (several pages still name
+   --sys-link on their h2s). A die or HB badge inside the heading keeps its own. */
+:root[data-system="PB"]:not([data-chrome]) body :is(h1, h2, [data-dash-head]):not(.dcc-chrome *) {
+  color: var(--sys-head);
 }
 :root[data-system="PB"]:not([data-chrome]) body h3 {
   font-family: "1651 Alchemy", var(--font-garamond), Georgia, serif;
@@ -1866,8 +1900,26 @@ body {
 [data-sys="MYZ"],   .home-tile[data-sys="MYZ"]   { --tile-accent: var(--myz);         --tile-sub: var(--myz-steel);   --tile-namefont: var(--font-anton);      --tile-face: var(--font-anton); --tile-bg: #100c0a; --tile-tex: url("/themes/myz-metal.webp"); --tile-scrim: 0.18; }
 [data-sys="VAE"],   .home-tile[data-sys="VAE"]   { --tile-accent: var(--vae);         --tile-sub: var(--vae-bone);    --tile-namefont: var(--font-fraunces);   --tile-face: var(--font-fraunces); --tile-bg: #0c0a07; --tile-tex: url("/themes/vae-paper.webp"); --tile-scrim: 0.16; }
 [data-sys="LOTR"],  .home-tile[data-sys="LOTR"]  { --tile-accent: var(--lotr-ink);    --tile-sub: #b9cfa6;            --tile-namefont: var(--font-garamond);   --tile-face: "Ringbearer", var(--font-garamond); --tile-bg: #07120c; --tile-tex: url("/themes/lotr-mist.webp"); --tile-zoom: 1.4; --tile-scrim: 0.12; }
-[data-sys="DB"],    .home-tile[data-sys="DB"]    { --tile-accent: var(--db-ink);      --tile-sub: var(--db-gold);     --tile-namefont: var(--font-garamond);   --tile-face: "Hideout", var(--font-garamond); --tile-bg: #120d09; --tile-tex: url("/themes/db-parchment.webp"); --tile-zoom: 1.2; --tile-scrim: 0.14; }
-[data-sys="PB"],    .home-tile[data-sys="PB"]    { --tile-accent: var(--pb-ink);      --tile-sub: var(--pb-bone);     --tile-namefont: var(--font-garamond);   --tile-face: "JSL Blackletter", var(--font-garamond); --tile-bg: #0a0808; --tile-tex: url("/themes/pb-splatter.webp"); --tile-zoom: 1.15; --tile-scrim: 0.2; }
+[data-sys="DB"],    .home-tile[data-sys="DB"]    { --tile-accent: var(--db-ink);      --tile-ink: var(--db-logo);     --tile-sub: var(--db-gold);     --tile-namefont: var(--font-garamond);   --tile-face: "Hideout", var(--font-garamond); --tile-bg: #0f0e0d; --tile-tex: url("/themes/db-parchment.webp"); --tile-zoom: 1.2; --tile-scrim: 0.14; }
+[data-sys="PB"],    .home-tile[data-sys="PB"]    { --tile-accent: var(--pb-ink);      --tile-ink: #ffffff;            --tile-sub: var(--pb-bone);     --tile-namefont: var(--font-garamond);   --tile-face: "JSL Blackletter", var(--font-garamond); --tile-bg: #0a0808; --tile-tex: url("/themes/pb-splatter.webp"); --tile-zoom: 1.15; --tile-scrim: 0.2; }
+
+/* Dragonbane's wordmark everywhere it is lettered on its own — the game tile,
+   the home roster label, the navbar title: Hideout in the logo red inside a gold
+   outline (--tile-ink is --db-logo, set in the map line above). Same recipe as
+   the compendium headings in the DB theme block; the stroke is drawn first so
+   only its outer half shows. 400 because the face has one cut. */
+.home-tile[data-sys="DB"] .home-tile-name,
+.roster-sys[data-sys="DB"] .roster-sys-name,
+.nav-sys-title[data-sys="DB"] {
+  font-weight: 400;
+  -webkit-text-stroke: 0.1em var(--db-gold);
+  paint-order: stroke fill;
+}
+/* Pirate Borg's blackletter is white (the map line sets --tile-ink); the red
+   stays on the tile's border and hover ring. */
+.home-tile[data-sys="PB"] .home-tile-name,
+.roster-sys[data-sys="PB"] .roster-sys-name,
+.nav-sys-title[data-sys="PB"] { font-weight: 400; }
 
 /* ===========================================================================
    HOME ROSTERS — "My Characters" / "My Campaigns" on the home page.

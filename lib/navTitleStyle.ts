@@ -21,8 +21,10 @@ export const TITLE: Record<SystemKey, { f: string; c: string; x?: string }> = {
   NIM: { f: '"Fraunces"', c: "#ffffff", x: "-webkit-text-stroke:.1em #000000;paint-order:stroke fill;text-shadow:.05em .06em 0 #000000,0 0 .22em rgba(142,201,236,.75);font-weight:700" },
   DND: { f: '"DnDC","Cinzel"', c: "var(--gold-ink)" },
   LOTR: { f: '"Ringbearer","EB Garamond"', c: "var(--lotr-ink)" },
-  DB: { f: '"Hideout","EB Garamond"', c: "var(--db-ink)", x: "font-weight:400" },
-  PB: { f: '"JSL Blackletter","EB Garamond"', c: "var(--pb-ink)", x: "font-weight:400" },
+  // Dragonbane: the logo — red Hideout inside a gold outline, stroke painted first.
+  DB: { f: '"Hideout","EB Garamond"', c: "var(--db-logo,#e42a32)", x: "font-weight:400;-webkit-text-stroke:.1em var(--db-gold,#c9a14a);paint-order:stroke fill" },
+  // Pirate Borg: white blackletter.
+  PB: { f: '"JSL Blackletter","EB Garamond"', c: "#ffffff", x: "font-weight:400" },
   DCC: { f: '"Anton"', c: "var(--dcc-gold)" },
   KOB: { f: '"Dreadful"', c: "var(--kob)" },
   CO: { f: '"Cormorant Garamond"', c: "var(--candela-gold)" },

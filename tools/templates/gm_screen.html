@@ -2198,7 +2198,8 @@ body[data-cview="free"] .cst-log-rail{display:none}
 <style id="db-gm-style">
 /* Dragonbane GM suite (public/tools-data/db-gm-tables.js) + DB-only tracker bits. */
 html:not([data-gm-sys="DB"]) .db-only { display: none !important; }
-.db-gen-card .gen-card-name { font-family: "Hideout", "EB Garamond", Georgia, serif; font-weight: 400; letter-spacing: .03em; color: #e0614f; text-transform: none; }
+/* Hideout is the logo: red letters in a gold outline, stroke painted first so only its outer half shows. */
+.db-gen-card .gen-card-name { font-family: "Hideout", "EB Garamond", Georgia, serif; font-weight: 400; letter-spacing: .03em; color: #e42a32; -webkit-text-stroke: .11em #c9a14a; paint-order: stroke fill; text-transform: none; }
 .db-gen-card { border-left: 3px solid #b3261e; }
 .db-gen-card .gen-card-row-label { color: #c9a14a; }
 .db-dim { color: var(--dim, #8a93a0); }
@@ -2219,7 +2220,7 @@ html:not([data-gm-sys="DB"]) .db-only { display: none !important; }
 .db-btnlbl { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim, #8a93a0); min-width: 64px; }
 .gen-select.db-num { width: 62px; }
 .db-hint { font-size: 11.5px; color: var(--dim, #8a93a0); margin: 2px 0 4px; line-height: 1.4; }
-.pcard.db-pc .pty-name { font-family: "Hideout", "EB Garamond", Georgia, serif; font-weight: 400; letter-spacing: .03em; }
+.pcard.db-pc .pty-name { font-family: "Hideout", "EB Garamond", Georgia, serif; font-weight: 400; letter-spacing: .03em; color: #e42a32; -webkit-text-stroke: .11em #c9a14a; paint-order: stroke fill; }
 .db-chip-bad { color: #ff7a5a !important; }
 /* Initiative cards on a Dragonbane combatant (lowest acts first). */
 .cc-dbcards { display: inline-flex; gap: 3px; align-items: center; }
@@ -2235,7 +2236,7 @@ html:not([data-gm-sys="DB"]) .db-only { display: none !important; }
    JSL Blackletter for names, 1651 Alchemy for labels, EB Garamond for numbers
    (Alchemy's numerals are old-style and it lacks < > ^ ~ { } \). */
 html:not([data-gm-sys="PB"]) .pb-only { display: none !important; }
-.pb-gen-card .gen-card-name { font-family: "JSL Blackletter", "EB Garamond", Georgia, serif; font-weight: 400; letter-spacing: .01em; color: #e6463a; text-transform: none; font-size: 17px; }
+.pb-gen-card .gen-card-name { font-family: "JSL Blackletter", "EB Garamond", Georgia, serif; font-weight: 400; letter-spacing: .01em; color: #ffffff; text-transform: none; font-size: 17px; }
 .pb-gen-card { border-left: 3px solid #a3121a; }
 .pb-gen-card.pb-dead { border-left-color: #e6463a; box-shadow: inset 0 0 0 1px rgba(230,70,58,.35); }
 .pb-gen-card .gen-card-row-label { color: #d9cdb4; font-family: "1651 Alchemy", "EB Garamond", Georgia, serif; letter-spacing: .03em; text-transform: none; }
@@ -2261,7 +2262,7 @@ html:not([data-gm-sys="PB"]) .pb-only { display: none !important; }
 .pb-rules .pb-sub { font-family: "1651 Alchemy", "EB Garamond", Georgia, serif; color: #e6463a; font-size: 13px; margin: 6px 0 2px; }
 .pb-ul { margin: 2px 0 6px 18px; padding: 0; font-size: 13px; line-height: 1.45; }
 .pb-ul li { margin: 1px 0; }
-.pcard.pb-pc .pty-name { font-family: "JSL Blackletter", "EB Garamond", Georgia, serif; font-weight: 400; letter-spacing: .01em; }
+.pcard.pb-pc .pty-name { font-family: "JSL Blackletter", "EB Garamond", Georgia, serif; font-weight: 400; letter-spacing: .01em; color: #ffffff; }
 .pb-chip-bad { color: #ff7a5a !important; }
 /* Individual initiative on a Pirate Borg combatant (highest acts first). */
 .cc-pbinit { display: inline-flex; gap: 3px; align-items: center; }
