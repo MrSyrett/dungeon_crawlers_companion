@@ -136,8 +136,8 @@ const SYSTEMS = [
   {
     file: "db_session_prep_builder.html", key: "db_session", ls: "db_builder_v1", cfg: "db", random: "Random Monster", handBuilt: true,
     name: "Dragonbane", title: "Dragonbane — Adventure",
-    accent: "#b3261e", accentDark: "#8a1c16", red: "#b3261e", redDark: "#8a1c16", highlight: "#c9a14a", boxBg: "#e9dab7",
-    paper: "#efe2c4", previewBg: "#0f0e0d", displayFont: '"Hideout", "EB Garamond", Georgia, serif',
+    accent: "#236855", accentDark: "#1e5842", red: "#236855", redDark: "#1e5842", highlight: "#c9a14a", boxBg: "#e9dab7",
+    paper: "#efe2c4", previewBg: "#0d110f", displayFont: '"Hideout", "EB Garamond", Georgia, serif',
     chapter: "Chapter", chapterPh: "Chapter 1", session: "Session", mobs: "Monsters/NPCs", mobsHeading: "Monsters &amp; NPCs",
     mob: "Monster", boss: "Boss", npc: "NPC", typePh: "MONSTER // LARGE // FEROCITY 2", titlePh: "e.g. The Sinking Tower", subtitlePh: "e.g. A Dragonbane adventure",
   },
@@ -510,7 +510,7 @@ const BANNERS = {
   myz:    ["#8f4517", "#cf6a2a", "#f4ece0", 800, "#d9d3c6"],
   vae:    ["#2a2016", "#b8924e", "#efe6d4", 700, "#e7dec9"],
   lotr:   ["#0f2118", "#1f4a30", "#e2c36b", 400, "#d9e4cc"],
-  db:     ["#1a1918", "#4a1410", "#e42a32", 400, "#e3d2ad"],
+  db:     ["#0b1f18", "#236855", "#e42a32", 400, "#e3d2ad"],
   pb:     ["#0d0b0b", "#3a0a0d", "#ffffff", 400, "#e6463a"],
 };
 

@@ -90,7 +90,7 @@ const PAGE = String.raw`<!doctype html>
   .group-head.myz { color: #cf6a2a; }
   .group-head.vae { color: #d4a53a; }
   .group-head.lotr { color: #e2c36b; }
-  .group-head.db { color: #e0614f; }
+  .group-head.db { color: #5cb894; }
   .group-head.pb { color: #e6463a; }
   .note { font-size: 11px; color: var(--muted); line-height: 1.6; }
   .note a { color: var(--gold); }

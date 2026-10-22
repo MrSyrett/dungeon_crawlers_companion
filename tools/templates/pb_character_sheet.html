@@ -172,15 +172,16 @@ body.sheet-unlocked .ab-row input{background:var(--input-bg);color:var(--ink);bo
 
 /* luck */
 /* Devil's Luck: a compact number + −/+ in the Status row */
-.luck-box{flex-wrap:nowrap;gap:8px;}
-.luck-n{font-family:var(--f-num);font-size:26px;font-weight:600;color:var(--acc-dk);line-height:1;min-width:26px;text-align:center;}
+/* the number on top, its −/+ underneath */
+.luck-box{flex-direction:column;flex-wrap:nowrap;align-items:center;gap:6px;}
+.luck-n{font-family:var(--f-num);font-size:26px;font-weight:600;color:var(--acc-dk);line-height:34px;min-width:26px;text-align:center;}
 .luck-box .counter{gap:4px;}
 .cond-box{padding:8px 10px;}
 .cond-sum:empty::before{content:"None";font-size:13px;color:var(--muted);}
 
 /* status / vitals */
 /* Devil's Luck | Armor | Hit Points */
-.vitals{display:grid;grid-template-columns:max-content minmax(0,1.3fr) minmax(0,1fr);gap:6px;padding:8px;align-items:stretch;}
+.vitals{display:grid;grid-template-columns:max-content minmax(0,1fr) minmax(0,1fr);gap:6px;padding:8px;align-items:stretch;}   /* Armor and Hit Points share the width equally */
 .vital{border:1px solid var(--rule);border-radius:9px;background:var(--box);padding:7px 9px;min-width:0;}
 body.dark .vital{background:#1a1212;}
 .vital.wide{grid-column:1 / -1;}.vital.half{grid-column:span 2;}
@@ -245,6 +246,16 @@ body.dark .eq-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 .inv-name-line .tag{flex:0 0 auto;}
 .inv-eq-slot{flex:0 0 17px;width:17px;display:inline-flex;align-items:center;}
 .inv-sub{margin:1px 0 3px 23px;font-size:12.5px;line-height:1.35;}
+/* ▽ stow in a container / △ take it out — Shadowdark's Gear Slots ⇄ Free to Carry buttons */
+.mv-btn{width:22px;height:22px;padding:0;background:transparent;border:1px solid var(--rule);border-radius:4px;color:var(--muted);cursor:pointer;font-size:11px;line-height:1;vertical-align:middle;margin-right:2px;}
+.mv-btn:hover{border-color:var(--acc);color:var(--acc-dk);}
+.inv-acts{white-space:nowrap;text-align:right;}
+.cont-sec{border-top:1px solid var(--rule);margin-top:6px;}
+.cont-bar .cont-fill{font-family:var(--f-num);font-size:15px;color:var(--muted);}
+.cont-bar .cont-fill.over{color:var(--red);}
+.cont-bar label{display:inline-flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap;}
+.cont-bar input[type=checkbox]{width:auto;margin:0;accent-color:var(--acc);}
+.cont-empty{font-size:13px;color:var(--muted);padding:6px 10px 8px;}
 .inv-sub .small-btn{margin-left:4px;padding:1px 7px;font-size:12px;}
 .subhead{font-family:var(--f-label);font-size:14px;letter-spacing:.03em;color:var(--bone);padding:9px 10px 3px;}
 .blk{padding:8px 10px;}
@@ -345,10 +356,15 @@ body.dark .eq-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 }
 @container (max-width:520px){
   .hdr-metarow>*{flex:1 1 47%!important;}
-  /* phone: Devil's Luck | Armor on one line, Hit Points across under them */
-  .vitals{grid-template-columns:max-content minmax(0,1fr);}
-  .vital.hp-vital{grid-column:1 / -1;}
+  /* phone: the same one row — Devil's Luck (narrow) | Armor | Hit Points, the last two equal */
+  .vitals{grid-template-columns:64px minmax(0,1fr) minmax(0,1fr);gap:5px;padding:6px;}
+  .luck-vital{padding:6px 4px;}
+  .luck-box .small-btn{padding:4px 6px;}
+  .vital{padding:6px 7px;}
   .vital.half{grid-column:auto;}
+  .luck-vital .vlbl{justify-content:center;text-align:center;line-height:1.05;}   /* "Devil's / Luck" on two lines */
+  .hp-vital .vbig{flex-wrap:nowrap;gap:3px;}
+  .hp-vital .vbig input{width:44px;}
   .hdr-logo .lg-word{font-size:38px;}
 }
 @media (max-width:1024px){.body-row{flex-direction:column;align-items:stretch;}.stats-col,.center-col{width:100%;}.hdr-top{grid-template-columns:1fr;gap:9px;}}
@@ -390,13 +406,14 @@ body.dark .eq-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 }
 @media (max-width:560px){
   /* phone: each inventory row becomes a stacked grid so nothing runs off the right edge */
-  #inv-tbl thead{display:none;}
-  #inv-tbl tbody tr{display:grid;grid-template-columns:minmax(0,1fr) 46px 46px 36px;grid-template-areas:"n q s x" "c o o o";border-bottom:1px solid var(--rule);}
-  #inv-tbl tbody td{min-width:0;}
-  #inv-tbl td:nth-child(5) input{min-width:0!important;width:100%!important;}
-  #inv-tbl tbody td{border:none;}
-  #inv-tbl td:nth-child(1){grid-area:n;}#inv-tbl td:nth-child(2){grid-area:q;}#inv-tbl td:nth-child(3){grid-area:s;}#inv-tbl td:nth-child(4){grid-area:c;}#inv-tbl td:nth-child(5){grid-area:o;}#inv-tbl td:nth-child(6){grid-area:x;}
-  #inv-tbl td[colspan]{grid-column:1/-1;}
+  .inv-tbl thead{display:none;}
+  .inv-tbl tbody tr{display:grid;grid-template-columns:minmax(0,1fr) 46px 46px 58px;grid-template-areas:"n q s x" "o o o o";border-bottom:1px solid var(--rule);}
+  .inv-tbl tbody td{min-width:0;}
+  .inv-tbl td:nth-child(4) .inv-note{min-width:0!important;width:100%!important;}
+  .inv-tbl td:nth-child(4){display:flex;flex-wrap:wrap;align-items:center;gap:2px 4px;}
+  .inv-tbl tbody td{border:none;}
+  .inv-tbl td:nth-child(1){grid-area:n;}.inv-tbl td:nth-child(2){grid-area:q;}.inv-tbl td:nth-child(3){grid-area:s;}.inv-tbl td:nth-child(4){grid-area:o;}.inv-tbl td:nth-child(5){grid-area:x;}
+  .inv-tbl td[colspan]{grid-column:1/-1;}
 }
 textarea,select,.log-entries,.modal-bd,.brow-list{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
 select option{background:var(--input-bg);color:var(--ink);}
@@ -548,7 +565,9 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
           <div class="coins">
             <label>Silver <input type="number" id="c-silver" class="no-spin" data-nolock oninput="onSilver()"></label>
           </div>
-          <table class="tbl" id="inv-tbl"><thead><tr><th style="width:48%;">Item</th><th style="width:50px;">Qty</th><th style="width:50px;">Slots</th><th style="width:16%;">Stowed in</th><th>Note / uses</th><th style="width:30px;"></th></tr></thead><tbody id="inv-body"></tbody></table>
+          <table class="tbl inv-tbl" id="inv-tbl"><thead><tr><th style="width:50%;">Item</th><th style="width:50px;">Qty</th><th style="width:50px;">Slots</th><th>Note / uses</th><th style="width:60px;"></th></tr></thead><tbody id="inv-body"></tbody></table>
+          <!-- one section per container (backpack, sea chest, boat): what's stowed in it, moved with ▽ / △ like Shadowdark's Gear Slots ⇄ Free to Carry -->
+          <div id="cont-secs"></div>
         </div>
 
         <div class="tab-panel" id="tab-background">
@@ -647,7 +666,7 @@ function blankState(){ return {
   prot:[], light:null,
   combat:{on:false, round:1, action:false, side:'', init:null, liars:null, eldritch:'', kills:0, inspire:null, reloaded:false},
   day:{ghost:false, breath:false, blood:false},
-  deck:[], timed:[], subtab:'action', built:false, campaign:null }; }
+  deck:[], timed:[], built:false, campaign:null }; }
 var S=blankState();
 
 // ── lookups (read the globals each time: the homebrew loader can add rows) ──
@@ -916,30 +935,56 @@ function clothSummary(x){ var info=(x.ruined?'<span class="tag warn">ruined</spa
   return info; }
 function hatSummary(x){ return 'hat'+(x.dr?' · −'+x.dr+' damage':'')+(x.sacrifice?' · breakable':'')+(x.metal?' · metal':'')+(x.broken?' <span class="tag warn">broken</span>':''); }
 function equippable(x){ return (x.kind==='weapon'&&!x.natural)||x.kind==='clothing'||x.kind==='hat'; }
-// The Gear tab: ONE inventory list (weapons, clothing and hats included). Weapons, clothing
-// and hats carry the equip pip: equipped weapons are your attacks; the worn clothing and
-// hat are your armor die and damage reduction (one of each).
+// The Gear tab: the Inventory list is what you carry on you (weapons, clothing and hats
+// included); every container (backpack, sea chest, boat) gets its own section listing what's
+// stowed in it. ▽ stows a row in a container, △ takes it back out — Shadowdark's Gear Slots ⇄
+// Free to Carry buttons. Weapons, clothing and hats carry the equip pip: equipped weapons are
+// your attacks; the worn clothing and hat are your armor die and damage reduction (one of each).
+// Where an item is: x.in = the container's uid ('' = on you).
+function stowedIn(x){ var c=x&&x.in?itemBy(x.in):null; return c&&c.container&&c.uid!==x.uid?c:null; }
+function insideOf(x,c){ var p=c, g=0; while(p&&g<9){ if(p.uid===x.uid) return true; p=stowedIn(p); g++; } return false; }   // is c x itself or inside x?
+function stowTargets(x){ if(!x||x.natural||(x.container&&x.carried===false&&x.capacity==null)) return [];   // boats aren't stowed
+  return containers().filter(function(c){ return !insideOf(x,c); }); }
+function contLabel(c){ var f=containerFill(c); return c.name+' ('+(c.capacity!=null?f+'/'+c.capacity:f)+')'; }
+function stowItem(u,cu){ var x=itemBy(u); if(!x) return; var t=stowTargets(x);
+  if(!cu){ if(!t.length) return; if(t.length>1){ openDlg('Stow '+x.name,'<p class="m-hint">Which container?</p>',t.map(function(c){ return {t:contLabel(c),f:function(){ closeDlg(); stowItem(u,c.uid); }}; })); return; } cu=t[0].uid; }
+  var c=t.find(function(k){ return k.uid===cu; }); if(!c) return;
+  if(equippable(x)&&x.equipped) x.equipped=false;   // stowed gear isn't at hand
+  x.in=c.uid; changed(); }
+function unstowItem(u){ var x=itemBy(u); if(!x) return; x.in=''; changed(); }
+function invRow(x,where){
+  var pip='';
+  if(equippable(x)){ var dis=(x.kind==='clothing'&&x.ruined)||(x.kind==='hat'&&x.broken); var worn=x.kind!=='weapon';
+    pip='<button class="eq-pip'+(x.equipped?' on':'')+'" data-nolock onclick="toggleEquip(\''+x.uid+'\')" title="'+(x.equipped?(worn?'Worn — click to take it off':'Equipped — click to put it away'):(worn?'Click to wear it':'Not equipped — click to ready it'))+'"'+(dis?' disabled':'')+'></button>'; }
+  var st=[], sub='', acts='';
+  if(x.kind==='weapon'){ if(x.broken) st.push('<span class="tag warn">broken</span>'); if(x.dropped) st.push('<span class="tag warn">dropped</span>'); if(x.trusted) st.push('<span class="tag">trusted</span>'); if(x.natural) st.push('<span class="tag">natural</span>'); if(x.poisoned) st.push('<span class="tag ok">grog-poisoned</span>');
+    sub=wSummary(x); if(x.broken&&!x.trusted) acts+='<button class="row-x" title="Repaired" onclick="fixWeapon(\''+x.uid+'\')">⚒</button>'; if(x.dropped) acts+='<button class="row-x" title="Pick it up" onclick="pickUp(\''+x.uid+'\')">⇧</button>'; }
+  else if(x.kind==='clothing') sub=clothSummary(x);
+  else if(x.kind==='hat') sub=hatSummary(x);
+  var extra='';
+  if(x.container) extra+='<span class="tag">'+(x.carried===false&&x.capacity==null?'boat':'container')+'</span>';
+  if(x.kind==='ammo') extra+='<span class="tag">ammo</span>'; if(x.kind==='bomb') extra+='<span class="tag">bomb '+esc(x.dmg||'')+'</span>';
+  if(x.kind==='potion') extra+='<span class="tag" title="'+esc(potionSummary(x.potion,true))+'">potion'+(x.potion&&x.potion.known?'':' · unknown')+'</span>'; if(x.kind==='ash') extra+='<span class="tag">ASH · doses</span>';
+  if(x.uses!=null) extra+='<span class="desc">uses</span> <input class="num no-spin" type="number" style="width:40px;" value="'+num(x.uses)+'" data-nolock onchange="onItem(\''+x.uid+'\',\'uses\',this.value)"> ';
+  var mv='';
+  if(where) mv='<button class="mv-btn" data-nolock onclick="unstowItem(\''+x.uid+'\')" title="Take it out — back to Inventory">△</button>';
+  else { var t=stowTargets(x); if(t.length) mv='<button class="mv-btn" data-nolock onclick="stowItem(\''+x.uid+'\')" title="'+esc(t.length===1?'Stow in '+t[0].name:'Stow in a container')+(equippable(x)&&x.equipped?' (puts it away)':'')+'">▽</button>'; }
+  var slotsTitle=(x.kind==='clothing'||x.kind==='hat')?'Slots when carried, not worn':stackItem(x)?'Slots for the whole stack':'Slots per item';
+  return '<tr class="inv-row'+(x.equipped&&equippable(x)?' is-eq':'')+'" data-uid="'+x.uid+'"><td><div class="inv-name-line"><span class="inv-eq-slot">'+pip+'</span><input class="inv-name" value="'+esc(x.name)+'" onchange="onItem(\''+x.uid+'\',\'name\',this.value)">'+st.join('')+'</div>'+(sub?'<div class="inv-sub desc">'+sub+'</div>':'')+'</td>'+
+    '<td><input class="num no-spin" type="number" value="'+num(x.qty,1)+'" data-nolock onchange="onItem(\''+x.uid+'\',\'qty\',this.value)"></td><td><input class="num" value="'+esc(x.slots==null?1:x.slots)+'" onchange="onItem(\''+x.uid+'\',\'slots\',this.value)" title="'+slotsTitle+'"></td>'+
+    '<td>'+extra+'<input class="inv-note" value="'+esc(x.note||'')+'" style="width:auto;min-width:80px;font-weight:400;font-size:13px;" onchange="onItem(\''+x.uid+'\',\'note\',this.value)"></td><td class="inv-acts">'+mv+acts+(x.natural?'':'<button class="row-x" onclick="removeItem(\''+x.uid+'\')" title="Remove">✕</button>')+'</td></tr>'; }
 function renderGear(){
-  var conts=containers(); var inv='';
-  S.items.forEach(function(x){
-    var pip='';
-    if(equippable(x)){ var dis=(x.kind==='clothing'&&x.ruined)||(x.kind==='hat'&&x.broken); var worn=x.kind!=='weapon';
-      pip='<button class="eq-pip'+(x.equipped?' on':'')+'" data-nolock onclick="toggleEquip(\''+x.uid+'\')" title="'+(x.equipped?(worn?'Worn — click to take it off':'Equipped — click to put it away'):(worn?'Click to wear it':'Not equipped — click to ready it'))+'"'+(dis?' disabled':'')+'></button>'; }
-    var st=[], sub='', acts='';
-    if(x.kind==='weapon'){ if(x.broken) st.push('<span class="tag warn">broken</span>'); if(x.dropped) st.push('<span class="tag warn">dropped</span>'); if(x.trusted) st.push('<span class="tag">trusted</span>'); if(x.natural) st.push('<span class="tag">natural</span>'); if(x.poisoned) st.push('<span class="tag ok">grog-poisoned</span>');
-      sub=wSummary(x); if(x.broken&&!x.trusted) acts+='<button class="row-x" title="Repaired" onclick="fixWeapon(\''+x.uid+'\')">⚒</button>'; if(x.dropped) acts+='<button class="row-x" title="Pick it up" onclick="pickUp(\''+x.uid+'\')">⇧</button>'; }
-    else if(x.kind==='clothing') sub=clothSummary(x);
-    else if(x.kind==='hat') sub=hatSummary(x);
-    var sel='<select onchange="onItem(\''+x.uid+'\',\'in\',this.value)" data-nolock><option value="">on you</option>'+conts.filter(function(k){ return k.uid!==x.uid; }).map(function(k){ return '<option value="'+k.uid+'"'+(x.in===k.uid?' selected':'')+'>'+esc(k.name)+'</option>'; }).join('')+'</select>';
-    var extra=''; if(x.container){ var f=containerFill(x); extra='<span class="tag'+(x.capacity!=null&&f>x.capacity?' warn':'')+'">holds '+f+(x.capacity!=null?'/'+x.capacity:'')+'</span><label style="font-size:12px;color:var(--muted);white-space:nowrap;"><input type="checkbox" data-nolock style="width:auto;" '+(x.carried!==false?'checked':'')+' onchange="onItem(\''+x.uid+'\',\'carried\',this.checked)"> carried</label> '; }
-    if(x.kind==='ammo') extra+='<span class="tag">ammo</span>'; if(x.kind==='bomb') extra+='<span class="tag">bomb '+esc(x.dmg||'')+'</span>';
-    if(x.kind==='potion') extra+='<span class="tag" title="'+esc(potionSummary(x.potion,true))+'">potion'+(x.potion&&x.potion.known?'':' · unknown')+'</span>'; if(x.kind==='ash') extra+='<span class="tag">ASH · doses</span>';
-    if(x.uses!=null) extra+='<span class="desc">uses</span> <input class="num no-spin" type="number" style="width:40px;" value="'+num(x.uses)+'" data-nolock onchange="onItem(\''+x.uid+'\',\'uses\',this.value)"> ';
-    var slotsTitle=(x.kind==='clothing'||x.kind==='hat')?'Slots when carried, not worn':stackItem(x)?'Slots for the whole stack':'Slots per item';
-    inv+='<tr class="inv-row'+(x.equipped&&equippable(x)?' is-eq':'')+'"><td><div class="inv-name-line"><span class="inv-eq-slot">'+pip+'</span><input class="inv-name" value="'+esc(x.name)+'" onchange="onItem(\''+x.uid+'\',\'name\',this.value)">'+st.join('')+'</div>'+(sub?'<div class="inv-sub desc">'+sub+'</div>':'')+'</td>'+
-      '<td><input class="num no-spin" type="number" value="'+num(x.qty,1)+'" data-nolock onchange="onItem(\''+x.uid+'\',\'qty\',this.value)"></td><td><input class="num" value="'+esc(x.slots==null?1:x.slots)+'" onchange="onItem(\''+x.uid+'\',\'slots\',this.value)" title="'+slotsTitle+'"></td>'+
-      '<td>'+sel+'</td><td>'+extra+'<input value="'+esc(x.note||'')+'" style="width:auto;min-width:80px;font-weight:400;font-size:13px;" onchange="onItem(\''+x.uid+'\',\'note\',this.value)"></td><td style="white-space:nowrap;text-align:right;">'+acts+(x.natural?'':'<button class="row-x" onclick="removeItem(\''+x.uid+'\')" title="Remove">✕</button>')+'</td></tr>'; });
-  $('inv-body').innerHTML=inv||'<tr><td colspan="6" class="desc">Empty.</td></tr>';
+  var inv=''; S.items.forEach(function(x){ if(!stowedIn(x)) inv+=invRow(x,null); });
+  $('inv-body').innerHTML=inv||'<tr><td colspan="5" class="desc">Empty.</td></tr>';
+  var cs='';
+  containers().forEach(function(c){ var f=containerFill(c), over=c.capacity!=null&&f>c.capacity, boat=c.carried===false&&c.capacity==null;
+    var rows=''; S.items.forEach(function(x){ if(stowedIn(x)===c) rows+=invRow(x,c); });
+    var right=boat?'<span class="sb-note" title="A boat is never carried: nothing in it counts against your Carry Capacity">not carried</span>'
+      :'<label class="sb-note" title="An uncarried container (a sea chest left aboard) doesn\'t count against your Carry Capacity, nor does anything in it"><input type="checkbox" data-nolock '+(c.carried!==false?'checked':'')+' onchange="onItem(\''+c.uid+'\',\'carried\',this.checked)"> carried</label>';
+    cs+='<div class="cont-sec" data-cont="'+c.uid+'"><div class="section-bar cont-bar"><span>'+esc(c.name)+' <span class="cont-fill'+(over?' over':'')+'"'+(over?' title="Over capacity"':'')+'>('+(c.capacity!=null?f+'/'+c.capacity:f+(f===1?' slot':' slots'))+')</span></span><span class="hdr-right">'+right+'</span></div>'+
+      (rows?'<table class="tbl inv-tbl"><thead><tr><th style="width:50%;">Item</th><th style="width:50px;">Qty</th><th style="width:50px;">Slots</th><th>Note / uses</th><th style="width:60px;"></th></tr></thead><tbody>'+rows+'</tbody></table>'
+        :'<div class="cont-empty">Empty — stow things here with ▽ in Inventory.</div>')+'</div>'; });
+  $('cont-secs').innerHTML=cs;
   var load=carryLoad(), cap=carryCap(); var e=$('enc'); e.className='sb-note enc-note'+(load>cap?' over':'');
   e.title=load>2*cap?'Too much to carry':load>cap?'Over-encumbered: STRENGTH and AGILITY tests +2 DR':'Slots carried / carrying capacity (8 + STRENGTH)';
   e.innerHTML='Carry Capacity <b>'+load+'/'+cap+'</b>';
@@ -1192,7 +1237,6 @@ function inCombat(){ return true; }
 function incapacitated(){ return S.dead||num(S.cond.out)>0||S.hp<0||timedHas('paralyzed'); }
 function canAct(){ return !incapacitated(); }
 function useAction(){}
-function setSubtab(t){ S.subtab=t; renderTurn(); scheduleAutosave(); }
 function clearFight(){ S.combat=Object.assign({},S.combat,{on:false,round:1,action:false,acts:0,side:'',init:null,liars:null,eldritch:'',inspire:null,reloaded:false,pistols:0,extra:0,bayonet:false,knave:0,shotAt:false,kills:0}); }
 // A round passes (the Time panel): timed effects tick, "out" counts down, a stun wears off.
 function passRound(){ closeDlg(); if(num(S.cond.out)>0) S.cond.out--; if(S.cond.stunned) S.cond.stunned=false;
@@ -1302,7 +1346,7 @@ function doDefend(){
   var o={label:'Defend',ability:'AGILITY',kind:'defense',neutralizeCrit:false,ask:'The GM sets the DR (normally 12): did you dodge it?'};
   o.note=function(res){ return res.crit?'Critical: you get an immediate free attack.':res.fumble?'Fumble: you take double damage — lower your HP — and your armor drops a tier.':'If you are hit, the sheet rolls your armor; lower your HP by what gets through.'; };
   o.onRes=function(res){ showResult(o,res,function(r){
-    if(r.crit) return [{t:'Free attack!',f:function(){ finish(o); addLog('Defense critical','Free attack','Make an immediate free attack','crit'); S.subtab='action'; changed(); }}];
+    if(r.crit) return [{t:'Free attack!',f:function(){ finish(o); addLog('Defense critical','Free attack','Make an immediate free attack','crit'); changed(); }}];
     var hat=wornHat();
     var btns=[{t:r.fumble?'Take double damage':'Hit',cls:'warn',f:function(){ finish(o); defendHit(r.fumble,false); }}];
     if(hat&&hat.sacrifice&&!r.fumble) btns.push({t:'Hit — break my '+String(hat.name).replace(/\s*\(.*\)$/,''),cls:'warn',f:function(){ finish(o); defendHit(false,true); }});
@@ -1644,8 +1688,8 @@ function renderTurn(){
   if(c.inspire!=null) h+='<span class="pb-badge">Inspiring Leader ±'+c.inspire+'</span>';
   A(S.timed).forEach(function(t){ h+='<span class="pb-badge'+(t.fx.death||t.fx.paralyzed?' warn':'')+'" title="'+esc(t.src+(t.text?': '+t.text:''))+'">'+esc(t.name)+' · '+esc(fmtLeft(t.left))+'</span>'; });
   if(S.light) h+='<span class="pb-badge">'+esc(S.light.name)+' lit</span>'; if(S.cond.invisible) h+='<span class="pb-badge">Invisible</span>';
-  h+='</div><div class="pb-subtabs"><button class="pb-st'+(S.subtab!=='defend'?' on':'')+'" onclick="setSubtab(\'action\')">Action</button><button class="pb-st'+(S.subtab==='defend'?' on':'')+'" onclick="setSubtab(\'defend\')">Defend</button></div></div>';
-  h+=S.subtab==='defend'?renderDefendTab():renderActionTab(act);
+  h+='</div></div>';
+  h+=renderActionTab(act);
   el.innerHTML=h;
 }
 function renderActionTab(act){ var h='';
@@ -1667,6 +1711,8 @@ function renderActionTab(act){ var h='';
     a+=tcard(esc(w.name)+(w.trusted?' <span class="tag">trusted</span>':''),sub,btns,!!g&&!(w.blackPowder&&!w.loaded&&act)); });
   var dropped=items('weapon').filter(function(w){ return w.dropped; }); dropped.forEach(function(w){ a+=tcard(esc(w.name)+' <span class="tag warn">dropped</span>','',tbtn('Pick up','pickUp(\''+w.uid+'\')','ghost')); });
   h+=tsec('attacks','Attacks',a,list.length);
+  // Defend sits right under Attacks (it used to be its own sub-tab)
+  h+=renderDefendSection();
   // class actions that aren't attacks
   var ca='';
   if(has('liars-dice')) ca+=tcard("Liar's Dice",S.combat.liars!=null?'<b>'+(S.combat.liars?'even':'odd')+'</b>':'',tbtn('Roll 5d6','rollLiars()','ghost'));
@@ -1708,14 +1754,14 @@ function conduitCast(){ var r=ritualDef(S.conduit.id); if(!r||S.conduit.used) re
 // Individual initiative (optional rule): d6 + AGILITY.
 function rollInit(){ var n=d(6), v=n+abil('AGILITY'); addLog('Initiative',String(v),'d6('+n+') '+sgn(abil('AGILITY'))+' AGL','normal'); }
 function holdBreath(){ DX.breath=num(DX.breath)+1; var o={label:'Hold breath (round '+DX.breath+')',ability:'TOUGHNESS',kind:'test',ask:'The GM sets the DR (it climbs each round): still holding?'}; o.onRes=function(res){ showResult(o,res,function(r){ return pf(r,{t:'Still holding',f:function(){ finish(o); renderTurn(); }},{t:'Lose 1 HP',cls:'warn',f:function(){ finish(o); takeDamage(1,{label:'Out of breath',raw:true,noLuck:true}); renderTurn(); }}); }); }; test(o); }
-function renderDefendTab(){ var h='';
+// The Defend section of the Action tab: the defense test, plus the prayers that answer an attack.
+function renderDefendSection(){
   var bon=rollBonuses({kind:'defense'});
   var sub='d20 '+sgn(abil('AGILITY'))+' AGILITY'+(bon.length?' '+bon.map(function(x){ return sgn(x.v)+' '+esc(x.l); }).join(' '):'')+' · armor '+(armorDie()?'−'+armorDie():'none')+(hatReduction()?' · hat −'+hatReduction():'')+(extraProt().length?' · '+extraProt().map(function(p){ return '−'+p.die; }).join(' '):'');
-  h+=tsec('defend','Defend',tcard('Defend',sub,tbtn('Defend','doDefend()','','',S.dead||num(S.cond.out)>0)));
-  var pr=''; if(S.prayers.indexOf('holy-protection')>=0) pr+=tcard('Holy Protection','prayer · −4 DR',tbtn('Pray','pray(\'holy-protection\')'),num(S.prayerUses.left)<=0);
-  if(S.prayers.indexOf('blessed-guidance')>=0) pr+=tcard('Blessed Guidance','prayer · +d4',tbtn('Pray','pray(\'blessed-guidance\')'),num(S.prayerUses.left)<=0);
-  if(pr) h+=tsec('rxpray','Reactions',pr);
-  return h; }
+  var df=tcard('Defend',sub,tbtn('Defend','doDefend()','','',S.dead||num(S.cond.out)>0));
+  if(S.prayers.indexOf('holy-protection')>=0) df+=tcard('Holy Protection','prayer · −4 DR',tbtn('Pray','pray(\'holy-protection\')'),num(S.prayerUses.left)<=0);
+  if(S.prayers.indexOf('blessed-guidance')>=0) df+=tcard('Blessed Guidance','prayer · +d4',tbtn('Pray','pray(\'blessed-guidance\')'),num(S.prayerUses.left)<=0);
+  return tsec('defend','Defend',df); }
 
 // ═══ PICKERS — compendium / shop ═══════════════════════════════════════════
 var _pk=null, _shopTab='gear';
@@ -1881,7 +1927,11 @@ function applySheet(d0){
   ['origin','abilities','prayerUses','spellCasts','ritualCasts','conduit','cond','grog','combat','day'].forEach(function(k){ S[k]=Object.assign({},b[k],(d0[k]&&typeof d0[k]==='object'&&!Array.isArray(d0[k]))?d0[k]:{}); });
   ['features','prayers','spells','rituals','relics','mishaps','items','prot','deck','timed'].forEach(function(k){ if(!Array.isArray(S[k])) S[k]=[]; });
   S.items.forEach(function(x){ if(!x.uid) x.uid=uid(); }); S.relics.forEach(function(x){ if(!x.uid) x.uid=uid(); });
-  delete S.derived; S.system='PB';
+  // where each item is stowed: x.in = a container's uid. Older saves may carry it as stowedIn,
+  // or point at a container that's gone, at a non-container, at itself or round in a loop → on you.
+  S.items.forEach(function(x){ if(x.in==null&&x.stowedIn!=null) x.in=x.stowedIn; delete x.stowedIn; if(x.in&&!stowedIn(x)) x.in=''; });
+  S.items.forEach(function(x){ var p=stowedIn(x), g=0; while(p&&g<12){ if(p===x){ x.in=''; break; } p=stowedIn(p); g++; } if(g>=12) x.in=''; });
+  delete S.derived; delete S.subtab; S.system='PB';
   if(typeof campaignRestore==='function') campaignRestore(d0.campaign);
   renderAll(); setDefaultTab();
   if(window.__ddSaveTitle && S.name) try{ window.__ddSaveTitle(S.name); }catch(e){}
@@ -2125,6 +2175,7 @@ window.openCampaign=openCampaign; window.closeCampaign=closeCampaign; window.cam
 /* ── Action tab (turn controller) ── */
 #tab-action{padding:0;}
 .pb-top{background:var(--box);border-bottom:1px solid var(--rule);}
+.pb-top:has(.pb-badges:empty){display:none;}   /* no badges → no empty strip over Attacks */
 body.dark .pb-top{background:#1a1111;}
 .pb-row1{display:flex;align-items:center;gap:10px;padding:10px 12px 6px;flex-wrap:wrap;}
 .pb-round{display:flex;flex-direction:column;align-items:center;justify-content:center;width:46px;height:50px;border-radius:7px;border:2px solid var(--acc);line-height:1;}
@@ -2142,14 +2193,11 @@ body.dark .pb-top{background:#1a1111;}
 .pb-do.end{margin-left:auto;padding:8px 16px;font-size:15px;}
 .pb-do:disabled{opacity:.45;cursor:default;filter:none;}
 .pb-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px;}
-.pb-badges{display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 8px;}
+.pb-badges{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;}
 .pb-badges:empty{display:none;}
 .pb-badge{font-family:var(--f-ui);font-size:12.5px;border:1px solid var(--rule);color:var(--muted);border-radius:12px;padding:1px 9px;}
 .pb-badge.warn{border-color:var(--red);color:var(--red);background:rgba(163,18,26,.1);}
 .pb-badge.luck{border-color:#a8862c;color:#c9a14a;}
-.pb-subtabs{display:flex;border-top:1px solid var(--rule);}
-.pb-st{flex:1;background:transparent;border:none;border-bottom:3px solid transparent;padding:8px;font-family:var(--f-disp);font-size:19px;color:var(--muted);cursor:pointer;}
-.pb-st.on{color:var(--disp);border-bottom-color:var(--acc);}
 .pb-sec{border-bottom:1px solid var(--rule);}
 .pb-sec-hd{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;user-select:none;}
 .pb-caret{color:var(--acc);font-size:10px;transition:transform .12s;}

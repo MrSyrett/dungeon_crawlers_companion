@@ -23,8 +23,9 @@
    levels, and session-end advancement instead of levels.
    Data: /tools-data/db-data.js (window.DB_*). Builder: db-sheet-builder.js (window.DBB);
    advancement: db-advance.js (window.DBADV); homebrew loader: db-homebrew.js (window.DBHB).
-   Palette: neutral greys (the D&D / Shadowdark sheets' panel greys) with dragon-crimson
-   accents; dark is the default, the theme follows the account page (db_dark, seeded by
+   Palette: neutral greys in light mode, green-tinted near-blacks in dark, with the core
+   book's green (#236855) as the accent and its gold (#c9a14a) second; red is the logo's
+   alone, plus the semantic reds (banes, Demon rolls, death, warnings); dark is the default, the theme follows the account page (db_dark, seeded by
    the injected head — no toggle on the sheet).
    Fonts: Hideout (masthead + section titles, logo red with a gold stroke), Minion Pro
    (labels), EB Garamond (text). */
@@ -34,28 +35,27 @@
   --f-ui:"EB Garamond",ui-serif,Georgia,serif;
   --f-num:"EB Garamond",ui-serif,Georgia,serif;
   --bg:#e8e6e2;--paper:#e6e4e0;--card:#fbfbfa;--box:#f0eeeb;--ink:#1d1b19;--muted:#5f5b55;--rule:#cbc7c0;
-  --acc:#b3261e;--acc-dk:#8c1c15;--acc-lt:#f3dcd6;--on-acc:#fff8ef;--gold:#8a6a1f;--gold-lt:#c9a14a;
+  --acc:#236855;--acc-dk:#1e5842;--acc-lt:#dce9e3;--on-acc:#f3f8f5;--gold:#8a6a1f;--gold-lt:#c9a14a;
   --green:#2f7a46;--red:#b3261e;--blue:#2b5f9a;
   --border:#3a3833;--input-bg:#fff;--input-border:#aaa49a;
-  /* Hideout headings: the Dragonbane logo's red fill with a gold stroke. paint-order puts the
-     stroke behind the fill, so only half its width shows — thin at small sizes. */
-  --hd-fill:#b3261e;--hd-stroke:#c9a14a;
-  --log-bg:#131316;--log-text:#e9e7e3;--log-card:#1f1f24;--log-line:#3a3a41;--log-muted:#a09d96;
+  /* The "Dragonbane" wordmark: the logo's red fill (--db-logo) with a gold stroke. paint-order
+     puts the stroke behind the fill, so only half its width shows — thin at small sizes. */
+  --hd-fill:#e42a32;--hd-stroke:#c9a14a;
+  --log-bg:#101412;--log-text:#e9e7e3;--log-card:#1a211e;--log-line:#2f3a35;--log-muted:#a09d96;
 }
 body.dark{
-  --bg:#141417;--paper:#121215;--card:#22222a;--box:#28282e;--ink:#e9e7e3;--muted:#9b988f;--rule:#3a3a41;
-  --acc:#b3261e;--acc-dk:#e0614f;--acc-lt:#3b2426;--on-acc:#fff3ea;--gold:#c9a14a;--gold-lt:#e2c37a;
+  --bg:#111614;--paper:#101412;--card:#1b2220;--box:#212926;--ink:#e9e7e3;--muted:#a09d94;--rule:#34403a;
+  --acc:#236855;--acc-dk:#5cb894;--acc-lt:#1f3a30;--on-acc:#eef6f1;--gold:#c9a14a;--gold-lt:#e2c37a;
   --green:#5fae76;--red:#e0614f;--blue:#7fa8de;
-  --border:#3a3a41;--input-bg:#171719;--input-border:#3a3a41;
+  --border:#34403a;--input-bg:#141917;--input-border:#34403a;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:var(--f-ui);font-variant-numeric:lining-nums;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;}
 input,select,textarea,button{font-family:var(--f-ui);font-variant-numeric:lining-nums;}
 /* Light mode on the themed page: the warm parchment ground instead of the dark one. */
 :root[data-themed][data-system="DB"] body:not(.dark){background-color:#d6d3cd;background-image:radial-gradient(130% 98% at 50% 42%,rgba(0,0,0,0) 50%,rgba(0,0,0,.18) 100%),url("/themes/db-parchment-light.webp");}
-/* Hideout = the logo treatment everywhere on the sheet (red fill, gold stroke) */
 /* Only the "Dragonbane" logo word keeps the logo treatment (red fill, gold stroke); every other
-   Hideout heading is plain crimson, no stroke, so it stays readable. */
+   Hideout heading is plain accent green (--acc-dk), no stroke, so it stays readable. */
 .hdr-logo .lg-word{color:var(--hd-fill);-webkit-text-stroke:1.6px var(--hd-stroke);paint-order:stroke fill;text-shadow:none;}
 .app-wrap{display:flex;flex:1;min-height:0;align-items:flex-start;}
 .sheet-wrap{flex:1;overflow-y:auto;padding:44px 16px 16px;container-type:inline-size;}
@@ -67,8 +67,8 @@ input,select,textarea,button{font-family:var(--f-ui);font-variant-numeric:lining
 #log-collapse-btn::after{content:"\25C0";}
 .roll-log.collapsed #log-collapse-btn{right:0;}
 .roll-log.collapsed #log-collapse-btn::after{content:"\25B6";}
-.log-header{padding:12px 14px 10px;background:#1b1b1f;border-bottom:2px solid var(--acc);display:flex;justify-content:space-between;align-items:center;}
-.log-title{font-family:var(--f-disp);font-weight:400;font-size:19px;letter-spacing:.06em;color:#e0614f;}
+.log-header{padding:12px 14px 10px;background:#161d1a;border-bottom:2px solid var(--acc);display:flex;justify-content:space-between;align-items:center;}
+.log-title{font-family:var(--f-disp);font-weight:400;font-size:19px;letter-spacing:.06em;color:#5cb894;}
 .log-clear{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.4);color:#fff;font-family:var(--f-label);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;cursor:pointer;border-radius:6px;}
 .log-clear:hover{background:rgba(255,255,255,.32);}
 .log-entries{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column-reverse;gap:6px;}
@@ -76,23 +76,23 @@ input,select,textarea,button{font-family:var(--f-ui);font-variant-numeric:lining
 .log-entry .roll-label{font-family:var(--f-label);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--log-muted);margin-bottom:2px;}
 .log-entry .roll-result{font-family:var(--f-num);font-size:21px;font-weight:600;color:var(--log-text);line-height:1.05;font-variant-numeric:lining-nums tabular-nums;}
 .log-entry .roll-detail{font-family:var(--f-ui);font-size:11.5px;color:#a09d96;margin-top:3px;line-height:1.4;word-break:break-word;font-variant-numeric:lining-nums tabular-nums;}
-.log-push{margin-top:6px;background:var(--acc);color:#fff;border:1px solid #6e1510;border-radius:6px;padding:4px 12px;font-family:var(--f-label);font-size:12px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
+.log-push{margin-top:6px;background:var(--acc);color:#fff;border:1px solid #17503b;border-radius:6px;padding:4px 12px;font-family:var(--f-label);font-size:12px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
 .log-push:hover{filter:brightness(1.15);}
 .log-entry.crit{border-color:#d9a84a;}.log-entry.crit .roll-result{color:#f0c56a;}
 .log-entry.fumble{border-color:#e0614f;}.log-entry.fumble .roll-result{color:#ff7d6a;}
-.log-entry.remote{border-left:3px solid #c9a14a;background:#1b1b1f;}
-.log-hint{color:#6b5842;font-size:12px;font-family:var(--f-label);text-align:center;padding:20px 10px;letter-spacing:.04em;}
+.log-entry.remote{border-left:3px solid #c9a14a;background:#161d1a;}
+.log-hint{color:#6f7d76;font-size:12px;font-family:var(--f-label);text-align:center;padding:20px 10px;letter-spacing:.04em;}
 .log-actions{display:flex;flex-wrap:nowrap;gap:4px;padding:8px 10px;border-bottom:1px solid #2c2c32;}
 .log-action-btn{flex:1 1 0;min-width:0;padding:5px 2px;border:none;cursor:pointer;font-family:var(--f-label);font-size:12px;letter-spacing:.02em;text-transform:uppercase;border-radius:6px;white-space:nowrap;overflow:hidden;text-overflow:clip;}
 .log-action-btn.campaign{flex:0 0 auto;padding:5px 7px;background:transparent;color:#a09d96;border:1px solid #3a3a41;}
 .log-action-btn.campaign:hover{background:#26262c;color:#fff;}
 .log-action-btn.export{background:#1a2430;color:#7fb0e0;border:1px solid #234a72;}
-.log-action-btn.import{background:#2a1714;color:#e08a7a;border:1px solid #5a2219;}
-.log-action-btn.wizard{background:#3a1611;color:#f09a7e;border:1px solid #7a2b1f;}
-.log-action-btn.wizard:hover{background:#7a2b1f;color:#fff;}
+.log-action-btn.import{background:#2a2213;color:#e6c98a;border:1px solid #6a5320;}
+.log-action-btn.wizard{background:#14261f;color:#7fd3b0;border:1px solid #2a6a52;}
+.log-action-btn.wizard:hover{background:#236855;color:#fff;}
 .log-action-btn.rules{background:#241e12;color:#e2c37a;border:1px solid #4d3e20;}
 .log-foundloot,.log-system,.log-lootbox{border-left:3px solid var(--acc) !important;}
-.fl-head,.sys-head,.lb-head{font-family:var(--f-label);font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#e0614f;}
+.fl-head,.sys-head,.lb-head{font-family:var(--f-label);font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#5cb894;}
 .fl-name,.lb-name{font-family:var(--f-ui);font-size:15px;font-weight:600;color:var(--log-text);margin-top:2px;}
 .fl-desc,.sys-body,.lb-desc{font-size:12px;color:#b5b1a8;margin-top:2px;line-height:1.4;}
 .fl-for,.lb-for{font-family:var(--f-label);font-size:10px;color:#97948d;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
@@ -107,7 +107,7 @@ input,select,textarea,button{font-family:var(--f-ui);font-variant-numeric:lining
 .lb-actions{margin-top:6px;}
 
 /* dice tray */
-.dice-tray{border-top:1px solid #2c2c32;padding:10px;display:flex;flex-direction:column;gap:7px;background:#0e0e11;}
+.dice-tray{border-top:1px solid #26302c;padding:10px;display:flex;flex-direction:column;gap:7px;background:#0c100e;}
 .tray-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
 .tray-label{font-family:var(--f-label);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#a09d96;flex-shrink:0;}
 .bb-ctl{display:inline-flex;align-items:center;border:1px solid #3a3a41;border-radius:7px;overflow:hidden;}
@@ -117,8 +117,8 @@ input,select,textarea,button{font-family:var(--f-ui);font-variant-numeric:lining
 .bb-ctl.boon .bb-val{color:#9fdcae;}.bb-ctl.bane .bb-val{color:#ff9d8a;}
 .tray-note{font-size:11px;color:#7d7a74;font-family:var(--f-ui);line-height:1.35;}
 .dice-btns{display:flex;gap:4px;}
-.dice-btn{flex:1;padding:6px 0;background:var(--acc);border:1px solid #6e1510;color:#fff;font-family:var(--f-num);font-size:13px;cursor:pointer;border-radius:6px;}
-.dice-btn:hover{background:#d0332a;}
+.dice-btn{flex:1;padding:6px 0;background:var(--acc);border:1px solid #17503b;color:#fff;font-family:var(--f-num);font-size:13px;cursor:pointer;border-radius:6px;}
+.dice-btn:hover{background:#2e8269;}
 
 /* ── the sheet & cards ── */
 .sheet{background:var(--paper);border:2px solid var(--border);border-radius:14px;overflow:hidden;max-width:1080px;margin:0 auto;position:relative;box-shadow:0 14px 40px rgba(0,0,0,.35);}
@@ -126,7 +126,7 @@ body.dark .sheet{box-shadow:0 14px 40px rgba(0,0,0,.6);}
 .card{background:var(--card);border:1px solid var(--rule);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(20,20,20,.08);}
 body.dark .card{background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,.3);}
 .section-bar{position:relative;color:var(--acc-dk);font-family:var(--f-disp);font-weight:400;font-size:17px;letter-spacing:.04em;padding:8px 13px 6px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.section-bar::after{content:'';position:absolute;left:13px;right:13px;bottom:0;height:1px;background:linear-gradient(90deg,var(--acc),rgba(179,38,30,0));opacity:.6;}
+.section-bar::after{content:'';position:absolute;left:13px;right:13px;bottom:0;height:1px;background:linear-gradient(90deg,var(--gold-lt),rgba(201,161,74,0));opacity:.7;}
 .section-bar .sb-note{font-family:var(--f-label);font-size:12px;letter-spacing:.02em;color:var(--muted);}
 .section-bar .sb-note b{color:var(--acc-dk);font-weight:600;}
 .hdr-right{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
@@ -134,10 +134,10 @@ body.dark .card{background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,.3);}
 .hdr-btn:hover{background:var(--acc-lt);}
 
 /* ── masthead ── */
-.hdr-row{display:flex;flex-direction:column;gap:9px;background:linear-gradient(120deg,#2a0d09 0%,#5a1610 55%,#8c1c15 100%);border-bottom:2px solid var(--gold-lt);color:#f3e6cc;padding:14px 18px;}
+.hdr-row{display:flex;flex-direction:column;gap:9px;background:linear-gradient(120deg,#0b1f18 0%,#17503b 55%,#236855 100%);border-bottom:2px solid var(--gold-lt);color:#f3e6cc;padding:14px 18px;}
 .hdr-top{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:center;}
 .hdr-logo .lg-word{font-family:var(--f-disp);font-weight:400;font-size:34px;line-height:.9;letter-spacing:.03em;}
-.hdr-logo .lg-sub{font-family:var(--f-label);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#e9b9a6;margin-top:4px;}
+.hdr-logo .lg-sub{font-family:var(--f-label);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#e2c37a;margin-top:4px;}
 .hdr-metarow{display:flex;gap:7px;flex-wrap:wrap;}
 .hdr-field,.lockfield{border:1px solid rgba(243,220,168,.3);background:rgba(255,240,220,.10);border-radius:7px;min-width:0;}
 .hdr-field{padding:3px 10px 4px;}
@@ -238,7 +238,7 @@ body.sheet-locked .sk-lvl:hover{border-color:var(--acc);background:var(--acc-lt)
 
 /* tabs */
 .tabs-bar{display:flex;gap:0;background:var(--box);border-bottom:2px solid var(--acc-lt);flex-wrap:wrap;}
-body.dark .tabs-bar{background:#1a1a1f;}
+body.dark .tabs-bar{background:#161d1a;}
 .tab-btn{flex:1 1 auto;padding:9px 10px;background:transparent;color:var(--muted);border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:var(--f-label);font-size:14px;letter-spacing:.06em;white-space:nowrap;}
 .tab-btn:hover{color:var(--ink);}
 .tab-btn.on{color:var(--acc-dk);border-bottom-color:var(--acc);background:var(--acc-lt);}
@@ -290,11 +290,29 @@ body.dark .prep-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 /* picker / modals */
 .ov{display:none;position:fixed;inset:var(--dd-bar-h,0px) 0 0 0;background:rgba(0,0,0,.75);z-index:1000;align-items:center;justify-content:center;padding:16px;}
 .ov.open{display:flex;}
-.modal{background:#1c1c21;border:2px solid var(--acc);border-radius:10px;max-width:600px;width:100%;max-height:92vh;display:flex;flex-direction:column;color:#e9e7e3;font-family:var(--f-ui);}
+.modal{background:#18201c;border:2px solid var(--acc);border-radius:10px;max-width:600px;width:100%;max-height:92vh;display:flex;flex-direction:column;color:#e9e7e3;font-family:var(--f-ui);}
 .modal.wide{max-width:880px;}
 .modal-hd{background:#121215;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-radius:8px 8px 0 0;}
-.modal-hd .ttl{font-family:var(--f-disp);font-weight:400;font-size:21px;letter-spacing:.03em;line-height:1;color:#e0614f;}
-.bd-title{color:#e0614f;}
+.modal-hd .ttl{font-family:var(--f-disp);font-weight:400;font-size:21px;letter-spacing:.03em;line-height:1;color:#5cb894;}
+.bd-title{color:#5cb894;}
+.bd-steps{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;}
+.bd-step{font-family:var(--f-label);font-size:11px;padding:3px 9px;border-radius:12px;border:1px solid #3a3a41;color:#a09d96;background:transparent;cursor:pointer;line-height:1.3;}
+.bd-step:hover{border-color:var(--acc);color:#e9e7e3;}
+.bd-step:focus-visible{outline:2px solid var(--acc);outline-offset:1px;}
+.bd-step.on{border-color:var(--acc);color:#cdeedd;background:#14261f;cursor:default;}
+.bd-step.done{color:#d6d3cc;border-color:#4a4a52;}
+.bd-ck{color:#7fbf7a;}
+.bd-schools{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-bottom:4px;}
+.bd-school{text-align:left;background:#131316;border:1px solid #3a3a41;border-radius:8px;padding:10px 12px;color:#d6d3cc;font:inherit;font-size:13px;line-height:1.45;cursor:pointer;display:flex;flex-direction:column;gap:5px;}
+.bd-school:hover{border-color:var(--acc);}
+.bd-school.sel{border-color:#236855;background:#12201b;box-shadow:inset 0 0 0 1px #236855;}
+.bd-school-hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+.bd-school-hd b{font-family:var(--f-disp);font-size:18px;color:#f3dca8;font-weight:400;}
+.bd-school-hd span{font-family:var(--f-label);font-size:12px;color:#a09d96;}
+.bd-school.sel .bd-school-hd span{color:#cdeedd;}
+.bd-school-tx{color:#e9e7e3;}
+.bd-school-tx.dim{color:#a09d96;font-style:italic;}
+.bd-school-row i{display:block;font-style:normal;font-family:var(--f-label);font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:#a09d96;}
 .modal-hd .x{background:transparent;border:none;color:#a09d96;font-size:20px;cursor:pointer;padding:0 4px;}
 .modal-bd{padding:14px 16px;overflow-y:auto;}
 .modal-ft{padding:10px 16px;border-top:1px solid #3a3a41;display:flex;justify-content:space-between;gap:8px;flex-shrink:0;flex-wrap:wrap;}
@@ -305,7 +323,7 @@ body.dark .prep-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 .m-btn:disabled{opacity:.4;cursor:default;filter:none;}
 .m-hint{font-size:14px;color:#b5b1a8;margin:0 0 12px;line-height:1.5;}
 .m-input{width:100%;padding:9px 10px;background:#131316;border:1px solid #3a3a41;border-radius:7px;color:#e9e7e3;font-family:var(--f-ui);font-size:15px;outline:none;}
-.m-lbl{font-family:var(--f-label);font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:#e0614f;margin:12px 0 6px;}
+.m-lbl{font-family:var(--f-label);font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:#c9a14a;margin:12px 0 6px;}
 .m-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
 .m-check{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid #2c2c32;font-size:14px;line-height:1.35;cursor:pointer;}
 .m-check input{margin-top:3px;accent-color:var(--acc);width:16px;height:16px;flex-shrink:0;}
@@ -313,7 +331,7 @@ body.dark .prep-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 .m-check.dis{opacity:.45;cursor:default;}
 .chip{background:#1d1d22;border:1px solid #3a3a41;color:#d6d3cc;border-radius:14px;padding:4px 11px;font-family:var(--f-label);font-size:13px;cursor:pointer;}
 .chip:hover{border-color:var(--acc);}
-.chip.sel{background:#3a1611;border-color:var(--acc);color:#ffd5c8;}
+.chip.sel{background:#14261f;border-color:var(--acc);color:#cdeedd;}
 .chip:disabled{opacity:.35;cursor:default;}
 .brow-tabs{display:flex;flex-shrink:0;border-bottom:1px solid #2c2c32;flex-wrap:wrap;}
 .brow-tabs:empty{display:none;}
@@ -331,10 +349,10 @@ body.dark .prep-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 .brow-desc{font-size:13px;color:#c2bfb8;line-height:1.4;margin-top:3px;}
 .brow-btns{display:flex;flex-direction:row;gap:4px;flex-shrink:0;align-items:flex-start;}
 .brow-add{flex-shrink:0;background:var(--acc);color:#fff;border:none;border-radius:6px;padding:6px 11px;font-family:var(--f-label);font-size:13px;cursor:pointer;white-space:nowrap;}
-.brow-add.ghost{background:transparent;border:1px solid #7a2b1f;color:#ffb3a3;}
+.brow-add.ghost{background:transparent;border:1px solid #2a6a52;color:#9fdcc2;}
 .brow-add.have,.brow-add:disabled{background:transparent;color:#8c8983;border:1px solid #4a4a52;cursor:default;}
 .brow-empty{padding:14px 4px;font-size:14px;color:#998;}
-.rules-list h4{font-family:var(--f-disp);font-weight:400;font-size:18px;margin:14px 0 4px;color:#e0614f;}
+.rules-list h4{font-family:var(--f-disp);font-weight:400;font-size:18px;margin:14px 0 4px;color:#5cb894;}
 .rules-list p,.rules-list li{font-size:14px;line-height:1.5;color:#d6d3cc;}
 .rules-list ul{padding-left:18px;}
 .rules-list table{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px;}
@@ -344,7 +362,7 @@ body.dark .prep-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 .opt-row .opt-note{font-size:13px;color:#a09d96;line-height:1.35;margin-top:2px;}
 .res-box{background:#131316;border:1px solid #3a3a41;border-radius:8px;padding:10px 12px;margin-top:10px;font-size:14px;line-height:1.5;}
 .res-box b{color:#f3dca8;}
-#roll-toast{display:none;position:fixed;bottom:52px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(18,12,8,.95);border:2px solid var(--acc);border-radius:9px;padding:10px 20px;text-align:center;min-width:170px;max-width:84vw;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,.7);}
+#roll-toast{display:none;position:fixed;bottom:52px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(10,16,13,.95);border:2px solid var(--acc);border-radius:9px;padding:10px 20px;text-align:center;min-width:170px;max-width:84vw;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,.7);}
 #roll-toast.show{display:block;}
 #roll-toast.crit{border-color:#d9a84a;}#roll-toast.fumble{border-color:#e0614f;}
 #roll-toast .t-label{font-family:var(--f-label);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#a09d96;margin-bottom:3px;}
@@ -683,7 +701,7 @@ function blankState(){ return {
   grudges:'', story:'', notes:'', tiny:'', attrs:{STR:10,CON:10,AGL:10,INT:10,WIL:10,CHA:10}, cond:{}, hp:10, wp:10, moveMod:0,
   death:{s:0,f:0,dead:false,rallied:false}, rests:{round:false,stretch:false}, skills:{}, abilities:[], spells:[], tricks:[],
   inventory:[], coins:{gold:0,silver:0,copper:0}, injuries:[], light:null, prey:'', berserk:false, proneTarget:false,
-  opts:{push:true,damageTypes:false,mishaps:true}, turn:{card:null,prev:null,action:false,done:false,extra:0,prone:false,round:1},
+  opts:{push:true,damageTypes:false,mishaps:true}, turn:{action:false,done:false,extra:0,prone:false},
   subtab:'action', built:false, campaign:null, v:2 }; }
 // v:2 — weapons, armor and helmets live in the one inventory list (with an equip pip);
 // v1 saves kept them in weapons[] / armor / helmet and are migrated on load (applySheet).
@@ -1137,31 +1155,21 @@ function openDlg(title,body,btns,modal,wide){ _dlgModal=!!modal; $('dlg-title').
 function closeDlg(force){ if(_dlgModal&&!force) return; _dlgModal=false; $('dlg-overlay').classList.remove('open'); }
 
 // ═══ ACTION TAB — the turn controller ══════════════════════════════════════
-// Dragonbane turn: draw an initiative card (1–10, lowest first), then one action
-// and your movement. Parry and Dodge are reactions — they replace your turn, so
-// they need a turn you haven't taken yet and they spend it. Nothing is
-// restricted until you draw a card (out of combat everything stays open).
-function inCombat(){ return S.turn.card!=null; }
-function canAct(){ if(S.death.dead) return false; if(S.hp<=0&&!S.death.rallied) return false; if(!inCombat()) return true; return !S.turn.action&&!S.turn.done; }
-function canReact(){ if(S.death.dead||S.hp<=0) return false; if(S.berserk) return false; if(!inCombat()) return true; return !S.turn.action&&!S.turn.done; }
-function useAction(){ if(!inCombat()) return; if(S.turn.action&&S.turn.extra>0){ S.turn.extra--; return; } S.turn.action=true; }
-function useReaction(){ if(!inCombat()) return; S.turn.done=true; }
-function canAttack(){ return canAct()||(inCombat()&&S.turn.extra>0&&!S.death.dead); }
-
-// Drawing a card starts a round: your action (and any spent reaction) comes back.
-function newTurnState(){ S.turn.prev=S.turn.card; S.turn.action=false; S.turn.done=false; S.turn.extra=0; S.turn.dual=false; S.turn.round=num(S.turn.round,1)+1; }
-function drawInit(mode){
-  if(mode==='veteran'){ var keep=S.turn.card!=null?S.turn.card:S.turn.prev; if(keep==null){ addLog('Veteran','—','No card from last round','normal'); return; } if(!spendWp(1,'Veteran')) return; newTurnState(); S.turn.card=keep; addLog('Initiative','Card '+keep,'Veteran (1 WP): kept last round\'s card','normal'); changed(); return; }
-  if(mode==='fast'){ if(!spendWp(2,'Lightning Fast')) return; var a=d(10), b=d(10); while(b===a) b=d(10);
-    openDlg('Lightning Fast','<div class="m-row"><button class="m-btn" onclick="pickInit('+a+')">Card '+a+'</button><button class="m-btn" onclick="pickInit('+b+')">Card '+b+'</button></div>',[],true); return; }
-  newTurnState(); S.turn.card=d(10); addLog('Initiative','Card '+S.turn.card,'Lowest acts first','normal'); changed();
-}
+// Dragonbane turn: one action and your movement. Initiative is dealt by the GM
+// (GM screen → Combat Tracker → Initiative; the deal shows in the Roll Log), so
+// the sheet keeps no card. Parry and Dodge are reactions — they replace your
+// turn, so they need a turn you haven't taken yet and they spend it. End Turn
+// gives your action, any spent reaction and extra attacks back.
+function inCombat(){ return true; }
+function canAct(){ if(S.death.dead) return false; if(S.hp<=0&&!S.death.rallied) return false; return !S.turn.action&&!S.turn.done; }
+function canReact(){ if(S.death.dead||S.hp<=0) return false; if(S.berserk) return false; return !S.turn.action&&!S.turn.done; }
+function useAction(){ if(S.turn.action&&S.turn.extra>0){ S.turn.extra--; return; } S.turn.action=true; }
+function useReaction(){ S.turn.done=true; }
+function canAttack(){ return canAct()||(S.turn.extra>0&&!S.death.dead); }
 // End Turn (as on the D&D sheet): your action, any spent reaction and extra attacks come back.
-// The initiative card stays; drawing a new one still starts the next round.
 function endTurn(){ S.turn.action=false; S.turn.done=false; S.turn.extra=0; S.turn.dual=false; changed(); }
-function pickInit(c){ closeDlg(true); newTurnState(); S.turn.card=c; addLog('Initiative','Card '+c,'Lightning Fast (2 WP): two cards, kept '+c,'normal'); changed(); }
-// A stretch or shift rest ends the fight: the initiative card is put back.
-function leaveCombat(quiet){ S.turn={card:null,prev:null,action:false,done:false,extra:0,prone:S.turn.prone,round:1}; if(S.berserk) endBerserk(true); if(!quiet){ addLog('Combat over','✓','','normal'); changed(); } }
+// A stretch or shift rest ends the fight: the turn starts fresh.
+function leaveCombat(quiet){ S.turn={action:false,done:false,extra:0,prone:S.turn.prone}; if(S.berserk) endBerserk(true); if(!quiet){ addLog('Combat over','✓','','normal'); changed(); } }
 function toggleProneTarget(on){ S.proneTarget=!!on; renderTurn(); scheduleAutosave(); }
 function setSubtab(t){ S.subtab=t; renderTurn(); scheduleAutosave(); }
 
@@ -1322,7 +1330,6 @@ function douse(){ if(!S.light) return; addLog('Light','Put out',S.light.name,'no
 // ── abilities ──
 function activateAbility(i){ var a=S.abilities[i]; if(!a) return; var def=abilityDef(a.name)||{}; var wp=num(def.wp); var n=a.name;
   if(def.timing==='action'&&!canAct()){ addLog(n,'—','Uses your action, and you have none left','normal'); return; }
-  if(n==='Lightning Fast'){ drawInit('fast'); return; } if(n==='Veteran'){ drawInit('veteran'); return; }
   if(def.wp==='varies'){ openDlg(n,'<p class="m-hint">'+esc(def.text||'')+'</p><div class="m-lbl">WP to spend</div><input id="ab-wp" class="m-input" type="number" value="1">',[{t:'Activate',f:function(){ var x=num($('ab-wp').value,1); closeDlg(); if(spendWp(x,n)){ addLog(n,'−'+x+' WP',def.text||'','normal'); changed(); } }}]); return; }
   if(!spendWp(wp,n)) return;
   if(def.timing==='action') useAction();
@@ -1331,6 +1338,9 @@ function activateAbility(i){ var a=S.abilities[i]; if(!a) return; var def=abilit
   if(n==='Ill-Tempered'){ TR.boon++; if(!S.cond.Angry){ S.cond.Angry=true; extra=' · you become Angry · a boon is in the tray'; } else extra=' · a boon is in the tray'; }
   if(n==='Hunting Instincts'){ var p=window.prompt('Mark which creature as your prey?',S.prey||''); if(p!=null) S.prey=p; extra=S.prey?' · prey: '+S.prey:''; }
   if(n==='Unforgiving'){ TR.boon++; extra=' · a boon is in the tray for your attack'; }
+  // Initiative is dealt on the GM screen: these just pay the WP and tell the GM.
+  if(n==='Lightning Fast') extra=' · tell the GM which of your two cards you keep';
+  if(n==='Veteran') extra=' · tell the GM you keep last round\'s card';
   addLog(n,wp?'−'+wp+' WP':'Activated',(def.text||'')+extra,'normal'); changed(); }
 function preyBoon(){ if(!S.prey) return; if(!spendWp(1,'Hunting Instincts')) return; TR.boon++; addLog('Hunting Instincts','−1 WP','A boon on your next attack against '+S.prey+' (in the tray)','normal'); changed(); }
 function endBerserk(quiet){ S.berserk=false; S.cond.Exhausted=true; if(!quiet) addLog('Berserker ends','Exhausted','The rage is over','normal'); changed(); }
@@ -1409,13 +1419,10 @@ function tcard(name,sub,btns,dis){ return '<div class="db-card'+(dis?' disabled'
 function tbtn(label,fn,cls,title){ return '<button class="db-do'+(cls?' '+cls:'')+'" onclick="'+fn+'"'+(title?' title="'+esc(title)+'"':'')+'>'+label+'</button>'; }
 function renderTurn(){
   var el=$('db-turn'); if(!el) return; var t=S.turn; var act=canAct(), react=canReact(), atk=canAttack();
-  // The initiative card is always on the tab: click it to draw (a new card each round).
+  // Initiative is dealt by the GM (it shows in the Roll Log): the top row is the action economy and End Turn.
   var h='<div class="db-top"><div class="db-row1">';
-  h+='<button type="button" class="db-init" onclick="drawInit()" title="Draw an initiative card"><span class="db-card-num'+(t.card==null?' empty':'')+'">'+(t.card==null?'?':t.card)+'</span><span class="db-init-lbl">Initiative</span></button>';
   h+='<div class="db-econ">';
-  if(t.card!=null) h+='<span class="db-pip'+(t.action||t.done?' used':'')+'" title="One action per turn">Action</span>'+(t.extra>0?'<span class="db-pip extra">+'+t.extra+' attack</span>':'');
-  if(hasAbility('Lightning Fast')) h+=tbtn('Draw 2 · 2 WP','drawInit(\'fast\')','ghost','Lightning Fast: draw two cards, keep one');
-  if(hasAbility('Veteran')&&(t.card!=null||t.prev!=null)) h+=tbtn('Keep '+(t.card!=null?t.card:t.prev)+' · 1 WP','drawInit(\'veteran\')','ghost','Veteran: keep last round\'s card');
+  h+='<span class="db-pip'+(t.action||t.done?' used':'')+'" title="One action per turn">Action</span>'+(t.extra>0?'<span class="db-pip extra">+'+t.extra+' attack</span>':'');
   h+='</div>';
   h+=tbtn('⟳ End Turn','endTurn()','end','Start a new turn — your action and reaction come back');
   h+='</div><div class="db-badges">';
@@ -1573,7 +1580,7 @@ function pickerCustom(){ var n=window.prompt('Name'); if(!n) return;
 function openRules(){
   var h='<h4>Rolling</h4><ul><li>Roll a D20: equal to or under your skill level (or attribute) succeeds. A 1 is a <b>Dragon</b>, a 20 a <b>Demon</b>.</li><li><b>Boon</b>: roll an extra D20, keep the lowest. <b>Bane</b>: keep the highest. They cancel one for one; several add dice.</li><li>A Dragon or Demon on a skill marks it for advancement.</li><li>Only one person can help — helping gives a boon (add it in the dice tray) and costs their action in combat.</li><li><b>Pushing</b>: a failed roll (never a Demon) shows a Push button — re-roll it, then take a condition you don\'t already have.</li></ul>';
   h+='<h4>Conditions</h4><p>Exhausted (STR), Sickly (CON), Dazed (AGL), Angry (INT), Scared (WIL), Disheartened (CHA): each is a bane on the attribute and its skills. A stretch rest heals one, a shift rest all.</p>';
-  h+='<h4>Combat</h4><ul><li>Each round draw an initiative card (1–10, lowest first). On your turn: movement and one action.</li><li>Parry or dodge are reactions: they replace your turn, so you must not have acted yet this round.</li><li>Damage = weapon dice + damage bonus (STR for STR skills, AGL for AGL skills; none for crossbows). Armor subtracts its rating.</li><li>Dragon on an attack: double the weapon dice, a free extra attack (melee) or ignore armor (piercing). Only a Dragon parries or dodges it.</li><li>At 0 HP make a death roll (CON) each turn: three successes and you recover D6 HP, three failures and you die.</li></ul>';
+  h+='<h4>Combat</h4><ul><li>Each round the GM deals initiative cards (1–10, lowest first); the deal shows in your Roll Log. Lightning Fast and Veteran: activate them here (it spends the WP) and tell the GM. On your turn: movement and one action, then End Turn.</li><li>Parry or dodge are reactions: they replace your turn, so you must not have acted yet this round.</li><li>Damage = weapon dice + damage bonus (STR for STR skills, AGL for AGL skills; none for crossbows). Armor subtracts its rating.</li><li>Dragon on an attack: double the weapon dice, a free extra attack (melee) or ignore armor (piercing). Only a Dragon parries or dodges it.</li><li>At 0 HP make a death roll (CON) each turn: three successes and you recover D6 HP, three failures and you die.</li></ul>';
   h+='<h4>Magic</h4><ul><li>2 WP per power level (1–3); tricks cost 1 WP and always work. Prepared spells = INT base chance.</li><li>No casting with metal armor or a metal weapon at hand.</li><li>At 1 WP or less you can draw power from the body: roll a die, gain WP, take that much damage after.</li></ul>';
   $('rules-body').innerHTML=h; $('rules-overlay').classList.add('open'); }
 function closeRules(){ $('rules-overlay').classList.remove('open'); }
@@ -1619,6 +1626,8 @@ function collectSheet(){ var d=JSON.parse(JSON.stringify(S)); d.system='DB'; d.n
 function applySheet(d){
   d=d||{}; var b=blankState(); S=Object.assign(b,d);
   ['attrs','cond','death','rests','coins','opts','turn'].forEach(function(k){ S[k]=Object.assign({},b[k],(d[k]&&typeof d[k]==='object')?d[k]:{}); });
+  // Older saves kept a drawn initiative card on the sheet; the GM deals initiative now.
+  delete S.turn.card; delete S.turn.prev; delete S.turn.round;
   ['skills'].forEach(function(k){ if(!S[k]||typeof S[k]!=='object'||Array.isArray(S[k])) S[k]={}; });
   ['abilities','spells','tricks','inventory','injuries'].forEach(function(k){ if(!Array.isArray(S[k])) S[k]=[]; });
   S.opts=blankState().opts;   // the optional rules are the table's call, not a sheet setting: pushing and magical mishaps on, damage types off
@@ -1707,12 +1716,12 @@ var _campaign=null; var _campaignClientKey='ck-'+Math.random().toString(36).slic
 var CAMPAIGN_SKIP_LABELS=new Set(['Sheet Saved','Sheet Exported','Imported','Import failed','Campaign']);
 function campaignPlayerName(){ return ($('f-name').value||'').trim()||'Player'; }
 function campaignUpdateBtn(){
-  if (window.__ddVtt) window.__ddVtt(_campaign);   /* roll-log VTT button follows the campaign link */ var btn=$('campaign-btn'); if(!btn) return; if(_campaign){ btn.title='Campaign: '+_campaign.name; btn.style.background='#3a1611'; btn.style.color='#f09a7e'; btn.style.borderColor='#7a2b1f'; } else { btn.title='Campaign'; btn.style.background='transparent'; btn.style.color='#a09d96'; btn.style.borderColor='#3a3a41'; } }
+  if (window.__ddVtt) window.__ddVtt(_campaign);   /* roll-log VTT button follows the campaign link */ var btn=$('campaign-btn'); if(!btn) return; if(_campaign){ btn.title='Campaign: '+_campaign.name; btn.style.background='#14261f'; btn.style.color='#7fd3b0'; btn.style.borderColor='#2a6a52'; } else { btn.title='Campaign'; btn.style.background='transparent'; btn.style.color='#a09d96'; btn.style.borderColor='#3a3a41'; } }
 function openCampaign(){ $('campaign-overlay').classList.add('open'); campaignRenderModal(); }
 function closeCampaign(){ $('campaign-overlay').classList.remove('open'); }
 function campaignRenderModal(){
   var body=$('campaign-body');
-  if(_campaign) body.innerHTML='<p class="m-hint">Connected — your rolls are shared with everyone in this campaign.</p><div style="background:#0f0f12;border:1px solid #7a2b1f;border-radius:5px;padding:12px;margin-bottom:12px;"><div style="font-family:var(--f-disp);font-size:19px;color:#f3dca8;">'+esc(_campaign.name)+'</div><div style="font-size:11px;color:#97948d;margin-top:4px;">Join code: <b style="color:#eee;font-size:15px;letter-spacing:.2em;">'+esc(_campaign.code)+'</b></div></div><button class="m-btn warn" style="width:100%;" onclick="campaignLeave()">Leave Campaign</button>';
+  if(_campaign) body.innerHTML='<p class="m-hint">Connected — your rolls are shared with everyone in this campaign.</p><div style="background:#0f0f12;border:1px solid #2a6a52;border-radius:5px;padding:12px;margin-bottom:12px;"><div style="font-family:var(--f-disp);font-size:19px;color:#f3dca8;">'+esc(_campaign.name)+'</div><div style="font-size:11px;color:#97948d;margin-top:4px;">Join code: <b style="color:#eee;font-size:15px;letter-spacing:.2em;">'+esc(_campaign.code)+'</b></div></div><button class="m-btn warn" style="width:100%;" onclick="campaignLeave()">Leave Campaign</button>';
   else body.innerHTML='<p class="m-hint">Enter a join code from your GM to connect this sheet. Campaigns are created on the Campaigns page.</p><div class="m-lbl">Join a Campaign</div><div style="display:flex;gap:6px;"><input type="text" id="campaign-code-input" class="m-input" placeholder="Join code (e.g. K7XP2M)" maxlength="6" style="flex:1;text-transform:uppercase;letter-spacing:.15em;"><button class="m-btn" onclick="campaignJoin()">Join</button></div><div id="campaign-error" style="font-size:12px;color:#df6a6a;margin-top:10px;"></div>';
 }
 function campaignError(msg){ var el=$('campaign-error'); if(el) el.textContent=msg; }
@@ -1878,16 +1887,8 @@ window.openCampaign=openCampaign; window.closeCampaign=closeCampaign; window.cam
 /* ── Action tab (turn controller) ── */
 #tab-action{padding:0;}
 .db-top{background:var(--box);border-bottom:1px solid var(--rule);}
-body.dark .db-top{background:#1c1c21;}
+body.dark .db-top{background:#18201c;}
 .db-row1{display:flex;align-items:center;gap:10px;padding:10px 12px 6px;flex-wrap:wrap;}
-.db-init{display:flex;align-items:center;gap:8px;background:transparent;border:none;padding:0;cursor:pointer;color:inherit;font:inherit;}
-.db-init:hover .db-card-num{filter:brightness(1.12);transform:translateY(-1px);}
-.db-card-num{transition:transform .1s;}
-.db-card-num{width:40px;height:52px;border-radius:6px;border:2px solid var(--acc);background:linear-gradient(160deg,#f6ecd6,#e7d3ab);color:#5a1610;font-family:var(--f-disp);font-size:28px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.3);}
-body.dark .db-card-num{background:linear-gradient(160deg,#34343b,#1f1f24);color:#f3dca8;}
-.db-card-num.empty{border-style:dashed;color:var(--muted);background:transparent;box-shadow:none;}
-.db-init-lbl{font-family:var(--f-label);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);line-height:1.2;}
-.db-init-lbl small{letter-spacing:.02em;text-transform:none;}
 .db-econ{display:flex;gap:6px;flex:1 1 auto;flex-wrap:wrap;align-items:center;}
 .db-pip{font-family:var(--f-label);font-size:13px;letter-spacing:.06em;text-transform:uppercase;border:1.5px solid var(--acc);color:var(--acc-dk);background:transparent;border-radius:14px;padding:3px 13px;}
 .db-pip.used{background:var(--rule);border-color:var(--rule);color:var(--muted);text-decoration:line-through;}

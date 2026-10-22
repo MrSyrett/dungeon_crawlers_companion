@@ -303,11 +303,16 @@
   --lotr: #c9a227;
   --lotr-ink: #e2c36b;
   --lotr-green: #1f4a30;
-  /* Dragonbane — dragon-crimson on dark parchment. --db is the brand crimson
-     (rules, borders, fills); --db-ink is lifted for small text on the dark
-     panels; --db-gold is the illuminated-capital gold for labels and accents. */
-  --db: #b3261e;
-  --db-ink: #e0614f;
+  /* Dragonbane — the core book's green and gold on dark green-black parchment.
+     --db is the book's banner/box green (sampled from the rulebook, #236855:
+     rules, borders, fills, buttons — --text on it 5.2:1); --db-deep is the
+     book's heading green (#1e5842, gradients and ink on the light ground);
+     --db-ink is lifted for small text on the dark panels (6.6:1 on --panel-2);
+     --db-gold is the illuminated-capital gold for labels, rules and highlights.
+     The red lives only in the wordmark (--db-logo below). */
+  --db: #236855;
+  --db-deep: #1e5842;
+  --db-ink: #5cb894;
   --db-gold: #c9a14a;
   /* The cover wordmark's red (sampled from the core book's logo, #ec2c38),
      pulled a touch deeper so the gold outline round it still separates. Hideout
@@ -1431,33 +1436,34 @@ body {
   letter-spacing: 0.02em;
 }
 
-/* --- Dragonbane: dragon-crimson on dark parchment --------------------------
+/* --- Dragonbane: green and gold on dark parchment --------------------------
    Hideout letters the titles as the logo does — red inside a gold outline; Minion Pro takes the labels in old
    gold; EB Garamond carries the reading. The ground is an original aged-parchment
-   texture taken down to near-black for dark mode (public/themes/db-parchment.webp,
-   neutral, not umber), under a faint ember glow from above. */
+   texture taken down to near-black with a dark green tint for dark mode
+   (public/themes/db-parchment.webp), under a faint green glow from above.
+   Green (the book's banners and boxes) is the accent, gold the second colour;
+   the red belongs to the Hideout wordmark alone. */
 :root[data-system="DB"]:not([data-chrome]) body {
   --sys-head: var(--db-logo);
   --sys-sub: var(--db-gold);
   --sys-link: var(--db-ink);
   --sys-hilite: var(--db);
   --sys-action: var(--db);
-  /* Neutral near-black, not umber: the panels used to be #1d1712 / #261e17 on a
-     #4a3a2c rule, which read red-brown under the crimson. Text contrast on
-     --panel-2: --text 13.6:1, --muted 7.3:1, --db-ink 4.6:1. */
-  --panel: #1a1918;
-  --panel-2: #232120;
-  --border: #3f3a35;
+  /* Green-tinted near-black to sit on the green parchment. Text contrast on
+     --panel-2: --text 12.4:1, --muted 6.6:1, --db-ink 6.6:1, --db-gold 6.5:1. */
+  --panel: #161b19;
+  --panel-2: #1d2421;
+  --border: #34403a;
   --text: #eee3cc;
   --muted: #b5a68c;
   --gold: var(--db-gold);
   --sys-display: "Hideout";
   --sys-text: var(--font-garamond);
   --sys-label: "Minion Pro";
-  background-color: #0f0e0d;
+  background-color: #0d110f;
   background-image:
     radial-gradient(130% 98% at 50% 42%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.66) 100%),
-    radial-gradient(70% 46% at 50% 0%, rgba(179, 38, 30, 0.06) 0%, rgba(179, 38, 30, 0) 70%),
+    radial-gradient(70% 46% at 50% 0%, rgba(35, 104, 85, 0.1) 0%, rgba(35, 104, 85, 0) 70%),
     url("/themes/db-parchment.webp");
   background-attachment: fixed;
   background-position: center;
@@ -1900,7 +1906,7 @@ body {
 [data-sys="MYZ"],   .home-tile[data-sys="MYZ"]   { --tile-accent: var(--myz);         --tile-sub: var(--myz-steel);   --tile-namefont: var(--font-anton);      --tile-face: var(--font-anton); --tile-bg: #100c0a; --tile-tex: url("/themes/myz-metal.webp"); --tile-scrim: 0.18; }
 [data-sys="VAE"],   .home-tile[data-sys="VAE"]   { --tile-accent: var(--vae);         --tile-sub: var(--vae-bone);    --tile-namefont: var(--font-fraunces);   --tile-face: var(--font-fraunces); --tile-bg: #0c0a07; --tile-tex: url("/themes/vae-paper.webp"); --tile-scrim: 0.16; }
 [data-sys="LOTR"],  .home-tile[data-sys="LOTR"]  { --tile-accent: var(--lotr-ink);    --tile-sub: #b9cfa6;            --tile-namefont: var(--font-garamond);   --tile-face: "Ringbearer", var(--font-garamond); --tile-bg: #07120c; --tile-tex: url("/themes/lotr-mist.webp"); --tile-zoom: 1.4; --tile-scrim: 0.12; }
-[data-sys="DB"],    .home-tile[data-sys="DB"]    { --tile-accent: var(--db-ink);      --tile-ink: var(--db-logo);     --tile-sub: var(--db-gold);     --tile-namefont: var(--font-garamond);   --tile-face: "Hideout", var(--font-garamond); --tile-bg: #0f0e0d; --tile-tex: url("/themes/db-parchment.webp"); --tile-zoom: 1.2; --tile-scrim: 0.14; }
+[data-sys="DB"],    .home-tile[data-sys="DB"]    { --tile-accent: var(--db-ink);      --tile-ink: var(--db-logo);     --tile-sub: var(--db-gold);     --tile-namefont: var(--font-garamond);   --tile-face: "Hideout", var(--font-garamond); --tile-bg: #0d110f; --tile-tex: url("/themes/db-parchment.webp"); --tile-zoom: 1.2; --tile-scrim: 0.14; }
 [data-sys="PB"],    .home-tile[data-sys="PB"]    { --tile-accent: var(--pb-ink);      --tile-ink: #ffffff;            --tile-sub: var(--pb-bone);     --tile-namefont: var(--font-garamond);   --tile-face: "JSL Blackletter", var(--font-garamond); --tile-bg: #0a0808; --tile-tex: url("/themes/pb-splatter.webp"); --tile-zoom: 1.15; --tile-scrim: 0.2; }
 
 /* Dragonbane's wordmark everywhere it is lettered on its own — the game tile,

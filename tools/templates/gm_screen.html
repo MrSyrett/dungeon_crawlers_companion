@@ -2200,7 +2200,7 @@ body[data-cview="free"] .cst-log-rail{display:none}
 html:not([data-gm-sys="DB"]) .db-only { display: none !important; }
 /* Hideout is the logo: red letters in a gold outline, stroke painted first so only its outer half shows. */
 .db-gen-card .gen-card-name { font-family: "Hideout", "EB Garamond", Georgia, serif; font-weight: 400; letter-spacing: .03em; color: #e42a32; -webkit-text-stroke: .11em #c9a14a; paint-order: stroke fill; text-transform: none; }
-.db-gen-card { border-left: 3px solid #b3261e; }
+.db-gen-card { border-left: 3px solid #2e8269; }
 .db-gen-card .gen-card-row-label { color: #c9a14a; }
 .db-dim { color: var(--dim, #8a93a0); }
 .db-warn { color: #f0a070; }
@@ -2269,6 +2269,25 @@ html:not([data-gm-sys="PB"]) .pb-only { display: none !important; }
 .cc-pbinit .l { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim, #8a93a0); margin-right: 1px; }
 .npc-card .cc-pbinit input, .cc-pbinit input { width: 30px; height: 22px; text-align: center; font: 700 12px "EB Garamond", Georgia, serif; color: #0d0b0b !important; background: #e8e0cc !important; border: 1px solid #a3121a !important; border-radius: 4px; padding: 0; -moz-appearance: textfield; }
 .cc-pbinit input::-webkit-inner-spin-button, .cc-pbinit input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.db-init-banner { margin: 0 0 8px; padding: 7px 10px; border: 1px solid #6b5326; border-left: 3px solid #c9a14a; border-radius: 6px; font-size: 13px; color: var(--light, #ddd); background: rgba(201,161,74,.10); }
+.db-init-banner .dbi-hd { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.db-init-banner .dbi-t { font-weight: 700; color: #e2c37a; }
+.db-init-banner .dbi-s { font-size: 11px; color: var(--dim, #8a93a0); flex: 1 1 auto; }
+.db-init-banner .dbi-msg { margin-top: 4px; color: var(--dim, #8a93a0); }
+.db-init-banner .dbi-order { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.db-init-banner .dbi-slot { display: inline-flex; align-items: center; gap: 4px; padding: 1px 7px 1px 2px; border: 1px solid #5a4a2a; border-radius: 12px; font-size: 12px; }
+.db-init-banner .dbi-slot b { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; border-radius: 9px; background: #eee3cc; color: #1d1712; font: 700 11px 'Geist Mono', monospace; }
+.db-init-banner .dbi-slot.pc { border-color: #c9a14a; }
+.db-init-banner .dbi-slot.pc b { background: #c9a14a; }
+.db-init-banner .dbi-pcs { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 6px; padding-top: 6px; border-top: 1px dashed #5a4a2a; }
+.db-init-banner .dbi-pc { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.db-init-banner .dbi-n { font-size: 12px; font-weight: 600; }
+.db-init-banner .dbi-note { font-size: 11px; color: var(--dim, #8a93a0); }
+.db-init-banner .dbi-card { width: 30px; height: 22px; text-align: center; font: 700 12px 'Geist Mono', monospace; color: #1d1712; background: #eee3cc; border: 1px solid #c9a14a; border-radius: 4px; padding: 0; -moz-appearance: textfield; }
+.db-init-banner .dbi-card::-webkit-inner-spin-button, .db-init-banner .dbi-card::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.db-init-banner .dbi-keep { font: 600 11px inherit; padding: 1px 7px; border-radius: 10px; border: 1px solid #c9a14a; background: transparent; color: #e2c37a; cursor: pointer; }
+.db-init-banner .dbi-keep:hover { background: rgba(201,161,74,.2); }
+html:not([data-gm-sys="DB"]) .db-init-banner { display: none; }
 .pb-init-banner { margin: 0 0 8px; padding: 6px 10px; border: 1px solid #5a2424; border-left: 3px solid #a3121a; border-radius: 6px; font-size: 13px; color: var(--light, #ddd); background: rgba(163,18,26,.12); }
 .pb-init-banner b { color: #e6463a; }
 html:not([data-gm-sys="PB"]) .pb-init-banner { display: none; }
@@ -3246,7 +3265,7 @@ GMScenes.renderPins();
   <div class="tool-instance cbt-tool trk-tool" data-tool="trackers">
     <div class="toolbar-tpl" style="display:none">
       <button class="btn small primary cbt-add-monster" title="Add a monster or combatant from the bestiary" aria-label="Add combatant">&#43; Add Combatant</button>
-      <button class="btn small ghost trk-db-init db-only" title="Deal initiative cards 1–10 to every combatant (a monster draws one per point of Ferocity) and sort by the lowest card" aria-label="Draw initiative">🃏<span class="trk-db-lbl"> Initiative</span></button>
+      <button class="btn small ghost trk-db-init db-only" title="Deal initiative cards 1–10 from one deck to every player character in the campaign and every combatant here (a monster draws one per point of Ferocity), sort by the lowest card and post the deal to the players' Roll Log" aria-label="Draw initiative">🃏<span class="trk-db-lbl"> Initiative</span></button>
       <button class="btn small ghost trk-pb-init pb-only" title="Initiative d6: 1-3 the enemies act first, 4-6 the PCs do" aria-label="Roll side initiative">⚔<span class="trk-pb-lbl"> Initiative</span></button>
       <button class="btn small ghost trk-pb-indiv pb-only" title="Optional individual initiative: every enemy rolls d6 (ships d6 + AGILITY) and the list sorts highest first; PCs roll d6 + AGILITY on their sheets" aria-label="Roll individual initiative">🎲<span class="trk-pb-lbl"> Individual</span></button>
       <div class="toolbar-spacer"></div>
@@ -9397,6 +9416,7 @@ function init_trackers(root) {
       inp.addEventListener('change', () => {
         const v = Math.max(1, Math.min(10, parseInt(inp.value, 10) || 1));
         if(Array.isArray(n.dbCards)) n.dbCards[+inp.dataset.ci] = v;
+        dbRenderBanner();
         if(window.__ddScheduleSave) window.__ddScheduleSave();
       });
     });
@@ -9613,6 +9633,7 @@ function init_trackers(root) {
       wireDrag(card, it);
       list.appendChild(card);
     });
+    if(window.GM_SYSTEM === 'DB' || dbBanner) dbRenderBanner();
   }
 
   // Running timers tick once a second. A tick only touches the ticking card's
@@ -9662,7 +9683,7 @@ function init_trackers(root) {
       pbIndividualInitiative();
     } else if(btn.classList.contains('trk-reset') || btn.classList.contains('cbt-reset')) {
       if(!confirm('Reset the round counter and clear all trackers and combatants?')) return;
-      round = 1; items = [];
+      round = 1; items = []; dbPcs = []; dbDealRound = null;
       updateRoundDisplay(); render();
     } else if(btn.classList.contains('cbt-add-tracker')) {
       items.push({ id: nextId++, type: 'tracker', name: '', kind: 'rounds', rounds: 1, totalSeconds: 60, remainingSeconds: 60, running: false });
@@ -9679,20 +9700,128 @@ function init_trackers(root) {
 
   // Advance the initiative round (also steps any legacy round-tracker cards).
   // Exposed so the Monitor bar's Next-Round control can drive it.
-  // Dragonbane initiative: a deck of cards 1–10 dealt each round, lowest first.
-  // Monsters draw one card per point of Ferocity (a turn per card); everyone
-  // else one. Players draw their own cards at the table, so the GM can edit any
-  // card on a combatant to match. More than ten cards needed → a second deck.
-  function dbDrawInitiative(noRender) {
+  // Dragonbane initiative (core p.41): ONE deck of ten cards, 1–10, dealt anew
+  // every round; lowest acts first. The GM deals to the whole table — every
+  // player character in the campaign (the Party tool's roster, else the
+  // campaign's linked sheets) and every combatant in this tracker. A monster
+  // draws one card per point of Ferocity (a turn per card); a Lightning Fast
+  // hero is dealt two and keeps one, a Veteran may keep last round's card (the
+  // GM settles both on the banner). A PC who is also a tracker entry is dealt
+  // once, as the entry. More than ten cards → a second deck. The deal goes to
+  // the campaign roll log, so it shows in every player's sheet Roll Log.
+  let dbPcs = [];          // [{ name, cards:[…], fast, veteran, prev }]
+  let dbDealRound = null;  // the round the last deal was for
+  let dbBanner = null;
+  const dbAbil = (p, n) => (p.abilities || []).some(a => String(a).toLowerCase() === n.toLowerCase());
+  async function dbPartyForInit() {
+    const out = [], seen = new Set();
+    const add = (name, abil) => {
+      name = String(name || '').trim(); if(!name || seen.has(name.toLowerCase())) return; seen.add(name.toLowerCase());
+      out.push({ name, abilities: (Array.isArray(abil) ? abil : []).map(a => typeof a === 'string' ? a : (a && a.name) || '').filter(Boolean) });
+    };
+    // The Party tool's roster first (campaign sheets + any the GM imported) …
+    try { const node = getOrCreateInstance('party'); if(node && typeof node._dbInitParty === 'function') node._dbInitParty().forEach(pc => add(pc.name, pc.abilities)); } catch(e) {}
+    if(out.length) return out;
+    // … else the campaign's linked sheets straight from the server.
+    const camp = (typeof window.__gmCampaign === 'function') ? window.__gmCampaign() : null;
+    if(!camp || !camp.id) return out;
+    try {
+      const r = await fetch('/api/campaigns/' + camp.id + '/characters', { credentials: 'same-origin' });
+      if(r.ok) {
+        const data = await r.json(); const rows = Array.isArray(data) ? data : (data && data.characters) || [];
+        rows.forEach(e => { const d = (e && e.sheet && typeof e.sheet === 'object') ? e.sheet : e; if(!d) return; if(d.system && d.system !== 'DB' && (!e || e.system !== 'DB')) return; add(d.name || (e && e.name), d.heroicAbilities || d.abilities); });
+      }
+    } catch(e) {}
+    return out;
+  }
+  // Every turn this round as [card, label], lowest first (a two-card Lightning Fast
+  // hero still choosing is listed at the lower card).
+  function dbTurnOrder() {
+    const slots = [];
+    items.filter(it => it.type === 'npc' && Array.isArray(it.dbCards)).forEach(n => n.dbCards.forEach(c => slots.push({ c, name: n.name || '?', pc: false })));
+    dbPcs.forEach(pc => { if(pc.cards.length) slots.push({ c: Math.min.apply(null, pc.cards), name: pc.name, pc: true }); });
+    return slots.sort((a, b) => a.c - b.c || (a.pc === b.pc ? 0 : a.pc ? -1 : 1));
+  }
+  // One line per combatant, lowest first: "Brok 3 · Zed 3 / 8 (Lightning Fast: keeps one) · Orc ×2: 1, 9".
+  function dbDealText() {
+    const rows = [];
+    dbPcs.forEach(pc => { if(!pc.cards.length) return; let t = pc.name + ' ' + pc.cards.join(' / ');
+      if(pc.cards.length > 1) t += ' (Lightning Fast: keeps one)';
+      if(pc.veteran && pc.prev != null && pc.cards.indexOf(pc.prev) < 0) t += ' (Veteran: may keep ' + pc.prev + ')';
+      rows.push({ c: Math.min.apply(null, pc.cards), t }); });
+    items.filter(it => it.type === 'npc' && Array.isArray(it.dbCards) && it.dbCards.length).forEach(n => {
+      const cs = n.dbCards.slice().sort((a, b) => a - b);
+      rows.push({ c: cs[0], t: (n.name || '?') + (cs.length > 1 ? ' ×' + cs.length + ': ' + cs.join(', ') : ' ' + cs[0]) }); });
+    return rows.sort((a, b) => a.c - b.c).map(r => r.t).join(' · ');
+  }
+  // Post the current deal to the campaign roll log (players see it in their sheet's
+  // Roll Log). A deliberate send — it goes out even while the GM hides their own
+  // rolls. No campaign linked → it lands in the GM's Roll Log only.
+  function dbPostDeal(decks) {
+    const text = dbDealText(); if(!text) return;
+    const label = 'Initiative · Round ' + round + ' · lowest acts first';
+    const first = dbTurnOrder()[0];
+    const result = first ? ('First: ' + first.name).slice(0, 40) : '';
+    const detail = text + (decks > 1 ? ' · ' + decks + ' decks (more than ten cards)' : '');
+    let sent = false;
+    try { if(typeof GMCamp !== 'undefined' && GMCamp.get && GMCamp.get()) sent = GMCamp.send({ type: 'normal', label, result, detail }); } catch(e) {}
+    if(!sent && typeof window.rollMonsterToDiceTray === 'function') window.rollMonsterToDiceTray({ kind: 'pblog', label, result, detail, type: '' });
+  }
+  async function dbDrawInitiative(noRender) {
     const npcs = items.filter(it => it.type === 'npc');
-    if(!npcs.length) return;
+    let party = []; try { party = await dbPartyForInit(); } catch(e) {}
+    const inTracker = new Set(npcs.map(n => String(n.name || '').trim().toLowerCase()).filter(Boolean));
+    party = party.filter(pc => !inTracker.has(pc.name.toLowerCase()));
+    if(!npcs.length && !party.length) { dbPcs = []; dbRenderBanner('No one to deal to yet — link a campaign with Dragonbane characters, or add combatants.'); return; }
     const fresh = () => { const d = [1,2,3,4,5,6,7,8,9,10]; for(let i = d.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [d[i], d[j]] = [d[j], d[i]]; } return d; };
-    let deck = fresh();
-    const draw = () => { if(!deck.length) deck = fresh(); return deck.pop(); };
+    let deck = fresh(), decks = 1;
+    const draw = () => { if(!deck.length) { deck = fresh(); decks++; } return deck.pop(); };
+    // Last round's kept card, for Veteran.
+    const prevBy = {}; dbPcs.forEach(pc => { if(pc.cards.length) prevBy[pc.name.toLowerCase()] = Math.min.apply(null, pc.cards); });
+    dbPcs = party.map(pc => {
+      const fast = dbAbil(pc, 'Lightning Fast'), veteran = dbAbil(pc, 'Veteran');
+      const cards = [draw()]; if(fast) cards.push(draw());
+      return { name: pc.name, cards: cards.sort((a, b) => a - b), fast, veteran, prev: veteran && prevBy[pc.name.toLowerCase()] != null ? prevBy[pc.name.toLowerCase()] : null };
+    });
     npcs.forEach(n => { const f = Math.max(1, Math.min(6, parseInt(n.dbFerocity, 10) || 1)); const cards = []; for(let i = 0; i < f; i++) cards.push(draw()); n.dbCards = cards.sort((a, b) => a - b); });
     const rest = items.filter(it => it.type !== 'npc');
     items = npcs.slice().sort((a, b) => a.dbCards[0] - b.dbCards[0]).concat(rest);
-    if(!noRender) { render(); if(window.__ddScheduleSave) window.__ddScheduleSave(); }
+    dbDealRound = round;
+    dbPostDeal(decks);
+    render();
+    if(window.__ddScheduleSave) window.__ddScheduleSave();
+  }
+  // The initiative banner above the cards: this round's full turn order, with
+  // the heroes' cards editable (the monsters' cards are edited on their cards).
+  function dbRenderBanner(msg) {
+    if(window.GM_SYSTEM !== 'DB') { if(dbBanner) dbBanner.style.display = 'none'; return; }
+    if(!dbBanner) {
+      dbBanner = document.createElement('div'); dbBanner.className = 'db-init-banner'; list.parentNode.insertBefore(dbBanner, list);
+      dbBanner.addEventListener('click', e => {
+        const k = e.target.closest('[data-dbkeep]'); if(k) { const pc = dbPcs[+k.dataset.pi]; if(pc) { pc.cards = [+k.dataset.dbkeep]; dbRenderBanner(); if(window.__ddScheduleSave) window.__ddScheduleSave(); } return; }
+        if(e.target.closest('.dbi-post')) { dbPostDeal(1); return; }
+      });
+      dbBanner.addEventListener('change', e => {
+        const inp = e.target.closest('.dbi-card'); if(!inp) return; const pc = dbPcs[+inp.dataset.pi]; if(!pc) return;
+        pc.cards[+inp.dataset.ci] = Math.max(1, Math.min(10, parseInt(inp.value, 10) || 1)); dbRenderBanner(); if(window.__ddScheduleSave) window.__ddScheduleSave();
+      });
+    }
+    const esc = t => String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    const dealt = dbPcs.length || items.some(it => it.type === 'npc' && Array.isArray(it.dbCards) && it.dbCards.length);
+    if(!dealt && !msg) { dbBanner.style.display = 'none'; dbBanner.innerHTML = ''; return; }
+    let h = '<div class="dbi-hd"><span class="dbi-t">🃏 Initiative' + (dbDealRound != null ? ' · Round ' + dbDealRound : '') + '</span><span class="dbi-s">lowest acts first</span>' + (dealt ? '<button type="button" class="btn small ghost dbi-post" title="Send the current cards to the players\' Roll Log again (after an edit or a Lightning Fast choice)">Post to log</button>' : '') + '</div>';
+    if(msg) h += '<div class="dbi-msg">' + esc(msg) + '</div>';
+    if(dealt) {
+      h += '<div class="dbi-order">' + dbTurnOrder().map(sl => '<span class="dbi-slot' + (sl.pc ? ' pc' : '') + '"><b>' + sl.c + '</b> ' + esc(sl.name) + '</span>').join('') + '</div>';
+      if(dbPcs.length) h += '<div class="dbi-pcs">' + dbPcs.map((pc, pi) => {
+        let x = '<span class="dbi-pc"><span class="dbi-n">' + esc(pc.name) + '</span>';
+        x += pc.cards.map((c, ci) => '<input class="dbi-card" type="number" min="1" max="10" data-pi="' + pi + '" data-ci="' + ci + '" value="' + c + '" aria-label="' + esc(pc.name) + ' initiative card">').join('');
+        if(pc.cards.length > 1) x += '<span class="dbi-note">Lightning Fast — keep:</span>' + pc.cards.map(c => '<button type="button" class="dbi-keep" data-pi="' + pi + '" data-dbkeep="' + c + '">' + c + '</button>').join('');
+        if(pc.veteran && pc.prev != null && pc.cards.indexOf(pc.prev) < 0) x += '<button type="button" class="dbi-keep vet" data-pi="' + pi + '" data-dbkeep="' + pc.prev + '" title="Veteran (1 WP): keep last round\'s card instead">Veteran: keep ' + pc.prev + '</button>';
+        return x + '</span>';
+      }).join('') + '</div>';
+    }
+    dbBanner.innerHTML = h; dbBanner.style.display = '';
   }
   // Pirate Borg initiative (Guidebook p.30): d6 for the sides — 1-3 the enemies
   // act first, 4-6 the PCs do. Optional individual initiative: d6 + AGILITY for
@@ -9729,8 +9858,8 @@ function init_trackers(root) {
   root._dbDrawInitiative = dbDrawInitiative;
   function nextRound() {
     round += 1;
-    // Dragonbane: the initiative cards are dealt anew every round.
-    if(window.GM_SYSTEM === 'DB' && items.some(it => Array.isArray(it.dbCards) && it.dbCards.length)) dbDrawInitiative(true);
+    // Dragonbane: once a deal is on the table, the cards are dealt anew every round.
+    if(window.GM_SYSTEM === 'DB' && (dbPcs.length || items.some(it => Array.isArray(it.dbCards) && it.dbCards.length))) dbDrawInitiative(true);
     updateRoundDisplay();
     items.forEach(it => { if(it.type === 'tracker' && it.kind === 'rounds') it.rounds = Math.max(0, it.rounds - 1); });
     render();
@@ -9769,10 +9898,12 @@ function init_trackers(root) {
   // the exact same combat-card visual (read-only — the hub strips the inputs).
   window.buildNpcCard = buildNpcCard;
 
-  root._getState = () => ({ round, items });
+  root._getState = () => ({ round, items, dbPcs, dbDealRound });
   root._setState = (st) => {
     if(!st) return;
     round = st.round || 1;
+    dbPcs = Array.isArray(st.dbPcs) ? st.dbPcs.filter(x => x && x.name && Array.isArray(x.cards)) : [];
+    dbDealRound = st.dbDealRound != null ? st.dbDealRound : null;
     // Accept the new unified shape, and migrate old saves that kept
     // { trackers: [...] } and { npcs: [...] } in two separate tools.
     let list_ = Array.isArray(st.items) ? st.items.slice() : [];
@@ -19817,6 +19948,8 @@ function init_party(root) {
   });
 
   root._getState = () => ({ chars, openIds: [...openIds], nextId });
+  // The Combat Tracker's Dragonbane Initiative deals a card to each of these.
+  root._dbInitParty = () => chars.filter(x => x && x.sheet && x.sheet.system === 'DB').map(x => ({ name: x.sheet.name, abilities: x.sheet.abilities || [] }));
   root._setState = (st) => {
     if(!st) return;
     chars  = Array.isArray(st.chars) ? st.chars.filter(x => x && x.sheet) : [];

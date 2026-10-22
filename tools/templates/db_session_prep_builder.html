@@ -63,25 +63,26 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    /* Dragonbane: crimson and gold on near-black, parchment pages.
+    /* Dragonbane: the core book's green and gold on green-black, parchment pages.
+       Red is the Hideout wordmark's alone (red letters in a gold outline).
        Sidebar --ui-* values match :root[data-themed][data-system="DB"] in
        public/tokens.css (which wins when injected); these are the fallback. */
-    --ink: #2a1d14; --paper: #efe2c4; --accent: #b3261e; --accent-dark: #8a1c16;
-    --accent-red: #b3261e; --accent-red-dark: #8a1c16;
+    --ink: #2a1d14; --paper: #efe2c4; --accent: #236855; --accent-dark: #1e5842;
+    --accent-red: #236855; --accent-red-dark: #1e5842;
     --muted: #6e5b45; --rule: #d3bf96; --box-bg: #e9dab7; --read-bg: #2a1d14;
     --read-text: #f3e7cc; --highlight: #c9a14a; --green: #4f6a2f; --blue-npc: #2f4f6f;
-    --section-hdr: #8a1c16; --table-hdr: #5a1a14; --preview-bg: #0f0e0d;
-    --gold: #c9a14a; --gold-lift: #e3c27a; --db: #b3261e; --db-ink: #e0614f;
+    --section-hdr: #1e5842; --table-hdr: #1e5842; --preview-bg: #0d110f;
+    --gold: #c9a14a; --gold-lift: #e3c27a; --db: #236855; --db-ink: #5cb894;
     /* The logo red: every Hideout title is lettered in it inside a --gold stroke. */
     --db-logo: #e42a32;
     --font-display: "Hideout", "EB Garamond", Georgia, serif;
     --font-label: "Minion Pro", "EB Garamond", Georgia, serif;
     --font-body: "EB Garamond", Georgia, serif;
-    /* Masthead banner — near-black into crimson, with the title as the logo (red, gold outline) */
-    --banner-a: #1a1918; --banner-b: #4a1410; --title-color: #e42a32; --title-weight: 400; --sub-color: #e3d2ad;
-    /* UI (sidebar) — neutral near-black */
-    --ui-bg: #1a1918; --ui-panel: #232120; --ui-border: #3f3a35;
-    --ui-text: #eee3cc; --ui-muted: #b5a68c; --ui-accent: #e0614f; --ui-highlight: #b3261e;
+    /* Masthead banner — green-black into the book's green, with the title as the logo (red, gold outline) */
+    --banner-a: #0b1f18; --banner-b: #236855; --title-color: #e42a32; --title-weight: 400; --sub-color: #e3d2ad;
+    /* UI (sidebar) — green-tinted near-black */
+    --ui-bg: #161b19; --ui-panel: #1d2421; --ui-border: #34403a;
+    --ui-text: #eee3cc; --ui-muted: #b5a68c; --ui-accent: #5cb894; --ui-highlight: #236855;
   }
   body { font-family: 'Barlow', sans-serif; background: var(--ui-bg); color: var(--ui-text); display: flex; height: 100vh; overflow: hidden; }
 
@@ -658,7 +659,7 @@ body.flow-mode .page + .page {
    the ground behind the pages are themed by public/tokens.css
    (:root[data-themed][data-system="DB"]); everything below is page-side or
    Dragonbane-only sidebar furniture. Hideout titles, Minion Pro labels,
-   Garamond body, crimson + gold on parchment. */
+   Garamond body, green + gold on parchment (red only in the Hideout titles). */
 .page { font-family: var(--font-body); background: radial-gradient(120% 90% at 50% 40%, #f4e9d0 0%, #ecdcb8 70%, #dfc99c 100%); color: var(--ink); }
 .page .p-text, .page .entry-desc, .page .loc-desc, .page .clue-item, .page .sb-notes, .page .sb-npc-notes, .page .rt-table, .page .loc-dq, .page .sb-flavor, .page .read-aloud p { font-family: var(--font-body); }
 .page .p-text, .page .entry-desc, .page .loc-desc, .page .clue-item { font-size: 10.5px; line-height: 1.5; }
@@ -680,12 +681,12 @@ body.flow-mode .page + .page {
 .page.dark-mode .sl, .page.dark-mode .sb-name { color: var(--db-logo); -webkit-text-stroke: var(--db-stroke, .11em) var(--gold); paint-order: stroke fill; }
 .adventure-title { --db-stroke: .09em; }
 .sb-type, .entry-meta, .loc-tag { color: var(--accent-dark); }
-.read-aloud, .sb-flavor { background: linear-gradient(180deg, #2a1d14, #1f150e); border-left: 4px solid var(--db); }
+.read-aloud, .sb-flavor { background: linear-gradient(180deg, #17302a, #10221d); border-left: 4px solid var(--db); }
 .read-aloud p, .sb-flavor { color: #f3e7cc; font-size: 10px; }
 .stat-block { background: #eadbb8; border-top-color: var(--db); }
 .sb-table th { background: var(--table-hdr); color: #f3e2bd; font-family: var(--font-label); font-weight: 400; letter-spacing: .04em; }
 .sb-table td { font-family: var(--font-body); font-size: 9.5px; }
-/* A monster's D6 attack row: the die result as a crimson tab. */
+/* A monster's D6 attack row: the die result as a green tab. */
 .sb-ability.sb-matk { display: flex; gap: 5px; align-items: baseline; }
 .sb-ability.sb-matk .sb-d6 { flex: 0 0 auto; font-family: var(--font-display); font-size: 9px; letter-spacing: .04em; color: #fff; background: var(--db); border-radius: 3px; padding: 0 4px; line-height: 1.5; }
 .sb-ability.sb-matk strong { color: var(--accent-dark); }
@@ -714,19 +715,22 @@ body.flow-mode .page + .page {
 .db-tbl td { font-size: 9.6px !important; }
 .db-dmg { font-family: var(--font-display); font-size: 9px; color: #fff; background: var(--db); border-radius: 3px; padding: 0 4px; }
 .db-src { color: var(--muted); font-size: 9px; }
-/* Dark page: neutral near-black, cream text */
-.page.dark-mode { background: radial-gradient(120% 90% at 50% 40%, #222120 0%, #1a1918 70%, #121110 100%); }
+/* Dark page: green-tinted near-black, cream text */
+.page.dark-mode { background: radial-gradient(120% 90% at 50% 40%, #1e2522 0%, #161b19 70%, #0f1311 100%); }
 .page.dark-mode .p-text, .page.dark-mode .loc-desc, .page.dark-mode .entry-desc, .page.dark-mode .sb-ability, .page.dark-mode .columns { color: #e9dcc0; }
 .page.dark-mode .entry-name { color: #f0d9a8; }
-.page.dark-mode .stat-block, .page.dark-mode .npc-block, .page.dark-mode .mob-block { background: #262422; }
-.page.dark-mode .sb-table td { background: #1e1c1a; color: #e9dcc0; }
-.page.dark-mode .clue-item { background: #262422; color: #e9dcc0; }
-.page.dark-mode .db-box { background: rgba(10,10,9,.55); border-color: #3f3a35; }
-.page.dark-mode .db-badge { background: #262422; color: #eee3cc; border-color: #5a5248; }
+.page.dark-mode .stat-block, .page.dark-mode .npc-block, .page.dark-mode .mob-block { background: #212926; }
+.page.dark-mode .sb-table td { background: #1a201e; color: #e9dcc0; }
+.page.dark-mode .clue-item { background: #212926; color: #e9dcc0; }
+.page.dark-mode .db-box { background: rgba(8,12,10,.55); border-color: #34403a; }
+.page.dark-mode .db-badge { background: #212926; color: #eee3cc; border-color: #4a5a52; }
 .page.dark-mode .db-badge > span, .page.dark-mode .db-route, .page.dark-mode .sb-ability.sb-matk strong { color: var(--gold-lift); }
 .page.dark-mode .db-badge.gold { background: #3a2e15; border-color: var(--gold); }
 .page.dark-mode .db-note { color: #e2a27a; } .page.dark-mode .db-note.dim, .page.dark-mode .db-src { color: #b5a68c; }
 .page.dark-mode .db-mishaps .sb-ability { color: #f0b8a0; }
+/* --accent is the book's deep green — fine as a rule or fill, too dim as text on the dark
+   page; the lifted --db-ink (6.6:1) takes the green text there. */
+.page.dark-mode .entry-meta, .page.dark-mode .sb-type, .page.dark-mode .loc-tag, .page.dark-mode .rt-table .rt-roll, .page.dark-mode .map-placeholder, .page.dark-mode .db-site-box .loc-lbl, .page.dark-mode .db-danger .loc-lbl, .page.dark-mode .db-boss .loc-lbl { color: var(--db-ink) !important; }
 /* Sidebar furniture (Dragonbane-only controls) */
 .db-tabs { flex-wrap: wrap; }
 .db-tabs .tab-btn { flex: 1 0 25%; font-size: 8px; padding: 7px 2px; }
@@ -742,6 +746,9 @@ body.flow-mode .page + .page {
 .db-checks label { font-size: 11px; color: var(--ui-text); display: flex; gap: 6px; align-items: center; cursor: pointer; line-height: 1.35; }
 .btn-add.btn-mini { padding: 5px; margin-bottom: 6px; }
 .btn-add.btn-roll { border-color: var(--ui-highlight); color: var(--ui-accent); }
+/* --ui-accent is the lifted green for text; a filled button takes the book's deep green so its white label reads (6.4:1). */
+.btn-primary { background: var(--ui-highlight); }
+.btn-primary:hover { background: #2e8269; }
 @media (max-width: 768px) { .db-tabs .tab-btn { font-size: 9px !important; } .db-checks label { font-size: 13px; } }
 </style>
 <style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}

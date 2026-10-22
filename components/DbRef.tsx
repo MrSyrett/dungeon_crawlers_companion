@@ -3,10 +3,11 @@ import PageHeader from "./PageHeader";
 
 // Shared shell for the Dragonbane reference pages (app/dragonbane/*) — the same
 // pieces as LotrRef/DndRef (header, chips, search, count line, empty state,
-// cards) in crimson on dark parchment. Borders and hovers take the brand crimson
-// var(--db); text accents take var(--sys-link), which the DB page theme maps to
-// the lifted crimson (--db-ink) so it reads on the umber panels. Eyebrow labels
-// use Minion Pro (--sys-label) in the parchment gold (--sys-sub).
+// cards) in the core book's green and gold on dark parchment. Borders and hovers
+// take the brand green var(--db); text accents take var(--sys-link), which the DB
+// page theme maps to the lifted green (--db-ink) so it reads on the dark panels.
+// Eyebrow labels use Minion Pro (--sys-label) in the parchment gold (--sys-sub).
+// Red is the Hideout wordmark's alone (headings / .font-display, via the theme).
 //
 // Typography: headings pick up Hideout from the theme (one bold cut, set at
 // weight 400 so the browser doesn't fake a heavier one), mixed case.
