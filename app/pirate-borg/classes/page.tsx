@@ -208,7 +208,7 @@ export default async function PbClassesPage({ searchParams }: { searchParams: Pr
         <ol className="flex list-decimal flex-col gap-1 pl-5 text-[13px] leading-relaxed text-[var(--muted)] marker:text-[var(--pb-ink)]">
           {PB_RULES.creation.steps.map((s) => <li key={s.id}>{s.text}</li>)}
         </ol>
-        <p className="mt-2 text-[12.5px] text-[var(--muted)]">Tables for every step are on <a href="/pirate-borg/backgrounds" className="text-[var(--sys-link)] underline">Backgrounds</a> and <a href="/pirate-borg/gear" className="text-[var(--sys-link)] underline">Gear</a>; abilities and HP on <a href="/pirate-borg/rules#abilities" className="text-[var(--sys-link)] underline">Rules</a>.</p>
+        <p className="mt-2 text-[12.5px] text-[var(--muted)]">Tables for every step are on <a href="/pirate-borg/backgrounds" className="text-[var(--sys-link)] underline">Backgrounds</a> and <a href="/pirate-borg/gear" className="text-[var(--sys-link)] underline">Gear</a>.</p>
       </section>
     </div>
   );

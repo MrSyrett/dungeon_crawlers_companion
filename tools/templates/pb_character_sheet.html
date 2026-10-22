@@ -5,8 +5,8 @@
        self-hosted: the injected head links /tokens.css, whose @font-face blocks
        serve them from this origin (the label face below re-declares the same
        /fonts/1651-alchemy.woff2 with a unicode-range). -->
-<!-- BUILD: Pirate Borg Character Sheet — 2026-10-21 -->
-<script>window.__BUILD__="Pirate Borg Character Sheet — 2026-10-21";</script>
+<!-- BUILD: Pirate Borg Character Sheet — 2026-10-22 -->
+<script>window.__BUILD__="Pirate Borg Character Sheet — 2026-10-22";</script>
 <meta charset="UTF-8">
 <!-- Fixed size on mobile: no pinch zoom, so the sheet behaves like an app rather
      than a zoomable document (standalone note: iOS honours this only from the
@@ -159,15 +159,16 @@ body.dark .card{background:var(--box);box-shadow:0 2px 10px rgba(0,0,0,.4);}
 
 /* abilities */
 .ab-grid{display:flex;flex-direction:column;gap:5px;padding:8px;}
-.ab-row{display:grid;grid-template-columns:1fr 62px 40px;align-items:center;gap:8px;border:1px solid var(--rule);border-radius:9px;background:var(--box);padding:5px 8px;}
+.ab-row{display:grid;grid-template-columns:1fr 62px;align-items:center;gap:8px;border:1px solid var(--rule);border-radius:9px;background:var(--box);padding:5px 8px;}
 body.dark .ab-row{background:#1a1212;}
 .ab-name{font-family:var(--f-label);font-size:17px;letter-spacing:.03em;color:var(--acc-dk);cursor:pointer;line-height:1.05;}
 .ab-name:hover{text-decoration:underline;}
 .ab-use{display:block;font-family:var(--f-ui);font-size:11.5px;color:var(--muted);letter-spacing:0;line-height:1.2;margin-top:1px;}
 .ab-tmp{font-family:var(--f-num);font-size:12px;color:var(--red);}
-.ab-row input{width:58px;height:36px;border:2px solid var(--acc);border-radius:8px;background:var(--input-bg);font-family:var(--f-num);font-size:21px;font-weight:600;text-align:center;color:var(--ink);outline:none;}
-.ab-roll{width:38px;height:34px;border:1px solid var(--acc);background:transparent;color:var(--acc-dk);border-radius:7px;cursor:pointer;font-size:14px;line-height:1;}
-.ab-roll:hover{background:var(--acc);color:#fff;}
+.ab-row input{width:58px;height:36px;border:1px solid var(--acc-dk);border-radius:8px;background:var(--acc);font-family:var(--f-num);font-size:21px;font-weight:600;text-align:center;color:#fff;outline:none;}
+body.sheet-locked .ab-row input{cursor:pointer;user-select:none;caret-color:transparent;}
+body.sheet-locked .ab-row input:hover{filter:brightness(1.15);}
+body.sheet-unlocked .ab-row input{background:var(--input-bg);color:var(--ink);border:2px dashed var(--acc);cursor:text;}
 
 /* luck */
 .luck-box{padding:8px 10px;}
@@ -177,8 +178,8 @@ body.dark .ab-row{background:#1a1212;}
 .lpip{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--acc);background:transparent;}
 .lpip.on{background:var(--acc);box-shadow:inset 0 0 0 2px var(--card);}
 body.dark .lpip.on{box-shadow:inset 0 0 0 2px var(--box);}
-.luck-uses{display:flex;flex-direction:column;gap:4px;margin-top:8px;}
-.luck-uses .small-btn{text-align:left;}
+.cond-box{padding:8px 10px;}
+.cond-sum:empty::before{content:"None";font-size:13px;color:var(--muted);}
 
 /* status / vitals */
 .vitals{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px;align-items:stretch;}
@@ -187,9 +188,10 @@ body.dark .vital{background:#1a1212;}
 .vital.wide{grid-column:1 / -1;}.vital.half{grid-column:span 2;}
 .vlbl{font-family:var(--f-label);font-size:14px;letter-spacing:.02em;color:var(--ink);display:flex;justify-content:space-between;align-items:baseline;gap:4px;flex-wrap:wrap;}
 .vlbl small{font-size:12px;letter-spacing:0;color:var(--muted);text-align:right;font-family:var(--f-ui);}
-.vbig{font-family:var(--f-num);font-size:26px;font-weight:600;line-height:1.1;color:var(--ink);display:flex;align-items:center;gap:5px;margin-top:2px;flex-wrap:wrap;}
-.vbig input{width:56px;height:34px;border:1px solid var(--input-border);border-radius:7px;background:var(--input-bg);font-family:var(--f-num);font-size:21px;font-weight:600;text-align:center;color:var(--ink);outline:none;}
+.vbig{font-family:var(--f-num);font-size:26px;font-weight:600;line-height:1.1;color:var(--ink);display:flex;align-items:center;gap:4px;margin-top:2px;flex-wrap:wrap;}
+.vbig input{width:52px;height:34px;border:1px solid var(--input-border);border-radius:7px;background:var(--input-bg);font-family:var(--f-num);font-size:21px;font-weight:600;text-align:center;color:var(--ink);outline:none;}
 .vbig .slash{color:var(--muted);font-size:20px;}
+.vbig .small-btn{padding:4px 7px;}
 .vbig .calc{font-size:22px;color:var(--acc-dk);}
 .vbar{height:6px;border-radius:4px;background:var(--rule);overflow:hidden;margin-top:5px;}
 .vbar>span{display:block;height:100%;background:var(--acc);}
@@ -199,7 +201,7 @@ body.dark .vital{background:#1a1212;}
 .small-btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--rule);}
 .small-btn.ghost:hover{background:var(--acc-lt);}
 .small-btn:disabled{opacity:.4;cursor:default;filter:none;}
-.cond-sum{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;}
+.cond-sum{display:flex;gap:5px;flex-wrap:wrap;}
 .cs{font-family:var(--f-label);font-size:12.5px;border:1px solid var(--rule);border-radius:12px;padding:2px 9px;color:var(--muted);cursor:pointer;background:transparent;}
 .cs.on{background:var(--acc);border-color:var(--acc-dk);color:#fff;}
 .cs b{font-family:var(--f-num);}
@@ -373,7 +375,6 @@ body.dark .eq-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
   .small-btn{min-height:36px;padding:7px 11px;}
   .row-x{min-width:36px;min-height:36px;font-size:18px;}
   .ab-row input{height:38px;}
-  .ab-roll{width:42px;height:38px;}
   .m-btn{min-height:44px;}
   .brow-add{min-height:40px;}
   .chip{padding:7px 12px;}
@@ -383,8 +384,8 @@ body.dark .eq-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
   .log-action-btn{min-height:38px;}
 }
 @media (max-width:600px){
-  .tabs-bar{display:grid;grid-template-columns:repeat(3,1fr);}
-  .tabs-bar .tab-btn{padding:10px 4px;min-width:0;font-size:14px;}
+  .tabs-bar{flex-wrap:nowrap;}
+  .tabs-bar .tab-btn{padding:10px 2px;min-width:0;font-size:13.5px;}
 }
 @media (max-width:560px){
   /* phone: each inventory row becomes a stacked grid so nothing runs off the right edge */
@@ -491,11 +492,15 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   <div class="body-row">
     <div class="stats-col">
       <div class="card">
-        <div class="section-bar"><span>Abilities</span><span class="sb-note">click to roll · d20 ± ability</span></div>
+        <div class="section-bar"><span>Abilities</span></div>
         <div class="ab-grid" id="ab-grid"></div>
       </div>
       <div class="card">
-        <div class="section-bar"><span>Devil's Luck</span><span class="sb-note" id="luck-note"></span></div>
+        <div class="section-bar"><span>Conditions</span><span class="sb-note" id="cond-count"></span></div>
+        <div class="cond-box"><div class="cond-sum" id="cond-sum"></div></div>
+      </div>
+      <div class="card">
+        <div class="section-bar"><span>Devil's Luck</span></div>
         <div class="luck-box" id="luck-box"></div>
       </div>
     </div>
@@ -507,19 +512,15 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="broken-banner" id="broken-banner"></div>
         <div class="vitals">
           <div class="vital half">
-            <div class="vlbl"><span>Hit Points</span><small id="hp-note"></small></div>
-            <div class="vbig"><input type="number" id="f-hp" class="no-spin" data-nolock oninput="onHpInput()"><span class="slash">/</span><input type="number" id="f-hpmax" class="no-spin" onchange="onHpMax(this.value)" title="Maximum HP (rolled: class die ± TOUGHNESS, +d6 each time you get better)">
-              <button class="small-btn ghost" onclick="promptDamage()" title="Take damage — your armor die and hat reduce it unless it's black powder">− Dmg</button><button class="small-btn ghost" onclick="promptHeal()">+ Heal</button></div>
-            <div class="vbar"><span id="hp-bar"></span></div>
-          </div>
-          <div class="vital half">
-            <div class="vlbl"><span>Armor</span><small id="armor-note"></small></div>
+            <div class="vlbl"><span>Armor</span></div>
             <div class="vbig" id="armor-big"></div>
             <div class="vline" id="armor-line"></div>
           </div>
-          <div class="vital wide">
-            <div class="vlbl"><span>Conditions</span><small id="cond-count"></small></div>
-            <div class="cond-sum" id="cond-sum"></div>
+          <div class="vital half">
+            <div class="vlbl"><span>Hit Points</span><small id="hp-note"></small></div>
+            <div class="vbig"><input type="number" id="f-hp" class="no-spin" data-nolock oninput="onHpInput()"><span class="slash">/</span><input type="number" id="f-hpmax" class="no-spin" onchange="onHpMax(this.value)" title="Maximum HP">
+              <button class="small-btn ghost" onclick="promptDamage()" title="Take damage">− Dmg</button><button class="small-btn ghost" onclick="promptHeal()">+ Heal</button></div>
+            <div class="vbar"><span id="hp-bar"></span></div>
           </div>
         </div>
       </div>
@@ -527,29 +528,29 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="card tabs-card">
         <div class="tabs-bar">
           <button class="tab-btn" data-tab="action" onclick="setTab('action')">Action</button>
-          <button class="tab-btn" data-tab="class" onclick="setTab('class')">Class &amp; Magic</button>
+          <button class="tab-btn" data-tab="class" onclick="setTab('class')">Class</button>
+          <button class="tab-btn" data-tab="magic" onclick="setTab('magic')">Magic</button>
           <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Gear</button>
           <button class="tab-btn" data-tab="background" onclick="setTab('background')">Background</button>
-          <button class="tab-btn" data-tab="notes" onclick="setTab('notes')">Notes</button>
         </div>
 
         <div class="tab-panel" id="tab-action"><div id="pb-turn"></div></div>
 
         <div class="tab-panel" id="tab-class">
-          <div class="section-bar"><span id="class-title">Class</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('feature')">＋ Feature</button></span></div>
+          <div class="section-bar"><span id="class-title">Class</span></div>
           <div id="class-body"></div>
-          <div id="magic-body"></div>
         </div>
 
+        <div class="tab-panel" id="tab-magic"><div id="magic-body"></div></div>
+
         <div class="tab-panel" id="tab-gear">
-          <div class="section-bar"><span>Inventory</span><span class="hdr-right"><span class="sb-note" title="Equipped weapons are your attacks; the worn clothing and hat are your armor">● equipped / worn</span><button class="hdr-btn" onclick="openPicker('shop')">＋ Gear</button><button class="hdr-btn" onclick="addCustomItem()">＋ Custom</button></span></div>
-          <div class="enc" id="enc"></div>
-          <table class="tbl" id="inv-tbl"><thead><tr><th style="width:48%;">Item</th><th style="width:50px;">Qty</th><th style="width:50px;" title="How many of your 8 + STRENGTH carrying slots it takes">Slots</th><th style="width:16%;">Stowed in</th><th>Note / uses</th><th style="width:30px;"></th></tr></thead><tbody id="inv-body"></tbody></table>
-          <div class="subhead">Silver</div>
+          <div class="section-bar"><span>Silver</span></div>
           <div class="coins">
             <label>Silver <input type="number" id="c-silver" class="no-spin" data-nolock oninput="onSilver()"></label>
-            <span class="tray-note" id="coin-note" style="color:var(--muted);"></span>
           </div>
+          <div class="section-bar"><span>Inventory</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('shop')">＋ Gear</button></span></div>
+          <div class="enc" id="enc"></div>
+          <table class="tbl" id="inv-tbl"><thead><tr><th style="width:48%;">Item</th><th style="width:50px;">Qty</th><th style="width:50px;">Slots</th><th style="width:16%;">Stowed in</th><th>Note / uses</th><th style="width:30px;"></th></tr></thead><tbody id="inv-body"></tbody></table>
         </div>
 
         <div class="tab-panel" id="tab-background">
@@ -565,9 +566,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
             <div class="fld"><label>Ship &amp; crew</label><input type="text" id="f-ship" onchange="onField('ship',this.value)"></div>
             <div class="fld" style="grid-column:1/-1;"><label>Story</label><textarea id="f-story" onchange="onField('story',this.value)"></textarea></div>
           </div></div>
-        </div>
-
-        <div class="tab-panel" id="tab-notes">
           <div class="section-bar"><span>Notes</span></div>
           <div class="notes-box"><textarea id="f-notes" onchange="onField('notes',this.value)"></textarea></div>
         </div>
@@ -589,18 +587,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>
-  <div class="log-entries" id="log-entries"><div class="log-hint">Click an ability to roll it — d20 ± the ability. The GM says whether it beats the DR.</div></div>
+  <div class="log-entries" id="log-entries"><div class="log-hint">Click an ability or attack to roll</div></div>
   <div class="dice-tray">
-    <div class="tray-row">
-      <span class="tray-label">Last roll</span>
-      <button class="tray-toggle" id="tray-reroll" onclick="luckOnLast('reroll')" disabled title="Spend 1 Devil's Luck: reroll your last test">Luck: reroll</button>
-      <button class="tray-toggle" id="tray-lower" onclick="luckOnLast('lower')" disabled title="Spend 1 Devil's Luck: your last test's DR drops by 4 — logged for the GM">Luck: −4 DR</button>
-      <button class="tray-toggle" id="tray-neut" onclick="luckOnLast('neutralize')" disabled title="Spend 1 Devil's Luck: cancel the crit or fumble on your last test">Luck: neutralize</button>
-    </div>
     <div class="dice-btns">
       <button class="dice-btn" onclick="rollFree(2)">d2</button><button class="dice-btn" onclick="rollFree(4)">d4</button><button class="dice-btn" onclick="rollFree(6)">d6</button><button class="dice-btn" onclick="rollFree(8)">d8</button><button class="dice-btn" onclick="rollFree(10)">d10</button><button class="dice-btn" onclick="rollFree(12)">d12</button><button class="dice-btn" onclick="rollFree(20)">d20</button>
     </div>
-    <div class="tray-note">Natural 20 = critical, natural 1 = fumble. The GM sets the DR and says whether a roll beats it.</div>
   </div>
 </div>
 </div>
@@ -640,7 +631,6 @@ function uid(){ return 'i'+Math.random().toString(36).slice(2,9); }
 function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
 var ABIL=['STRENGTH','AGILITY','PRESENCE','TOUGHNESS','SPIRIT'];
 var ABS={STRENGTH:'STR',AGILITY:'AGL',PRESENCE:'PRE',TOUGHNESS:'TOU',SPIRIT:'SPI'};
-var ABIL_USE={STRENGTH:'melee · lift · grapple',AGILITY:'defend · balance · swim · flee',PRESENCE:'ranged · perceive · charm',TOUGHNESS:'grog · poison · breath · falls',SPIRIT:'relics · rituals · willpower'};
 var DIE_BY_TIER=[null,'d2','d4','d6'];
 var NONMETAL=/^(unarmed-insults|broken-bottle|belaying-pin|wood-plank|whale-bone|cudgel|heavy-club|cat-o-nine-tails|blowpipe|wooden-knife|rotten-cargo-net|fists)$/;
 
@@ -661,7 +651,6 @@ function blankState(){ return {
   day:{ghost:false, breath:false, blood:false},
   deck:[], timed:[], subtab:'action', built:false, campaign:null }; }
 var S=blankState();
-var TR={luckMax:false, luckSoak:false};   // Devil's Luck armed for the next damage roll / the next hit
 
 // ── lookups (read the globals each time: the homebrew loader can add rows) ──
 function low(s){ return String(s||'').toLowerCase().trim(); }
@@ -818,39 +807,25 @@ function renderHeader(){
 }
 function renderAbilities(){
   var h=''; ABIL.forEach(function(a){ var t=tempAbil(a); var eff=abil(a);
-    h+='<div class="ab-row"><div><div class="ab-name" onclick="quickTest(\''+a+'\')" title="Roll '+a+': d20 '+sgn(eff)+'">'+a+'</div><span class="ab-use">'+ABIL_USE[a]+(t.length?' · <span class="ab-tmp">now '+sgn(eff)+' ('+esc(t.map(function(x){ return x.l; }).join(', '))+')</span>':'')+'</span></div>'+
-      '<input type="number" class="no-spin" id="ab-'+a+'" value="'+baseAbil(a)+'" min="-3" max="6" onchange="onAbil(\''+a+'\',this.value)" title="'+a+' modifier (−3 to +6)">'+
-      '<button class="ab-roll" data-nolock onclick="quickTest(\''+a+'\')" title="Roll d20 '+sgn(eff)+'" aria-label="Roll '+a+'">d20</button></div>'; });
+    h+='<div class="ab-row"><div><div class="ab-name" onclick="quickTest(\''+a+'\')" title="Roll '+a+': d20 '+sgn(eff)+'">'+a+'</div>'+(t.length?'<span class="ab-use"><span class="ab-tmp">now '+sgn(eff)+' ('+esc(t.map(function(x){ return x.l; }).join(', '))+')</span></span>':'')+'</div>'+
+      '<input type="number" class="no-spin" id="ab-'+a+'" value="'+baseAbil(a)+'" min="-3" max="6" onclick="if(locked())quickTest(\''+a+'\')" onchange="onAbil(\''+a+'\',this.value)" title="'+a+' '+sgn(eff)+'"></div>'; });
   $('ab-grid').innerHTML=h;
 }
 function renderLuck(){
-  var die=luckDie(); var n=num(S.luck); var ld=has('lucky-devil');
-  $('luck-note').innerHTML='die <b>'+esc(die)+'</b>';
-  var pips=''; for(var i=0;i<Math.max(n,1);i++) pips+='<span class="lpip'+(i<n?' on':'')+'"></span>';
-  var can=n>0&&!S.dead;
-  var b=function(lbl,fn,on,title){ return '<button class="small-btn'+(on?'':' ghost')+'" onclick="'+fn+'" '+(can||on?'':'disabled ')+'title="'+esc(title)+'">'+lbl+'</button>'; };
-  var h='<div class="luck-top"><span class="luck-n">'+n+'</span><span class="luck-pips">'+pips+'</span><span style="margin-left:auto;" class="counter"><button class="small-btn ghost" data-nolock onclick="adjLuck(-1)">−</button><button class="small-btn ghost" data-nolock onclick="adjLuck(1)">＋</button></span></div>';
-  h+='<div class="luck-uses">'+
-    b((TR.luckMax?'● ':'')+'Max damage on your next hit','armLuck(\'luckMax\')',TR.luckMax,'Spend 1 Luck: your next damage roll deals its maximum')+
-    b('Lower your last test\'s DR by 4','luckOnLast(\'lower\')',false,'Spend 1 Luck: the GM lowers the DR of your last test by 4 (it goes in the log)')+
-    b((TR.luckSoak?'● ':'')+'−d6 damage the next time you are hurt','armLuck(\'luckSoak\')',TR.luckSoak,'Spend 1 Luck: roll a d6 and subtract it from the next damage dealt to you')+
-    b('Reroll your last test','luckOnLast(\'reroll\')',false,'Spend 1 Luck: reroll your last test')+
-    b('Neutralize a crit or fumble','luckOnLast(\'neutralize\')',false,'Spend 1 Luck: cancel the critical or fumble on your last test')+'</div>';
-  h+='<div class="hint-line" style="padding:6px 0 0;">Recharges only when it is empty: after resting at least 6 hours, roll '+esc(die)+'.'+(ld?' <b>Lucky Devil</b>: every Luck you spend draws a card — '+luckyThreshold()+'+ regains 1, a Joker rolls on the Joker table.':'')+(animalDef()&&animalDef().luckDaily?' Lucky Parrot: roll d6 Luck each day (at dawn).':'')+'</div>';
-  $('luck-box').innerHTML=h;
+  var n=num(S.luck);
+  $('luck-box').innerHTML='<div class="luck-top"><span class="luck-n">'+n+'</span><span style="margin-left:auto;" class="counter"><button class="small-btn ghost" data-nolock onclick="adjLuck(-1)"'+(n>0?'':' disabled')+' aria-label="Spend one Devil\'s Luck">−</button><button class="small-btn ghost" data-nolock onclick="adjLuck(1)" aria-label="Gain one Devil\'s Luck">＋</button></span></div>';
 }
 function hpMax(){ return Math.max(1,num(S.hpMax,1)); }
 function renderStatus(){
   var hm=hpMax(); S.hp=Math.min(num(S.hp),hm);
   $('f-hp').value=S.hp; $('f-hpmax').value=hm; $('hp-bar').style.width=(hm?clamp(Math.round(100*Math.max(0,S.hp)/hm),0,100):0)+'%';
-  $('hp-note').textContent=(num(S.tempHp)>0?'+'+num(S.tempHp)+' temporary · ':'')+(S.hp===0&&!S.dead?'Broken':S.hp<0||S.dead?'dead':'TOUGHNESS '+sgn(abil('TOUGHNESS')));
+  $('hp-note').textContent=(num(S.tempHp)>0?'+'+num(S.tempHp)+' temporary · ':'')+(S.hp===0&&!S.dead?'Broken':S.hp<0||S.dead?'dead':'');
   var t=armorTier(), die=armorDie(), c=wornClothing(), hat=wornHat();
   $('armor-big').innerHTML='<span class="calc">'+(die?'−'+die:'—')+'</span><span style="font-size:14px;font-weight:400;color:var(--muted);font-family:var(--f-ui);">tier '+t+(c?' · '+esc(c.name):has('thick-skinned')?' · Thick Skinned':' · no armor')+(hat&&hat.dr?' · hat −'+hat.dr:'')+'</span>';
   var line=[]; extraProt().forEach(function(p){ line.push('<span class="tag" title="Extra protection, in addition to armor">−'+esc(p.die)+' '+esc(p.label)+(p.perm?'':' <button class="row-x" style="padding:0 2px;font-size:12px;" data-nolock onclick="removeProt('+p.i+')">✕</button>')+'</span>'); });
-  if(agilityPenalty()) line.push('<span class="tag warn">AGILITY tests +'+agilityPenalty()+' · defense +'+defensePenalty()+'</span>');
+  if(agilityPenalty()) line.push('<span class="tag warn">AGILITY +'+agilityPenalty()+' DR · defense +'+defensePenalty()+' DR</span>');
   if(c&&c.tier<c.origTier) line.push('<span class="tag">damaged (was tier '+c.origTier+')</span>');
-  $('armor-line').innerHTML=line.join('')||'<span>Black powder ignores armor.</span>';
-  $('armor-note').textContent=metalAtHand()?'metal: '+metalAtHand():'';
+  $('armor-line').innerHTML=line.join('');
   $('dead-banner').classList.toggle('on',!!S.dead);
   var bb=$('broken-banner'); if(S.broken&&!S.dead){ bb.classList.add('on'); bb.innerHTML='<b>Broken — '+esc(S.broken.name)+'</b> · '+esc(S.broken.text)+(S.broken.note?' <span style="color:var(--muted);">('+esc(S.broken.note)+')</span>':'')+' <button class="small-btn ghost" data-nolock onclick="clearBroken()">Recovered</button>'; } else { bb.classList.remove('on'); bb.innerHTML=''; }
   var cs=[]; var C=S.cond;
@@ -870,7 +845,7 @@ function renderStatus(){
   if(overEnc()) cs.push('<span class="cs on" title="STRENGTH and AGILITY tests +2 DR">Over-encumbered</span>');
   $('cond-sum').innerHTML=cs.join('');
   var n=A(S.timed).length; ['starving','infected','stunned','underwater','sunlight','invisible'].forEach(function(k){ if(C[k]) n++; }); if(num(C.hemorrhage)) n++; if(num(C.brain)) n++; if(num(C.out)) n++;
-  $('cond-count').textContent=n?n+' active':'none';
+  $('cond-count').textContent=n?n+' active':'';
 }
 function isMerfolk(){ return S.classId==='tall-tale'&&S.origin.variant==='merfolk'; }
 
@@ -878,15 +853,11 @@ function isMerfolk(){ return S.classId==='tall-tale'&&S.origin.variant==='merfol
 function renderClass(){
   var c=clsDef(); var mc=mechDef(); var h='';
   $('class-title').textContent=c?classLabel():'Class';
-  if(!c){ $('class-body').innerHTML='<div class="hint-line">No class yet. Use <b>Create</b> in the roll log to roll up a pirate, or pick a class in the header.</div>'; $('magic-body').innerHTML=renderMagic(); return; }
+  if(!c){ $('class-body').innerHTML='<div class="hint-line">No class yet.</div>'; $('magic-body').innerHTML=renderMagic(); return; }
   h+='<div class="feat"><div class="feat-text">'+esc(c.text||'')+'</div>'+(mc&&mc!==c?'<div class="feat-again"><b>'+esc(mc.name)+':</b> '+esc(mc.text||'')+'</div>':'')+'</div>';
   var ai=ailmentDef(); if(ai) h+='<div class="feat"><div class="feat-name">'+esc(ai.name)+' <span class="tag">ailment</span></div><div class="feat-text">'+esc(ai.text)+'</div>'+ailmentTools(ai)+'</div>';
   var v=variantDef(); if(v) h+='<div class="feat"><div class="feat-name">'+esc(v.name)+' <span class="tag">Tall Tale</span></div><div class="feat-text">'+esc(v.text)+'</div></div>';
   var an=ancestryDef()||animalDef(); if(an) h+='<div class="feat"><div class="feat-name">'+esc(an.name)+'</div><div class="feat-text">'+esc(an.text)+'</div>'+(an.weapon?'<div class="feat-again">Natural weapon: '+esc(an.weapon.name)+' '+esc(an.weapon.damage)+(an.weapon.special?' — '+esc(an.weapon.special):'')+'</div>':'')+'</div>';
-  var r=restrictions(); var rs=[];
-  if(!r.rituals) rs.push('can\'t use arcane rituals');
-  rs.push('relics and rituals almost never work in armor above tier '+(r.magicArmorTier||1)+(r.noColdIron?', near cold iron or while holding metal':' or while wielding cold iron'));
-  h+='<div class="feat"><div class="feat-name" style="font-size:14px;">Restrictions</div><div class="feat-text" style="color:var(--muted);">'+esc(rs.join('; '))+'.</div></div>';
   if(S.deity) h+='<div class="feat"><div class="feat-name">Whom dost thou serve?</div><div class="feat-text">'+esc(S.deity)+'</div></div>';
   if(S.features.length){ h+='<div class="subhead">Features</div>'; S.features.forEach(function(f,i){ var df=featDef(f.tbl,f.id)||{name:f.name||f.id,text:f.text||''}; var pk=num(f.picks,1);
     h+='<div class="feat"><div class="feat-name">'+esc(df.name)+(pk>1?' <span class="tag">×'+pk+'</span>':'')+' <button class="row-x lk-hide" style="float:right;" onclick="removeFeature('+i+')" title="Remove">✕</button></div><div class="feat-text">'+esc(df.text||'')+'</div>'+
@@ -896,34 +867,33 @@ function renderClass(){
 }
 function cardNote(f){ if(!f.card) return ''; var c=f.card; var p=[]; if(c.dr) p.push('DR '+sgn(c.dr)); if(c.step) p.push('damage die +'+c.step+' step'+(c.step>1?'s':'')); return p.length?' <span class="tag">cards: '+esc(p.join(', '))+'</span>':''; }
 function featureTools(f,df){ var id=f.id;
-  if(id==='blood-frenzy') return '<div class="vline">Kills this battle: <span class="counter"><button class="small-btn ghost" data-nolock onclick="adjKills(-1)">−</button><b>'+num(S.combat.kills)+'</b><button class="small-btn ghost" data-nolock onclick="adjKills(1)">＋</button></span> → +'+2*num(S.combat.kills)+' damage</div>';
-  if(id==='grog-brewer') return '<div class="vline">Brewed today: <span class="counter"><button class="small-btn ghost" data-nolock onclick="adjBrew(-1)">−</button><b>'+num(S.grog.brewed)+'</b><button class="small-btn ghost" data-nolock onclick="adjBrew(1)">＋</button></span> <button class="small-btn ghost" data-nolock onclick="brewGrog()">Brew d4</button>'+(S.grog.coated?' · coated: '+esc(S.grog.coated):'')+' · poison: TOUGHNESS DR'+grogPoisonDR()+' or −'+grogPoisonDie()+' HP</div>';
-  if(id==='liars-dice') return '<div class="vline">This combat: '+(S.combat.liars==null?'not rolled':S.combat.liars?'<b>even</b> — melee −2 DR, defend +2 DR':'odd — no effect')+' <button class="small-btn ghost" data-nolock onclick="rollLiars()">Roll 5d6</button></div>';
-  if(id==='lucky-devil') return '<div class="vline">Regain Luck on a card of <b>'+luckyThreshold()+'</b> or higher (ace 1, J 11, Q 12, K 13). Deck: '+deckLeft()+' cards left.</div>';
+  if(id==='blood-frenzy') return '<div class="vline">Kills: <span class="counter"><button class="small-btn ghost" data-nolock onclick="adjKills(-1)">−</button><b>'+num(S.combat.kills)+'</b><button class="small-btn ghost" data-nolock onclick="adjKills(1)">＋</button></span> +'+2*num(S.combat.kills)+' damage</div>';
+  if(id==='grog-brewer') return '<div class="vline">Brewed today: <span class="counter"><button class="small-btn ghost" data-nolock onclick="adjBrew(-1)">−</button><b>'+num(S.grog.brewed)+'</b><button class="small-btn ghost" data-nolock onclick="adjBrew(1)">＋</button></span> <button class="small-btn ghost" data-nolock onclick="brewGrog()">Brew d4</button>'+(S.grog.coated?' · coated: '+esc(S.grog.coated):'')+'</div>';
+  if(id==='liars-dice') return '<div class="vline">'+(S.combat.liars==null?'':S.combat.liars?'<b>even</b> ':'odd ')+'<button class="small-btn ghost" data-nolock onclick="rollLiars()">Roll 5d6</button></div>';
+  if(id==='lucky-devil') return '<div class="vline">Card needed: <b>'+luckyThreshold()+'+</b> · deck '+deckLeft()+'</div>';
   return ''; }
 function ailmentTools(ai){ var id=ai.id;
   if(id==='zombie') return '<div class="vline"><button class="small-btn ghost" data-nolock onclick="zombieDay()">A day without human flesh (−d2 HP)</button><button class="small-btn ghost" data-nolock onclick="eatBrain()">Eat a human brain (+2d6 HP)</button></div>';
-  if(id==='vampirism') return '<div class="vline"><button class="small-btn ghost" data-nolock onclick="drinkBlood(\'animal\')"'+(S.day.blood?' disabled':'')+'>Animal blood (+d2)</button><button class="small-btn ghost" data-nolock onclick="drinkBlood(\'human\')"'+(S.day.blood?' disabled':'')+'>Human blood (+d6)</button>'+(S.day.blood?' · fed this hour':'')+'</div>';
+  if(id==='vampirism') return '<div class="vline"><button class="small-btn ghost" data-nolock onclick="drinkBlood(\'animal\')"'+(S.day.blood?' disabled':'')+'>Animal blood (+d2)</button><button class="small-btn ghost" data-nolock onclick="drinkBlood(\'human\')"'+(S.day.blood?' disabled':'')+'>Human blood (+d6)</button>'+(S.day.blood?' · fed':'')+'</div>';
   if(id==='conduit') { var r=ritualDef(S.conduit.id); return '<div class="vline">Today\'s spirit ritual: <b>'+(r?esc(r.name):'—')+'</b>'+(S.conduit.used?' (used)':'')+' <button class="small-btn ghost" data-nolock onclick="conduitRoll()">Roll at dawn</button></div>'; }
-  if(id==='skeleton') return '<div class="vline">If you are killed, use <b>Reform</b> in the status banner to reroll the killing damage (3 or less: back with 1 HP).</div>';
   return ''; }
 function renderMagic(){
   var h=''; var mc=mechDef(); var r=restrictions();
   if(isClass('zealot')||S.prayers.length){ var pu=S.prayerUses;
-    h+='<div class="section-bar" style="margin-top:6px;"><span>Prayers</span><span class="hdr-right"><span class="sb-note">today <b>'+num(pu.left)+'/'+num(pu.max)+'</b> · d2 + SPIRIT at dawn</span><button class="hdr-btn" data-nolock onclick="rollDaily(\'prayers\')">Roll uses</button><button class="hdr-btn lk-hide" onclick="openPicker(\'prayer\')">＋ Prayer</button></span></div>';
+    h+='<div class="section-bar"><span>Prayers</span><span class="hdr-right"><span class="sb-note">today <b>'+num(pu.left)+'/'+num(pu.max)+'</b></span><button class="hdr-btn" data-nolock onclick="rollDaily(\'prayers\')">Roll uses</button><button class="hdr-btn lk-hide" onclick="openPicker(\'prayer\')">＋ Prayer</button></span></div>';
     h+='<table class="tbl"><tbody>'+(S.prayers.map(function(id,i){ var p=prayerDef(id)||{name:id,text:''}; return '<tr><td style="width:34%;"><b>'+esc(p.numeral||'')+' '+esc(p.name)+'</b>'+(p.noAction?'<br><span class="tag">no action</span>':'')+'</td><td class="desc">'+esc(p.text)+'</td><td style="width:92px;white-space:nowrap;"><button class="small-btn" onclick="pray(\''+jsq(id)+'\')">Pray</button><button class="row-x lk-hide" onclick="removePrayer('+i+')">✕</button></td></tr>'; }).join('')||'<tr><td class="desc">No prayers.</td></tr>')+'</tbody></table>'; }
   if(isClass('sorcerer')||S.spells.length){ var sc=S.spellCasts;
-    h+='<div class="section-bar" style="margin-top:6px;"><span>Spells</span><span class="hdr-right"><span class="sb-note">today <b>'+num(sc.left)+'/'+num(sc.max)+'</b> · d2 + SPIRIT, resets at sunset</span><button class="hdr-btn" data-nolock onclick="rollDaily(\'spells\')">Roll casts</button><button class="hdr-btn lk-hide" onclick="openPicker(\'spell\')">＋ Spell</button></span></div>';
+    h+='<div class="section-bar"><span>Spells</span><span class="hdr-right"><span class="sb-note">today <b>'+num(sc.left)+'/'+num(sc.max)+'</b></span><button class="hdr-btn" data-nolock onclick="rollDaily(\'spells\')">Roll casts</button><button class="hdr-btn lk-hide" onclick="openPicker(\'spell\')">＋ Spell</button></span></div>';
     h+='<table class="tbl"><tbody>'+(S.spells.map(function(s,i){ var p=spellDef(s.id)||{name:s.id,text:'',ranks:{}}; var rk=p.ranks&&p.ranks[rankName(s.rank)]||{}; return '<tr><td style="width:34%;"><b>'+esc(p.name)+'</b><br><span class="tag">rank '+rankName(s.rank)+'</span></td><td class="desc">'+esc(p.text)+'<br><i>'+esc(rankText(rk))+'</i></td><td style="width:92px;white-space:nowrap;"><button class="small-btn" onclick="castSpell(\''+jsq(s.id)+'\')">Cast</button><button class="row-x lk-hide" onclick="removeSpell('+i+')">✕</button></td></tr>'; }).join('')||'<tr><td class="desc">No spells.</td></tr>')+'</tbody></table>'; }
   var rc=S.ritualCasts; var block=ritualBlock();
-  h+='<div class="section-bar" style="margin-top:6px;"><span>Arcane Rituals</span><span class="hdr-right"><span class="sb-note">today <b>'+num(rc.left)+'/'+num(rc.max)+'</b> · d4 + SPIRIT at dawn</span><button class="hdr-btn" data-nolock onclick="rollDaily(\'rituals\')">Roll casts</button><button class="hdr-btn lk-hide" onclick="openPicker(\'ritual\')">＋ Ritual</button></span></div>';
+  h+='<div class="section-bar" style="margin-top:6px;"><span>Arcane Rituals</span><span class="hdr-right"><span class="sb-note">today <b>'+num(rc.left)+'/'+num(rc.max)+'</b></span><button class="hdr-btn" data-nolock onclick="rollDaily(\'rituals\')">Roll casts</button><button class="hdr-btn lk-hide" onclick="openPicker(\'ritual\')">＋ Ritual</button></span></div>';
   if(!r.rituals) h+='<div class="hint-line" style="color:var(--red);">'+esc(mc?mc.name:'You')+'s can\'t use arcane rituals.</div>';
   else if(block) h+='<div class="hint-line" style="color:var(--red);">'+esc(block)+'</div>';
-  h+='<table class="tbl"><tbody>'+(S.rituals.map(function(x,i){ var p=ritualDef(x.id)||{name:x.id,text:''}; return '<tr><td style="width:34%;"><b>'+esc(p.numeral||'')+' '+esc(p.name)+'</b>'+(x.locked?'<br><span class="tag warn">failed — until dawn</span>':'')+'</td><td class="desc">'+esc(p.text)+'</td><td style="width:92px;white-space:nowrap;"><button class="small-btn" onclick="openRitual(\''+jsq(x.id)+'\')"'+(x.locked||!r.rituals?' disabled':'')+'>Cast</button><button class="row-x lk-hide" onclick="removeRitual('+i+')">✕</button></td></tr>'; }).join('')||'<tr><td class="desc">No rituals known. Among the dead you may find scrolls of them.</td></tr>')+'</tbody></table>';
+  h+='<table class="tbl"><tbody>'+(S.rituals.map(function(x,i){ var p=ritualDef(x.id)||{name:x.id,text:''}; return '<tr><td style="width:34%;"><b>'+esc(p.numeral||'')+' '+esc(p.name)+'</b>'+(x.locked?'<br><span class="tag warn">failed — until dawn</span>':'')+'</td><td class="desc">'+esc(p.text)+'</td><td style="width:92px;white-space:nowrap;"><button class="small-btn" onclick="openRitual(\''+jsq(x.id)+'\')"'+(x.locked||!r.rituals?' disabled':'')+'>Cast</button><button class="row-x lk-hide" onclick="removeRitual('+i+')">✕</button></td></tr>'; }).join('')||'<tr><td class="desc">No rituals.</td></tr>')+'</tbody></table>';
   h+='<div class="section-bar" style="margin-top:6px;"><span>Ancient Relics</span><span class="hdr-right"><button class="hdr-btn lk-hide" onclick="openPicker(\'relic\')">＋ Relic</button></span></div>';
   var rb=relicBlock(); if(rb) h+='<div class="hint-line" style="color:var(--red);">'+esc(rb)+'</div>';
   h+='<table class="tbl"><tbody>'+(S.relics.map(function(x,i){ var p=relicDef(x.id)||{name:x.id,text:''}; return '<tr><td style="width:34%;"><b>'+esc(p.name)+'</b>'+(x.destroyed?'<br><span class="tag warn">destroyed</span>':x.locked?'<br><span class="tag warn">spent — until dawn</span>':'')+'</td><td class="desc">'+esc(p.text)+'</td><td style="width:92px;white-space:nowrap;"><button class="small-btn" onclick="useRelic(\''+x.uid+'\')"'+(x.locked||x.destroyed?' disabled':'')+'>Use</button><button class="row-x lk-hide" onclick="removeRelic('+i+')">✕</button></td></tr>'; }).join('')||'<tr><td class="desc">No relics.</td></tr>')+'</tbody></table>';
-  if(S.mishaps.length) h+='<div class="hint-line">Mystical mishaps suffered: '+S.mishaps.map(function(n){ return '<b style="font-family:var(--f-num);">'+n+'</b>'; }).join(', ')+' — the same one twice and your body slowly melts into sea water.</div>';
+  if(S.mishaps.length) h+='<div class="hint-line">Mystical mishaps: '+S.mishaps.map(function(n){ return '<b style="font-family:var(--f-num);">'+n+'</b>'; }).join(', ')+'</div>';
   return h; }
 function rankName(r){ return ['I','II','III'][clamp(num(r,1),1,3)-1]; }
 function rankText(rk){ return Object.keys(rk||{}).map(function(k){ return k+': '+rk[k]; }).join(' · '); }
@@ -940,13 +910,13 @@ function wSummary(w){ var p=[]; var dm=weaponDamage(w); p.push('<b class="mono">
   p.push(w.wtype==='ranged'?(w.thrown?'thrown':'ranged')+' · PRESENCE':'melee · STRENGTH');
   if(w.range) p.push(w.range+"'"); if(w.reach) p.push(w.reach+"' reach"); if(w.hands===2) p.push('two-handed');
   if(w.blackPowder) p.push('black powder · reload '+reloadRounds(w)+' · '+(w.loaded?'loaded':'<span style="color:var(--red);">empty'+(num(w.prog)?' ('+num(w.prog)+'/'+reloadRounds(w)+')':'')+'</span>')+' · shot '+ammoCount('shot'));
-  if(w.trusted) p.push('trusted: never breaks');
+  if(w.trusted) p.push('trusted');
   if(w.special) p.push(esc(w.special));
   return p.join(' · '); }
 function clothSummary(x){ var info=(x.ruined?'<span class="tag warn">ruined</span>':'tier '+x.tier+(x.tier!==x.origTier?' (of '+x.origTier+')':'')+' · '+(DIE_BY_TIER[x.tier]?'−'+DIE_BY_TIER[x.tier]+' damage':'no armor die'))+(x.agilityDR?' · AGILITY tests +'+x.agilityDR+' DR, defense +'+x.defenseDR:'')+(x.metal?' · metal':'')+(x.special&&!/^DR \+/.test(x.special)?' · '+esc(x.special):'');
   var rep=repairCost(x); if(rep) info+=' <button class="small-btn ghost" onclick="repairArmor(\''+x.uid+'\')" title="Armor repair: tier '+x.tier+' → '+(x.tier+1)+'">Repair '+rep+'s</button>';
   return info; }
-function hatSummary(x){ return 'hat'+(x.dr?' · −'+x.dr+' damage':'')+(x.sacrifice?' · can break to ignore one attack':'')+(x.metal?' · metal':'')+(x.broken?' <span class="tag warn">broken</span>':''); }
+function hatSummary(x){ return 'hat'+(x.dr?' · −'+x.dr+' damage':'')+(x.sacrifice?' · breakable':'')+(x.metal?' · metal':'')+(x.broken?' <span class="tag warn">broken</span>':''); }
 function equippable(x){ return (x.kind==='weapon'&&!x.natural)||x.kind==='clothing'||x.kind==='hat'; }
 // The Gear tab: ONE inventory list (weapons, clothing and hats included). Weapons, clothing
 // and hats carry the equip pip: equipped weapons are your attacks; the worn clothing and
@@ -971,24 +941,20 @@ function renderGear(){
     inv+='<tr class="inv-row'+(x.equipped&&equippable(x)?' is-eq':'')+'"><td><div class="inv-name-line"><span class="inv-eq-slot">'+pip+'</span><input class="inv-name" value="'+esc(x.name)+'" onchange="onItem(\''+x.uid+'\',\'name\',this.value)">'+st.join('')+'</div>'+(sub?'<div class="inv-sub desc">'+sub+'</div>':'')+'</td>'+
       '<td><input class="num no-spin" type="number" value="'+num(x.qty,1)+'" data-nolock onchange="onItem(\''+x.uid+'\',\'qty\',this.value)"></td><td><input class="num" value="'+esc(x.slots==null?1:x.slots)+'" onchange="onItem(\''+x.uid+'\',\'slots\',this.value)" title="'+slotsTitle+'"></td>'+
       '<td>'+sel+'</td><td>'+extra+'<input value="'+esc(x.note||'')+'" style="width:auto;min-width:80px;font-weight:400;font-size:13px;" onchange="onItem(\''+x.uid+'\',\'note\',this.value)"></td><td style="white-space:nowrap;text-align:right;">'+acts+(x.natural?'':'<button class="row-x" onclick="removeItem(\''+x.uid+'\')" title="Remove">✕</button>')+'</td></tr>'; });
-  $('inv-body').innerHTML=inv||'<tr><td colspan="6" class="desc">Empty — use ＋ Gear to buy or add weapons, clothing, hats and gear. With no weapon you fight with fists and insults (d2).</td></tr>';
+  $('inv-body').innerHTML=inv||'<tr><td colspan="6" class="desc">Empty.</td></tr>';
   var load=carryLoad(), cap=carryCap(); var e=$('enc'); e.className='enc'+(load>cap?' over':'');
-  e.innerHTML='Carrying <b>'+load+' / '+cap+'</b> <span>(8 + STRENGTH normal-sized items, max '+(2*cap)+'; the clothing and hat you wear are free; relics count; an uncarried sea chest or boat doesn\'t)</span>'+(load>2*cap?' <span class="tag warn">too much to carry</span>':load>cap?' <span class="tag warn">over-encumbered: STRENGTH &amp; AGILITY tests +2 DR</span>':'');
-  $('c-silver').value=num(S.silver); $('coin-note').textContent='s = silver';
+  e.innerHTML='Carrying <b>'+load+' / '+cap+'</b>'+(load>2*cap?' <span class="tag warn">too much to carry</span>':load>cap?' <span class="tag warn">over-encumbered</span>':'');
+  $('c-silver').value=num(S.silver);
 }
 function repairCost(x){ if(x.ruined||x.tier>=x.origTier||x.tier<1) return 0; var r=A((D('PB_ARMOR_REPAIR')||{}).rows).find(function(z){ return z.from===x.tier; }); return r?r.cost:0; }
 function renderBackground(){
   $('f-bg2').value=S.background||''; $('f-flaw2').value=S.flaw||''; $('f-mark2').value=S.trademark||''; $('f-idio').value=S.idiosyncrasy||''; $('f-incident').value=S.incident||'';
   $('f-thing').value=S.thing||''; $('f-pet').value=S.pet||''; $('f-ship').value=S.ship||''; $('f-story').value=S.story||''; $('f-notes').value=S.notes||'';
 }
-function renderTray(){
-  var L=_last, ok=!!(L&&!L.o.done&&num(S.luck)>0&&!S.dead);
-  $('tray-reroll').disabled=!ok; $('tray-lower').disabled=!(ok&&!L.res.crit&&!L.res.fumble&&!L.res.luckDR); $('tray-neut').disabled=!(ok&&(L.res.crit||L.res.fumble));
-}
 // Create before a pirate exists, Level (Getting Better) after — the D&D sheet's pair, in one place.
 function refreshWizardButtons(){ var built=!!(S.built||S.classId); var bb=$('build-btn'), lb=$('levelup-btn'); if(bb) bb.style.display=built?'none':''; if(lb) lb.style.display=built?'':'none'; }
 function renderAll(){
-  refreshWizardButtons(); renderHeader(); renderAbilities(); renderLuck(); renderStatus(); renderClass(); renderGear(); renderBackground(); renderTray();
+  refreshWizardButtons(); renderHeader(); renderAbilities(); renderLuck(); renderStatus(); renderClass(); renderGear(); renderBackground();
   if(typeof renderTurn==='function') renderTurn();
   if(window.applySheetLock && window.__lockReady) try{ window.applySheetLock(); }catch(e){}
 }
@@ -1002,7 +968,8 @@ function onAbil(a,v){ S.abilities[a]=clamp(num(v,0),-3,6); changed(); }
 function onClass(v){ S.classId=v; if(v!=='haunted-soul'&&v!=='tall-tale'){ S.baseClassId=''; S.origin={kind:'',ailment:'',variant:'',ancestry:'',animal:''}; } S['class']=classLabel(); changed(); }
 function onHpInput(){ var was=S.hp; S.hp=Math.min(hpMax(),num($('f-hp').value)); if(S.hp>0&&S.dead&&was<=0){} renderStatus(); renderLuck(); if(typeof renderTurn==='function') renderTurn(); scheduleAutosave(); }
 function onHpMax(v){ S.hpMax=Math.max(1,num(v,1)); changed(); }
-function adjLuck(n){ S.luck=Math.max(0,num(S.luck)+n); changed(); }
+// − spends a point (a Rapscallion's Lucky Devil draws a card for it); ＋ gains one.
+function adjLuck(n){ if(n<0){ if(num(S.luck)<=0) return; spendLuck(''); changed(); return; } S.luck=num(S.luck)+n; changed(); }
 function onSilver(){ S.silver=Math.max(0,num($('c-silver').value)); scheduleAutosave(); }
 function toggleCond(k){ S.cond[k]=!S.cond[k]; if(k==='starving'&&!S.cond[k]) S.cond.starveDays=0; addLog(k.charAt(0).toUpperCase()+k.slice(1),S.cond[k]?'On':'Off','','normal'); changed(); }
 function cycleHemorrhage(){ var h=num(S.cond.hemorrhage); if(h===1){ S.cond.hemorrhage=2; addLog('Hemorrhage','Last hour','Every test is DR18 — get treated!','fumble'); } else { S.cond.hemorrhage=0; addLog('Hemorrhage','Treated','The bleeding stops','normal'); } changed(); }
@@ -1020,7 +987,6 @@ function fixWeapon(u){ var x=itemBy(u); if(!x) return; x.broken=false; addLog(x.
 function pickUp(u){ var x=itemBy(u); if(!x) return; x.dropped=false; addLog(x.name,'Picked up','','normal'); changed(); }
 function removeItem(u){ var i=S.items.findIndex(function(x){ return x.uid===u; }); if(i<0) return; var x=S.items[i]; if((x.kind==='weapon'||x.kind==='clothing'||x.kind==='hat')&&needUnlock()) return; S.items.forEach(function(y){ if(y.in===u) y.in=''; }); S.items.splice(i,1); changed(); }
 function onItem(u,k,v){ var x=itemBy(u); if(!x) return; if(k==='qty') v=Math.max(0,num(v,1)); if(k==='uses') v=Math.max(0,num(v)); if(k==='slots'){ v=String(v).trim(); v=v===''?1:(isNaN(Number(v))?1:Number(v)); } if(k==='in'&&v){ var c=itemBy(v); var p=c; var g=0; while(p&&g<9){ if(p.uid===u){ v=''; break; } p=p.in?itemBy(p.in):null; g++; } } x[k]=v; changed(); }
-function addCustomItem(){ S.items.push({uid:uid(),kind:'gear',ref:'',name:'',qty:1,slots:1,note:''}); changed(); }
 function repairArmor(u){ var x=itemBy(u); var c=x?repairCost(x):0; if(!c) return; if(num(S.silver)<c){ addLog('Armor repair','Not enough silver',x.name+': '+c+'s','normal'); return; } S.silver=num(S.silver)-c; x.tier++; addLog('Armor repaired',x.name+' tier '+x.tier,'−'+c+'s','normal'); changed(); }
 function removeFeature(i){ if(needUnlock()) return; S.features.splice(i,1); changed(); }
 function removePrayer(i){ if(needUnlock()) return; S.prayers.splice(i,1); changed(); }
@@ -1047,7 +1013,7 @@ function resolve(o,prev){
   var mod=o.ability?abil(o.ability):0; var bonus=num(o.bonus); A(o.bonuses).forEach(function(x){ bonus+=num(x.v); });
   var crit=n>=critOn(o), fumble=n===1; var total=n+mod+bonus;
   var res={n:n,n2:n2,mod:mod,bonus:bonus,total:total,crit:crit,fumble:fumble,neut:false,luckDR:false,rerolled:!!prev};
-  logTest(o,res); _last={o:o,res:res}; renderTray(); renderLuck();
+  logTest(o,res); _last={o:o,res:res};
   if(o.onRes) try{ o.onRes(res); }catch(e){ console.error(e); }
   scheduleAutosave(); return res;
 }
@@ -1060,24 +1026,13 @@ function logTest(o,res){
   addLog(o.label,resLine(res),det,res.crit?'crit':res.fumble?'fumble':'normal');
 }
 function quickTest(a){ test({label:'Test '+a,ability:a,kind:'test'}); }
-function armLuck(k){ if(!TR[k]&&num(S.luck)<=0) return; TR[k]=!TR[k]; renderTray(); renderLuck(); if(typeof renderTurn==='function') renderTurn(); }
 function rollFree(n){ var r=d(n); addLog('d'+n, String(r), 'd'+n+'('+r+')', n===20&&r===20?'crit':n===20&&r===1?'fumble':'normal'); }
 
 // ═══ DEVIL'S LUCK ═══════════════════════════════════════════════════════════
 function spendLuck(why){ if(num(S.luck)<=0){ addLog("Devil's Luck",'None left',why||'','normal'); return false; }
-  S.luck=num(S.luck)-1; addLog("Devil's Luck",'−1 Luck',(why||'')+' · '+S.luck+' left','normal');
+  S.luck=num(S.luck)-1; addLog("Devil's Luck",'−1 Luck',(why?why+' · ':'')+S.luck+' left','normal');
   if(has('lucky-devil')) luckyDevilDraw();
   renderLuck(); scheduleAutosave(); return true; }
-// Spend Luck on the last test: reroll it, have the GM lower its DR by 4 (logged), or
-// neutralize its crit / fumble. A result dialog that is still open re-opens on the new result.
-function luckOnLast(kind){ var L=_last; if(!L||L.o.done){ addLog("Devil's Luck",'—','No test to change','normal'); return; }
-  var res=L.res, o=L.o;
-  if(kind==='reroll'){ if(!spendLuck('reroll '+o.label)) return; resolve(o,res); return; }
-  if(kind==='lower'){ if(res.crit||res.fumble||res.luckDR) return; if(!spendLuck('−4 DR on '+o.label)) return; res.luckDR=true;
-    addLog(o.label,'DR −4',"Devil's Luck: the GM lowers this test's DR by 4 (you rolled "+res.total+')','normal'); renderTray(); if(o.onRes) o.onRes(res); return; }
-  if(kind==='neutralize'){ if(!res.crit&&!res.fumble) return; if(!spendLuck('neutralize the '+(res.crit?'crit':'fumble')+' on '+o.label)) return; var was=res.crit?'critical':'fumble'; res.crit=false; res.fumble=false; res.neut=true;
-    addLog(o.label,res.total+' (neutralized)','The '+was+' is cancelled: an ordinary '+res.total,'normal'); renderTray(); if(o.onRes) o.onRes(res); }
-}
 // Rapscallion — Lucky Devil: a virtual 54-card deck (26 black, 26 red, 2 jokers); ace 1, J/Q/K 11/12/13.
 function luckyThreshold(){ var p=picks('lucky-devil'); return 9-Math.max(0,p-1); }
 function newDeck(){ var d0=[]; ['♠','♣','♥','♦'].forEach(function(s){ for(var r=1;r<=13;r++) d0.push({r:r,s:s,red:s==='♥'||s==='♦'}); }); d0.push({joker:true}); d0.push({joker:true});
@@ -1100,14 +1055,10 @@ function jokerTable(){ var t=D('PB_JOKER_TABLE')||{}; var n=d(20); var row=rowFo
 function soakRoll(opt){ var parts=[], total=0;
   if(!opt.blackPowder){ var die=armorDie(); if(die){ var r=rollExpr(die); total+=r.total; parts.push('armor '+r.text); } var hr=hatReduction(); if(hr){ total+=hr; parts.push(wornHat().name+' −'+hr); } }
   extraProt().forEach(function(p){ var r=rollExpr(p.die); total+=r.total; parts.push(p.label+' '+r.text); });
-  if(opt.luck){ var l=rollExpr('d6'); total+=l.total; parts.push("Devil's Luck "+l.text); }
   return {total:total,parts:parts}; }
 function takeDamage(n,opt){ opt=opt||{}; n=Math.max(0,num(n)); var parts=[];
   if(opt.double){ n*=2; parts.push('doubled (fumble)'); }
-  var want=opt.luck===true||(opt.luck===undefined&&!opt.noLuck&&TR.luckSoak); var luck=false;
-  if(want) luck=spendLuck('−d6 damage'); if(want||opt.luck===false) TR.luckSoak=false;
-  var soak=opt.raw?{total:0,parts:[]}:soakRoll({blackPowder:opt.blackPowder,luck:luck});
-  if(opt.raw&&luck){ var lr=rollExpr('d6'); soak.total+=lr.total; soak.parts.push("Devil's Luck "+lr.text); }   // Luck −d6 isn't armor: it still applies
+  var soak=opt.raw?{total:0,parts:[]}:soakRoll({blackPowder:opt.blackPowder});
   if(opt.blackPowder&&!opt.raw) parts.push('black powder ignores armor');
   var dmg=Math.max(0,n-soak.total);
   if(num(S.tempHp)>0&&dmg>0){ var tk=Math.min(num(S.tempHp),dmg); S.tempHp-=tk; dmg-=tk; parts.push(tk+' from temporary HP'); }
@@ -1140,16 +1091,15 @@ function healHp(n,why){ n=Math.max(0,num(n)); if(S.dead){ addLog(why||'Heal','�
   addLog(why||'Healed','+'+(S.hp-was)+' HP','→ '+S.hp+'/'+hpMax(),'normal'); changed(); return S.hp-was; }
 function promptDamage(){
   var hat=wornHat();
-  var body='<div class="m-lbl">Damage dealt to you</div><input id="dm-n" class="m-input" placeholder="a number, or dice like d6 or 2d4">'+
-    '<label class="m-check"><input type="checkbox" id="dm-bp"><span>Black powder<small>Pistols, muskets, blunderbusses and cannon ignore armor.</small></span></label>'+
-    '<label class="m-check"><input type="checkbox" id="dm-raw"><span>Ignore all protection<small>Falling, drowning, poison, a mishap — no armor die.</small></span></label>'+
-    (num(S.luck)>0?'<label class="m-check"><input type="checkbox" id="dm-luck"'+(TR.luckSoak?' checked':'')+'><span>Devil\'s Luck: −d6<small>Spend 1 Luck to lower the damage by d6.</small></span></label>':'')+
-    (hat&&hat.sacrifice?'<label class="m-check"><input type="checkbox" id="dm-sac"><span>Sacrifice your '+esc(hat.name)+'<small>Ignore all of this damage, but the helmet breaks.</small></span></label>':'')+
-    '<p class="m-hint" style="margin-top:10px;">Armor <b>'+(armorDie()?'−'+armorDie():'none')+'</b>'+(hatReduction()?' · hat −'+hatReduction():'')+(extraProt().length?' · '+extraProt().map(function(p){ return '−'+p.die+' '+p.label; }).join(', '):'')+'.</p>';
-  openDlg('Take Damage',body,[{t:'Apply',f:function(){ var v=String($('dm-n').value||'').trim(); if(!v) return; var r=/d/i.test(v)?rollExpr(v):{total:num(v),text:v}; var sac=$('dm-sac')&&$('dm-sac').checked; var lk=!!($('dm-luck')&&$('dm-luck').checked);
+  var body='<div class="m-lbl">Damage</div><input id="dm-n" class="m-input" placeholder="5, d6, 2d4">'+
+    '<label class="m-check"><input type="checkbox" id="dm-bp"><span>Black powder</span></label>'+
+    '<label class="m-check"><input type="checkbox" id="dm-raw"><span>Ignore all protection</span></label>'+
+    (hat&&hat.sacrifice?'<label class="m-check"><input type="checkbox" id="dm-sac"><span>Sacrifice your '+esc(hat.name)+'</span></label>':'')+
+    '<p class="m-hint" style="margin-top:10px;">Armor <b>'+(armorDie()?'−'+armorDie():'none')+'</b>'+(hatReduction()?' · hat −'+hatReduction():'')+(extraProt().length?' · '+extraProt().map(function(p){ return '−'+p.die+' '+p.label; }).join(', '):'')+'</p>';
+  openDlg('Take Damage',body,[{t:'Apply',f:function(){ var v=String($('dm-n').value||'').trim(); if(!v) return; var r=/d/i.test(v)?rollExpr(v):{total:num(v),text:v}; var sac=$('dm-sac')&&$('dm-sac').checked;
     closeDlg();
     if(sac){ hat.broken=true; hat.equipped=false; addLog(hat.name,'Breaks','Ignores '+r.total+' damage'+(/d/i.test(v)?' ('+r.text+')':''),'normal'); changed(); return; }
-    takeDamage(r.total,{label:'Damage taken'+(/d/i.test(v)?' ('+r.text+')':''),blackPowder:$('dm-bp').checked,raw:$('dm-raw').checked,luck:lk,expr:v}); }}]);
+    takeDamage(r.total,{label:'Damage taken'+(/d/i.test(v)?' ('+r.text+')':''),blackPowder:$('dm-bp').checked,raw:$('dm-raw').checked,expr:v}); }}]);
   setTimeout(function(){ var i=$('dm-n'); if(i) i.focus(); },50);
 }
 function promptHeal(){ openDlg('Heal','<div class="m-lbl">HP healed</div><input id="hl-n" class="m-input" type="number" inputmode="numeric"><div class="m-row" style="margin-top:8px;">'+['d2','d4','d6','d8','2d6'].map(function(x){ return '<button class="chip" onclick="var r=rollExpr(\''+x+'\');$(\'hl-n\').value=r.total;">'+x+'</button>'; }).join('')+'</div><div class="m-lbl">Temporary HP</div><input id="hl-t" class="m-input" type="number" placeholder="0">',
@@ -1169,7 +1119,7 @@ function openRestPanel(){
   openDlg('Rest',body,[]); }
 function doRest(kind){
   var C=S.cond; var parts=[]; var heal=0;
-  if(kind==='short'){ closeDlg(); tickTime(RND_MIN*10); if(noRestHeal()||C.starving){ addLog('Short rest','+0 HP',noRestHeal()?'Vampirism: rest doesn\'t heal you':'Starving: no HP restored','normal'); return; } var r=rollExpr('d4'); healHp(r.total,'Short rest ('+r.text+')'); return; }
+  if(kind==='short'){ closeDlg(); clearFight(); tickTime(RND_MIN*10); if(noRestHeal()||C.starving){ addLog('Short rest','+0 HP',noRestHeal()?'Vampirism: rest doesn\'t heal you':'Starving: no HP restored','normal'); return; } var r=rollExpr('d4'); healHp(r.total,'Short rest ('+r.text+')'); return; }
   var dawn=$('rs-dawn').checked, six=$('rs-6h').checked, fed=$('rs-food').checked; closeDlg(); tickTime(RND_HOUR*8);
   if(!fed){ C.starving=true; C.starveDays=num(C.starveDays)+1; } else { C.starving=false; C.starveDays=0; }
   if(C.infected&&!immuneSick()){ var inf=rollExpr('d6'); parts.push('infection −'+inf.total+' ('+inf.text+')'); takeDamage(inf.total,{label:'Infection (morning)',raw:true,noLuck:true}); }
@@ -1179,15 +1129,15 @@ function doRest(kind){
   if(six&&num(S.luck)<=0&&!(animalDef()&&animalDef().luckDaily)){ var l=rollExpr(luckDie()); S.luck=l.total; parts.push("Devil's Luck recharged: "+l.total+' ('+l.text+')'); }
   else if(six) parts.push("Devil's Luck not empty — no recharge");
   if(C.brain>0){ C.brain=Math.max(0,num(C.brain)-1); }
-  S.grog.drinks=0; S.light=null; S.day={ghost:false,breath:false,blood:false};
+  S.grog.drinks=0; S.light=null; S.day={ghost:false,breath:false,blood:false}; clearFight();
   addLog('Long rest','Overnight',parts.join(' · '),'normal');
   if(dawn){ newDawn(true); sunset(true); }
   changed(); }
 function openTimePanel(){
   var tl=A(S.timed);
-  var body='<p class="m-hint">Grog wears off one drink an hour, lights burn down, hourly limits (Grog Breath, blood feeding) reset. Timed effects (ASH, potions, a hangover) count down here and with each combat round.</p><div class="m-row"><button class="m-btn ghost" onclick="passMinutes(1)">A minute</button><button class="m-btn ghost" onclick="passMinutes(10)">10 minutes</button><button class="m-btn" onclick="passHour()">An hour passes</button><button class="m-btn ghost" onclick="closeDlg();newDawn()">Dawn</button><button class="m-btn ghost" onclick="closeDlg();sunset()">Sunset</button></div>'+
+  var body='<div class="m-row"><button class="m-btn ghost" onclick="passRound()">A round</button><button class="m-btn ghost" onclick="passMinutes(1)">A minute</button><button class="m-btn ghost" onclick="passMinutes(10)">10 minutes</button><button class="m-btn" onclick="passHour()">An hour passes</button><button class="m-btn ghost" onclick="closeDlg();newDawn()">Dawn</button><button class="m-btn ghost" onclick="closeDlg();sunset()">Sunset</button></div>'+
     '<div class="m-lbl">Running effects</div>'+(tl.length?tl.map(function(t){ return '<div class="m-check" style="cursor:default;"><span style="flex:1;"><b>'+esc(t.name)+'</b> <span style="font-family:var(--f-num);color:#f0c56a;">'+esc(fmtLeft(t.left))+' left</span><small>'+esc(t.src)+(t.text?' · '+esc(t.text):'')+'</small></span><button class="m-btn ghost" style="padding:4px 10px;min-height:0;" onclick="endTimedNow(\''+t.uid+'\')" title="It ends now (cured, dispelled, or the GM says so)">End</button></div>'; }).join(''):'<p class="m-hint">Nothing running.</p>')+
-    '<div class="res-box"><b>Dawn</b>: roll today\'s prayers (d2 + SPIRIT) and rituals (d4 + SPIRIT); failed rituals and spent relics are usable again'+(hasAilment('conduit')?'; the spirits bring a new ritual (unused yesterday\'s costs d2 HP)':'')+(has('grog-brewer')?'; brew d4 servings of grog':'')+(animalDef()&&animalDef().luckDaily?'; Lucky Parrot rolls d6 Luck':'')+'.<br><b>Sunset</b>: roll today\'s spells (d2 + SPIRIT).</div>';
+    '';
   openDlg('Time',body,[]); }
 function passHour(){ var p=[];
   if(num(S.grog.drinks)>0){ S.grog.drinks--; p.push('one drink wears off (AGILITY −'+S.grog.drinks+')'); }
@@ -1232,42 +1182,31 @@ function closeDlg(force){ if(_dlgModal&&!force) return; _dlgModal=false; $('dlg-
 function showResult(o,res,next){
   var cls=res.crit?'crit':res.fumble?'bad':'';
   var decided=res.crit||res.fumble;
-  var body='<div class="res-word'+(res.crit?' crit':res.fumble?' fumble':'')+'">'+esc(resWord(res))+(res.neut?' <small style="font-family:var(--f-ui);font-size:14px;color:#a89a8a;">(neutralized)</small>':'')+'</div><div class="res-big '+cls+'">'+res.total+'</div>'+
-    '<p class="m-hint" style="margin-top:4px;">'+esc(rollText(o,res))+(res.luckDR?" · Devil's Luck: the GM lowers the DR by 4":'')+'</p>'+
+  var body='<div class="res-word'+(res.crit?' crit':res.fumble?' fumble':'')+'">'+esc(resWord(res))+'</div><div class="res-big '+cls+'">'+res.total+'</div>'+
+    '<p class="m-hint" style="margin-top:4px;">'+esc(rollText(o,res))+'</p>'+
     (decided?'':'<p class="m-hint">'+(o.ask||'The GM sets the DR: did it succeed?')+'</p>')+(o.note?'<p class="m-hint">'+o.note(res)+'</p>':'');
-  var btns=[]; var luck=num(S.luck)>0&&!S.dead;
-  if(luck&&!o.done){ btns.push({t:'Luck: reroll',cls:'luck',f:function(){ luckOnLast('reroll'); }});
-    if(!decided&&!res.luckDR) btns.push({t:'Luck: −4 DR',cls:'luck',title:'Spend 1 Luck: the GM lowers this DR by 4',f:function(){ luckOnLast('lower'); }});
-    if(res.fumble||(res.crit&&o.neutralizeCrit)) btns.push({t:'Luck: neutralize',cls:'luck',f:function(){ luckOnLast('neutralize'); }}); }
+  var btns=[];
   next(res).forEach(function(b){ btns.push(b); });
   openDlg(o.title||o.label,body,btns,true); }
 // pass / fail continue buttons: a crit only passes, a fumble only fails, otherwise both.
 function pf(r,pass,fail){ if(r.crit) return [pass]; if(r.fumble) return [fail]; return [pass,fail]; }
-function finish(o){ o.done=true; closeDlg(true); renderTray(); }
+function finish(o){ o.done=true; closeDlg(true); }
 
 // ═══ ACTION TAB — the turn controller ══════════════════════════════════════
-// A round is ~6 seconds: move, plus one action (attack, reload, pray, cast, use a
-// relic or an item). Defending is not an action — you roll it whenever an enemy
-// attacks. Nothing is restricted until you start combat.
-var DX={dmg:'',bp:false,luck:false,sac:false,breath:0};   // the Defend subtab's form (not saved)
-function inCombat(){ return !!S.combat.on; }
+// Combat is always on: every attack, action and reaction is available at any time — there is
+// no Start Combat, round counter or action tracker (the table keeps the turn order). Per-fight
+// state (Liar's Dice, Eldritch Mind, Inspiring Leader, Blood Frenzy kills) clears on a rest.
+var DX={dmg:'',bp:false,sac:false,breath:0};   // the Defend subtab's form (not saved)
+function inCombat(){ return true; }
 function incapacitated(){ return S.dead||num(S.cond.out)>0||S.hp<0||timedHas('paralyzed'); }
-function canAct(){ if(incapacitated()) return false; if(!inCombat()) return true; return !S.combat.action; }
-// ASH 12 (time slows) gives two actions a round while it lasts.
-function actsMax(){ return timedHas('acts')?2:1; }
-function useAction(){ if(!inCombat()) return; S.combat.acts=num(S.combat.acts)+1; if(S.combat.acts>=actsMax()) S.combat.action=true; }
+function canAct(){ return !incapacitated(); }
+function useAction(){}
 function setSubtab(t){ S.subtab=t; renderTurn(); scheduleAutosave(); }
-function startCombat(){ var n=d(6); var side=n<=3?'Enemies act first':'PCs act first'; var ind=d(6), iv=ind+abil('AGILITY');
-  S.combat=Object.assign({},S.combat,{on:true,round:1,action:false,acts:0,side:side,init:iv,liars:null,eldritch:'',inspire:null,reloaded:false,pistols:0,extra:0,bayonet:false,knave:0,shotAt:false,kills:0});
-  addLog('Initiative',side,'d6('+n+') · individual (optional): d6('+ind+') '+sgn(abil('AGILITY'))+' AGL = '+iv,'normal');
-  if(has('liars-dice')) rollLiars(true);
-  if(hasAilment('eldritch-mind')) eldritchTest();
-  changed(); }
-function newRound(){ S.combat.round=num(S.combat.round,1)+1; S.combat.action=false; S.combat.acts=0; S.combat.reloaded=false; S.combat.pistols=0; S.combat.bayonet=false; S.combat.knave=0;
-  if(num(S.cond.out)>0) S.cond.out--; if(S.cond.stunned) S.cond.stunned=false;
-  addLog('New round','Round '+S.combat.round,'','normal'); tickTime(1); changed(); }
-function endCombat(){ S.combat={on:false,round:1,action:false,side:'',init:null,liars:null,eldritch:'',kills:0,inspire:null,reloaded:false}; addLog('Combat over','✓','Blood Frenzy and once-per-combat abilities reset','normal'); changed(); }
-function rollLiars(quiet){ var r=rollExpr('5d6'); S.combat.liars=r.total%2===0; addLog("Liar's Dice",String(r.total),r.text+(S.combat.liars?' · even: this combat your melee attacks are −2 DR and you defend at +2 DR (tell the GM)':' · odd: no effect'),'normal'); if(!quiet) changed(); }
+function clearFight(){ S.combat=Object.assign({},S.combat,{on:false,round:1,action:false,acts:0,side:'',init:null,liars:null,eldritch:'',inspire:null,reloaded:false,pistols:0,extra:0,bayonet:false,knave:0,shotAt:false,kills:0}); }
+// A round passes (the Time panel): timed effects tick, "out" counts down, a stun wears off.
+function passRound(){ closeDlg(); if(num(S.cond.out)>0) S.cond.out--; if(S.cond.stunned) S.cond.stunned=false;
+  addLog('A round passes','⌛',A(S.timed).length||num(S.cond.out)?'':'Nothing is running','normal'); tickTime(1); changed(); }
+function rollLiars(quiet){ var r=rollExpr('5d6'); S.combat.liars=r.total%2===0; addLog("Liar's Dice",String(r.total),r.text+(S.combat.liars?' · even: melee −2 DR, defend +2 DR':' · odd'),'normal'); if(!quiet) changed(); }
 // Eldritch Mind: PRESENCE when combat starts. Pass — harness it (attacks −2 DR this combat);
 // fail — panic (attacks +4 DR, but two attacks a turn). The GM applies the DR; the badge reminds.
 function eldritchTest(){ var o={label:'Eldritch Mind (combat starts)',ability:'PRESENCE',kind:'test',ask:'The GM sets the DR (normally 12): did you keep your head?'};
@@ -1306,23 +1245,12 @@ function attackGate(w){ // why this weapon can't attack right now, or ''
   if(w.blackPowder&&!w.loaded) return 'needs reloading';
   if(w.blackPowder&&ammoCount('shot')<=0) return 'out of shot';
   if(w.damageFromAmmo&&!S.items.some(function(x){ return x.kind==='ammo'&&x.dart&&num(x.qty)>0; })) return 'no darts';
-  if(!inCombat()) return '';
-  if(num(S.combat.extra)>0) return '';
-  if(!S.combat.action) return '';
-  if(has('flintlock-fanatic')&&w.pistol&&num(S.combat.pistols)>0&&num(S.combat.pistols)<3) return '';
-  if(has('fix-bayonets')&&w.ref==='bayonet'&&S.combat.reloaded&&!S.combat.bayonet) return '';
-  return 'no action left this round'; }
+  return ''; }
 function isKnave(w){ return has('knife-knave')&&w.wtype==='melee'&&/knife|dagger/i.test(w.name); }
 // opt: {opt: index into attackSituations(w).opts, chosen: [situations], second: Knife Knave's 2nd knife}
 function doAttack(u,opt){ opt=opt||{}; var w=weaponByUid(u); if(!w) return; var g=opt.second?'':attackGate(w); if(g){ addLog('Attack · '+w.name,'—',g,'normal'); return; }
   var sit=attackSituations(w); var chosen=opt.chosen||(opt.opt!=null&&sit.opts[opt.opt]?[sit.opts[opt.opt]]:[]); var close=chosen.some(function(c){ return c.close; }), thrown=chosen.some(function(c){ return c.thrown; });
-  // spend the action (or the free attack a defense crit granted, a Fanatic's 2nd/3rd pistol, a bayonet after reloading; Knife Knave's 2nd knife is part of the same action)
   var how=opt.second?'second knife':'';
-  if(inCombat()&&!opt.second){ if(num(S.combat.extra)>0&&S.combat.action){ S.combat.extra--; how='free attack'; }
-    else if(S.combat.action&&has('flintlock-fanatic')&&w.pistol){ how='pistol '+(num(S.combat.pistols)+1)+' of 3'; }
-    else if(S.combat.action&&w.ref==='bayonet'&&S.combat.reloaded){ S.combat.bayonet=true; how='bayonet while reloading'; }
-    else useAction();
-    if(w.pistol) S.combat.pistols=num(S.combat.pistols)+1; }
   if(w.blackPowder){ var sh=ammoRow('shot'); if(sh){ sh.qty=num(sh.qty)-1; } w.loaded=false; w.prog=0; }
   if(S.cond.invisible&&!opt.second){ S.cond.invisible=false; addLog('Invisible','Ends','You attacked','normal'); }
   var dart=null; if(w.damageFromAmmo){ dart=S.items.find(function(x){ return x.kind==='ammo'&&x.dart&&num(x.qty)>0; }); if(dart) dart.qty=num(dart.qty)-1; }
@@ -1333,15 +1261,14 @@ function doAttack(u,opt){ opt=opt||{}; var w=weaponByUid(u); if(!w) return; var 
   var dmgArgs=function(r,max){ return {crit:r.crit,chosen:chosen,close:close,dmgAuto:sit.dmgAuto,dart:dart,max:max}; };
   o.onRes=function(res){ showResult(o,res,function(r){
     if(r.fumble) return [{t:w.noFumble?'Just a miss':'Accept the fumble',cls:'warn',f:function(){ finish(o); attackFumble(w); }}];
-    var hit=[{t:r.crit?'Roll double damage':'Hit — roll damage',f:function(){ finish(o); attackDamage(w,dmgArgs(r,false)); knaveNext(true); }},
-      {t:'Max damage (Luck)',cls:'luck',dis:num(S.luck)<=0,f:function(){ finish(o); if(spendLuck('max damage')) attackDamage(w,dmgArgs(r,true)); knaveNext(true); }}];
+    var hit=[{t:r.crit?'Roll double damage':'Hit — roll damage',f:function(){ finish(o); attackDamage(w,dmgArgs(r,false)); knaveNext(true); }}];
     if(r.crit) return hit;
     return hit.concat([{t:knave?'Missed — second knife':'Missed',cls:'ghost',f:function(){ finish(o); addLog(o.label,'Missed','','normal'); knaveNext(false); }}]); }); };
   changed(); test(o);
 }
 function attackDamage(w,o){ o=o||{}; var expr=weaponDamage(w); if(o.close) expr=/boomstick/i.test(w.name)?'d10':(w.closeDamage||'d10');
   if(!expr||expr==='—'){ addLog('Damage · '+w.name,'—',w.special||'No damage — see the weapon\'s effect','normal'); return 0; }
-  var max=!!o.max||(TR.luckMax&&(function(){ var ok=spendLuck('max damage'); TR.luckMax=false; return ok; })());
+  var max=!!o.max;
   var r=rollExpr(expr,{max:max}); var total=r.total, parts=[r.text+(max?' (max)':'')];
   A(o.dmgAuto).forEach(function(x){ var e=rollExpr(x.v,{max:max}); total+=e.total; parts.push(x.l+' '+(/d/.test(x.v)?e.text:x.v)); });
   A(o.chosen).forEach(function(c){ if(c.dmg){ var e=rollExpr(c.dmg,{max:max}); total+=e.total; parts.push(c.l+' '+e.text); } });
@@ -1370,10 +1297,10 @@ function attackFumble(w){
   else { it2.broken=true; addLog(w.name,'Broken or lost','Fumble: the weapon breaks or is lost','fumble'); }
   changed(); }
 function reloadWeapon(u){ var w=itemBy(u); if(!w||!w.blackPowder) return; if(w.loaded){ addLog(w.name,'Loaded','Already loaded','normal'); return; }
-  if(!canAct()){ addLog('Reload · '+w.name,'—','No action left this round','normal'); return; } if(ammoCount('shot')<=0){ addLog('Reload · '+w.name,'Out of shot','','fumble'); return; }
-  useAction(); S.combat.reloaded=true; var need=reloadRounds(w); w.prog=num(w.prog)+1;
-  if(w.prog>=need){ w.loaded=true; w.prog=0; addLog('Reload · '+w.name,'Loaded',need===1?'One round'+(isClass('buccaneer')?' (Buccaneer)':' (Flintlock Fanatic)'):'Round 2 of 2 — ready to fire','normal'); }
-  else addLog('Reload · '+w.name,'Round '+w.prog+' of '+need,'Keep reloading next round','normal');
+  if(!canAct()){ addLog('Reload · '+w.name,'—','You can\'t act','normal'); return; } if(ammoCount('shot')<=0){ addLog('Reload · '+w.name,'Out of shot','','fumble'); return; }
+  var need=reloadRounds(w); w.prog=num(w.prog)+1;
+  if(w.prog>=need){ w.loaded=true; w.prog=0; addLog('Reload · '+w.name,'Loaded',need===1?'One round':'Round 2 of 2','normal'); }
+  else addLog('Reload · '+w.name,'Round '+w.prog+' of '+need,'','normal');
   changed(); }
 
 // ── defense ──
@@ -1385,7 +1312,7 @@ function doDefend(){
   var o={label:'Defend',ability:'AGILITY',kind:'defense',neutralizeCrit:false,ask:'The GM sets the DR (normally 12): did you dodge it?'};
   o.note=function(res){ return res.crit?'Critical: you get an immediate free attack.':res.fumble?'Fumble: double damage, then your armor drops a tier.':'If you are hit'+(dmg?': '+esc(dmg)+(DX.bp?' (black powder — no armor)':''):' — enter the damage, or apply it later with − Dmg')+'.'; };
   o.onRes=function(res){ showResult(o,res,function(r){
-    if(r.crit) return [{t:'Free attack!',f:function(){ finish(o); S.combat.extra=num(S.combat.extra)+1; addLog('Defense critical','Free attack','Make an immediate free attack','crit'); S.subtab='action'; changed(); }}];
+    if(r.crit) return [{t:'Free attack!',f:function(){ finish(o); addLog('Defense critical','Free attack','Make an immediate free attack','crit'); S.subtab='action'; changed(); }}];
     var hitBtn={t:r.fumble?'Take double damage':'Hit — take the damage',cls:'warn',f:function(){ finish(o); defendHit(dmg,r.fumble,hat); }};
     if(r.fumble) return [hitBtn];
     return [{t:'Dodged',f:function(){ finish(o); addLog('Defend','Dodged','The blow misses','normal'); DX.dmg=''; renderTurn(); }},hitBtn]; }); };
@@ -1393,8 +1320,7 @@ function doDefend(){
 function defendHit(dmg,fumble,hat){ var r=/d/i.test(dmg)?rollExpr(dmg):{total:num(dmg),text:dmg||'0'};
   if(DX.sac&&hat&&hat.sacrifice){ hat.broken=true; hat.equipped=false; addLog(hat.name,'Breaks','Ignores the hit ('+r.total+')','normal'); DX.sac=false; }
   else if(!dmg) addLog('Hit','Enter the damage','Use − Dmg in the status box to apply it','normal');
-  else takeDamage(r.total,{label:'Hit'+(/d/i.test(dmg)?' ('+r.text+')':''),double:fumble,blackPowder:DX.bp,luck:DX.luck,expr:dmg});
-  DX.luck=false;
+  else takeDamage(r.total,{label:'Hit'+(/d/i.test(dmg)?' ('+r.text+')':''),double:fumble,blackPowder:DX.bp,expr:dmg});
   if(fumble) armorDrop();
   DX.dmg=''; changed(); }
 function armorDrop(){ var c=wornClothing(); if(!c||num(c.tier)<1){ addLog('Armor','—','No armor to damage','normal'); return; }
@@ -1405,11 +1331,11 @@ function armorDrop(){ var c=wornClothing(); if(!c||num(c.tier)<1){ addLog('Armor
 function apparate(){ if(S.day.ghost){ addLog('Apparate','—','Once per night','normal'); return; } if(!canAct()){ addLog('Apparate','—','No action left','normal'); return; } useAction(); S.day.ghost=true;
   var o={label:'Apparate (Ghost)',ability:'SPIRIT',kind:'test',ask:'The GM sets the DR (normally 14): did it work?'}; o.onRes=function(res){ showResult(o,res,function(r){ return pf(r,{t:'Passed — roll d12',f:function(){ finish(o); var x=rollExpr('d12'); addLog('Apparate','d12: '+x.total,x.text+' · terrifying ghostly visage',r.crit?'crit':'normal'); }},{t:'Failed',cls:'ghost',f:function(){ finish(o); addLog('Apparate','No effect','','normal'); }}); }); }; changed(); test(o); }
 function grogBreath(){ if(S.day.breath){ addLog('Grog Breath','—','Once an hour unless you drink more grog','normal'); return; } if(!canAct()){ addLog('Grog Breath','—','No action left','normal'); return; } useAction(); S.day.breath=true; addLog('Grog Breath','Belch!','An opponent in melee range is stunned for 1 round','normal'); changed(); }
-function inspiringLeader(){ if(S.combat.inspire!=null){ addLog('Inspiring Leader','—','Once each combat (rolled '+S.combat.inspire+')','normal'); return; } var r=rollExpr('d4'); S.combat.inspire=r.total; addLog('Inspiring Leader','±'+r.total,r.text+' · each ally may add or subtract '+r.total+' to one roll this combat','normal'); changed(); }
+function inspiringLeader(){ var r=rollExpr('d4'); S.combat.inspire=r.total; addLog('Inspiring Leader','±'+r.total,r.text+' · each ally may add or subtract '+r.total+' to one roll this combat','normal'); changed(); }
 function mastermind(){ test({label:'Military Mastermind',ability:'PRESENCE',kind:'test'}); }
-function skylark(u){ var w=weaponByUid(u)||attackList()[0]; if(!canAct()&&!(inCombat()&&num(S.combat.extra)>0)){ addLog('Skylarker','—','No action left','normal'); return; } useAction(); var extra=2+(picks('skylarker')>=2?1:0);
+function skylark(u){ var w=weaponByUid(u)||attackList()[0]; if(!canAct()){ addLog('Skylarker','—','You can\'t act','normal'); return; } var extra=2+(picks('skylarker')>=2?1:0);
   var o={label:'Skylarker · '+w.name,ability:'AGILITY',kind:'test',ask:'The GM sets the DR (normally 10): did you pull it off?'}; o.onRes=function(res){ showResult(o,res,function(r){ return pf(r,{t:'Passed — automatic hit, roll damage',f:function(){ finish(o); attackDamage(w,{crit:r.crit,bonus:extra,bonusLabel:'Skylarker',dmgAuto:attackSituations(w).dmgAuto}); }},{t:'Failed',cls:'ghost',f:function(){ finish(o); addLog('Skylarker','Failed','','normal'); }}); }); }; changed(); test(o); }
-function sneakyBastard(u){ var w=weaponByUid(u)||attackList()[0]; if(!canAct()&&!(inCombat()&&num(S.combat.extra)>0)){ addLog('Sneaky Bastard','—','No action left','normal'); return; } useAction();
+function sneakyBastard(u){ var w=weaponByUid(u)||attackList()[0]; if(!canAct()){ addLog('Sneaky Bastard','—','You can\'t act','normal'); return; }
   var o={label:'Sneaky Bastard · '+w.name,ability:'AGILITY',kind:'test',ask:'The GM sets the DR (normally 12'+(picks('sneaky-bastard')>=2?', −2 for you':'')+'): did you strike unseen?'}; o.onRes=function(res){ showResult(o,res,function(r){ return pf(r,{t:'Passed — automatic critical, roll damage',f:function(){ finish(o); attackDamage(w,{crit:true,dmgAuto:attackSituations(w).dmgAuto}); }},{t:'Failed',cls:'ghost',f:function(){ finish(o); addLog('Sneaky Bastard','Failed','','normal'); }}); }); }; changed(); test(o); }
 function grogPoisonDR(){ var f=featRec('grog-brewer'); return 14+(f&&f.card?num(f.card.dr):0); }
 function grogPoisonDie(){ var f=featRec('grog-brewer'); return dieStep(['d6','d8','d10','d12'],'d6',f&&f.card?num(f.card.step):0); }
@@ -1715,90 +1641,91 @@ function tcard(name,sub,btns,dis){ return '<div class="pb-card'+(dis?' disabled'
 function tbtn(label,fn,cls,title,dis){ return '<button class="pb-do'+(cls?' '+cls:'')+'" onclick="'+fn+'"'+(title?' title="'+esc(title)+'"':'')+(dis?' disabled':'')+'>'+label+'</button>'; }
 function renderTurn(){
   var el=$('pb-turn'); if(!el) return; var c=S.combat; var act=canAct();
-  var h='<div class="pb-top"><div class="pb-row1">';
-  if(!c.on) h+='<span class="pb-init-lbl">Out of combat</span><div class="pb-econ">'+tbtn('Start combat','startCombat()','','Roll initiative (d6: 1–3 enemies first, 4–6 PCs first)')+'</div>';
-  else { h+='<span class="pb-round"><b>'+num(c.round,1)+'</b><small>round</small></span><div class="pb-econ">'+(actsMax()>1?[0,1].map(function(i){ return '<span class="pb-pip'+(num(c.acts)>i||c.action?' used':'')+'" title="Time slows: two actions or attacks this round">Action '+(i+1)+'</span>'; }).join(''):'<span class="pb-pip'+(c.action?' used':'')+'" title="One action a round">Action</span>')+(num(c.extra)>0?'<span class="pb-pip extra">+'+num(c.extra)+' free attack</span>':'')+'<span class="pb-side">'+esc(c.side||'')+(c.init!=null?' · d6+AGL '+c.init:'')+'</span></div>'+tbtn('New round','newRound()','end')+'<button class="pb-x" title="End combat" onclick="endCombat()">✕</button>'; }
-  h+='</div><div class="pb-badges">';
+  var h='<div class="pb-top"><div class="pb-badges">';
   if(S.dead) h+='<span class="pb-badge warn">Dead</span>'; else if(S.hp===0) h+='<span class="pb-badge warn">Broken</span>';
   if(num(S.cond.out)) h+='<span class="pb-badge warn">Out '+num(S.cond.out)+' rounds</span>'; if(S.cond.stunned) h+='<span class="pb-badge warn">Stunned</span>';
   if(num(S.cond.hemorrhage)) h+='<span class="pb-badge warn">Hemorrhage'+(S.cond.hemorrhage===2?': last hour':'')+'</span>';
   if(overEnc()) h+='<span class="pb-badge warn">Over-encumbered</span>'; if(num(S.grog.drinks)) h+='<span class="pb-badge">Grog ×'+num(S.grog.drinks)+'</span>';
-  if(c.liars===true) h+='<span class="pb-badge" title="Melee attacks −2 DR, defense +2 DR this combat — the GM applies it">Liar\'s Dice: even</span>'; if(c.eldritch) h+='<span class="pb-badge'+(c.eldritch==='panic'?' warn':'')+'" title="The GM applies the DR">Eldritch Mind: '+(c.eldritch==='panic'?'panic (+4 DR, 2 attacks)':'harnessed (−2 DR)')+'</span>';
+  if(c.liars===true) h+='<span class="pb-badge">Liar\'s Dice: even</span>'; if(c.eldritch) h+='<span class="pb-badge'+(c.eldritch==='panic'?' warn':'')+'">Eldritch Mind: '+(c.eldritch==='panic'?'panic':'harnessed')+'</span>';
   if(c.inspire!=null) h+='<span class="pb-badge">Inspiring Leader ±'+c.inspire+'</span>';
   A(S.timed).forEach(function(t){ h+='<span class="pb-badge'+(t.fx.death||t.fx.paralyzed?' warn':'')+'" title="'+esc(t.src+(t.text?': '+t.text:''))+'">'+esc(t.name)+' · '+esc(fmtLeft(t.left))+'</span>'; });
   if(S.light) h+='<span class="pb-badge">'+esc(S.light.name)+' lit</span>'; if(S.cond.invisible) h+='<span class="pb-badge">Invisible</span>';
-  if(TR.luckMax) h+='<span class="pb-badge luck">Luck: max damage armed</span>'; if(TR.luckSoak) h+='<span class="pb-badge luck">Luck: −d6 armed</span>';
   h+='</div><div class="pb-subtabs"><button class="pb-st'+(S.subtab!=='defend'?' on':'')+'" onclick="setSubtab(\'action\')">Action</button><button class="pb-st'+(S.subtab==='defend'?' on':'')+'" onclick="setSubtab(\'defend\')">Defend</button></div></div>';
   h+=S.subtab==='defend'?renderDefendTab():renderActionTab(act);
   el.innerHTML=h;
 }
 function renderActionTab(act){ var h='';
-  if(S.dead){ h+=tsec('dead','Dead','<div class="pb-note">Below 0 HP. '+(hasAilment('skeleton')&&!S.day.reformed?'':'Optionally the GM may let you return as a Haunted Soul.')+'</div>'+(hasAilment('skeleton')?tcard('Skeleton: reform','Reroll the damage dice that killed you — 3 or less and you return with 1 HP',tbtn('Reform','skeletonReform()','','',!!S.day.reformed)):'')); return h; }
+  if(S.dead){ h+=tsec('dead','Dead',hasAilment('skeleton')?tcard('Skeleton: reform','',tbtn('Reform','skeletonReform()','','',!!S.day.reformed)):'<div class="pb-note">Below 0 HP.</div>'); return h; }
   if(S.broken) h+=tsec('broken','Broken','<div class="pb-note"><b>'+esc(S.broken.name)+'</b> — '+esc(S.broken.text)+(S.broken.note?' ('+esc(S.broken.note)+')':'')+'</div>');
-  // attacks
+  // attacks — one card per weapon at hand. A class attack (Sneaky Bastard, Skylarker) and a
+  // situational one (Back Stabber's surprise d2, Focused Aim, a duel, the blunderbuss up close,
+  // a throw) is its own button on the row, left of Attack, which is always rightmost.
   var a=''; var list=attackList();
-  if(num(S.combat.extra)>0) a+='<div class="pb-note good">Defense critical: one free attack, even if you have acted.</div>';
-  if(has('flintlock-fanatic')) a+='<div class="pb-note">Flintlock Fanatic: up to three pistol attacks in one action'+(num(S.combat.pistols)?' ('+num(S.combat.pistols)+' fired)':'')+'.</div>';
   list.forEach(function(w){ var g=attackGate(w); var sit=attackSituations(w); var ab=attackAbility(w);
-    var sub='d20 '+sgn(abil(ab))+' '+esc(ab)+' · <b>'+esc(weaponDamage(w))+'</b>'+(sit.dmgAuto.length?' '+sit.dmgAuto.map(function(x){ return x.v; }).join(' '):'')+(w.reach?' · '+w.reach+'\' reach':'')+(w.range?' · '+w.range+'\'':'')+(w.blackPowder?' · ignores armor · shot '+ammoCount('shot'):'')+(w.trusted?' · trusted':'')+(w.poisoned?' · grog-poisoned':'')+(g?' · <span style="color:var(--red);">'+esc(g)+'</span>':'');
-    var btns=tbtn('Attack','doAttack(\''+w.uid+'\',{})','',g)+sit.opts.map(function(x,i){ return tbtn(esc(optLabel(x)),'doAttack(\''+w.uid+'\',{opt:'+i+'})','ghost',x.why); }).join('');
-    if(w.blackPowder&&!w.loaded) btns=tbtn('Reload'+(num(w.prog)?' '+(num(w.prog)+1)+'/'+reloadRounds(w):''),'reloadWeapon(\''+w.uid+'\')','','Reload '+reloadRounds(w)+' round'+(reloadRounds(w)>1?'s':''),!act)+btns;
+    var sub='d20 '+sgn(abil(ab))+' '+esc(ab)+' · <b>'+esc(weaponDamage(w))+'</b>'+(sit.dmgAuto.length?' '+sit.dmgAuto.map(function(x){ return x.v; }).join(' '):'')+(w.reach?' · '+w.reach+'\' reach':'')+(w.range?' · '+w.range+'\'':'')+(w.blackPowder?' · shot '+ammoCount('shot'):'')+(w.trusted?' · trusted':'')+(w.poisoned?' · grog-poisoned':'')+(g?' · <span style="color:var(--red);">'+esc(g)+'</span>':'');
+    var btns='';
+    if(has('sneaky-bastard')) btns+=tbtn('Sneaky Bastard','sneakyBastard(\''+w.uid+'\')','ghost','Test AGILITY: automatic critical',!!g);
+    if(has('skylarker')) btns+=tbtn('Skylarker','skylark(\''+w.uid+'\')','ghost','Test AGILITY: automatic hit, +'+(2+(picks('skylarker')>=2?1:0))+' damage',!!g);
+    btns+=sit.opts.map(function(x,i){ return tbtn(esc(optLabel(x)),'doAttack(\''+w.uid+'\',{opt:'+i+'})','ghost',x.why,!!g); }).join('');
+    // an empty gun shows Reload where its Attack button goes
+    if(w.blackPowder&&!w.loaded) btns+=tbtn('Reload'+(num(w.prog)?' '+(num(w.prog)+1)+'/'+reloadRounds(w):''),'reloadWeapon(\''+w.uid+'\')','','',!act||ammoCount('shot')<=0);
+    else btns+=tbtn('Attack','doAttack(\''+w.uid+'\',{})','',g,!!g);
     a+=tcard(esc(w.name)+(w.trusted?' <span class="tag">trusted</span>':''),sub,btns,!!g&&!(w.blackPowder&&!w.loaded&&act)); });
-  var dropped=items('weapon').filter(function(w){ return w.dropped; }); dropped.forEach(function(w){ a+=tcard(esc(w.name)+' <span class="tag warn">dropped</span>','Pick it up to fight with it again',tbtn('Pick up','pickUp(\''+w.uid+'\')','ghost')); });
+  var dropped=items('weapon').filter(function(w){ return w.dropped; }); dropped.forEach(function(w){ a+=tcard(esc(w.name)+' <span class="tag warn">dropped</span>','',tbtn('Pick up','pickUp(\''+w.uid+'\')','ghost')); });
   h+=tsec('attacks','Attacks',a,list.length);
-  // class actions
+  // class actions that aren't attacks
   var ca='';
-  if(has('skylarker')) ca+=tcard('Skylarker','After swinging, jumping or acrobatics: test AGILITY → automatic hit, +'+(2+(picks('skylarker')>=2?1:0))+' damage',attackList().slice(0,4).map(function(w){ return tbtn(esc(w.name),'skylark(\''+w.uid+'\')','ghost'); }).join(''),!act);
-  if(has('sneaky-bastard')) ca+=tcard('Sneaky Bastard','From the shadows or sneaking: test AGILITY → automatic critical',attackList().slice(0,4).map(function(w){ return tbtn(esc(w.name),'sneakyBastard(\''+w.uid+'\')','ghost'); }).join(''),!act);
-  if(has('liars-dice')) ca+=tcard("Liar's Dice",'Roll 5d6 at the start of combat: even → melee −2 DR, defense +2 DR (the GM applies it)'+(S.combat.liars!=null?' · <b>'+(S.combat.liars?'even':'odd')+'</b>':''),tbtn('Roll 5d6','rollLiars()','ghost'));
-  if(has('grog-breath')) ca+=tcard('Grog Breath','Stun an opponent in melee range for 1 round · once an hour unless you drink more grog'+(S.day.breath?' · <b>used</b>':''),tbtn('Belch','grogBreath()'),!act||S.day.breath);
-  if(has('inspiring-leader')) ca+=tcard('Inspiring Leader','Once each combat: roll d4 — allies may add or subtract it from one roll',tbtn('Roll d4','inspiringLeader()','ghost'),S.combat.inspire!=null);
-  if(has('military-mastermind')) ca+=tcard('Military Mastermind','When combat starts: test PRESENCE to take a surprise round or prevent one',tbtn('Test','mastermind()','ghost'));
-  if(hasAilment('ghost')) ca+=tcard('Apparate','Once per night: test SPIRIT to terrify a target for d12'+(S.day.ghost?' · <b>used tonight</b>':''),tbtn('Apparate','apparate()'),!act||S.day.ghost);
-  if(hasAilment('eldritch-mind')) ca+=tcard('Eldritch Mind','When combat starts: test PRESENCE — fail: panic (+4 DR, 2 attacks a turn); pass: −2 DR this combat',tbtn('Test','eldritchTest()','ghost'));
+  if(has('liars-dice')) ca+=tcard("Liar's Dice",S.combat.liars!=null?'<b>'+(S.combat.liars?'even':'odd')+'</b>':'',tbtn('Roll 5d6','rollLiars()','ghost'));
+  if(has('grog-breath')) ca+=tcard('Grog Breath',S.day.breath?'used':'',tbtn('Belch','grogBreath()'),!act||S.day.breath);
+  if(has('inspiring-leader')) ca+=tcard('Inspiring Leader',S.combat.inspire!=null?'±<b>'+S.combat.inspire+'</b>':'',tbtn('Roll d4','inspiringLeader()','ghost'));
+  if(has('military-mastermind')) ca+=tcard('Military Mastermind','PRESENCE',tbtn('Test','mastermind()','ghost'));
+  if(hasAilment('ghost')) ca+=tcard('Apparate','SPIRIT · d12'+(S.day.ghost?' · used tonight':''),tbtn('Apparate','apparate()'),!act||S.day.ghost);
+  if(hasAilment('eldritch-mind')) ca+=tcard('Eldritch Mind','PRESENCE'+(S.combat.eldritch?' · <b>'+(S.combat.eldritch==='panic'?'panic':'harnessed')+'</b>':''),tbtn('Test','eldritchTest()','ghost'));
   if(ca) h+=tsec('classact','Class Actions',ca);
   // magic
   var mg='';
-  if(S.prayers.length){ mg+='<div class="pb-note">Prayers today: <b>'+num(S.prayerUses.left)+'/'+num(S.prayerUses.max)+'</b></div>'; S.prayers.forEach(function(id){ var p=prayerDef(id); if(!p) return; mg+=tcard(esc(p.name)+' <span class="tag">prayer'+(p.noAction?' · no action':'')+'</span>',esc(p.text),tbtn('Pray','pray(\''+jsq(id)+'\')'),num(S.prayerUses.left)<=0||(!p.noAction&&!act)); }); }
-  if(S.spells.length){ mg+='<div class="pb-note">Spells today: <b>'+num(S.spellCasts.left)+'/'+num(S.spellCasts.max)+'</b></div>'; S.spells.forEach(function(s){ var p=spellDef(s.id); if(!p) return; mg+=tcard(esc(p.name)+' <span class="tag">rank '+rankName(s.rank)+'</span>',esc(rankText((p.ranks||{})[rankName(s.rank)]))+(p.test?' · test '+esc(p.test.ability||'SPIRIT'):''),tbtn('Cast','castSpell(\''+jsq(s.id)+'\')'),num(S.spellCasts.left)<=0||!act); }); }
-  if(S.rituals.length&&restrictions().rituals){ var rb=ritualBlock(); mg+='<div class="pb-note">Rituals today: <b>'+num(S.ritualCasts.left)+'/'+num(S.ritualCasts.max)+'</b> · test SPIRIT'+(rb?' · <span style="color:var(--red);">'+esc(rb)+'</span>':'')+'</div>';
+  if(S.prayers.length){ mg+='<div class="pb-note">Prayers today <b>'+num(S.prayerUses.left)+'/'+num(S.prayerUses.max)+'</b></div>'; S.prayers.forEach(function(id){ var p=prayerDef(id); if(!p) return; mg+=tcard(esc(p.name)+' <span class="tag">prayer'+(p.noAction?' · no action':'')+'</span>',esc(p.text),tbtn('Pray','pray(\''+jsq(id)+'\')'),num(S.prayerUses.left)<=0||(!p.noAction&&!act)); }); }
+  if(S.spells.length){ mg+='<div class="pb-note">Spells today <b>'+num(S.spellCasts.left)+'/'+num(S.spellCasts.max)+'</b></div>'; S.spells.forEach(function(s){ var p=spellDef(s.id); if(!p) return; mg+=tcard(esc(p.name)+' <span class="tag">rank '+rankName(s.rank)+'</span>',esc(rankText((p.ranks||{})[rankName(s.rank)]))+(p.test?' · test '+esc(p.test.ability||'SPIRIT'):''),tbtn('Cast','castSpell(\''+jsq(s.id)+'\')'),num(S.spellCasts.left)<=0||!act); }); }
+  if(S.rituals.length&&restrictions().rituals){ var rb=ritualBlock(); mg+='<div class="pb-note">Rituals today <b>'+num(S.ritualCasts.left)+'/'+num(S.ritualCasts.max)+'</b>'+(rb?' · <span style="color:var(--red);">'+esc(rb)+'</span>':'')+'</div>';
     S.rituals.forEach(function(x){ var p=ritualDef(x.id); if(!p) return; var sp=hasAilment('conduit')&&S.conduit.id===x.id&&!S.conduit.used; mg+=tcard(esc(p.name)+' <span class="tag">ritual</span>'+(x.locked?' <span class="tag warn">until dawn</span>':'')+(sp?' <span class="tag ok">spirits</span>':''),esc(p.text),tbtn('Cast','openRitual(\''+jsq(x.id)+'\')'),x.locked||(!sp&&num(S.ritualCasts.left)<=0)); }); }
-  if(hasAilment('conduit')&&S.conduit.id&&!S.rituals.some(function(r){ return r.id===S.conduit.id; })){ var cr=ritualDef(S.conduit.id); if(cr) mg+=tcard(esc(cr.name)+' <span class="tag ok">spirits</span>','Conduit: cast it once today without a SPIRIT test'+(S.conduit.used?' · <b>used</b>':''),tbtn('Cast','conduitCast()'),S.conduit.used||!act); }
-  var relics=S.relics.filter(function(r){ return !r.destroyed; }); if(relics.length){ var rlb=relicBlock(); if(rlb) mg+='<div class="pb-note" style="color:var(--red);">'+esc(rlb)+'</div>'; relics.forEach(function(x){ var p=relicDef(x.id); if(!p) return; mg+=tcard(esc(p.name)+' <span class="tag">relic</span>'+(x.locked?' <span class="tag warn">until dawn</span>':''),esc(p.text)+(p.cheatDeath?'':' · then test SPIRIT'),tbtn(p.cheatDeath?'Passive':'Use','useRelic(\''+x.uid+'\')',p.cheatDeath?'ghost':''),x.locked||(!act&&!p.cheatDeath)); }); }
+  if(hasAilment('conduit')&&S.conduit.id&&!S.rituals.some(function(r){ return r.id===S.conduit.id; })){ var cr=ritualDef(S.conduit.id); if(cr) mg+=tcard(esc(cr.name)+' <span class="tag ok">spirits</span>','Conduit'+(S.conduit.used?' · <b>used</b>':''),tbtn('Cast','conduitCast()'),S.conduit.used||!act); }
+  var relics=S.relics.filter(function(r){ return !r.destroyed; }); if(relics.length){ var rlb=relicBlock(); if(rlb) mg+='<div class="pb-note" style="color:var(--red);">'+esc(rlb)+'</div>'; relics.forEach(function(x){ var p=relicDef(x.id); if(!p) return; mg+=tcard(esc(p.name)+' <span class="tag">relic</span>'+(x.locked?' <span class="tag warn">until dawn</span>':''),esc(p.text),tbtn(p.cheatDeath?'Passive':'Use','useRelic(\''+x.uid+'\')',p.cheatDeath?'ghost':''),x.locked||(!act&&!p.cheatDeath)); }); }
   if(mg) h+=tsec('magic','Prayers, Spells, Rituals & Relics',mg);
   // equipment: consumables with a set effect, used up when used
   var eq='';
   S.items.forEach(function(x){
-    if(x.kind==='potion'&&x.potion&&num(x.qty,1)>0){ var pp=x.potion; eq+=tcard(esc(x.name)+(num(x.qty,1)>1?' <span class="pb-qty">×'+num(x.qty,1)+'</span>':'')+' <span class="tag">'+(pp.known?'potion':'unknown potion')+'</span>',esc(potionSummary(pp))+' · an action, used up',tbtn(potionVerb(pp.delivery),'usePotion(\''+x.uid+'\')','','Use it on yourself')+tbtn('On another','usePotion(\''+x.uid+'\',true)','ghost','Give, splash or inject it into someone else: the effect is logged for them')+(pp.known?'':tbtn('Identify','identifyPotion(\''+x.uid+'\')','ghost','Someone who knows (Tela charges 25s) names its effect')),!act); }
-    else if(x.kind==='ash'&&num(x.qty,1)>0) eq+=tcard('ASH <span class="pb-qty">×'+num(x.qty,1)+' dose'+(num(x.qty,1)===1?'':'s')+'</span>','Eat, snort or smoke a dose: d20 on the Effects of Consuming ASH · most effects last 2d6 minutes · an action',tbtn('Consume','consumeAsh(\''+x.uid+'\')'),!act);
-    else if(x.ref==='medical-kit'&&num(x.uses)>0) eq+=tcard(esc(x.name)+' <span class="pb-qty">'+num(x.uses)+' uses</span>','Action: heal d6 HP and stop bleeding, poison or infection',tbtn('Use','useMedKit(\''+x.uid+'\')'),!act);
-    else if(x.drink&&num(x.qty,1)>0) eq+=tcard(esc(x.name)+' <span class="pb-qty">×'+num(x.qty,1)+'</span>','Drink: test TOUGHNESS → heal d4 (fail: vomit d2 rounds) · AGILITY −1 for an hour',tbtn('Drink','drink(\''+x.uid+'\')'),!act);
-    else if(isMeat(x)&&num(x.qty,1)>0) eq+=tcard(esc(x.name)+' <span class="pb-qty">×'+num(x.qty,1)+'</span>','Buccan Cook: eat one to heal '+(picks('buccan-cook')>=2?'d6':'d4')+' HP',tbtn('Eat','eatMeat(\''+x.uid+'\')'),!act);
-    else if(x.kind==='bomb'&&num(x.qty,1)>0) eq+=tcard(esc(x.name)+' <span class="pb-qty">×'+num(x.qty,1)+'</span>','Throw: test AGILITY'+(x.dmg?' · '+esc(x.dmg):'')+(x.effect?' · '+esc(x.effect):'')+' · 5\' blast',tbtn('Throw','throwBomb(\''+x.uid+'\')'),!act);
-    else if((x.ref==='torch'||x.ref==='candle'||/^(torch|candle)/i.test(x.name))&&num(x.qty,1)>0) eq+=tcard(esc(x.name)+' <span class="pb-qty">×'+num(x.qty,1)+'</span>','Light one: an action, burns for 1 hour',S.light&&S.light.name===x.name.replace(/s$/,'')?tbtn('Douse','douse()','ghost'):tbtn('Light','lightUp(\''+x.uid+'\')'),!act&&!(S.light&&S.light.name===x.name.replace(/s$/,'')));
+    if(x.kind==='potion'&&x.potion&&num(x.qty,1)>0){ var pp=x.potion; eq+=tcard(esc(x.name)+(num(x.qty,1)>1?' <span class="pb-qty">×'+num(x.qty,1)+'</span>':'')+' <span class="tag">'+(pp.known?'potion':'unknown potion')+'</span>',esc(potionSummary(pp)),tbtn(potionVerb(pp.delivery),'usePotion(\''+x.uid+'\')','','Use it on yourself')+tbtn('On another','usePotion(\''+x.uid+'\',true)','ghost','Give, splash or inject it into someone else: the effect is logged for them')+(pp.known?'':tbtn('Identify','identifyPotion(\''+x.uid+'\')','ghost','Someone who knows (Tela charges 25s) names its effect')),!act); }
+    else if(x.kind==='ash'&&num(x.qty,1)>0) eq+=tcard('ASH <span class="pb-qty">×'+num(x.qty,1)+' dose'+(num(x.qty,1)===1?'':'s')+'</span>','d20 on the Effects of Consuming ASH',tbtn('Consume','consumeAsh(\''+x.uid+'\')'),!act);
+    else if(x.ref==='medical-kit'&&num(x.uses)>0) eq+=tcard(esc(x.name)+' <span class="pb-qty">'+num(x.uses)+' uses</span>','Heal d6',tbtn('Use','useMedKit(\''+x.uid+'\')'),!act);
+    else if(x.drink&&num(x.qty,1)>0) eq+=tcard(esc(x.name)+' <span class="pb-qty">×'+num(x.qty,1)+'</span>','TOUGHNESS · heal d4',tbtn('Drink','drink(\''+x.uid+'\')'),!act);
+    else if(isMeat(x)&&num(x.qty,1)>0) eq+=tcard(esc(x.name)+' <span class="pb-qty">×'+num(x.qty,1)+'</span>','Heal '+(picks('buccan-cook')>=2?'d6':'d4'),tbtn('Eat','eatMeat(\''+x.uid+'\')'),!act);
+    else if(x.kind==='bomb'&&num(x.qty,1)>0) eq+=tcard(esc(x.name)+' <span class="pb-qty">×'+num(x.qty,1)+'</span>','AGILITY'+(x.dmg?' · '+esc(x.dmg):'')+(x.effect?' · '+esc(x.effect):''),tbtn('Throw','throwBomb(\''+x.uid+'\')'),!act);
+    else if((x.ref==='torch'||x.ref==='candle'||/^(torch|candle)/i.test(x.name))&&num(x.qty,1)>0) eq+=tcard(esc(x.name)+' <span class="pb-qty">×'+num(x.qty,1)+'</span>','1 hour',S.light&&S.light.name===x.name.replace(/s$/,'')?tbtn('Douse','douse()','ghost'):tbtn('Light','lightUp(\''+x.uid+'\')'),!act&&!(S.light&&S.light.name===x.name.replace(/s$/,'')));
     else if((x.ref==='lantern'||/^lantern$/i.test(x.name))){ var oil=S.items.filter(function(y){ return y.ref==='lantern-oil'; }).reduce(function(t,y){ return t+num(y.qty,1); },0); var lit=S.light&&S.light.name===x.name;
-      eq+=tcard(esc(x.name)+(lit?' <span class="tag ok">lit '+num(S.light.hours)+' h</span>':''),'Burns a flask of oil for d6 hours · oil: '+(oil?oil:'<b style="color:var(--red);">none</b>'),lit?tbtn('Douse','douse()','ghost'):tbtn('Light','lightUp(\''+x.uid+'\')'),!lit&&(!act||!oil)); } });
-  if(num(S.grog.brewed)>0) eq+=tcard('Potent grog <span class="pb-qty">×'+num(S.grog.brewed)+'</span>','Grog Brewer: drink it, or coat a melee weapon (TOUGHNESS DR'+grogPoisonDR()+' or −'+grogPoisonDie()+' HP)',tbtn('Drink','drink(null,true)')+tbtn('Coat','coatWeapon()','ghost'),!act);
+      eq+=tcard(esc(x.name)+(lit?' <span class="tag ok">lit '+num(S.light.hours)+' h</span>':''),'Oil: '+(oil?oil:'<b style="color:var(--red);">none</b>'),lit?tbtn('Douse','douse()','ghost'):tbtn('Light','lightUp(\''+x.uid+'\')'),!lit&&(!act||!oil)); } });
+  if(num(S.grog.brewed)>0) eq+=tcard('Potent grog <span class="pb-qty">×'+num(S.grog.brewed)+'</span>','',tbtn('Drink','drink(null,true)')+tbtn('Coat','coatWeapon()','ghost'),!act);
   if(eq) h+=tsec('equipment','Equipment',eq);
   // other
-  var ot=tcard('Hold your breath','1 + TOUGHNESS = '+Math.max(1,1+abil('TOUGHNESS'))+' min (half under duress) · then test TOUGHNESS each round or lose 1 HP'+(num(DX.breath)?' · <b>round '+num(DX.breath)+'</b>':''),tbtn('Test','holdBreath()','ghost')+(num(DX.breath)?tbtn('Surface','DX.breath=0;renderTurn()','ghost'):''));
+  var ot=tcard('Initiative','d6 '+sgn(abil('AGILITY'))+' AGILITY',tbtn('Roll','rollInit()','ghost'));
+  ot+=tcard('Hold your breath',Math.max(1,1+abil('TOUGHNESS'))+' min'+(num(DX.breath)?' · <b>round '+num(DX.breath)+'</b>':''),tbtn('Test','holdBreath()','ghost')+(num(DX.breath)?tbtn('Surface','DX.breath=0;renderTurn()','ghost'):''));
   h+=tsec('other','Other',ot);
   return h; }
 function conduitCast(){ var r=ritualDef(S.conduit.id); if(!r||S.conduit.used) return; if(!canAct()){ addLog(r.name,'—','No action left','normal'); return; } useAction(); S.conduit.used=true; addLog('Ritual · '+r.name,'Through the spirits','Conduit: no SPIRIT test','normal'); ritualEffect(r,{},{ok:true}); changed(); }
+// Individual initiative (optional rule): d6 + AGILITY.
+function rollInit(){ var n=d(6), v=n+abil('AGILITY'); addLog('Initiative',String(v),'d6('+n+') '+sgn(abil('AGILITY'))+' AGL','normal'); }
 function holdBreath(){ DX.breath=num(DX.breath)+1; var o={label:'Hold breath (round '+DX.breath+')',ability:'TOUGHNESS',kind:'test',ask:'The GM sets the DR (it climbs each round): still holding?'}; o.onRes=function(res){ showResult(o,res,function(r){ return pf(r,{t:'Still holding',f:function(){ finish(o); renderTurn(); }},{t:'Lose 1 HP',cls:'warn',f:function(){ finish(o); takeDamage(1,{label:'Out of breath',raw:true,noLuck:true}); renderTurn(); }}); }); }; test(o); }
 function renderDefendTab(){ var h='';
   var hat=wornHat(); var bon=rollBonuses({kind:'defense'});
   var f='<div class="pb-form">'+
-    '<div class="pb-frow"><label>Incoming damage</label><input id="dx-dmg" data-nolock class="pb-in" placeholder="e.g. d6, 2d4, 5" value="'+esc(DX.dmg)+'" oninput="DX.dmg=this.value"></div>'+
-    '<div class="pb-frow pb-checks"><label><input type="checkbox" data-nolock '+(DX.bp?'checked':'')+' onchange="DX.bp=this.checked;renderTurn()"> Black powder (ignores armor)</label>'+
-      (num(S.luck)>0?'<label><input type="checkbox" data-nolock '+(DX.luck?'checked':'')+' onchange="DX.luck=this.checked"> Devil\'s Luck −d6 damage</label>':'')+
-      (hat&&hat.sacrifice?'<label><input type="checkbox" data-nolock '+(DX.sac?'checked':'')+' onchange="DX.sac=this.checked"> Break the '+esc(hat.name)+' to ignore the hit</label>':'')+'</div></div>';
+    '<div class="pb-frow"><label>Incoming damage</label><input id="dx-dmg" data-nolock class="pb-in" placeholder="5, d6, 2d4" value="'+esc(DX.dmg)+'" oninput="DX.dmg=this.value"></div>'+
+    '<div class="pb-frow pb-checks"><label><input type="checkbox" data-nolock '+(DX.bp?'checked':'')+' onchange="DX.bp=this.checked;renderTurn()"> Black powder</label>'+
+      (hat&&hat.sacrifice?'<label><input type="checkbox" data-nolock '+(DX.sac?'checked':'')+' onchange="DX.sac=this.checked"> Break the '+esc(hat.name)+'</label>':'')+'</div></div>';
   var sub='d20 '+sgn(abil('AGILITY'))+' AGILITY'+(bon.length?' '+bon.map(function(x){ return sgn(x.v)+' '+esc(x.l); }).join(' '):'')+' · armor '+(DX.bp?'ignored':(armorDie()?'−'+armorDie():'none')+(hatReduction()?' · hat −'+hatReduction():''))+(extraProt().length?' · '+extraProt().map(function(p){ return '−'+p.die; }).join(' '):'');
-  h+=tsec('defend','Defend',f+tcard('Defend','Roll when an enemy attacks you · '+sub,tbtn('Defend','doDefend()','','',S.dead||num(S.cond.out)>0))+'<div class="pb-note">The GM sets the DR and says whether the blow lands. Critical (natural '+(has('calculating-cutthroat')?'19–20':'20')+'): an immediate free attack. Fumble: double damage and your armor drops a tier.</div>');
-  var pr=''; if(S.prayers.indexOf('holy-protection')>=0) pr+=tcard('Holy Protection','Prayer, no action: you or an ally defend at −4 DR against one attack',tbtn('Pray','pray(\'holy-protection\')'),num(S.prayerUses.left)<=0);
-  if(S.prayers.indexOf('blessed-guidance')>=0) pr+=tcard('Blessed Guidance','Prayer, no action: add d4 to any roll, even after it',tbtn('Pray','pray(\'blessed-guidance\')'),num(S.prayerUses.left)<=0);
+  h+=tsec('defend','Defend',f+tcard('Defend',sub,tbtn('Defend','doDefend()','','',S.dead||num(S.cond.out)>0)));
+  var pr=''; if(S.prayers.indexOf('holy-protection')>=0) pr+=tcard('Holy Protection','prayer · −4 DR',tbtn('Pray','pray(\'holy-protection\')'),num(S.prayerUses.left)<=0);
+  if(S.prayers.indexOf('blessed-guidance')>=0) pr+=tcard('Blessed Guidance','prayer · +d4',tbtn('Pray','pray(\'blessed-guidance\')'),num(S.prayerUses.left)<=0);
   if(pr) h+=tsec('rxpray','Reactions',pr);
-  h+=tsec('hit','Hurt without a defense roll',tcard('Take damage','Traps, falls, cannon fire… your armor die still applies unless it\'s black powder',tbtn('Damage','promptDamage()'))+tcard('Heal','Bandages, prayers, a friend\'s medical kit',tbtn('Heal','promptHeal()','ghost')));
+  h+=tsec('hit','Hit',tcard('Take damage','',tbtn('Damage','promptDamage()'))+tcard('Heal','',tbtn('Heal','promptHeal()','ghost')));
   return h; }
 
 // ═══ PICKERS — compendium / shop ═══════════════════════════════════════════
@@ -1854,7 +1781,7 @@ function renderPicker(){ if(!_pk) return; var it=pickerItems(); var h='';
     else if(isShop()) btn='<button class="brow-add ghost" onclick="pickAdd('+ix+',false)">Add</button>'+(cost?'<button class="brow-add" '+(cost>num(S.silver)?'disabled title="Not enough silver"':'')+' onclick="pickAdd('+ix+',true)">Buy</button>':'');
     else btn='<button class="brow-add" onclick="pickAdd('+ix+')">'+(_pk==='feature'&&has(x.id)?'Take again':'Add')+'</button>';
     h+='<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(x.name)+(cost!=null?'<span class="brow-cost">'+cost+'s</span>':x.costText?'<span class="brow-cost">'+esc(x.costText)+'</span>':'')+(x.source==='Homebrew'?' <span class="brow-cost" style="color:#9fdcae;">homebrew</span>':'')+'</div><div class="brow-meta">'+esc(meta)+'</div>'+(desc?'<div class="brow-desc">'+esc(desc)+'</div>':'')+'</div><div style="display:flex;flex-direction:column;gap:4px;">'+btn+'</div></div>'; });
-  if(isShop()) h='<div class="brow-meta" style="padding:6px 2px;">Purse: '+num(S.silver)+'s. “Buy” pays from it; “Add” is free. Everything lands in your inventory'+(_shopTab==='weapon'||_shopTab==='clothing'?' — tick its pip to equip it.':'.')+'</div>'+h;
+  if(isShop()) h='<div class="brow-meta" style="padding:6px 2px;">Silver: '+num(S.silver)+'s</div>'+h;
   $('picker-body').innerHTML=h||'<div class="brow-empty">Nothing matches.</div>'; }
 function pickAdd(ix,buy){ var x=pickerItems()[ix]; if(!x) return; var cost=costOf(x);
   if(buy){ if(cost==null||cost>num(S.silver)){ addLog('Shop','Too expensive',x.name,'normal'); return; } S.silver=num(S.silver)-cost; }
@@ -1930,7 +1857,7 @@ function addLog(label,result,detail,type){
   entries.insertBefore(div, entries.firstChild); while(entries.children.length>60) entries.removeChild(entries.lastChild); entries.scrollTop=0;
   showRollToast(label,result,detail,type);
 }
-function clearLog(){ $('log-entries').innerHTML='<div class="log-hint">Click an ability to roll it — d20 ± the ability. The GM says whether it beats the DR.</div>'; }
+function clearLog(){ $('log-entries').innerHTML='<div class="log-hint">Click an ability or attack to roll</div>'; }
 function toggleLogCollapse(){ document.querySelector('.roll-log').classList.toggle('collapsed'); }
 document.querySelector('.log-header').addEventListener('click', function(e){ if(window.innerWidth<=768 && !e.target.closest('button,.dm-toggle-btn')) toggleLogCollapse(); });
 (function(){ if(window.innerWidth<=768) document.querySelector('.roll-log').classList.add('collapsed'); })();
@@ -2248,7 +2175,7 @@ body.dark .pb-top{background:#1a1111;}
 .pb-name{font-family:var(--f-ui);font-weight:600;font-size:16px;color:var(--ink);line-height:1.2;}
 .pb-sub{font-size:13px;color:var(--muted);line-height:1.35;}
 .pb-sub b{color:var(--ink);font-family:var(--f-num);}
-.pb-btns{display:flex;gap:5px;flex:0 0 auto;flex-wrap:wrap;justify-content:flex-end;max-width:55%;}
+.pb-btns{display:flex;gap:5px;flex:0 1 auto;flex-wrap:wrap;justify-content:flex-end;max-width:78%;}
 .pb-qty{font-family:var(--f-num);font-size:13px;color:var(--muted);font-weight:400;}
 .pb-card.disabled{opacity:.5;}
 .pb-card.disabled .pb-do{background:var(--muted);border-color:var(--muted);color:#fff;cursor:default;pointer-events:none;}

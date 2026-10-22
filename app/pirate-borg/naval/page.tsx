@@ -316,7 +316,7 @@ export default async function PbNavalPage({ searchParams }: { searchParams: Prom
             <TableCard t={PB_CARGO.plotTwist} cols={1} />
             <RuleNote title="Market rates" className="">
               <p>{PB_CARGO.marketRates.text}</p>
-              <p className="mt-1.5">Swing: <N className="text-[var(--text)]">±{Math.round(PB_CARGO.marketSwing * 100)}%</N> · ASH: <N className="text-[var(--text)]">{PB_CARGO.marketRates.ashStandardRate}s</N> a dose, see <a href="/pirate-borg/alchemy#ash-market" className="text-[var(--sys-link)] hover:underline">the ASH market</a>.</p>
+              <p className="mt-1.5">Swing: <N className="text-[var(--text)]">±{Math.round(PB_CARGO.marketSwing * 100)}%</N> · ASH: <N className="text-[var(--text)]">{PB_CARGO.marketRates.ashStandardRate}s</N> a dose.</p>
             </RuleNote>
           </div>
         </div>

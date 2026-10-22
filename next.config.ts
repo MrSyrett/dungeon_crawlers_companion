@@ -13,6 +13,14 @@ const nextConfig: NextConfig = {
       // (combat, encounters, generators) is the Bestiary.
       { source: "/dragonbane/skills/:path*", destination: "/dragonbane/professions", permanent: true },
       { source: "/dragonbane/adventuring/:path*", destination: "/dragonbane/bestiary", permanent: true },
+      // Pirate Borg Rules, The Dark Caribbean, ASH & Alchemy, Treasure and GM
+      // Tables pages were removed. Character rules land on Classes, alchemy and
+      // loot on Gear, and the GM roll tables on the Bestiary.
+      { source: "/pirate-borg/rules/:path*", destination: "/pirate-borg/classes", permanent: true },
+      { source: "/pirate-borg/setting/:path*", destination: "/pirate-borg/classes", permanent: true },
+      { source: "/pirate-borg/alchemy/:path*", destination: "/pirate-borg/gear", permanent: true },
+      { source: "/pirate-borg/treasure/:path*", destination: "/pirate-borg/gear", permanent: true },
+      { source: "/pirate-borg/tables/:path*", destination: "/pirate-borg/bestiary", permanent: true },
     ];
   },
   async headers() {

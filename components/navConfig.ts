@@ -164,17 +164,12 @@ export const COMPENDIUM: Record<SystemKey, NavLink[]> = {
     { href: "/dragonbane/bestiary", label: "Bestiary" },
   ],
   PB: [
-    { href: "/pirate-borg/rules", label: "Rules" },
     { href: "/pirate-borg/classes", label: "Classes" },
     { href: "/pirate-borg/backgrounds", label: "Backgrounds" },
     { href: "/pirate-borg/gear", label: "Gear" },
     { href: "/pirate-borg/magic", label: "Relics & Rituals" },
-    { href: "/pirate-borg/alchemy", label: "ASH & Alchemy" },
     { href: "/pirate-borg/bestiary", label: "Bestiary" },
     { href: "/pirate-borg/naval", label: "Naval" },
-    { href: "/pirate-borg/treasure", label: "Treasure" },
-    { href: "/pirate-borg/setting", label: "The Dark Caribbean" },
-    { href: "/pirate-borg/tables", label: "GM Tables" },
   ],
 };
 
@@ -346,13 +341,8 @@ const CONCEPT: Record<string, string[]> = {
   Professions: ["archetype"],
   "Heroic Abilities": ["traits", "skills"],
   // Pirate Borg
-  Rules: ["rules"],
   "Relics & Rituals": ["magic"],
-  "ASH & Alchemy": ["gear", "magic"],
   Naval: ["vehicles", "rules"],
-  Treasure: ["gear"],
-  "The Dark Caribbean": ["setting"],
-  "GM Tables": ["tables"],
 };
 
 // When the user switches system while on a compendium page, keep them in the

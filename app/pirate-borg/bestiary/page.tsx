@@ -179,7 +179,7 @@ export default async function PbBestiaryPage({ searchParams }: { searchParams: P
               <article key={c.id} id={`captain-${c.id}`} className={`${cardCls} scroll-mt-20 border-l-4`} style={{ borderLeftColor: "var(--pb)" }}>
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <h3 className="text-[22px] leading-tight text-[var(--sys-link)]">{c.name}</h3>
-                  <span className="flex gap-1.5">{faction ? <a href={`/pirate-borg/setting#faction-${faction.id}`} className={`${badge} hover:text-[var(--text)]`}>{faction.name}</a> : null}<span className={dBadge}>pg. {c.page}</span></span>
+                  <span className="flex gap-1.5">{faction ? <span className={badge}>{faction.name}</span> : null}<span className={dBadge}>pg. {c.page}</span></span>
                 </div>
                 <p className="mt-1 text-[13px] italic leading-relaxed text-[var(--muted)]">{c.text}</p>
                 <p className={`${eyebrow} mt-3`}>Captain, officers &amp; crew</p>

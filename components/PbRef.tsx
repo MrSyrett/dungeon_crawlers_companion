@@ -230,13 +230,6 @@ export const cleanNote = (n?: string): string | undefined =>
   n?.replace(/\s*Converting from another system[^.]*\.?(\s*[^.]*Hit Dice\.)?/, "").replace(/[Tt]ext in the `hidden` (part|field)/g, "Text in italics").replace(/The `answer` is the GM's explanation\./, "The answer under each riddle is for the GM.").replace(/`([^`]+)`/g, "$1");
 /** The dice to roll for a table: "4d20" for carousing, else its die. */
 export const tableDice = (t: AnyTable): string => (typeof t.dice === "string" && t.dice ? t.dice : t.die);
-/** Plain text of every row / cell, for search and the data-coverage check. */
-export function tableText(t: AnyTable): string {
-  const parts: string[] = [t.name, t.note ?? ""];
-  for (const c of t.columns ?? []) parts.push(c.name, ...c.values);
-  for (const r of t.rows ?? []) parts.push(r.name ?? "", r.text, typeof r.hidden === "string" ? r.hidden : "", typeof r.answer === "string" ? r.answer : "", ...(r.sub?.rows.map((x) => x.text) ?? []));
-  return parts.join(" ");
-}
 /** A PbTable as a d-list, or — when it has several columns — as a real grid
  *  (carousing, names, alchemy, history d66: first die = column, second = row). */
 export function GenTable({ t, cols, bare }: { t: AnyTable; cols?: 1 | 2 | 3; bare?: boolean }) {
