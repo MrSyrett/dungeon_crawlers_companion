@@ -158,13 +158,10 @@ export const COMPENDIUM: Record<SystemKey, NavLink[]> = {
   DB: [
     { href: "/dragonbane/kin", label: "Kin" },
     { href: "/dragonbane/professions", label: "Professions" },
-    { href: "/dragonbane/skills", label: "Skills" },
     { href: "/dragonbane/abilities", label: "Heroic Abilities" },
     { href: "/dragonbane/magic", label: "Magic" },
     { href: "/dragonbane/gear", label: "Gear" },
     { href: "/dragonbane/bestiary", label: "Bestiary" },
-    { href: "/dragonbane/npcs", label: "NPCs" },
-    { href: "/dragonbane/adventuring", label: "Adventuring" },
   ],
   PB: [
     { href: "/pirate-borg/rules", label: "Rules" },
@@ -285,6 +282,7 @@ const CONCEPT: Record<string, string[]> = {
   "The Dead": ["creatures"],
   "The Vaesen": ["creatures"],
   Characters: ["creatures"],
+  NPCs: ["creatures"],
   // what you are
   Classes: ["archetype"],
   Roles: ["archetype"],
@@ -347,7 +345,6 @@ const CONCEPT: Record<string, string[]> = {
   Kin: ["ancestry"],
   Professions: ["archetype"],
   "Heroic Abilities": ["traits", "skills"],
-  NPCs: ["creatures"],
   // Pirate Borg
   Rules: ["rules"],
   "Relics & Rituals": ["magic"],

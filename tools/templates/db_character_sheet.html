@@ -54,9 +54,9 @@ input,select,textarea,button{font-family:var(--f-ui);font-variant-numeric:lining
 /* Light mode on the themed page: the warm parchment ground instead of the dark one. */
 :root[data-themed][data-system="DB"] body:not(.dark){background-color:#d6d3cd;background-image:radial-gradient(130% 98% at 50% 42%,rgba(0,0,0,0) 50%,rgba(0,0,0,.18) 100%),url("/themes/db-parchment-light.webp");}
 /* Hideout = the logo treatment everywhere on the sheet (red fill, gold stroke) */
-.hd-logo,.section-bar,.db-title,.db-st.on,.log-title,.modal-hd .ttl,.rules-list h4,.hdr-logo .lg-word,.abil-name,.bd-title,.name-primary input,.db-card-num:not(.empty){color:var(--hd-fill)!important;-webkit-text-stroke:.9px var(--hd-stroke);paint-order:stroke fill;}
-.hdr-logo .lg-word{-webkit-text-stroke:1.6px var(--hd-stroke);}
-.section-bar .sb-note,.section-bar .hdr-right{-webkit-text-stroke:0;}
+/* Only the "Dragonbane" logo word keeps the logo treatment (red fill, gold stroke); every other
+   Hideout heading is plain crimson, no stroke, so it stays readable. */
+.hdr-logo .lg-word{color:var(--hd-fill);-webkit-text-stroke:1.6px var(--hd-stroke);paint-order:stroke fill;text-shadow:0 2px 3px rgba(0,0,0,.55);}
 .app-wrap{display:flex;flex:1;min-height:0;align-items:flex-start;}
 .sheet-wrap{flex:1;overflow-y:auto;padding:44px 16px 16px;container-type:inline-size;}
 
@@ -68,7 +68,7 @@ input,select,textarea,button{font-family:var(--f-ui);font-variant-numeric:lining
 .roll-log.collapsed #log-collapse-btn{right:0;}
 .roll-log.collapsed #log-collapse-btn::after{content:"\25B6";}
 .log-header{padding:12px 14px 10px;background:#1b1b1f;border-bottom:2px solid var(--acc);display:flex;justify-content:space-between;align-items:center;}
-.log-title{font-family:var(--f-disp);font-weight:400;font-size:19px;letter-spacing:.06em;}
+.log-title{font-family:var(--f-disp);font-weight:400;font-size:19px;letter-spacing:.06em;color:#e0614f;}
 .log-clear{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.4);color:#fff;font-family:var(--f-label);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;cursor:pointer;border-radius:6px;}
 .log-clear:hover{background:rgba(255,255,255,.32);}
 .log-entries{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column-reverse;gap:6px;}
@@ -134,10 +134,10 @@ body.dark .card{background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,.3);}
 .hdr-btn:hover{background:var(--acc-lt);}
 
 /* ── masthead ── */
-.hdr-row{display:flex;flex-direction:column;gap:9px;background:linear-gradient(120deg,#151517 0%,#232227 60%,#3a1a17 100%);border-bottom:2px solid var(--acc);color:#f3e6cc;padding:14px 18px;}
+.hdr-row{display:flex;flex-direction:column;gap:9px;background:linear-gradient(120deg,#2a0d09 0%,#5a1610 55%,#8c1c15 100%);border-bottom:2px solid var(--gold-lt);color:#f3e6cc;padding:14px 18px;}
 .hdr-top{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:center;}
 .hdr-logo .lg-word{font-family:var(--f-disp);font-weight:400;font-size:34px;line-height:.9;letter-spacing:.03em;}
-.hdr-logo .lg-sub{font-family:var(--f-label);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#d8c08a;margin-top:4px;}
+.hdr-logo .lg-sub{font-family:var(--f-label);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#e9b9a6;margin-top:4px;}
 .hdr-metarow{display:flex;gap:7px;flex-wrap:wrap;}
 .hdr-field,.lockfield{border:1px solid rgba(243,220,168,.3);background:rgba(255,240,220,.10);border-radius:7px;min-width:0;}
 .hdr-field{padding:3px 10px 4px;}
@@ -146,8 +146,7 @@ body.dark .card{background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,.3);}
 .hdr-field label{font-size:10px;margin-bottom:1px;}
 .lockfield label{font-size:9.5px;letter-spacing:.1em;}
 .hdr-field input,.hdr-field select,.lockfield input,.lockfield select{width:100%;background:transparent;border:none;outline:none;color:#fff7e8;font-family:var(--f-ui);font-weight:600;padding:1px 0;}
-.name-primary input{font-family:var(--f-disp);font-weight:400;font-size:22px;letter-spacing:.02em;}
-.name-primary input::placeholder{-webkit-text-stroke:0;color:rgba(255,240,220,.4)!important;}
+.name-primary input{font-size:20px;}
 .lockfield input,.lockfield select{font-size:14px;}
 .hdr-field select option,.lockfield select option{color:#111;background:#fff;}
 .hdr-field input::placeholder,.lockfield input::placeholder{color:rgba(255,240,220,.5);font-weight:400;}
@@ -163,7 +162,7 @@ body.dark .card{background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,.3);}
 /* attributes — one box per attribute, the score is the roll button (D&D's ability boxes) */
 .abil-list{display:flex;flex-direction:column;}
 .abil-box{margin:7px 8px;border:1px solid var(--rule);border-radius:8px;background:var(--box);padding:5px 4px 6px;text-align:center;position:relative;}
-.abil-name{font-family:var(--f-disp);font-weight:400;font-size:17px;letter-spacing:.06em;line-height:1;cursor:pointer;}
+.abil-name{font-family:var(--f-disp);font-weight:400;font-size:17px;letter-spacing:.06em;line-height:1;cursor:pointer;color:var(--acc-dk);}
 .abil-full{font-family:var(--f-label);font-size:10px;color:var(--muted);letter-spacing:.04em;margin-top:1px;}
 .abil-score{display:block;width:calc(100% - 16px);margin:4px 8px 4px;border:1px solid var(--acc-dk);border-radius:8px;background:var(--acc);font-family:var(--f-num);font-size:26px;font-weight:600;line-height:1;text-align:center;color:#fff;outline:none;padding:5px 0 6px;-moz-appearance:textfield;appearance:textfield;}
 body.sheet-locked .abil-score{cursor:pointer;user-select:none;caret-color:transparent;}
@@ -211,7 +210,8 @@ body.sheet-locked .sk-lvl:hover{border-color:var(--acc);background:var(--acc-lt)
 .pool-pips.wp .pool-pip.on{background:#4a6fb3;}
 .pool-pip:hover{transform:scale(1.12);}
 .vbig .cur{min-width:1.2em;text-align:right;}
-.vgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;grid-column:1 / -1;}
+.vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;grid-column:1 / -1;}
+.vmax{font-family:var(--f-num);font-size:20px;font-weight:600;letter-spacing:0;color:var(--acc-dk);line-height:1;}
 .dv{border:1px solid var(--rule);border-radius:9px;padding:5px 6px;background:var(--box);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:1px;min-width:0;}
 .dv .dl{font-family:var(--f-label);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);line-height:1.15;}
 .dv .dval{font-family:var(--f-num);font-size:22px;line-height:1.1;font-weight:600;color:var(--ink);white-space:nowrap;}
@@ -293,7 +293,8 @@ body.dark .prep-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 .modal{background:#1c1c21;border:2px solid var(--acc);border-radius:10px;max-width:600px;width:100%;max-height:92vh;display:flex;flex-direction:column;color:#e9e7e3;font-family:var(--f-ui);}
 .modal.wide{max-width:880px;}
 .modal-hd{background:#121215;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-radius:8px 8px 0 0;}
-.modal-hd .ttl{font-family:var(--f-disp);font-weight:400;font-size:21px;letter-spacing:.03em;line-height:1;}
+.modal-hd .ttl{font-family:var(--f-disp);font-weight:400;font-size:21px;letter-spacing:.03em;line-height:1;color:#e0614f;}
+.bd-title{color:#e0614f;}
 .modal-hd .x{background:transparent;border:none;color:#a09d96;font-size:20px;cursor:pointer;padding:0 4px;}
 .modal-bd{padding:14px 16px;overflow-y:auto;}
 .modal-ft{padding:10px 16px;border-top:1px solid #3a3a41;display:flex;justify-content:space-between;gap:8px;flex-shrink:0;flex-wrap:wrap;}
@@ -328,11 +329,12 @@ body.dark .prep-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 .brow-cost{font-size:13px;color:#e2c37a;margin-left:8px;font-weight:400;}
 .brow-meta{font-family:var(--f-label);font-size:11.5px;color:#aeaaa2;letter-spacing:.02em;margin-top:1px;}
 .brow-desc{font-size:13px;color:#c2bfb8;line-height:1.4;margin-top:3px;}
+.brow-btns{display:flex;flex-direction:row;gap:4px;flex-shrink:0;align-items:flex-start;}
 .brow-add{flex-shrink:0;background:var(--acc);color:#fff;border:none;border-radius:6px;padding:6px 11px;font-family:var(--f-label);font-size:13px;cursor:pointer;white-space:nowrap;}
 .brow-add.ghost{background:transparent;border:1px solid #7a2b1f;color:#ffb3a3;}
 .brow-add.have,.brow-add:disabled{background:transparent;color:#8c8983;border:1px solid #4a4a52;cursor:default;}
 .brow-empty{padding:14px 4px;font-size:14px;color:#998;}
-.rules-list h4{font-family:var(--f-disp);font-weight:400;font-size:18px;margin:14px 0 4px;}
+.rules-list h4{font-family:var(--f-disp);font-weight:400;font-size:18px;margin:14px 0 4px;color:#e0614f;}
 .rules-list p,.rules-list li{font-size:14px;line-height:1.5;color:#d6d3cc;}
 .rules-list ul{padding-left:18px;}
 .rules-list table{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px;}
@@ -371,7 +373,6 @@ body.dark .prep-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
   .hdr-metarow>*{flex:1 1 47%!important;}
   .vitals{grid-template-columns:1fr;}
   .vital.half{grid-column:auto;}
-  .vgrid{grid-template-columns:1fr 1fr;}
   .skills-wrap{columns:1;}
   .abil-box{margin:5px 3px;}
 }
@@ -417,6 +418,7 @@ body.dark .prep-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 }
 @media (max-width:560px){
   /* phone: each inventory row becomes two lines — the item (and its stats) across, then qty / weight / note / actions */
+  .coins{gap:6px;flex-wrap:nowrap;}.coins label{gap:3px;}.coins input{width:100%;min-width:0;}.coins label{flex:1 1 0;min-width:0;}
   #inv-tbl thead{display:none;}
   #inv-tbl tbody tr{display:grid;grid-template-columns:48px 48px 1fr auto;grid-template-areas:"n n n n" "q w o x";align-items:center;border-bottom:1px solid var(--rule);padding:2px 0 4px;}
   #inv-tbl tbody td{border:none;}
@@ -533,26 +535,22 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="dead-banner" id="dead-banner">☠ Dead</div>
         <div class="vitals">
           <div class="vital half">
-            <div class="vlbl"><span>Hit Points</span><small id="hp-note">CON</small></div>
-            <div class="vbig"><span class="cur" id="hp-cur">0</span><span class="slash">/</span><span class="calc" id="hp-max">0</span></div>
+            <div class="vlbl"><span>Hit Points</span><span class="vmax" id="hp-max">0</span></div>
             <div class="pool-pips hp" id="hp-pips"></div>
-            <div class="vline"><button class="small-btn ghost" onclick="promptDamage()" title="Take damage (armor applies to physical damage)">− Damage</button><button class="small-btn ghost" onclick="promptHeal()">+ Heal</button></div>
           </div>
           <div class="vital half">
-            <div class="vlbl"><span>Willpower Points</span><small id="wp-note">WIL</small></div>
-            <div class="vbig"><span class="cur" id="wp-cur">0</span><span class="slash">/</span><span class="calc" id="wp-max">0</span></div>
+            <div class="vlbl"><span>Willpower Points</span><span class="vmax" id="wp-max">0</span></div>
             <div class="pool-pips wp" id="wp-pips"></div>
-            <div class="vline" id="rest-flags"></div>
           </div>
           <div class="vgrid wide" id="derived"></div>
           <div class="vital half" id="death-vital">
-            <div class="vlbl"><span>Death Rolls</span><small>vs CON at 0 HP</small></div>
+            <div class="vlbl"><span>Death Rolls</span></div>
             <div class="death-row"><span class="dlab">Success</span><span class="pips" id="death-ok"></span></div>
             <div class="death-row"><span class="dlab">Failure</span><span class="pips" id="death-bad"></span></div>
             <div class="vline"><button class="small-btn" id="death-btn" onclick="rollDeath()">Death Roll</button><button class="small-btn ghost" onclick="rollRallySelf()" title="Rally yourself: WIL with a bane">Rally Self</button></div>
           </div>
           <div class="vital half">
-            <div class="vlbl"><span>Severe Injuries</span><small><button class="small-btn ghost" onclick="rollInjury()" title="Survived 0 HP? Roll CON; on a failure roll the D20 injury table">Roll Injury</button> <button class="small-btn ghost" onclick="addInjuryManual()">＋</button></small></div>
+            <div class="vlbl"><span>Severe Injuries</span><small><button class="small-btn ghost" onclick="addInjuryManual()" title="Add a severe injury">＋</button></small></div>
             <div class="injury-list" id="injury-list"></div>
           </div>
         </div>
@@ -561,37 +559,39 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="card tabs-card">
         <div class="tabs-bar">
           <button class="tab-btn" data-tab="action" onclick="setTab('action')">Action</button>
-          <button class="tab-btn" data-tab="abilities" onclick="setTab('abilities')">Abilities &amp; Magic</button>
+          <button class="tab-btn" data-tab="abilities" onclick="setTab('abilities')">Abilities</button>
+          <button class="tab-btn" data-tab="magic" onclick="setTab('magic')">Magic</button>
           <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Gear</button>
           <button class="tab-btn" data-tab="background" onclick="setTab('background')">Background</button>
-          <button class="tab-btn" data-tab="notes" onclick="setTab('notes')">Notes</button>
         </div>
 
         <div class="tab-panel" id="tab-action"><div id="db-turn"></div></div>
 
         <div class="tab-panel" id="tab-abilities">
-          <div class="section-bar"><span>Abilities</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('ability')">＋ Heroic Ability</button></span></div>
+          <div class="section-bar"><span>Abilities</span></div>
           <table class="tbl"><thead><tr><th style="width:32%;">Ability</th><th>Effect</th><th style="width:70px;">WP</th><th style="width:28px;"></th></tr></thead><tbody id="abil-body"></tbody></table>
-          <div class="section-bar" style="margin-top:6px;"><span>Magic</span><span class="hdr-right"><span class="sb-note" id="prep-note"></span><button class="hdr-btn" onclick="openPicker('spell')">＋ Spell</button><button class="hdr-btn" onclick="openPicker('trick')">＋ Trick</button></span></div>
+        </div>
+
+        <div class="tab-panel" id="tab-magic">
+          <div class="section-bar"><span>Spells</span><span class="hdr-right"><span class="sb-note" id="prep-note"></span><button class="hdr-btn" onclick="openPicker('spell')">＋ Spell</button></span></div>
           <div class="hint-line" id="magic-hint"></div>
-          <table class="tbl"><thead><tr><th style="width:26px;" title="Prepared">P</th><th style="width:30%;">Spell</th><th>Rank · School · Casting · Range</th><th style="width:28px;"></th></tr></thead><tbody id="spell-body"></tbody></table>
-          <div class="subhead">Magic Tricks</div>
-          <table class="tbl"><tbody id="trick-body"></tbody></table>
+          <div class="mg-list" id="spell-body"></div>
+          <div class="section-bar"><span>Magic Tricks</span></div>
+          <div class="mg-list" id="trick-body"></div>
         </div>
 
         <div class="tab-panel" id="tab-gear">
-          <div class="section-bar"><span>Inventory</span><span class="hdr-right"><span class="sb-note" id="wpn-count" title="Equipped weapons are your attacks (three at hand at most, shields count); the worn armor and helmet are your armor rating"></span><button class="hdr-btn" onclick="openPicker('shop')">＋ Gear</button><button class="hdr-btn" onclick="addInvRow({name:''})">＋ Custom</button></span></div>
-          <div class="enc" id="enc"></div>
-          <table class="tbl" id="inv-tbl"><thead><tr><th>Item</th><th style="width:46px;">Qty</th><th style="width:46px;" title="Weight per item (0 = tiny)">Wt</th><th style="width:19%;">Note</th><th style="width:52px;"></th></tr></thead><tbody id="inv-body"></tbody></table>
-          <div class="subhead">Coins</div>
+          <div class="section-bar"><span>Coins</span></div>
           <div class="coins">
             <label>Gold <input type="number" id="c-gold" class="no-spin" data-nolock oninput="onCoins()"></label>
             <label>Silver <input type="number" id="c-silver" class="no-spin" data-nolock oninput="onCoins()"></label>
             <label>Copper <input type="number" id="c-copper" class="no-spin" data-nolock oninput="onCoins()"></label>
-            <span class="tray-note" id="coin-note" style="color:var(--muted);"></span>
           </div>
+          <div class="section-bar"><span>Inventory</span><span class="hdr-right"><span class="sb-note" id="wpn-count"></span><button class="hdr-btn" onclick="openPicker('shop')">＋ Gear</button></span></div>
+          <div class="enc" id="enc"></div>
+          <table class="tbl" id="inv-tbl"><thead><tr><th>Item</th><th style="width:46px;">Qty</th><th style="width:46px;" title="Weight per item (0 = tiny)">Wt</th><th style="width:19%;">Note</th><th style="width:52px;"></th></tr></thead><tbody id="inv-body"></tbody></table>
           <div class="subhead">Tiny Items</div>
-          <div class="blk"><div class="fld"><textarea id="f-tiny" placeholder="Fist-sized things that don't count toward encumbrance — rings, keys, dice…" onchange="onField('tiny',this.value)"></textarea></div></div>
+          <div class="blk"><div class="fld"><textarea id="f-tiny" onchange="onField('tiny',this.value)"></textarea></div></div>
         </div>
 
         <div class="tab-panel" id="tab-background">
@@ -602,12 +602,9 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
             <div class="fld"><label>Weakness</label><input type="text" id="f-weak2" onchange="onField('weakness',this.value)"></div>
             <div class="fld"><label>Memento <span id="memento-used"></span></label><input type="text" id="f-memento2" onchange="onField('memento',this.value)"></div>
             <div class="fld"><label>Appearance</label><input type="text" id="f-appear2" onchange="onField('appearance',this.value)"></div>
-            <div class="fld" id="grudges-fld"><label>Enemies who harmed you <small style="text-transform:none;">(dwarf: Unforgiving)</small></label><input type="text" id="f-grudges" onchange="onField('grudges',this.value)"></div>
+            <div class="fld" id="grudges-fld"><label>Grudges</label><input type="text" id="f-grudges" onchange="onField('grudges',this.value)"></div>
             <div class="fld" style="grid-column:1/-1;"><label>Story</label><textarea id="f-story" onchange="onField('story',this.value)"></textarea></div>
           </div></div>
-        </div>
-
-        <div class="tab-panel" id="tab-notes">
           <div class="section-bar"><span>Notes</span></div>
           <div class="notes-box"><textarea id="f-notes" onchange="onField('notes',this.value)"></textarea></div>
         </div>
@@ -629,7 +626,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>
-  <div class="log-entries" id="log-entries"><div class="log-hint">Click a skill or attribute to roll a D20 — equal to or under the level succeeds</div></div>
+  <div class="log-entries" id="log-entries"><div class="log-hint">Click a skill or attribute to roll</div></div>
   <div class="dice-tray">
     <div class="tray-row">
       <span class="bb-ctl boon" title="Boons on the next roll: roll an extra D20 and keep the lowest"><button onclick="trayBB('boon',-1)">−</button><span class="bb-val" id="tray-boon">0 boons</span><button onclick="trayBB('boon',1)">＋</button></span>
@@ -638,7 +635,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     <div class="dice-btns">
       <button class="dice-btn" onclick="rollFree(4)">D4</button><button class="dice-btn" onclick="rollFree(6)">D6</button><button class="dice-btn" onclick="rollFree(8)">D8</button><button class="dice-btn" onclick="rollFree(10)">D10</button><button class="dice-btn" onclick="rollFree(12)">D12</button><button class="dice-btn" onclick="rollFree(20)">D20</button>
     </div>
-    <div class="tray-note">Boons and banes cancel one for one and apply to your next skill, attribute or attack roll (someone helping you is a boon). Conditions, armor and helmets add their banes automatically. 1 = Dragon, 20 = Demon. A failed roll shows a Push button.</div>
   </div>
 </div>
 </div>
@@ -743,8 +739,13 @@ function reqText(h){ if(!h||!h.requirement) return 'No requirement'; var rq=h.re
 // ONE inventory list. Weapons (shields included), armor and helmets carry an equip pip:
 // equipped weapons are "at hand" (three at most) and are your attacks and parries; the worn
 // armor and helmet (one of each) give your armor rating and their banes.
-function kindOf(r){ if(!r) return 'gear'; if(r.kind) return r.kind; var w=weaponDef(r.name); if(w&&!w.natural) return 'weapon'; if(armorDef(r.name)) return 'armor'; if(helmetDef(r.name)) return 'helmet'; return 'gear'; }
-function equippable(r){ var k=kindOf(r); return k==='weapon'||k==='armor'||k==='helmet'; }
+function kindOf(r){ if(!r) return 'gear'; if(r.kind) return r.kind; var w=weaponDef(r.name); if(w&&!w.natural) return 'weapon'; if(armorDef(r.name)) return 'armor'; if(helmetDef(r.name)) return 'helmet'; var g=gearDef(r.name); if(g&&g.focus) return 'focus'; return 'gear'; }
+function equippable(r){ var k=kindOf(r); return k==='weapon'||k==='armor'||k==='helmet'||k==='focus'; }
+// A focus (wand, amulet, orbuculum…) held in hand: it takes one of the three at-hand places like a
+// weapon. Spells whose requirements list "focus" can only be cast with one in hand.
+function focusInHand(){ var r=S.inventory.find(function(x){ return kindOf(x)==='focus'&&x.equipped; }); return r?r.name:null; }
+function handCount(){ return S.inventory.filter(function(r){ var k=kindOf(r); return (k==='weapon'||k==='focus')&&r.equipped; }).length; }
+function needsFocus(def){ return A(def&&def.requirements).indexOf('focus')>=0; }
 function isEq(r){ return !!(r&&r.equipped&&equippable(r)); }
 function wDef(w){ if(!w) return null; var d=weaponDef(w.name)||{}; var o=Object.assign({},d,{name:w.name,broken:!!w.broken}); ['damage','skill','melee','ranged','grip','str','durability','range'].forEach(function(k){ if(w[k]!=null&&w[k]!=='') o[k]=w[k]; }); o.features=A(w.features).length?w.features:(d.features||[]); return o; }
 function atHand(){ var out=[]; S.inventory.forEach(function(r,i){ if(kindOf(r)==='weapon'&&r.equipped) out.push({i:i,r:r,d:wDef(r)}); }); return out; }
@@ -820,15 +821,13 @@ function renderSkills(){
   $('skills-list').innerHTML=h;
   if(window.applySheetLock&&window.__lockReady) try{ window.applySheetLock(); }catch(e){}   // re-rendered fields take the lock again
   var marks=Object.keys(S.skills).filter(function(k){ return S.skills[k]&&S.skills[k].mark; }).length;
-  $('sk-note').innerHTML='☐ advancement · ● trained'+(marks?' · <b>'+marks+' marked</b>':'');
+  $('sk-note').innerHTML=marks?'<b>'+marks+' marked</b>':'';
 }
 function poolPips(id,cur,max,fn){ var h=''; for(var i=1;i<=max;i++) h+='<button class="pool-pip'+(i<=cur?' on':'')+'" data-nolock onclick="'+fn+'('+i+')" title="'+(i<=cur?'Lose points down to '+(i-1):'Recover points up to '+i)+'"></button>'; $(id).innerHTML=h; }
 function renderStatus(){
   var hm=hpMax(), wm=wpMax(); S.hp=Math.max(0,Math.min(num(S.hp),hm)); S.wp=Math.max(0,Math.min(num(S.wp),wm));
-  $('hp-cur').textContent=S.hp; $('hp-max').textContent=hm; $('wp-cur').textContent=S.wp; $('wp-max').textContent=wm;
+  $('hp-max').textContent=hm; $('wp-max').textContent=wm;
   poolPips('hp-pips',S.hp,hm,'setHpPip'); poolPips('wp-pips',S.wp,wm,'setWpPip');
-  $('hp-note').textContent='CON '+attr('CON')+(countAbility('Robust')?' + Robust ×'+countAbility('Robust'):'');
-  $('wp-note').textContent='WIL '+attr('WIL')+(countAbility('Focused')?' + Focused ×'+countAbility('Focused'):'');
   var pip=function(cls,n,on,fn){ var h=''; for(var i=0;i<n;i++) h+='<button class="pip '+cls+(i<on?' on':'')+'" onclick="'+fn+'('+(i+1)+')" data-nolock></button>'; return h; };
   $('death-ok').innerHTML=pip('ok',3,S.death.s,'setDeathS'); $('death-bad').innerHTML=pip('bad',3,S.death.f,'setDeathF');
   var dying=S.hp<=0&&!S.death.dead; $('death-btn').disabled=!dying; $('death-vital').style.outline=dying?'2px solid var(--red)':'';
@@ -836,35 +835,40 @@ function renderStatus(){
   // Movement, carrying capacity and the two damage bonuses — computed, never entered
   var sb=dmgBonus(attr('STR')), ab=dmgBonus(attr('AGL'));
   $('derived').innerHTML='<div class="dv" title="Kin '+((kinDef()||{}).movement||10)+' + AGL '+attr('AGL')+'"><span class="dl">Movement</span><span class="dval">'+movement()+'</span></div>'+
-    '<div class="dv" title="STR ÷ 2, rounded up'+(hasBackpack()?', +2 backpack':'')+'"><span class="dl">Carry Capacity</span><span class="dval">'+carryLimit()+'</span></div>'+
     '<div class="dv" title="STR '+attr('STR')+'"><span class="dl">Damage Bonus STR</span><span class="dval">'+(sb?'+'+sb:'—')+'</span></div>'+
     '<div class="dv" title="AGL '+attr('AGL')+'"><span class="dl">Damage Bonus AGL</span><span class="dval">'+(ab?'+'+ab:'—')+'</span></div>';
-  var fl=[]; fl.push('<span class="tag'+(S.rests.round?' warn':'')+'">Round rest '+(S.rests.round?'used':'ready')+'</span>');
-  fl.push('<span class="tag'+(S.rests.stretch?' warn':'')+'">Stretch rest '+(S.rests.stretch?'used':'ready')+'</span>');
-  if(S.memento) fl.push('<span class="tag'+(S.mementoUsed?' warn':'')+'">Memento '+(S.mementoUsed?'used':'ready')+'</span>');
-  $('rest-flags').innerHTML=fl.join('');
   var ij=''; S.injuries.forEach(function(x,i){ ij+='<div class="inj"><b>'+esc(x.name)+'</b><span style="color:var(--muted);">'+esc(x.text||'')+(x.heal?' · heals in '+esc(x.heal):'')+'</span><button class="row-x inj-x" onclick="removeInjury('+i+')" title="Healed">✕</button></div>'; });
-  $('injury-list').innerHTML=ij||'<div class="hint-line" style="padding:2px 0;">None.</div>';
+  $('injury-list').innerHTML=ij;
 }
 function abilityKindTag(a){ return a.kind==='kin'?'Innate':a.kind==='prof'?'Profession':'Heroic'; }
 function renderAbilities(){
   var h=''; S.abilities.forEach(function(a,i){ var def=abilityDef(a.name)||{}; var wp=def.wp; var passive=def.timing==='passive'||def.timing==='rest'||wp==null||wp==='';
     var act=passive?'<span class="tag">'+(def.timing==='rest'?'rest':'passive')+'</span>':'<button class="small-btn" onclick="activateAbility('+i+')" title="Spend '+esc(wp)+' WP">'+esc(wp)+' WP</button>';
     h+='<tr><td><b>'+esc(a.name)+'</b><br><span class="tag">'+abilityKindTag(a)+'</span>'+(def.timing&&!passive?'<span class="tag">'+esc(def.timing)+'</span>':'')+'</td><td class="desc">'+esc(a.note||def.text||'')+'</td><td>'+act+'</td><td><button class="row-x lk-hide" onclick="removeAbility('+i+')">✕</button></td></tr>'; });
-  $('abil-body').innerHTML=h||'<tr><td colspan="4" class="desc">No abilities yet — your kin gives an innate ability, your profession a heroic one.</td></tr>';
+  $('abil-body').innerHTML=h;
 }
-function spellBlock(){ var m=isMetalAtHand(); return m?('You carry metal ('+m+') — no spells or tricks until it is removed from your body and your hands.'):''; }
+function spellBlock(){ var m=isMetalAtHand(); return m?(m+' (metal) — no magic'):''; }
+// Why a spell can't be cast right now ('' = it can): metal on you, or a focus it needs not in hand.
+function spellBlockFor(def){ var m=spellBlock(); if(m) return m; if(needsFocus(def)&&!focusInHand()) return 'Needs a focus in hand'+(def.requirementDetail?' ('+def.requirementDetail+')':''); return ''; }
+function rangeTxt(r){ if(r==null||r==='') return ''; return /^\d+$/.test(String(r))?r+' m':String(r).replace(/ meters?$/,' m'); }
+function capTxt(t){ t=String(t||''); return t?t.charAt(0).toUpperCase()+t.slice(1):''; }
+function spellLine(def){ return [def.rank!=null?'Rank '+def.rank:'',def.school||'',capTxt(def.castingTime),rangeTxt(def.range),def.duration||''].filter(Boolean).map(esc).join(' · '); }
+function mgCard(lead,name,sub,desc,btns){ return '<div class="db-card mg-card">'+(lead!=null?'<div class="mg-lead">'+lead+'</div>':'')+'<div class="db-main"><div class="db-name">'+name+'</div>'+(sub?'<div class="db-sub">'+sub+'</div>':'')+(desc?'<div class="mg-desc">'+desc+'</div>':'')+'</div><div class="db-btns">'+btns+'</div></div>'; }
 function renderSpells(){
   var schools=knownSchools(); var lim=preparedLimit(); var prep=S.spells.filter(function(s){ return s.prepared; }).length;
   $('prep-note').innerHTML=schools.length?('Prepared <b>'+prep+'/'+lim+'</b>'):'';
-  var hint=schools.length?('Schools: '+schools.map(function(s){ return s+' '+skillLevel(s); }).join(', ')+'. 2 WP per power level (max 3); tricks cost 1 WP and always work. Prepared spells = INT base chance; others can be cast from the grimoire at twice the casting time.'):'You know no school of magic. A mage starts with one; anyone else needs the Magic Talent heroic ability and a teacher.';
-  var blk=spellBlock(); if(blk) hint+=' <b style="color:var(--red);">'+esc(blk)+'</b>';
-  $('magic-hint').innerHTML=hint;
+  var hint=schools.map(function(s){ return esc(s)+' <b>'+skillLevel(s)+'</b>'; }).join(' · ');
+  var fo=focusInHand(); if(fo) hint+=(hint?' · ':'')+'Focus: '+esc(fo);
+  var blk=spellBlock(); if(blk) hint+=(hint?' · ':'')+'<b style="color:var(--red);">'+esc(blk)+'</b>';
+  $('magic-hint').innerHTML=hint; $('magic-hint').style.display=hint?'':'none';
   var h=''; S.spells.forEach(function(s,i){ var def=spellDef(s.name)||{};
-    h+='<tr><td><button class="prep-pip'+(s.prepared?' on':'')+'" onclick="togglePrepared('+i+')" title="Prepared"></button></td><td><b>'+esc(s.name)+'</b></td><td class="desc">'+(def.rank!=null?'Rank '+def.rank+' · ':'')+esc(def.school||'')+' · '+esc(def.castingTime||'')+' · '+esc(def.range||'')+' · '+esc(def.duration||'')+'<br>'+esc(def.text||s.note||'')+'</td><td style="white-space:nowrap;"><button class="small-btn" onclick="openCast(\'spell\','+i+')">Cast</button><button class="row-x lk-hide" onclick="removeSpell('+i+')">✕</button></td></tr>'; });
-  $('spell-body').innerHTML=h||'<tr><td colspan="4" class="desc">No spells.</td></tr>';
-  var t=''; S.tricks.forEach(function(s,i){ var def=trickDef(s.name)||{}; t+='<tr><td style="width:30%;"><b>'+esc(s.name)+'</b><br><span class="tag">'+esc(def.school||'')+'</span></td><td class="desc">'+esc(def.text||'')+'</td><td style="width:90px;white-space:nowrap;"><button class="small-btn" onclick="castTrick('+i+')">1 WP</button><button class="row-x lk-hide" onclick="removeTrick('+i+')">✕</button></td></tr>'; });
-  $('trick-body').innerHTML=t||'<tr><td class="desc">No magic tricks.</td></tr>';
+    var req=A(def.requirements).length?'Requires '+A(def.requirements).join(', ')+(def.requirementDetail?' ('+esc(def.requirementDetail)+')':''):'';
+    h+=mgCard('<button class="prep-pip'+(s.prepared?' on':'')+'" data-nolock onclick="togglePrepared('+i+')" title="Prepared"></button>',esc(s.name),spellLine(def)+(req?' · '+req:''),esc(def.text||s.note||''),
+      tbtn('Cast','openCast(\'spell\','+i+')')+'<button class="row-x lk-hide" onclick="removeSpell('+i+')" title="Remove">✕</button>'); });
+  $('spell-body').innerHTML=h;
+  var t=''; S.tricks.forEach(function(s,i){ var def=trickDef(s.name)||{};
+    t+=mgCard('',esc(s.name),esc(def.school||'')+' · 1 WP',esc(def.text||''),tbtn('Cast','castTrick('+i+')')+'<button class="row-x lk-hide" onclick="removeTrick('+i+')" title="Remove">✕</button>'); });
+  $('trick-body').innerHTML=t;
 }
 function wSummary(dd){ var sk=weaponSkill(dd), b=weaponBonus(dd), strBad=dd.str&&attr('STR')<dd.str;
   var p=[esc(sk)+' <b>'+skillLevel(sk)+'</b>', esc(dd.damage||'—')+(b?' + '+b:'')];
@@ -874,26 +878,25 @@ function wSummary(dd){ var sk=weaponSkill(dd), b=weaponBonus(dd), strBad=dd.str&
 function aSummary(a,kind){ if(!a) return kind==='helmet'?'helmet':'armor'; return (kind==='helmet'?'helmet':'armor')+' · rating '+a.rating+(A(a.banes).length?' · bane on '+a.banes.map(esc).join(', '):'')+(a.metal?' · metal':''); }
 function renderGear(){
   var inv=''; S.inventory.forEach(function(r,i){ var k=kindOf(r), pip='', st='', sub='', acts='';
-    if(equippable(r)){ var worn=k!=='weapon'; pip='<button class="eq-pip'+(r.equipped?' on':'')+'" data-nolock onclick="toggleEquip('+i+')" title="'+(r.equipped?(worn?'Worn — click to take it off':'At hand — click to stow it'):(worn?'Click to wear it':'Click to take it in hand'))+'"></button>'; }
+    if(equippable(r)){ var worn=k==='armor'||k==='helmet'; pip='<button class="eq-pip'+(r.equipped?' on':'')+'" data-nolock onclick="toggleEquip('+i+')" title="'+(r.equipped?(worn?'Worn':'At hand'):(worn?'Wear':'Take in hand'))+'"></button>'; }
     if(k==='weapon'){ var dd=wDef(r); sub=wSummary(dd); if(dd.shield) st+='<span class="tag">shield</span>'; if(r.broken) st+='<span class="tag warn" title="Damaged — bane on every use until repaired">damaged</span>';
       acts+='<button class="row-x" title="'+(r.broken?'Repaired':'Mark damaged')+'" onclick="toggleBroken('+i+')">'+(r.broken?'⚒':'⚠')+'</button>'; }
-    else if(k==='armor') sub=aSummary(armorDef(r.name),'armor'); else if(k==='helmet') sub=aSummary(helmetDef(r.name),'helmet');
+    else if(k==='armor') sub=aSummary(armorDef(r.name),'armor'); else if(k==='helmet') sub=aSummary(helmetDef(r.name),'helmet'); else if(k==='focus') sub='focus';
     inv+='<tr class="inv-row'+(isEq(r)?' is-eq':'')+'"><td><div class="inv-name-line"><span class="inv-eq-slot">'+pip+'</span><input class="inv-name" value="'+esc(r.name)+'" onchange="onInv('+i+',\'name\',this.value)">'+st+'</div>'+(sub?'<div class="inv-sub desc">'+sub+'</div>':'')+'</td>'+
       '<td><input class="num no-spin" type="number" value="'+num(r.qty,1)+'" data-nolock onchange="onInv('+i+',\'qty\',this.value)"></td><td><input class="num" value="'+esc(r.wt==null?1:r.wt)+'" onchange="onInv('+i+',\'wt\',this.value)" title="'+(isEq(r)?'At hand / worn: doesn\'t count toward your load':'Weight per item (0 = tiny)')+'"></td>'+
       '<td>'+(r.uses!=null?'<span class="desc">uses</span> <input class="num no-spin" type="number" style="width:44px;" value="'+num(r.uses)+'" data-nolock onchange="onInv('+i+',\'uses\',this.value)"> ':'')+'<input value="'+esc(r.note||'')+'" style="width:'+(r.uses!=null?'60%':'100%')+';font-weight:400;font-size:13px;" onchange="onInv('+i+',\'note\',this.value)"></td>'+
       '<td style="white-space:nowrap;text-align:right;">'+acts+'<button class="row-x" onclick="removeInv('+i+')" title="Remove">✕</button></td></tr>'; });
-  $('inv-body').innerHTML=inv||'<tr><td colspan="5" class="desc">Empty — use ＋ Gear to buy or add weapons, armor and gear. With no weapon at hand you fight Unarmed (Brawling, D6).</td></tr>';
-  var n=atHand().length; $('wpn-count').innerHTML='● equipped / worn · <b>'+n+'/3</b> at hand';
+  $('inv-body').innerHTML=inv;
+  var n=handCount(); $('wpn-count').innerHTML='At hand <b>'+n+'/3</b>';
   var load=invLoad(), lim=carryLimit(); var e=$('enc'); e.className='enc'+(load>lim?' over':'');
-  e.innerHTML='Load <b>'+load+' / '+lim+'</b> <span>(STR '+attr('STR')+' ÷ 2'+(hasBackpack()?', +2 backpack':'')+'; 4 rations = 1 item; 100 coins = 1 item; weapons at hand, worn armor and tiny items are free)</span>'+(load>lim?' <span class="tag warn">over-encumbered</span>':'');
+  e.innerHTML='Carry Capacity <b>'+load+' / '+lim+'</b>'+(load>lim?' <span class="tag warn">over-encumbered</span>':'');
   $('c-gold').value=num(S.coins.gold); $('c-silver').value=num(S.coins.silver); $('c-copper').value=num(S.coins.copper);
-  $('coin-note').textContent='1 gold = 10 silver = 100 copper';
   $('f-tiny').value=S.tiny||'';
 }
 function renderBackground(){
   var k=kinDef(), p=profDef();
-  $('kin-blurb').textContent=k?(k.name+' — '+k.text+' Movement '+k.movement+'.'):'Choose a kin in the header.';
-  $('prof-blurb').textContent=p?(p.name+' — '+p.text+' Key attribute '+p.keyAttribute+'.'):'Choose a profession in the header.';
+  $('kin-blurb').textContent=k?(k.name+' — '+k.text+' Movement '+k.movement+'.'):'—';
+  $('prof-blurb').textContent=p?(p.name+' — '+p.text+' Key attribute '+p.keyAttribute+'.'):'—';
   $('f-weak2').value=S.weakness||''; $('f-memento2').value=S.memento||''; $('f-appear2').value=S.appearance||'';
   $('memento-used').textContent=S.memento?(S.mementoUsed?'· used this session':'· ready'):'';
   $('f-grudges').value=S.grudges||''; $('grudges-fld').style.display=(hasAbility('Unforgiving')||S.grudges)?'':'none'; $('f-story').value=S.story||''; $('f-notes').value=S.notes||'';
@@ -939,7 +942,7 @@ function toggleBroken(i){ var w=S.inventory[i]; if(!w) return; w.broken=!w.broke
 // worn one of each — wearing another takes the old one off.
 function toggleEquip(i){ var r=S.inventory[i]; if(!r||!equippable(r)) return; var k=kindOf(r); r.kind=k;
   if(r.equipped){ r.equipped=false; changed(); return; }
-  if(k==='weapon'){ if(atHand().length>=3){ addLog('Weapons at hand','Full','At most three weapons (shields count) at hand — stow one first','normal'); return; }
+  if(k==='weapon'||k==='focus'){ if(handCount()>=3){ addLog('At hand','Full','At most three items at hand — stow one first','normal'); return; }
     if(num(r.qty,1)>1){ var one=Object.assign({},r,{qty:1,equipped:true}); r.qty=num(r.qty,1)-1; S.inventory.splice(i+1,0,one); changed(); return; } }
   else S.inventory.forEach(function(x){ if(x!==r&&kindOf(x)===k) x.equipped=false; });
   r.equipped=true; if(k!=='weapon'&&inCombat()) addLog(r.name,'Worn','Putting on armor or a helmet takes an action in combat','normal'); changed(); }
@@ -952,10 +955,11 @@ function addAbility(name,kind,note){ var def=abilityDef(name); S.abilities.push(
 function invItemFromGear(g,qty){ var row={name:g.name,qty:qty||1,wt:(g.weight==null?0:g.weight),note:''}; if(g.doses) row.uses=g.doses; return row; }
 function addGearByName(name,qty,note){ // used by the builder, the shop and loot claims — everything lands in the inventory; weapons go to hand (≤3), armor / a helmet is worn if you wear none
   var w=weaponDef(name), a=armorDef(name), h=helmetDef(name), g=gearDef(name);
-  if(w&&!w.natural){ for(var i=0;i<(qty||1);i++) S.inventory.push({name:w.name,kind:'weapon',qty:1,wt:1,note:note||'',equipped:atHand().length<3}); return 'weapon'; }
+  if(w&&!w.natural){ for(var i=0;i<(qty||1);i++) S.inventory.push({name:w.name,kind:'weapon',qty:1,wt:1,note:note||'',equipped:handCount()<3}); return 'weapon'; }
   if(a){ S.inventory.push({name:a.name,kind:'armor',qty:1,wt:1,note:note||'',equipped:!wornRow('armor')}); return 'armor'; }
   if(h){ S.inventory.push({name:h.name,kind:'helmet',qty:1,wt:1,note:note||'',equipped:!wornRow('helmet')}); return 'helmet'; }
   var ex=S.inventory.find(function(r){ return r.name===name && r.uses==null && !equippable(r); });
+  if(g&&g.focus){ var fr=invItemFromGear(g,1); fr.kind='focus'; fr.equipped=!focusInHand()&&handCount()<3; if(note) fr.note=note; S.inventory.push(fr); return 'focus'; }
   if(g){ if(ex&&!g.doses){ ex.qty=num(ex.qty,1)+(qty||1); } else { var r=invItemFromGear(g,qty); if(note) r.note=note; S.inventory.push(r); } return 'gear'; }
   S.inventory.push({name:name,qty:qty||1,wt:1,note:note||''}); return 'other';
 }
@@ -1047,12 +1051,10 @@ function promptDamage(){
   var body='<div class="m-lbl">Damage rolled against you</div><input id="dm-n" class="m-input" type="number" inputmode="numeric" placeholder="e.g. 7">'+
     (S.opts.damageTypes?'<div class="m-lbl">Damage type</div><select id="dm-t" class="m-input">'+types.map(function(t){ return '<option value="'+t+'">'+(t||'Untyped')+'</option>'; }).join('')+'</select>':'')+
     '<label class="m-check"><input type="checkbox" id="dm-ig"><span>Ignores armor<small>A critical hit on a weak spot, Find Weak Spot, poison, falling and similar.</small></span></label>'+
-    '<p class="m-hint" style="margin-top:10px;">Your armor rating: <b>'+armorRating()+'</b>'+(S.opts.damageTypes?' (leather +2 vs bludgeoning, chainmail +2 vs slashing)':'')+'.</p>';
+    '<p class="m-hint" style="margin-top:10px;">Armor rating <b>'+armorRating()+'</b></p>';
   openDlg('Take Damage',body,[{t:'Apply',f:function(){ var n=num($('dm-n').value); takeDamage(n,{type:$('dm-t')?$('dm-t').value:'',ignoreArmor:$('dm-ig').checked}); closeDlg(); }}]);
   setTimeout(function(){ var i=$('dm-n'); if(i) i.focus(); },50);
 }
-function promptHeal(){ openDlg('Heal',  '<div class="m-lbl">HP healed</div><input id="hl-n" class="m-input" type="number" inputmode="numeric"><div class="m-row" style="margin-top:8px;"><button class="chip" onclick="var r=rollExpr(\'D6\');$(\'hl-n\').value=r.total;">Roll D6</button><button class="chip" onclick="var r=rollExpr(\'2D6\');$(\'hl-n\').value=r.total;">Roll 2D6</button></div>',
-  [{t:'Heal',f:function(){ healHp(num($('hl-n').value),'Healed'); closeDlg(); }}]); }
 function rollDeath(){
   if(S.hp>0||S.death.dead) return;
   testRoll({label:'Death Roll (CON)',target:attr('CON'),attr:'CON',canPush:false,noMark:true,onDone:function(r){
@@ -1068,7 +1070,7 @@ function rollInjury(){
   testRoll({label:'Severe injury? (CON)',target:attr('CON'),attr:'CON',noMark:true,onDone:function(r){ if(r.ok){ addLog('Severe injury','Avoided','','normal'); return; } addInjuryRoll(); }}); }
 function addInjuryRoll(){ var t=(D('DB_GM_TABLES')||{}).severeInjuries; if(!t) return; var n=d(20); var row=A(t.rows).find(function(x){ var r=x.roll; return Array.isArray(r)?(n>=r[0]&&n<=r[1]):n===r; }); if(row) applyInjury(row,'d20('+n+')'); }
 function addInjuryManual(){ var t=(D('DB_GM_TABLES')||{}).severeInjuries; if(!t) return;
-  openDlg('Add Severe Injury','<p class="m-hint">Pick the injury rolled on the D20 table.</p><div class="brow-list" style="padding:0;">'+A(t.rows).map(function(x,i){ return '<div class="brow-item"><div class="brow-main"><div class="brow-name">'+(Array.isArray(x.roll)?x.roll.join('–'):x.roll)+'. '+esc(x.name)+'</div><div class="brow-desc">'+esc(x.text)+'</div></div><button class="brow-add" onclick="applyInjuryIdx('+i+')">Add</button></div>'; }).join('')+'</div>',[]); }
+  openDlg('Severe Injury','<div class="m-row" style="margin-bottom:8px;"><button class="m-btn" onclick="closeDlg();rollInjury()" title="Roll CON; on a failure roll the D20 injury table">🎲 Roll Injury (CON)</button></div><div class="brow-list" style="padding:0;">'+A(t.rows).map(function(x,i){ return '<div class="brow-item"><div class="brow-main"><div class="brow-name">'+(Array.isArray(x.roll)?x.roll.join('–'):x.roll)+'. '+esc(x.name)+'</div><div class="brow-desc">'+esc(x.text)+'</div></div><button class="brow-add" onclick="applyInjuryIdx('+i+')">Add</button></div>'; }).join('')+'</div>',[]); }
 function applyInjuryIdx(i){ var t=(D('DB_GM_TABLES')||{}).severeInjuries; closeDlg(); applyInjury(t.rows[i],'chosen'); }
 function applyInjury(row,how){
   var heal=row.heal?(function(){ var m=String(row.heal).match(/^(\d*D\d+)\s*(.*)$/i); if(!m) return row.heal; var r=rollExpr(m[1]); return r.total+' '+m[2]+' ('+m[1]+')'; })():'';
@@ -1096,8 +1098,7 @@ function rollFearTable(){ var t=(D('DB_GM_TABLES')||{}).fear; if(!t) return; var
 function openRestPanel(){
   var held=CONDS.filter(function(c){ return S.cond[c]; });
   var elf=hasAbility('Inner Peace'), fh=hasAbility('Fast Healer');
-  var body='<p class="m-hint">You can\'t roll or use WP while resting; something dramatic interrupting the rest cancels it.</p>'+
-   '<div class="opt-row"><div><div class="opt-name">Round Rest</div><div class="opt-note">An action: recover D6 WP. Once per shift.</div></div><button class="m-btn" '+(S.rests.round?'disabled':'')+' onclick="doRoundRest()">'+(S.rests.round?'Used':'Rest')+'</button></div>'+
+  var body='<div class="opt-row"><div><div class="opt-name">Round Rest</div><div class="opt-note">An action: recover D6 WP. Once per shift.</div></div><button class="m-btn" '+(S.rests.round?'disabled':'')+' onclick="doRoundRest()">'+(S.rests.round?'Used':'Rest')+'</button></div>'+
    '<div class="opt-row" style="flex-wrap:wrap;"><div style="flex:1 1 260px;"><div class="opt-name">Stretch Rest</div><div class="opt-note">15 minutes: D6 HP (2D6 if someone tends you with a successful Healing roll), D6 WP and heal one condition. Once per shift.</div>'+
      '<label class="m-check"><input type="checkbox" id="rs-tend"><span>Tended — a companion passed a Healing roll</span></label>'+
      (elf?'<label class="m-check"><input type="checkbox" id="rs-elf" checked><span>Inner Peace — meditate: +D6 HP, +D6 WP, one more condition</span></label>':'')+
@@ -1122,9 +1123,9 @@ function doStretchRest(){
   if(fh){ var c=rollExpr('D6'); hp+=c.total; parts.push('Fast Healer '+c.text); }
   var h0=S.hp, w0=S.wp; S.hp=Math.min(hpMax(),S.hp+hp); S.wp=Math.min(wpMax(),S.wp+wp); if(h0<=0&&S.hp>0){ S.death.s=0; S.death.f=0; }
   sel.forEach(function(c){ S.cond[c]=false; }); if(mem&&sel.length>1+(elf?1:0)) S.mementoUsed=true;
-  S.rests.stretch=true; closeDlg();
+  S.rests.stretch=true; leaveCombat(true); closeDlg();
   addLog('Stretch Rest','+'+(S.hp-h0)+' HP · +'+(S.wp-w0)+' WP',parts.join(' · ')+(sel.length?' · healed '+sel.join(', '):''),'normal'); changed(); }
-function doShiftRest(){ S.hp=hpMax(); S.wp=wpMax(); CONDS.forEach(function(c){ S.cond[c]=false; }); S.rests={round:false,stretch:false}; S.death.s=0; S.death.f=0;
+function doShiftRest(){ leaveCombat(true); S.hp=hpMax(); S.wp=wpMax(); CONDS.forEach(function(c){ S.cond[c]=false; }); S.rests={round:false,stretch:false}; S.death.s=0; S.death.f=0;
   closeDlg(); addLog('Shift Rest','Fully rested','All HP, WP and conditions recovered · round and stretch rests available again','normal'); changed(); }
 
 // ═══ DIALOG ═════════════════════════════════════════════════════════════════
@@ -1147,20 +1148,20 @@ function inCombat(){ return S.turn.card!=null; }
 function canAct(){ if(S.death.dead) return false; if(S.hp<=0&&!S.death.rallied) return false; if(!inCombat()) return true; return !S.turn.action&&!S.turn.done; }
 function canReact(){ if(S.death.dead||S.hp<=0) return false; if(S.berserk) return false; if(!inCombat()) return true; return !S.turn.action&&!S.turn.done; }
 function useAction(){ if(!inCombat()) return; if(S.turn.action&&S.turn.extra>0){ S.turn.extra--; return; } S.turn.action=true; }
-function useReaction(){ if(!inCombat()) return; S.turn.done=true; addLog('Reaction','Turn spent','Flip your initiative card','normal'); }
+function useReaction(){ if(!inCombat()) return; S.turn.done=true; }
 function canAttack(){ return canAct()||(inCombat()&&S.turn.extra>0&&!S.death.dead); }
 
+// Drawing a card starts a round: your action (and any spent reaction) comes back.
+function newTurnState(){ S.turn.prev=S.turn.card; S.turn.action=false; S.turn.done=false; S.turn.extra=0; S.turn.dual=false; S.turn.round=num(S.turn.round,1)+1; }
 function drawInit(mode){
-  var prev=S.turn.card;
-  if(mode==='veteran'){ if(S.turn.prev==null){ addLog('Veteran','—','No card from last round','normal'); return; } if(!spendWp(1,'Veteran')) return; S.turn.card=S.turn.prev; addLog('Initiative','Card '+S.turn.card,'Veteran (1 WP): kept last round\'s card','normal'); changed(); return; }
+  if(mode==='veteran'){ var keep=S.turn.card!=null?S.turn.card:S.turn.prev; if(keep==null){ addLog('Veteran','—','No card from last round','normal'); return; } if(!spendWp(1,'Veteran')) return; newTurnState(); S.turn.card=keep; addLog('Initiative','Card '+keep,'Veteran (1 WP): kept last round\'s card','normal'); changed(); return; }
   if(mode==='fast'){ if(!spendWp(2,'Lightning Fast')) return; var a=d(10), b=d(10); while(b===a) b=d(10);
-    openDlg('Lightning Fast','<p class="m-hint">You drew two cards — keep the one you want.</p><div class="m-row"><button class="m-btn" onclick="pickInit('+a+')">Card '+a+'</button><button class="m-btn" onclick="pickInit('+b+')">Card '+b+'</button></div>',[],true); return; }
-  S.turn.card=d(10); addLog('Initiative','Card '+S.turn.card,'Lowest acts first · round '+S.turn.round,'normal'); changed();
+    openDlg('Lightning Fast','<div class="m-row"><button class="m-btn" onclick="pickInit('+a+')">Card '+a+'</button><button class="m-btn" onclick="pickInit('+b+')">Card '+b+'</button></div>',[],true); return; }
+  newTurnState(); S.turn.card=d(10); addLog('Initiative','Card '+S.turn.card,'Lowest acts first','normal'); changed();
 }
-function pickInit(c){ closeDlg(true); S.turn.card=c; addLog('Initiative','Card '+c,'Lightning Fast (2 WP): two cards, kept '+c,'normal'); changed(); }
-function endTurn(){ if(!inCombat()) return; S.turn.done=true; addLog('End Turn','✓','Round '+S.turn.round+(S.turn.card!=null?' · card '+S.turn.card:''),'normal'); changed(); }
-function newRound(){ S.turn.prev=S.turn.card; S.turn.card=null; S.turn.action=false; S.turn.done=false; S.turn.extra=0; S.turn.dual=false; S.turn.round=num(S.turn.round,1)+1; addLog('New Round','Round '+S.turn.round,'Draw a new initiative card','normal'); changed(); }
-function leaveCombat(){ S.turn={card:null,prev:null,action:false,done:false,extra:0,prone:S.turn.prone,round:1}; if(S.berserk) endBerserk(true); addLog('Combat over','✓','','normal'); changed(); }
+function pickInit(c){ closeDlg(true); newTurnState(); S.turn.card=c; addLog('Initiative','Card '+c,'Lightning Fast (2 WP): two cards, kept '+c,'normal'); changed(); }
+// A stretch or shift rest ends the fight: the initiative card is put back.
+function leaveCombat(quiet){ S.turn={card:null,prev:null,action:false,done:false,extra:0,prone:S.turn.prone,round:1}; if(S.berserk) endBerserk(true); if(!quiet){ addLog('Combat over','✓','','normal'); changed(); } }
 function toggleProneTarget(on){ S.proneTarget=!!on; renderTurn(); scheduleAutosave(); }
 function setSubtab(t){ S.subtab=t; renderTurn(); scheduleAutosave(); }
 
@@ -1332,19 +1333,19 @@ function spellSchoolSkill(def){ if(!def) return null; if(def.school==='General')
 function openCast(kind,i){
   var s=S.spells[i]; if(!s) return; var def=spellDef(s.name)||{name:s.name,school:'General',powerLevels:true,castingTime:'action'};
   var reaction=def.castingTime==='reaction'; var freeCast=/doesn't use up your action|not an action/i.test(def.text||'');
-  var sk=spellSchoolSkill(def); var metal=isMetalAtHand();
+  var sk=spellSchoolSkill(def); var metal=spellBlockFor(def);
   if(!sk){ addLog(def.name,'—','You don\'t know the '+def.school+' school','normal'); return; }
   if(reaction&&!freeCast&&!canReact()){ addLog(def.name,'—','A reaction needs a turn you haven\'t taken','normal'); return; }
   if(!reaction&&def.castingTime==='action'&&!canAct()){ addLog(def.name,'—','No action left this turn','normal'); return; }
   if(reaction&&!s.prepared){ addLog(def.name,'—','Reaction spells can\'t be cast from the grimoire — prepare it first','normal'); return; }
   var pls=def.powerLevels!==false; var body='<p class="m-hint">'+esc(def.text||'')+'</p><p class="m-hint" style="margin-top:-6px;">'+esc(def.school)+(def.rank!=null?' rank '+def.rank:'')+' · roll '+esc(sk)+' '+skillLevel(sk)+' · '+esc(def.castingTime)+' · '+esc(def.range||'')+' · '+esc(def.duration||'')+(def.requirements?' · needs '+def.requirements.join(', '):'')+'</p>';
-  if(metal) body+='<div class="res-box" style="border-color:var(--red);"><b>Blocked:</b> '+esc(metal)+' — you can\'t cast with metal armor or a metal weapon at hand.</div>';
+  if(metal) body+='<div class="res-box" style="border-color:var(--red);"><b>Blocked:</b> '+esc(metal)+'</div>';
   if(!s.prepared&&!reaction) body+='<div class="res-box">Not prepared: cast from your grimoire at <b>twice the casting time</b>.</div>';
   if(pls) body+='<div class="m-lbl">Power level</div><div class="m-row" id="cs-pl">'+[1,2,3].map(function(p){ return '<button class="chip'+(p===1?' sel':'')+'" data-p="'+p+'">'+p+' · '+spellCost(def,p,false)+' WP</button>'; }).join('')+'</div>';
   if(def.indoorsDoubleWp) body+='<label class="m-check"><input type="checkbox" id="cs-in"><span>Indoors — double WP</span></label>';
   var heal=!!def.healing; if(heal&&def.self!==false) body+='<label class="m-check"><input type="checkbox" id="cs-self"><span>Cast on yourself — heal your HP</span></label>';
   if(S.wp<=num(((D('DB_MAGIC_RULES')||{}).powerFromBody||{}).atOrBelowWp,1)&&!heal) body+='<div class="m-lbl">Power from the body</div><p class="m-hint" style="margin-bottom:4px;">At 1 WP or less: roll a die, gain that many WP for this spell and take as much damage afterwards.</p><div class="m-row" id="cs-body"><button class="chip sel" data-b="">None</button>'+A(((D('DB_MAGIC_RULES')||{}).powerFromBody||{}).dice||['D4','D6','D8','D10','D12','D20']).map(function(x){ return '<button class="chip" data-b="'+x+'">'+x+'</button>'; }).join('')+'</div>';
-  body+='<p class="m-hint" style="margin-top:10px;">You have <b>'+S.wp+' WP</b>. WP is spent even if the roll fails.</p>';
+  body+='<p class="m-hint" style="margin-top:10px;">You have <b>'+S.wp+' WP</b></p>';
   openDlg('Cast · '+def.name,body,[{t:'Cast',dis:!!metal,f:function(){ var pl=1; var sel=document.querySelector('#cs-pl .chip.sel'); if(sel) pl=num(sel.dataset.p,1); var bsel=document.querySelector('#cs-body .chip.sel'); var bodyDie=bsel?bsel.dataset.b:'';
     closeDlg(); castSpell(i,{pl:pl,indoors:$('cs-in')&&$('cs-in').checked,self:$('cs-self')&&$('cs-self').checked,body:bodyDie}); }}]);
   ['cs-pl','cs-body'].forEach(function(id){ var row=$(id); if(row) row.onclick=function(e){ var b=e.target.closest('.chip'); if(!b) return; row.querySelectorAll('.chip').forEach(function(x){ x.classList.remove('sel'); }); b.classList.add('sel'); }; });
@@ -1376,7 +1377,7 @@ function spellEffect(def,c,r,cost,fromWp){
     if(opt.another) { TR.bane++; renderTray(); }
     changed(); };
   if(r.dragon){ var opts=(D('DB_MAGIC_RULES')||{}).dragon||['Double the spell\'s damage or range','The spell costs no WP','Cast another spell at once, with a bane'];
-    openDlg('Dragon! Choose one','<p class="m-hint">A perfect casting.</p>'+['double','free','another'].map(function(k,ix){ return '<label class="m-check"><input type="radio" name="sdr" value="'+k+'"'+(ix===0?' checked':'')+'><span>'+esc(opts[ix])+'</span></label>'; }).join(''),[{t:'Apply',f:function(){ var v=(document.querySelector('input[name="sdr"]:checked')||{}).value; closeDlg(true); var o={}; o[v]=true; go(o); }}],true); return; }
+    openDlg('Dragon! Choose one',''+['double','free','another'].map(function(k,ix){ return '<label class="m-check"><input type="radio" name="sdr" value="'+k+'"'+(ix===0?' checked':'')+'><span>'+esc(opts[ix])+'</span></label>'; }).join(''),[{t:'Apply',f:function(){ var v=(document.querySelector('input[name="sdr"]:checked')||{}).value; closeDlg(true); var o={}; o[v]=true; go(o); }}],true); return; }
   go();
 }
 function magicalMishap(pl){ var t=(D('DB_GM_TABLES')||{}).magicalMishaps; if(!t) return; var n=d(20); var row=A(t.rows).find(function(x){ return x.roll===n; })||{}; var notes=[];
@@ -1385,8 +1386,8 @@ function magicalMishap(pl){ var t=(D('DB_GM_TABLES')||{}).magicalMishaps; if(!t)
   if(n===7){ var x=rollExpr(pl+'D6'); takeDamage(x.total,{ignoreArmor:true,label:'Mishap damage ('+x.text+')'}); }
   if(n===8){ var y=rollExpr(pl+'D6'); var lost=Math.min(S.wp,y.total); S.wp-=lost; addLog('Mishap','−'+lost+' WP',y.text,'fumble'); }
   changed(); }
-function castTrick(i){ var t=S.tricks[i]; if(!t) return; var def=trickDef(t.name)||{}; var metal=isMetalAtHand();
-  if(metal){ addLog(t.name,'Blocked',metal+': no magic with metal','fumble'); return; }
+function castTrick(i){ var t=S.tricks[i]; if(!t) return; var def=trickDef(t.name)||{}; var metal=spellBlock();
+  if(metal){ addLog(t.name,'Blocked',metal,'fumble'); return; }
   if(!knownSchools().length){ addLog(t.name,'—','You know no school of magic','normal'); return; }
   if(!canAct()){ addLog(t.name,'—','No action left','normal'); return; }
   if(!spendWp((D('DB_MAGIC_RULES')||{}).trickCost||1,t.name)) return; useAction();
@@ -1400,13 +1401,14 @@ function tcard(name,sub,btns,dis){ return '<div class="db-card'+(dis?' disabled'
 function tbtn(label,fn,cls,title){ return '<button class="db-do'+(cls?' '+cls:'')+'" onclick="'+fn+'"'+(title?' title="'+esc(title)+'"':'')+'>'+label+'</button>'; }
 function renderTurn(){
   var el=$('db-turn'); if(!el) return; var t=S.turn; var act=canAct(), react=canReact(), atk=canAttack();
+  // The initiative card is always on the tab: click it to draw (a new card each round).
   var h='<div class="db-top"><div class="db-row1">';
-  h+='<div class="db-init"><span class="db-card-num'+(t.card==null?' empty':'')+'" title="Initiative card">'+(t.card==null?'—':t.card)+'</span><span class="db-init-lbl">Initiative<br><small>Round '+num(t.round,1)+'</small></span></div>';
+  h+='<button type="button" class="db-init" onclick="drawInit()" title="Draw an initiative card"><span class="db-card-num'+(t.card==null?' empty':'')+'">'+(t.card==null?'?':t.card)+'</span><span class="db-init-lbl">Initiative</span></button>';
   h+='<div class="db-econ">';
-  if(t.card==null){ h+=tbtn('Draw card','drawInit()'); if(hasAbility('Lightning Fast')) h+=tbtn('Draw 2 · 2 WP','drawInit(\'fast\')','ghost','Lightning Fast: draw two cards, keep one'); if(hasAbility('Veteran')&&t.prev!=null) h+=tbtn('Keep '+t.prev+' · 1 WP','drawInit(\'veteran\')','ghost','Veteran: keep last round\'s card'); }
-  else { h+='<span class="db-pip'+(t.action?' used':'')+'" title="One action per turn">Action</span>'+(t.extra>0?'<span class="db-pip extra">+'+t.extra+' attack</span>':'')+(t.done?'<span class="db-pip used">Turn over</span>':''); }
+  if(t.card!=null) h+='<span class="db-pip'+(t.action||t.done?' used':'')+'" title="One action per turn">Action</span>'+(t.extra>0?'<span class="db-pip extra">+'+t.extra+' attack</span>':'');
+  if(hasAbility('Lightning Fast')) h+=tbtn('Draw 2 · 2 WP','drawInit(\'fast\')','ghost','Lightning Fast: draw two cards, keep one');
+  if(hasAbility('Veteran')&&(t.card!=null||t.prev!=null)) h+=tbtn('Keep '+(t.card!=null?t.card:t.prev)+' · 1 WP','drawInit(\'veteran\')','ghost','Veteran: keep last round\'s card');
   h+='</div>';
-  if(t.card!=null) h+=(t.done?tbtn('New Round','newRound()','end'):tbtn('End Turn','endTurn()','end'))+'<button class="db-x" title="Leave combat" onclick="leaveCombat()">✕</button>';
   h+='</div><div class="db-badges">';
   CONDS.forEach(function(c){ if(S.cond[c]) h+='<span class="db-badge warn" title="Bane on '+COND_ATTR[c]+' rolls">'+c+'</span>'; });
   if(S.death.dead) h+='<span class="db-badge warn">Dead</span>'; else if(S.hp<=0) h+='<span class="db-badge warn">0 HP — '+(S.death.rallied?'rallied, still making death rolls':'death roll on your turn')+'</span>';
@@ -1418,37 +1420,38 @@ function renderTurn(){
 }
 function renderActions(act,atk){
   var h='';
-  if(S.hp<=0&&!S.death.dead){ h+=tsec('death','Dying',tcard('Death Roll','CON '+attr('CON')+' · successes '+S.death.s+'/3 · failures '+S.death.f+'/3 · a Dragon counts twice, a Demon too',tbtn('Roll','rollDeath()'))+tcard('Rally Yourself','WIL with a bane — act normally at 0 HP',tbtn('Roll','rollRallySelf()'))); }
+  if(S.hp<=0&&!S.death.dead){ h+=tsec('death','Dying',tcard('Death Roll','CON '+attr('CON')+' · successes '+S.death.s+'/3 · failures '+S.death.f+'/3',tbtn('Roll','rollDeath()'))+tcard('Rally Yourself','WIL with a bane',tbtn('Roll','rollRallySelf()'))); }
   // attacks — one card per weapon at hand (+ unarmed). Sneak Attack and Backstab are their own
   // buttons; an attack heroic ability you have shows as a button on the weapons it works with.
   var a=''; var list=atHand().concat([{i:-1,d:unarmed()}]);
   list.forEach(function(x){ var dd=x.d, sk=weaponSkill(dd), b=weaponBonus(dd); var m=autoMods({skill:sk,weapon:dd,ranged:!!dd.ranged}); var nb=m.banes.length-m.boons.length;
     var melee=!dd.ranged, subtle=hasFeat(dd,'Subtle');
     var sub=esc(sk)+' <b>'+skillLevel(sk)+'</b> · '+esc(dd.damage||'D6')+(b?' + '+b:'')+(dd.ranged?' · range '+esc(dd.range)+' m':'')+(hasFeat(dd,'Long')?' · reach 4 m':'')+(nb>0?' · <span style="color:var(--red);">'+nb+' bane'+(nb>1?'s':'')+'</span>':'');
-    var bt=tbtn('Attack','doAttack('+x.i+',{})','',(atk?'':'No action left'))+
-      tbtn('Sneak Attack','doAttack('+x.i+',{sneak:true})','ghost','Outside combat, after a successful Sneaking roll: a boon, it can\'t be dodged or parried'+(subtle?', +1 damage die (subtle weapon)':''));
-    if(melee&&subtle&&hasAbility('Backstabbing')) bt+=tbtn('Backstab · 3 WP','doAttack('+x.i+',{backstab:true})','ghost','Backstabbing: the enemy is within 2 m of another PC — a sneak attack, even in combat');
+    // right to left: Attack, Sneak Attack, Backstab, then the ability attacks
+    var bt='';
     if(melee&&dd.grip==='1H'&&hasAbility('Dual Wield')&&!S.turn.dual) bt+=tbtn('Dual Wield · 3 WP','doAttack('+x.i+',{offhand:true})','ghost','A one-handed weapon in each hand: after this attack, an extra one with the other, at a bane');
     if(melee&&hasFeat(dd,'Slashing')&&hasAbility('Double Slash')) bt+=tbtn('Double Slash · 3 WP','doAttack('+x.i+',{double:true})','ghost','Strike two enemies within 2 m with one roll');
     if(melee&&dd.grip==='1H'&&!dd._unarmed&&hasAbility('Throwing Arm')) bt+=tbtn('Throw · 2 WP','doAttack('+x.i+',{throw:true})','ghost','Throwing Arm: hurl it up to your STR in metres');
     if(dd.ranged&&hasAbility('Eagle Eye')) bt+=tbtn('Eagle Eye · 2 WP','doAttack('+x.i+',{eagle:true})','ghost','Shoot beyond range (up to double) without the bane');
     if(dd.ranged&&dd.skill==='Bows'&&hasAbility('Twin Shot')) bt+=tbtn('Twin Shot · 3 WP','doAttack('+x.i+',{twin:true})','ghost','Two arrows, one roll at a bane; damage rolled for each');
+    if(melee&&subtle&&hasAbility('Backstabbing')) bt+=tbtn('Backstab · 3 WP','doAttack('+x.i+',{backstab:true})','ghost','Backstabbing: the enemy is within 2 m of another PC — a sneak attack, even in combat');
+    bt+=tbtn('Sneak Attack','doAttack('+x.i+',{sneak:true})','ghost','Outside combat, after a successful Sneaking roll: a boon, it can\'t be dodged or parried'+(subtle?', +1 damage die (subtle weapon)':''))+
+      tbtn('Attack','doAttack('+x.i+',{})','',(atk?'':'No action left'));
     a+=tcard(esc(dd.name)+(dd.shield?' <span class="tag">shield</span>':''),sub,bt,!atk); });
   a='<div class="db-rx" style="padding:4px 2px 2px;"><label title="Melee against a prone target: a boon and +D6 damage (applies to your next attack)"><input type="checkbox" data-nolock '+(S.proneTarget?'checked':'')+' onchange="toggleProneTarget(this.checked)"> Target is prone</label></div>'+a;
   if(S.turn.extra>0) a='<div class="db-note good">'+(S.turn.dual?'Dual Wield: one extra attack with your other one-handed weapon, at a bane.':'Critical hit: one free extra attack against another enemy.')+'</div>'+a;
-  h+=tsec('attacks','Attacks',a,list.length);
+  h+=tsec('attacks','Attacks',a);
   var sp=tcard('Topple','Weapon skill vs Evade — a boon with a toppling weapon',tbtn('Roll','specialAttack(\'Topple\')'),!atk)+
     tcard('Disarm','Weapon skill vs their weapon skill',tbtn('Roll','specialAttack(\'Disarm\')'),!atk)+
     tcard('Grapple','Brawling vs Brawling'+(hasAbility('Iron Grip')?' · Iron Grip boon':''),tbtn('Roll','grapple()'),!atk)+
     tcard('Find Weak Spot','Piercing weapon: a bane, but the target counts as armorless',tbtn('Attack','specialAttack(\'Find Weak Spot\')'),!atk);
   h+=tsec('special','Special Attacks',sp);
   // magic
-  var mg=''; var blk=isMetalAtHand();
-  S.spells.forEach(function(s,i){ var def=spellDef(s.name)||{}; if(def.castingTime==='reaction') return; if(!s.prepared) return; var c=def.powerLevels===false?'fixed 2 WP':'2/4/6 WP';
-    mg+=tcard(esc(s.name),esc(def.school||'')+' · '+esc(def.castingTime||'')+' · '+esc(def.range||'')+' · '+c+(def.damage?' · '+esc(def.damage.base)+' +'+esc(def.damage.perLevel)+'/PL':'')+(def.healing?' · heals '+esc(def.healing.base)+' +'+esc(def.healing.perLevel)+'/PL':''),tbtn('Cast','openCast(\'spell\','+i+')'),!act||!!blk); });
-  var unp=S.spells.filter(function(s){ var def=spellDef(s.name)||{}; return !s.prepared&&def.castingTime!=='reaction'; }).length;
+  var mg=''; var blk=spellBlock();
+  S.spells.forEach(function(s,i){ var def=spellDef(s.name)||{}; if(def.castingTime==='reaction') return; if(!s.prepared) return; var c=def.powerLevels===false?'fixed 2 WP':'2/4/6 WP'; var why=spellBlockFor(def);
+    mg+=tcard(esc(s.name),esc(def.school||'')+' · '+esc(capTxt(def.castingTime))+' · '+esc(rangeTxt(def.range))+' · '+c+(def.damage?' · '+esc(def.damage.base)+' +'+esc(def.damage.perLevel)+'/PL':'')+(def.healing?' · heals '+esc(def.healing.base)+' +'+esc(def.healing.perLevel)+'/PL':'')+(why&&!blk?' · <span style="color:var(--red);">'+esc(why)+'</span>':''),tbtn('Cast','openCast(\'spell\','+i+')'),!act||!!why); });
   S.tricks.forEach(function(t,i){ var def=trickDef(t.name)||{}; mg+=tcard(esc(t.name)+' <span class="tag">trick</span>',esc(def.text||''),tbtn('1 WP','castTrick('+i+')'),!act||!!blk); });
-  if(mg||unp){ if(blk) mg='<div class="db-note">'+esc(spellBlock())+'</div>'+mg; if(unp) mg+='<div class="db-note">'+unp+' unprepared spell'+(unp>1?'s':'')+' — cast from the grimoire on the Abilities &amp; Magic tab (twice the casting time).</div>'; h+=tsec('magic','Cast Spell',mg); }
+  if(mg){ if(blk) mg='<div class="db-note" style="color:var(--red);">'+esc(blk)+'</div>'+mg; h+=tsec('magic','Cast Spell',mg); }
   // abilities
   var ab=''; S.abilities.forEach(function(x,i){ var def=abilityDef(x.name)||{}; if(!(def.timing==='action'||def.timing==='free')||def.wp==null) return;
     if(/^(Assassin|Dragonslayer|Iron Fist|Massive Blow|Backstabbing|Twin Shot|Double Slash|Dual Wield|Throwing Arm|Eagle Eye|Iron Grip)$/.test(x.name)) return; // buttons on the weapon cards, or offered in the damage step
@@ -1456,7 +1459,6 @@ function renderActions(act,atk){
   if(S.prey&&hasAbility('Hunting Instincts')) ab+=tcard('Attack your prey <span class="tag">free</span>','1 WP: a boon on your next attack against '+esc(S.prey),tbtn('1 WP','preyBoon()'));
   if(S.berserk) ab='<div class="db-note">Berserk: a boon on melee attacks, no parrying or dodging. '+tbtn('End rage','endBerserk()','ghost')+'</div>'+ab;
   var inAtk=S.abilities.filter(function(x){ return /^(Assassin|Dragonslayer|Iron Fist|Massive Blow)$/.test(x.name); }).map(function(x){ return x.name; });
-  if(inAtk.length) ab+='<div class="db-note">Offered when you roll damage: '+esc(inAtk.join(', '))+'.</div>';
   if(ab) h+=tsec('abilities','Activate Ability',ab);
   // equipment
   var eq=''; S.inventory.forEach(function(r,i){ var g=gearDef(r.name); if(g&&g.heal&&num(r.qty,1)>0) eq+=tcard(esc(r.name)+' <span class="db-qty">×'+num(r.qty,1)+'</span>','Action: heals '+esc(g.heal)+' HP',tbtn('Use','useItem('+i+')'),!act); });
@@ -1476,8 +1478,7 @@ function renderActions(act,atk){
   return h;
 }
 function renderReactions(react){
-  var h='<div class="db-note" style="padding:8px 12px 4px;">A reaction replaces your turn: you need a turn you haven\'t taken this round, and it flips your initiative card. Declare it before damage is rolled.</div>';
-  h+='<div class="db-rx"><label><input type="checkbox" data-nolock '+(RX.crit?'checked':'')+' onchange="RX.crit=this.checked;renderTurn()"> Incoming critical hit (Dragon)</label><label><input type="checkbox" data-nolock '+(RX.ranged?'checked':'')+' onchange="RX.ranged=this.checked;renderTurn()"> Ranged attack</label><label><input type="checkbox" data-nolock '+(RX.monster?'checked':'')+' onchange="RX.monster=this.checked;renderTurn()"> Monster attack</label></div>';
+  var h='<div class="db-rx" style="padding-top:8px;"><label><input type="checkbox" data-nolock '+(RX.crit?'checked':'')+' onchange="RX.crit=this.checked;renderTurn()"> Incoming critical hit (Dragon)</label><label><input type="checkbox" data-nolock '+(RX.ranged?'checked':'')+' onchange="RX.ranged=this.checked;renderTurn()"> Ranged attack</label><label><input type="checkbox" data-nolock '+(RX.monster?'checked':'')+' onchange="RX.monster=this.checked;renderTurn()"> Monster attack</label></div>';
   var dg=tcard('Dodge','Evade <b>'+skillLevel('Evade')+'</b>'+(RX.crit?' · only a Dragon dodges a crit':''),tbtn('Dodge','dodge()'),!react);
   if(hasAbility('Hard to Catch')) dg+=tcard('Dodge · Hard to Catch','3 WP: a boon on the Evade roll',tbtn('3 WP','dodge(\'hard\')'),!react);
   if(hasAbility('Fast Footwork')) dg+=tcard('Fast Footwork','3 WP: dodge without spending your turn',tbtn('3 WP','dodge(\'footwork\')'),S.berserk||S.hp<=0);
@@ -1490,22 +1491,25 @@ function renderReactions(react){
     if(!dd.shield&&RX.ranged&&hasAbility('Deflect Arrow')) b=tbtn('Deflect 1 WP','parry('+i+',\'deflect\')','','Deflect Arrow: parry a ranged attack with a melee weapon');
     if(hasAbility('Defensive')&&!dd.ranged) b+=tbtn('Free 3 WP','parry('+i+',\'defensive\')','ghost','Defensive: parry without spending your turn');
     var dis=!react||((!okType&&!(RX.ranged&&hasAbility('Deflect Arrow')))||!okMon); pr+=tcard(esc(dd.name)+(dd.shield?' <span class="tag">shield</span>':''),sub,b,dis&&!(hasAbility('Defensive')&&okType&&okMon)); });
-  if(!pr) pr='<div class="db-empty">Nothing at hand to parry with — you can\'t parry unarmed.</div>';
+  if(!pr) pr='<div class="db-empty">Nothing at hand to parry with</div>';
   h+=tsec('parry','Parry',pr);
   var ab=''; ['Guardian','Weasel'].forEach(function(n){ if(hasAbility(n)){ var def=abilityDef(n)||{}; ab+=tcard(n+' <span class="tag">'+def.wp+' WP</span>',esc(def.text||''),tbtn(def.wp+' WP','reactAbility(\''+n+'\')'),S.hp<=0); } });
-  S.spells.forEach(function(s,i){ var def=spellDef(s.name)||{}; if(def.castingTime!=='reaction') return; ab+=tcard(esc(s.name)+' <span class="tag">spell</span>'+(s.prepared?'':' <span class="tag warn">not prepared</span>'),esc(def.text||''),tbtn('Cast','openCast(\'spell\','+i+')'),!s.prepared||!!isMetalAtHand()); });
+  S.spells.forEach(function(s,i){ var def=spellDef(s.name)||{}; if(def.castingTime!=='reaction') return; ab+=tcard(esc(s.name)+' <span class="tag">spell</span>'+(s.prepared?'':' <span class="tag warn">not prepared</span>'),esc(def.text||''),tbtn('Cast','openCast(\'spell\','+i+')'),!s.prepared||!!spellBlockFor(def)); });
   if(ab) h+=tsec('rxab','Reaction Abilities & Spells',ab);
-  h+=tsec('hit','Hit',tcard('Take Damage','Armor rating '+armorRating()+' is subtracted from physical damage',tbtn('Damage','promptDamage()'))+tcard('Fear Attack','WIL '+attr('WIL')+' — failure rolls on the fear table',tbtn('Roll','rollFear()')));
+  h+=tsec('hit','Hit',tcard('Take Damage','Armor rating '+armorRating(),tbtn('Damage','promptDamage()'))+tcard('Fear Attack','WIL '+attr('WIL'),tbtn('Roll','rollFear()')));
   return h;
 }
 
 // ═══ PICKERS — compendium / shop ═══════════════════════════════════════════
 var _pk=null, _shopTab='gear';
+var MAGIC_TABS=[{id:'spell',label:'Spells'},{id:'trick',label:'Magic Tricks'}];
+function isMagicPk(){ return _pk==='spell'||_pk==='trick'; }
+function magicTab(t){ _pk=t; $('picker-search').value=''; pickerChrome(); renderPicker(); }
 var SHOP_TABS=[{id:'gear',label:'Gear'},{id:'weapon',label:'Weapons'},{id:'armor',label:'Armor & Helmets'}];
 function isShop(){ return _pk==='shop'; }
 function openPicker(kind,tab){ if(kind==='gear'||kind==='weapon'||kind==='armor'){ tab=tab||kind; kind='shop'; }
   _pk=kind; if(kind==='shop') _shopTab=tab||'gear'; $('picker-search').value='';
-  $('picker-title').textContent={shop:'Gear',ability:'Heroic Abilities',spell:'Spells',trick:'Magic Tricks'}[kind]||'Add';
+  $('picker-title').textContent={shop:'Gear',ability:'Heroic Abilities',spell:'Magic',trick:'Magic'}[kind]||'Add';
   $('picker-overlay').classList.add('open'); pickerChrome(); renderPicker(); }
 function shopTab(t){ _shopTab=t; $('picker-search').value=''; pickerChrome(); renderPicker(); }
 function pickerChrome(){ var f=$('picker-filter'); var opts=[];
@@ -1515,7 +1519,8 @@ function pickerChrome(){ var f=$('picker-filter'); var opts=[];
   else if(_pk==='ability'){ opts=[['eligible','Requirement met'],['','All heroic abilities']]; }
   else if(_pk==='spell'||_pk==='trick'){ opts=[['mine','My schools + General'],['','All schools']].concat(['General','Animism','Elementalism','Mentalism'].map(function(s){ return [s,s]; })); }
   f.innerHTML=opts.map(function(o){ return '<option value="'+esc(o[0])+'">'+esc(o[1])+'</option>'; }).join(''); f.style.display=opts.length?'':'none';
-  $('picker-tabs').innerHTML=isShop()?SHOP_TABS.map(function(t){ return '<button class="brow-tab'+(_shopTab===t.id?' on':'')+'" onclick="shopTab(\''+t.id+'\')">'+esc(t.label)+'</button>'; }).join(''):'';
+  $('picker-tabs').innerHTML=isShop()?SHOP_TABS.map(function(t){ return '<button class="brow-tab'+(_shopTab===t.id?' on':'')+'" onclick="shopTab(\''+t.id+'\')">'+esc(t.label)+'</button>'; }).join(''):
+    isMagicPk()?MAGIC_TABS.map(function(t){ return '<button class="brow-tab'+(_pk===t.id?' on':'')+'" onclick="magicTab(\''+t.id+'\')">'+esc(t.label)+'</button>'; }).join(''):'';
   $('picker-custom').style.display=(isShop()&&_shopTab!=='armor')||_pk==='ability'?'':'none'; }
 function closePicker(){ $('picker-overlay').classList.remove('open'); _pk=null; }
 function pickerItems(){ var q=($('picker-search').value||'').toLowerCase(), f=$('picker-filter').value, out=[];
@@ -1537,11 +1542,11 @@ function renderPicker(){ if(!_pk) return; var items=pickerItems(); var h='';
     if(isShop()){ var cp=costCopper(x.cost); btn=(x.weight==null&&x.category==='Services')?'':'<button class="brow-add ghost" onclick="pickAdd('+ix+',false)">Add</button>'+(x.cost?'<button class="brow-add" '+(cp>purseCopper()?'disabled title="Not enough coins"':'')+' onclick="pickAdd('+ix+',true)">Buy</button>':''); }
     if(_pk==='ability'){ var ok=meetsRequirement(x); var have=hasAbility(x.name)&&!x.repeatable; meta=esc(reqText(x))+' · '+(x.wp==null||x.wp===''?'passive':esc(x.wp)+' WP')+(ok?'':' · <span style="color:#ff9d8a;">requirement not met</span>'); desc=esc(x.text||'');
       btn=have?'<button class="brow-add have" disabled>Have it</button>':'<button class="brow-add'+(ok?'':' ghost')+'" onclick="pickAdd('+ix+')">'+(ok?'Add':'Add anyway')+'</button>'; }
-    if(_pk==='spell'){ var hv=S.spells.some(function(s){ return s.name===x.name; }); meta=esc(x.school)+' · rank '+x.rank+' · '+esc(x.castingTime)+' · '+esc(x.range)+' · '+esc(x.duration)+(x.prerequisite?' · needs '+esc(x.prerequisite):''); desc=esc(x.text||'');
+    if(_pk==='spell'){ var hv=S.spells.some(function(s){ return s.name===x.name; }); meta=spellLine(x)+(x.prerequisite?' · needs '+esc(x.prerequisite):''); desc=esc(x.text||'');
       btn=hv?'<button class="brow-add have" disabled>Known</button>':'<button class="brow-add" onclick="pickAdd('+ix+')">Learn</button>'; }
-    if(_pk==='trick'){ var ht=S.tricks.some(function(s){ return s.name===x.name; }); meta=esc(x.school); desc=esc(x.text||''); btn=ht?'<button class="brow-add have" disabled>Known</button>':'<button class="brow-add" onclick="pickAdd('+ix+')">Learn</button>'; }
-    h+='<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(x.name)+(x.cost?'<span class="brow-cost">'+esc(costText(x.cost))+'</span>':'')+(x.source==='Homebrew'?' <span class="brow-cost" style="color:#9fdcae;">homebrew</span>':'')+'</div><div class="brow-meta">'+meta+'</div>'+(desc?'<div class="brow-desc">'+desc+'</div>':'')+'</div><div style="display:flex;flex-direction:column;gap:4px;">'+btn+'</div></div>'; });
-  if(isShop()) h='<div class="brow-meta" style="padding:6px 2px;">Purse: '+num(S.coins.gold)+' gold · '+num(S.coins.silver)+' silver · '+num(S.coins.copper)+' copper. “Buy” pays from it; “Add” is free. Everything lands in your inventory'+(_shopTab!=='gear'?' — tick its pip to equip it.':'.')+'</div>'+h;
+    if(_pk==='trick'){ var ht=S.tricks.some(function(s){ return s.name===x.name; }); meta=esc(x.school)+' · 1 WP'; desc=esc(x.text||''); btn=ht?'<button class="brow-add have" disabled>Known</button>':'<button class="brow-add" onclick="pickAdd('+ix+')">Learn</button>'; }
+    h+='<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(x.name)+(x.cost?'<span class="brow-cost">'+esc(costText(x.cost))+'</span>':'')+(x.source==='Homebrew'?' <span class="brow-cost" style="color:#9fdcae;">homebrew</span>':'')+'</div><div class="brow-meta">'+meta+'</div>'+(desc?'<div class="brow-desc">'+desc+'</div>':'')+'</div><div class="brow-btns">'+btn+'</div></div>'; });
+  if(isShop()) h='<div class="brow-meta" style="padding:6px 2px;">Purse: '+num(S.coins.gold)+' gold · '+num(S.coins.silver)+' silver · '+num(S.coins.copper)+' copper</div>'+h;
   $('picker-body').innerHTML=h||'<div class="brow-empty">Nothing matches.</div>'; }
 function pickAdd(ix,buy){ var x=pickerItems()[ix]; if(!x) return;
   if(buy){ if(!pay(costCopper(x.cost))){ addLog('Shop','Too expensive',x.name+' costs '+costText(x.cost),'normal'); return; } }
@@ -1552,7 +1557,7 @@ function pickAdd(ix,buy){ var x=pickerItems()[ix]; if(!x) return;
   addLog(buy?'Bought':'Added',x.name,buy?costText(x.cost):'','normal'); changed(); renderPicker(); }
 function pickerCustom(){ var n=window.prompt('Name'); if(!n) return;
   if(isShop()&&_shopTab==='gear') S.inventory.push({name:n,qty:1,wt:1,note:''});
-  if(isShop()&&_shopTab==='weapon'){ var dmg=window.prompt('Damage (e.g. 2D6)','D8')||'D8'; var sk=window.prompt('Skill (e.g. Swords)','Swords')||'Brawling'; S.inventory.push({name:n,kind:'weapon',qty:1,wt:1,note:'',damage:dmg,skill:sk,melee:true,features:[],equipped:atHand().length<3}); }
+  if(isShop()&&_shopTab==='weapon'){ var dmg=window.prompt('Damage (e.g. 2D6)','D8')||'D8'; var sk=window.prompt('Skill (e.g. Swords)','Swords')||'Brawling'; S.inventory.push({name:n,kind:'weapon',qty:1,wt:1,note:'',damage:dmg,skill:sk,melee:true,features:[],equipped:handCount()<3}); }
   if(_pk==='ability'){ var t=window.prompt('What does it do?')||''; S.abilities.push({name:n,kind:'heroic',note:t}); }
   closePicker(); changed(); }
 
@@ -1589,7 +1594,7 @@ function addLog(label,result,detail,type){
   showRollToast(label,result,detail,type);
   return div;
 }
-function clearLog(){ $('log-entries').innerHTML='<div class="log-hint">Click a skill or attribute to roll a D20 — equal to or under the level succeeds</div>'; }
+function clearLog(){ $('log-entries').innerHTML='<div class="log-hint">Click a skill or attribute to roll</div>'; }
 function toggleLogCollapse(){ document.querySelector('.roll-log').classList.toggle('collapsed'); }
 document.querySelector('.log-header').addEventListener('click', function(e){ if(window.innerWidth<=768 && !e.target.closest('button,.dm-toggle-btn')) toggleLogCollapse(); });
 (function(){ if(window.innerWidth<=768) document.querySelector('.roll-log').classList.add('collapsed'); })();
@@ -1677,6 +1682,7 @@ window.DBSHEET={
     A(b.spells).forEach(function(n){ S.spells.push({name:n,prepared:true}); }); A(b.tricks).forEach(function(n){ S.tricks.push({name:n}); });
     S.spells.forEach(function(s,i){ s.prepared=i<preparedLimit(); });
     A(b.gear).forEach(function(g){ addGearByName(g.name,g.qty||1,g.note||''); });
+    if(knownSchools().length) S.inventory.forEach(function(r){ var w=kindOf(r)==='weapon'&&wDef(r); if(w&&w.metal) r.equipped=false; });
     if(b.food){ addGearByName('Field Ration',b.food); }
     S.coins={gold:0,silver:num(b.silver),copper:0};
     S.hp=hpMax(); S.wp=wpMax(); S.built=true;
@@ -1866,7 +1872,9 @@ window.openCampaign=openCampaign; window.closeCampaign=closeCampaign; window.cam
 .db-top{background:var(--box);border-bottom:1px solid var(--rule);}
 body.dark .db-top{background:#1c1c21;}
 .db-row1{display:flex;align-items:center;gap:10px;padding:10px 12px 6px;flex-wrap:wrap;}
-.db-init{display:flex;align-items:center;gap:8px;}
+.db-init{display:flex;align-items:center;gap:8px;background:transparent;border:none;padding:0;cursor:pointer;color:inherit;font:inherit;}
+.db-init:hover .db-card-num{filter:brightness(1.12);transform:translateY(-1px);}
+.db-card-num{transition:transform .1s;}
 .db-card-num{width:40px;height:52px;border-radius:6px;border:2px solid var(--acc);background:linear-gradient(160deg,#f6ecd6,#e7d3ab);color:#5a1610;font-family:var(--f-disp);font-size:28px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.3);}
 body.dark .db-card-num{background:linear-gradient(160deg,#34343b,#1f1f24);color:#f3dca8;}
 .db-card-num.empty{border-style:dashed;color:var(--muted);background:transparent;box-shadow:none;}
@@ -1905,6 +1913,11 @@ body.dark .db-card-num{background:linear-gradient(160deg,#34343b,#1f1f24);color:
 .db-btns{display:flex;gap:5px;flex:0 0 auto;flex-wrap:wrap;justify-content:flex-end;}
 .db-qty{font-family:var(--f-label);font-size:12px;color:var(--muted);font-weight:400;}
 .db-card.disabled{opacity:.45;}
+#tab-magic .mg-list{padding:0 12px 6px;}
+.mg-card{align-items:flex-start;}
+.mg-card .db-btns{align-items:center;}
+.mg-lead{flex:0 0 18px;padding-top:2px;}
+.mg-desc{font-size:12.5px;color:var(--muted);line-height:1.35;margin-top:2px;opacity:.9;}
 .db-card.disabled .db-do{background:var(--muted);border-color:var(--muted);color:#fff;cursor:default;pointer-events:none;}
 .db-note{font-size:12.5px;color:var(--muted);padding:7px 2px;line-height:1.4;}
 .db-note.good{color:var(--gold);}

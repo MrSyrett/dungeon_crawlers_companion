@@ -1,6 +1,20 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Retired compendium routes, kept resolving so old links and bookmarks don't
+  // 404. Query strings are carried through to the destination.
+  async redirects() {
+    return [
+      // Dragonbane NPCs became a tab of the Bestiary.
+      { source: "/dragonbane/npcs", destination: "/dragonbane/bestiary?tab=npcs", permanent: true },
+      { source: "/dragonbane/npcs/:path+", destination: "/dragonbane/bestiary?tab=npcs", permanent: true },
+      // Dragonbane Skills and Adventuring pages were removed. Skill lists live on
+      // each profession; the closest remaining home for the adventuring rules
+      // (combat, encounters, generators) is the Bestiary.
+      { source: "/dragonbane/skills/:path*", destination: "/dragonbane/professions", permanent: true },
+      { source: "/dragonbane/adventuring/:path*", destination: "/dragonbane/bestiary", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

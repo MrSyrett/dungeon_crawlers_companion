@@ -40,7 +40,7 @@ function ProfessionDetail({ p }: { p: DbProfession }) {
       ) : (
         <>
           <h3 className={`${sectionH} mt-5`}>Profession skills</h3>
-          <p className="text-[13px] leading-relaxed text-[var(--muted)]">{p.skills.map((s) => <a key={s} href={`/dragonbane/skills?s=${encodeURIComponent(s)}`} className="mr-2 inline-block hover:text-[var(--sys-link)] hover:underline">{s}</a>)}</p>
+          <p className="text-[13px] leading-relaxed text-[var(--muted)]">{p.skills.join(", ")}</p>
           <p className="mt-1 text-[12px] italic text-[var(--muted)]">Six of your trained starting skills must come from this list.</p>
         </>
       )}
