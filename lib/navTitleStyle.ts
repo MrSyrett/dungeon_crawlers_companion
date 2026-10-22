@@ -22,7 +22,7 @@ export const TITLE: Record<SystemKey, { f: string; c: string; x?: string }> = {
   DND: { f: '"DnDC","Cinzel"', c: "var(--gold-ink)" },
   LOTR: { f: '"Ringbearer","EB Garamond"', c: "var(--lotr-ink)" },
   // Dragonbane: the logo — red Hideout inside a gold outline, stroke painted first.
-  DB: { f: '"Hideout","EB Garamond"', c: "var(--db-logo,#e42a32)", x: "font-weight:400;-webkit-text-stroke:.1em var(--db-gold,#c9a14a);paint-order:stroke fill" },
+  DB: { f: '"Hideout","EB Garamond"', c: "var(--db-logo,#e42a32)", x: "font-weight:400;-webkit-text-stroke:.1em var(--db-gold,#c9a14a);paint-order:stroke fill;text-shadow:none" },
   // Pirate Borg: white blackletter.
   PB: { f: '"JSL Blackletter","EB Garamond"', c: "#ffffff", x: "font-weight:400" },
   DCC: { f: '"Anton"', c: "var(--dcc-gold)" },

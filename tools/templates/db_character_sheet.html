@@ -56,7 +56,7 @@ input,select,textarea,button{font-family:var(--f-ui);font-variant-numeric:lining
 /* Hideout = the logo treatment everywhere on the sheet (red fill, gold stroke) */
 /* Only the "Dragonbane" logo word keeps the logo treatment (red fill, gold stroke); every other
    Hideout heading is plain crimson, no stroke, so it stays readable. */
-.hdr-logo .lg-word{color:var(--hd-fill);-webkit-text-stroke:1.6px var(--hd-stroke);paint-order:stroke fill;text-shadow:0 2px 3px rgba(0,0,0,.55);}
+.hdr-logo .lg-word{color:var(--hd-fill);-webkit-text-stroke:1.6px var(--hd-stroke);paint-order:stroke fill;text-shadow:none;}
 .app-wrap{display:flex;flex:1;min-height:0;align-items:flex-start;}
 .sheet-wrap{flex:1;overflow-y:auto;padding:44px 16px 16px;container-type:inline-size;}
 
@@ -184,7 +184,6 @@ body.sheet-unlocked .abil-score{background:var(--input-bg);color:var(--ink);bord
 .sk-pip.on{background:var(--acc);box-shadow:inset 0 0 0 2px var(--card);}
 body.sheet-locked .sk-pip{cursor:default;}
 .sk-lvl{width:40px;height:25px;border:1px solid var(--input-border);border-radius:6px;background:var(--input-bg);font-family:var(--f-num);font-size:15px;font-weight:600;text-align:center;color:var(--acc-dk);outline:none;padding:0;-moz-appearance:textfield;appearance:textfield;}
-.sk-lvl.base{color:var(--muted);font-weight:400;}
 /* locked: the score is a number you click to roll, not a field */
 body.sheet-locked .sk-lvl{border-color:transparent;background:transparent;cursor:pointer;caret-color:transparent;user-select:none;}
 body.sheet-locked .sk-lvl:hover{border-color:var(--acc);background:var(--acc-lt);}
@@ -203,8 +202,9 @@ body.sheet-locked .sk-lvl:hover{border-color:var(--acc);background:var(--acc-lt)
 .vbig .slash{color:var(--muted);font-size:20px;}
 .vbig .calc{font-size:22px;color:var(--acc-dk);}
 /* HP / WP: one tickable pip per point (filled = still have it); click a pip to set the pool there */
-.pool-pips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
-.pool-pip{width:18px;height:18px;border:1.5px solid var(--acc);border-radius:50%;background:transparent;cursor:pointer;padding:0;}
+/* ten to a row: each pip shrinks with the box (up to --pp) so a narrow vital never overflows */
+.pool-pips{--pp:18px;display:grid;grid-template-columns:repeat(10,minmax(0,var(--pp)));gap:4px;margin-top:6px;}
+.pool-pip{width:100%;height:auto;aspect-ratio:1;border:1.5px solid var(--acc);border-radius:50%;background:transparent;cursor:pointer;padding:0;}
 .pool-pip.on{background:var(--acc);box-shadow:inset 0 0 0 2px var(--box);}
 .pool-pips.wp .pool-pip{border-color:#4a6fb3;}
 .pool-pips.wp .pool-pip.on{background:#4a6fb3;}
@@ -270,9 +270,9 @@ body.dark .prep-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 .fld textarea{font-size:14px;line-height:1.45;border:1px solid var(--rule);border-radius:7px;background:var(--input-bg);padding:6px 8px;resize:vertical;min-height:60px;}
 .notes-box{padding:8px 10px;}
 .notes-box textarea{width:100%;min-height:140px;border:1px solid var(--rule);border-radius:8px;background:var(--input-bg);color:var(--ink);font-size:15px;line-height:1.5;padding:8px;outline:none;resize:vertical;}
-.enc{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 10px;font-size:13px;color:var(--muted);}
-.enc b{font-size:16px;color:var(--ink);}
-.enc.over b{color:var(--red);}
+.section-bar .enc-note.over b{color:var(--red);}
+.inv-bar .hdr-right{gap:10px;row-gap:4px;}
+.inv-bar .sb-note{white-space:nowrap;}
 .coins{display:flex;gap:8px;flex-wrap:wrap;padding:6px 10px 8px;align-items:center;}
 .coins label{font-family:var(--f-label);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:4px;}
 .coins input{width:62px;height:28px;border:1px solid var(--input-border);border-radius:6px;background:var(--input-bg);text-align:center;font-size:15px;font-weight:600;color:var(--ink);outline:none;}
@@ -403,7 +403,7 @@ body.dark .prep-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
   .sk-lvl{height:32px;width:46px;font-size:16px;}
   .sk-pip{width:18px;height:18px;}
   .sk-mark{width:20px;height:20px;}
-  .pool-pip{width:24px;height:24px;}
+  .pool-pips{--pp:24px;}
   .m-btn{min-height:44px;}
   .brow-add{min-height:40px;}
   .chip{padding:7px 12px;}
@@ -417,6 +417,11 @@ body.dark .prep-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
   .tabs-bar .tab-btn{padding:10px 4px;min-width:0;font-size:13px;}
 }
 @media (max-width:560px){
+  /* the Inventory header holds the title, both counters and + Gear on one line at phone width */
+  .inv-bar{padding-left:11px;padding-right:11px;gap:6px;}
+  .inv-bar .hdr-right{gap:7px;}
+  .inv-bar .sb-note{font-size:11px;letter-spacing:0;}
+  .inv-bar .hdr-btn{padding:3px 8px;}
   /* phone: each inventory row becomes two lines — the item (and its stats) across, then qty / weight / note / actions */
   .coins{gap:6px;flex-wrap:nowrap;}.coins label{gap:3px;}.coins input{width:100%;min-width:0;}.coins label{flex:1 1 0;min-width:0;}
   #inv-tbl thead{display:none;}
@@ -581,14 +586,12 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         </div>
 
         <div class="tab-panel" id="tab-gear">
-          <div class="section-bar"><span>Coins</span></div>
+          <div class="section-bar inv-bar"><span>Inventory</span><span class="hdr-right"><span class="sb-note" id="wpn-count"></span><span class="sb-note" id="enc"></span><button class="hdr-btn" onclick="openPicker('shop')">＋ Gear</button></span></div>
           <div class="coins">
             <label>Gold <input type="number" id="c-gold" class="no-spin" data-nolock oninput="onCoins()"></label>
             <label>Silver <input type="number" id="c-silver" class="no-spin" data-nolock oninput="onCoins()"></label>
             <label>Copper <input type="number" id="c-copper" class="no-spin" data-nolock oninput="onCoins()"></label>
           </div>
-          <div class="section-bar"><span>Inventory</span><span class="hdr-right"><span class="sb-note" id="wpn-count"></span><button class="hdr-btn" onclick="openPicker('shop')">＋ Gear</button></span></div>
-          <div class="enc" id="enc"></div>
           <table class="tbl" id="inv-tbl"><thead><tr><th>Item</th><th style="width:46px;">Qty</th><th style="width:46px;" title="Weight per item (0 = tiny)">Wt</th><th style="width:19%;">Note</th><th style="width:52px;"></th></tr></thead><tbody id="inv-body"></tbody></table>
           <div class="subhead">Tiny Items</div>
           <div class="blk"><div class="fld"><textarea id="f-tiny" onchange="onField('tiny',this.value)"></textarea></div></div>
@@ -888,8 +891,8 @@ function renderGear(){
       '<td style="white-space:nowrap;text-align:right;">'+acts+'<button class="row-x" onclick="removeInv('+i+')" title="Remove">✕</button></td></tr>'; });
   $('inv-body').innerHTML=inv;
   var n=handCount(); $('wpn-count').innerHTML='At hand <b>'+n+'/3</b>';
-  var load=invLoad(), lim=carryLimit(); var e=$('enc'); e.className='enc'+(load>lim?' over':'');
-  e.innerHTML='Carry Capacity <b>'+load+' / '+lim+'</b>'+(load>lim?' <span class="tag warn">over-encumbered</span>':'');
+  var load=invLoad(), lim=carryLimit(); var e=$('enc'); e.className='sb-note enc-note'+(load>lim?' over':''); e.title=load>lim?'Over-encumbered':'Load / carrying capacity';
+  e.innerHTML='Carry Capacity <b>'+load+'/'+lim+'</b>';
   $('c-gold').value=num(S.coins.gold); $('c-silver').value=num(S.coins.silver); $('c-copper').value=num(S.coins.copper);
   $('f-tiny').value=S.tiny||'';
 }
@@ -999,6 +1002,10 @@ function resolveRoll(o,boons,banes,pushed){
   var mods=[]; if(boons.length) mods.push('boon: '+boons.join(', ')); if(banes.length) mods.push('bane: '+banes.join(', '));
   var poolTxt=(p.n>1?p.n:'')+'d20('+p.rolls.join(',')+')'+(nb>0?' keep lowest':nb<0?' keep highest':'');
   var det=poolTxt+' → '+r+' vs '+t+(mods.length?' · '+mods.join(' · '):'')+(pushed?' · pushed':'')+((res.dragon||res.demon)&&o.skill&&!o.noMark?' · '+o.skill+' marked':'');
+  // An attack rolls its damage dice WITH the d20 (one throw, hit or miss — the dice animation
+  // reads them from this line). Damage is only dealt on a hit: the Damage entry that follows
+  // uses these same dice; on a miss they're shown here and marked not dealt.
+  if(o.preDamage){ res.pre=o.preDamage(); det+=' · damage '+res.pre.text+' = '+res.pre.total+(res.ok?'':' (miss, not dealt)'); }
   var entry=addLog((pushed?'Push · ':'')+o.label, word+' ('+r+')', det, res.dragon?'crit':res.demon?'fumble':'normal');
   _last={o:o,res:res,boons:boons,banes:banes,pushed:pushed};
   // The Push button lives in the roll's own log card, and only on a failure you may push
@@ -1046,15 +1053,6 @@ function takeDamage(n,opt){ opt=opt||{}; n=Math.max(0,num(n)); var soak=opt.igno
 function healHp(n,why){ n=Math.max(0,num(n)); var was=S.hp; S.hp=Math.min(hpMax(),S.hp+n); if(was<=0&&S.hp>0){ S.death.s=0; S.death.f=0; S.death.rallied=false; }
   addLog(why||'Healed','+'+(S.hp-was)+' HP','→ '+S.hp+'/'+hpMax(),'normal'); changed(); }
 function healWp(n,why){ var was=S.wp; S.wp=Math.min(wpMax(),S.wp+Math.max(0,num(n))); addLog(why||'Willpower','+'+(S.wp-was)+' WP','→ '+S.wp+'/'+wpMax(),'normal'); changed(); }
-function promptDamage(){
-  var types=['','bludgeoning','slashing','piercing'];
-  var body='<div class="m-lbl">Damage rolled against you</div><input id="dm-n" class="m-input" type="number" inputmode="numeric" placeholder="e.g. 7">'+
-    (S.opts.damageTypes?'<div class="m-lbl">Damage type</div><select id="dm-t" class="m-input">'+types.map(function(t){ return '<option value="'+t+'">'+(t||'Untyped')+'</option>'; }).join('')+'</select>':'')+
-    '<label class="m-check"><input type="checkbox" id="dm-ig"><span>Ignores armor<small>A critical hit on a weak spot, Find Weak Spot, poison, falling and similar.</small></span></label>'+
-    '<p class="m-hint" style="margin-top:10px;">Armor rating <b>'+armorRating()+'</b></p>';
-  openDlg('Take Damage',body,[{t:'Apply',f:function(){ var n=num($('dm-n').value); takeDamage(n,{type:$('dm-t')?$('dm-t').value:'',ignoreArmor:$('dm-ig').checked}); closeDlg(); }}]);
-  setTimeout(function(){ var i=$('dm-n'); if(i) i.focus(); },50);
-}
 function rollDeath(){
   if(S.hp>0||S.death.dead) return;
   testRoll({label:'Death Roll (CON)',target:attr('CON'),attr:'CON',canPush:false,noMark:true,onDone:function(r){
@@ -1143,7 +1141,6 @@ function closeDlg(force){ if(_dlgModal&&!force) return; _dlgModal=false; $('dlg-
 // and your movement. Parry and Dodge are reactions — they replace your turn, so
 // they need a turn you haven't taken yet and they spend it. Nothing is
 // restricted until you draw a card (out of combat everything stays open).
-var RX={crit:false,ranged:false,monster:false};   // what the incoming attack is (Reaction subtab)
 function inCombat(){ return S.turn.card!=null; }
 function canAct(){ if(S.death.dead) return false; if(S.hp<=0&&!S.death.rallied) return false; if(!inCombat()) return true; return !S.turn.action&&!S.turn.done; }
 function canReact(){ if(S.death.dead||S.hp<=0) return false; if(S.berserk) return false; if(!inCombat()) return true; return !S.turn.action&&!S.turn.done; }
@@ -1159,6 +1156,9 @@ function drawInit(mode){
     openDlg('Lightning Fast','<div class="m-row"><button class="m-btn" onclick="pickInit('+a+')">Card '+a+'</button><button class="m-btn" onclick="pickInit('+b+')">Card '+b+'</button></div>',[],true); return; }
   newTurnState(); S.turn.card=d(10); addLog('Initiative','Card '+S.turn.card,'Lowest acts first','normal'); changed();
 }
+// End Turn (as on the D&D sheet): your action, any spent reaction and extra attacks come back.
+// The initiative card stays; drawing a new one still starts the next round.
+function endTurn(){ S.turn.action=false; S.turn.done=false; S.turn.extra=0; S.turn.dual=false; changed(); }
 function pickInit(c){ closeDlg(true); newTurnState(); S.turn.card=c; addLog('Initiative','Card '+c,'Lightning Fast (2 WP): two cards, kept '+c,'normal'); changed(); }
 // A stretch or shift rest ends the fight: the initiative card is put back.
 function leaveCombat(quiet){ S.turn={card:null,prev:null,action:false,done:false,extra:0,prone:S.turn.prone,round:1}; if(S.berserk) endBerserk(true); if(!quiet){ addLog('Combat over','✓','','normal'); changed(); } }
@@ -1190,7 +1190,7 @@ function doAttack(i,o){
   changed();
   // a tallow candle in hand gutters whenever its bearer attacks
   if(S.light&&/candle/i.test(S.light.name)) lightCheck(true);
-  testRoll({label:(offhand?'Off-hand attack · ':'Attack · ')+dd.name,target:skillLevel(sk),skill:sk,weapon:wpn,ranged:!!dd.ranged,boons:boons,banes:banes,onDone:function(r){
+  testRoll({label:(offhand?'Off-hand attack · ':'Attack · ')+dd.name,target:skillLevel(sk),skill:sk,weapon:wpn,ranged:!!dd.ranged,boons:boons,banes:banes,preDamage:function(){ return baseDamage(i,o); },onDone:function(r){
     if(r.ok) afterHit(i,o,r,notes); else if(r.demon) demonMishap(i,dd);
     if(o.backstab&&!r.ok) addLog('Backstabbing','3 WP spent','The attack missed','normal');
   }});
@@ -1201,7 +1201,7 @@ function afterHit(i,o,r,notes){
   if((o.sneak||o.backstab)&&hasAbility('Assassin')) adds.push(['assassin','Assassin (3 WP)','+D8 on a sneak attack']);
   if(dd._unarmed&&hasAbility('Iron Fist')) adds.push(['ironfist','Iron Fist (1 WP)','+D6 unarmed']);
   if(melee&&dd.grip==='2H'&&hasAbility('Massive Blow')) adds.push(['massive','Massive Blow (3 WP)','+D8 — you can\'t move this round']);
-  if(!r.dragon&&!adds.length){ rollDamage(i,o,{},notes); return; }
+  if(!r.dragon&&!adds.length){ rollDamage(i,o,{},notes,null,r.pre); return; }
   var h='';
   if(r.dragon){ h+='<div class="m-lbl">Critical hit — choose one</div><p class="m-hint" style="margin-bottom:4px;">Only a Dragon can parry or dodge it.</p>'+
     '<label class="m-check"><input type="radio" name="crit" value="double" checked><span>Double the weapon\'s damage dice<small>Before the damage bonus and other extra dice.</small></span></label>'+
@@ -1212,21 +1212,32 @@ function afterHit(i,o,r,notes){
   openDlg(r.dragon?'Dragon! Critical Hit':'Hit · '+dd.name,h,[{t:'Roll Damage',f:function(){
     var ch={}; var c=document.querySelector('input[name="crit"]:checked'); if(c) ch[c.value]=true;
     var wp=0; adds.forEach(function(a){ var el=$('ad-'+a[0]); if(el&&el.checked){ ch[a[0]]=true; wp+=(a[0]==='ironfist'?1:3); } });
-    if(wp&&!spendWp(wp,'Damage abilities')){ return; } closeDlg(true); rollDamage(i,o,ch,notes); }}],true);
+    if(wp&&!spendWp(wp,'Damage abilities')){ return; } closeDlg(true); rollDamage(i,o,ch,notes,null,r.pre); }}],true);
 }
-function rollDamage(i,o,ch,notes,label){
-  var dd=weaponAt(i); var expr=dd.damage||'D6'; notes=(notes||[]).slice();
+// The damage known before the attack roll: weapon dice (+1 die for a subtle sneak attack or a
+// backstab), the damage bonus, +D6 against a prone target. Rolled with the attack's d20.
+function baseDamage(i,o,ch){ ch=ch||{};
+  var dd=weaponAt(i); var expr=dd.damage||'D6';
   var subtle=hasFeat(dd,'Subtle'); if(((o.sneak&&subtle)||o.backstab)) expr=dicePlus(expr,1);
   if(ch.double) expr=diceTimes(expr,2);
   var parts=[], total=0; var w=rollExpr(expr); total+=w.total; parts.push(w.text);
   var b=(ch.nobonus)?null:weaponBonus(dd); if(b){ var bb=rollExpr(b); total+=bb.total; parts.push(bb.text+' bonus'); }
   if(o.prone){ var p=rollExpr('D6'); total+=p.total; parts.push(p.text+' prone'); }
-  [['dragonslayer','D8'],['assassin','D8'],['ironfist','D6'],['massive','D8']].forEach(function(x){ if(ch[x[0]]){ var r=rollExpr(x[1]); total+=r.total; parts.push(r.text+' '+x[0]); } });
+  return {total:total,parts:parts,text:parts.join(' + '),expr:expr}; }
+function rollDamage(i,o,ch,notes,label,pre){
+  var dd=weaponAt(i); notes=(notes||[]).slice();
+  // pre = the dice already thrown with the attack: reuse them, and animate only what's added now
+  // (the crit's doubled dice, a damage ability's die).
+  var base=pre||baseDamage(i,o,ch); var parts=base.parts.slice(), total=base.total, extra=[];
+  if(pre&&ch.double){ var cx=rollExpr(pre.expr.split('+').filter(function(t){ return /D/i.test(t); }).join('+')); total+=cx.total; parts.push(cx.text+' crit'); extra.push(cx.text); }
+  [['dragonslayer','D8'],['assassin','D8'],['ironfist','D6'],['massive','D8']].forEach(function(x){ if(ch[x[0]]){ var r=rollExpr(x[1]); total+=r.total; parts.push(r.text+' '+x[0]); extra.push(r.text); } });
+  if(pre) window.__daNext=extra.length?{detail:extra.join(' + ')}:{skip:true};
   if(ch.massive) notes.push('no movement this round');
   if(ch.armor||o.weak) notes.push('ignores armor'); if(ch.extra){ S.turn.extra=num(S.turn.extra)+1; notes.push('free extra attack against another enemy'); }
   var types=A(dd.features).filter(function(f){ return /^(Bludgeoning|Slashing|Piercing)$/.test(f); }).map(function(f){ return f.toLowerCase(); });
   if(o.twin) notes.push('roll again for the second arrow');
   addLog((label||'Damage')+' · '+dd.name, String(total), parts.join(' + ')+(types.length?' · '+types.join('/'):'')+(notes.length?' · '+notes.join(' · '):''), ch.double?'crit':'normal');
+  window.__daNext=null;   // consumed by the dice hook; cleared here too in case the animation is off
   changed(); return total;
 }
 function demonMishap(i,dd){
@@ -1261,12 +1272,10 @@ function parry(i,mode){
   if(mode==='block') boons.push('Shield Block');
   if(wp&&!spendWp(wp,'Parry')) return;
   var sk=weaponSkill(dd); if(!free) useReaction();
-  testRoll({label:(free?'Defensive parry':'Parry')+' · '+dd.name,target:RX.crit?0:skillLevel(sk),skill:sk,weapon:dd,boons:boons,onDone:function(r){
-    if(RX.crit&&!r.dragon){ return; }
-    if(r.dragon&&!RX.crit){ addLog('Counterattack','Automatic hit','A Dragon on the parry: strike back — it can\'t be dodged or parried','crit'); rollDamage(i,{},{},['counterattack'],'Counterattack'); }
+  testRoll({label:(free?'Defensive parry':'Parry')+' · '+dd.name,target:skillLevel(sk),skill:sk,weapon:dd,boons:boons,onDone:function(r){
+    if(r.dragon){ addLog('Counterattack','Automatic hit','A Dragon on the parry: strike back — it can\'t be dodged or parried','crit'); rollDamage(i,{},{},['counterattack'],'Counterattack'); }
     if(r.ok&&dd.durability){ openDlg('Parried','<p class="m-hint">The blow hits your '+esc(dd.name)+' (durability <b>'+dd.durability+'</b>). If its damage exceeds that, the weapon is damaged until repaired with Crafting. Piercing attacks never damage a parrying weapon.</p>',[{t:'Weapon damaged',cls:'warn',f:function(){ if(i>=0&&S.inventory[i]) S.inventory[i].broken=true; closeDlg(); addLog(dd.name,'Damaged','Bane on every use until repaired','fumble'); changed(); }},{t:'It held',f:function(){ closeDlg(); }}]); }
   }});
-  if(RX.crit) addLog('Parry vs critical hit','Dragon needed','Only a Dragon parries a critical hit','normal');
   changed();
 }
 function dodge(mode){
@@ -1274,8 +1283,7 @@ function dodge(mode){
   if(S.berserk){ addLog('Dodge','—','Berserk: you can neither parry nor dodge','normal'); return; }
   var wp=(free?3:0)+(mode==='hard'?3:0); var boons=[]; if(mode==='hard') boons.push('Hard to Catch');
   if(wp&&!spendWp(wp,'Dodge')) return; if(!free) useReaction();
-  testRoll({label:(free?'Fast Footwork dodge':'Dodge (Evade)'),target:RX.crit?0:skillLevel('Evade'),skill:'Evade',boons:boons});
-  if(RX.crit) addLog('Dodge vs critical hit','Dragon needed','Only a Dragon dodges a critical hit','normal');
+  testRoll({label:(free?'Fast Footwork dodge':'Dodge (Evade)'),target:skillLevel('Evade'),skill:'Evade',boons:boons});
   changed();
 }
 function reactAbility(n){ var def=abilityDef(n)||{}; if(!spendWp(def.wp,n)) return; addLog(n,'−'+def.wp+' WP',def.text||'','normal'); changed(); }
@@ -1409,6 +1417,7 @@ function renderTurn(){
   if(hasAbility('Lightning Fast')) h+=tbtn('Draw 2 · 2 WP','drawInit(\'fast\')','ghost','Lightning Fast: draw two cards, keep one');
   if(hasAbility('Veteran')&&(t.card!=null||t.prev!=null)) h+=tbtn('Keep '+(t.card!=null?t.card:t.prev)+' · 1 WP','drawInit(\'veteran\')','ghost','Veteran: keep last round\'s card');
   h+='</div>';
+  h+=tbtn('⟳ End Turn','endTurn()','end','Start a new turn — your action and reaction come back');
   h+='</div><div class="db-badges">';
   CONDS.forEach(function(c){ if(S.cond[c]) h+='<span class="db-badge warn" title="Bane on '+COND_ATTR[c]+' rolls">'+c+'</span>'; });
   if(S.death.dead) h+='<span class="db-badge warn">Dead</span>'; else if(S.hp<=0) h+='<span class="db-badge warn">0 HP — '+(S.death.rallied?'rallied, still making death rolls':'death roll on your turn')+'</span>';
@@ -1478,25 +1487,24 @@ function renderActions(act,atk){
   return h;
 }
 function renderReactions(react){
-  var h='<div class="db-rx" style="padding-top:8px;"><label><input type="checkbox" data-nolock '+(RX.crit?'checked':'')+' onchange="RX.crit=this.checked;renderTurn()"> Incoming critical hit (Dragon)</label><label><input type="checkbox" data-nolock '+(RX.ranged?'checked':'')+' onchange="RX.ranged=this.checked;renderTurn()"> Ranged attack</label><label><input type="checkbox" data-nolock '+(RX.monster?'checked':'')+' onchange="RX.monster=this.checked;renderTurn()"> Monster attack</label></div>';
-  var dg=tcard('Dodge','Evade <b>'+skillLevel('Evade')+'</b>'+(RX.crit?' · only a Dragon dodges a crit':''),tbtn('Dodge','dodge()'),!react);
+  var h='';
+  var dg=tcard('Dodge','Evade <b>'+skillLevel('Evade')+'</b>',tbtn('Dodge','dodge()'),!react);
   if(hasAbility('Hard to Catch')) dg+=tcard('Dodge · Hard to Catch','3 WP: a boon on the Evade roll',tbtn('3 WP','dodge(\'hard\')'),!react);
   if(hasAbility('Fast Footwork')) dg+=tcard('Fast Footwork','3 WP: dodge without spending your turn',tbtn('3 WP','dodge(\'footwork\')'),S.berserk||S.hp<=0);
   h+=tsec('dodge','Dodge',dg);
   var pr=''; atHand().forEach(function(x){ var dd=x.d, i=x.i; if(dd.ranged) return; if(hasFeat(dd,'Cannot be used for parrying')) { pr+=tcard(esc(dd.name),'Can\'t be used for parrying','',true); return; }
-    var sk=weaponSkill(dd); var okType=!RX.ranged||dd.shield; var okMon=!RX.monster||(dd.shield&&hasAbility('Shield Block'));
-    var sub=esc(sk)+' <b>'+skillLevel(sk)+'</b> · durability '+(dd.durability||'—')+(RX.crit?' · only a Dragon parries a crit':'')+(!okType?' · ranged attacks need a shield':'')+(RX.monster&&!okMon?' · monster attacks can\'t be parried':'');
-    var b=tbtn('Parry','parry('+i+')','',!okType||!okMon?'Not possible':'');
+    var sk=weaponSkill(dd);
+    var sub=esc(sk)+' <b>'+skillLevel(sk)+'</b> · durability '+(dd.durability||'—');
+    var b=tbtn('Parry','parry('+i+')','',dd.shield?'':'A ranged attack needs a shield (or Deflect Arrow)');
     if(dd.shield&&hasAbility('Shield Block')) b+=tbtn('+Block 2 WP','parry('+i+',\'block\')','ghost','Shield Block: a boon, and you can parry monster attacks');
-    if(!dd.shield&&RX.ranged&&hasAbility('Deflect Arrow')) b=tbtn('Deflect 1 WP','parry('+i+',\'deflect\')','','Deflect Arrow: parry a ranged attack with a melee weapon');
+    if(!dd.shield&&hasAbility('Deflect Arrow')) b+=tbtn('Deflect 1 WP','parry('+i+',\'deflect\')','ghost','Deflect Arrow: parry a ranged attack with a melee weapon');
     if(hasAbility('Defensive')&&!dd.ranged) b+=tbtn('Free 3 WP','parry('+i+',\'defensive\')','ghost','Defensive: parry without spending your turn');
-    var dis=!react||((!okType&&!(RX.ranged&&hasAbility('Deflect Arrow')))||!okMon); pr+=tcard(esc(dd.name)+(dd.shield?' <span class="tag">shield</span>':''),sub,b,dis&&!(hasAbility('Defensive')&&okType&&okMon)); });
+    pr+=tcard(esc(dd.name)+(dd.shield?' <span class="tag">shield</span>':''),sub,b,!react&&!hasAbility('Defensive')); });
   if(!pr) pr='<div class="db-empty">Nothing at hand to parry with</div>';
   h+=tsec('parry','Parry',pr);
   var ab=''; ['Guardian','Weasel'].forEach(function(n){ if(hasAbility(n)){ var def=abilityDef(n)||{}; ab+=tcard(n+' <span class="tag">'+def.wp+' WP</span>',esc(def.text||''),tbtn(def.wp+' WP','reactAbility(\''+n+'\')'),S.hp<=0); } });
   S.spells.forEach(function(s,i){ var def=spellDef(s.name)||{}; if(def.castingTime!=='reaction') return; ab+=tcard(esc(s.name)+' <span class="tag">spell</span>'+(s.prepared?'':' <span class="tag warn">not prepared</span>'),esc(def.text||''),tbtn('Cast','openCast(\'spell\','+i+')'),!s.prepared||!!spellBlockFor(def)); });
   if(ab) h+=tsec('rxab','Reaction Abilities & Spells',ab);
-  h+=tsec('hit','Hit',tcard('Take Damage','Armor rating '+armorRating(),tbtn('Damage','promptDamage()'))+tcard('Fear Attack','WIL '+attr('WIL'),tbtn('Roll','rollFear()')));
   return h;
 }
 

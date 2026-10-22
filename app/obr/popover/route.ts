@@ -274,12 +274,10 @@ const PAGE = String.raw`<!doctype html>
             { key: "NIM", name: "Nimble", cls: "nim" },
             { key: "DND", name: "D&D", cls: "dnd" },
             { key: "LOTR", name: "The Lord of the Rings", cls: "lotr" },
-            { key: "DB", name: "Dragonbane", cls: "db" },
             { key: "PB", name: "Pirate Borg", cls: "pb" },
+            { key: "ICRPG", name: "Index Card RPG", cls: "icrpg" },
+            { key: "DB", name: "Dragonbane", cls: "db" },
             { key: "DCC", name: "Dungeon Crawler Carl", cls: "dcc" },
-            { key: "KOB", name: "Kids on Bikes", cls: "kob" },
-            { key: "MMRPG", name: "Marvel Multiverse RPG", cls: "mmrpg" },
-            { key: "JLU", name: "Justice League Unlimited", cls: "jlu" },
             { key: "GB", name: "Ghostbusters", cls: "gb" },
             { key: "SW", name: "Star Wars", cls: "sw" },
             { key: "ACE", name: "ACE!", cls: "ace" },
@@ -288,7 +286,9 @@ const PAGE = String.raw`<!doctype html>
             { key: "TWD", name: "The Walking Dead", cls: "twd" },
             { key: "MYZ", name: "Mutant: Year Zero", cls: "myz" },
             { key: "VAE", name: "Vaesen", cls: "vae" },
-            { key: "ICRPG", name: "Index Card RPG", cls: "icrpg" },
+            { key: "MMRPG", name: "Marvel Multiverse RPG", cls: "mmrpg" },
+            { key: "JLU", name: "Justice League Unlimited", cls: "jlu" },
+            { key: "KOB", name: "Kids on Bikes", cls: "kob" },
             { key: "CO", name: "Candela Obscura", cls: "co" }
           ];
           var seen = {};

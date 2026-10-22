@@ -812,11 +812,15 @@
   // Year Zero sheets so stress dice carry their own colour and the dice glow is
   // decoupled from the log's success/failure styling (it glows only on the bad
   // state). It is consumed once; everything else keeps parsing the detail string.
+  // { skip:true } plays nothing for that entry (its dice were already thrown with an
+  // earlier one); { detail:'2d6(3,4)' } animates that string instead of the entry's.
   var _add = window.addLog;
   window.addLog = function(label,result,detail,type){ var r = _add ? _add.apply(this, arguments) : undefined;
     try{ if(S.on){
       var spec = window.__daNext; window.__daNext = null;
-      if(spec && spec.dice && spec.dice.length){ play(spec.dice, spec.glow||'normal'); }
+      if(spec && spec.skip){ /* these dice were already thrown (e.g. an attack's damage, rolled with its d20) */ }
+      else if(spec && spec.detail!=null){ var dd=parseDice(spec.detail); if(dd.length) play(dd, spec.glow||type||'normal'); }
+      else if(spec && spec.dice && spec.dice.length){ play(spec.dice, spec.glow||'normal'); }
       else { var dice=parseDice(detail); if(dice.length) play(dice, type||'normal'); }
     } }catch(e){} return r; };
 

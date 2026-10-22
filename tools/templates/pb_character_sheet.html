@@ -171,18 +171,16 @@ body.sheet-locked .ab-row input:hover{filter:brightness(1.15);}
 body.sheet-unlocked .ab-row input{background:var(--input-bg);color:var(--ink);border:2px dashed var(--acc);cursor:text;}
 
 /* luck */
-.luck-box{padding:8px 10px;}
-.luck-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.luck-n{font-family:var(--f-num);font-size:30px;font-weight:600;color:var(--acc-dk);line-height:1;min-width:30px;text-align:center;}
-.luck-pips{display:flex;gap:4px;flex-wrap:wrap;}
-.lpip{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--acc);background:transparent;}
-.lpip.on{background:var(--acc);box-shadow:inset 0 0 0 2px var(--card);}
-body.dark .lpip.on{box-shadow:inset 0 0 0 2px var(--box);}
+/* Devil's Luck: a compact number + −/+ in the Status row */
+.luck-box{flex-wrap:nowrap;gap:8px;}
+.luck-n{font-family:var(--f-num);font-size:26px;font-weight:600;color:var(--acc-dk);line-height:1;min-width:26px;text-align:center;}
+.luck-box .counter{gap:4px;}
 .cond-box{padding:8px 10px;}
 .cond-sum:empty::before{content:"None";font-size:13px;color:var(--muted);}
 
 /* status / vitals */
-.vitals{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px;align-items:stretch;}
+/* Devil's Luck | Armor | Hit Points */
+.vitals{display:grid;grid-template-columns:max-content minmax(0,1.3fr) minmax(0,1fr);gap:6px;padding:8px;align-items:stretch;}
 .vital{border:1px solid var(--rule);border-radius:9px;background:var(--box);padding:7px 9px;min-width:0;}
 body.dark .vital{background:#1a1212;}
 .vital.wide{grid-column:1 / -1;}.vital.half{grid-column:span 2;}
@@ -196,6 +194,7 @@ body.dark .vital{background:#1a1212;}
 .vbar{height:6px;border-radius:4px;background:var(--rule);overflow:hidden;margin-top:5px;}
 .vbar>span{display:block;height:100%;background:var(--acc);}
 .vline{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:5px;font-size:12.5px;color:var(--muted);}
+.vline .tag{white-space:normal;max-width:100%;}   /* the narrow Armor box wraps a long note instead of clipping it */
 .small-btn{background:var(--acc);color:#fff;border:none;border-radius:6px;padding:4px 9px;font-family:var(--f-label);font-size:13px;letter-spacing:.01em;cursor:pointer;white-space:nowrap;}
 .small-btn:hover{filter:brightness(1.15);}
 .small-btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--rule);}
@@ -255,9 +254,10 @@ body.dark .eq-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 .fld textarea{font-size:14px;line-height:1.45;border:1px solid var(--rule);border-radius:7px;background:var(--input-bg);padding:6px 8px;resize:vertical;min-height:60px;}
 .notes-box{padding:8px 10px;}
 .notes-box textarea{width:100%;min-height:160px;border:1px solid var(--rule);border-radius:8px;background:var(--input-bg);color:var(--ink);font-size:15px;line-height:1.5;padding:8px;outline:none;resize:vertical;}
-.enc{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 10px;font-size:13px;color:var(--muted);}
-.enc b{font-size:16px;color:var(--ink);font-family:var(--f-num);}
-.enc.over b{color:var(--red);}
+/* the Inventory header carries Carry Capacity and + Gear */
+.inv-bar .hdr-right{gap:10px;row-gap:4px;}
+.inv-bar .sb-note{white-space:nowrap;}
+.section-bar .enc-note.over b{color:var(--red);}
 .coins{display:flex;gap:8px;flex-wrap:wrap;padding:6px 10px 8px;align-items:center;}
 .coins label{font-family:var(--f-label);font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;}
 .coins input{width:80px;height:30px;border:1px solid var(--input-border);border-radius:6px;background:var(--input-bg);text-align:center;font-size:16px;font-weight:600;color:var(--ink);outline:none;font-family:var(--f-num);}
@@ -341,12 +341,13 @@ body.dark .eq-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
   .stats-col,.center-col{width:100%;}
   .hdr-top{grid-template-columns:1fr;gap:9px;}
   .hdr-metarow>*{flex:1 1 31%!important;}
-  .vitals{grid-template-columns:1fr 1fr;}
   .blk-grid{grid-template-columns:1fr;}
 }
 @container (max-width:520px){
   .hdr-metarow>*{flex:1 1 47%!important;}
-  .vitals{grid-template-columns:1fr;}
+  /* phone: Devil's Luck | Armor on one line, Hit Points across under them */
+  .vitals{grid-template-columns:max-content minmax(0,1fr);}
+  .vital.hp-vital{grid-column:1 / -1;}
   .vital.half{grid-column:auto;}
   .hdr-logo .lg-word{font-size:38px;}
 }
@@ -499,10 +500,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="section-bar"><span>Conditions</span><span class="sb-note" id="cond-count"></span></div>
         <div class="cond-box"><div class="cond-sum" id="cond-sum"></div></div>
       </div>
-      <div class="card">
-        <div class="section-bar"><span>Devil's Luck</span></div>
-        <div class="luck-box" id="luck-box"></div>
-      </div>
     </div>
 
     <div class="center-col">
@@ -511,15 +508,18 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="dead-banner" id="dead-banner">Dead — down to Davy Jones' Locker</div>
         <div class="broken-banner" id="broken-banner"></div>
         <div class="vitals">
-          <div class="vital half">
+          <div class="vital luck-vital">
+            <div class="vlbl"><span>Devil's Luck</span></div>
+            <div class="vbig luck-box" id="luck-box"></div>
+          </div>
+          <div class="vital">
             <div class="vlbl"><span>Armor</span></div>
             <div class="vbig" id="armor-big"></div>
             <div class="vline" id="armor-line"></div>
           </div>
-          <div class="vital half">
+          <div class="vital hp-vital">
             <div class="vlbl"><span>Hit Points</span><small id="hp-note"></small></div>
-            <div class="vbig"><input type="number" id="f-hp" class="no-spin" data-nolock oninput="onHpInput()"><span class="slash">/</span><input type="number" id="f-hpmax" class="no-spin" onchange="onHpMax(this.value)" title="Maximum HP">
-              <button class="small-btn ghost" onclick="promptDamage()" title="Take damage">− Dmg</button><button class="small-btn ghost" onclick="promptHeal()">+ Heal</button></div>
+            <div class="vbig"><input type="number" id="f-hp" class="no-spin" data-nolock onfocus="_hpFocus=S.hp" oninput="onHpInput()" onchange="onHpCommit()" title="Current HP — type the new value after a hit"><span class="slash">/</span><input type="number" id="f-hpmax" class="no-spin" onchange="onHpMax(this.value)" title="Maximum HP"></div>
             <div class="vbar"><span id="hp-bar"></span></div>
           </div>
         </div>
@@ -544,12 +544,10 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="tab-panel" id="tab-magic"><div id="magic-body"></div></div>
 
         <div class="tab-panel" id="tab-gear">
-          <div class="section-bar"><span>Silver</span></div>
+          <div class="section-bar inv-bar"><span>Inventory</span><span class="hdr-right"><span class="sb-note enc-note" id="enc"></span><button class="hdr-btn" onclick="openPicker('shop')">＋ Gear</button></span></div>
           <div class="coins">
             <label>Silver <input type="number" id="c-silver" class="no-spin" data-nolock oninput="onSilver()"></label>
           </div>
-          <div class="section-bar"><span>Inventory</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('shop')">＋ Gear</button></span></div>
-          <div class="enc" id="enc"></div>
           <table class="tbl" id="inv-tbl"><thead><tr><th style="width:48%;">Item</th><th style="width:50px;">Qty</th><th style="width:50px;">Slots</th><th style="width:16%;">Stowed in</th><th>Note / uses</th><th style="width:30px;"></th></tr></thead><tbody id="inv-body"></tbody></table>
         </div>
 
@@ -813,7 +811,7 @@ function renderAbilities(){
 }
 function renderLuck(){
   var n=num(S.luck);
-  $('luck-box').innerHTML='<div class="luck-top"><span class="luck-n">'+n+'</span><span style="margin-left:auto;" class="counter"><button class="small-btn ghost" data-nolock onclick="adjLuck(-1)"'+(n>0?'':' disabled')+' aria-label="Spend one Devil\'s Luck">−</button><button class="small-btn ghost" data-nolock onclick="adjLuck(1)" aria-label="Gain one Devil\'s Luck">＋</button></span></div>';
+  $('luck-box').innerHTML='<span class="luck-n">'+n+'</span><span class="counter"><button class="small-btn ghost" data-nolock onclick="adjLuck(-1)"'+(n>0?'':' disabled')+' aria-label="Spend one Devil\'s Luck">−</button><button class="small-btn ghost" data-nolock onclick="adjLuck(1)" aria-label="Gain one Devil\'s Luck">＋</button></span>';
 }
 function hpMax(){ return Math.max(1,num(S.hpMax,1)); }
 function renderStatus(){
@@ -942,8 +940,9 @@ function renderGear(){
       '<td><input class="num no-spin" type="number" value="'+num(x.qty,1)+'" data-nolock onchange="onItem(\''+x.uid+'\',\'qty\',this.value)"></td><td><input class="num" value="'+esc(x.slots==null?1:x.slots)+'" onchange="onItem(\''+x.uid+'\',\'slots\',this.value)" title="'+slotsTitle+'"></td>'+
       '<td>'+sel+'</td><td>'+extra+'<input value="'+esc(x.note||'')+'" style="width:auto;min-width:80px;font-weight:400;font-size:13px;" onchange="onItem(\''+x.uid+'\',\'note\',this.value)"></td><td style="white-space:nowrap;text-align:right;">'+acts+(x.natural?'':'<button class="row-x" onclick="removeItem(\''+x.uid+'\')" title="Remove">✕</button>')+'</td></tr>'; });
   $('inv-body').innerHTML=inv||'<tr><td colspan="6" class="desc">Empty.</td></tr>';
-  var load=carryLoad(), cap=carryCap(); var e=$('enc'); e.className='enc'+(load>cap?' over':'');
-  e.innerHTML='Carrying <b>'+load+' / '+cap+'</b>'+(load>2*cap?' <span class="tag warn">too much to carry</span>':load>cap?' <span class="tag warn">over-encumbered</span>':'');
+  var load=carryLoad(), cap=carryCap(); var e=$('enc'); e.className='sb-note enc-note'+(load>cap?' over':'');
+  e.title=load>2*cap?'Too much to carry':load>cap?'Over-encumbered: STRENGTH and AGILITY tests +2 DR':'Slots carried / carrying capacity (8 + STRENGTH)';
+  e.innerHTML='Carry Capacity <b>'+load+'/'+cap+'</b>';
   $('c-silver').value=num(S.silver);
 }
 function repairCost(x){ if(x.ruined||x.tier>=x.origTier||x.tier<1) return 0; var r=A((D('PB_ARMOR_REPAIR')||{}).rows).find(function(z){ return z.from===x.tier; }); return r?r.cost:0; }
@@ -966,7 +965,15 @@ function needUnlock(){ if(locked()){ addLog('Sheet locked','🔒','Unlock the sh
 function onField(k,v){ S[k]=v; if(k==='name') syncDocTitle(); changed(); }
 function onAbil(a,v){ S.abilities[a]=clamp(num(v,0),-3,6); changed(); }
 function onClass(v){ S.classId=v; if(v!=='haunted-soul'&&v!=='tall-tale'){ S.baseClassId=''; S.origin={kind:'',ailment:'',variant:'',ancestry:'',animal:''}; } S['class']=classLabel(); changed(); }
-function onHpInput(){ var was=S.hp; S.hp=Math.min(hpMax(),num($('f-hp').value)); if(S.hp>0&&S.dead&&was<=0){} renderStatus(); renderLuck(); if(typeof renderTurn==='function') renderTurn(); scheduleAutosave(); }
+function onHpInput(){ S.hp=Math.min(hpMax(),num($('f-hp').value)); renderStatus(); renderLuck(); if(typeof renderTurn==='function') renderTurn(); scheduleAutosave(); }
+// HP is lowered by typing the new value: once it's committed, reaching exactly 0 rolls Broken and
+// dropping below 0 kills (Charon's Obol still saves you); climbing back above 0 clears Broken.
+var _hpFocus=null;
+function onHpCommit(){ var was=_hpFocus==null?S.hp:_hpFocus; _hpFocus=S.hp; if(S.dead||S.hp===was) return;
+  if(S.hp>0&&was<=0) S.broken=null;
+  addLog('Hit Points',(S.hp<was?'−'+(was-S.hp):'+'+(S.hp-was))+' HP','→ '+S.hp+'/'+hpMax(),S.hp<=0?'fumble':'normal');
+  if(S.hp<0) dying({}); else if(S.hp===0) brokenRoll();
+  changed(); }
 function onHpMax(v){ S.hpMax=Math.max(1,num(v,1)); changed(); }
 // − spends a point (a Rapscallion's Lucky Devil draws a card for it); ＋ gains one.
 function adjLuck(n){ if(n<0){ if(num(S.luck)<=0) return; spendLuck(''); changed(); return; } S.luck=num(S.luck)+n; changed(); }
@@ -1050,17 +1057,16 @@ function jokerTable(){ var t=D('PB_JOKER_TABLE')||{}; var n=d(20); var row=rowFo
   addLog('Joker table','d20: '+n,'d20('+n+') · '+(row.text||'')+' · Luck '+S.luck,row.dead?'fumble':'crit'); changed(); }
 
 // ═══ DAMAGE, HEALING, BROKEN ════════════════════════════════════════════════
-// Incoming damage: × 2 on a fumbled defense, then the armor die (unless black powder),
-// the hat (metal-lined / morion −1), extra protection dice, and Devil's Luck −d6.
-function soakRoll(opt){ var parts=[], total=0;
-  if(!opt.blackPowder){ var die=armorDie(); if(die){ var r=rollExpr(die); total+=r.total; parts.push('armor '+r.text); } var hr=hatReduction(); if(hr){ total+=hr; parts.push(wornHat().name+' −'+hr); } }
+// Damage the sheet deals to you itself (backfires, mishaps, infection, starvation, bombs…) — never
+// reduced by armor. Blows in a fight are applied by the player lowering the HP field.
+// The protection roll on a failed defense: armor die, the hat (metal-lined / morion −1), extra dice.
+function soakRoll(){ var parts=[], total=0;
+  var die=armorDie(); if(die){ var r=rollExpr(die); total+=r.total; parts.push('armor '+r.text); } var hr=hatReduction(); if(hr){ total+=hr; parts.push(wornHat().name+' −'+hr); }
   extraProt().forEach(function(p){ var r=rollExpr(p.die); total+=r.total; parts.push(p.label+' '+r.text); });
   return {total:total,parts:parts}; }
 function takeDamage(n,opt){ opt=opt||{}; n=Math.max(0,num(n)); var parts=[];
-  if(opt.double){ n*=2; parts.push('doubled (fumble)'); }
-  var soak=opt.raw?{total:0,parts:[]}:soakRoll({blackPowder:opt.blackPowder});
-  if(opt.blackPowder&&!opt.raw) parts.push('black powder ignores armor');
-  var dmg=Math.max(0,n-soak.total);
+  var soak={total:0,parts:[]};
+  var dmg=n;
   if(num(S.tempHp)>0&&dmg>0){ var tk=Math.min(num(S.tempHp),dmg); S.tempHp-=tk; dmg-=tk; parts.push(tk+' from temporary HP'); }
   if(S.cond.invisible&&dmg>0){ S.cond.invisible=false; parts.push('no longer invisible'); }
   var before=S.hp; S.hp=before-dmg;
@@ -1089,21 +1095,6 @@ function brokenRoll(){ var t=(D('PB_RULES')||{}).broken||{}; var n=d(6); var row
   addLog('Broken',row.name||('d6: '+n),'d6('+n+') · '+(row.text||'')+(note.length?' · '+note.join(' · '):''),'fumble'); changed(); }
 function healHp(n,why){ n=Math.max(0,num(n)); if(S.dead){ addLog(why||'Heal','—','The dead don\'t heal','normal'); return 0; } var was=S.hp; S.hp=Math.min(hpMax(),S.hp+n); if(was<=0&&S.hp>0) S.broken=null;
   addLog(why||'Healed','+'+(S.hp-was)+' HP','→ '+S.hp+'/'+hpMax(),'normal'); changed(); return S.hp-was; }
-function promptDamage(){
-  var hat=wornHat();
-  var body='<div class="m-lbl">Damage</div><input id="dm-n" class="m-input" placeholder="5, d6, 2d4">'+
-    '<label class="m-check"><input type="checkbox" id="dm-bp"><span>Black powder</span></label>'+
-    '<label class="m-check"><input type="checkbox" id="dm-raw"><span>Ignore all protection</span></label>'+
-    (hat&&hat.sacrifice?'<label class="m-check"><input type="checkbox" id="dm-sac"><span>Sacrifice your '+esc(hat.name)+'</span></label>':'')+
-    '<p class="m-hint" style="margin-top:10px;">Armor <b>'+(armorDie()?'−'+armorDie():'none')+'</b>'+(hatReduction()?' · hat −'+hatReduction():'')+(extraProt().length?' · '+extraProt().map(function(p){ return '−'+p.die+' '+p.label; }).join(', '):'')+'</p>';
-  openDlg('Take Damage',body,[{t:'Apply',f:function(){ var v=String($('dm-n').value||'').trim(); if(!v) return; var r=/d/i.test(v)?rollExpr(v):{total:num(v),text:v}; var sac=$('dm-sac')&&$('dm-sac').checked;
-    closeDlg();
-    if(sac){ hat.broken=true; hat.equipped=false; addLog(hat.name,'Breaks','Ignores '+r.total+' damage'+(/d/i.test(v)?' ('+r.text+')':''),'normal'); changed(); return; }
-    takeDamage(r.total,{label:'Damage taken'+(/d/i.test(v)?' ('+r.text+')':''),blackPowder:$('dm-bp').checked,raw:$('dm-raw').checked,expr:v}); }}]);
-  setTimeout(function(){ var i=$('dm-n'); if(i) i.focus(); },50);
-}
-function promptHeal(){ openDlg('Heal','<div class="m-lbl">HP healed</div><input id="hl-n" class="m-input" type="number" inputmode="numeric"><div class="m-row" style="margin-top:8px;">'+['d2','d4','d6','d8','2d6'].map(function(x){ return '<button class="chip" onclick="var r=rollExpr(\''+x+'\');$(\'hl-n\').value=r.total;">'+x+'</button>'; }).join('')+'</div><div class="m-lbl">Temporary HP</div><input id="hl-t" class="m-input" type="number" placeholder="0">',
-  [{t:'Heal',f:function(){ var t=num($('hl-t').value); if(t>0){ S.tempHp=num(S.tempHp)+t; addLog('Temporary HP','+'+t,'','normal'); } var n=num($('hl-n').value); closeDlg(); if(n>0) healHp(n,'Healed'); else changed(); }}]); }
 
 // ═══ RESTS & TIME ═══════════════════════════════════════════════════════════
 function noRestHeal(){ return hasAilment('vampirism'); }
@@ -1196,7 +1187,7 @@ function finish(o){ o.done=true; closeDlg(true); }
 // Combat is always on: every attack, action and reaction is available at any time — there is
 // no Start Combat, round counter or action tracker (the table keeps the turn order). Per-fight
 // state (Liar's Dice, Eldritch Mind, Inspiring Leader, Blood Frenzy kills) clears on a rest.
-var DX={dmg:'',bp:false,sac:false,breath:0};   // the Defend subtab's form (not saved)
+var DX={breath:0};   // Hold-your-breath round count (not saved)
 function inCombat(){ return true; }
 function incapacitated(){ return S.dead||num(S.cond.out)>0||S.hp<0||timedHas('paralyzed'); }
 function canAct(){ return !incapacitated(); }
@@ -1307,22 +1298,25 @@ function reloadWeapon(u){ var w=itemBy(u); if(!w||!w.blackPowder) return; if(w.l
 // d20 + AGILITY (Dazzling Acrobatics +2). Crit: a free attack. Fumble: double damage and the
 // armor drops a tier. Otherwise the player says whether the blow landed (the GM's DR).
 function doDefend(){
-  if(S.dead){ return; } var dmg=String(DX.dmg||'').trim();
-  var hat=wornHat();
+  if(S.dead){ return; }
   var o={label:'Defend',ability:'AGILITY',kind:'defense',neutralizeCrit:false,ask:'The GM sets the DR (normally 12): did you dodge it?'};
-  o.note=function(res){ return res.crit?'Critical: you get an immediate free attack.':res.fumble?'Fumble: double damage, then your armor drops a tier.':'If you are hit'+(dmg?': '+esc(dmg)+(DX.bp?' (black powder — no armor)':''):' — enter the damage, or apply it later with − Dmg')+'.'; };
+  o.note=function(res){ return res.crit?'Critical: you get an immediate free attack.':res.fumble?'Fumble: you take double damage — lower your HP — and your armor drops a tier.':'If you are hit, the sheet rolls your armor; lower your HP by what gets through.'; };
   o.onRes=function(res){ showResult(o,res,function(r){
     if(r.crit) return [{t:'Free attack!',f:function(){ finish(o); addLog('Defense critical','Free attack','Make an immediate free attack','crit'); S.subtab='action'; changed(); }}];
-    var hitBtn={t:r.fumble?'Take double damage':'Hit — take the damage',cls:'warn',f:function(){ finish(o); defendHit(dmg,r.fumble,hat); }};
-    if(r.fumble) return [hitBtn];
-    return [{t:'Dodged',f:function(){ finish(o); addLog('Defend','Dodged','The blow misses','normal'); DX.dmg=''; renderTurn(); }},hitBtn]; }); };
+    var hat=wornHat();
+    var btns=[{t:r.fumble?'Take double damage':'Hit',cls:'warn',f:function(){ finish(o); defendHit(r.fumble,false); }}];
+    if(hat&&hat.sacrifice&&!r.fumble) btns.push({t:'Hit — break my '+String(hat.name).replace(/\s*\(.*\)$/,''),cls:'warn',f:function(){ finish(o); defendHit(false,true); }});
+    if(r.fumble) return btns;
+    return [{t:'Dodged',f:function(){ finish(o); addLog('Defend','Dodged','The blow misses','normal'); renderTurn(); }}].concat(btns); }); };
   test(o); }
-function defendHit(dmg,fumble,hat){ var r=/d/i.test(dmg)?rollExpr(dmg):{total:num(dmg),text:dmg||'0'};
-  if(DX.sac&&hat&&hat.sacrifice){ hat.broken=true; hat.equipped=false; addLog(hat.name,'Breaks','Ignores the hit ('+r.total+')','normal'); DX.sac=false; }
-  else if(!dmg) addLog('Hit','Enter the damage','Use − Dmg in the status box to apply it','normal');
-  else takeDamage(r.total,{label:'Hit'+(/d/i.test(dmg)?' ('+r.text+')':''),double:fumble,blackPowder:DX.bp,expr:dmg});
+// A failed defense: roll the protection so the player knows how much to take off (black powder
+// ignores armor). A fumble doubles the damage and knocks the armor down a tier.
+function defendHit(fumble,sacrifice){ var hat=wornHat();
+  if(sacrifice&&hat){ hat.broken=true; hat.equipped=false; addLog(hat.name,'Breaks','It takes the whole blow — no damage','normal'); changed(); return; }
+  var soak=soakRoll();
+  addLog(fumble?'Hit — double damage':'Hit',soak.total?'−'+soak.total+' armor':'No armor',(fumble?'Double the damage, then ':'')+(soak.parts.length?'reduce it by '+soak.total+' ('+soak.parts.join(' + ')+') — black powder ignores armor':'no protection')+' · lower your HP',fumble?'fumble':'normal');
   if(fumble) armorDrop();
-  DX.dmg=''; changed(); }
+  changed(); }
 function armorDrop(){ var c=wornClothing(); if(!c||num(c.tier)<1){ addLog('Armor','—','No armor to damage','normal'); return; }
   c.tier=num(c.tier)-1; if(c.tier<1){ c.ruined=true; c.equipped=false; c.tier=0; addLog('Armor ruined',c.name,'Reduced below tier 1 — it can\'t be repaired','fumble'); }
   else addLog('Armor damaged',c.name+' → tier '+c.tier,'Keeps its test penalties; repair at '+(repairCost(c)||'—')+'s','fumble'); }
@@ -1715,17 +1709,12 @@ function conduitCast(){ var r=ritualDef(S.conduit.id); if(!r||S.conduit.used) re
 function rollInit(){ var n=d(6), v=n+abil('AGILITY'); addLog('Initiative',String(v),'d6('+n+') '+sgn(abil('AGILITY'))+' AGL','normal'); }
 function holdBreath(){ DX.breath=num(DX.breath)+1; var o={label:'Hold breath (round '+DX.breath+')',ability:'TOUGHNESS',kind:'test',ask:'The GM sets the DR (it climbs each round): still holding?'}; o.onRes=function(res){ showResult(o,res,function(r){ return pf(r,{t:'Still holding',f:function(){ finish(o); renderTurn(); }},{t:'Lose 1 HP',cls:'warn',f:function(){ finish(o); takeDamage(1,{label:'Out of breath',raw:true,noLuck:true}); renderTurn(); }}); }); }; test(o); }
 function renderDefendTab(){ var h='';
-  var hat=wornHat(); var bon=rollBonuses({kind:'defense'});
-  var f='<div class="pb-form">'+
-    '<div class="pb-frow"><label>Incoming damage</label><input id="dx-dmg" data-nolock class="pb-in" placeholder="5, d6, 2d4" value="'+esc(DX.dmg)+'" oninput="DX.dmg=this.value"></div>'+
-    '<div class="pb-frow pb-checks"><label><input type="checkbox" data-nolock '+(DX.bp?'checked':'')+' onchange="DX.bp=this.checked;renderTurn()"> Black powder</label>'+
-      (hat&&hat.sacrifice?'<label><input type="checkbox" data-nolock '+(DX.sac?'checked':'')+' onchange="DX.sac=this.checked"> Break the '+esc(hat.name)+'</label>':'')+'</div></div>';
-  var sub='d20 '+sgn(abil('AGILITY'))+' AGILITY'+(bon.length?' '+bon.map(function(x){ return sgn(x.v)+' '+esc(x.l); }).join(' '):'')+' · armor '+(DX.bp?'ignored':(armorDie()?'−'+armorDie():'none')+(hatReduction()?' · hat −'+hatReduction():''))+(extraProt().length?' · '+extraProt().map(function(p){ return '−'+p.die; }).join(' '):'');
-  h+=tsec('defend','Defend',f+tcard('Defend',sub,tbtn('Defend','doDefend()','','',S.dead||num(S.cond.out)>0)));
+  var bon=rollBonuses({kind:'defense'});
+  var sub='d20 '+sgn(abil('AGILITY'))+' AGILITY'+(bon.length?' '+bon.map(function(x){ return sgn(x.v)+' '+esc(x.l); }).join(' '):'')+' · armor '+(armorDie()?'−'+armorDie():'none')+(hatReduction()?' · hat −'+hatReduction():'')+(extraProt().length?' · '+extraProt().map(function(p){ return '−'+p.die; }).join(' '):'');
+  h+=tsec('defend','Defend',tcard('Defend',sub,tbtn('Defend','doDefend()','','',S.dead||num(S.cond.out)>0)));
   var pr=''; if(S.prayers.indexOf('holy-protection')>=0) pr+=tcard('Holy Protection','prayer · −4 DR',tbtn('Pray','pray(\'holy-protection\')'),num(S.prayerUses.left)<=0);
   if(S.prayers.indexOf('blessed-guidance')>=0) pr+=tcard('Blessed Guidance','prayer · +d4',tbtn('Pray','pray(\'blessed-guidance\')'),num(S.prayerUses.left)<=0);
   if(pr) h+=tsec('rxpray','Reactions',pr);
-  h+=tsec('hit','Hit',tcard('Take damage','',tbtn('Damage','promptDamage()'))+tcard('Heal','',tbtn('Heal','promptHeal()','ghost')));
   return h; }
 
 // ═══ PICKERS — compendium / shop ═══════════════════════════════════════════
@@ -2182,14 +2171,7 @@ body.dark .pb-top{background:#1a1111;}
 .pb-note{font-size:13px;color:var(--muted);padding:7px 2px;line-height:1.4;}
 .pb-note b{color:var(--ink);font-family:var(--f-num);}
 .pb-note.good{color:#c9a14a;}
-.pb-form{display:flex;flex-direction:column;gap:7px;padding:4px 2px 8px;border-bottom:1px solid var(--rule);}
-.pb-frow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.pb-frow>label{font-family:var(--f-label);font-size:14px;color:var(--muted);min-width:118px;}
-.pb-in{flex:1;min-width:140px;max-width:260px;height:32px;border:1px solid var(--input-border);border-radius:7px;background:var(--input-bg);color:var(--ink);font-family:var(--f-num);font-size:16px;padding:0 8px;outline:none;}
 .pb-chips{display:flex;gap:4px;flex-wrap:wrap;}
-.pb-checks{gap:14px;font-size:13.5px;color:var(--ink);}
-.pb-checks label{display:flex;align-items:center;gap:5px;cursor:pointer;font-family:var(--f-ui);font-size:13.5px;color:var(--ink);min-width:0;}
-.pb-checks input{accent-color:var(--acc);width:16px;height:16px;}
 body.sheet-locked .lk-hide{display:none;}
 @media (max-width:600px){
   .pb-row1{gap:8px;}
@@ -2197,8 +2179,6 @@ body.sheet-locked .lk-hide{display:none;}
   .pb-card{flex-wrap:wrap;}
   .pb-btns{margin-left:auto;max-width:100%;}
   .pb-card:has(.pb-btns>.pb-do:nth-child(3)) .pb-main{flex-basis:100%;}   /* three or more buttons: text on its own line */
-  .pb-frow>label{min-width:0;width:100%;}
-  .pb-in{max-width:none;}
 }
 </style>
 <style id="dd-lock-style">

@@ -11,7 +11,8 @@
 export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG" | "CO" | "YZE" | "MMRPG" | "JLU" | "GB" | "TWD" | "MYZ" | "VAE" | "LOTR" | "DB" | "PB";
 
 // Homepage/toggle display order (the tab order the user sees).
-export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: string }[] = [
+export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: string }[
+] = [
   { key: "SD", name: "Shadowdark", short: "SD", accent: "var(--sd)" },
   { key: "NIM", name: "Nimble", short: "NIM", accent: "var(--nimble)" },
   // Dungeons & Dragons (2024 rules): mechanics adapted from the SRD 5.2 (CC-BY)
@@ -22,23 +23,18 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // Shadow points & Shadow Paths, the shared Fellowship pool, Journeys, Councils
   // and the Fellowship Phase. Mechanics adapted; descriptive text is original.
   { key: "LOTR", name: "The Lord of the Rings", short: "LotR", accent: "var(--lotr)" },
-  // Dragonbane (Free League, 2023) — roll-under D20 vs skill level, Dragons (1) and
-  // Demons (20), boons & banes, no levels: skills improve through advancement marks.
-  { key: "DB", name: "Dragonbane", short: "DB", accent: "var(--db)" },
   // Pirate Borg (Limithron, a MÖRK BORG derivative) — d20 + ability vs DR, roll high;
   // PCs roll attack and defense, armor is a damage-reduction die, Devil's Luck,
   // no levels: getting better is d6 rolls per ability. Mechanics adapted.
   { key: "PB", name: "Pirate Borg", short: "PB", accent: "var(--pb)" },
+  // Index Card RPG (Runehammer, Master Edition) — a rules-light unified d20
+  // system: one TARGET, roll for EFFORT, five worlds.
+  { key: "ICRPG", name: "Index Card RPG", short: "ICRPG", accent: "var(--icrpg)" },
+  // Dragonbane (Free League, 2023) — roll-under D20 vs skill level, Dragons (1) and
+  // Demons (20), boons & banes, no levels: skills improve through advancement marks.
+  { key: "DB", name: "Dragonbane", short: "DB", accent: "var(--db)" },
   // Accent is the covers' hot magenta (--dcc), not the app's brick --red.
   { key: "DCC", name: "Dungeon Crawler Carl", short: "DCC", accent: "var(--dcc)" },
-  // Kids on Bikes, with Kids on Brooms and Kids in Capes as flavors of the
-  // same system (one sheet, one shelf, one tab).
-  { key: "KOB", name: "Kids on Bikes", short: "KoB", accent: "var(--kob)" },
-  { key: "MMRPG", name: "Marvel Multiverse RPG", short: "Marvel", accent: "var(--mmrpg)" },
-  // Justice League Unlimited RPG (Quickstart) — DC's d20 super-hero system:
-  // six attributes, a single Resolve pool, Tiers E–S, and a comic-book
-  // narrative layer (Plot Points / Editorial Points / the Crisis Die).
-  { key: "JLU", name: "Justice League Unlimited", short: "JLU", accent: "var(--jlu)" },
   // Ghostbusters — the classic West End Games game (1986): 4 Traits, Talents, Brownie Points, Ghost Die:
   // four Traits (Brains/Muscles/Moves/Cool), Talents, the Ghost Die, and
   // Brownie Points. Roll a pool of d6 vs a Difficulty; one die is the Ghost Die.
@@ -67,9 +63,14 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // D6 dice pools, NO stress dice, health modeled by Conditions (three physical +
   // three mental), the Fear test, and a Gothic investigate-and-banish campaign loop.
   { key: "VAE", name: "Vaesen", short: "Vaesen", accent: "var(--vae)" },
-  // Index Card RPG (Runehammer, Master Edition) — a rules-light unified d20
-  // system: one TARGET, roll for EFFORT, five worlds.
-  { key: "ICRPG", name: "Index Card RPG", short: "ICRPG", accent: "var(--icrpg)" },
+  { key: "MMRPG", name: "Marvel Multiverse RPG", short: "Marvel", accent: "var(--mmrpg)" },
+  // Justice League Unlimited RPG (Quickstart) — DC's d20 super-hero system:
+  // six attributes, a single Resolve pool, Tiers E–S, and a comic-book
+  // narrative layer (Plot Points / Editorial Points / the Crisis Die).
+  { key: "JLU", name: "Justice League Unlimited", short: "JLU", accent: "var(--jlu)" },
+  // Kids on Bikes, with Kids on Brooms and Kids in Capes as flavors of the
+  // same system (one sheet, one shelf, one tab).
+  { key: "KOB", name: "Kids on Bikes", short: "KoB", accent: "var(--kob)" },
   // Candela Obscura (Darrington Press) — gaslamp horror on the Illuminated
   // Worlds engine: d6 dice pools, roles & specialties, drives & actions.
   { key: "CO", name: "Candela Obscura", short: "CO", accent: "var(--candela)" },

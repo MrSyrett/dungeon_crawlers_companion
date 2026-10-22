@@ -1907,13 +1907,16 @@ body {
    the home roster label, the navbar title: Hideout in the logo red inside a gold
    outline (--tile-ink is --db-logo, set in the map line above). Same recipe as
    the compendium headings in the DB theme block; the stroke is drawn first so
-   only its outer half shows. 400 because the face has one cut. */
+   only its outer half shows. 400 because the face has one cut. Flat: no
+   shadow — the tiles' dark name halo sits inside the gold outline and reads
+   as a bevel, which the logo does not have. */
 .home-tile[data-sys="DB"] .home-tile-name,
 .roster-sys[data-sys="DB"] .roster-sys-name,
 .nav-sys-title[data-sys="DB"] {
   font-weight: 400;
   -webkit-text-stroke: 0.1em var(--db-gold);
   paint-order: stroke fill;
+  text-shadow: none;
 }
 /* Pirate Borg's blackletter is white (the map line sets --tile-ink); the red
    stays on the tile's border and hover ring. */
