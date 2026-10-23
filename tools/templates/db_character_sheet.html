@@ -1536,8 +1536,24 @@ function castCheck(i){ var s=S.spells[i]; if(!s) return null; var def=spellDef(s
   return {s:s,def:def,sk:sk,reaction:reaction,metal:spellBlockFor(def)}; }
 function quickCast(i){ var c=castCheck(i); if(!c) return;
   if(c.metal){ addLog(c.def.name,'Blocked',c.metal,'normal'); return; }
-  var cost=spellCost(c.def,1,false); if(S.wp<cost){ addLog(c.def.name,'Not enough WP','Costs '+cost+' WP, you have '+S.wp+(S.wp<=num(((D('DB_MAGIC_RULES')||{}).powerFromBody||{}).atOrBelowWp,1)&&!c.def.healing&&spellCanUpcast(c.def)?' · ↑ to draw power from the body':''),'fumble'); return; }
+  var cost=spellCost(c.def,1,false); if(S.wp<cost){
+    if(canDrawBody()&&!c.def.healing){ askBody(c.def.name,cost,function(die){ castSpell(i,{pl:1,indoors:false,self:false,body:die}); }); return; }
+    addLog(c.def.name,'Not enough WP','Costs '+cost+' WP, you have '+S.wp+(c.def.healing&&canDrawBody()?' · healing spells can\'t draw power from the body':''),'fumble'); return; }
   castSpell(i,{pl:1,indoors:false,self:false,body:''}); }
+// Power from the body (rulebook p.58): at 1 WP or less, roll any die you choose — gain that
+// many WP for this one spell (unused WP is lost) and take as much damage after casting,
+// armor doesn't help. Not for healing spells. Cast offers it automatically when you're short.
+function pfbRule(){ return (D('DB_MAGIC_RULES')||{}).powerFromBody||{}; }
+function canDrawBody(){ return S.wp<=num(pfbRule().atOrBelowWp,1); }
+function bodyDice(){ return A(pfbRule().dice||['D4','D6','D8','D10','D12','D20']); }
+function askBody(name,cost,go){ var need=Math.max(0,cost-S.wp), dice=bodyDice();
+  var pick=dice.find(function(x){ return num(String(x).replace(/^\D+/,''),0)>=need; })||dice[dice.length-1];
+  var body='<p class="m-hint">'+esc(name)+' costs <b>'+cost+' WP</b> and you have <b>'+S.wp+'</b> — you need <b>'+need+'</b> more.</p>'+
+    '<p class="m-hint">Draw power from your body: pick a die and roll it. You gain that many WP for this spell only (any left over is lost), then take the same amount of damage once it\'s cast — armor doesn\'t help. If the roll comes up short, the spell can\'t be cast and you still take the damage.</p>'+
+    '<div class="m-lbl">Die</div><div class="m-row" id="pfb-die">'+dice.map(function(x){ return '<button class="chip'+(x===pick?' sel':'')+'" data-b="'+x+'">'+x+'</button>'; }).join('')+'</div>'+
+    '<p class="m-hint" style="margin-top:10px;">You have <b>'+S.hp+' HP</b></p>';
+  openDlg('Power from the body',body,[{t:'Roll & cast',f:function(){ var sel=document.querySelector('#pfb-die .chip.sel'); var die=sel?sel.dataset.b:pick; closeDlg(); go(die); }}]);
+  var row=$('pfb-die'); if(row) row.onclick=function(e){ var b=e.target.closest('.chip'); if(!b) return; row.querySelectorAll('.chip').forEach(function(x){ x.classList.remove('sel'); }); b.classList.add('sel'); }; }
 function openCast(kind,i){
   var cc=castCheck(i); if(!cc) return; var s=cc.s, def=cc.def, sk=cc.sk, reaction=cc.reaction, metal=cc.metal;
   var pls=def.powerLevels!==false; var body='<p class="m-hint">'+esc(def.text||'')+'</p><p class="m-hint" style="margin-top:-6px;">'+esc(def.school)+(def.rank!=null?' rank '+def.rank:'')+' · roll '+esc(sk)+' '+skillLevel(sk)+' · '+esc(def.castingTime)+' · '+esc(def.range||'')+' · '+esc(def.duration||'')+(def.requirements?' · needs '+def.requirements.join(', '):'')+'</p>';
@@ -1592,7 +1608,13 @@ function castTrick(i){ var t=S.tricks[i]; if(!t) return; var def=trickDef(t.name
   if(metal){ addLog(t.name,'Blocked',metal,'fumble'); return; }
   if(!knownSchools().length){ addLog(t.name,'—','You know no school of magic','normal'); return; }
   if(!canAct()){ addLog(t.name,'—','No action left','normal'); return; }
-  if(!spendWp((D('DB_MAGIC_RULES')||{}).trickCost||1,t.name)) return; useAction();
+  var tc=(D('DB_MAGIC_RULES')||{}).trickCost||1;
+  if(S.wp<tc&&canDrawBody()){ askBody(t.name,tc,function(die){ var br=rollExpr(die);
+      if(S.wp+br.total<tc){ addLog(t.name,'Not enough WP','Rolled '+br.total+' from the body ('+br.text+')','fumble'); takeDamage(br.total,{ignoreArmor:true,label:'Power from the body ('+br.text+')'}); changed(); return; }
+      S.wp-=Math.max(0,tc-br.total); useAction();
+      addLog('Trick · '+t.name,'Success',tc+' WP drawn from the body ('+br.text+') · tricks always work · '+(def.text||''),'normal');
+      takeDamage(br.total,{ignoreArmor:true,label:'Power from the body ('+br.text+')'}); changed(); }); return; }
+  if(!spendWp(tc,t.name)) return; useAction();
   addLog('Trick · '+t.name,'Success','1 WP · tricks always work · '+(def.text||''),'normal'); changed(); }
 
 // ── render ──
