@@ -249,7 +249,7 @@ body.dark .atk-formula input[readonly]{color:#8fc4ec;}
 .skill-check{width:18px;height:18px;cursor:pointer;accent-color:var(--red);}
 .skill-roll-btn{height:24px;min-width:32px;padding:0 7px;background:transparent;border:1px solid var(--red);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--red);white-space:nowrap;}
 .skill-roll-btn:hover{background:var(--red);border-color:var(--red);color:white;}
-.skill-roll-btn.no-mana,.skill-roll-btn.no-mana:hover{opacity:.35;cursor:not-allowed;background:transparent;color:var(--red);}
+.skill-roll-btn.no-mana,.skill-roll-btn.no-mana:hover,.skill-roll-btn.no-action,.skill-roll-btn.no-action:hover{opacity:.35;cursor:not-allowed;background:transparent;color:var(--red);}
 .hot-pin{background:transparent;border:none;cursor:pointer;font-size:15px;line-height:1;color:var(--muted);padding:0 3px;vertical-align:middle;}
 .hot-pin:hover{color:var(--red);}
 .hot-pin.on{color:var(--red);}
@@ -1719,7 +1719,7 @@ function addSkillRow() {
     <div class="dl-ctrls">
       <input type="checkbox" class="skill-check" title="Advancement mark — used this session" aria-label="Advancement mark">
       <button class="skill-info-btn dl-i" onclick="if(window.DCCSkills)DCCSkills.infoRow(this)" title="Look up this skill/spell" aria-label="Skill info">i</button>
-      <button class="skill-roll-btn dl-roll" onclick="rollSkill(this)" title="Roll skill" aria-label="Roll skill">Roll</button>
+      <button class="skill-roll-btn dl-roll" onclick="sheetRollSkill(this)" title="Roll skill" aria-label="Roll skill">Roll</button>
     </div>
   </div></td>`;
   tbody.appendChild(tr);
@@ -1750,20 +1750,30 @@ function refreshSkillRowRules() {
   });
   refreshSpellManaState();
 }
-// A spell skill can't be rolled without the Mana to cast it: its Roll button is
-// disabled (greyed, with the cost in the tooltip) while current Mana is short.
+// A skill's Roll button is disabled (greyed, reason in the tooltip) when either:
+//  · it's a spell and current Mana is short of its cost, or
+//  · the turn has no Action left for it (rolling from the Skills tab spends one —
+//    see sheetRollSkill). An attack skill can't use the AI Favor "+1 Action".
+// End Turn / +1 Action re-enable them (turnAfter calls this; so does any click).
 function refreshSpellManaState() {
   const tbody = document.getElementById('skills-body');
   if(!tbody || typeof spellManaOf !== 'function') return;
   const cur = parseInt((document.getElementById('mana-current') || {}).value, 10) || 0;
+  const canOther = typeof turnCan !== 'function' || turnCan('other');
+  const canAtk = typeof turnCan !== 'function' || turnCan('attack');
   tbody.querySelectorAll('tr').forEach(tr => {
     const btn = tr.querySelector('.skill-roll-btn');
     if(!btn) return;
     const cost = spellManaOf(tr);
     const short = cost > 0 && cur < cost;
-    btn.disabled = short;
+    const atk = !!skillDmgOf(tr);
+    const noAct = !(atk ? canAtk : canOther);
+    const title = noAct ? (atk && canOther ? 'No actions left — the +1 Action can\'t be an Attack' : 'No actions left')
+                : short ? 'Not enough Mana — costs ' + cost + ', you have ' + cur : 'Roll skill';
+    if(btn.disabled !== (noAct || short)) btn.disabled = noAct || short;
     btn.classList.toggle('no-mana', short);
-    btn.title = short ? 'Not enough Mana — costs ' + cost + ', you have ' + cur : 'Roll skill';
+    btn.classList.toggle('no-action', noAct);
+    if(btn.title !== title) btn.title = title;
   });
 }
 (function () {
@@ -1878,7 +1888,7 @@ function turnSpend(kind, label){
   _turn.done.push(label);
   return true;
 }
-function turnAfter(){ renderTurn(); if(typeof scheduleAutosave === 'function') scheduleAutosave(); }
+function turnAfter(){ renderTurn(); refreshSpellManaState(); if(typeof scheduleAutosave === 'function') scheduleAutosave(); }
 // Rolls made from the main sheet (Stat mods, the Evade box) also spend the turn —
 // quietly: the roll always goes through, and an already-spent turn just isn't charged.
 function turnSpendQuiet(kind, label){
@@ -1895,6 +1905,26 @@ function sheetRollStat(id, name){
 function sheetRollEvade(){
   rollEvade();
   if(!_turn.evading && turnSpendQuiet('other', 'Evade')) { _turn.evading = true; turnAfter(); }
+}
+
+// A Skill / Spell / Attack rolled from its Skills-tab row is a "Use a Skill" (or
+// Attack / Cast) Action, Core p.64. Unlike the Stat / Evade rolls above it doesn't
+// go through with the turn spent: the Roll button is disabled (refreshSpellManaState)
+// and this guard refuses it. Attack rows (Dmg dice) are Attacks, so they can't use
+// the AI Favor +1 Action. Rolling the same skill from the Action tab goes through
+// turnDo -> turnRollRow -> rollSkill, which spends there — never both.
+function sheetRollSkill(btn){
+  const row = btn && btn.closest('tr'); if(!row) return;
+  const kind = skillDmgOf(row) ? 'attack' : 'other';
+  if(!turnCan(kind)) { refreshSpellManaState(); return; }
+  const r = rollSkill(btn);
+  if(!r) return;                          // out of Mana — nothing rolled, no Action spent
+  turnSpend(kind, r.name || 'Skill');
+  // Only redraw the Action hub when it's on screen (switchTab('turn') renders it).
+  const tp = document.getElementById('tab-turn');
+  if(tp && tp.classList.contains('active')) renderTurn();
+  refreshSpellManaState();
+  if(typeof scheduleAutosave === 'function') scheduleAutosave();
 }
 
 // Skill rows by role. [name, rank, checkType, notes]
@@ -2801,6 +2831,7 @@ function applySheet(data) {
   window.__dccSkillPotions = parseInt(data.skillPotions || 0, 10) || 0;
   if(data.turn && typeof data.turn === 'object') { Object.assign(_turn, data.turn); if(!Array.isArray(_turn.done)) _turn.done = []; }
   if(typeof renderTurn === 'function') renderTurn();
+  if(typeof refreshSpellManaState === 'function') refreshSpellManaState();
   // Keep each attack skill's Dmg in step with its Rank (Rank 5/10/15 upgrades).
   if(typeof syncLinkedAttacks === 'function') syncLinkedAttacks();
   // Layer the always-on skill buffs (Dodge etc.) onto Evade/DR now that the skill

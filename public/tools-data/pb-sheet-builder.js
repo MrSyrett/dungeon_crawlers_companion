@@ -8,6 +8,8 @@
 // generator — with a "choose or roll" control at every step. Rules and tables come
 // from window.PB_* (pb-data.js); the finished pirate is handed to the sheet through
 // window.PBSHEET.applyBuild. Renders into #builder-overlay.
+// The step pills are navigation (as in the Dragonbane wizard): any step can be opened; a step
+// that needs an earlier choice (the class, or the abilities for HP) says so, with a link to it.
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
@@ -30,7 +32,7 @@
   // −0.44, −1.25 → [+1, +1, 0, 0, −1]; a landlubber's 4d6-drop-lowest → +1.95, +1.15,
   // +0.55, +0.09, −0.55 → [+2, +1, +1, 0, −1]. Class modifiers apply afterwards, as for rolls.
   var ARRAY = [1, 1, 0, 0, -1], ARRAY_LAND = [2, 1, 1, 0, -1];
-  var B = null, step = 0;
+  var B = null, step = 0, seen = {};  // seen: steps opened, so an untouched step isn't ticked
 
   function fresh() { return { cls: '', optional: false, ailment: '', base: '', variant: '', ancestry: '', animal: '',
     method: 'roll', drop4: false, rolls: {}, mods: {}, order: 'order', assign: [0, 1, 2, 3, 4], pool: null, hp: null, hpTxt: '', luck: null, luckTxt: '',
@@ -71,6 +73,7 @@
   function sw() { return window.PB_STARTING_WEAPONS || { rows: [] }; }
 
   function valid(i) {
+    if (i >= 1 && i <= 4 && !valid(0)) return false;   // these steps rest on the class
     switch (i) {
       case 0: if (!B.cls) return false; if (B.cls === 'haunted-soul') return !!B.ailment && !!B.base;
         if (B.cls === 'tall-tale') { var v = variant(); if (!v) return false; if (v.id === 'sentient-animal') return !!B.animal; if (v.id === 'aquatic-mutant' && !B.ancestry) return false; return !!B.base; }
@@ -90,8 +93,11 @@
   }
   function allValid() { for (var i = 0; i < STEPS.length; i++) if (!valid(i)) return false; return true; }
   function render() {
-    var h = '<div class="m-row" style="gap:4px;margin-bottom:12px;">' + STEPS.map(function (s, i) { return '<span style="font-family:var(--f-label);font-size:12.5px;padding:2px 8px;border-radius:12px;border:1px solid ' + (i === step ? 'var(--acc)' : '#3a2424') + ';color:' + (i === step ? '#ffd5c8' : '#a89a8a') + ';background:' + (i === step ? '#3a0f12' : 'transparent') + ';' + (i > step ? 'opacity:.5;' : '') + '"><span style="font-family:var(--f-num);">' + (i + 1) + '.</span> ' + esc(s) + '</span>'; }).join('') + '</div>';
-    h += '<div style="font-family:var(--f-disp);font-size:27px;color:#fff;margin-bottom:6px;">' + esc(STEPS[step]) + '</div>' + page();
+    // the step pills double as navigation: click to open a step; a finished (opened and complete) step carries a check
+    seen[step] = true;
+    var h = '<nav class="bd-steps" aria-label="Steps">' + STEPS.map(function (s, i) { var ok = i !== step && !!seen[i] && valid(i), cls = 'bd-step' + (i === step ? ' on' : '') + (ok ? ' done' : '');
+      return '<button class="' + cls + '"' + (i === step ? ' aria-current="step"' : '') + ' onclick="PBB.go(' + i + ')">' + (i + 1) + '. ' + esc(s) + (ok ? ' <span class="bd-ck">✓</span>' : '') + '</button>'; }).join('') + '</nav>';
+    h += '<div class="bd-title" style="font-family:var(--f-disp);font-size:27px;color:#fff;margin-bottom:6px;">' + (step + 1) + '. ' + esc(STEPS[step]) + '</div>' + page();
     // Same step re-rendered (a roll, a pick): keep the dialog where it was; a new step starts at the top.
     var bd = $('builder-body'), keep = bd._step === step ? bd.scrollTop : 0;
     bd.innerHTML = h; bd.scrollTop = keep; bd._step = step;
@@ -101,14 +107,19 @@
   }
 
   function page() {
+    // steps 1–4 rest on the class (its modifiers, dice and tables); HP also on TOUGHNESS
+    if (step >= 1 && step <= 4 && !valid(0)) return need(0, 'its ' + ['', 'ability modifiers', 'HP and luck dice', 'weapon, clothing and hat dice', 'feature tables'][step] + ' come from it');
+    if (step === 2 && !valid(1)) return need(1, 'your TOUGHNESS adds to your HP');
     switch (step) {
       case 0: return classPage(); case 1: return abilPage(); case 2: return hpPage(); case 3: return weaponPage();
       case 4: return featPage(); case 5: return gearPage(); case 6: return bgPage(); case 7: return namePage();
     }
     return '';
   }
+  // a "finish that step first" prompt with a link to it
+  function need(i, why) { return '<div class="res-box">' + (i === 0 ? 'Choose your <b>class</b> first' : 'Set your <b>abilities</b> first') + ', ' + esc(why) + '. <a href="#" style="color:#ff9d8a;" onclick="PBB.go(' + i + ');return false;">Go to ' + esc(STEPS[i]) + '</a></div>'; }
   function classPage() {
-    var h = '<p class="m-hint">Choose your class or roll for it — d6 for the six classes, d8 to include the optional Haunted Soul and Tall Tale — or play a landlubber with no class.</p><div class="m-row">' +
+    var h = '<div class="m-row">' +
       A(window.PB_CLASSES).map(function (c) { return chip('<span style="font-family:var(--f-num);">' + c.roll + '.</span> ' + esc(c.name) + (c.optional ? ' <small>(optional)</small>' : ''), B.cls === c.id, "PBB.cls('" + c.id + "')"); }).join('') + chip('Landlubber', B.cls === 'landlubber', "PBB.cls('landlubber')") + '</div>' +
       '<div class="m-row" style="margin-top:8px;">' + rollBtn('d6 class', 'PBB.rollClass(6)') + rollBtn('d8 (with optional)', 'PBB.rollClass(8)') + '</div>';
     var c = C(); if (c) h += box('<b>' + esc(c.name) + '</b>' + (c.tagline ? ' — ' + esc(c.tagline) : '') + '<br>' + esc(c.text || '') + (c.hpDie ? '<br>HP ' + esc(c.hpDie) + ' ± TOUGHNESS · Devil\'s Luck ' + esc(c.luckDie) + (c.abilities ? ' · ' + ABIL.filter(function (a) { return c.abilities[a]; }).map(function (a) { return a + ' ' + sg(c.abilities[a]); }).join(', ') : '') : ''));
@@ -135,16 +146,14 @@
     var b = B.base ? C(B.base) : null; if (b) h += box('Your abilities, HP, weapon, clothing, hat, Devil\'s Luck and features come from <b>' + esc(b.name) + '</b>: HP ' + esc(b.hpDie) + ' ± TOU, Luck ' + esc(b.luckDie) + '.'); return h; }
   function abilPage() {
     var cm = classMods();
-    var h = '<p class="m-hint">Roll 3d6 for each ability and keep only the modifier (3–4 −3, 5–6 −2, 7–8 −1, 9–12 ±0, 13–14 +1, 15–16 +2, 17–18 +3)' + (isLand() ? ' — as a landlubber you may roll 4d6 and drop the lowest die' : '') + ', or take the standard array. Class modifiers then apply; nothing goes below −3 or above +6.</p>';
-    h += '<div class="m-row" style="margin-bottom:8px;">' +
+    var h = '<div class="m-row" style="margin-bottom:8px;">' +
       '<button class="m-btn' + (B.method === 'roll' ? '' : ' ghost') + '" style="flex:1;" onclick="PBB.rollAll()">🎲 Roll ' + (B.drop4 && isLand() ? '4d6 drop lowest' : '3d6') + ' × 5</button>' +
       '<button class="m-btn' + (B.method === 'array' ? '' : ' ghost') + '" style="flex:1;" onclick="PBB.method(\'array\')" title="A house option: Pirate Borg has no standard array">Standard Array <small>(house)</small></button>' +
       '<button class="m-btn' + (B.method === 'manual' ? '' : ' ghost') + '" style="flex:0 0 auto;" onclick="PBB.method(\'manual\')">Enter</button></div>';
     if (isLand()) h += '<div class="m-row" style="margin-bottom:8px;">' + chip((B.drop4 ? '✓ ' : '') + 'Landlubber: 4d6, drop the lowest', B.drop4, 'PBB.drop4()') + '</div>';
     if (B.method === 'roll' && B.pool) h += '<div class="m-row" style="margin-bottom:8px;">' + chip('In order (as rolled)', B.order !== 'assign', "PBB.order('order')") + chip('Assign them', B.order === 'assign', "PBB.order('assign')") + '</div>';
-    if (B.method === 'array') h += '<p class="m-hint" style="margin-bottom:6px;">Standard array <b style="font-family:var(--f-num);">' + arr().map(sg).join(' · ') + '</b> — a house option (the book has no array; this is what the ' + (isLand() ? 'landlubber\'s 4d6-drop-lowest' : '3d6') + ' roll gives on average). Pick a value for each ability: choosing one already used swaps them.</p>';
-    else if (B.method === 'roll' && B.pool && B.order === 'assign') h += '<p class="m-hint" style="margin-bottom:6px;">Rolled: <b style="font-family:var(--f-num);">' + B.pool.map(function (r) { return sg(rawMod(r.sum)); }).join(' · ') + '</b>. Pick a value for each ability: choosing one already used swaps them.</p>';
-    else if (B.method === 'roll' && !B.pool) h += '<p class="m-hint" style="margin-bottom:6px;">Roll to fill the five abilities.</p>';
+    if (B.method === 'array') h += '<p class="m-hint" style="margin-bottom:6px;">Standard array <b style="font-family:var(--f-num);">' + arr().map(sg).join(' · ') + '</b></p>';
+    else if (B.method === 'roll' && B.pool && B.order === 'assign') h += '<p class="m-hint" style="margin-bottom:6px;">Rolled: <b style="font-family:var(--f-num);">' + B.pool.map(function (r) { return sg(rawMod(r.sum)); }).join(' · ') + '</b></p>';
     var assignSel = function (a, labels) { var cur = slotOf(a); return '<select class="m-input" style="width:auto;min-width:84px;font-family:var(--f-num);" onchange="PBB.assign(\'' + a + '\',this.value)">' + labels.map(function (l, i) { return '<option value="' + i + '"' + (i === cur ? ' selected' : '') + '>' + esc(l) + '</option>'; }).join('') + '</select>'; };
     h += '<table class="tbl" style="color:#ece4d4;"><tbody>' + ABIL.map(function (a) { var bm = baseMod(a), fm = finalMod(a); var cmv = num(cm[a]); var cell = '';
       if (B.method === 'manual') cell = '<input class="m-input" type="number" min="-3" max="3" style="width:72px;text-align:center;font-family:var(--f-num);" value="' + (bm == null ? '' : bm) + '" onchange="PBB.manual(\'' + a + '\',this.value)">';
@@ -158,8 +167,7 @@
   }
   function hpPage() {
     var tou = finalMod('TOUGHNESS'); var hd = hpDie(), ld = luckDie();
-    var h = '<p class="m-hint">Hit points: your class die ' + esc(hd) + ' ± TOUGHNESS (' + sg(tou) + '), never less than 1. Devil\'s Luck: roll ' + esc(ld) + '.</p>';
-    h += '<div class="m-lbl">Hit points</div><div class="m-row">' + rollBtn(hd + ' ' + sg(tou), 'PBB.rollHp()') + '<input class="m-input" type="number" min="1" style="width:80px;font-family:var(--f-num);" value="' + (B.hp == null ? '' : B.hp) + '" onchange="PBB.setNum(\'hp\',this.value)"><span class="m-hint" style="margin:0;">' + esc(B.hpTxt) + '</span></div>';
+    var h = '<div class="m-lbl">Hit points</div><div class="m-row">' + rollBtn(hd + ' ' + sg(tou), 'PBB.rollHp()') + '<input class="m-input" type="number" min="1" style="width:80px;font-family:var(--f-num);" value="' + (B.hp == null ? '' : B.hp) + '" onchange="PBB.setNum(\'hp\',this.value)"><span class="m-hint" style="margin:0;">' + esc(B.hpTxt) + '</span></div>';
     h += '<div class="m-lbl">Devil\'s Luck</div><div class="m-row">' + rollBtn(ld, 'PBB.rollLuck()') + '<input class="m-input" type="number" min="0" style="width:80px;font-family:var(--f-num);" value="' + (B.luck == null ? '' : B.luck) + '" onchange="PBB.setNum(\'luck\',this.value)"><span class="m-hint" style="margin:0;">' + esc(B.luckTxt) + '</span></div>';
     if (animal() && animal().luckDaily) h += '<p class="m-hint" style="margin-top:8px;">Lucky Parrot: you roll d6 Luck again each day.</p>';
     return h;
@@ -170,7 +178,7 @@
     if (!ws) h += '<p class="m-hint">No weapon roll.</p>';
     else if (ws.natural) { h += box('Natural weapon: <b>' + esc(ws.natural.name) + '</b> ' + esc(ws.natural.damage) + (ws.natural.special ? ' — ' + esc(ws.natural.special) : '')); if (ws.monkey) h += '<div class="m-lbl">Starting weapon (' + esc(ws.monkey) + ')</div>' + weaponChooser(weaponRowsFor(ws.monkey), 'monkeyWeapon', 'monkeySub', ws.monkey); }
     else if (ws.trusted) { var tt = A((M().tables || []).find(function (t) { return t.id === 'trustedWeapon'; }).rows);
-      h += '<p class="m-hint">Brute: your trusted weapon (d6). It never breaks (you drop it on a fumble) and attacks with it are DR −2. Name it!</p><div class="m-row">' + tt.map(function (r) { return chip('<span style="font-family:var(--f-num);">' + r.roll + '.</span> ' + esc(r.name), B.weapon && B.weapon.id === r.id, "PBB.trusted('" + r.id + "')", false, r.text); }).join('') + rollBtn('d6', 'PBB.rollTrusted()') + '</div>';
+      h += '<p class="m-hint">Brute: your trusted weapon (d6). It never breaks (you drop it on a fumble) and attacks with it are DR −2.</p><div class="m-row">' + tt.map(function (r) { return chip('<span style="font-family:var(--f-num);">' + r.roll + '.</span> ' + esc(r.name), B.weapon && B.weapon.id === r.id, "PBB.trusted('" + r.id + "')", false, r.text); }).join('') + rollBtn('d6', 'PBB.rollTrusted()') + '</div>';
       if (B.weapon) h += box('<b>' + esc(B.weapon.name) + '</b> — ' + esc(B.weapon.text)) + '<div class="m-lbl">Its name</div><input class="m-input" value="' + esc(B.trustedName) + '" placeholder="e.g. Old Bess" oninput="PBB.setq(\'trustedName\',this.value)">'; }
     else if (ws.fixed) h += box('Buccaneer: a <b>musket</b> (2d6, range 150\', you reload in 1 round) and 10 + PRESENCE = <b>' + Math.max(1, 10 + num(finalMod('PRESENCE'))) + '</b> rounds of shot.');
     else if (ws.choice) { h += '<div class="m-lbl">Weapon</div><div class="m-row">' + ws.choice.map(function (c, i) { var nm = c.name || (window.PBSHEET && PBSHEET.weaponDef(c.weapon) || {}).name || c.weapon; return chip(esc(nm) + ' <small>' + esc(c.damage) + '</small>', B.weapon && B.weapon.ix === i, 'PBB.choiceWeapon(' + i + ')'); }).join('') + rollBtn('d2', 'PBB.choiceWeapon(' + (d(2) - 1) + ')') + '</div>'; }
@@ -205,9 +213,9 @@
     return h;
   }
   function tallRoll(key, label, list) { var cur = B[key]; var rows = A(window[list]); var got = cur.map(function (id) { var r = rows.find(function (x) { return x.id === id; }); return r ? r.name : id; });
-    return '<div class="m-lbl">' + esc(label) + '</div><div class="m-row">' + rollBtn('d20', "PBB.rollTall('" + key + "','" + list + "')") + '<span class="m-hint" style="margin:0;">' + (got.length ? esc(got.join(', ')) : 'rolled when you create the pirate if you skip this') + '</span></div>'; }
+    return '<div class="m-lbl">' + esc(label) + '</div><div class="m-row">' + rollBtn('d20', "PBB.rollTall('" + key + "','" + list + "')") + '<span class="m-hint" style="margin:0;">' + esc(got.join(', ')) + '</span></div>'; }
   function gearPage() {
-    var h = '<p class="m-hint">Roll once on each starting gear table (pg. 27).</p>';
+    var h = '';
     var cs = A(window.PB_CONTAINERS); h += '<div class="m-lbl">Container (d6)</div><div class="m-row">' + cs.map(function (c) { return chip('<span style="font-family:var(--f-num);">' + c.roll + '.</span> ' + esc(c.name), B.container === c.id, "PBB.set('container','" + c.id + "')", false, c.text); }).join('') + rollBtn('d6', "PBB.rollGear('container')") + '</div>';
     var c = cs.find(function (x) { return x.id === B.container; }); if (c && c.orChoice) h += '<div class="m-row" style="margin-top:6px;"><span class="m-hint" style="margin:0;">…or one of the above instead:</span>' + cs.filter(function (x) { return !x.orChoice; }).map(function (x) { return chip(esc(x.name), B.containerAlt === x.id, "PBB.set('containerAlt','" + x.id + "')"); }).join('') + chip('Keep the ' + esc(c.name.toLowerCase()), !B.containerAlt, "PBB.set('containerAlt','')") + '</div>';
     h += '<div class="m-lbl">Cheap gear (d12)</div><div class="m-row">' + A(window.PB_CHEAP_GEAR).map(function (r) { return chip('<span style="font-family:var(--f-num);">' + r.roll + '.</span> ' + esc(r.text.replace(/\s*\(.*$/, '')), B.cheap && B.cheap.roll === r.roll, 'PBB.gearRow(\'cheap\',' + r.roll + ')', false, r.text); }).join('') + rollBtn('d12', "PBB.rollGear('cheap')") + '</div>';
@@ -232,13 +240,14 @@
   }
   function namePage() {
     var n = A(window.PB_NAMES);
-    var h = '<p class="m-hint">Roll d66 (two d6: tens and ones) for each part on the name generator (Player\'s Guidebook pg. 79 · Core Rules pg. 125), or write your own.</p>';
-    h += '<div class="m-row" style="margin-bottom:8px;">' + chip('Any', B.sex === 'any', "PBB.set('sex','any')") + chip('Male names', B.sex === 'male', "PBB.set('sex','male')") + chip('Female names', B.sex === 'female', "PBB.set('sex','female')") + rollBtn('Roll everything', 'PBB.rollName()') + '</div>';
+    var h = '<div class="m-row" style="margin-bottom:8px;">' + chip('Any', B.sex === 'any', "PBB.set('sex','any')") + chip('Male names', B.sex === 'male', "PBB.set('sex','male')") + chip('Female names', B.sex === 'female', "PBB.set('sex','female')") + rollBtn('Roll everything', 'PBB.rollName()') + '</div>';
     h += '<div class="m-row">' + rollBtn('d66 first name', "PBB.rollPart('first')") + '<b>' + esc(B.first || '—') + '</b></div>';
     h += '<div class="m-row" style="margin-top:6px;">' + rollBtn('d66 surname', "PBB.rollPart('surname')") + '<b>' + esc(B.surname || '—') + '</b></div>';
     h += '<div class="m-row" style="margin-top:6px;">' + rollBtn('d66 nickname', "PBB.rollPart('nick')") + '<b>' + esc(B.nick || '—') + '</b></div>';
     h += '<div class="m-lbl">Name</div><input class="m-input" id="bd-name" value="' + esc(B.name) + '" oninput="PBB.setq(\'name\',this.value)" placeholder="Your pirate\'s name">';
     h += box(summary());
+    var todo = STEPS.map(function (s, i) { return i; }).filter(function (i) { return i !== step && !valid(i); });
+    if (todo.length) h += '<p class="m-hint" style="margin-top:8px;">Still to finish: ' + todo.map(function (i) { return '<a href="#" style="color:#ff9d8a;" onclick="PBB.go(' + i + ');return false;">' + esc(STEPS[i]) + '</a>'; }).join(', ') + '.</p>';
     return h;
   }
   // A few d66 nicknames offer a choice ("Sir/Madam", "One-Eye/Arm/Leg", "The Bride/Groom"):
@@ -263,10 +272,11 @@
 
   // ── actions ──
   var api = {
-    launch: function () { B = fresh(); step = 0; $('builder-body')._step = -1; $('builder-overlay').classList.add('open'); render(); },
+    launch: function () { B = fresh(); step = 0; seen = {}; $('builder-body')._step = -1; $('builder-overlay').classList.add('open'); render(); },
     close: function () { $('builder-overlay').classList.remove('open'); },
     next: function () { if (!valid(step)) return; step = Math.min(STEPS.length - 1, step + 1); render(); },
     back: function () { step = Math.max(0, step - 1); render(); },
+    go: function (i) { i = parseInt(i, 10); if (isNaN(i) || i < 0 || i >= STEPS.length) return; step = i; render(); },
     set: function (k, v) { var keepB = B[k] === v; B[k] = String(v); if (!keepB && (k === 'base' || k === 'animal' || k === 'ancestry')) { var r = B.rolls, m = B.mods, pl = B.pool, as = B.assign; resetAfterClass(); B.rolls = r; B.mods = m; B.pool = pl; B.assign = as; } render(); },
     setq: function (k, v) { B[k] = v; var ft = $('builder-ft'); if (ft) { var nb = ft.querySelector('.m-btn:last-child'); if (nb) nb.disabled = !(step === STEPS.length - 1 ? allValid() : valid(step)); } },
     setNum: function (k, v) { var n = parseInt(v, 10); B[k] = isNaN(n) ? null : Math.max(k === 'hp' ? 1 : 0, n); B[k + 'Txt'] = 'entered'; render(); },
@@ -352,7 +362,7 @@
       if (needRit) { if (!B.extraRituals.length) api.rollTall('extraRituals', 'PB_RITUALS'); out.rituals = out.rituals.concat(B.extraRituals); }
       sh.applyBuild(out); api.close();
     },
-    _state: function () { return B; }, _step: function () { return step; }, _go: function (i) { step = i; render(); }, _valid: valid
+    _state: function () { return B; }, _step: function () { return step; }, _go: function (i) { api.go(i); }, _valid: valid
   };
   window.PBB = api;
 })();

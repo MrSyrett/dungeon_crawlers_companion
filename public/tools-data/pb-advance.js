@@ -62,7 +62,7 @@
     V.dead = { n: n, text: row.text || '', got: got }; log('Among the dead', got, 'd6(' + n + ') · ' + (row.text || ''), n >= 3 ? 'crit' : 'normal'); SH().changed(); render(); }
 
   function render() {
-    var st = S(); var tables = expTables(); var h = '<p class="m-hint">' + esc(((window.PB_RULES || {}).experience || {}).when || 'The GM decides when the crew gets better.') + ' Roll each step below — it is applied straight away. <b>Undo</b> puts everything back.</p>';
+    var st = S(); var tables = expTables(); var h = '';
     // 1 abilities
     h += '<div class="m-lbl">1 · Ability changes</div>';
     if (!V.abil) h += '<p class="m-hint" style="margin-bottom:6px;">d6 for each ability: −3 to +1 rise unless the die shows 1; +2 and up rise on a d6 equal or higher, otherwise fall. Never below −3 or above +6.</p><button class="m-btn" onclick="PBADV.abil()">Roll d6 × 5</button>';

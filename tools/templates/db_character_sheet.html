@@ -250,13 +250,31 @@ body.sheet-unlocked .sk-lvl{display:none;}
 .pip.ok.on{background:var(--green);border-color:var(--green);}
 .pip.bad.on{background:var(--red);border-color:var(--red);}
 .death-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px;}
+.death-wrap{display:flex;align-items:center;gap:8px;}
+.death-track{flex:1 1 auto;min-width:0;}
+.death-btns{flex:0 0 auto;display:flex;flex-direction:column;gap:4px;}
+.death-btns .small-btn{width:100%;}
+#death-vital{container:deathv / inline-size;}
+.death-wrap .death-row{flex-wrap:nowrap;}
+/* the desktop status column is narrow: shrink the tracker so the two rows still sit beside the stacked buttons */
+@container deathv (max-width:240px){
+  .death-wrap{gap:6px;}
+  .death-wrap .death-row{gap:5px;}
+  .death-wrap .dlab{min-width:0;font-size:10px;letter-spacing:.02em;}
+  .death-wrap .pips{gap:3px;}
+  .death-wrap .pip{width:16px;height:16px;}
+  .death-btns .small-btn{padding:4px 7px;}
+}
 .death-row .dlab{font-family:var(--f-label);font-size:11px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;min-width:58px;}
 .rest-btns{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;}
 .rest-btns .small-btn{flex:1 1 auto;}
-.injury-list{display:flex;flex-direction:column;gap:3px;margin-top:4px;}
-.inj{display:flex;align-items:center;gap:6px;font-size:13px;}
-.inj b{font-weight:600;}
-.inj .inj-x{margin-left:auto;}
+.injury-list{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;}
+.inj-badge{font-family:var(--f-label);font-size:12px;letter-spacing:.03em;border:1px solid var(--red);color:var(--red);background:rgba(179,38,30,.1);border-radius:12px;padding:2px 10px;cursor:pointer;line-height:1.4;}
+.inj-badge:hover{background:rgba(179,38,30,.2);}
+.inj-badge:focus-visible{outline:2px solid var(--red);outline-offset:1px;}
+.inj-dl{margin:0;font-size:14px;line-height:1.5;}
+.inj-dl p{margin:0 0 8px;}
+.inj-dl .inj-k{font-family:var(--f-label);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#a09d96;margin-right:6px;}
 .dead-banner{display:none;background:#3a0c08;color:#ffd5c8;border:1px solid #e0614f;border-radius:8px;padding:6px 10px;font-family:var(--f-disp);font-size:18px;text-align:center;margin:0 8px 8px;}
 .dead-banner.on{display:block;}
 
@@ -308,7 +326,6 @@ body.dark .prep-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 .inv-name-line .tag{flex:0 0 auto;}
 .inv-eq-slot{flex:0 0 17px;width:17px;display:inline-flex;align-items:center;}
 .inv-sub{margin:1px 0 3px 23px;font-size:12.5px;line-height:1.35;}
-.sheet-foot{padding:6px 10px;font-family:var(--f-label);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;}
 .hint-line{font-size:12.5px;color:var(--muted);padding:6px 10px;line-height:1.4;}
 
 /* picker / modals */
@@ -671,9 +688,13 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
           <div class="vgrid wide" id="derived"></div>
           <div class="vital half" id="death-vital">
             <div class="vlbl"><span>Death Rolls</span></div>
-            <div class="death-row"><span class="dlab">Success</span><span class="pips" id="death-ok"></span></div>
-            <div class="death-row"><span class="dlab">Failure</span><span class="pips" id="death-bad"></span></div>
-            <div class="vline"><button class="small-btn" id="death-btn" onclick="rollDeath()">Death Roll</button><button class="small-btn ghost" onclick="rollRallySelf()" title="Rally yourself: WIL with a bane">Rally Self</button></div>
+            <div class="death-wrap">
+              <div class="death-track">
+                <div class="death-row"><span class="dlab">Success</span><span class="pips" id="death-ok"></span></div>
+                <div class="death-row"><span class="dlab">Failure</span><span class="pips" id="death-bad"></span></div>
+              </div>
+              <div class="death-btns"><button class="small-btn" id="death-btn" onclick="rollDeath()">Death Roll</button><button class="small-btn ghost" onclick="rollRallySelf()" title="Rally yourself: WIL with a bane">Rally Self</button></div>
+            </div>
           </div>
           <div class="vital half">
             <div class="vlbl"><span>Severe Injuries</span><small><button class="small-btn ghost" onclick="addInjuryManual()" title="Add a severe injury">＋</button></small></div>
@@ -735,7 +756,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       </div>
     </div>
   </div>
-  <div class="sheet-foot"><span>Dragonbane © Fria Ligan AB — rules paraphrased for play</span><span id="foot-build"></span></div>
 </div>
 </div>
 
@@ -972,7 +992,7 @@ function renderStatus(){
   setHTML($('derived'),'<div class="dv" title="Kin '+((kinDef()||{}).movement||10)+' + AGL '+attr('AGL')+'"><span class="dl">Movement</span><span class="dval">'+movement()+'</span></div>'+
     '<div class="dv" title="STR '+attr('STR')+'"><span class="dl">Damage Bonus STR</span><span class="dval">'+(sb?'+'+sb:'—')+'</span></div>'+
     '<div class="dv" title="AGL '+attr('AGL')+'"><span class="dl">Damage Bonus AGL</span><span class="dval">'+(ab?'+'+ab:'—')+'</span></div>');
-  var ij=''; S.injuries.forEach(function(x,i){ ij+='<div class="inj"><b>'+esc(x.name)+'</b><span style="color:var(--muted);">'+esc(x.text||'')+(x.heal?' · heals in '+esc(x.heal):'')+'</span><button class="row-x inj-x" onclick="removeInjury('+i+')" title="Healed">✕</button></div>'; });
+  var ij=''; S.injuries.forEach(function(x,i){ ij+='<button type="button" class="inj-badge" onclick="showInjury('+i+')" title="Details">'+esc(x.name)+'</button>'; });
   setHTML($('injury-list'),ij);
 }
 function abilityKindTag(a){ return a.kind==='kin'?'Innate':a.kind==='prof'?'Profession':'Heroic'; }
@@ -999,7 +1019,7 @@ function renderSpells(){
   var h=''; S.spells.forEach(function(s,i){ var def=spellDef(s.name)||{};
     var req=A(def.requirements).length?'Requires '+A(def.requirements).join(', ')+(def.requirementDetail?' ('+esc(def.requirementDetail)+')':''):'';
     h+=mgCard('<button class="prep-pip'+(s.prepared?' on':'')+'" data-nolock onclick="togglePrepared('+i+')" title="Prepared"></button>',esc(s.name),spellLine(def)+(req?' · '+req:''),esc(def.text||s.note||''),
-      tbtn('Cast','openCast(\'spell\','+i+')')+'<button class="row-x lk-hide" onclick="removeSpell('+i+')" title="Remove">✕</button>'); });
+      castBtns(i,def)+'<button class="row-x lk-hide" onclick="removeSpell('+i+')" title="Remove">✕</button>'); });
   setHTML($('spell-body'),h);
   var t=''; S.tricks.forEach(function(s,i){ var def=trickDef(s.name)||{};
     t+=mgCard('',esc(s.name),esc(def.school||'')+' · 1 WP',esc(def.text||''),tbtn('Cast','castTrick('+i+')')+'<button class="row-x lk-hide" onclick="removeTrick('+i+')" title="Remove">✕</button>'); });
@@ -1068,6 +1088,9 @@ function setWpPip(i){ var was=num(S.wp); S.wp=Math.max(0,Math.min(wpMax(),i<=was
 function adjWp(n){ S.wp=Math.max(0,Math.min(wpMax(),S.wp+n)); changed(); }
 function setDeathS(n){ S.death.s=(S.death.s===n?n-1:n); changed(); }
 function setDeathF(n){ S.death.f=(S.death.f===n?n-1:n); S.death.dead=S.death.f>=3; changed(); }
+function showInjury(i){ var x=S.injuries[i]; if(!x) return; var b=A(x.banes).concat(A(x.banesAttr).map(function(a){ return a+' rolls'; }));
+  var h='<div class="inj-dl"><p>'+esc(x.text||'')+'</p>'+(b.length?'<p><span class="inj-k">Bane on</span>'+esc(b.join(', '))+'</p>':'')+(x.heal?'<p><span class="inj-k">Heals</span>'+esc(x.heal==='permanent'||x.heal==='—'?x.heal:'in '+x.heal)+'</p>':'')+'</div>';
+  openDlg(x.name,h,[{t:'Healed — remove',cls:'warn',f:function(){ closeDlg(); removeInjury(i); }}]); }
 function removeInjury(i){ var x=S.injuries.splice(i,1)[0]; if(x) addLog('Injury healed','✓',x.name,'normal'); changed(); }
 function removeAbility(i){ if(needUnlock()) return; S.abilities.splice(i,1); changed(); }
 function removeSpell(i){ if(needUnlock()) return; S.spells.splice(i,1); changed(); }
@@ -1466,14 +1489,25 @@ function endBerserk(quiet){ S.berserk=false; S.cond.Exhausted=true; if(!quiet) a
 // ── magic ──
 function spellCost(def,pl,indoors){ var c=def.powerLevels===false?(D('DB_MAGIC_RULES')||{}).fixedCost||2:2*pl; if(indoors&&def.indoorsDoubleWp) c*=2; return c; }
 function spellSchoolSkill(def){ if(!def) return null; if(def.school==='General') return bestSkill(knownSchools()); return knowsSchool(def.school)?def.school:null; }
-function openCast(kind,i){
-  var s=S.spells[i]; if(!s) return; var def=spellDef(s.name)||{name:s.name,school:'General',powerLevels:true,castingTime:'action'};
+// Cast: casts straight away at the base power level (the popup's defaults — power level 1,
+// not indoors, not on yourself, no power from the body). ↑ (upcast) opens the popup with
+// the power level and those options; it only shows for spells with power levels.
+function spellCanUpcast(def){ return !def||def.powerLevels!==false; }
+function castBtns(i,def){ return (spellCanUpcast(def)?tbtn('↑','openCast(\'spell\','+i+')','up','Upcast — choose the power level'):'')+tbtn('Cast','quickCast('+i+')'); }
+function castCheck(i){ var s=S.spells[i]; if(!s) return null; var def=spellDef(s.name)||{name:s.name,school:'General',powerLevels:true,castingTime:'action'};
   var reaction=def.castingTime==='reaction'; var freeCast=/doesn't use up your action|not an action/i.test(def.text||'');
-  var sk=spellSchoolSkill(def); var metal=spellBlockFor(def);
-  if(!sk){ addLog(def.name,'—','You don\'t know the '+def.school+' school','normal'); return; }
-  if(reaction&&!freeCast&&!canReact()){ addLog(def.name,'—','A reaction needs a turn you haven\'t taken','normal'); return; }
-  if(!reaction&&def.castingTime==='action'&&!canAct()){ addLog(def.name,'—','No action left this turn','normal'); return; }
-  if(reaction&&!s.prepared){ addLog(def.name,'—','Reaction spells can\'t be cast from the grimoire — prepare it first','normal'); return; }
+  var sk=spellSchoolSkill(def);
+  if(!sk){ addLog(def.name,'—','You don\'t know the '+def.school+' school','normal'); return null; }
+  if(reaction&&!freeCast&&!canReact()){ addLog(def.name,'—','A reaction needs a turn you haven\'t taken','normal'); return null; }
+  if(!reaction&&def.castingTime==='action'&&!canAct()){ addLog(def.name,'—','No action left this turn','normal'); return null; }
+  if(reaction&&!s.prepared){ addLog(def.name,'—','Reaction spells can\'t be cast from the grimoire — prepare it first','normal'); return null; }
+  return {s:s,def:def,sk:sk,reaction:reaction,metal:spellBlockFor(def)}; }
+function quickCast(i){ var c=castCheck(i); if(!c) return;
+  if(c.metal){ addLog(c.def.name,'Blocked',c.metal,'normal'); return; }
+  var cost=spellCost(c.def,1,false); if(S.wp<cost){ addLog(c.def.name,'Not enough WP','Costs '+cost+' WP, you have '+S.wp+(S.wp<=num(((D('DB_MAGIC_RULES')||{}).powerFromBody||{}).atOrBelowWp,1)&&!c.def.healing&&spellCanUpcast(c.def)?' · ↑ to draw power from the body':''),'fumble'); return; }
+  castSpell(i,{pl:1,indoors:false,self:false,body:''}); }
+function openCast(kind,i){
+  var cc=castCheck(i); if(!cc) return; var s=cc.s, def=cc.def, sk=cc.sk, reaction=cc.reaction, metal=cc.metal;
   var pls=def.powerLevels!==false; var body='<p class="m-hint">'+esc(def.text||'')+'</p><p class="m-hint" style="margin-top:-6px;">'+esc(def.school)+(def.rank!=null?' rank '+def.rank:'')+' · roll '+esc(sk)+' '+skillLevel(sk)+' · '+esc(def.castingTime)+' · '+esc(def.range||'')+' · '+esc(def.duration||'')+(def.requirements?' · needs '+def.requirements.join(', '):'')+'</p>';
   if(metal) body+='<div class="res-box" style="border-color:var(--red);"><b>Blocked:</b> '+esc(metal)+'</div>';
   if(!s.prepared&&!reaction) body+='<div class="res-box">Not prepared: cast from your grimoire at <b>twice the casting time</b>.</div>';
@@ -1572,7 +1606,7 @@ function renderActions(act,atk,react){
     bt+=tbtn('Sneak Attack','doAttack('+x.i+',{sneak:true})','ghost','Outside combat, after a successful Sneaking roll: a boon, it can\'t be dodged or parried'+(subtle?', +1 damage die (subtle weapon)':''))+
       tbtn('Attack','doAttack('+x.i+',{})','',(atk?'':'No action left'));
     a+=tcard(esc(dd.name)+(dd.shield?' <span class="tag">shield</span>':''),sub,bt,!atk); });
-  a='<div class="db-rx" style="padding:4px 2px 2px;"><button type="button" class="db-tog'+(S.proneTarget?' on':'')+'" aria-pressed="'+(!!S.proneTarget)+'" onclick="toggleProneTarget(!S.proneTarget)" title="Melee against a prone target: a boon and +D6 damage (applies to your next attack)"><span class="db-tog-box"></span>Target is prone</button></div>'+a;
+  a='<div class="db-rx" style="padding:4px 2px 2px;justify-content:flex-end;"><button type="button" class="db-tog'+(S.proneTarget?' on':'')+'" aria-pressed="'+(!!S.proneTarget)+'" onclick="toggleProneTarget(!S.proneTarget)" title="Melee against a prone target: a boon and +D6 damage (applies to your next attack)"><span class="db-tog-box"></span>Target is prone</button></div>'+a;
   if(S.turn.extra>0) a='<div class="db-note good">'+(S.turn.dual?'Dual Wield: one extra attack with your other one-handed weapon, at a bane.':'Critical hit: one free extra attack against another enemy.')+'</div>'+a;
   h+=tsec('attacks','Attacks',a);
   var sp=tcard('Topple','Weapon skill vs Evade — a boon with a toppling weapon',tbtn('Roll','specialAttack(\'Topple\')'),!atk)+
@@ -1585,7 +1619,7 @@ function renderActions(act,atk,react){
   // magic
   var mg=''; var blk=spellBlock();
   S.spells.forEach(function(s,i){ var def=spellDef(s.name)||{}; if(def.castingTime==='reaction') return; if(!s.prepared) return; var c=def.powerLevels===false?'fixed 2 WP':'2/4/6 WP'; var why=spellBlockFor(def);
-    mg+=tcard(esc(s.name),esc(def.school||'')+' · '+esc(capTxt(def.castingTime))+' · '+esc(rangeTxt(def.range))+' · '+c+(def.damage?' · '+esc(def.damage.base)+' +'+esc(def.damage.perLevel)+'/PL':'')+(def.healing?' · heals '+esc(def.healing.base)+' +'+esc(def.healing.perLevel)+'/PL':'')+(why&&!blk?' · <span style="color:var(--red);">'+esc(why)+'</span>':''),tbtn('Cast','openCast(\'spell\','+i+')'),!act||!!why); });
+    mg+=tcard(esc(s.name),esc(def.school||'')+' · '+esc(capTxt(def.castingTime))+' · '+esc(rangeTxt(def.range))+' · '+c+(def.damage?' · '+esc(def.damage.base)+' +'+esc(def.damage.perLevel)+'/PL':'')+(def.healing?' · heals '+esc(def.healing.base)+' +'+esc(def.healing.perLevel)+'/PL':'')+(why&&!blk?' · <span style="color:var(--red);">'+esc(why)+'</span>':''),castBtns(i,def),!act||!!why); });
   S.tricks.forEach(function(t,i){ var def=trickDef(t.name)||{}; mg+=tcard(esc(t.name)+' <span class="tag">trick</span>',esc(def.text||''),tbtn('1 WP','castTrick('+i+')'),!act||!!blk); });
   if(mg){ if(blk) mg='<div class="db-note" style="color:var(--red);">'+esc(blk)+'</div>'+mg; h+=tsec('magic','Cast Spell',mg); }
   // abilities
@@ -1631,7 +1665,7 @@ function renderReactions(react){
   if(!pr) pr='<div class="db-empty">Nothing at hand to parry with</div>';
   h+=pr;
   var ab=''; ['Guardian','Weasel'].forEach(function(n){ if(hasAbility(n)){ var def=abilityDef(n)||{}; ab+=tcard(n+' <span class="tag">'+def.wp+' WP</span>',esc(def.text||''),tbtn(def.wp+' WP','reactAbility(\''+n+'\')'),S.hp<=0); } });
-  S.spells.forEach(function(s,i){ var def=spellDef(s.name)||{}; if(def.castingTime!=='reaction') return; ab+=tcard(esc(s.name)+' <span class="tag">spell</span>'+(s.prepared?'':' <span class="tag warn">not prepared</span>'),esc(def.text||''),tbtn('Cast','openCast(\'spell\','+i+')'),!s.prepared||!!spellBlockFor(def)); });
+  S.spells.forEach(function(s,i){ var def=spellDef(s.name)||{}; if(def.castingTime!=='reaction') return; ab+=tcard(esc(s.name)+' <span class="tag">spell</span>'+(s.prepared?'':' <span class="tag warn">not prepared</span>'),esc(def.text||''),castBtns(i,def),!s.prepared||!!spellBlockFor(def)); });
   h+=ab;
   return tsec('reactions','Reactions',h);
 }
@@ -1675,7 +1709,7 @@ function renderPicker(){ if(!_pk) return; var items=pickerItems(); var h='';
     if(x._k==='gear'){ meta=esc(x.category)+(x.supply?' · '+esc(x.supply):'')+(x.weight===0?' · tiny':x.weight===0.25?' · ¼ item':x.weight==null?'':' · weight '+x.weight); desc=esc(x.effect||''); }
     if(x._k==='weapon'){ meta=esc(x.grip||'')+' · '+(x.skill?esc(x.skill):'any STR melee skill')+' · STR '+(x.str||'—')+' · '+esc(x.damage)+' · durability '+(x.durability||'—')+(x.ranged?' · range '+esc(x.range)+' m':''); desc=esc(A(x.features).join(', ')); }
     if(x._k==='armor'||x._k==='helmet'){ meta=(x._k==='armor'?'armor':'helmet')+(x.supply?' · '+esc(x.supply):'')+(x.metal?' · metal':''); desc=esc(x.effect||''); }
-    if(isShop()){ var cp=costCopper(x.cost); btn=(x.weight==null&&x.category==='Services')?'':'<button class="brow-add ghost" onclick="pickAdd('+ix+',false)">Add</button>'+(x.cost?'<button class="brow-add" '+(cp>purseCopper()?'disabled title="Not enough coins"':'')+' onclick="pickAdd('+ix+',true)">Buy</button>':''); }
+    if(isShop()){ var cp=costCopper(x.cost); btn=(x.weight==null&&x.category==='Services')?'':(x.cost?'<button class="brow-add" '+(cp>purseCopper()?'disabled title="Not enough coins"':'')+' onclick="pickAdd('+ix+',true)">Buy</button>':'')+'<button class="brow-add ghost" onclick="pickAdd('+ix+',false)">Add</button>'; }
     if(_pk==='ability'){ var ok=meetsRequirement(x); var have=hasAbility(x.name)&&!x.repeatable; meta=esc(reqText(x))+' · '+(x.wp==null||x.wp===''?'passive':esc(x.wp)+' WP')+(ok?'':' · <span style="color:#ff9d8a;">requirement not met</span>'); desc=esc(x.text||'');
       btn=have?'<button class="brow-add have" disabled>Have it</button>':'<button class="brow-add'+(ok?'':' ghost')+'" onclick="pickAdd('+ix+')">'+(ok?'Add':'Add anyway')+'</button>'; }
     if(_pk==='spell'){ var hv=S.spells.some(function(s){ return s.name===x.name; }); meta=spellLine(x)+(x.prerequisite?' · needs '+esc(x.prerequisite):''); desc=esc(x.text||'');
@@ -2028,7 +2062,6 @@ function autoLoad(){
 }
 S=blankState();
 autoLoad();
-var _fb=$('foot-build'); if(_fb) _fb.textContent=window.__BUILD__||'';
 </script>
 
 <script src="/tools-data/db-sheet-builder.js"></script>
@@ -2054,6 +2087,7 @@ body.dark .db-top{background:#1c1c21;}
 .db-pip.extra{border-color:var(--gold);color:var(--gold);}
 .db-do{flex:0 0 auto;background:var(--acc);color:#fff;border:none;border-radius:7px;padding:6px 12px;font-family:var(--f-label);font-size:13px;letter-spacing:.03em;cursor:pointer;white-space:nowrap;}
 .db-do:hover{filter:brightness(1.12);}
+.db-do.up{padding-left:9px;padding-right:9px;background:transparent;color:var(--acc-dk);border:1px solid var(--acc);font-size:15px;line-height:1;}
 .db-do.ghost{background:transparent;color:var(--acc-dk);border:1px solid var(--acc);}
 .db-do.end{margin-left:auto;padding:8px 16px;font-size:14px;}
 .db-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px;}

@@ -198,6 +198,8 @@ body.dark .vital{background:#1a1212;}
 .vbig .calc{font-size:22px;color:var(--acc-dk);}
 .vbar{height:6px;border-radius:4px;background:var(--rule);overflow:hidden;margin-top:5px;}
 .vbar>span{display:block;height:100%;background:var(--acc);}
+.armor-sub{font-family:var(--f-ui);font-size:13.5px;line-height:1.25;color:var(--muted);margin-top:2px;overflow-wrap:anywhere;}   /* tier, then armor type, under the number */
+.armor-sub>span{display:block;}
 .vline{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:5px;font-size:12.5px;color:var(--muted);}
 .vline .tag{white-space:normal;max-width:100%;}   /* the narrow Armor box wraps a long note instead of clipping it */
 .small-btn{background:var(--acc);color:#fff;border:none;border-radius:6px;padding:4px 9px;font-family:var(--f-label);font-size:13px;letter-spacing:.01em;cursor:pointer;white-space:nowrap;}
@@ -276,7 +278,6 @@ body.dark .eq-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 .coins{display:flex;gap:8px;flex-wrap:wrap;padding:6px 10px 8px;align-items:center;}
 .coins label{font-family:var(--f-label);font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;}
 .coins input{width:80px;height:30px;border:1px solid var(--input-border);border-radius:6px;background:var(--input-bg);text-align:center;font-size:16px;font-weight:600;color:var(--ink);outline:none;font-family:var(--f-num);}
-.sheet-foot{padding:6px 10px;font-family:var(--f-label);font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;}
 .hint-line{font-size:13px;color:var(--muted);padding:6px 10px;line-height:1.4;}
 .feat{padding:7px 10px;border-bottom:1px solid var(--rule);}
 .feat:last-child{border-bottom:none;}
@@ -329,6 +330,8 @@ body.dark .eq-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 .brow-meta{font-family:var(--f-ui);font-size:12.5px;color:#b3a28a;margin-top:1px;}
 .brow-desc{font-size:13px;color:#c2b39b;line-height:1.4;margin-top:3px;}
 .brow-add{flex-shrink:0;background:var(--acc);color:#fff;border:none;border-radius:6px;padding:6px 11px;font-family:var(--f-label);font-size:13.5px;cursor:pointer;white-space:nowrap;}
+.brow-btns{display:flex;flex-direction:column;gap:4px;flex-shrink:0;}
+.brow-btns.row{flex-direction:row;align-items:flex-start;}   /* Gear Shop: Buy on the left, Add on the right */
 .brow-add.ghost{background:transparent;border:1px solid #7a1f22;color:#ffb3a3;}
 .brow-add.have,.brow-add:disabled{background:transparent;color:#8f826d;border:1px solid #4d3a32;cursor:default;}
 .brow-empty{padding:14px 4px;font-size:14px;color:#998;}
@@ -339,6 +342,14 @@ body.dark .eq-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 .rules-list td,.rules-list th{padding:3px 6px;border-bottom:1px solid #2a1b1b;text-align:left;vertical-align:top;}
 .res-box{background:#0e0909;border:1px solid #3a2424;border-radius:8px;padding:10px 12px;margin-top:10px;font-size:14px;line-height:1.5;}
 .res-box b{color:#f3e6d4;}
+/* creation wizard: the step pills are navigation (as in the Dragonbane wizard) */
+.bd-steps{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;}
+.bd-step{font-family:var(--f-label);font-size:12.5px;padding:3px 9px;border-radius:12px;border:1px solid #3a2424;color:#a89a8a;background:transparent;cursor:pointer;line-height:1.3;}
+.bd-step:hover{border-color:var(--acc);color:#f3e6d4;}
+.bd-step:focus-visible{outline:2px solid var(--acc);outline-offset:1px;}
+.bd-step.on{border-color:var(--acc);color:#ffd5c8;background:#3a0f12;cursor:default;}
+.bd-step.done{color:#d8cbb8;border-color:#5a3a32;}
+.bd-ck{color:#9fdcae;}
 .res-big{font-family:var(--f-num);font-size:30px;font-weight:600;color:#f3e6d4;line-height:1.1;}
 .res-big.ok{color:#9fdcae;}.res-big.bad{color:#ff9d8a;}.res-big.crit{color:#f0c56a;}
 .res-word{font-family:var(--f-disp);font-size:26px;color:#fff;}
@@ -613,6 +624,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
           <div class="vital">
             <div class="vlbl"><span>Armor</span></div>
             <div class="vbig" id="armor-big"></div>
+            <div class="armor-sub" id="armor-sub"></div>
             <div class="vline" id="armor-line"></div>
           </div>
           <div class="vital hp-vital">
@@ -670,7 +682,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       </div>
     </div>
   </div>
-  <div class="sheet-foot"><span>Pirate Borg © Limithron — rules paraphrased for play</span><span id="foot-build"></span></div>
 </div>
 </div>
 
@@ -685,7 +696,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>
-  <div class="log-entries" id="log-entries"><div class="log-hint">Click an ability or attack to roll</div></div>
+  <div class="log-entries" id="log-entries"></div>
   <div class="dice-tray">
     <div class="dice-btns">
       <button class="dice-btn" onclick="rollFree(2)">d2</button><button class="dice-btn" onclick="rollFree(4)">d4</button><button class="dice-btn" onclick="rollFree(6)">d6</button><button class="dice-btn" onclick="rollFree(8)">d8</button><button class="dice-btn" onclick="rollFree(10)">d10</button><button class="dice-btn" onclick="rollFree(12)">d12</button><button class="dice-btn" onclick="rollFree(20)">d20</button>
@@ -927,7 +938,8 @@ function renderStatus(){
   setVal($('f-hp'),S.hp); setVal($('f-hpmax'),hm); $('hp-bar').style.width=(hm?clamp(Math.round(100*Math.max(0,S.hp)/hm),0,100):0)+'%';
   setText($('hp-note'),(num(S.tempHp)>0?'+'+num(S.tempHp)+' temporary · ':'')+(S.hp===0&&!S.dead?'Broken':S.hp<0||S.dead?'dead':''));
   var t=armorTier(), die=armorDie(), c=wornClothing(), hat=wornHat();
-  setHTML($('armor-big'),'<span class="calc">'+(die?'−'+die:'—')+'</span><span style="font-size:14px;font-weight:400;color:var(--muted);font-family:var(--f-ui);">tier '+t+(c?' · '+esc(c.name):has('thick-skinned')?' · Thick Skinned':' · no armor')+(hat&&hat.dr?' · hat −'+hat.dr:'')+'</span>');
+  setHTML($('armor-big'),'<span class="calc">'+(die?'−'+die:'—')+'</span>');
+  setHTML($('armor-sub'),'<span>Tier '+t+'</span><span>'+(c?esc(c.name):has('thick-skinned')?'Thick Skinned':'No armor')+'</span>'+(hat&&hat.dr?'<span>Hat −'+hat.dr+'</span>':''));
   var line=[]; extraProt().forEach(function(p){ line.push('<span class="tag" title="Extra protection, in addition to armor">−'+esc(p.die)+' '+esc(p.label)+(p.perm?'':' <button class="row-x" style="padding:0 2px;font-size:12px;" data-nolock onclick="removeProt('+p.i+')">✕</button>')+'</span>'); });
   if(agilityPenalty()) line.push('<span class="tag warn">AGILITY +'+agilityPenalty()+' DR · defense +'+defensePenalty()+' DR</span>');
   if(c&&c.tier<c.origTier) line.push('<span class="tag">damaged (was tier '+c.origTier+')</span>');
@@ -1072,7 +1084,7 @@ function renderGear(){
       :'<label class="sb-note" title="An uncarried container (a sea chest left aboard) doesn\'t count against your Carry Capacity, nor does anything in it"><input type="checkbox" data-nolock '+(c.carried!==false?'checked':'')+' onchange="onItem(\''+c.uid+'\',\'carried\',this.checked)"> carried</label>';
     cs+='<div class="cont-sec" data-cont="'+c.uid+'"><div class="section-bar cont-bar"><span>'+esc(c.name)+' <span class="cont-fill'+(over?' over':'')+'"'+(over?' title="Over capacity"':'')+'>('+(c.capacity!=null?f+'/'+c.capacity:f+(f===1?' slot':' slots'))+')</span></span><span class="hdr-right">'+right+'</span></div>'+
       (rows?'<table class="tbl inv-tbl"><thead><tr><th style="width:50%;">Item</th><th style="width:50px;">Qty</th><th style="width:50px;">Slots</th><th>Note / uses</th><th style="width:60px;"></th></tr></thead><tbody>'+rows+'</tbody></table>'
-        :'<div class="cont-empty">Empty — stow things here with ▽ in Inventory.</div>')+'</div>'; });
+        :'<div class="cont-empty">Empty</div>')+'</div>'; });
   setHTML($('cont-secs'),cs);
   var load=carryLoad(), cap=carryCap(); var e=$('enc'); e.className='sb-note enc-note'+(load>cap?' over':'');
   e.title=load>2*cap?'Too much to carry':load>cap?'Over-encumbered: STRENGTH and AGILITY tests +2 DR':'Slots carried / carrying capacity (8 + STRENGTH)';
@@ -1239,12 +1251,13 @@ function healHp(n,why){ n=Math.max(0,num(n)); if(S.dead){ addLog(why||'Heal','�
 function noRestHeal(){ return hasAilment('vampirism'); }
 function immuneSick(){ return has('survivalist'); }
 function openRestPanel(){
-  var C=S.cond; var body='<p class="m-hint">'+(noRestHeal()?'<b>Vampirism:</b> rest can\'t heal you — only blood. ':'')+(C.starving?'<b>Starving:</b> rest restores no HP. ':'')+(C.infected&&!immuneSick()?'<b>Infected:</b> you lose d6 HP each morning instead of recovering. ':'')+'</p>'+
+  var C=S.cond; var warn=(noRestHeal()?'<b>Vampirism:</b> rest can\'t heal you — only blood. ':'')+(C.starving?'<b>Starving:</b> rest restores no HP. ':'')+(C.infected&&!immuneSick()?'<b>Infected:</b> you lose d6 HP each morning instead of recovering. ':'');
+  var body=(warn?'<p class="m-hint">'+warn+'</p>':'')+
     '<div class="res-box"><b>Short rest</b> — about 10 minutes: recover d4 HP.<div style="margin-top:6px;"><button class="m-btn" onclick="doRest(\'short\')">Short rest</button></div></div>'+
     '<div class="res-box"><b>Long rest</b> — overnight: recover d8 HP.'+
       '<label class="m-check"><input type="checkbox" id="rs-dawn" checked><span>The night passes: dawn and sunset<small>Prayers, rituals, relics and spells reset (rolled anew); Conduit / Grog Brewer / Lucky Parrot roll for the day.</small></span></label>'+
       '<label class="m-check"><input type="checkbox" id="rs-6h" checked><span>Six hours or more of rest<small>Devil\'s Luck recharges if — and only if — it is empty: roll '+esc(luckDie())+'.</small></span></label>'+
-      '<label class="m-check"><input type="checkbox" id="rs-food"'+(C.starving?'':' checked')+'><span>Ate and drank today<small>Untick when going without: 0 HP restored, and after two days d4 HP lost per day.</small></span></label>'+
+      '<label class="m-check"><input type="checkbox" id="rs-food"'+(C.starving?'':' checked')+'><span>Ate and drank today<small>Without: 0 HP restored; after two days, d4 HP lost per day.</small></span></label>'+
       '<div style="margin-top:6px;"><button class="m-btn" onclick="doRest(\'long\')">Long rest</button></div></div>';
   openDlg('Rest',body,[]); }
 function doRest(kind){
@@ -1527,12 +1540,12 @@ function openRitual(id){ var x=S.rituals.find(function(r){ return r.id===id; });
   var no=ritualOk(); if(no){ addLog(p.name,'—',no,'normal'); return; } if(x.locked){ addLog(p.name,'—','Failed — it can\'t be used again until dawn','normal'); return; }
   var spirit=hasAilment('conduit')&&S.conduit.id===id&&!S.conduit.used; var left=num(S.ritualCasts.left);
   var block=ritualBlock();
-  var body='<p class="m-hint">'+esc(p.text)+'</p><p class="m-hint">Test SPIRIT ('+sgn(abil('SPIRIT'))+') · '+left+' cast'+(left===1?'':'s')+' left today. Success uses one; failure rolls a mystical mishap and locks this ritual until dawn. The GM sets the DR (normally 12; harder under duress, easier if you take your time or spill blood).</p>'+(block?'<div class="res-box" style="border-color:var(--acc);color:#ffb3a3;">'+esc(block)+'</div>':'')+
+  var body='<p class="m-hint">'+esc(p.text)+'</p><p class="m-hint">Test SPIRIT ('+sgn(abil('SPIRIT'))+') · '+left+' cast'+(left===1?'':'s')+' left today.</p>'+(block?'<div class="res-box" style="border-color:var(--acc);color:#ffb3a3;">'+esc(block)+'</div>':'')+
     (spirit?'<label class="m-check"><input type="checkbox" id="rt-sp" checked><span>Through the spirits (Conduit)<small>Cast it once today without testing SPIRIT and without using a cast.</small></span></label>':'')+
     '<div class="m-lbl">Casting time</div>'+
     '<label class="m-check"><input type="radio" name="rt-t" value="0" checked><span>Your action</span></label><label class="m-check"><input type="radio" name="rt-t" value="1"><span>Take 1 minute<small>No action this round; the GM lowers the DR.</small></span></label><label class="m-check"><input type="radio" name="rt-t" value="2"><span>Take 1 hour</span></label>'+
     '<label class="m-check"><input type="checkbox" id="rt-tg"><span>Several casters together<small>Roll twice and keep the higher.</small></span></label>'+
-    '<div class="m-row" style="margin-top:6px;"><span class="m-hint" style="margin:0;">Spend HP in blood<small style="display:block;">each HP lowers the DR by 1 — the GM applies it</small></span><input id="rt-bl" class="m-input" type="number" value="0" min="0" style="width:70px;"></div>'+
+    '<div class="m-row" style="margin-top:6px;"><span class="m-hint" style="margin:0;">Spend HP in blood</span><input id="rt-bl" class="m-input" type="number" value="0" min="0" style="width:70px;"></div>'+
     (p.extraArmor||p.heal?'<label class="m-check"><input type="checkbox" id="rt-self"><span>On yourself<small>Apply the healing or protection to your sheet.</small></span></label>':'');
   openDlg('Ritual · '+p.name,body,[{t:'Cast',dis:!spirit&&left<=0,f:function(){ var sp=$('rt-sp')&&$('rt-sp').checked;
     var tv=num((document.querySelector('input[name="rt-t"]:checked')||{}).value);
@@ -1851,13 +1864,10 @@ function renderActionTab(act){ var h='';
   if(num(S.grog.brewed)>0) eq+=tcard('Potent grog <span class="pb-qty">×'+num(S.grog.brewed)+'</span>','',tbtn('Drink','drink(null,true)')+tbtn('Coat','coatWeapon()','ghost'),!act);
   if(eq) h+=tsec('equipment','Equipment',eq);
   // other
-  var ot=tcard('Initiative','d6 '+sgn(abil('AGILITY'))+' AGILITY',tbtn('Roll','rollInit()','ghost'));
-  ot+=tcard('Hold your breath',Math.max(1,1+abil('TOUGHNESS'))+' min'+(num(DX.breath)?' · <b>round '+num(DX.breath)+'</b>':''),tbtn('Test','holdBreath()','ghost')+(num(DX.breath)?tbtn('Surface','DX.breath=0;renderTurn()','ghost'):''));
+  var ot=tcard('Hold your breath',Math.max(1,1+abil('TOUGHNESS'))+' min'+(num(DX.breath)?' · <b>round '+num(DX.breath)+'</b>':''),tbtn('Test','holdBreath()','ghost')+(num(DX.breath)?tbtn('Surface','DX.breath=0;renderTurn()','ghost'):''));
   h+=tsec('other','Other',ot);
   return h; }
 function conduitCast(){ var r=ritualDef(S.conduit.id); if(!r||S.conduit.used) return; if(!canAct()){ addLog(r.name,'—','No action left','normal'); return; } useAction(); S.conduit.used=true; addLog('Ritual · '+r.name,'Through the spirits','Conduit: no SPIRIT test','normal'); ritualEffect(r,{},{ok:true}); changed(); }
-// Individual initiative (optional rule): d6 + AGILITY.
-function rollInit(){ var n=d(6), v=n+abil('AGILITY'); addLog('Initiative',String(v),'d6('+n+') '+sgn(abil('AGILITY'))+' AGL','normal'); }
 function holdBreath(){ DX.breath=num(DX.breath)+1; var o={label:'Hold breath (round '+DX.breath+')',ability:'TOUGHNESS',kind:'test',ask:'The GM sets the DR (it climbs each round): still holding?'}; o.onRes=function(res){ showResult(o,res,function(r){ return pf(r,{t:'Still holding',f:function(){ finish(o); renderTurn(); }},{t:'Lose 1 HP',cls:'warn',f:function(){ finish(o); takeDamage(1,{label:'Out of breath',raw:true,noLuck:true}); renderTurn(); }}); }); }; test(o); }
 // The Defend section of the Action tab: the defense test, plus the prayers that answer an attack.
 function renderDefendSection(){
@@ -1909,7 +1919,7 @@ function renderPicker(){ if(!_pk) return; var it=pickerItems(); var h='';
     else if(x._k==='hat'){ meta='hat'+(x.damageReduction?' · −'+x.damageReduction+' damage':''); desc=x.special||''; }
     else if(x._k==='bomb'){ meta='bomb · '+(x.damage||'no damage'); desc=x.effect||''; }
     else if(x._k==='ammo'){ meta='ammo'+(x.damage?' · '+x.damage:''); desc=x.effect||''; }
-    else if(x._k==='hosp'){ meta=x.drink?'a drink (Action tab: TOUGHNESS test to heal d4)':'rations'; }
+    else if(x._k==='hosp'){ meta=x.drink?'a drink · TOUGHNESS test to heal d4':'rations'; }
     else if(x._k==='potion'){ meta=x._unknown?'potion · effect unknown':'potion'+(x.delivery?' · '+x.delivery:'')+(x.dr?' · resist TOUGHNESS DR'+x.dr:''); desc=x.effectText||''; }
     else if(x._k==='ash'){ meta='a dose · about 5 lbs. · one carrying slot · what it fetches depends on the port\'s ASH market'; desc=x.text||''; }
     else if(x._k==='gear'){ meta=x.category+(x.capacity?' · holds '+x.capacity:'')+(x.uses?' · '+x.uses+' uses':'')+(x.duration?' · '+x.duration:''); desc=x.effect||x.note||''; }
@@ -1918,14 +1928,14 @@ function renderPicker(){ if(!_pk) return; var it=pickerItems(); var h='';
     var have=(_pk==='relic'&&false)||(_pk==='ritual'&&S.rituals.some(function(r){ return r.id===x.id; }))||(_pk==='prayer'&&S.prayers.indexOf(x.id)>=0);
     if(_pk==='spell'){ var sr=spellRec(x.id); btn=sr?(num(sr.rank)>=3?'<button class="brow-add have" disabled>Rank III</button>':'<button class="brow-add" onclick="pickAdd('+ix+')">Rank up</button>'):'<button class="brow-add" onclick="pickAdd('+ix+')">Learn</button>'; }
     else if(have) btn='<button class="brow-add have" disabled>Known</button>';
-    else if(isShop()) btn='<button class="brow-add ghost" onclick="pickAdd('+ix+',false)">Add</button>'+(cost?'<button class="brow-add" '+(cost>num(S.silver)?'disabled title="Not enough silver"':'')+' onclick="pickAdd('+ix+',true)">Buy</button>':'');
+    else if(isShop()) btn=(cost?'<button class="brow-add" '+(cost>num(S.silver)?'disabled title="Not enough silver"':'')+' onclick="pickAdd('+ix+',true)">Buy</button>':'')+'<button class="brow-add ghost" onclick="pickAdd('+ix+',false)">Add</button>';
     else btn='<button class="brow-add" onclick="pickAdd('+ix+')">'+(_pk==='feature'&&has(x.id)?'Take again':'Add')+'</button>';
-    h+='<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(x.name)+(cost!=null?'<span class="brow-cost">'+cost+'s</span>':x.costText?'<span class="brow-cost">'+esc(x.costText)+'</span>':'')+(x.source==='Homebrew'?' <span class="brow-cost" style="color:#9fdcae;">homebrew</span>':'')+'</div><div class="brow-meta">'+esc(meta)+'</div>'+(desc?'<div class="brow-desc">'+esc(desc)+'</div>':'')+'</div><div style="display:flex;flex-direction:column;gap:4px;">'+btn+'</div></div>'; });
+    h+='<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(x.name)+(cost!=null?'<span class="brow-cost">'+cost+'s</span>':x.costText?'<span class="brow-cost">'+esc(x.costText)+'</span>':'')+(x.source==='Homebrew'?' <span class="brow-cost" style="color:#9fdcae;">homebrew</span>':'')+'</div><div class="brow-meta">'+esc(meta)+'</div>'+(desc?'<div class="brow-desc">'+esc(desc)+'</div>':'')+'</div><div class="brow-btns'+(isShop()?' row':'')+'">'+btn+'</div></div>'; });
   if(isShop()) h='<div class="brow-meta" style="padding:6px 2px;">Silver: '+num(S.silver)+'s</div>'+h;
   $('picker-body').innerHTML=h||'<div class="brow-empty">Nothing matches.</div>'; }
 function pickAdd(ix,buy){ var x=pickerItems()[ix]; if(!x) return; var cost=costOf(x);
   if(buy){ if(cost==null||cost>num(S.silver)){ addLog('Shop','Too expensive',x.name,'normal'); return; } S.silver=num(S.silver)-cost; }
-  if(x._k==='weapon'){ S.items.push(mkWeapon(x,{equipped:equippedWeapons().length<3})); if(x.blackPowder&&!ammoCount('shot')) addLog('Ammo','—','Black powder needs shot: add "20 rounds of shot" from Bombs & Ammo','normal'); }
+  if(x._k==='weapon'){ S.items.push(mkWeapon(x,{equipped:equippedWeapons().length<3})); if(x.blackPowder&&!ammoCount('shot')) addLog('Ammo','—','Black powder needs shot','normal'); }
   else if(x._k==='potion'){ S.items.push(x._unknown?mkPotion({name:'Unknown potion',known:false}):mkPotion(Object.assign({},x,{name:x._pname||x.name}))); }
   else if(x._k==='ash') addAsh(1);
   else if(x._k==='clothing') S.items.push(mkClothing(x,{equipped:!wornClothing()}));
@@ -2007,7 +2017,7 @@ function addLog(label,result,detail,type){
   entries.insertBefore(div, entries.firstChild); while(entries.children.length>60) entries.removeChild(entries.lastChild); entries.scrollTop=0;
   showRollToast(label,result,detail,type);
 }
-function clearLog(){ $('log-entries').innerHTML='<div class="log-hint">Click an ability or attack to roll</div>'; }
+function clearLog(){ $('log-entries').innerHTML=''; }
 function toggleLogCollapse(){ document.querySelector('.roll-log').classList.toggle('collapsed'); }
 document.querySelector('.log-header').addEventListener('click', function(e){ if(window.innerWidth<=768 && !e.target.closest('button,.dm-toggle-btn')) toggleLogCollapse(); });
 (function(){ if(window.innerWidth<=768) document.querySelector('.roll-log').classList.add('collapsed'); })();
@@ -2284,7 +2294,6 @@ function autoLoad(){
   setDefaultTab();
 }
 S=blankState(); autoLoad();
-(function(){ var fb=$('foot-build'); if(fb) fb.textContent=window.__BUILD__||''; })();
 // Pull the viewer's homebrew into the pickers when it lands: re-render an open picker, and the
 // regions that name a homebrew relic / ritual / weapon (only those whose markup changes are touched).
 if(window.PBHB){ try{ window.PBHB.load(function(){ if(_pk) renderPicker(); renderPlay(); }); }catch(e){} }
@@ -2301,7 +2310,6 @@ body.dark .pb-top{background:#1a1111;}
 .pb-round{display:flex;flex-direction:column;align-items:center;justify-content:center;width:46px;height:50px;border-radius:7px;border:2px solid var(--acc);line-height:1;}
 .pb-round b{font-family:var(--f-num);font-size:24px;color:var(--acc-dk);}
 .pb-round small{font-family:var(--f-label);font-size:11px;color:var(--muted);}
-.pb-init-lbl{font-family:var(--f-label);font-size:14px;color:var(--muted);}
 .pb-side{font-size:13px;color:var(--muted);}
 .pb-econ{display:flex;gap:6px;flex:1 1 auto;flex-wrap:wrap;align-items:center;}
 .pb-pip{font-family:var(--f-label);font-size:14px;border:1.5px solid var(--acc);color:var(--acc-dk);background:transparent;border-radius:14px;padding:2px 13px;}

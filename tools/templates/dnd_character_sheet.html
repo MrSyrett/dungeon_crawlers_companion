@@ -262,6 +262,7 @@ body.dark .econ-chip.avail{background:rgba(90,200,120,.18);color:#7ad48a;}
 .turn-sl-hd{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px 2px 2px;}
 .turn-sec-body .spell-row.turn-dis{opacity:.42;}
 .turn-sec-body .spell-row.turn-dis .cast-btn{background:var(--muted);pointer-events:none;}
+.turn-sec-body .spell-row.turn-dis .upcast-btn{border-color:var(--muted);color:var(--muted);pointer-events:none;}
 .turn-sec-body .spell-row.turn-dis .sp-name-txt{text-decoration:line-through;text-decoration-thickness:1px;color:var(--muted);}
 .sp-name-txt{flex:1 1 auto;min-width:0;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.01em;color:var(--ink);line-height:1.2;}
 .turn-empty{font-size:12px;color:var(--muted);padding:12px;line-height:1.5;}
@@ -3721,12 +3722,14 @@ function spellRowHTML(sk, sp, opts){
     '<div class="sp-ctrls">' +
       '<button class="row-i" onclick="openSpell(\'' + q + '\')" title="Spell details">&#9432;</button>' +
       (canRitual(sk, sp) ? '<button class="ritual-btn" onclick="castRitual(\'' + q + '\')" title="Cast as a Ritual — no spell slot, takes 10 minutes longer">Ritual</button>' : '') +
-      ((!opts.noUpcast && sp && (sp.higherLevels || sp.upcast) && lvl > 0 && castReady(sk, sp)) ? '<button class="upcast-btn" onclick="upcastSpell(\'' + q + '\')" title="Cast at a higher level (upcast)">⇧</button>' : '') +
+      ((!opts.noUpcast && canUpcast(sk, sp)) ? '<button class="upcast-btn" onclick="upcastSpell(\'' + q + '\'' + (opts.turnSub ? ',\'' + opts.turnSub + '\'' : '') + ')" title="Cast at a higher level (upcast)">⇧</button>' : '') +
       (castReady(sk, sp) ? '<button class="cast-btn" onclick="' + castCall + '" title="Cast this spell">Cast</button>'
                          : '<button class="cast-btn" disabled title="Not prepared — tick its Prepared box to cast it">Cast</button>') +
     '</div>' +
   '</div>';
 }
+// Upcast (⇧): leveled spells with higher-level scaling that are ready to cast.
+function canUpcast(sk, sp){ return !!(sp && (sp.higherLevels || sp.upcast) && sp.level > 0 && castReady(sk, sp)); }
 // Leveled spells must be prepared (or granted) to cast; cantrips always can.
 function castReady(sk, sp){ return !sp || sp.level === 0 || !!sk.prepared || !!sk.granted; }
 // Rituals: castable as a Ritual when prepared — a Wizard can ritual-cast straight from the spellbook.
@@ -3899,23 +3902,28 @@ function upcastBonusDice(sp, castLevel){
   if(times <= 0) return '';
   return ((num(m[1]) || 1) * times) + 'd' + m[2];
 }
-function openCastPicker(name, label, levels){
+// sub: Action-tab subtab ('action'/'bonus'/'reaction') — the pick goes through turnCastSpell so it spends that economy.
+function openCastPicker(name, label, levels, sub){
   let ov = $('cast-overlay');
   if(!ov){ ov = document.createElement('div'); ov.id = 'cast-overlay'; ov.className = 'ov'; ov.addEventListener('click', e => { if(e.target === ov) ov.classList.remove('open'); }); document.body.appendChild(ov); }
   const q = esc(name).replace(/'/g,"\\'");
   ov.innerHTML = '<div class="modal" style="max-width:340px;"><div class="modal-hd"><div class="ttl">Cast ' + esc(label) + '</div><button class="x" onclick="document.getElementById(\'cast-overlay\').classList.remove(\'open\')">✕</button></div><div class="modal-bd"><p class="m-hint">Choose a spell-slot level (casting higher upcasts the spell).</p><div class="cast-lvls">' +
-    levels.map(l => '<button class="m-btn cast-lvl-btn" onclick="pickCastLevel(\'' + q + '\',' + l + ')">Level ' + l + (l > 0 ? '' : '') + '</button>').join('') +
+    levels.map(l => '<button class="m-btn cast-lvl-btn" onclick="pickCastLevel(\'' + q + '\',' + l + (sub ? ',\'' + sub + '\'' : '') + ')">Level ' + l + (l > 0 ? '' : '') + '</button>').join('') +
     '</div></div></div>';
   ov.classList.add('open');
 }
-function pickCastLevel(name, level){ const ov = $('cast-overlay'); if(ov) ov.classList.remove('open'); castSpellFull(name, level); }
+function pickCastLevel(name, level, sub){ const ov = $('cast-overlay'); if(ov) ov.classList.remove('open'); if(sub) turnCastSpell(name, sub, level); else castSpellFull(name, level); }
 // Explicit upcast: open the slot-level picker (falls back to a normal cast if nothing higher is free).
-function upcastSpell(name){
-  const sp = spellByName(name); if(!sp || sp.level === 0) return castSpellFull(name);
+// sub: called from an Action-tab spell row — casts via turnCastSpell (spends that action type).
+function upcastSpell(name, sub){
+  const plain = () => sub ? turnCastSpell(name, sub) : castSpellFull(name);
+  const sp = spellByName(name); if(!sp || sp.level === 0) return plain();
+  if(sub && (_turn[sub] || isIncapacitated())) return;   // greyed row: economy already spent
+  if(sub && slotCastBlocked(spellsKnown.find(s => norm(s.name) === norm(name)) || { name }, sp, sub)) return plain();   // logs the one-slot-per-turn block
   const opts = availableCastLevels(sp.level);
-  if(opts.length <= 1) return castSpellFull(name);
+  if(opts.length <= 1) return plain();
   const sk = spellsKnown.find(s => norm(s.name) === norm(name));
-  openCastPicker(name, (sk && sk.display) || name, opts);
+  openCastPicker(name, (sk && sk.display) || name, opts, sub);
 }
 // Cast a spell: pick/spend a slot (with upcasting), then roll/report by type — attack roll, saving throw, plain damage, or effect text.
 // Returns true when the spell was cast (so the Turn hub only spends the action on success).
@@ -4293,11 +4301,11 @@ function castableSpells(sub){
 // 2024: on your own turn you can expend only ONE spell slot to cast a spell (Action and Bonus Action spells combined).
 function slotsSpentTotal(){ return Object.keys(slotUsed || {}).reduce((n, k) => n + (num(slotUsed[k]) || 0), 0); }
 function slotCastBlocked(sk, sp, sub){ return sub !== 'reaction' && _turn.slotCast && sp && sp.level > 0 && hasSlotTracking() && !(isFreeCastSpell(sk) && !freeCastUsed[norm(sk.name)]); }
-function turnCastSpell(name, sub){ if(isIncapacitated && isIncapacitated()){ addLog('Cast', '✗', 'Incapacitated — you can\'t take actions', 'fumble'); return; }
+function turnCastSpell(name, sub, castLevel){ if(isIncapacitated && isIncapacitated()){ addLog('Cast', '✗', 'Incapacitated — you can\'t take actions', 'fumble'); return; }
   const sk = spellsKnown.find(s => norm(s.name) === norm(name)), sp = spellByName(name);
   if(slotCastBlocked(sk || { name }, sp, sub)){ addLog('Cast ' + name, '—', 'You already expended a spell slot this turn — only cantrips or slot-free casts until End Turn', 'normal'); return; }
   const before = slotsSpentTotal();
-  if(castSpellFull(name)){ _turn[sub] = true; if(sub !== 'reaction' && slotsSpentTotal() > before) _turn.slotCast = true; afterTurnAction(); } }
+  if(castSpellFull(name, castLevel)){ _turn[sub] = true; if(sub !== 'reaction' && slotsSpentTotal() > before) _turn.slotCast = true; afterTurnAction(); } }
 function toggleTurnSec(id){ _turnCollapsed[id] = !_turnCollapsed[id]; renderTurn(); scheduleAutosave(); }
 // ── Opportunity Attack: mirrors the Attacks section, melee options only ──
 // Unarmed Strikes and melee weapons qualify; ranged weapons and spell-attack rows don't.
@@ -4382,7 +4390,7 @@ function turnSpellsHTML(sub){
     byLvl[lvl].forEach(({ sk, sp }) => {
       const free = sp.level === 0 ? Infinity : freeSlotsAtOrAbove(sp.level);
       const noSlot = (sp.level > 0 && hasSlotTracking() && free <= 0) || slotCastBlocked(sk, sp, sub);
-      h += spellRowHTML(sk, sp, { prep:false, nameInput:false, turnSub:sub, noUpcast:true, disabled: econ || noSlot });
+      h += spellRowHTML(sk, sp, { prep:false, nameInput:false, turnSub:sub, disabled: econ || noSlot });
     });
   });
   return h;
