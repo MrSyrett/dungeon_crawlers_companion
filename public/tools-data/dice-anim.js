@@ -142,6 +142,20 @@
     try{ document.fonts.load('400 48px '+GHOST_FONT,'O').then(go,go); }catch(e){ go(); }
     setTimeout(go, 700); }
 
+  // ─── Marvel: the Marvel die ───
+  // Its 1 face (label 'M', the Fantastic) reads MARVEL in the Marvel wordmark face
+  // (public/fonts/marvel.woff2, @font-face "Marvel" in tokens.css — A–Z only).
+  var MARVEL_FACE='M', MARVEL_WORD='MARVEL', MARVEL_FONT='"Marvel","Oswald",sans-serif';
+  // Fit a word into a maxW × maxH box centred on (cx,cy), by its measured ink box.
+  function wordFit(font,text,cx,cy,maxW,maxH){ var m=measure('400 100px '+font,text);
+    var l=m.actualBoundingBoxLeft||0, r=m.actualBoundingBoxRight||m.width||100, a=m.actualBoundingBoxAscent||70, d=m.actualBoundingBoxDescent||0;
+    var k=Math.min(maxW/Math.max(l+r,1), maxH/Math.max(a+d,1));
+    return {px:100*k, x:cx-(r-l)*k/2, y:cy+(a-d)*k/2}; }
+  function marvelReady(cb){ if(!document.fonts||!document.fonts.load){ cb(); return; }
+    var done=false, go=function(){ if(done) return; done=true; cb(); };
+    try{ document.fonts.load('400 48px "Marvel"',MARVEL_WORD).then(go,go); }catch(e){ go(); }
+    setTimeout(go, 700); }
+
   // ─── colour helpers ───
   function hx(n){ n=Math.max(0,Math.min(255,Math.round(n))).toString(16); return n.length<2?'0'+n:n; }
   function toRgb(h){ h=(h||'#d8b24a').replace('#',''); if(h.length===3) h=h.split('').map(function(c){return c+c;}).join(''); return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]; }
@@ -181,6 +195,8 @@
   function cY(pts){ var s=0; pts.forEach(function(p){s+=p[1];}); return s/pts.length; }
   function pstr(pts){ return pts.map(function(p){return p.join(',');}).join(' '); }
   function numSVG(disp, cx, cy, fs, numColor){
+    if(disp===MARVEL_FACE){ var mf=wordFit(MARVEL_FONT,MARVEL_WORD,cx,cy,fs*1.55,fs*0.8);
+      return '<text x="'+mf.x.toFixed(2)+'" y="'+mf.y.toFixed(2)+'" font-family="Marvel,Oswald,sans-serif" font-weight="400" font-size="'+mf.px.toFixed(2)+'" fill="'+(numColor||S.num)+'">'+MARVEL_WORD+'</text>'; }
     if(disp===GHOST_FACE){ var gf=ghostFit(cx,cy,fs*1.55);
       return '<text x="'+gf.x.toFixed(2)+'" y="'+gf.y.toFixed(2)+'" font-family="Ghostbusters" font-weight="400" font-size="'+gf.px.toFixed(2)+'" fill="'+(numColor||S.num)+'">O</text>'; }
     var y=cy+fs*0.355, nc=numColor||S.num, fi=fontInfo(), fam='Montserrat,Barlow Condensed,Arial,sans-serif', fw=800, tfs=fs;
@@ -493,6 +509,7 @@
   // number sits IN the face and its rim catches the light — engraved and
   // inked, the way real dice are made, not a sticker.
   function drawDigit(g,s,text){ var px=text.length>1?70:92, fi=fontInfo();
+    if(text===MARVEL_FACE){ var mf=wordFit(MARVEL_FONT,MARVEL_WORD,s/2,s/2,s*0.9,s*0.42); g.font='400 '+mf.px+'px '+MARVEL_FONT; g.textAlign='left'; g.textBaseline='alphabetic'; g.fillText(MARVEL_WORD,mf.x,mf.y); return; }
     if(text===GHOST_FACE){ var gf=ghostFit(s/2,s/2,s*0.8); g.font='400 '+gf.px+'px '+GHOST_FONT; g.textAlign='left'; g.textBaseline='alphabetic'; g.fillText('O',gf.x,gf.y); return; }
     if(fi.themed){ var tm=themedMetrics(fi,px,text); g.font=tm.font; g.textAlign='center'; g.textBaseline='alphabetic'; g.fillText(text,s/2,s/2+tm.off); }
     else { g.font='bold '+px+'px Montserrat,sans-serif'; g.textAlign='center'; g.textBaseline='middle'; g.fillText(text,s/2,s/2+4); }
@@ -836,16 +853,16 @@
   // it right after when this roll IS inline).
   function clearInline(){ try{ var els=document.querySelectorAll('[data-da-inline]'); for(var i=0;i<els.length;i++) els[i].innerHTML=''; }catch(e){} }
   function play(dice, crit){ if(!S.on || !dice || !dice.length) return; ensureOverlay();
-    var hasGhost=false;
-    var rd=dice.map(function(d){ var gh=d.faceSet==='ghost'; if(gh) hasGhost=true;
+    var hasGhost=false, hasMarvel=false;
+    var rd=dice.map(function(d){ var gh=d.faceSet==='ghost'; if(gh) hasGhost=true; if(d.faceSet==='marvel') hasMarvel=true;
       var disp=(d.display!=null?d.display:d.val); if(gh && String(disp)===String(d.sides||6)) disp=GHOST_FACE;
       return { sides:d.sides, display:disp, faceSet:d.faceSet||null, wave:d.wave||0,
         color:(d.color!=null?d.color:(gh?GHOST_COLOR:resolveColor())), numColor:(d.numColor!=null?d.numColor:(gh?GHOST_NUM:null)) }; });
     if(S.sound!==false) playAudio(rd.length);
     clearInline();
-    (hasGhost?ghostReady:function(f){f();})(function(){ fontReady(function(){
+    (hasGhost?ghostReady:function(f){f();})(function(){ (hasMarvel?marvelReady:function(f){f();})(function(){ fontReady(function(){
     if(S.mode==='3d' && HAS_WEBGL){ if(threeState===2){ play3D(rd,crit); } else { play2D(rd,crit); if(threeState!==3) loadThree(function(ok){}); } }
-    else { play2D(rd,crit); } }); }); }
+    else { play2D(rd,crit); } }); }); }); }
   // warm up three.js if 3D is the active mode
   if(S.on && S.mode==='3d' && HAS_WEBGL) setTimeout(function(){ loadThree(function(){}); }, 400);
 
