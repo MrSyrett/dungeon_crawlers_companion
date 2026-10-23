@@ -361,28 +361,81 @@ body.dark .eq-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 #roll-toast .t-result{font-family:var(--f-num);font-size:28px;font-weight:600;color:#f3e6d4;line-height:1;}
 #roll-toast .t-detail{font-size:12px;color:#a89a8a;margin-top:3px;}
 
+/* status row: Devil's Luck | Conditions | Armor | Hit Points (Armor and Hit Points equal) */
+.vitals{grid-template-columns:max-content minmax(0,1.45fr) minmax(0,1fr) minmax(0,1fr);}
+.cond-vital .cond-sum{margin-top:5px;}
+.cond-vital .cs{white-space:normal;text-align:left;line-height:1.25;}
+.hp-nums{flex-wrap:nowrap;gap:2px;margin-top:4px;}
+.hp-nums input{width:46px;height:44px;font-size:30px;padding:0;border-color:transparent;background:transparent;}
+.hp-nums #f-hp{border-color:var(--input-border);background:var(--input-bg);}
+.hp-nums .slash{font-size:26px;}
+body.sheet-unlocked .hp-nums #f-hpmax{border:1px dashed var(--acc);background:var(--input-bg);}
+
+/* ship (under Abilities) */
+.ship-tabs{display:flex;border-bottom:1px solid var(--rule);margin-top:2px;}
+.ship-tab{flex:1;padding:7px 4px;background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--f-label);font-size:14.5px;letter-spacing:.02em;color:var(--muted);}
+.ship-tab:hover{color:var(--ink);}
+.ship-tab.on{color:var(--acc-dk);border-bottom-color:var(--acc);background:var(--acc-lt);}
+.ship-panel{display:none;}
+.ship-panel.on{display:block;}
+.sh-ed{display:none;}
+body.sheet-unlocked .sh-ed{display:inline-block;}
+body.sheet-unlocked .sh-vw{display:none;}
+input.sh-ed,select.sh-ed{height:28px;border:1px dashed var(--acc);border-radius:6px;background:var(--input-bg);color:var(--ink);font-family:var(--f-num);font-size:16px;font-weight:600;text-align:center;outline:none;padding:0 2px;}
+.sh-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:8px;padding:8px 10px 2px;}
+.sh-top select{width:100%;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:var(--f-ui);font-size:15px;color:var(--ink);outline:none;padding:3px 0;}
+.sh-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;padding:8px;}
+.sst{border:1px solid var(--rule);border-radius:9px;background:var(--box);padding:4px 7px 5px;min-width:0;}
+body.dark .sst{background:#1a1212;}
+.sst-l{font-family:var(--f-label);font-size:13px;letter-spacing:.02em;color:var(--muted);}
+.sst-v{font-family:var(--f-num);font-size:22px;font-weight:600;line-height:1.15;color:var(--ink);display:flex;align-items:center;gap:2px;flex-wrap:nowrap;min-height:30px;}
+.sst-v .slash{color:var(--muted);font-size:18px;}
+.sst-s{font-family:var(--f-num);font-size:12.5px;color:var(--muted);white-space:nowrap;}
+.sst-s input.sh-ed{height:22px;font-size:13px;}
+.sst-v input.sh-hp,.sst-v input.sh-crew{width:48px;height:30px;border:1px solid var(--input-border);border-radius:7px;background:var(--input-bg);font-family:var(--f-num);font-size:20px;font-weight:600;text-align:center;color:var(--ink);outline:none;padding:0;}
+.sst-v input.sh-crew{width:56px;}
+.sh-roll{min-width:46px;height:30px;border:1px solid var(--acc-dk);border-radius:7px;background:var(--acc);font-family:var(--f-num);font-size:19px;font-weight:600;color:#fff;cursor:pointer;padding:0 6px;line-height:1;}
+.sh-roll:hover{filter:brightness(1.15);}
+.sh-weap{padding:0 10px;border-top:1px solid var(--rule);}
+.sh-weap .pb-card{padding:5px 0;}
+.sh-weap .pb-sub b{font-size:15px;}
+.sh-acts{display:flex;flex-wrap:wrap;gap:5px;padding:8px 10px;border-top:1px solid var(--rule);}
+.sh-acts .pb-do{padding:5px 9px;font-size:13.5px;}
+.sh-special{font-size:12.5px;color:var(--muted);padding:0 10px 8px;line-height:1.35;}
+.section-bar.sh-sub{font-size:16px;padding:6px 10px 4px;}
+.section-bar.sh-sub .cont-fill{font-size:14px;}
+.sh-ups{padding:2px 10px 6px;}
+.sh-up{display:flex;align-items:flex-start;gap:7px;padding:4px 0;border-bottom:1px solid var(--rule);font-size:13.5px;line-height:1.3;cursor:pointer;}
+.sh-up:last-child{border-bottom:none;}
+.sh-up input{margin-top:2px;accent-color:var(--acc);width:15px;height:15px;flex-shrink:0;}
+.sh-up small{color:var(--muted);font-family:var(--f-num);}
+.sh-shan{padding:0 10px;}
+.ship-dgrid{grid-template-columns:1fr 1fr!important;}
+
 /* ── responsive (same breakpoints as the other sheets) ── */
 @container (max-width:900px){
   .body-row{flex-direction:column;align-items:stretch;}
   .stats-col,.center-col{width:100%;}
   .hdr-top{grid-template-columns:1fr;gap:9px;}
-  .hdr-metarow>*{flex:1 1 31%!important;}
+  .hdr-metarow>*{flex:1 1 22%!important;}
   .blk-grid{grid-template-columns:1fr;}
 }
 @container (max-width:520px){
   .hdr-metarow>*{flex:1 1 47%!important;}
-  /* phone: the same one row — Devil's Luck (narrow) | Armor | Hit Points, the last two equal */
-  .vitals{grid-template-columns:64px minmax(0,1fr) minmax(0,1fr);gap:5px;padding:6px;}
+  /* phone: two rows — Devil's Luck (narrow) | Conditions, then Armor | Hit Points (equal) */
+  .vitals{display:flex;flex-wrap:wrap;gap:5px;padding:6px;}
+  .luck-vital{flex:0 0 64px;}
+  .cond-vital{flex:1 1 calc(100% - 70px);min-width:0;}
+  .armor-vital,.hp-vital{flex:1 1 40%;}
+  .hp-nums input{width:54px;height:48px;font-size:34px;}
   .luck-vital{padding:6px 4px;}
   .luck-box .small-btn{padding:4px 6px;}
   .vital{padding:6px 7px;}
   .vital.half{grid-column:auto;}
   .luck-vital .vlbl{justify-content:center;text-align:center;line-height:1.05;}   /* "Devil's / Luck" on two lines */
-  .hp-vital .vbig{flex-wrap:nowrap;gap:3px;}
-  .hp-vital .vbig input{width:44px;}
   .hdr-logo .lg-word{font-size:38px;}
 }
-@media(max-width:768px){.hdr-metarow>*{flex:1 1 31%!important;}}
+@media(max-width:768px){.hdr-metarow>*{flex:1 1 22%!important;}}
 @media(max-width:460px){.hdr-metarow>*{flex:1 1 47%!important;}}
 @media (max-width:1024px){.body-row{flex-direction:column;align-items:stretch;}.stats-col,.center-col{width:100%;}.hdr-top{grid-template-columns:1fr;gap:9px;}}
 @media (max-width:768px){
@@ -592,8 +645,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     </div>
     <div class="hdr-metarow">
       <div class="lockfield"><label>Class</label><select id="f-class" onchange="onClass(this.value)"></select></div>
-      <div class="lockfield" id="f-origin-wrap"><label id="f-origin-lbl">Origin</label><input type="text" id="f-origin" placeholder="—" readonly data-nolock tabindex="-1"></div>
-      <div class="lockfield" style="flex:1.3 1 0;"><label>Background</label><input type="text" id="f-bg" placeholder="—" onchange="onField('background',this.value)"></div>
+      <div class="lockfield"><label>Background</label><input type="text" id="f-bg" placeholder="—" onchange="onField('background',this.value)"></div>
       <div class="lockfield" style="flex:1.3 1 0;"><label>Distinctive Flaw</label><input type="text" id="f-flaw" placeholder="—" onchange="onField('flaw',this.value)"></div>
       <div class="lockfield" style="flex:1.3 1 0;"><label>Physical Trademark</label><input type="text" id="f-mark" placeholder="—" onchange="onField('trademark',this.value)"></div>
     </div>
@@ -605,9 +657,21 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="section-bar"><span>Abilities</span></div>
         <div class="ab-grid" id="ab-grid"></div>
       </div>
-      <div class="card">
-        <div class="section-bar"><span>Conditions</span><span class="sb-note" id="cond-count"></span></div>
-        <div class="cond-box"><div class="cond-sum" id="cond-sum"></div></div>
+      <div class="card ship-card" id="ship-card">
+        <div class="section-bar"><span>Ship</span><span class="sb-note" id="ship-note"></span></div>
+        <div class="ship-tabs" id="ship-tabs"><button class="ship-tab" data-sub="stats" onclick="setShipSub('stats')">Stats</button><button class="ship-tab" data-sub="cargo" onclick="setShipSub('cargo')">Cargo</button><button class="ship-tab" data-sub="details" onclick="setShipSub('details')">Details</button></div>
+        <div class="ship-panel" id="ship-stats"></div>
+        <div class="ship-panel" id="ship-cargo"></div>
+        <div class="ship-panel" id="ship-details">
+          <div class="blk"><div class="blk-grid ship-dgrid">
+            <div class="fld"><label>Captain</label><input type="text" id="sh-captain" onchange="onShip('captain',this.value)"></div>
+            <div class="fld"><label>Flag</label><input type="text" id="sh-flag" onchange="onShip('flag',this.value)"></div>
+            <div class="fld"><label>Home port</label><input type="text" id="sh-port" onchange="onShip('port',this.value)"></div>
+            <div class="fld"><label>Last careened</label><input type="text" id="sh-careen" onchange="onShip('careened',this.value)"></div>
+            <div class="fld" style="grid-column:1/-1;"><label>Crew</label><textarea id="sh-crewnotes" onchange="onShip('crewNotes',this.value)"></textarea></div>
+            <div class="fld" style="grid-column:1/-1;"><label>Notes</label><textarea id="sh-notes" onchange="onShip('notes',this.value)"></textarea></div>
+          </div></div>
+        </div>
       </div>
     </div>
 
@@ -621,7 +685,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
             <div class="vlbl"><span>Devil's Luck</span></div>
             <div class="vbig luck-box" id="luck-box"></div>
           </div>
-          <div class="vital">
+          <div class="vital cond-vital">
+            <div class="vlbl"><span>Conditions</span><small id="cond-count"></small></div>
+            <div class="cond-sum" id="cond-sum"></div>
+          </div>
+          <div class="vital armor-vital">
             <div class="vlbl"><span>Armor</span></div>
             <div class="vbig" id="armor-big"></div>
             <div class="armor-sub" id="armor-sub"></div>
@@ -629,8 +697,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
           </div>
           <div class="vital hp-vital">
             <div class="vlbl"><span>Hit Points</span><small id="hp-note"></small></div>
-            <div class="vbig"><input type="number" id="f-hp" class="no-spin" data-nolock onfocus="_hpFocus=S.hp" oninput="onHpInput()" onchange="onHpCommit()" title="Current HP — type the new value after a hit"><span class="slash">/</span><input type="number" id="f-hpmax" class="no-spin" onchange="onHpMax(this.value)" title="Maximum HP"></div>
-            <div class="vbar"><span id="hp-bar"></span></div>
+            <div class="vbig hp-nums"><input type="number" id="f-hp" class="no-spin" data-nolock onfocus="_hpFocus=S.hp" oninput="onHpInput()" onchange="onHpCommit()" title="Current HP — type the new value after a hit"><span class="slash">/</span><input type="number" id="f-hpmax" class="no-spin" onchange="onHpMax(this.value)" title="Maximum HP"></div>
           </div>
         </div>
       </div>
@@ -647,7 +714,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="tab-panel" id="tab-action"><div id="pb-turn"></div></div>
 
         <div class="tab-panel" id="tab-class">
-          <div class="section-bar"><span id="class-title">Class</span></div>
+          <div class="section-bar"><span id="class-title">Class</span><span class="sb-note" id="class-origin"></span></div>
           <div id="class-body"></div>
         </div>
 
@@ -667,13 +734,13 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
           <div class="section-bar"><span>Background</span></div>
           <div class="blk"><div class="blk-grid">
             <div class="fld"><label>Background</label><input type="text" id="f-bg2" onchange="onField('background',this.value)"></div>
+            <div class="fld"><label>Background gear</label><input type="text" id="f-bgitem" onchange="onField('bgItem',this.value)"></div>
             <div class="fld"><label>Thing of Importance</label><input type="text" id="f-thing" onchange="onField('thing',this.value)"></div>
             <div class="fld"><label>Distinctive Flaw</label><input type="text" id="f-flaw2" onchange="onField('flaw',this.value)"></div>
             <div class="fld"><label>Physical Trademark</label><input type="text" id="f-mark2" onchange="onField('trademark',this.value)"></div>
             <div class="fld" style="grid-column:1/-1;"><label>Idiosyncrasy</label><input type="text" id="f-idio" onchange="onField('idiosyncrasy',this.value)"></div>
             <div class="fld" style="grid-column:1/-1;"><label>Unfortunate Incident or Condition</label><input type="text" id="f-incident" onchange="onField('incident',this.value)"></div>
             <div class="fld"><label>Pet</label><input type="text" id="f-pet" onchange="onField('pet',this.value)"></div>
-            <div class="fld"><label>Ship &amp; crew</label><input type="text" id="f-ship" onchange="onField('ship',this.value)"></div>
             <div class="fld" style="grid-column:1/-1;"><label>Story</label><textarea id="f-story" onchange="onField('story',this.value)"></textarea></div>
           </div></div>
           <div class="section-bar"><span>Notes</span></div>
@@ -753,7 +820,7 @@ function blankState(){ return {
   features:[], deity:'', prayers:[], prayerUses:{left:0,max:0}, spells:[], spellCasts:{left:0,max:0},
   rituals:[], ritualCasts:{left:0,max:0}, relics:[], conduit:{id:'',used:false}, mishaps:[],
   items:[], silver:0,
-  background:'', flaw:'', trademark:'', idiosyncrasy:'', incident:'', thing:'', pet:'', ship:'', story:'', notes:'',
+  background:'', bgItem:'', flaw:'', trademark:'', idiosyncrasy:'', incident:'', thing:'', pet:'', ship:blankShip(), story:'', notes:'',
   cond:{starving:false, starveDays:0, infected:false, hemorrhage:0, brain:0, out:0, stunned:false, underwater:false, sunlight:false, invisible:false},
   broken:null, dead:false,
   grog:{drinks:0, brewed:0, coated:''},
@@ -921,8 +988,7 @@ function renderHeader(){
   setVal($('f-name'),S.name||''); setVal($('f-bg'),S.background||''); setVal($('f-flaw'),S.flaw||''); setVal($('f-mark'),S.trademark||'');
   var opts=A(D('PB_CLASSES')).map(function(c){ return {v:c.id,t:c.name+(c.optional?' (optional)':'')}; }); opts.push({v:'landlubber',t:'Landlubber (no class)'});
   fillSelect($('f-class'),opts,S.classId,'—');
-  var lbl=S.classId==='haunted-soul'?'Ailment · class':S.classId==='tall-tale'?'Tall Tale':S.classId==='zealot'?'Deity':'Class trait';
-  setText($('f-origin-lbl'),lbl); setVal($('f-origin'),originText());
+  setText($('class-origin'),originText());
 }
 function renderAbilities(){
   var h=''; ABIL.forEach(function(a){ var t=tempAbil(a); var eff=abil(a);
@@ -938,7 +1004,7 @@ function renderLuck(){
 function hpMax(){ return Math.max(1,num(S.hpMax,1)); }
 function renderStatus(){
   var hm=hpMax(); S.hp=Math.min(num(S.hp),hm);
-  setVal($('f-hp'),S.hp); setVal($('f-hpmax'),hm); $('hp-bar').style.width=(hm?clamp(Math.round(100*Math.max(0,S.hp)/hm),0,100):0)+'%';
+  setVal($('f-hp'),S.hp); setVal($('f-hpmax'),hm); 
   setText($('hp-note'),(num(S.tempHp)>0?'+'+num(S.tempHp)+' temporary · ':'')+(S.hp===0&&!S.dead?'Broken':S.hp<0||S.dead?'dead':''));
   var t=armorTier(), die=armorDie(), c=wornClothing(), hat=wornHat();
   setHTML($('armor-big'),'<span class="calc">'+(die?'−'+die:'—')+'</span>');
@@ -1096,7 +1162,135 @@ function renderGear(){
 }
 function repairCost(x){ if(x.ruined||x.tier>=x.origTier||x.tier<1) return 0; var r=A((D('PB_ARMOR_REPAIR')||{}).rows).find(function(z){ return z.from===x.tier; }); return r?r.cost:0; }
 function renderBackground(){
-  [['f-bg2','background'],['f-flaw2','flaw'],['f-mark2','trademark'],['f-idio','idiosyncrasy'],['f-incident','incident'],['f-thing','thing'],['f-pet','pet'],['f-ship','ship'],['f-story','story'],['f-notes','notes']].forEach(function(f){ setVal($(f[0]),S[f[1]]||''); });
+  [['f-bg2','background'],['f-flaw2','flaw'],['f-mark2','trademark'],['f-idio','idiosyncrasy'],['f-incident','incident'],['f-thing','thing'],['f-pet','pet'],['f-bgitem','bgItem'],['f-story','story'],['f-notes','notes']].forEach(function(f){ setVal($(f[0]),S[f[1]]||''); });
+}
+// ═══ SHIP (under Abilities: Stats / Cargo / Details) ═════════════════════════
+// The crew's vessel, after the Core Rules ship stats (pg. 73–85): HP, hull (an armor tier
+// and die), AGILITY, speed, crew SKILL, broadsides / small arms / ram damage, crew min–max
+// and cargo slots. Picking a type from PB_SHIPS fills the stats in. Crew-action rolls are
+// d20 + the ship's stat + the pirate's ability where the action names one (the GM sets the
+// DR); attack damage is rolled with the attack. Shipwright upgrades (pg. 77) change the
+// numbers; known sea shanties (pg. 68) are sung as a CREW SKILL test.
+function blankShip(){ return {type:'', name:'', hp:0, hpMax:0, hull:0, agility:0, speed:0, skill:0, broadsides:'', broadsidesN:1, smallArms:'', smallArmsN:1, ram:'',
+  crewMin:0, crewMax:0, crew:0, cargoCap:0, misfired:{broadsides:false, smallArms:false}, upgrades:[], cargo:[], shanties:[],
+  captain:'', flag:'', port:'', careened:'', crewNotes:'', notes:''}; }
+function normShip(v){ var b=blankShip(); if(typeof v==='string'){ b.crewNotes=v; return b; }   // older saves: a "Ship & crew" line on the Background tab
+  if(!v||typeof v!=='object'||Array.isArray(v)) return b; var o=Object.assign(b,v);
+  o.misfired=Object.assign({broadsides:false,smallArms:false},(v.misfired&&typeof v.misfired==='object')?v.misfired:{});
+  ['upgrades','cargo','shanties'].forEach(function(k){ if(!Array.isArray(o[k])) o[k]=[]; }); o.cargo.forEach(function(c){ if(!c.uid) c.uid=uid(); }); return o; }
+function SH(){ if(!S.ship||typeof S.ship!=='object') S.ship=normShip(S.ship); return S.ship; }
+function shipDef(){ return byId(D('PB_SHIPS'),SH().type); }
+function shipUpgrades(){ return A((D('PB_SHIPWRIGHT')||{}).upgrades); }
+function shipMods(){ var m={}; var own=SH().upgrades; shipUpgrades().forEach(function(u){ if(own.indexOf(u.id)<0) return; Object.keys(u.mods||{}).forEach(function(k){ m[k]=num(m[k])+num(u.mods[k]); }); }); return m; }
+function shipNA(v){ return v===''||v==null; }
+function shipAgl(){ return num(SH().agility)+num(shipMods().agility); }
+function shipSkill(){ return num(SH().skill); }
+function shipSpeed(){ return Math.max(0,num(SH().speed)+num(shipMods().speed)); }
+function shipHull(){ var t=num(SH().hull); if(t>0||shipMods().hullTier) t+=num(shipMods().hullTier); return clamp(t,0,3); }
+function shipDmg(k){ var e=String(SH()[k]||'').trim(); if(!e) return ''; var m=shipMods();
+  if(k==='broadsides'&&m.broadsidesDamage) e+='+'+m.broadsidesDamage; if(k==='smallArms'&&m.smallArmsDamage) e+='+'+m.smallArmsDamage;
+  if(k==='ram'&&m.ramDice) e=e.replace(/^(\d*)d(\d+)/i,function(_,n,s){ return (num(n||1,1)*m.ramDice)+'d'+s; });
+  return e; }
+// How many broadside / small-arms attacks the ship makes now: the stat block's number, cut
+// down as it loses HP where its type says so (frigate, galleon, man-of-war, ship of the line,
+// forts), plus an Extra cannons / Extra swivels upgrade.
+function shipAttacks(k){ var sh=SH(), n=Math.max(1,num(sh[k+'N'],1)), def=shipDef(), hm=num(sh.hpMax), f=hm>0?num(sh.hp)/hm:1;
+  if(def&&def.attackScaling&&def.attackScaling[k]){ var row=A(def.attackScaling[k]).find(function(r){ return f>r.above; }); n=Math.min(n,row?row.attacks:1); }
+  else if(def&&def.multiAttackAboveHalfHp&&k==='broadsides'&&f<=0.5) n=1;
+  else if(def&&def.attackPerHp&&k==='broadsides') n=Math.min(n,Math.max(1,Math.ceil(num(sh.hp)/def.attackPerHp)));
+  return n+num(shipMods()[k+'Attacks']); }
+function shipRoll(o){ var n=d(20), pm=o.pc?abil(o.pc):0, total=n+o.mod+pm, crit=n===20, fum=n===1;
+  var det='d20('+n+') '+sgn(o.mod)+' '+o.modLbl+(o.pc?' '+sgn(pm)+' '+ABS[o.pc]:'')+' = '+total, res=String(total);
+  if(o.dmg){ var r=rollExpr(o.dmg), dm=crit?r.total*2:r.total; det+=' · damage '+r.text+(crit?' ×2':'')+' = '+dm; res+=' · '+dm+' dmg'; }
+  if(o.heal){ var h=rollExpr(o.heal); det+=' · recovers '+h.text+' = '+h.total+' HP (up to '+Math.floor(num(SH().hpMax)/2)+')'; }
+  if(crit) det+=' · natural 20: critical'+(o.dmg?', target hull −1 tier':''); if(fum) det+=' · natural 1: '+(o.misfire?'misfire':'fumble');
+  if(fum&&o.misfire){ SH().misfired[o.misfire]=true; }
+  addLog(o.label,res+(crit?' · Critical!':fum?' · Fumble!':''),det,crit?'crit':fum?'fumble':'normal');
+  return fum; }
+function shipLabel(){ var sh=SH(), def=shipDef(); return sh.name||(def?def.name:'Ship'); }
+function shipFire(k){ var sh=SH(); if(sh.misfired[k]){ addLog(shipLabel()+' · '+(k==='broadsides'?'Broadsides':'Small arms'),'—','Misfired: repair first','normal'); return; }
+  var e=shipDmg(k); if(!e) return; var n=shipAttacks(k), nm=k==='broadsides'?'Broadsides':'Small arms', mis=false;
+  for(var i=0;i<n;i++){ if(shipRoll({label:shipLabel()+' · '+nm+(n>1?' '+(i+1)+'/'+n:''),mod:shipSkill(),modLbl:'SKILL',pc:i===0?'PRESENCE':null,dmg:e,misfire:k})) mis=true; }
+  if(mis) changed(); else scheduleAutosave(); }
+function shipRam(){ var e=shipDmg('ram'); if(!e) return; var r=rollExpr(e); addLog(shipLabel()+' · Ram',String(r.total)+' dmg',r.text+' = '+r.total+' (+1 per hex moved)','normal'); }
+function shipAct(k){ var sh=SH(), L=shipLabel();
+  if(k==='init'){ var r=d(6), a=shipAgl(); addLog(L+' · Initiative',String(r+a),'d6('+r+') '+sgn(a)+' AGILITY = '+(r+a),'normal'); return; }
+  if(k==='morale'){ var m=rollExpr('2d6'), t=m.total+shipSkill(); addLog(L+' · Morale',String(t)+(t<4?' · surrender or mutiny':''),m.text+' '+sgn(shipSkill())+' SKILL = '+t,t<4?'fumble':'normal'); return; }
+  if(k==='agility'){ shipRoll({label:L+' · AGILITY test',mod:shipAgl(),modLbl:'AGILITY'}); return; }
+  if(k==='skill'){ shipRoll({label:L+' · Crew SKILL test',mod:shipSkill(),modLbl:'SKILL'}); return; }
+  if(k==='sail'){ shipRoll({label:L+' · Full Sail',mod:shipAgl(),modLbl:'AGILITY',pc:'AGILITY'}); return; }
+  if(k==='about'){ shipRoll({label:L+' · Come About',mod:shipAgl(),modLbl:'AGILITY',pc:'STRENGTH'}); return; }
+  if(k==='repair'){ shipRoll({label:L+' · Repair',mod:shipSkill(),modLbl:'SKILL',pc:'PRESENCE',heal:'d6'}); return; }
+  if(k==='derelict'){ var n=d(8), row=rowFor(D('PB_DERELICT'),n)||{}; addLog(L+' · Derelict',String(row.text||n).replace(/:.*/,''),'d8('+n+') '+(row.text||''),n>=3?'fumble':'normal'); return; } }
+function shipFixed(k){ SH().misfired[k]=false; addLog(shipLabel()+' · '+(k==='broadsides'?'Broadsides':'Small arms'),'Repaired','','normal'); changed(); }
+function sing(id){ var p=byId(D('PB_SHANTIES'),id); if(!p) return; shipRoll({label:'Shanty · '+p.name,mod:shipSkill(),modLbl:'SKILL'}); }
+// edits
+var SHIP_NUM={hp:1,hpMax:1,hull:1,agility:1,speed:1,skill:1,broadsidesN:1,smallArmsN:1,crewMin:1,crewMax:1,crew:1,cargoCap:1};
+function onShip(k,v){ var sh=SH(); if(SHIP_NUM[k]) v=(k==='skill'&&String(v).trim()==='')?'':num(v); if(k==='hpMax') v=Math.max(0,v); sh[k]=v; changed(); }
+function onShipHp(el){ var sh=SH(), v=parseInt(el.value,10); if(isNaN(v)){ el.value=sh.hp; return; } v=Math.min(v,num(sh.hpMax)||v); var was=num(sh.hp); if(v===was){ el.value=v; return; }
+  sh.hp=v; addLog(shipLabel()+' · HP',(v<was?'−'+(was-v):'+'+(v-was))+' HP','→ '+v+'/'+num(sh.hpMax)+(v<=0?' · derelict':''),v<=0?'fumble':'normal'); changed(); }
+function onShipType(id){ var sh=SH(), def=byId(D('PB_SHIPS'),id); sh.type=id; if(def){ var hm=num(def.hp);
+    Object.assign(sh,{hpMax:hm,hp:hm,hull:def.hull?num(def.hull.tier):0,agility:def.agility==null?0:num(def.agility),speed:num(def.speed),skill:def.skill==null?'':num(def.skill),
+      broadsides:def.broadsides||'',broadsidesN:num(def.broadsidesAttacks,1)||1,smallArms:def.smallArms||'',smallArmsN:num(def.smallArmsAttacks,1)||1,ram:def.ram||'',
+      crewMin:def.crew?num(def.crew.min):0,crewMax:def.crew?num(def.crew.max):0,cargoCap:num(def.cargo),misfired:{broadsides:false,smallArms:false}});
+    if(!num(sh.crew)&&def.crew) sh.crew=num(def.crew.min); }
+  changed(); }
+function toggleUpgrade(id){ if(needUnlock()) return false; var u=SH().upgrades, i=u.indexOf(id); if(i<0) u.push(id); else u.splice(i,1); changed(); return true; }
+function onCargo(u,k,v){ var c=SH().cargo.find(function(x){ return x.uid===u; }); if(!c) return; c[k]=k==='value'?String(v).trim():v; changed(); }
+function removeCargo(u){ var cg=SH().cargo, i=cg.findIndex(function(x){ return x.uid===u; }); if(i<0) return; cg.splice(i,1); changed(); }
+function addCargo(name,value){ name=String(name||'').trim(); if(!name) return; SH().cargo.push({uid:uid(),name:name,value:value||''}); changed(); }
+function openCargo(){ openDlg('Cargo','<input id="cg-name" class="m-input" placeholder="Cargo">',[{t:'Roll d12',cls:'ghost',f:function(){ closeDlg(); rollCargo(); }},{t:'Add',f:function(){ var v=$('cg-name').value; closeDlg(); addCargo(v); }}]); }
+function rollCargo(){ var C=D('PB_CARGO')||{}, t=C.mundane||{}, n=d(12), row=rowFor(t.rows,n)||{}, det='d12('+n+')';
+  if(row.table&&C.special){ var n2=d(12); row=rowFor(C.special.rows,n2)||{}; det+=' special cargo · d12('+n2+')'; }
+  var txt=String(row.text||'cargo'), m=txt.match(/^(.*),\s*(\d+)s$/); var name=m?m[1]:txt; name=name.charAt(0).toUpperCase()+name.slice(1);
+  addLog('Cargo',name,det+' '+txt,'normal'); addCargo(name,m?m[2]:''); }
+function openShanty(){ var own=SH().shanties; openDlg('Sea shanties','<div class="m-row">'+A(D('PB_SHANTIES')).map(function(p){ var on=own.indexOf(p.id)>=0; return '<button class="chip'+(on?' sel':'')+'"'+(on?' disabled':'')+' onclick="learnShanty(\''+jsq(p.id)+'\')">'+esc(p.name)+'</button>'; }).join('')+'</div>',[]); }
+function learnShanty(id){ if(SH().shanties.indexOf(id)<0) SH().shanties.push(id); closeDlg(); changed(); }
+function forgetShanty(i){ if(needUnlock()) return; SH().shanties.splice(i,1); changed(); }
+var _shipSub='stats'; try{ _shipSub=localStorage.getItem('pb_shipsub')||'stats'; }catch(e){}
+function setShipSub(k){ _shipSub=k; try{ localStorage.setItem('pb_shipsub',k); }catch(e){}
+  [].forEach.call(document.querySelectorAll('.ship-tab'),function(b){ b.classList.toggle('on',b.dataset.sub===k); });
+  [].forEach.call(document.querySelectorAll('.ship-panel'),function(p){ p.classList.toggle('on',p.id==='ship-'+k); }); }
+// a stat that shows as text (or a roll button) while locked and as a field while unlocked
+function shEd(k,v,w,type){ return '<input class="sh-ed'+(type==='number'?' no-spin':'')+'" type="'+(type||'number')+'" style="width:'+(w||40)+'px;" value="'+esc(v)+'" onchange="onShip(\''+k+'\',this.value)">'; }
+function renderShip(){ var sh=SH(), def=shipDef(), hm=num(sh.hpMax), hp=num(sh.hp), mods=shipMods(), h='';
+  var types=A(D('PB_SHIPS')).map(function(x){ return '<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>'; }).join('');
+  h+='<div class="sh-top"><div class="fld"><label>Type</label><select id="sh-type" onchange="onShipType(this.value)"><option value="">—</option>'+types+'</select></div>'+
+     '<div class="fld"><label>Name</label><input type="text" id="sh-name" onchange="onShip(\'name\',this.value)"></div></div>';
+  var hull=shipHull();
+  h+='<div class="sh-grid">'+
+    '<div class="sst sst-hp"><div class="sst-l">HP</div><div class="sst-v"><input type="number" id="sh-hp" class="no-spin sh-hp" data-nolock onchange="onShipHp(this)"><span class="slash">/</span><span class="sh-vw">'+hm+'</span>'+shEd('hpMax',hm,46)+'</div></div>'+
+    '<div class="sst"><div class="sst-l">Hull</div><div class="sst-v"><span class="sh-vw">'+(hull?'−'+DIE_BY_TIER[hull]:'—')+'</span><select class="sh-ed" onchange="onShip(\'hull\',this.value)">'+[0,1,2,3].map(function(t){ return '<option value="'+t+'"'+(num(sh.hull)===t?' selected':'')+'>'+(t?'−'+DIE_BY_TIER[t]:'—')+'</option>'; }).join('')+'</select></div>'+(hull?'<div class="sst-s">tier '+hull+'</div>':'')+'</div>'+
+    '<div class="sst"><div class="sst-l">Speed</div><div class="sst-v"><span class="sh-vw">'+shipSpeed()+'</span>'+shEd('speed',num(sh.speed))+'</div></div>'+
+    '<div class="sst"><div class="sst-l">Agility</div><div class="sst-v"><button type="button" class="sh-roll sh-vw" onclick="shipAct(\'agility\')" title="Ship AGILITY test: d20 '+sgn(shipAgl())+'">'+sgn(shipAgl())+'</button>'+shEd('agility',num(sh.agility))+'</div></div>'+
+    '<div class="sst"><div class="sst-l">Skill</div><div class="sst-v"><button type="button" class="sh-roll sh-vw" onclick="shipAct(\'skill\')" title="Crew SKILL test: d20 '+sgn(shipSkill())+'">'+(shipNA(sh.skill)?'—':sgn(shipSkill()))+'</button>'+shEd('skill',sh.skill)+'</div></div>'+
+    '<div class="sst"><div class="sst-l">Crew</div><div class="sst-v"><input type="number" id="sh-crew" class="no-spin sh-crew" data-nolock onchange="onShip(\'crew\',this.value)"></div><div class="sst-s"><span class="sh-vw">'+num(sh.crewMin)+'–'+num(sh.crewMax)+'</span><span class="sh-ed">'+shEd('crewMin',num(sh.crewMin),38)+'–'+shEd('crewMax',num(sh.crewMax),38)+'</span></div></div>'+
+    '</div>';
+  var wrow=function(k,nm){ var e=shipDmg(k), n=shipAttacks(k), mis=sh.misfired[k];
+    var vw=e?(n>1?n+' × ':'')+'<b>'+esc(e)+'</b>':'—';
+    var ed=(k!=='ram'?shEd(k+'N',num(sh[k+'N'],1),36)+' × ':'')+shEd(k,sh[k]||'',56,'text');
+    var btn=k==='ram'?tbtn('Ram','shipRam()','',e?'Ram damage: '+e:'',!e):(mis?tbtn('Repaired','shipFixed(\''+k+'\')','ghost','Misfired — repaired?'):tbtn('Fire','shipFire(\''+k+'\')','',e?nm+': d20 '+sgn(shipSkill())+' SKILL '+sgn(abil('PRESENCE'))+' PRE, '+e+' damage':'',!e));
+    return '<div class="pb-card sh-w"><div class="pb-main"><div class="pb-name">'+nm+(mis?' <span class="tag warn">misfired</span>':'')+'</div><div class="pb-sub"><span class="sh-vw">'+vw+'</span><span class="sh-ed">'+ed+'</span></div></div><div class="pb-btns">'+btn+'</div></div>'; };
+  h+='<div class="sh-weap">'+wrow('broadsides','Broadsides')+wrow('smallArms','Small arms')+wrow('ram','Ram')+'</div>';
+  h+='<div class="sh-acts">'+tbtn('Initiative','shipAct(\'init\')','ghost','d6 '+sgn(shipAgl())+' AGILITY')+tbtn('Full Sail','shipAct(\'sail\')','ghost','d20 '+sgn(shipAgl())+' AGILITY '+sgn(abil('AGILITY'))+' AGL')+
+     tbtn('Come About','shipAct(\'about\')','ghost','d20 '+sgn(shipAgl())+' AGILITY '+sgn(abil('STRENGTH'))+' STR')+tbtn('Repair','shipAct(\'repair\')','ghost','d20 '+sgn(shipSkill())+' SKILL '+sgn(abil('PRESENCE'))+' PRE; d6 HP')+
+     tbtn('Morale','shipAct(\'morale\')','ghost','2d6 '+sgn(shipSkill())+' SKILL')+(hm&&hp<=0?tbtn('Derelict d8','shipAct(\'derelict\')','','The ship is derelict: roll when it takes more damage'):'')+'</div>';
+  if(def&&def.special) h+='<div class="sh-special">'+esc(def.special)+'</div>';
+  setHTML($('ship-stats'),h);
+  setVal($('sh-type'),sh.type||''); setVal($('sh-name'),sh.name||''); setVal($('sh-hp'),hp); setVal($('sh-crew'),num(sh.crew));
+  // cargo, upgrades, shanties
+  var cap=num(sh.cargoCap), used=sh.cargo.length, c='';
+  c+='<div class="section-bar sh-sub"><span>Cargo <span class="cont-fill'+(cap&&used>cap?' over':'')+'">('+used+'/'+'<span class="sh-vw">'+cap+'</span><span class="sh-ed">'+shEd('cargoCap',cap,36)+'</span>)</span></span><span class="hdr-right"><button class="hdr-btn" data-nolock onclick="openCargo()">＋ Cargo</button></span></div>';
+  c+=used?'<table class="tbl"><tbody>'+sh.cargo.map(function(x){ return '<tr><td><input value="'+esc(x.name)+'" onchange="onCargo(\''+x.uid+'\',\'name\',this.value)"></td><td style="width:80px;white-space:nowrap;"><input class="num" style="width:56px;" value="'+esc(x.value||'')+'" placeholder="s" onchange="onCargo(\''+x.uid+'\',\'value\',this.value)" title="Value in silver"><span class="desc">s</span></td><td style="width:34px;"><button class="row-x" onclick="removeCargo(\''+x.uid+'\')" title="Remove">✕</button></td></tr>'; }).join('')+'</tbody></table>':'<div class="cont-empty">Empty</div>';
+  c+='<div class="section-bar sh-sub"><span>Upgrades</span></div><div class="sh-ups">'+shipUpgrades().map(function(u){ var on=sh.upgrades.indexOf(u.id)>=0;
+    return '<label class="m-check sh-up"><input type="checkbox" data-nolock'+(on?' checked':'')+' onclick="return toggleUpgrade(\''+jsq(u.id)+'\')"><span><b>'+esc(u.name)+'</b> · '+esc(u.effect)+(u.hpMultiplier&&hm?' <small>'+(hm*u.hpMultiplier)+'s</small>':'')+'</span></label>'; }).join('')+'</div>';
+  c+='<div class="section-bar sh-sub"><span>Shanties</span><span class="hdr-right"><button class="hdr-btn lk-hide" onclick="openShanty()">＋ Shanty</button></span></div>';
+  c+=sh.shanties.length?'<div class="sh-shan">'+sh.shanties.map(function(id,i){ var p=byId(D('PB_SHANTIES'),id)||{name:id,text:''}; var tx=String(p.text||'').replace(/^[^:]*:\s*/,'');
+    return '<div class="pb-card"><div class="pb-main"><div class="pb-name">'+esc(p.name)+'</div><div class="pb-sub">'+esc(tx)+'</div></div><div class="pb-btns">'+tbtn('Sing','sing(\''+jsq(id)+'\')','','Crew SKILL test: d20 '+sgn(shipSkill()))+'<button class="row-x lk-hide" onclick="forgetShanty('+i+')" title="Remove">✕</button></div></div>'; }).join('')+'</div>':'<div class="cont-empty">None</div>';
+  setHTML($('ship-cargo'),c);
+  [['sh-captain','captain'],['sh-flag','flag'],['sh-port','port'],['sh-careen','careened'],['sh-crewnotes','crewNotes'],['sh-notes','notes']].forEach(function(f){ setVal($(f[0]),sh[f[1]]||''); });
+  setHTML($('ship-note'),hm&&hp<=0?'<span class="tag warn">derelict</span>':'');
+  if(!document.querySelector('.ship-tab.on')) setShipSub(_shipSub);
 }
 // Create before a pirate exists, Level (Getting Better) after — the D&D sheet's pair, in one place.
 function refreshWizardButtons(){ var built=!!(S.built||S.classId); var bb=$('build-btn'), lb=$('levelup-btn'); if(bb) bb.style.display=built?'none':''; if(lb) lb.style.display=built?'':'none'; }
@@ -1104,7 +1298,7 @@ function refreshWizardButtons(){ var built=!!(S.built||S.classId); var bb=$('bui
 // renderPlay redraws only what play changes (abilities' temporary modifiers, Luck, Status,
 // Class & Magic, Gear, the Action tab). Both skip regions whose markup didn't change.
 function renderPlay(){
-  refreshWizardButtons(); renderAbilities(); renderLuck(); renderStatus(); renderClass(); renderGear();
+  refreshWizardButtons(); renderAbilities(); renderLuck(); renderStatus(); renderShip(); renderClass(); renderGear();
   if(typeof renderTurn==='function') renderTurn();
   if(window.applySheetLock) try{ window.applySheetLock(); }catch(e){}   // freshly drawn fields follow the lock
 }
@@ -2095,12 +2289,16 @@ function applySheet(d0){
   // or point at a container that's gone, at a non-container, at itself or round in a loop → on you.
   S.items.forEach(function(x){ if(x.in==null&&x.stowedIn!=null) x.in=x.stowedIn; delete x.stowedIn; if(x.in&&!stowedIn(x)) x.in=''; });
   S.items.forEach(function(x){ var p=stowedIn(x), g=0; while(p&&g<12){ if(p===x){ x.in=''; break; } p=stowedIn(p); g++; } if(g>=12) x.in=''; });
+  S.ship=normShip(d0.ship); splitBg();
   delete S.derived; delete S.subtab; S.system='PB';
   renderAll();
   if(typeof campaignRestore==='function') campaignRestore(d0.campaign);
   if(window.__ddSaveTitle && S.name) try{ window.__ddSaveTitle(S.name); }catch(e){}
   scheduleAutosave();
 }
+// Older saves (and the creation wizard) store the background as "Name — what it gives you": the title stays in
+// Background, the rest goes to Background gear.
+function splitBg(){ var t=String(S.background||''), i=t.indexOf(' — '); if(i>0&&!S.bgItem){ S.bgItem=t.slice(i+3).trim(); S.background=t.slice(0,i).trim(); } }
 function saveSheet(quiet){
   var data=collectSheet(); var json=JSON.stringify(data);
   try{ localStorage.setItem('pb_sheet', json); }catch(e){}
@@ -2140,6 +2338,7 @@ window.PBSHEET={
     var camp=(typeof _campaign!=='undefined'&&_campaign)?{id:_campaign.id,code:_campaign.code,name:_campaign.name}:S.campaign;
     S=Object.assign(blankState(),{campaign:camp});
     ['name','classId','baseClassId','background','flaw','trademark','idiosyncrasy','incident','thing','pet','deity','story'].forEach(function(k){ if(b[k]!=null) S[k]=b[k]; });
+    splitBg();
     S.origin=Object.assign(S.origin,b.origin||{}); S.abilities=Object.assign(S.abilities,b.abilities||{});
     S.hpMax=Math.max(1,num(b.hp,1)); S.luck=Math.max(0,num(b.luck));
     S.silver=num(b.silver);
