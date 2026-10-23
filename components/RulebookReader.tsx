@@ -49,7 +49,7 @@ const posKey = (file: string) => `dcc-rule-pos:${file}`;
 // /vendor is cached for a day (+ a week stale-while-revalidate) under a fixed
 // name, so a changed reader can keep serving the old copy. Bump this whenever
 // public/vendor/dcc-pdf-reader.js changes (the GM Screen loader uses the same).
-const READER_V = "2026-10-22";
+const READER_V = "2026-10-22b";
 
 // Load a script once and resolve when ready (idempotent across remounts).
 function loadScript(src: string): Promise<void> {
@@ -90,6 +90,17 @@ export default function RulebookReader({
   const activeFileRef = useRef(active);
   // Two-page spreads need more room than the single-page column.
   const [spread, setSpread] = useState(false);
+  // Widen the column up front when spreads are remembered (the reader's own
+  // "dccpdf-spread" key), so the first page fit is computed at full width rather
+  // than in the narrow single-page column. Done in an effect, not the useState
+  // initializer, to keep server and client markup identical.
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("dccpdf-spread") === "1") setSpread(true);
+    } catch {
+      /* storage unavailable — the reader's onSpreadChange still corrects it */
+    }
+  }, []);
 
   // The selected game system (same store the dashboard toggle + grid use).
   const activeSystem = useSyncExternalStore(

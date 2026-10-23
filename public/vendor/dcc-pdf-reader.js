@@ -348,8 +348,11 @@
           setPannable();
           animateFlip(dir);
           rendering = 0;
-          if (queued && queued !== n) { var q = queued; queued = 0; render(q); }
-          else queued = 0;
+          // Re-render if anything asked for one mid-paint — INCLUDING the same page:
+          // a container resize (e.g. the host widening for two-page spreads right
+          // after a book opens) re-requests the current page, and dropping that
+          // left the first, too-small fit on screen.
+          if (queued) { var q = queued; queued = 0; render(q); }
     }
 
     // Two pages side by side, painted into ONE canvas so zoom, pan, double-tap and

@@ -8570,7 +8570,7 @@ function dccLoadScript(src) {
 }
 function dccLoadPdfReader() {
   if(window.DCCPdfReader && window.pdfjsLib) return Promise.resolve();
-  if(!_dccReaderLoading) _dccReaderLoading = dccLoadScript('/vendor/pdfjs/pdf.min.js').then(() => dccLoadScript('/vendor/dcc-pdf-reader.js?v=2026-10-22'))
+  if(!_dccReaderLoading) _dccReaderLoading = dccLoadScript('/vendor/pdfjs/pdf.min.js').then(() => dccLoadScript('/vendor/dcc-pdf-reader.js?v=2026-10-22b'))
     .catch(e => { _dccReaderLoading = null; throw e; });
   return _dccReaderLoading;
 }
