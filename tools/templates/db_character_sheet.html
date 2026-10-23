@@ -25,8 +25,8 @@
    advancement: db-advance.js (window.DBADV); homebrew loader: db-homebrew.js (window.DBHB).
    Palette: neutral greys (the D&D sheet's panel greys) in light and dark, with the core
    book's green (#236855) as the accent and its gold (#c9a14a) second; red is the logo's
-   alone, plus the semantic reds (banes, Demon rolls, death, warnings); dark is the default, the theme follows the account page (db_dark, seeded by
-   the injected head — no toggle on the sheet).
+   alone, plus the semantic reds (banes, Demon rolls, death, warnings). The theme follows the
+   account page (db_dark, seeded by the injected head — no toggle on the sheet), as on every sheet.
    Fonts: Hideout (masthead + section titles, logo red with a gold stroke), Minion Pro
    (labels), EB Garamond (text). */
 :root{
@@ -176,10 +176,14 @@ body.dark .card{background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,.3);}
 .abil-box{margin:7px 8px;border:1px solid var(--rule);border-radius:8px;background:var(--box);padding:5px 4px 6px;text-align:center;position:relative;}
 .abil-name{font-family:var(--f-disp);font-weight:400;font-size:17px;letter-spacing:.06em;line-height:1;cursor:pointer;color:var(--acc-dk);}
 .abil-full{font-family:var(--f-label);font-size:10px;color:var(--muted);letter-spacing:.04em;margin-top:1px;}
-.abil-score{display:block;width:calc(100% - 16px);margin:4px 8px 4px;border:1px solid var(--acc-dk);border-radius:8px;background:var(--acc);font-family:var(--f-num);font-size:26px;font-weight:600;line-height:1;text-align:center;color:#fff;outline:none;padding:5px 0 6px;-moz-appearance:textfield;appearance:textfield;}
-body.sheet-locked .abil-score{cursor:pointer;user-select:none;caret-color:transparent;}
-body.sheet-locked .abil-score:hover{filter:brightness(1.12);}
-body.sheet-unlocked .abil-score{background:var(--input-bg);color:var(--ink);border:2px dashed var(--acc);cursor:text;}
+/* The score is a button (the roll); unlocking the sheet swaps it for an input to edit the
+   number (D&D's abil-mod / readonly score split: a roll target is never a form field). */
+.abil-score,.abil-edit{display:block;width:calc(100% - 16px);margin:4px 8px 4px;border:1px solid var(--acc-dk);border-radius:8px;background:var(--acc);font-family:var(--f-num);font-size:26px;font-weight:600;line-height:1;text-align:center;color:#fff;outline:none;padding:5px 0 6px;}
+.abil-score{cursor:pointer;user-select:none;}
+.abil-score:hover{filter:brightness(1.12);}
+.abil-edit{display:none;background:var(--input-bg);color:var(--ink);border:2px dashed var(--acc);cursor:text;}
+body.sheet-unlocked .abil-edit{display:block;}
+body.sheet-unlocked .abil-score{display:none;}
 .cond-chip{display:block;width:100%;margin-top:2px;padding:3px 2px;border:1px dashed var(--rule);background:transparent;color:var(--muted);border-radius:12px;font-family:var(--f-label);font-size:11px;letter-spacing:.02em;cursor:pointer;line-height:1.1;}
 .cond-chip.on{background:var(--acc);border:1px solid var(--acc-dk);color:#fff;border-style:solid;}
 
@@ -195,10 +199,13 @@ body.sheet-unlocked .abil-score{background:var(--input-bg);color:var(--ink);bord
 .sk-pip{width:14px;height:14px;border:1.5px solid var(--acc);border-radius:50%;background:transparent;cursor:pointer;padding:0;display:block;}
 .sk-pip.on{background:var(--acc);box-shadow:inset 0 0 0 2px var(--card);}
 body.sheet-locked .sk-pip{cursor:default;}
-.sk-lvl{width:40px;height:25px;border:1px solid var(--input-border);border-radius:6px;background:var(--input-bg);font-family:var(--f-num);font-size:15px;font-weight:600;text-align:center;color:var(--acc-dk);outline:none;padding:0;-moz-appearance:textfield;appearance:textfield;}
-/* locked: the score is a number you click to roll, not a field */
-body.sheet-locked .sk-lvl{border-color:transparent;background:transparent;cursor:pointer;caret-color:transparent;user-select:none;}
-body.sheet-locked .sk-lvl:hover{border-color:var(--acc);background:var(--acc-lt);}
+/* The level is a button you click to roll; unlocked, an input takes its place to edit it. */
+.sk-lvl,.sk-edit{width:40px;height:25px;border:1px solid transparent;border-radius:6px;background:transparent;font-family:var(--f-num);font-size:15px;font-weight:600;text-align:center;color:var(--acc-dk);outline:none;padding:0;}
+.sk-lvl{cursor:pointer;user-select:none;}
+.sk-lvl:hover{border-color:var(--acc);background:var(--acc-lt);}
+.sk-edit{display:none;border-color:var(--input-border);background:var(--input-bg);}
+body.sheet-unlocked .sk-edit{display:block;}
+body.sheet-unlocked .sk-lvl{display:none;}
 /* Advancement mark: no checkbox — a small green tick appears on its own when a Dragon or Demon
    marks the skill; extra marks (session questions, GM) are placed in the Level dialog. */
 .sk-mark{display:block;text-align:center;font-size:13px;font-weight:700;line-height:1;color:var(--green);user-select:none;}
@@ -413,7 +420,7 @@ body.dark .prep-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 }
 @media (max-width:768px){
   .app-wrap{flex-direction:column;align-items:stretch;}
-  input[id$="-search"]{font-size:16px;}
+  input[id$="-search"],.m-input{font-size:16px;}
   .sheet-wrap{padding:44px 8px 60px;overflow-y:visible;}
   :root{--dd-log-tab:34px}
   /* Mobile roll log: a bottom sheet that docks to its own grab bar (same contract as
@@ -435,7 +442,7 @@ body.dark .prep-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
   .small-btn{min-height:36px;padding:7px 11px;}
   .row-x{min-width:40px;min-height:40px;font-size:18px;}
   .skill-row{grid-template-columns:22px 18px minmax(0,1fr) 26px 46px;padding:3px 4px;}
-  .sk-lvl{height:32px;width:46px;font-size:16px;}
+  .sk-lvl,.sk-edit{height:32px;width:46px;font-size:16px;}
   .sk-pip{width:18px;height:18px;}
   .sk-mark{font-size:15px;}
   .pool-pips{--pp:24px;}
@@ -488,10 +495,26 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .log-action-btn.campaign{padding:5px 6px;}
 </style>
 </head>
-<body class="dark">
+<body>
 <script>
-/* ── SAVED-STATE READER ── (shared contract: see the ICRPG / D&D sheets for the
-   full note). Parses the payload, tolerates an object, never blocks saving. */
+/* ── SAVED-STATE READER ────────────────────────────────────────────────────
+   Every sheet reads its saved state through __ddPick(). It parses the payload,
+   tolerates one being handed over as an object instead of a JSON string, and
+   says loudly in the console when something looks wrong.
+
+   It deliberately does NOT interfere. An earlier version of this could freeze
+   saving when it thought a sheet had loaded blank, and that was a mistake: the
+   check is a heuristic — it cannot tell "applySheet failed" from "this sheet
+   renders its values somewhere the check can't see" — and when it guessed wrong
+   it switched off saving, which destroyed exactly the work it existed to
+   protect. A character built in the wizard looked right on screen, never saved,
+   and came back empty. A guard that can be wrong must never be the thing
+   standing between the user and their save.
+
+   What replaced it is verification rather than runtime policing: the sheets are
+   booted in headless Chromium with a pageerror listener and a floor on rendered
+   controls, which is what actually catches the bug class (a null deref in INIT)
+   that lost data in the first place. See the session notes. */
 (function () {
   window.__ddPick = function (key) {
     if (window.__ddState === undefined) {
@@ -502,22 +525,54 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     if (raw === undefined || raw === null || raw === '') {
       try {
         var keys = Object.keys(window.__ddState || {});
-        if (keys.length) console.warn('[dd] no "' + key + '" in the saved data; it holds: ' + keys.join(', '));
+        if (keys.length) {
+          console.warn('[dd] no "' + key + '" in the saved data; it holds: ' + keys.join(', '));
+        }
       } catch (e) {}
       return null;
     }
-    if (typeof raw !== 'string') { try { return JSON.stringify(raw); } catch (e) { return null; } }
+    /* A payload handed over as an object still works: hand back the string the
+       sheet's own JSON.parse expects. */
+    if (typeof raw !== 'string') {
+      try { return JSON.stringify(raw); } catch (e) { return null; }
+    }
+    /* Parse once here purely to report a corrupt payload clearly; the sheet
+       parses it again itself. */
     try { JSON.parse(raw); }
     catch (e) { try { console.error('[dd] saved "' + key + '" is not valid JSON (' + raw.length + ' chars)'); } catch (e2) {} }
     return raw;
   };
 
-  /* ── The roll log's VTT button ── shown once this character joins a campaign;
-     /play/<id> or the GM's Owlbear room; hidden inside a frame. */
+  /* ── The roll log's VTT button ───────────────────────────────────────────
+     Shown only once this character has joined a campaign, because that campaign
+     is the table the button opens. With no campaign there is nothing to open, so
+     the button stays out of the way.
+
+     Where it goes depends on the campaign, the same way the dashboard decides:
+     our own tabletop at /play/<id>, or the GM's Owlbear room when one is set —
+     and then it says OBR and opens externally, so the label never lies about
+     where the click lands. The room URL is NOT kept in the sheet's saved data;
+     it is read from the campaign each time the link is restored, so a GM adding
+     or clearing the room takes effect without the player re-joining. The /play
+     default is painted first, so a slow or failed lookup still leaves a button
+     that works.
+
+     It stays hidden inside a frame. A sheet shown in our own tabletop, or in the
+     Owlbear popover, is already at the table — opening the tabletop from there
+     would nest it inside itself. (A cross-origin parent makes the check throw,
+     and "framed" is the safe answer to that too.)
+
+     Order in the header is VTT · dice · Clear: dice-anim.js mounts its gear
+     immediately before the LAST .log-clear, which is Clear. */
   var __ddFramed = false;
   try { __ddFramed = window.self !== window.top; } catch (e) { __ddFramed = true; }
-  var __ddVttDest = {};
-  function __ddVttHome(id) { return { href: '/play/' + encodeURIComponent(id), label: 'VTT', ext: false }; }
+
+  var __ddVttDest = {};   /* campaign id → where its button goes, asked once */
+
+  function __ddVttHome(id) {
+    return { href: '/play/' + encodeURIComponent(id), label: 'VTT', ext: false };
+  }
+
   function __ddVttPaint(btn, camp, d) {
     var name = camp && camp.name ? String(camp.name) : '';
     btn.textContent = d.label;
@@ -527,25 +582,40 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       : (name ? 'Open the tabletop for "' + name + '"' : 'Open the campaign tabletop');
     btn.setAttribute('aria-label', btn.title);
   }
+
   window.__ddVtt = function (camp) {
     var btn = document.getElementById('vtt-open-btn');
     if (!btn) return;
     var id = camp && camp.id ? String(camp.id) : '';
-    if (!id || __ddFramed) { btn.hidden = true; btn.removeAttribute('data-href'); return; }
+    if (!id || __ddFramed) {
+      btn.hidden = true;
+      btn.removeAttribute('data-href');
+      return;
+    }
     if (!btn.getAttribute('data-wired')) {
       btn.setAttribute('data-wired', '1');
-      btn.addEventListener('click', function () { var href = btn.getAttribute('data-href'); if (href) window.open(href, '_blank', 'noopener'); });
+      btn.addEventListener('click', function () {
+        var href = btn.getAttribute('data-href');
+        if (href) window.open(href, '_blank', 'noopener');
+      });
     }
     __ddVttPaint(btn, camp, __ddVttDest[id] || __ddVttHome(id));
     btn.hidden = false;
+
     if (__ddVttDest[id] || !(camp && camp.code)) return;
     try {
       fetch('/api/campaigns?code=' + encodeURIComponent(camp.code), { credentials: 'same-origin' })
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (c) {
+          /* A code can only be reused after a campaign is gone, but check anyway
+             rather than trust a lookup to be about the campaign we asked for. */
           if (!c || String(c.id) !== id) return;
           var url = typeof c.vttUrl === 'string' ? c.vttUrl.trim() : '';
-          __ddVttDest[id] = /^https?:\/\//i.test(url) ? { href: url, label: 'OBR', ext: true } : __ddVttHome(id);
+          /* http(s) only: the GM types this field by hand, and a javascript: or
+             data: value handed to window.open would run on our own origin. */
+          __ddVttDest[id] = /^https?:\/\//i.test(url)
+            ? { href: url, label: 'OBR', ext: true }
+            : __ddVttHome(id);
           if (!btn.hidden) __ddVttPaint(btn, camp, __ddVttDest[id]);
         })
         .catch(function () {});
@@ -842,7 +912,14 @@ function rollExpr(expr){ var parts=parseDice(expr), total=0, txt=[];
   return {total:total,text:txt.join(' + ')}; }
 
 // ═══ RENDER ═════════════════════════════════════════════════════════════════
-function fillSelect(sel,opts,val,blank){ var h=blank!=null?'<option value="">'+esc(blank)+'</option>':''; opts.forEach(function(o){ h+='<option value="'+esc(o.v)+'">'+esc(o.t)+'</option>'; }); sel.innerHTML=h; sel.value=val||''; }
+// Every region renders through setHTML: its markup is only replaced when it actually differs
+// from what that region last rendered. A roll, a pip or a toggle then rebuilds just the region
+// whose content changed — the tapped control and everything above it stay put (Mobile Safari
+// has no scroll anchoring). Edits that clamp a typed value call invalidate() so the field shows
+// the clamped number even when the markup would come out the same.
+function setHTML(el,h){ if(!el) return false; if(el.__h===h) return false; el.innerHTML=h; el.__h=h; return true; }
+function invalidate(id){ var el=$(id); if(el) el.__h=null; }
+function fillSelect(sel,opts,val,blank){ var h=blank!=null?'<option value="">'+esc(blank)+'</option>':''; opts.forEach(function(o){ h+='<option value="'+esc(o.v)+'">'+esc(o.t)+'</option>'; }); setHTML(sel,h); sel.value=val||''; }
 function renderHeader(){
   $('f-name').value=S.name||''; $('f-nick').value=S.nickname||'';
   fillSelect($('f-kin'),A(D('DB_KIN')).map(function(k){ return {v:k.name,t:k.name}; }),S.kin,'—');
@@ -852,12 +929,14 @@ function renderHeader(){
 function renderAttrs(){
   var h=''; ATTRS.forEach(function(a){ var c=COND[a];
     h+='<div class="abil-box"><div class="abil-name" onclick="rollAttr(\''+a+'\')" title="Roll '+ATTR_FULL[a]+' (D20 ≤ '+attr(a)+')">'+a+'</div><div class="abil-full">'+ATTR_FULL[a]+'</div>'+
-      '<input type="number" class="abil-score no-spin" id="at-'+a+'" value="'+attr(a)+'" min="3" max="18" onclick="if(locked())rollAttr(\''+a+'\')" onchange="onAttr(\''+a+'\',this.value)" title="'+ATTR_FULL[a]+' '+attr(a)+' — click to roll (unlock the sheet to change it)">'+
+      '<button type="button" class="abil-score" id="at-'+a+'" onclick="rollAttr(\''+a+'\')" title="Roll '+ATTR_FULL[a]+' (D20 ≤ '+attr(a)+') — unlock the sheet to change it">'+attr(a)+'</button>'+
+      '<input type="number" class="abil-edit no-spin" id="at-ed-'+a+'" value="'+attr(a)+'" min="3" max="18" onchange="onAttr(\''+a+'\',this.value)" title="'+ATTR_FULL[a]+'">'+
       '<button class="cond-chip'+(S.cond[c]?' on':'')+'" onclick="toggleCond(\''+c+'\')" title="'+c+': a bane on '+a+' and every '+a+'-based skill">'+c+'</button></div>'; });
-  $('abil-list').innerHTML=h;
+  return setHTML($('abil-list'),h);
 }
 function skillBanes(n){ var m=autoMods({skill:n,attr:(skillDef(n)||{}).attribute}); return m; }
-function renderSkills(){
+function renderSkills(){ var ch=setHTML($('skills-list'),skillsHTML()); renderMarkNote(); return ch; }
+function skillsHTML(){
   var all=A(D('DB_SKILLS')); var groups=[['General Skills','general'],['Weapon Skills','weapon'],['Magic','secondary']]; var h='';
   groups.forEach(function(g){ var rows=all.filter(function(s){ return s.type===g[1]; }); if(!rows.length) return;
     var anySchool=g[1]==='secondary'&&rows.some(function(s){ return knowsSchool(s.name); });
@@ -867,39 +946,41 @@ function renderSkills(){
       var badge=nb>0?'<span class="sk-bane" title="'+esc(m.banes.join(', '))+'">'+(nb>1?nb+'× ':'')+'bane</span>':nb<0?'<span class="sk-bane" style="color:var(--green);" title="'+esc(m.boons.join(', '))+'">boon</span>':'';
       var custom=(r.lvl!=null&&r.lvl!=='');
       h+='<div class="skill-row'+(r.trained?'':' untrained')+(sch&&!r.trained?' sk-school-off':'')+'">'+
-        '<span class="sk-mark"'+(r.mark?' title="Advancement mark — roll for it at the end of the session (Level)">&#10003;':'>')+'</span>'+
+        '<span class="sk-mark" data-sk="'+esc(s.name)+'"'+(r.mark?' title="'+MARK_TIP+'">&#10003;':'>')+'</span>'+
         '<button class="sk-pip'+(r.trained?' on':'')+'" title="Trained skill ('+(r.trained?'yes':'no')+') — unlock the sheet to change" onclick="toggleTrained(\''+q+'\')"></button>'+
         '<span class="sk-name" onclick="rollSkill(\''+q+'\')" title="'+esc(s.text||'')+'">'+esc(s.name)+badge+'</span>'+
         '<span class="sk-attr">'+s.attribute+'</span>'+
-        '<input type="number" class="sk-lvl no-spin'+(!r.trained&&!custom?' base':'')+'" value="'+lv+'" min="0" max="18" title="'+esc(s.name)+' '+lv+' — click to roll D20 ≤ '+lv+(custom?'':' (base chance '+baseChance(attr(s.attribute))+(r.trained?' ×2':'')+')')+'; unlock the sheet to change it" onclick="if(locked())rollSkill(\''+q+'\')" onchange="onSkillLvl(\''+q+'\',this.value)"></div>'; }); });
-  $('skills-list').innerHTML=h;
-  if(window.applySheetLock&&window.__lockReady) try{ window.applySheetLock(); }catch(e){}   // re-rendered fields take the lock again
-  var marks=Object.keys(S.skills).filter(function(k){ return S.skills[k]&&S.skills[k].mark; }).length;
-  $('sk-note').innerHTML=marks?'<b>'+marks+' marked</b>':'';
+        '<button type="button" class="sk-lvl'+(!r.trained&&!custom?' base':'')+'" onclick="rollSkill(\''+q+'\')" title="'+esc(s.name)+' '+lv+' — click to roll D20 ≤ '+lv+(custom?'':' (base chance '+baseChance(attr(s.attribute))+(r.trained?' ×2':'')+')')+'; unlock the sheet to change it">'+lv+'</button>'+
+        '<input type="number" class="sk-edit no-spin" value="'+lv+'" min="0" max="18" onchange="onSkillLvl(\''+q+'\',this.value)" title="'+esc(s.name)+'"></div>'; }); });
+  return h;
 }
-function poolPips(id,cur,max,fn){ var h=''; for(var i=1;i<=max;i++) h+='<button class="pool-pip'+(i<=cur?' on':'')+'" data-nolock onclick="'+fn+'('+i+')" title="'+(i<=cur?'Lose points down to '+(i-1):'Recover points up to '+i)+'"></button>'; $(id).innerHTML=h; }
+var MARK_TIP='Advancement mark — roll for it at the end of the session (Level)';
+function renderMarkNote(){ var marks=Object.keys(S.skills).filter(function(k){ return S.skills[k]&&S.skills[k].mark; }).length; setHTML($('sk-note'),marks?'<b>'+marks+' marked</b>':''); }
+// A Dragon or Demon marks the skill: put the tick on that one row in place (a roll re-renders nothing else).
+function showMark(n){ var el=document.querySelector('#skills-list .sk-mark[data-sk="'+String(n).replace(/["\\]/g,'\\$&')+'"]'); if(el&&!el.textContent){ el.textContent='\u2713'; el.title=MARK_TIP; } invalidate('skills-list'); renderMarkNote(); }   // the next re-render of the list picks it up from S
+function poolPips(id,cur,max,fn){ var h=''; for(var i=1;i<=max;i++) h+='<button class="pool-pip'+(i<=cur?' on':'')+'" data-nolock onclick="'+fn+'('+i+')" title="'+(i<=cur?'Lose points down to '+(i-1):'Recover points up to '+i)+'"></button>'; setHTML($(id),h); }
 function renderStatus(){
   var hm=hpMax(), wm=wpMax(); S.hp=Math.max(0,Math.min(num(S.hp),hm)); S.wp=Math.max(0,Math.min(num(S.wp),wm));
   $('hp-max').textContent=hm; $('wp-max').textContent=wm;
   poolPips('hp-pips',S.hp,hm,'setHpPip'); poolPips('wp-pips',S.wp,wm,'setWpPip');
   var pip=function(cls,n,on,fn){ var h=''; for(var i=0;i<n;i++) h+='<button class="pip '+cls+(i<on?' on':'')+'" onclick="'+fn+'('+(i+1)+')" data-nolock></button>'; return h; };
-  $('death-ok').innerHTML=pip('ok',3,S.death.s,'setDeathS'); $('death-bad').innerHTML=pip('bad',3,S.death.f,'setDeathF');
+  setHTML($('death-ok'),pip('ok',3,S.death.s,'setDeathS')); setHTML($('death-bad'),pip('bad',3,S.death.f,'setDeathF'));
   var dying=S.hp<=0&&!S.death.dead; $('death-btn').disabled=!dying; $('death-vital').style.outline=dying?'2px solid var(--red)':'';
   $('dead-banner').classList.toggle('on',!!S.death.dead);
   // Movement, carrying capacity and the two damage bonuses — computed, never entered
   var sb=dmgBonus(attr('STR')), ab=dmgBonus(attr('AGL'));
-  $('derived').innerHTML='<div class="dv" title="Kin '+((kinDef()||{}).movement||10)+' + AGL '+attr('AGL')+'"><span class="dl">Movement</span><span class="dval">'+movement()+'</span></div>'+
+  setHTML($('derived'),'<div class="dv" title="Kin '+((kinDef()||{}).movement||10)+' + AGL '+attr('AGL')+'"><span class="dl">Movement</span><span class="dval">'+movement()+'</span></div>'+
     '<div class="dv" title="STR '+attr('STR')+'"><span class="dl">Damage Bonus STR</span><span class="dval">'+(sb?'+'+sb:'—')+'</span></div>'+
-    '<div class="dv" title="AGL '+attr('AGL')+'"><span class="dl">Damage Bonus AGL</span><span class="dval">'+(ab?'+'+ab:'—')+'</span></div>';
+    '<div class="dv" title="AGL '+attr('AGL')+'"><span class="dl">Damage Bonus AGL</span><span class="dval">'+(ab?'+'+ab:'—')+'</span></div>');
   var ij=''; S.injuries.forEach(function(x,i){ ij+='<div class="inj"><b>'+esc(x.name)+'</b><span style="color:var(--muted);">'+esc(x.text||'')+(x.heal?' · heals in '+esc(x.heal):'')+'</span><button class="row-x inj-x" onclick="removeInjury('+i+')" title="Healed">✕</button></div>'; });
-  $('injury-list').innerHTML=ij;
+  setHTML($('injury-list'),ij);
 }
 function abilityKindTag(a){ return a.kind==='kin'?'Innate':a.kind==='prof'?'Profession':'Heroic'; }
 function renderAbilities(){
   var h=''; S.abilities.forEach(function(a,i){ var def=abilityDef(a.name)||{}; var wp=def.wp; var passive=def.timing==='passive'||def.timing==='rest'||wp==null||wp==='';
     var act=passive?'<span class="tag">'+(def.timing==='rest'?'rest':'passive')+'</span>':'<button class="small-btn" onclick="activateAbility('+i+')" title="Spend '+esc(wp)+' WP">'+esc(wp)+' WP</button>';
     h+='<tr><td><b>'+esc(a.name)+'</b><br><span class="tag">'+abilityKindTag(a)+'</span>'+(def.timing&&!passive?'<span class="tag">'+esc(def.timing)+'</span>':'')+'</td><td class="desc">'+esc(a.note||def.text||'')+'</td><td>'+act+'</td><td><button class="row-x lk-hide" onclick="removeAbility('+i+')">✕</button></td></tr>'; });
-  $('abil-body').innerHTML=h;
+  setHTML($('abil-body'),h);
 }
 function spellBlock(){ var m=isMetalAtHand(); return m?(m+' (metal) — no magic'):''; }
 // Why a spell can't be cast right now ('' = it can): metal on you, or a focus it needs not in hand.
@@ -910,19 +991,19 @@ function spellLine(def){ return [def.rank!=null?'Rank '+def.rank:'',def.school||
 function mgCard(lead,name,sub,desc,btns){ return '<div class="db-card mg-card">'+(lead!=null?'<div class="mg-lead">'+lead+'</div>':'')+'<div class="db-main"><div class="db-name">'+name+'</div>'+(sub?'<div class="db-sub">'+sub+'</div>':'')+(desc?'<div class="mg-desc">'+desc+'</div>':'')+'</div><div class="db-btns">'+btns+'</div></div>'; }
 function renderSpells(){
   var schools=knownSchools(); var lim=preparedLimit(); var prep=S.spells.filter(function(s){ return s.prepared; }).length;
-  $('prep-note').innerHTML=schools.length?('Prepared <b>'+prep+'/'+lim+'</b>'):'';
+  setHTML($('prep-note'),schools.length?('Prepared <b>'+prep+'/'+lim+'</b>'):'');
   var hint=schools.map(function(s){ return esc(s)+' <b>'+skillLevel(s)+'</b>'; }).join(' · ');
   var fo=focusInHand(); if(fo) hint+=(hint?' · ':'')+'Focus: '+esc(fo);
   var blk=spellBlock(); if(blk) hint+=(hint?' · ':'')+'<b style="color:var(--red);">'+esc(blk)+'</b>';
-  $('magic-hint').innerHTML=hint; $('magic-hint').style.display=hint?'':'none';
+  setHTML($('magic-hint'),hint); $('magic-hint').style.display=hint?'':'none';
   var h=''; S.spells.forEach(function(s,i){ var def=spellDef(s.name)||{};
     var req=A(def.requirements).length?'Requires '+A(def.requirements).join(', ')+(def.requirementDetail?' ('+esc(def.requirementDetail)+')':''):'';
     h+=mgCard('<button class="prep-pip'+(s.prepared?' on':'')+'" data-nolock onclick="togglePrepared('+i+')" title="Prepared"></button>',esc(s.name),spellLine(def)+(req?' · '+req:''),esc(def.text||s.note||''),
       tbtn('Cast','openCast(\'spell\','+i+')')+'<button class="row-x lk-hide" onclick="removeSpell('+i+')" title="Remove">✕</button>'); });
-  $('spell-body').innerHTML=h;
+  setHTML($('spell-body'),h);
   var t=''; S.tricks.forEach(function(s,i){ var def=trickDef(s.name)||{};
     t+=mgCard('',esc(s.name),esc(def.school||'')+' · 1 WP',esc(def.text||''),tbtn('Cast','castTrick('+i+')')+'<button class="row-x lk-hide" onclick="removeTrick('+i+')" title="Remove">✕</button>'); });
-  $('trick-body').innerHTML=t;
+  setHTML($('trick-body'),t);
 }
 function wSummary(dd){ var sk=weaponSkill(dd), b=weaponBonus(dd), strBad=dd.str&&attr('STR')<dd.str;
   var p=[esc(sk)+' <b>'+skillLevel(sk)+'</b>', esc(dd.damage||'—')+(b?' + '+b:'')];
@@ -940,10 +1021,10 @@ function renderGear(){
       '<td><input class="num no-spin" type="number" value="'+num(r.qty,1)+'" data-nolock onchange="onInv('+i+',\'qty\',this.value)"></td><td><input class="num" value="'+esc(r.wt==null?1:r.wt)+'" onchange="onInv('+i+',\'wt\',this.value)" title="'+(isEq(r)?'At hand / worn: doesn\'t count toward your load':'Weight per item (0 = tiny)')+'"></td>'+
       '<td>'+(r.uses!=null?'<span class="desc">uses</span> <input class="num no-spin" type="number" style="width:44px;" value="'+num(r.uses)+'" data-nolock onchange="onInv('+i+',\'uses\',this.value)"> ':'')+'<input value="'+esc(r.note||'')+'" style="width:'+(r.uses!=null?'60%':'100%')+';font-weight:400;font-size:13px;" onchange="onInv('+i+',\'note\',this.value)"></td>'+
       '<td style="white-space:nowrap;text-align:right;">'+acts+'<button class="row-x" onclick="removeInv('+i+')" title="Remove">✕</button></td></tr>'; });
-  $('inv-body').innerHTML=inv;
-  var n=handCount(); $('wpn-count').innerHTML='At hand <b>'+n+'/3</b>';
+  setHTML($('inv-body'),inv);
+  var n=handCount(); setHTML($('wpn-count'),'At hand <b>'+n+'/3</b>');
   var load=invLoad(), lim=carryLimit(); var e=$('enc'); e.className='sb-note enc-note'+(load>lim?' over':''); e.title=load>lim?'Over-encumbered':'Load / carrying capacity';
-  e.innerHTML='Carry Capacity <b>'+load+'/'+lim+'</b>';
+  setHTML(e,'Carry Capacity <b>'+load+'/'+lim+'</b>');
   $('c-gold').value=num(S.coins.gold); $('c-silver').value=num(S.coins.silver); $('c-copper').value=num(S.coins.copper);
   $('f-tiny').value=S.tiny||'';
 }
@@ -960,18 +1041,9 @@ function renderTray(){
 }
 // Create before a character exists, Level (advancement) after — the D&D sheet's pair, one button at a time.
 function refreshWizardButtons(){ var built=!!(S.built||(S.kin&&S.profession)); var bb=$('build-btn'), lb=$('level-btn'); if(bb) bb.style.display=built?'none':''; if(lb) lb.style.display=built?'':'none'; }
-// Re-rendering rebuilds most of the sheet, including the button that was just tapped. Mobile
-// Safari has no scroll anchoring and can jump the page when the focused button is removed, so
-// drop focus from a tapped button first and put the scroll position back afterwards.
+// Re-render every region from S. Each one goes through setHTML, so only a region whose markup
+// changed is rebuilt (see setHTML); the lock is re-applied to whatever fields were rebuilt.
 function renderAll(){
-  var _sx=window.scrollX, _sy=window.scrollY, _ae=document.activeElement;
-  if(_ae&&_ae!==document.body&&(_ae.tagName==='BUTTON'||_ae.getAttribute('role')==='button'||_ae.hasAttribute('onclick'))) try{ _ae.blur(); }catch(e){}
-  _renderAll();
-  if(Math.abs(window.scrollY-_sy)>1) window.scrollTo(_sx,_sy);
-  requestAnimationFrame(function(){ if(Math.abs(window.scrollY-_sy)>1&&!window.__userScrolling) window.scrollTo(_sx,_sy); });
-}
-(function(){ var t=0; ['touchmove','wheel'].forEach(function(ev){ window.addEventListener(ev,function(){ window.__userScrolling=true; clearTimeout(t); t=setTimeout(function(){ window.__userScrolling=false; },250); },{passive:true}); }); })();
-function _renderAll(){
   renderHeader(); renderAttrs(); renderSkills(); renderStatus(); renderAbilities(); renderSpells(); renderGear(); renderBackground(); renderTray(); refreshWizardButtons();
   if(typeof renderTurn==='function') renderTurn();
   if(window.applySheetLock && window.__lockReady) try{ window.applySheetLock(); }catch(e){}
@@ -982,14 +1054,14 @@ function changed(){ renderAll(); scheduleAutosave(); }
 function locked(){ return !!window._sheetLocked; }
 function needUnlock(){ if(locked()){ addLog('Sheet locked','🔒','Unlock the sheet (padlock in the roll log) to change this','normal'); return true; } return false; }
 function onField(k,v){ S[k]=v; if(k==='name') syncDocTitle(); changed(); }
-function onAttr(a,v){ S.attrs[a]=Math.max(1,Math.min(18,num(v,10))); changed(); }
+function onAttr(a,v){ S.attrs[a]=Math.max(1,Math.min(18,num(v,10))); invalidate('abil-list'); changed(); }
 function onKin(v){ S.kin=v; setKinAbilities(); changed(); }
 function setKinAbilities(){ S.abilities=S.abilities.filter(function(a){ return a.kind!=='kin'; }); var k=kinDef(); if(k) A(k.abilities).slice().reverse().forEach(function(a){ S.abilities.unshift({name:a.name,kind:'kin'}); }); }
 function onProf(v){ S.profession=v; changed(); }
 function onAge(v){ S.age=v; changed(); }
 function toggleCond(c){ S.cond[c]=!S.cond[c]; addLog(c, S.cond[c]?'Gained':'Healed', S.cond[c]?('Bane on '+COND_ATTR[c]+' and '+COND_ATTR[c]+'-based skills'):'', 'normal'); changed(); }
 function toggleTrained(n){ if(needUnlock()) return; var r=skRec(n); r.trained=!r.trained; delete r.lvl; changed(); }
-function onSkillLvl(n,v){ var r=skRec(n); var d=skillDef(n); var b=d?baseChance(attr(d.attribute)):0; var def=r.trained?2*b:(isSchool(n)?0:b); var x=Math.max(0,Math.min(18,num(v,def))); if(x===def) delete r.lvl; else r.lvl=x; changed(); }
+function onSkillLvl(n,v){ var r=skRec(n); var d=skillDef(n); var b=d?baseChance(attr(d.attribute)):0; var def=r.trained?2*b:(isSchool(n)?0:b); var x=Math.max(0,Math.min(18,num(v,def))); if(x===def) delete r.lvl; else r.lvl=x; invalidate('skills-list'); changed(); }
 // HP / WP pips: click a filled pip to lose points down to the one before it, an empty one to recover up to it.
 function setHpPip(i){ var was=num(S.hp); S.hp=Math.max(0,Math.min(hpMax(),i<=was?i-1:i)); if(S.hp>0&&was<=0){ S.death.s=0; S.death.f=0; S.death.rallied=false; } if(S.hp===0&&was>0){ S.death.s=0; S.death.f=0; S.death.rallied=false; } changed(); }
 function setWpPip(i){ var was=num(S.wp); S.wp=Math.max(0,Math.min(wpMax(),i<=was?i-1:i)); changed(); }
@@ -1010,7 +1082,7 @@ function toggleEquip(i){ var r=S.inventory[i]; if(!r||!equippable(r)) return; va
     if(num(r.qty,1)>1){ var one=Object.assign({},r,{qty:1,equipped:true}); r.qty=num(r.qty,1)-1; S.inventory.splice(i+1,0,one); changed(); return; } }
   else S.inventory.forEach(function(x){ if(x!==r&&kindOf(x)===k) x.equipped=false; });
   r.equipped=true; if(k!=='weapon'&&inCombat()) addLog(r.name,'Worn','Putting on armor or a helmet takes an action in combat','normal'); changed(); }
-function onInv(i,k,v){ var r=S.inventory[i]; if(!r) return; if(k==='name'&&!r.kind&&equippable(r)) r.kind=kindOf(r); if(k==='qty') v=Math.max(0,num(v,1)); if(k==='uses') v=Math.max(0,num(v)); if(k==='wt'){ v=String(v).trim(); v=v===''?1:(isNaN(Number(v))?1:Number(v)); } r[k]=v; changed(); }
+function onInv(i,k,v){ var r=S.inventory[i]; if(!r) return; if(k==='name'&&!r.kind&&equippable(r)) r.kind=kindOf(r); if(k==='qty') v=Math.max(0,num(v,1)); if(k==='uses') v=Math.max(0,num(v)); if(k==='wt'){ v=String(v).trim(); v=v===''?1:(isNaN(Number(v))?1:Number(v)); } r[k]=v; invalidate('inv-body'); changed(); }
 function removeInv(i){ S.inventory.splice(i,1); changed(); }
 function addInvRow(r){ S.inventory.push(Object.assign({qty:1,wt:1,note:''},r)); changed(); }
 function onCoins(){ S.coins={gold:Math.max(0,num($('c-gold').value)),silver:Math.max(0,num($('c-silver').value)),copper:Math.max(0,num($('c-copper').value))}; renderGear(); renderAttrs(); scheduleAutosave(); }
@@ -1073,7 +1145,9 @@ function resolveRoll(o,boons,banes,pushed){
   // (not a Demon, pushing on, not already pushed, a condition left to take).
   clearPushBtns();
   if(entry&&canPushLast()){ var pb=document.createElement('button'); pb.className='log-push'; pb.type='button'; pb.textContent='Push'; pb.title='Re-roll, then take a condition you don\'t have'; pb.onclick=function(){ pushLast(); }; entry.appendChild(pb); }
-  renderTray(); renderSkills();
+  // A roll only adds to the log: the tray's one-shot boons/banes reset, and a Dragon / Demon ticks
+  // that skill's advancement mark in place. Nothing else on the sheet is re-rendered.
+  renderTray(); if((res.dragon||res.demon)&&o.skill&&!o.noMark) showMark(o.skill);
   if(o.onDone) try{ o.onDone(res); }catch(e){ console.error(e); }
   scheduleAutosave();
   return res;
@@ -1373,12 +1447,14 @@ function douse(){ if(!S.light) return; addLog('Light','Put out',S.light.name,'no
 function activateAbility(i){ var a=S.abilities[i]; if(!a) return; var def=abilityDef(a.name)||{}; var wp=num(def.wp); var n=a.name;
   if(def.timing==='action'&&!canAct()){ addLog(n,'—','Uses your action, and you have none left','normal'); return; }
   if(def.wp==='varies'){ openDlg(n,'<p class="m-hint">'+esc(def.text||'')+'</p><div class="m-lbl">WP to spend</div><input id="ab-wp" class="m-input" type="number" value="1">',[{t:'Activate',f:function(){ var x=num($('ab-wp').value,1); closeDlg(); if(spendWp(x,n)){ addLog(n,'−'+x+' WP',def.text||'','normal'); changed(); } }}]); return; }
+  if(n==='Hunting Instincts'&&!activateAbility._prey){
+    openDlg(n,'<p class="m-hint">'+esc(def.text||'')+'</p><div class="m-lbl">Your prey</div><input id="ab-prey" class="m-input" type="text" value="'+esc(S.prey||'')+'" placeholder="Which creature?">',[{t:'Activate ('+wp+' WP)',f:function(){ var v=($('ab-prey').value||'').trim(); closeDlg(); activateAbility._prey=v||S.prey||''; try{ activateAbility(i); } finally { activateAbility._prey=null; } }}]); return; }
   if(!spendWp(wp,n)) return;
   if(def.timing==='action') useAction();
   var extra='';
   if(n==='Berserker'){ if(!S.cond.Angry){ S.cond.Angry=true; extra=' · you become Angry'; } else { changed(); chooseCondition('Berserker: you are already Angry — take another condition.'); extra=' · take another condition'; } S.berserk=true; }
   if(n==='Ill-Tempered'){ TR.boon++; if(!S.cond.Angry){ S.cond.Angry=true; extra=' · you become Angry · a boon is in the tray'; } else extra=' · a boon is in the tray'; }
-  if(n==='Hunting Instincts'){ var p=window.prompt('Mark which creature as your prey?',S.prey||''); if(p!=null) S.prey=p; extra=S.prey?' · prey: '+S.prey:''; }
+  if(n==='Hunting Instincts'){ S.prey=activateAbility._prey||S.prey||''; extra=S.prey?' · prey: '+S.prey:''; }
   if(n==='Unforgiving'){ TR.boon++; extra=' · a boon is in the tray for your attack'; }
   // Initiative is dealt on the GM screen: these just pay the WP and tell the GM.
   if(n==='Lightning Fast') extra=' · tell the GM which of your two cards you keep';
@@ -1454,9 +1530,9 @@ function castTrick(i){ var t=S.tricks[i]; if(!t) return; var def=trickDef(t.name
   addLog('Trick · '+t.name,'Success','1 WP · tricks always work · '+(def.text||''),'normal'); changed(); }
 
 // ── render ──
-var _tcol={}; try{ _tcol=JSON.parse(localStorage.getItem('db_turn_collapsed')||'{}')||{}; }catch(e){}
+var _tcol={};   // collapsed Action-tab sections (in memory, as on the other sheets)
 function tsec(id,title,body,count){ var col=!!_tcol[id]; return '<div class="db-sec'+(col?' collapsed':'')+'" id="ts-'+id+'"><div class="db-sec-hd" onclick="toggleTSec(\''+id+'\')"><span class="db-caret">▼</span><span class="db-title">'+title+'</span>'+(count!=null?'<span class="db-count">'+count+'</span>':'')+'</div><div class="db-sec-body">'+body+'</div></div>'; }
-function toggleTSec(id){ _tcol[id]=!_tcol[id]; try{ localStorage.setItem('db_turn_collapsed',JSON.stringify(_tcol)); }catch(e){} var el=$('ts-'+id); if(el) el.classList.toggle('collapsed',!!_tcol[id]); }
+function toggleTSec(id){ _tcol[id]=!_tcol[id]; var el=$('ts-'+id); if(el) el.classList.toggle('collapsed',!!_tcol[id]); }
 function tcard(name,sub,btns,dis){ return '<div class="db-card'+(dis?' disabled':'')+'"><div class="db-main"><div class="db-name">'+name+'</div>'+(sub?'<div class="db-sub">'+sub+'</div>':'')+'</div><div class="db-btns">'+btns+'</div></div>'; }
 function tbtn(label,fn,cls,title){ return '<button class="db-do'+(cls?' '+cls:'')+'" onclick="'+fn+'"'+(title?' title="'+esc(title)+'"':'')+'>'+label+'</button>'; }
 function renderTurn(){
@@ -1474,7 +1550,7 @@ function renderTurn(){
   if(S.light) h+='<span class="db-badge">'+esc(S.light.name)+' lit</span>'; if(S.prey) h+='<span class="db-badge">Prey: '+esc(S.prey)+'</span>';
   h+='</div></div>';
   h+=renderActions(act,atk,react);
-  el.innerHTML=h;
+  setHTML(el,h);
 }
 function renderActions(act,atk,react){
   var h='';
@@ -1496,7 +1572,7 @@ function renderActions(act,atk,react){
     bt+=tbtn('Sneak Attack','doAttack('+x.i+',{sneak:true})','ghost','Outside combat, after a successful Sneaking roll: a boon, it can\'t be dodged or parried'+(subtle?', +1 damage die (subtle weapon)':''))+
       tbtn('Attack','doAttack('+x.i+',{})','',(atk?'':'No action left'));
     a+=tcard(esc(dd.name)+(dd.shield?' <span class="tag">shield</span>':''),sub,bt,!atk); });
-  a='<div class="db-rx" style="padding:4px 2px 2px;"><label title="Melee against a prone target: a boon and +D6 damage (applies to your next attack)"><input type="checkbox" data-nolock '+(S.proneTarget?'checked':'')+' onchange="toggleProneTarget(this.checked)"> Target is prone</label></div>'+a;
+  a='<div class="db-rx" style="padding:4px 2px 2px;"><button type="button" class="db-tog'+(S.proneTarget?' on':'')+'" aria-pressed="'+(!!S.proneTarget)+'" onclick="toggleProneTarget(!S.proneTarget)" title="Melee against a prone target: a boon and +D6 damage (applies to your next attack)"><span class="db-tog-box"></span>Target is prone</button></div>'+a;
   if(S.turn.extra>0) a='<div class="db-note good">'+(S.turn.dual?'Dual Wield: one extra attack with your other one-handed weapon, at a bane.':'Critical hit: one free extra attack against another enemy.')+'</div>'+a;
   h+=tsec('attacks','Attacks',a);
   var sp=tcard('Topple','Weapon skill vs Evade — a boon with a toppling weapon',tbtn('Roll','specialAttack(\'Topple\')'),!atk)+
@@ -1615,11 +1691,18 @@ function pickAdd(ix,buy){ var x=pickerItems()[ix]; if(!x) return;
   if(_pk==='spell'){ S.spells.push({name:x.name,prepared:S.spells.filter(function(s){ return s.prepared; }).length<preparedLimit()}); }
   if(_pk==='trick'){ S.tricks.push({name:x.name}); }
   addLog(buy?'Bought':'Added',x.name,buy?costText(x.cost):'','normal'); changed(); renderPicker(); }
-function pickerCustom(){ var n=window.prompt('Name'); if(!n) return;
-  if(isShop()&&_shopTab==='gear') S.inventory.push({name:n,qty:1,wt:1,note:''});
-  if(isShop()&&_shopTab==='weapon'){ var dmg=window.prompt('Damage (e.g. 2D6)','D8')||'D8'; var sk=window.prompt('Skill (e.g. Swords)','Swords')||'Brawling'; S.inventory.push({name:n,kind:'weapon',qty:1,wt:1,note:'',damage:dmg,skill:sk,melee:true,features:[],equipped:handCount()<3}); }
-  if(_pk==='ability'){ var t=window.prompt('What does it do?')||''; S.abilities.push({name:n,kind:'heroic',note:t}); }
-  closePicker(); changed(); }
+// "+ Custom" opens a small form in the shared dialog (no native prompt()).
+function pickerCustom(){
+  var wpn=isShop()&&_shopTab==='weapon', ab=_pk==='ability';
+  var body='<div class="m-lbl">Name</div><input id="pc-name" class="m-input" type="text">'+
+    (wpn?'<div class="m-lbl">Damage</div><input id="pc-dmg" class="m-input" type="text" value="D8"><div class="m-lbl">Skill</div><select id="pc-sk" class="m-input">'+A(D('DB_SKILLS')).filter(function(s){ return s.type==='weapon'; }).map(function(s){ return '<option'+(s.name==='Swords'?' selected':'')+'>'+esc(s.name)+'</option>'; }).join('')+'</select>':'')+
+    (ab?'<div class="m-lbl">What does it do?</div><input id="pc-text" class="m-input" type="text">':'');
+  openDlg(wpn?'Custom Weapon':ab?'Custom Ability':'Custom Item',body,[{t:'Add',f:function(){ var n=($('pc-name').value||'').trim(); if(!n) return;
+    if(isShop()&&_shopTab==='gear') S.inventory.push({name:n,qty:1,wt:1,note:''});
+    if(wpn){ var dmg=($('pc-dmg').value||'').trim()||'D8'; var sk=$('pc-sk').value||'Brawling'; S.inventory.push({name:n,kind:'weapon',qty:1,wt:1,note:'',damage:dmg,skill:sk,melee:true,features:[],equipped:handCount()<3}); }
+    if(ab){ S.abilities.push({name:n,kind:'heroic',note:($('pc-text').value||'').trim()}); }
+    closeDlg(); closePicker(); addLog('Added',n,'custom','normal'); changed(); }}]);
+}
 
 // ═══ RULES & OPTIONS ════════════════════════════════════════════════════════
 function openRules(){
@@ -1631,7 +1714,11 @@ function openRules(){
 function closeRules(){ $('rules-overlay').classList.remove('open'); }
 
 // ═══ TABS ═══════════════════════════════════════════════════════════════════
-function setTab(name){ document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.toggle('on',b.dataset.tab===name); }); document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.toggle('on',p.id==='tab-'+name); }); }
+function setTab(name){
+  [].forEach.call(document.querySelectorAll('.tab-btn'),function(b){ b.classList.toggle('on', b.dataset.tab===name); });
+  [].forEach.call(document.querySelectorAll('.tab-panel'),function(p){ p.classList.toggle('on', p.id==='tab-'+name); });
+  try{ localStorage.setItem('db_tab',name); }catch(e){}
+}
 function setDefaultTab(){ setTab('action'); }   // sheets always open on the Action tab
 
 // ═══ LOG (shared chrome) ════════════════════════════════════════════════════
@@ -1659,8 +1746,8 @@ function toggleLogCollapse(){ document.querySelector('.roll-log').classList.togg
 document.querySelector('.log-header').addEventListener('click', function(e){ if(window.innerWidth<=768 && !e.target.closest('button,.dm-toggle-btn')) toggleLogCollapse(); });
 (function(){ if(window.innerWidth<=768) document.querySelector('.roll-log').classList.add('collapsed'); })();
 // Theme: the account page's preference, seeded into db_dark by the injected head (lib/minibar.ts) —
-// no toggle on the sheet, like every other sheet. Standalone (no seed) it opens dark.
-function setDarkMode(on){ document.body.classList.toggle('dark', on); }
+// no toggle on the sheet, like every other sheet.
+function setDarkMode(on){ document.body.classList.toggle('dark', on); try { localStorage.setItem('db_dark', on ? '1' : '0'); } catch(e){} }
 
 // ═══ SAVE / LOAD ════════════════════════════════════════════════════════════
 function collectSheet(){ var d=JSON.parse(JSON.stringify(S)); d.system='DB'; d.name=(S.name||'').trim();
@@ -1680,7 +1767,7 @@ function applySheet(d){
   migrateGear(d);
   S.system='DB';
   if(typeof campaignRestore==='function') campaignRestore(d.campaign);
-  renderAll(); setDefaultTab();
+  renderAll();
   if(window.__ddSaveTitle && S.name) try{ window.__ddSaveTitle(S.name); }catch(e){}
 }
 // v1 → v2: the separate "weapons at hand" list and the armor / helmet slots become inventory rows
@@ -1727,7 +1814,7 @@ var _autoSaveTimer=null;
 function scheduleAutosave(){ if(!_pageReady) return; if(_autoSaveTimer) clearTimeout(_autoSaveTimer); _autoSaveTimer=setTimeout(function(){ try{ saveSheet(true); }catch(e){} }, 1500); }
 window.scheduleAutosave=scheduleAutosave; window.save=function(){ scheduleAutosave(); };
 $('f-name').addEventListener('input', function(){ S.name=$('f-name').value; if(window.__ddSaveTitle) try{ window.__ddSaveTitle((S.name||'').trim()); }catch(e){} });
-try{ setDarkMode(localStorage.getItem('db_dark')!=='0'); }catch(e){ setDarkMode(true); }
+try { if(localStorage.getItem('db_dark') === '1') setDarkMode(true); } catch(e){}
 
 // ═══ API for the builder / advancement scripts ═════════════════════════════
 window.DBSHEET={
@@ -1930,6 +2017,18 @@ function campaignStartPolling(){ if(_campaignTimer) clearInterval(_campaignTimer
 document.addEventListener('visibilitychange', function(){ if(!_campaign||!_campaignTimer) return; clearInterval(_campaignTimer); if(!document.hidden) campaignPoll(); _campaignTimer=setInterval(campaignPoll, campaignPollDelay()); });
 function campaignRestore(saved){ if(saved&&saved.id&&saved.code){ _campaign={ id:saved.id, code:saved.code, name:saved.name||'Campaign' }; campaignStartPolling(); } else campaignLeaveSilent(); campaignUpdateBtn(); }
 window.openCampaign=openCampaign; window.closeCampaign=closeCampaign; window.campaignJoin=campaignJoin; window.campaignLeave=campaignLeave;
+
+// ═══ INIT ════════════════════════════════════════════════════════════════════
+function autoLoad(){
+  var saved=null;
+  saved=window.__ddPick('db_sheet');
+  if(!saved){ renderAll(); setDefaultTab(); return; }
+  try{ applySheet(JSON.parse(saved)); }catch(e){ renderAll(); }
+  setDefaultTab();
+}
+S=blankState();
+autoLoad();
+var _fb=$('foot-build'); if(_fb) _fb.textContent=window.__BUILD__||'';
 </script>
 
 <script src="/tools-data/db-sheet-builder.js"></script>
@@ -1937,14 +2036,9 @@ window.openCampaign=openCampaign; window.closeCampaign=closeCampaign; window.cam
 <script src="/tools-data/db-homebrew.js"></script>
 
 <script>
-// ═══ BOOT ═══════════════════════════════════════════════════════════════════
-(function boot(){
-  var saved=window.__ddPick('db_sheet'); var data=null; if(saved){ try{ data=JSON.parse(saved); }catch(e){} }
-  applySheet(data||{});
-  var fb=$('foot-build'); if(fb) fb.textContent=window.__BUILD__||'';
-  // Pull the viewer's homebrew into the pickers; re-render an open picker when it lands.
-  if(window.DBHB){ try{ window.DBHB.load(function(){ if(_pk) renderPicker(); renderAll(); }); }catch(e){} }
-})();
+// Pull the viewer's homebrew into the pickers and the creation wizard; when it lands, an open
+// picker re-renders, and so does any sheet region whose rows it changes (only those: setHTML).
+if(window.DBHB){ try{ window.DBHB.load(function(){ if(_pk) renderPicker(); renderAll(); }); }catch(e){} }
 </script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js -->
 <script src="/tools-data/dice-anim.js"></script>
@@ -1996,6 +2090,10 @@ body.dark .db-top{background:#1c1c21;}
 .db-rx{display:flex;gap:12px;flex-wrap:wrap;padding:0 12px 8px;font-size:13px;color:var(--ink);}
 .db-rx label{display:flex;align-items:center;gap:5px;cursor:pointer;}
 .db-rx input{accent-color:var(--acc);width:16px;height:16px;}
+/* a toggle (not a checkbox: no form field in the Action tab, so nothing there can take focus on a tap) */
+.db-tog{display:inline-flex;align-items:center;gap:6px;background:transparent;border:none;padding:2px 0;cursor:pointer;font-family:var(--f-ui);font-size:13px;color:var(--ink);}
+.db-tog-box{width:16px;height:16px;border:1.5px solid var(--acc);border-radius:4px;flex:0 0 auto;}
+.db-tog.on .db-tog-box{background:var(--acc);box-shadow:inset 0 0 0 2px var(--card);}
 body.sheet-locked .lk-hide{display:none;}
 body.sheet-locked .sk-school-off{display:none;}
 @media (max-width:600px){

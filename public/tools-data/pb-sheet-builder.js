@@ -92,7 +92,9 @@
   function render() {
     var h = '<div class="m-row" style="gap:4px;margin-bottom:12px;">' + STEPS.map(function (s, i) { return '<span style="font-family:var(--f-label);font-size:12.5px;padding:2px 8px;border-radius:12px;border:1px solid ' + (i === step ? 'var(--acc)' : '#3a2424') + ';color:' + (i === step ? '#ffd5c8' : '#a89a8a') + ';background:' + (i === step ? '#3a0f12' : 'transparent') + ';' + (i > step ? 'opacity:.5;' : '') + '"><span style="font-family:var(--f-num);">' + (i + 1) + '.</span> ' + esc(s) + '</span>'; }).join('') + '</div>';
     h += '<div style="font-family:var(--f-disp);font-size:27px;color:#fff;margin-bottom:6px;">' + esc(STEPS[step]) + '</div>' + page();
-    $('builder-body').innerHTML = h;
+    // Same step re-rendered (a roll, a pick): keep the dialog where it was; a new step starts at the top.
+    var bd = $('builder-body'), keep = bd._step === step ? bd.scrollTop : 0;
+    bd.innerHTML = h; bd.scrollTop = keep; bd._step = step;
     $('builder-title').textContent = 'Create a Pirate';
     $('builder-ft').innerHTML = '<button class="m-btn ghost" onclick="PBB.back()"' + (step === 0 ? ' disabled' : '') + '>Back</button><span class="m-hint" style="margin:0;align-self:center;">' + (valid(step) ? '' : 'Finish this step to continue') + '</span>' +
       (step < STEPS.length - 1 ? '<button class="m-btn" onclick="PBB.next()"' + (valid(step) ? '' : ' disabled') + '>Next</button>' : '<button class="m-btn" onclick="PBB.finish()"' + (allValid() ? '' : ' disabled') + '>Create Pirate</button>');
@@ -239,6 +241,14 @@
     h += box(summary());
     return h;
   }
+  // A few d66 nicknames offer a choice ("Sir/Madam", "One-Eye/Arm/Leg", "The Bride/Groom"):
+  // take one — the gendered ones follow the first name, the rest at random.
+  function nickPick(nk) { nk = String(nk || ''); if (nk.indexOf('/') < 0) return nk;
+    var pre = (nk.match(/^(The |One-)/) || [''])[0], opts = nk.slice(pre.length).split('/').map(function (x) { return pre + x.trim(); });
+    var FEM = /^(The )?(Madam|Mrs\.|Miss|Queen|Bride)$/, MAS = /^(The )?(Sir|Mr\.|King|Groom)$/;
+    var fem = B.sex === 'female' || (B.sex !== 'male' && (B.firstFem != null ? B.firstFem : d(2) === 2));
+    var g = opts.filter(function (o) { return fem ? FEM.test(o) : MAS.test(o); }); if (g.length) opts = g;
+    return opts[d(opts.length) - 1]; }
   function summary() { var c = C(); var parts = [];
     parts.push('<b>' + esc(B.name || '—') + '</b> — ' + esc(labelClass()));
     parts.push(ABIL.map(function (a) { var f = finalMod(a); return a.slice(0, 3) + ' ' + (f == null ? '—' : sg(f)); }).join(' · '));
@@ -253,9 +263,9 @@
 
   // ── actions ──
   var api = {
-    launch: function () { B = fresh(); step = 0; $('builder-overlay').classList.add('open'); render(); },
+    launch: function () { B = fresh(); step = 0; $('builder-body')._step = -1; $('builder-overlay').classList.add('open'); render(); },
     close: function () { $('builder-overlay').classList.remove('open'); },
-    next: function () { if (!valid(step)) return; step = Math.min(STEPS.length - 1, step + 1); render(); $('builder-body').scrollTop = 0; },
+    next: function () { if (!valid(step)) return; step = Math.min(STEPS.length - 1, step + 1); render(); },
     back: function () { step = Math.max(0, step - 1); render(); },
     set: function (k, v) { var keepB = B[k] === v; B[k] = String(v); if (!keepB && (k === 'base' || k === 'animal' || k === 'ancestry')) { var r = B.rolls, m = B.mods, pl = B.pool, as = B.assign; resetAfterClass(); B.rolls = r; B.mods = m; B.pool = pl; B.assign = as; } render(); },
     setq: function (k, v) { B[k] = v; var ft = $('builder-ft'); if (ft) { var nb = ft.querySelector('.m-btn:last-child'); if (nb) nb.disabled = !(step === STEPS.length - 1 ? allValid() : valid(step)); } },
@@ -302,8 +312,8 @@
     rollText: function (k, list, n) { var r = d(n); var row = rowFor(window[list], r); if (row) { B[k] = row.text; log({ flaw: 'Flaw', mark: 'Trademark', idio: 'Idiosyncrasy', incident: 'Unfortunate incident', thing: 'Thing of importance' }[k], row.text, 'd' + n + '(' + r + ')'); } render(); },
     pickText: function (k, list, i) { var row = A(window[list])[num(i, -1)]; B[k] = row ? row.text : ''; render(); },
     rollPart: function (part) { var n = d66(); var row = A(window.PB_NAMES).find(function (x) { return x.roll === n; }); if (!row) return; var v;
-      if (part === 'first') v = B.sex === 'female' ? row.female : B.sex === 'male' ? row.male : (d(2) === 1 ? row.male : row.female);
-      else if (part === 'surname') v = row.surname; else v = row.nickname;
+      if (part === 'first') { var fem = B.sex === 'female' || (B.sex !== 'male' && d(2) === 2); v = fem ? row.female : row.male; B.firstFem = fem; if (/\//.test(v)) { var vs = v.split('/'); v = vs[d(vs.length) - 1].trim(); } }   // "William/Billy"
+      else if (part === 'surname') v = row.surname; else v = nickPick(row.nickname);
       B[part] = v; B.name = [B.first, B.surname].filter(Boolean).join(' ') + (B.nick ? ' "' + B.nick + '"' : ''); log('Name', v, 'd66(' + n + ')'); render(); },
     rollName: function () { ['first', 'surname', 'nick'].forEach(function (p) { api.rollPart(p); }); },
     finish: function () {

@@ -85,12 +85,13 @@
     var done = V.abil && V.hp && V.dead && (V.feature || !tables.length);
     h += '<div class="m-lbl">Summary</div><div class="res-box">' + [V.abil ? 'Abilities: ' + V.abil.map(function (x) { return x.a.slice(0, 3) + ' ' + sg(x.to); }).join(', ') : 'Abilities: —', V.hp ? 'Max HP ' + V.hp.to + ' (+' + V.hp.n + ')' : 'HP: —', 'Feature: ' + (V.feature ? V.feature.name : '—'), 'Found: ' + (V.dead ? V.dead.got : '—')].map(esc).join('<br>') + '</div>';
     $('advance-title').textContent = 'Getting Better';
-    $('advance-body').innerHTML = h;
+    // Each roll re-renders the dialog: keep its scroll position (open() starts at the top).
+    var bd = $('advance-body'), keep = bd.scrollTop; bd.innerHTML = h; bd.scrollTop = keep;
     $('advance-ft').innerHTML = '<button class="m-btn warn" onclick="PBADV.undo()">Undo all</button><button class="m-btn ghost" onclick="PBADV.all()"' + (done ? ' disabled' : '') + '>Roll everything left</button><button class="m-btn" onclick="PBADV.close()">' + (done ? 'Done' : 'Close') + '</button>';
     $('advance-overlay').classList.add('open');
   }
   var api = {
-    open: function () { if (!SH()) return; V = { snap: SH().snapshot(), abil: null, hp: null, feature: null, dead: null }; render(); },
+    open: function () { if (!SH()) return; V = { snap: SH().snapshot(), abil: null, hp: null, feature: null, dead: null }; $('advance-body').scrollTop = 0; render(); },
     close: function () { $('advance-overlay').classList.remove('open'); },
     abil: rollAbilities, hp: rollHp, dead: rollDead, roll: rollFeature, pick: pickFeature,
     all: function () { if (!V.abil) rollAbilities(); if (!V.hp) rollHp(); if (!V.feature) { var t = expTables()[0]; if (t) rollFeature(t.id); } if (!V.dead) rollDead(); },

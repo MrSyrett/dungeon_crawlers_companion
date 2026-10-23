@@ -84,7 +84,11 @@
     var h = '<nav class="bd-steps" aria-label="Steps">' + steps().map(function (s, i) { var ok = i !== step && !!seen[s] && valid(i), cls = 'bd-step' + (i === step ? ' on' : '') + (ok ? ' done' : '');
       return '<button class="' + cls + '"' + (i === step ? ' aria-current="step"' : '') + ' onclick="DBB.go(' + i + ')">' + (i + 1) + '. ' + esc(stepName(i)) + (ok ? ' <span class="bd-ck">✓</span>' : '') + '</button>'; }).join('') + '</nav>';
     h += '<div class="bd-title" style="font-family:var(--f-disp);font-size:24px;margin-bottom:6px;">' + (step + 1) + '. ' + esc(stepName(step)) + '</div>' + page();
-    $('builder-body').innerHTML = h;
+    // same step re-rendered (a pick, a roll): keep the modal body where it was; a new step starts at the top
+    var body = $('builder-body'), same = render._step === step, prev = body.scrollTop;
+    body.innerHTML = h;
+    body.scrollTop = same ? prev : 0;
+    render._step = step;
     $('builder-title').textContent = 'Create a Character';
     $('builder-ft').innerHTML = '<button class="m-btn ghost" onclick="DBB.back()"' + (step === 0 ? ' disabled' : '') + '>Back</button><span class="m-hint" style="margin:0;align-self:center;">' + (valid(step) ? '' : 'Finish this step to continue') + '</span>' +
       (step < STEPS.length - 1 ? '<button class="m-btn" onclick="DBB.next()"' + (valid(step) ? '' : ' disabled') + '>Next</button>' : '<button class="m-btn" onclick="DBB.finish()"' + (allValid() ? '' : ' disabled') + '>Create Character</button>');
@@ -229,11 +233,11 @@
 
   // ── actions ──
   var api = {
-    launch: function () { B = fresh(); step = 0; seen = {}; $('builder-overlay').classList.add('open'); render(); },
+    launch: function () { B = fresh(); step = 0; seen = {}; render._step = -1; $('builder-overlay').classList.add('open'); render(); },
     close: function () { $('builder-overlay').classList.remove('open'); },
-    next: function () { if (!valid(step)) return; step = Math.min(STEPS.length - 1, step + 1); render(); $('builder-body').scrollTop = 0; },
-    back: function () { step = Math.max(0, step - 1); render(); $('builder-body').scrollTop = 0; },
-    go: function (i) { i = parseInt(i, 10); if (isNaN(i) || i < 0 || i >= STEPS.length) return; step = i; render(); $('builder-body').scrollTop = 0; },
+    next: function () { if (!valid(step)) return; step = Math.min(STEPS.length - 1, step + 1); render(); },
+    back: function () { step = Math.max(0, step - 1); render(); },
+    go: function (i) { i = parseInt(i, 10); if (isNaN(i) || i < 0 || i >= STEPS.length) return; step = i; render(); },
     set: function (k, v) { if (k === 'prof' && B.prof !== v) { B.profSkills = []; B.freeSkills = []; B.school = ''; B.ability = ''; B.spells = []; B.tricks = []; B.kit = -1; B.kitChoice = {}; B.food = null; B.silver = null; }
       if (k === 'age' && B.age !== v) { B.freeSkills = B.freeSkills.slice(0, (A(T().ages).find(function (a) { return a.id === v; }) || {}).freeSkills || 4); }
       B[k] = String(v); render(); },

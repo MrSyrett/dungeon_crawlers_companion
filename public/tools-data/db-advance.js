@@ -20,7 +20,10 @@
   function marked() { var st = S(); return skills().filter(function (s) { return st.skills[s.name] && st.skills[s.name].mark; }).map(function (s) { return s.name; }); }
   function setMark(n, on) { var st = S(); (st.skills[n] = st.skills[n] || {}).mark = !!on; }
   function earned() { var n = 0; V.q.forEach(function (on, i) { if (on && i < 4) n++; }); if (V.weak === 'gave') n += 1; if (V.weak === 'overcame') n += 2; return n + (V.extra || 0); }
-  function show(title, body, ft) { $('advance-title').textContent = title; $('advance-body').innerHTML = body; $('advance-ft').innerHTML = ft || '<button class="m-btn ghost" onclick="DBADV.close()">Close</button>'; $('advance-overlay').classList.add('open'); }
+  // Re-rendering the same view (placing a mark, ticking a question) keeps the modal body's scroll; a new view starts at the top.
+  function show(title, body, ft) { var ov = $('advance-overlay'), bd = $('advance-body'), key = title + '|' + (V && V.tab), same = ov.classList.contains('open') && show._k === key, prev = bd.scrollTop;
+    $('advance-title').textContent = title; bd.innerHTML = body; $('advance-ft').innerHTML = ft || '<button class="m-btn ghost" onclick="DBADV.close()">Close</button>'; ov.classList.add('open');
+    bd.scrollTop = same ? prev : 0; show._k = key; }
   function tabs(active) { return '<div class="m-row" style="margin-bottom:12px;">' + [['session', 'End of Session'], ['teacher', 'Teacher'], ['magic', 'Learn Magic'], ['reward', 'GM Reward']].map(function (t) { return '<button class="chip' + (active === t[0] ? ' sel' : '') + '" onclick="DBADV.tab(\'' + t[0] + '\')">' + t[1] + '</button>'; }).join('') + '</div>'; }
 
   function renderSession() {
