@@ -43,7 +43,7 @@
 .da-pop .da-hint{font-size:10px;color:#666;margin-top:8px;line-height:1.4;}
 `; (document.head||document.documentElement).appendChild(st); } }catch(e){} })();
   var LS='dcw_diceanim';  // shared across all sheets
-  var DEF={ on:true, mode:'3d', dice:'#d8b24a', num:'#2a2007', linger:1000, finish:'plastic', texture:'none', hand:'right', sound:true };
+  var DEF={ on:true, mode:'3d', dice:'#d8b24a', num:'#2a2007', linger:1000, finish:'plastic', texture:'none', hand:'right', sound:true, font:'standard' };
   // Two independent axes: FINISH (how the surface catches light) × TEXTURE (the
   // pattern on it). Any pair is valid — glossy marble, matte wood, metal steel…
   var FINISHES=['plastic','metal','matte'];
@@ -67,6 +67,54 @@
   try{ var raw=localStorage.getItem(LS); if(raw){ var saved=JSON.parse(raw)||{}; Object.assign(S, saved); var mt0=migrate(saved); S.finish=mt0.finish; S.texture=mt0.texture; delete S.mat; delete S.tex; hadLS=true; } }catch(e){}
   function persistLocal(){ try{ localStorage.setItem(LS, JSON.stringify(S)); }catch(e){} }
   function persist(){ persistLocal(); if(typeof window.saveSheet==='function'){ try{ window.saveSheet(true); }catch(e){} } }
+
+  // ─── number font: Standard (Montserrat) or Themed (the system's label face) ───
+  // Themed uses each system's SECOND accent face — its --sys-label in
+  // public/tokens.css — not the display face, which is often too decorative to
+  // read at die size. A themed sheet (<html data-themed data-system>) exposes it
+  // as --sys-label; the GM Screen isn't skinned, so it falls back to this copy of
+  // the same table, keyed by its current system (data-gm-sys / GM_SYSTEM).
+  // KEEP IN STEP with the --sys-label lines in public/tokens.css.
+  var SYS_LABEL_FONT={
+    SD:'"Montserrat",sans-serif', DND:'"Cinzel",serif', DCC:'"Share Tech Mono",monospace',
+    SW:'"Libre Franklin",sans-serif', MMRPG:'"Oswald",sans-serif', ACE:'"Nunito",sans-serif',
+    KOB:'"Mulish",sans-serif', D62E:'"Saira Condensed",sans-serif', GB:'"Asap",sans-serif',
+    CO:'"Lora",Georgia,serif', NIM:'"Figtree",sans-serif', ICRPG:'"Archivo",sans-serif',
+    YZE:'"Archivo Narrow",sans-serif', TWD:'"Oswald",sans-serif', MYZ:'"Barlow Condensed",sans-serif',
+    VAE:'"Cormorant Garamond",Georgia,serif', LOTR:'"Aniron","EB Garamond",Georgia,serif',
+    DB:'"Minion Pro","EB Garamond",Georgia,serif', PB:'"1651 Alchemy","EB Garamond",Georgia,serif',
+    JLU:'"Rubik",sans-serif' };
+  var STD_STACK='Montserrat,"Barlow Condensed",Arial,sans-serif';
+  function sysKey(){ var d=document.documentElement; return String(d.getAttribute('data-system')||d.getAttribute('data-gm-sys')||window.GM_SYSTEM||'').toUpperCase(); }
+  function themedStack(){ var d=document.documentElement;
+    if(d.hasAttribute('data-themed')){ try{ var v=getComputedStyle(d).getPropertyValue('--sys-label').trim(); if(v) return v; }catch(e){} }
+    return SYS_LABEL_FONT[sysKey()]||null; }
+  // Use a real bold only when the face ships one; synthetic bold smears the
+  // decorative faces (Aniron, Alchemy).
+  function hasBold(fam){ var ok=false; try{ document.fonts.forEach(function(f){ if(String(f.family).replace(/["']/g,'')===fam){ var hi=parseInt(String(f.weight).split(' ').pop(),10)||400; if(hi>=600) ok=true; } }); }catch(e){} return ok; }
+  var _fiKey=null, _fiVal=null;
+  function fontInfo(){ var st=S.font==='themed'?themedStack():null;
+    var k=(st||'std'); if(k===_fiKey) return _fiVal;
+    var v; if(!st) v={stack:STD_STACK, themed:false};
+    else { var fam=st.split(',')[0].trim().replace(/^["']|["']$/g,''); v={stack:st, w:hasBold(fam)?700:400, themed:true}; }
+    _fiKey=k; _fiVal=v; return v; }
+  // Size + centre a themed number against the standard face: never wider than
+  // Montserrat Bold would draw it (a wide face can't spill off the face), and
+  // centred on its real ink box (faces sit differently on the baseline).
+  var _mc=null;
+  function measure(font,text){ if(!_mc) _mc=document.createElement('canvas').getContext('2d'); _mc.font=font; return _mc.measureText(text); }
+  function themedMetrics(fi,px,text){ var ref=measure('bold '+px+'px Montserrat,sans-serif',text).width;
+    var m=measure(fi.w+' '+px+'px '+fi.stack,text); if(ref>0 && m.width>ref*1.08){ px=px*ref*1.08/m.width; m=measure(fi.w+' '+px+'px '+fi.stack,text); }
+    var asc=m.actualBoundingBoxAscent, desc=m.actualBoundingBoxDescent;
+    var off=(isFinite(asc)&&isFinite(desc)&&(asc+desc)>0)?(asc-desc)/2:px*0.35;
+    return {px:px, font:fi.w+' '+px+'px '+fi.stack, off:off}; }
+  // Make sure the themed face is downloaded before a roll draws with it (canvas
+  // text silently falls back if it isn't). Resolves at once when it's ready.
+  function fontReady(cb){ var fi=fontInfo(); if(!fi.themed || !document.fonts || !document.fonts.load){ cb(); return; }
+    var done=false, go=function(){ if(done) return; done=true; cb(); };
+    try{ document.fonts.load(fi.w+' 48px '+fi.stack,'0123456789M').then(go,go); }catch(e){ go(); }
+    setTimeout(go, 700); }
+  if(S.font==='themed') setTimeout(function(){ fontReady(function(){}); }, 300);
 
   // ─── colour helpers ───
   function hx(n){ n=Math.max(0,Math.min(255,Math.round(n))).toString(16); return n.length<2?'0'+n:n; }
@@ -106,8 +154,9 @@
   DICE[100]=DICE[10];
   function cY(pts){ var s=0; pts.forEach(function(p){s+=p[1];}); return s/pts.length; }
   function pstr(pts){ return pts.map(function(p){return p.join(',');}).join(' '); }
-  function numSVG(disp, cx, cy, fs, numColor){ var y=cy+fs*0.355, nc=numColor||S.num;
-    var t='<text x="'+cx+'" y="'+y+'" text-anchor="middle" font-family="Montserrat,Barlow Condensed,Arial,sans-serif" font-weight="800" font-size="'+fs+'" fill="'+nc+'">'+disp+'</text>';
+  function numSVG(disp, cx, cy, fs, numColor){ var y=cy+fs*0.355, nc=numColor||S.num, fi=fontInfo(), fam='Montserrat,Barlow Condensed,Arial,sans-serif', fw=800, tfs=fs;
+    if(fi.themed){ var tm=themedMetrics(fi,fs,String(disp)); tfs=+tm.px.toFixed(2); y=+(cy+tm.off).toFixed(2); fam=fi.stack.replace(/"/g,"'"); fw=fi.w; }
+    var t='<text x="'+cx+'" y="'+y+'" text-anchor="middle" font-family="'+fam+'" font-weight="'+fw+'" font-size="'+tfs+'" fill="'+nc+'">'+disp+'</text>';
     if(disp==='6'||disp==='9'){ var uw=fs*0.36; t+='<rect x="'+(cx-uw/2).toFixed(1)+'" y="'+(y+fs*0.12).toFixed(1)+'" width="'+uw.toFixed(1)+'" height="'+(fs*0.11).toFixed(1)+'" rx="'+(fs*0.055).toFixed(1)+'" fill="'+nc+'"/>'; }
     return t; }
   function dieSVG(sides,val,color,numColor){
@@ -413,7 +462,9 @@
   // layer (the same digit as a dent, with a soft shadow on one side) so the
   // number sits IN the face and its rim catches the light — engraved and
   // inked, the way real dice are made, not a sticker.
-  function drawDigit(g,s,text){ g.font='bold '+(text.length>1?70:92)+'px Montserrat,sans-serif'; g.textAlign='center'; g.textBaseline='middle'; g.fillText(text,s/2,s/2+4);
+  function drawDigit(g,s,text){ var px=text.length>1?70:92, fi=fontInfo();
+    if(fi.themed){ var tm=themedMetrics(fi,px,text); g.font=tm.font; g.textAlign='center'; g.textBaseline='alphabetic'; g.fillText(text,s/2,s/2+tm.off); }
+    else { g.font='bold '+px+'px Montserrat,sans-serif'; g.textAlign='center'; g.textBaseline='middle'; g.fillText(text,s/2,s/2+4); }
     if(text==='6'||text==='9'){ g.fillRect(s/2-24, s/2+42, 48, 8); } }
   // One edge-band inner shadow: a solid-with-glyph-hole mask is drawn clipped to
   // the glyph (source-atop) with an offset blurred shadow, so the glyph's own
@@ -757,8 +808,9 @@
     var rd=dice.map(function(d){ return { sides:d.sides, display:(d.display!=null?d.display:d.val), faceSet:d.faceSet||null, wave:d.wave||0, color:(d.color!=null?d.color:resolveColor()), numColor:(d.numColor!=null?d.numColor:null) }; });
     if(S.sound!==false) playAudio(rd.length);
     clearInline();
+    fontReady(function(){
     if(S.mode==='3d' && HAS_WEBGL){ if(threeState===2){ play3D(rd,crit); } else { play2D(rd,crit); if(threeState!==3) loadThree(function(ok){}); } }
-    else { play2D(rd,crit); } }
+    else { play2D(rd,crit); } }); }
   // warm up three.js if 3D is the active mode
   if(S.on && S.mode==='3d' && HAS_WEBGL) setTimeout(function(){ loadThree(function(){}); }, 400);
 
@@ -862,6 +914,7 @@
       +'<div class="da-row"><span class="k">Throw from</span><div class="da-seg" data-k="hand"><button data-v="right">Right hand</button><button data-v="left">Left hand</button></div></div>'
       +'<div class="da-row"><span class="k">Finish</span><select class="da-select" data-k="finish"><option value="plastic">Plastic</option><option value="metal">Metal</option><option value="matte">Matte</option></select></div>'
       +'<div class="da-row"><span class="k">Texture</span><select class="da-select" data-k="texture"><option value="none">None</option><option value="fog">Fog</option><option value="liquid">Liquid</option><option value="marble">Marble</option><option value="wood">Wood</option><option value="rock">Rock</option><option value="smoke">Smoke</option><option value="stains">Stains</option><option value="steel">Steel</option><option value="worn">Worn</option></select></div>'
+      +'<div class="da-row" data-row="font"><span class="k">Number font</span><div class="da-seg" data-k="font"><button data-v="standard">Standard</button><button data-v="themed">Themed</button></div></div>'
       +'<div class="da-row"><span class="k">Linger</span><div class="da-seg" data-k="linger"><button data-v="1000">1s</button><button data-v="2000">2s</button><button data-v="4000">4s</button><button data-v="8000">8s</button></div></div>'
       +'<div class="da-row" style="align-items:flex-start"><span class="k" style="padding-top:3px">Dice colour</span><div class="da-swatches" data-k="dice"></div></div>'
       +'<div class="da-row" style="align-items:flex-start"><span class="k" style="padding-top:3px">Number colour</span><div class="da-swatches" data-k="num"></div></div>'
@@ -880,6 +933,7 @@
     var finSel=pop.querySelector('select[data-k="finish"]'); if(finSel) finSel.onchange=function(){ setS('finish', finSel.value); };
     var texSel=pop.querySelector('select[data-k="texture"]'); if(texSel) texSel.onchange=function(){ setS('texture', texSel.value); };
     pop.querySelectorAll('[data-k="hand"] button').forEach(function(b){ b.onclick=function(){ setS('hand', b.dataset.v); }; });
+    pop.querySelectorAll('[data-k="font"] button').forEach(function(b){ b.onclick=function(){ setS('font', b.dataset.v); if(b.dataset.v==='themed') fontReady(function(){}); }; });
     syncPop();
   }
   function syncPop(){ if(!pop)return; pop.querySelector('[data-k="on"]').classList.toggle('on', !!S.on);
@@ -889,6 +943,8 @@
     var finSel=pop.querySelector('select[data-k="finish"]'); if(finSel) finSel.value=(S.finish||'plastic');
     var texSel=pop.querySelector('select[data-k="texture"]'); if(texSel) texSel.value=(S.texture||'none');
     pop.querySelectorAll('[data-k="hand"] button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===(S.hand||'right')); });
+    pop.querySelectorAll('[data-k="font"] button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===(S.font==='themed'?'themed':'standard')); });
+    var fr=pop.querySelector('[data-row="font"]'); if(fr) fr.style.display=themedStack()?'':'none';   // no system → nothing to theme
     var dc=pop.querySelector('[data-k="dice"] .da-custom'); if(dc && S.dice&&String(S.dice)[0]==='#')dc.value=S.dice; var nc=pop.querySelector('[data-k="num"] .da-custom'); if(nc)nc.value=S.num;
     var rb=pop.querySelector('.da-rand'); if(rb) rb.classList.toggle('sel', S.dice==='random'); }
   function setS(k,v){ S[k]=v; persist(); syncPop(); }
@@ -918,8 +974,8 @@
     if(clear && clear.parentNode){ clear.parentNode.insertBefore(g, clear); } else host.appendChild(g); }
 
   // ─── expose for sheet persistence ───
-  window.DiceAnim={ lastRoll:function(){ return lastRoll; }, _world:function(){ return world3d; }, _groups:function(sides){ return getGeoGroups(sides).groups; }, get:function(){ return {on:S.on,mode:S.mode,dice:S.dice,num:S.num,linger:S.linger,finish:S.finish,texture:S.texture,hand:S.hand,sound:S.sound}; },
-    restore:function(o,force){ if(hadLS&&force!==true) return; if(o&&typeof o==='object'){ if(typeof o.on==='boolean')S.on=o.on; if(o.mode)S.mode=o.mode; if(o.dice)S.dice=o.dice; if(o.num)S.num=o.num; if(typeof o.linger==='number')S.linger=o.linger; if(o.finish||o.texture||o.mat||o.tex){ var mt=migrate(o); S.finish=mt.finish; S.texture=mt.texture; } if(o.hand==='left'||o.hand==='right')S.hand=o.hand; if(typeof o.sound==='boolean')S.sound=o.sound; persistLocal(); syncPop(); if(S.on&&S.mode==='3d'&&HAS_WEBGL) loadThree(function(){}); } },
+  window.DiceAnim={ lastRoll:function(){ return lastRoll; }, _world:function(){ return world3d; }, _groups:function(sides){ return getGeoGroups(sides).groups; }, get:function(){ return {on:S.on,mode:S.mode,dice:S.dice,num:S.num,linger:S.linger,finish:S.finish,texture:S.texture,hand:S.hand,sound:S.sound,font:S.font}; },
+    restore:function(o,force){ if(hadLS&&force!==true) return; if(o&&typeof o==='object'){ if(typeof o.on==='boolean')S.on=o.on; if(o.mode)S.mode=o.mode; if(o.dice)S.dice=o.dice; if(o.num)S.num=o.num; if(typeof o.linger==='number')S.linger=o.linger; if(o.finish||o.texture||o.mat||o.tex){ var mt=migrate(o); S.finish=mt.finish; S.texture=mt.texture; } if(o.hand==='left'||o.hand==='right')S.hand=o.hand; if(typeof o.sound==='boolean')S.sound=o.sound; if(o.font==='themed'||o.font==='standard')S.font=o.font; persistLocal(); syncPop(); if(S.on&&S.mode==='3d'&&HAS_WEBGL) loadThree(function(){}); } },
     play:function(dice,crit){ play(dice,crit); } };
 
   // Persist settings into the saved sheet too, as a fallback for VTT webviews
