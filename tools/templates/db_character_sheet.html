@@ -81,6 +81,18 @@ input,select,textarea,button{font-family:var(--f-ui);font-variant-numeric:lining
 .log-entry.crit{border-color:#d9a84a;}.log-entry.crit .roll-result{color:#f0c56a;}
 .log-entry.fumble{border-color:#e0614f;}.log-entry.fumble .roll-result{color:#ff7d6a;}
 .log-entry.remote{border-left:3px solid #c9a14a;background:#161d1a;}
+/* the GM's initiative deal: a row per combatant, cards as chips (your own row highlighted) */
+.dbdeal{display:grid;grid-template-columns:max-content 1fr;gap:3px 8px;margin-top:5px;align-items:center;}
+.dbd-row{display:contents;}
+.dbd-cards{display:inline-flex;gap:3px;flex-wrap:wrap;}
+.dbd-card{display:inline-flex;align-items:center;justify-content:center;width:19px;height:25px;border-radius:3px;background:#f1e7cc;color:#1b1a17;border:1px solid #b89a4e;font-family:var(--f-num);font-size:12.5px;font-weight:700;box-shadow:0 1px 0 rgba(0,0,0,.35);font-variant-numeric:lining-nums tabular-nums;}
+.dbd-card.d2{border-style:dashed;border-color:#6b5a2c;background:#ddd2b4;}
+.dbd-row.first .dbd-card{border-color:#d9a84a;box-shadow:0 0 0 1px #d9a84a;}
+.dbd-who{min-width:0;font-family:var(--f-ui);font-size:12px;color:var(--log-text);line-height:1.25;}
+.dbd-name{font-weight:700;overflow-wrap:anywhere;}
+.dbd-row.me .dbd-name{color:#f0c56a;}
+.dbd-note{display:block;font-size:10.5px;color:var(--log-muted);}
+.dbd-foot{grid-column:1/-1;font-size:10.5px;color:var(--log-muted);margin-top:2px;}
 .log-hint{color:#6f7d76;font-size:12px;font-family:var(--f-label);text-align:center;padding:20px 10px;letter-spacing:.04em;}
 .log-actions{display:flex;flex-wrap:nowrap;gap:4px;padding:8px 10px;border-bottom:1px solid #2c2c32;}
 .log-action-btn{flex:1 1 0;min-width:0;padding:5px 2px;border:none;cursor:pointer;font-family:var(--f-label);font-size:12px;letter-spacing:.02em;text-transform:uppercase;border-radius:6px;white-space:nowrap;overflow:hidden;text-overflow:clip;}
@@ -1740,8 +1752,27 @@ function campaignAddRemote(roll){
   }
   var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint) hint.remove();
   var div=document.createElement('div'); div.className='log-entry remote'+(roll.type==='crit'?' crit':roll.type==='fumble'?' fumble':'');
-  div.innerHTML='<div class="roll-label"><span style="color:#e2c37a;">'+esc(roll.source||'Player')+'</span> · '+esc(roll.label||'')+'</div><div class="roll-result">'+esc(roll.result||'')+'</div><div class="roll-detail">'+esc(roll.detail||'')+'</div>';
+  var deal=dealParse(roll.label,roll.detail); if(deal) div.className+=' dbdeal-entry';
+  div.innerHTML='<div class="roll-label"><span style="color:#e2c37a;">'+esc(roll.source||'Player')+'</span> · '+esc(roll.label||'')+'</div><div class="roll-result">'+esc(roll.result||'')+'</div>'+(deal?dealHtml(deal):'<div class="roll-detail">'+esc(roll.detail||'')+'</div>');
   entries.insertBefore(div, entries.firstChild); while(entries.children.length>60) entries.removeChild(entries.lastChild); entries.scrollTop=0;
+}
+
+// The GM's initiative deal: one line per combatant ("Name: 3, 6*, 9 — note", "*" =
+// second deck — the GM Screen's dbDealText). Shown as a row of card chips per
+// combatant, lowest first; anything else (or an older one-line deal) stays text.
+function dealParse(label,detail){
+  if(!/^Initiative · Round/.test(String(label||''))) return null;
+  var rows=[], foot=[], lines=String(detail||'').split('\n');
+  for(var i=0;i<lines.length;i++){ var line=lines[i].trim(); if(!line) continue;
+    if(line.charAt(0)==='*'){ foot.push(line.replace(/^\*\s*/,'')); continue; }
+    var m=/^(.+?): (\d+\*?(?:, \d+\*?)*)(?: — (.+))?$/.exec(line); if(!m) return null;
+    rows.push({name:m[1],note:m[3]||'',cards:m[2].split(', ').map(function(t){ return {c:parseInt(t,10),d2:/\*$/.test(t)}; })}); }
+  return rows.length?{rows:rows,foot:foot}:null;
+}
+function dealHtml(deal){
+  var me=String(S.name||'').trim().toLowerCase();
+  return '<div class="dbdeal">'+deal.rows.map(function(r,i){ return '<div class="dbd-row'+(i===0?' first':'')+(me&&r.name.toLowerCase()===me?' me':'')+'"><span class="dbd-cards">'+r.cards.map(function(k){ return '<span class="dbd-card'+(k.d2?' d2':'')+'"'+(k.d2?' title="From the second deck"':'')+'>'+k.c+'</span>'; }).join('')+'</span><span class="dbd-who"><span class="dbd-name">'+esc(r.name)+'</span>'+(r.note?'<span class="dbd-note">'+esc(r.note)+'</span>':'')+'</span></div>'; }).join('')
+    +(deal.foot.length?'<div class="dbd-foot">Dashed cards: '+esc(deal.foot.join(' '))+'</div>':'')+'</div>';
 }
 
 // ── Campaign log cards (ported from the D&D sheet) ──

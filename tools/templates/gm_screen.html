@@ -1463,6 +1463,24 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 .gmt-trouble .gmt-etl { color: #e0776f; }
 .gmt-etv { font-family: 'Geist Mono', monospace; font-size: 14px; min-width: 15px; text-align: center; color: var(--light); }
 .gmt-mv .gmt-step { width: 26px; padding: 6px 0; font-size: 15px; }
+/* Dragonbane initiative deal in the roll log: a row per combatant, cards as chips */
+.dbdeal { display: grid; grid-template-columns: max-content 1fr; gap: 3px 8px; margin-top: 5px; align-items: center; }
+.dbd-row { display: contents; }
+.dbd-cards { display: inline-flex; gap: 3px; flex-wrap: wrap; }
+.dbd-card { display: inline-flex; align-items: center; justify-content: center; width: 19px; height: 25px; border-radius: 3px; background: #f1e7cc; color: #1b1a17; border: 1px solid #b89a4e; font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 800; box-shadow: 0 1px 0 rgba(0,0,0,.35); }
+.dbd-card.d2 { border-style: dashed; border-color: #6b5a2c; background: #ddd2b4; }
+.dbd-row.first .dbd-card { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+.dbd-who { min-width: 0; font-family: 'Geist', sans-serif; font-size: 12px; color: var(--light); line-height: 1.25; }
+.dbd-name { font-weight: 700; overflow-wrap: anywhere; }
+.dbd-note { display: block; font-size: 10px; color: var(--muted, #9a978f); }
+.dbd-foot { grid-column: 1 / -1; font-size: 10px; color: var(--muted, #9a978f); margin-top: 2px; }
+/* Dragonbane boons / banes counters (mirror the sheet's tray: − value ＋, boons green, banes red) */
+.gmt-dbbb { gap: 8px; }
+.gmt-bb { display: inline-flex; align-items: center; border: 1px solid var(--border); border-radius: 7px; overflow: hidden; }
+.gmt-bb button { background: var(--panel); color: var(--light); border: none; width: 26px; height: 30px; cursor: pointer; font-size: 16px; line-height: 1; font-family: 'Geist', sans-serif; }
+.gmt-bb button:hover { color: var(--gold); background: rgba(255,255,255,0.06); }
+.gmt-bbv { min-width: 56px; text-align: center; font-family: 'Geist', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .03em; padding: 0 4px; }
+.gmt-bb.boon .gmt-bbv { color: #9fdcae; } .gmt-bb.bane .gmt-bbv { color: #ff9d8a; }
 .gmt-btn { padding: 8px 10px; background: var(--panel); color: var(--light); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-family: 'Geist', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: .04em; flex-shrink: 0; }
 .gmt-btn:hover { border-color: var(--gold); }
 .gmt-btn.on { background: #1a3a1a; border-color: #2d7a2d; color: #6dbf6d; }
@@ -2441,6 +2459,29 @@ html:not([data-gm-sys="PB"]) .pb-init-banner { display: none; }
 // whenever that tool wasn't on screen. It now lives here — one connection,
 // owned by the page, that the Dice Tray broadcasts to and the Party tool reads.
 // ══════════════════════════════════════════
+// Dragonbane initiative deal → card chips. The deal is posted as plain text, one
+// combatant per line ("Name: 3, 6*, 9 — note", "*" = second deck; see dbDealText
+// in the Combat Tracker); this reads it back for the roll log. Returns null for
+// anything else (or an older one-line deal), which then shows as plain text.
+window.dbDealParse = function(label, detail) {
+  if(!/^Initiative · Round/.test(String(label || ''))) return null;
+  const rows = [], foot = [];
+  for(const raw of String(detail || '').split('\n')) {
+    const line = raw.trim(); if(!line) continue;
+    if(line.charAt(0) === '*') { foot.push(line.replace(/^\*\s*/, '')); continue; }
+    const m = /^(.+?): (\d+\*?(?:, \d+\*?)*)(?: — (.+))?$/.exec(line);
+    if(!m) return null;
+    rows.push({ name: m[1], note: m[3] || '', cards: m[2].split(', ').map(t => ({ c: parseInt(t, 10), d2: /\*$/.test(t) })) });
+  }
+  return rows.length ? { rows, foot } : null;
+};
+window.dbDealHtml = function(deal) {
+  const esc = t => String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+  return '<div class="dbdeal">' + deal.rows.map((r, i) => '<div class="dbd-row' + (i === 0 ? ' first' : '') + '">'
+    + '<span class="dbd-cards">' + r.cards.map(k => '<span class="dbd-card' + (k.d2 ? ' d2' : '') + '"' + (k.d2 ? ' title="From the second deck"' : '') + '>' + k.c + '</span>').join('') + '</span>'
+    + '<span class="dbd-who"><span class="dbd-name">' + esc(r.name) + '</span>' + (r.note ? '<span class="dbd-note">' + esc(r.note) + '</span>' : '') + '</span></div>').join('')
+    + (deal.foot.length ? '<div class="dbd-foot">Dashed cards: ' + esc(deal.foot.join(' ').replace(/^second deck\s*/i, 'second deck ')) + '</div>' : '') + '</div>';
+};
 const GMCamp = (function() {
   const clientKey = 'gm-' + Math.random().toString(36).slice(2, 12);
   let campaign  = null;     // {id, code, name}
@@ -9416,6 +9457,7 @@ function init_trackers(root) {
       inp.addEventListener('change', () => {
         const v = Math.max(1, Math.min(10, parseInt(inp.value, 10) || 1));
         if(Array.isArray(n.dbCards)) n.dbCards[+inp.dataset.ci] = v;
+        n.dbD2 = [];   // an edited card is the GM's, not a second-deck draw
         dbRenderBanner();
         if(window.__ddScheduleSave) window.__ddScheduleSave();
       });
@@ -9742,27 +9784,35 @@ function init_trackers(root) {
     dbPcs.forEach(pc => { if(pc.cards.length) slots.push({ c: Math.min.apply(null, pc.cards), name: pc.name, pc: true }); });
     return slots.sort((a, b) => a.c - b.c || (a.pc === b.pc ? 0 : a.pc ? -1 : 1));
   }
-  // One line per combatant, lowest first: "Brok 3 · Zed 3 / 8 (Lightning Fast: keeps one) · Orc ×2: 1, 9".
+  // The deal as text, ONE LINE PER COMBATANT, lowest card first:
+  //   "Goblin: 1"   "Ilsa: 2, 8 — Lightning Fast: keeps one"
+  //   "Dragon: 3, 6*, 9 — Ferocity 3"   "Brok: 4 — Veteran: may keep 7"
+  // A "*" marks a card from the second deck (more than ten cards dealt). Plain
+  // text on purpose: it is the campaign roll-log entry's detail, which every
+  // sheet shows; the GM log and the Dragonbane sheet parse it back into card
+  // chips (window.dbDealParse).
   function dbDealText() {
     const rows = [];
-    dbPcs.forEach(pc => { if(!pc.cards.length) return; let t = pc.name + ' ' + pc.cards.join(' / ');
-      if(pc.cards.length > 1) t += ' (Lightning Fast: keeps one)';
-      if(pc.veteran && pc.prev != null && pc.cards.indexOf(pc.prev) < 0) t += ' (Veteran: may keep ' + pc.prev + ')';
-      rows.push({ c: Math.min.apply(null, pc.cards), t }); });
+    const tag = (cards, d2) => { const left = (d2 || []).slice(); return cards.map(c => { const k = left.indexOf(c); if(k >= 0) { left.splice(k, 1); return c + '*'; } return String(c); }).join(', '); };
+    dbPcs.forEach(pc => { if(!pc.cards.length) return; const cs = pc.cards.slice().sort((a, b) => a - b), notes = [];
+      if(cs.length > 1) notes.push('Lightning Fast: keeps one');
+      if(pc.veteran && pc.prev != null && cs.indexOf(pc.prev) < 0) notes.push('Veteran: may keep ' + pc.prev);
+      rows.push({ c: cs[0], pc: true, t: pc.name + ': ' + tag(cs, pc.d2) + (notes.length ? ' — ' + notes.join(' · ') : '') }); });
     items.filter(it => it.type === 'npc' && Array.isArray(it.dbCards) && it.dbCards.length).forEach(n => {
       const cs = n.dbCards.slice().sort((a, b) => a - b);
-      rows.push({ c: cs[0], t: (n.name || '?') + (cs.length > 1 ? ' ×' + cs.length + ': ' + cs.join(', ') : ' ' + cs[0]) }); });
-    return rows.sort((a, b) => a.c - b.c).map(r => r.t).join(' · ');
+      rows.push({ c: cs[0], pc: false, t: (n.name || '?') + ': ' + tag(cs, n.dbD2) + (cs.length > 1 ? ' — Ferocity ' + cs.length : '') }); });
+    rows.sort((a, b) => a.c - b.c || (a.pc === b.pc ? 0 : a.pc ? -1 : 1));
+    const d2 = rows.some(r => /\d\*/.test(r.t));
+    return rows.map(r => r.t).join('\n') + (d2 ? '\n* second deck (more than ten cards)' : '');
   }
   // Post the current deal to the campaign roll log (players see it in their sheet's
   // Roll Log). A deliberate send — it goes out even while the GM hides their own
   // rolls. No campaign linked → it lands in the GM's Roll Log only.
-  function dbPostDeal(decks) {
-    const text = dbDealText(); if(!text) return;
+  function dbPostDeal() {
+    const detail = dbDealText(); if(!detail) return;
     const label = 'Initiative · Round ' + round + ' · lowest acts first';
     const first = dbTurnOrder()[0];
     const result = first ? ('First: ' + first.name).slice(0, 40) : '';
-    const detail = text + (decks > 1 ? ' · ' + decks + ' decks (more than ten cards)' : '');
     let sent = false;
     try { if(typeof GMCamp !== 'undefined' && GMCamp.get && GMCamp.get()) sent = GMCamp.send({ type: 'normal', label, result, detail }); } catch(e) {}
     if(!sent && typeof window.rollMonsterToDiceTray === 'function') window.rollMonsterToDiceTray({ kind: 'pblog', label, result, detail, type: '' });
@@ -9775,19 +9825,20 @@ function init_trackers(root) {
     if(!npcs.length && !party.length) { dbPcs = []; dbRenderBanner('No one to deal to yet — link a campaign with Dragonbane characters, or add combatants.'); return; }
     const fresh = () => { const d = [1,2,3,4,5,6,7,8,9,10]; for(let i = d.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [d[i], d[j]] = [d[j], d[i]]; } return d; };
     let deck = fresh(), decks = 1;
-    const draw = () => { if(!deck.length) { deck = fresh(); decks++; } return deck.pop(); };
+    // d2 collects the cards one combatant drew from the second (or later) deck.
+    const draw = d2 => { if(!deck.length) { deck = fresh(); decks++; } const c = deck.pop(); if(decks > 1 && d2) d2.push(c); return c; };
     // Last round's kept card, for Veteran.
     const prevBy = {}; dbPcs.forEach(pc => { if(pc.cards.length) prevBy[pc.name.toLowerCase()] = Math.min.apply(null, pc.cards); });
     dbPcs = party.map(pc => {
       const fast = dbAbil(pc, 'Lightning Fast'), veteran = dbAbil(pc, 'Veteran');
-      const cards = [draw()]; if(fast) cards.push(draw());
-      return { name: pc.name, cards: cards.sort((a, b) => a - b), fast, veteran, prev: veteran && prevBy[pc.name.toLowerCase()] != null ? prevBy[pc.name.toLowerCase()] : null };
+      const d2 = [], cards = [draw(d2)]; if(fast) cards.push(draw(d2));
+      return { name: pc.name, cards: cards.sort((a, b) => a - b), d2, fast, veteran, prev: veteran && prevBy[pc.name.toLowerCase()] != null ? prevBy[pc.name.toLowerCase()] : null };
     });
-    npcs.forEach(n => { const f = Math.max(1, Math.min(6, parseInt(n.dbFerocity, 10) || 1)); const cards = []; for(let i = 0; i < f; i++) cards.push(draw()); n.dbCards = cards.sort((a, b) => a - b); });
+    npcs.forEach(n => { const f = Math.max(1, Math.min(6, parseInt(n.dbFerocity, 10) || 1)); const cards = [], d2 = []; for(let i = 0; i < f; i++) cards.push(draw(d2)); n.dbCards = cards.sort((a, b) => a - b); n.dbD2 = d2; });
     const rest = items.filter(it => it.type !== 'npc');
     items = npcs.slice().sort((a, b) => a.dbCards[0] - b.dbCards[0]).concat(rest);
     dbDealRound = round;
-    dbPostDeal(decks);
+    dbPostDeal();
     render();
     if(window.__ddScheduleSave) window.__ddScheduleSave();
   }
@@ -9799,11 +9850,11 @@ function init_trackers(root) {
       dbBanner = document.createElement('div'); dbBanner.className = 'db-init-banner'; list.parentNode.insertBefore(dbBanner, list);
       dbBanner.addEventListener('click', e => {
         const k = e.target.closest('[data-dbkeep]'); if(k) { const pc = dbPcs[+k.dataset.pi]; if(pc) { pc.cards = [+k.dataset.dbkeep]; dbRenderBanner(); if(window.__ddScheduleSave) window.__ddScheduleSave(); } return; }
-        if(e.target.closest('.dbi-post')) { dbPostDeal(1); return; }
+        if(e.target.closest('.dbi-post')) { dbPostDeal(); return; }
       });
       dbBanner.addEventListener('change', e => {
         const inp = e.target.closest('.dbi-card'); if(!inp) return; const pc = dbPcs[+inp.dataset.pi]; if(!pc) return;
-        pc.cards[+inp.dataset.ci] = Math.max(1, Math.min(10, parseInt(inp.value, 10) || 1)); dbRenderBanner(); if(window.__ddScheduleSave) window.__ddScheduleSave();
+        pc.cards[+inp.dataset.ci] = Math.max(1, Math.min(10, parseInt(inp.value, 10) || 1)); pc.d2 = []; dbRenderBanner(); if(window.__ddScheduleSave) window.__ddScheduleSave();
       });
     }
     const esc = t => String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
@@ -17855,16 +17906,39 @@ function init_dice(root) {
     trayEl.querySelectorAll('.gmt-die').forEach(b => { b.onclick = () => rollCore([[parseInt(b.dataset.d, 10), 1]], 0, 'none', null); });
   }
 
-  // ════════ Dragonbane — D20 at or under the skill; boons / banes; Dragon (1) / Demon (20) ════════
-  // Each net boon adds a D20 and keeps the lowest, each net bane keeps the highest
-  // (they cancel one for one). A 1 is a Dragon, a 20 a Demon (always a failure).
-  function dbSkillRoll(lv, net) {
-    lv = Math.max(1, Math.min(20, lv | 0)); net = Math.max(-3, Math.min(3, net | 0));
-    const n = 1 + Math.abs(net), rolls = [];
+  // ════════ Dragonbane — boons / banes; D20 at or under the skill; Dragon (1) / Demon (20) ════════
+  // The tray mirrors the character sheet's: separate Boons and Banes counters
+  // (0–5 each) that cancel one for one and apply to the NEXT D20 roll — the
+  // tray's D20 or a combatant's skill / weapon roll from the Combat Tracker —
+  // then reset. Each net boon adds a D20 and keeps the lowest, each net bane
+  // keeps the highest. A 1 is a Dragon, a 20 a Demon (always a failure).
+  // The counts are shared by every Dice Tray on the screen (a layout can hold
+  // more than one, and the tracker's rolls go to whichever exists), so a boon
+  // dialled in on the visible tray is the one the next roll takes.
+  const DBBB = window.__dbBB || (window.__dbBB = { boon: 0, bane: 0 });
+  function dbBBChanged() { try { document.dispatchEvent(new Event('db-bb')); } catch(e) {} }
+  document.addEventListener('db-bb', () => { if(curSys() === 'DB' && trayEl.querySelector('.gmt-dbbb')) renderDBTray(); });
+  function dbTakeTray() {
+    const boon = DBBB.boon || 0, bane = DBBB.bane || 0;
+    DBBB.boon = 0; DBBB.bane = 0;
+    if(boon || bane) dbBBChanged();
+    return { boon, bane };
+  }
+  function dbPool(boon, bane) {
+    const nb = boon - bane, n = 1 + Math.abs(nb), rolls = [];
     for(let i = 0; i < n; i++) rolls.push(1 + Math.floor(Math.random() * 20));
-    const kept = net > 0 ? Math.min(...rolls) : net < 0 ? Math.max(...rolls) : rolls[0];
-    const dragon = kept === 1, demon = kept === 20, ok = !demon && kept <= lv;
-    const detail = 'd20(' + rolls.join(',') + (n > 1 ? ' ' + (net > 0 ? '▼' : '▲') + ' ' + kept : '') + ') vs ' + lv + (net > 0 ? ' · ' + net + ' boon' + (net > 1 ? 's' : '') : net < 0 ? ' · ' + (-net) + ' bane' + (net < -1 ? 's' : '') : '');
+    const kept = nb > 0 ? Math.min(...rolls) : nb < 0 ? Math.max(...rolls) : rolls[0];
+    const mods = [];
+    if(boon) mods.push(boon + ' boon' + (boon > 1 ? 's' : ''));
+    if(bane) mods.push(bane + ' bane' + (bane > 1 ? 's' : ''));
+    const pool = (n > 1 ? n : '') + 'd20(' + rolls.join(',') + ')' + (nb > 0 ? ' keep lowest' : nb < 0 ? ' keep highest' : '') + (n > 1 ? ' → ' + kept : '');
+    return { kept, rolls, nb, pool, mods: mods.length ? ' · ' + mods.join(', ') : '' };
+  }
+  function dbSkillRoll(lv, mods) {
+    lv = Math.max(1, Math.min(20, lv | 0));
+    const m = mods || dbTakeTray(), p = dbPool(m.boon || 0, m.bane || 0), kept = p.kept;
+    const dragon = kept === 1, demon = kept === 20, ok = !demon && (dragon || kept <= lv);
+    const detail = p.pool + ' vs ' + lv + p.mods;
     return { kept, dragon, demon, ok, detail, word: dragon ? 'DRAGON!' : demon ? 'DEMON!' : ok ? 'SUCCESS' : 'FAILURE', type: dragon ? 'crit' : demon ? 'fumble' : '' };
   }
   function dbDamage(expr) {
@@ -17875,44 +17949,36 @@ function init_dice(root) {
     return { total, detail: bits.join(' ') };
   }
   function renderDBTray() {
-    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row"><span class="gmt-etl">Skill</span>' + stepperHtml('db-lv', _tray.dbLv || 10, 1, 20)
-      + '<span class="gmt-etl" title="Positive = boons (keep the lowest), negative = banes (keep the highest)">Boon/Bane</span>' + stepperHtml('db-bb', _tray.dbBb || 0, -3, 3)
-      + '<button class="gmt-roll" id="db-roll" title="Roll D20 at or under the skill">Roll</button></div>'
-      + '<div class="gmt-row gmt-kob">' + diceForSystem('DB').map(d => '<button class="dice-die gmt-die" data-d="' + d + '" title="Roll a D' + d + '">D' + d + '</button>').join('') + '</div></div>';
-    wireStepper('db-lv', 1, 20, v => { _tray.dbLv = v; });
-    wireStepper('db-bb', -3, 3, v => { _tray.dbBb = v; });
-    trayEl.querySelector('#db-roll').onclick = () => {
-      const lv = Math.max(1, Math.min(20, parseInt((trayEl.querySelector('#db-lv') || {}).value, 10) || 10));
-      const bb = Math.max(-3, Math.min(3, parseInt((trayEl.querySelector('#db-bb') || {}).value, 10) || 0));
-      _tray.dbLv = lv; _tray.dbBb = bb;
-      const s = dbSkillRoll(lv, bb);
-      gmLog('D20 vs ' + lv, s.kept + ' · ' + s.word, s.detail, s.type);
-    };
-    trayEl.querySelectorAll('.gmt-die').forEach(b => { b.onclick = () => rollCore([[parseInt(b.dataset.d, 10), 1]], 0, 'none', null); });
+    const bb = (k, lbl, tip) => { const v = DBBB[k === 'dbBoon' ? 'boon' : 'bane'] || 0; return '<span class="gmt-bb ' + (k === 'dbBoon' ? 'boon' : 'bane') + '" title="' + tip + '">'
+      + '<button type="button" data-bb="' + k + '" data-dir="-1" aria-label="One fewer ' + lbl + '">−</button>'
+      + '<span class="gmt-bbv" id="db-' + k + '">' + v + ' ' + lbl + (v === 1 ? '' : 's') + '</span>'
+      + '<button type="button" data-bb="' + k + '" data-dir="1" aria-label="One more ' + lbl + '">＋</button></span>'; };
+    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row gmt-dbbb">'
+      + bb('dbBoon', 'boon', 'Boons on the next D20 roll: roll an extra D20 and keep the lowest')
+      + bb('dbBane', 'bane', 'Banes on the next D20 roll: roll an extra D20 and keep the highest') + '</div>'
+      + '<div class="gmt-row gmt-kob">' + diceForSystem('DB').map(d => '<button class="dice-die gmt-die" data-d="' + d + '" title="Roll a D' + d + (d === 20 ? ' (with the boons / banes above)' : '') + '">D' + d + '</button>').join('') + '</div></div>';
+    trayEl.querySelectorAll('[data-bb]').forEach(b => { b.onclick = () => {
+      const k = b.dataset.bb === 'dbBoon' ? 'boon' : 'bane'; DBBB[k] = Math.max(0, Math.min(5, (DBBB[k] || 0) + parseInt(b.dataset.dir, 10))); dbBBChanged(); }; });
+    trayEl.querySelectorAll('.gmt-die').forEach(b => { b.onclick = () => {
+      const d = parseInt(b.dataset.d, 10);
+      if(d !== 20) return rollCore([[d, 1]], 0, 'none', null);
+      const m = dbTakeTray(), p = dbPool(m.boon, m.bane), dragon = p.kept === 1, demon = p.kept === 20;
+      gmLog('D20', p.kept + (dragon ? ' · DRAGON!' : demon ? ' · DEMON!' : ''), p.pool + p.mods, dragon ? 'crit' : demon ? 'fumble' : '');
+    }; });
   }
 
   // ════════ Pirate Borg — a Test: d20 ± ability ≥ DR (roll high); 20 Crit, 1 Fumble ════════
   // Abilities run −3…+6; DR 6 easy … 12 normal … 18 nigh impossible. Creatures
-  // test with a plain d20 (ability 0). The die row rolls single dice (d2…d100).
+  // test with a plain d20 (ability 0). pbTest serves the tracker's 'pbtest' rolls;
+  // the tray itself is just the die row (d2…d100).
   function pbTest(mod, dr) {
     const d = 1 + Math.floor(Math.random() * 20), tot = d + mod, crit = d === 20, fum = d === 1, ok = tot >= dr;
     return { d, tot, crit, fum, ok, word: crit ? 'CRIT!' : fum ? 'FUMBLE!' : ok ? 'SUCCESS' : 'FAILURE', type: crit || (ok && !fum) ? 'crit' : 'fumble',
       detail: 'd20(' + d + ')' + (mod ? (mod > 0 ? ' +' : ' −') + Math.abs(mod) : '') + ' = ' + tot + ' vs DR' + dr };
   }
+  // The PB tray is plain dice (the sheet rolls the Tests; enemies never roll to hit).
   function renderPBTray() {
-    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row"><span class="gmt-etl" title="The ability added to the d20 (−3 to +6); 0 for a creature">Ability</span>' + stepperHtml('pb-mod', _tray.pbMod || 0, -3, 6)
-      + '<span class="gmt-etl" title="Difficulty Rating: 6 easy, 8 routine, 10 pretty simple, 12 normal, 14 difficult, 16 really hard, 18 nigh impossible">DR</span>' + stepperHtml('pb-dr', _tray.pbDr || 12, 2, 20)
-      + '<button class="gmt-roll" id="pb-roll" title="Test: d20 ± ability, equal to or over the DR succeeds">Test</button></div>'
-      + '<div class="gmt-row gmt-kob">' + diceForSystem('PB').map(d => '<button class="dice-die gmt-die" data-d="' + d + '" title="Roll a d' + d + '">d' + d + '</button>').join('') + '</div></div>';
-    wireStepper('pb-mod', -3, 6, v => { _tray.pbMod = v; });
-    wireStepper('pb-dr', 2, 20, v => { _tray.pbDr = v; });
-    trayEl.querySelector('#pb-roll').onclick = () => {
-      const mod = Math.max(-3, Math.min(6, parseInt((trayEl.querySelector('#pb-mod') || {}).value, 10) || 0));
-      const dr = Math.max(2, Math.min(20, parseInt((trayEl.querySelector('#pb-dr') || {}).value, 10) || 12));
-      _tray.pbMod = mod; _tray.pbDr = dr;
-      const t = pbTest(mod, dr);
-      gmLog('Test DR' + dr, t.tot + ' · ' + t.word, t.detail, t.type);
-    };
+    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row gmt-kob">' + diceForSystem('PB').map(d => '<button class="dice-die gmt-die" data-d="' + d + '" title="Roll a d' + d + '">d' + d + '</button>').join('') + '</div></div>';
     trayEl.querySelectorAll('.gmt-die').forEach(b => { b.onclick = () => rollCore([[parseInt(b.dataset.d, 10), 1]], 0, 'none', null); });
   }
 
@@ -18022,10 +18088,12 @@ function init_dice(root) {
       const advTag = e.adv==='adv' ? ' <span style="color:#6dbf6d;font-size:8px;">▲ADV</span>'
                    : e.adv==='dis' ? ' <span style="color:#df6a6a;font-size:8px;">▼DIS</span>' : '';
       const srcTag = e.remote ? '<span style="color:#8a7ac8;">'+String(e.source||'').replace(/</g,'&lt;')+'</span> · ' : '';
-      return '<div class="dice-log-entry'+(e.remote?' remote':'')+(e.crit==='crit'?' crit':e.crit==='fumble'?' fumble':'')+'">'
+      // A Dragonbane initiative deal: one row per combatant with their cards as chips.
+      const deal = window.dbDealParse ? window.dbDealParse(e.label, e.detail) : null;
+      return '<div class="dice-log-entry'+(e.remote?' remote':'')+(deal?' dbdeal-entry':'')+(e.crit==='crit'?' crit':e.crit==='fumble'?' fumble':'')+'">'
         + '<div class="roll-label">'+srcTag+String(e.label).replace(/</g,'&lt;')+critTag+advTag+'</div>'
-        + '<div class="roll-result">'+e.total+'</div>'
-        + '<div class="roll-detail">'+e.detail+'</div>'
+        + '<div class="roll-result">'+(deal?esc(e.total):e.total)+'</div>'
+        + (deal ? window.dbDealHtml(deal) : '<div class="roll-detail">'+e.detail+'</div>')
         + '</div>';
     }).join('');
     logEl.scrollTop = 0;
@@ -18237,7 +18305,7 @@ function init_dice(root) {
     if(kind === 'dbskill' || kind === 'dbweapon') {
       // Dragonbane NPC / animal: D20 at or under the skill; a weapon rolls its damage on a hit.
       const lv = parseInt(expr, 10); if(!lv) return null;
-      const s = dbSkillRoll(lv, 0);
+      const s = dbSkillRoll(lv);
       let res = s.kept + ' · ' + s.word, det = s.detail;
       if(kind === 'dbweapon' && s.ok && spec.dmg) {
         const d = dbDamage(spec.dmg);
@@ -19492,7 +19560,8 @@ function init_party(root) {
     const hpTxt = (c.hpCur !== '' ? c.hpCur + '/' : '') + dash(c.hpMax), wpTxt = (c.wpCur !== '' ? c.wpCur + '/' : '') + dash(c.wpMax);
     const html = pcShell(entry, { name: c.name, sub,
       chips: [{ l:'HP', v: hpTxt, bad: c.hpMax !== '' && c.hpCur !== '' && c.hpCur < c.hpMax }, { l:'WP', v: wpTxt, bad: c.wpMax !== '' && c.wpCur !== '' && c.wpCur < c.wpMax }, c.conditions.length ? { l:'Cond', v: c.conditions.length, bad: true } : null], body,
-      bubble: { hp: hpTxt, chips: [{ label:'WP', value: wpTxt }, { label:'Move', value: dash(c.movement) }, { label:'Cond', value: c.conditions.length ? c.conditions.join(', ') : '—' }] } });
+      // One row of short chips in the monitor bar (condition names are on the card).
+      bubble: { hp: hpTxt, chips: [{ label:'WP', value: wpTxt }, { label:'Move', value: dash(c.movement) }, { label:'Cond', value: c.conditions.length ? String(c.conditions.length) : '—' }] } });
     return html.replace('class="pty-card pcard', 'class="pty-card pcard db-pc');
   }
 
@@ -19522,7 +19591,12 @@ function init_party(root) {
     if(c.silver !== '' && c.silver != null) body += '<div class="pty-line dim" style="margin-top:4px;">' + esc(String(c.silver)) + ' silver</div>';
     const html = pcShell(entry, { name: c.name, sub,
       chips: [{ l:'HP', v: hpTxt, bad: c.broken || (c.hpMax !== '' && c.hpCur !== '' && c.hpCur < c.hpMax) }, { l:'Luck', v: c.luckCur === '' ? '—' : c.luckCur, bad: c.luckCur === 0 }, { l:'Armor', v: c.armorDie ? '−' + c.armorDie : (c.armorTier === 0 ? '0' : '—') }, c.conditions.length ? { l:'Cond', v: c.conditions.length, bad: true } : null], body,
-      bubble: { hp: hpTxt, chips: [{ label: 'Luck', value: luckTxt }, { label: 'Armor', value: armorTxt }, { label: 'Cond', value: c.conditions.length ? c.conditions.join(', ') : '—' }] } });
+      // The monitor-bar bubble keeps to ONE row of short chips (the bar has a fixed
+      // height; a second row ran into the Adventure window below). Luck's maximum
+      // and die, the armor tier and name, condition names and grog are on the card it opens.
+      bubble: { hp: hpTxt, chips: [{ label: 'Luck', value: c.luckCur === '' ? '—' : String(c.luckCur) },
+        { label: 'Armor', value: c.armorDie ? '−' + c.armorDie : (c.armorTier === 0 ? '0' : '—') },
+        c.conditions.length || !drunk ? { label: 'Cond', value: c.conditions.length ? String(c.conditions.length) : '—' } : { label: 'Grog', value: String(c.drinks) }] } });
     return html.replace('class="pty-card pcard', 'class="pty-card pcard pb-pc');
   }
 
