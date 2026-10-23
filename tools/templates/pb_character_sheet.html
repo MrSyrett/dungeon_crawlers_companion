@@ -1009,7 +1009,18 @@ function renderBackground(){
 }
 // Create before a pirate exists, Level (Getting Better) after — the D&D sheet's pair, in one place.
 function refreshWizardButtons(){ var built=!!(S.built||S.classId); var bb=$('build-btn'), lb=$('levelup-btn'); if(bb) bb.style.display=built?'none':''; if(lb) lb.style.display=built?'':'none'; }
+// Re-rendering rebuilds most of the sheet, including the button that was just tapped. Mobile
+// Safari has no scroll anchoring and can jump the page when the focused button is removed, so
+// drop focus from a tapped button first and put the scroll position back afterwards.
 function renderAll(){
+  var _sx=window.scrollX, _sy=window.scrollY, _ae=document.activeElement;
+  if(_ae&&_ae!==document.body&&(_ae.tagName==='BUTTON'||_ae.getAttribute('role')==='button'||_ae.hasAttribute('onclick'))) try{ _ae.blur(); }catch(e){}
+  _renderAll();
+  if(Math.abs(window.scrollY-_sy)>1) window.scrollTo(_sx,_sy);
+  requestAnimationFrame(function(){ if(Math.abs(window.scrollY-_sy)>1&&!window.__userScrolling) window.scrollTo(_sx,_sy); });
+}
+(function(){ var t=0; ['touchmove','wheel'].forEach(function(ev){ window.addEventListener(ev,function(){ window.__userScrolling=true; clearTimeout(t); t=setTimeout(function(){ window.__userScrolling=false; },250); },{passive:true}); }); })();
+function _renderAll(){
   refreshWizardButtons(); renderHeader(); renderAbilities(); renderLuck(); renderStatus(); renderClass(); renderGear(); renderBackground();
   if(typeof renderTurn==='function') renderTurn();
   if(window.applySheetLock && window.__lockReady) try{ window.applySheetLock(); }catch(e){}
@@ -1306,11 +1317,12 @@ function doAttack(u,opt){ opt=opt||{}; var w=weaponByUid(u); if(!w) return; var 
   o.note=function(res){ return (res.crit?'Critical: double damage, and the target\'s armor drops one tier.'+(/broken mast/i.test(w.name)?' Broken mast: +d6.':''):res.fumble?(w.blackPowder?'Misfire! Roll on the misfire table.':w.trusted?'Your trusted weapon never breaks — but you drop it.':w.noFumble?'Tavern Boxer: your fists ignore fumbles.':'Your weapon breaks or is lost.'):'')+(knave?' Knife Knave: if it hits, your second knife hits automatically; if not, attack again with it.':''); };
   var knaveNext=function(hit){ if(!knave) return; if(hit){ addLog('Knife Knave','Second knife hits','The first knife hit, so the second hits automatically','crit'); attackDamage(w,{dmgAuto:sit.dmgAuto}); } else setTimeout(function(){ doAttack(u,{second:true,chosen:chosen}); },30); };
   var dmgArgs=function(r,max){ return {crit:r.crit,chosen:chosen,close:close,dmgAuto:sit.dmgAuto,dart:dart,max:max}; };
-  o.onRes=function(res){ showResult(o,res,function(r){
-    if(r.fumble) return [{t:w.noFumble?'Just a miss':'Accept the fumble',cls:'warn',f:function(){ finish(o); attackFumble(w); }}];
-    var hit=[{t:r.crit?'Roll double damage':'Hit — roll damage',f:function(){ finish(o); attackDamage(w,dmgArgs(r,false)); knaveNext(true); }}];
-    if(r.crit) return hit;
-    return hit.concat([{t:knave?'Missed — second knife':'Missed',cls:'ghost',f:function(){ finish(o); addLog(o.label,'Missed','','normal'); knaveNext(false); }}]); }); };
+  // No "did it hit?" prompt: the damage is rolled together with the attack and the GM
+  // applies it if the attack beat the DR. A fumble rolls its consequence instead.
+  o.onRes=function(res){ o.done=true;
+    if(res.fumble){ attackFumble(w); return; }
+    attackDamage(w,dmgArgs(res,false));
+    if(knave) addLog('Knife Knave','Second knife','If the first knife hit, the second hits automatically (roll its Attack for damage); if it missed, attack again with it','normal'); };
   changed(); test(o);
 }
 function attackDamage(w,o){ o=o||{}; var expr=weaponDamage(w); if(o.close) expr=/boomstick/i.test(w.name)?'d10':(w.closeDamage||'d10');

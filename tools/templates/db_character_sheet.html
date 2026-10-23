@@ -960,7 +960,18 @@ function renderTray(){
 }
 // Create before a character exists, Level (advancement) after — the D&D sheet's pair, one button at a time.
 function refreshWizardButtons(){ var built=!!(S.built||(S.kin&&S.profession)); var bb=$('build-btn'), lb=$('level-btn'); if(bb) bb.style.display=built?'none':''; if(lb) lb.style.display=built?'':'none'; }
+// Re-rendering rebuilds most of the sheet, including the button that was just tapped. Mobile
+// Safari has no scroll anchoring and can jump the page when the focused button is removed, so
+// drop focus from a tapped button first and put the scroll position back afterwards.
 function renderAll(){
+  var _sx=window.scrollX, _sy=window.scrollY, _ae=document.activeElement;
+  if(_ae&&_ae!==document.body&&(_ae.tagName==='BUTTON'||_ae.getAttribute('role')==='button'||_ae.hasAttribute('onclick'))) try{ _ae.blur(); }catch(e){}
+  _renderAll();
+  if(Math.abs(window.scrollY-_sy)>1) window.scrollTo(_sx,_sy);
+  requestAnimationFrame(function(){ if(Math.abs(window.scrollY-_sy)>1&&!window.__userScrolling) window.scrollTo(_sx,_sy); });
+}
+(function(){ var t=0; ['touchmove','wheel'].forEach(function(ev){ window.addEventListener(ev,function(){ window.__userScrolling=true; clearTimeout(t); t=setTimeout(function(){ window.__userScrolling=false; },250); },{passive:true}); }); })();
+function _renderAll(){
   renderHeader(); renderAttrs(); renderSkills(); renderStatus(); renderAbilities(); renderSpells(); renderGear(); renderBackground(); renderTray(); refreshWizardButtons();
   if(typeof renderTurn==='function') renderTurn();
   if(window.applySheetLock && window.__lockReady) try{ window.applySheetLock(); }catch(e){}
