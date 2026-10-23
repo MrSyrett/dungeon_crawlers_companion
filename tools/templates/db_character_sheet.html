@@ -735,7 +735,7 @@ function blankState(){ return {
   death:{s:0,f:0,dead:false,rallied:false}, rests:{round:false,stretch:false}, skills:{}, abilities:[], spells:[], tricks:[],
   inventory:[], coins:{gold:0,silver:0,copper:0}, injuries:[], light:null, prey:'', berserk:false, proneTarget:false,
   opts:{push:true,damageTypes:false,mishaps:true}, turn:{action:false,done:false,extra:0,prone:false},
-  subtab:'action', built:false, campaign:null, v:2 }; }
+  built:false, campaign:null, v:2 }; }
 // v:2 — weapons, armor and helmets live in the one inventory list (with an equip pip);
 // v1 saves kept them in weapons[] / armor / helmet and are migrated on load (applySheet).
 var S=blankState();
@@ -1203,7 +1203,6 @@ function endTurn(){ S.turn.action=false; S.turn.done=false; S.turn.extra=0; S.tu
 // A stretch or shift rest ends the fight: the turn starts fresh.
 function leaveCombat(quiet){ S.turn={action:false,done:false,extra:0,prone:S.turn.prone}; if(S.berserk) endBerserk(true); if(!quiet){ addLog('Combat over','✓','','normal'); changed(); } }
 function toggleProneTarget(on){ S.proneTarget=!!on; renderTurn(); scheduleAutosave(); }
-function setSubtab(t){ S.subtab=t; renderTurn(); scheduleAutosave(); }
 
 // ── attacks ──
 function weaponAt(i){ return i<0?unarmed():wDef(S.inventory[i]); }
@@ -1462,11 +1461,11 @@ function renderTurn(){
   if(S.death.dead) h+='<span class="db-badge warn">Dead</span>'; else if(S.hp<=0) h+='<span class="db-badge warn">0 HP — '+(S.death.rallied?'rallied, still making death rolls':'death roll on your turn')+'</span>';
   if(S.berserk) h+='<span class="db-badge warn">Berserk</span>'; if(overEnc()) h+='<span class="db-badge warn">Over-encumbered</span>';
   if(S.light) h+='<span class="db-badge">'+esc(S.light.name)+' lit</span>'; if(S.prey) h+='<span class="db-badge">Prey: '+esc(S.prey)+'</span>';
-  h+='</div><div class="db-subtabs"><button class="db-st'+(S.subtab!=='reaction'?' on':'')+'" onclick="setSubtab(\'action\')">Action</button><button class="db-st'+(S.subtab==='reaction'?' on':'')+'" onclick="setSubtab(\'reaction\')">Reaction</button></div></div>';
-  if(S.subtab==='reaction') h+=renderReactions(react); else h+=renderActions(act,atk);
+  h+='</div></div>';
+  h+=renderActions(act,atk,react);
   el.innerHTML=h;
 }
-function renderActions(act,atk){
+function renderActions(act,atk,react){
   var h='';
   if(S.hp<=0&&!S.death.dead){ h+=tsec('death','Dying',tcard('Death Roll','CON '+attr('CON')+' · successes '+S.death.s+'/3 · failures '+S.death.f+'/3',tbtn('Roll','rollDeath()'))+tcard('Rally Yourself','WIL with a bane',tbtn('Roll','rollRallySelf()'))); }
   // attacks — one card per weapon at hand (+ unarmed). Sneak Attack and Backstab are their own
@@ -1494,6 +1493,8 @@ function renderActions(act,atk){
     tcard('Grapple','Brawling vs Brawling'+(hasAbility('Iron Grip')?' · Iron Grip boon':''),tbtn('Roll','grapple()'),!atk)+
     tcard('Find Weak Spot','Piercing weapon: a bane, but the target counts as armorless',tbtn('Attack','specialAttack(\'Find Weak Spot\')'),!atk);
   h+=tsec('special','Special Attacks',sp);
+  // Reactions sit right after the attacks (they used to be their own sub-tab)
+  h+=renderReactions(react);
   // magic
   var mg=''; var blk=spellBlock();
   S.spells.forEach(function(s,i){ var def=spellDef(s.name)||{}; if(def.castingTime==='reaction') return; if(!s.prepared) return; var c=def.powerLevels===false?'fixed 2 WP':'2/4/6 WP'; var why=spellBlockFor(def);
@@ -1525,12 +1526,13 @@ function renderActions(act,atk){
   h+=tsec('other','Other Actions',ot);
   return h;
 }
+// The Reactions section of the Action tab: dodge, parry, and the abilities and spells that answer an attack.
 function renderReactions(react){
   var h='';
   var dg=tcard('Dodge','Evade <b>'+skillLevel('Evade')+'</b>',tbtn('Dodge','dodge()'),!react);
   if(hasAbility('Hard to Catch')) dg+=tcard('Dodge · Hard to Catch','3 WP: a boon on the Evade roll',tbtn('3 WP','dodge(\'hard\')'),!react);
   if(hasAbility('Fast Footwork')) dg+=tcard('Fast Footwork','3 WP: dodge without spending your turn',tbtn('3 WP','dodge(\'footwork\')'),S.berserk||S.hp<=0);
-  h+=tsec('dodge','Dodge',dg);
+  h+=dg;
   var pr=''; atHand().forEach(function(x){ var dd=x.d, i=x.i; if(dd.ranged) return; if(hasFeat(dd,'Cannot be used for parrying')) { pr+=tcard(esc(dd.name),'Can\'t be used for parrying','',true); return; }
     var sk=weaponSkill(dd);
     var sub=esc(sk)+' <b>'+skillLevel(sk)+'</b> · durability '+(dd.durability||'—');
@@ -1540,11 +1542,11 @@ function renderReactions(react){
     if(hasAbility('Defensive')&&!dd.ranged) b+=tbtn('Free 3 WP','parry('+i+',\'defensive\')','ghost','Defensive: parry without spending your turn');
     pr+=tcard(esc(dd.name)+(dd.shield?' <span class="tag">shield</span>':''),sub,b,!react&&!hasAbility('Defensive')); });
   if(!pr) pr='<div class="db-empty">Nothing at hand to parry with</div>';
-  h+=tsec('parry','Parry',pr);
+  h+=pr;
   var ab=''; ['Guardian','Weasel'].forEach(function(n){ if(hasAbility(n)){ var def=abilityDef(n)||{}; ab+=tcard(n+' <span class="tag">'+def.wp+' WP</span>',esc(def.text||''),tbtn(def.wp+' WP','reactAbility(\''+n+'\')'),S.hp<=0); } });
   S.spells.forEach(function(s,i){ var def=spellDef(s.name)||{}; if(def.castingTime!=='reaction') return; ab+=tcard(esc(s.name)+' <span class="tag">spell</span>'+(s.prepared?'':' <span class="tag warn">not prepared</span>'),esc(def.text||''),tbtn('Cast','openCast(\'spell\','+i+')'),!s.prepared||!!spellBlockFor(def)); });
-  if(ab) h+=tsec('rxab','Reaction Abilities & Spells',ab);
-  return h;
+  h+=ab;
+  return tsec('reactions','Reactions',h);
 }
 
 // ═══ PICKERS — compendium / shop ═══════════════════════════════════════════
@@ -1660,6 +1662,7 @@ function applySheet(d){
   ['attrs','cond','death','rests','coins','opts','turn'].forEach(function(k){ S[k]=Object.assign({},b[k],(d[k]&&typeof d[k]==='object')?d[k]:{}); });
   // Older saves kept a drawn initiative card on the sheet; the GM deals initiative now.
   delete S.turn.card; delete S.turn.prev; delete S.turn.round;
+  delete S.subtab;   // the Action/Reaction sub-tabs are gone: Reactions is a section of the Action tab
   ['skills'].forEach(function(k){ if(!S[k]||typeof S[k]!=='object'||Array.isArray(S[k])) S[k]={}; });
   ['abilities','spells','tricks','inventory','injuries'].forEach(function(k){ if(!Array.isArray(S[k])) S[k]=[]; });
   S.opts=blankState().opts;   // the optional rules are the table's call, not a sheet setting: pushing and magical mishaps on, damage types off
@@ -1953,9 +1956,6 @@ body.dark .db-top{background:#1c1c21;}
 .db-badges:empty{display:none;}
 .db-badge{font-family:var(--f-label);font-size:12px;letter-spacing:.03em;border:1px solid var(--rule);color:var(--muted);border-radius:12px;padding:1px 9px;}
 .db-badge.warn{border-color:var(--red);color:var(--red);background:rgba(179,38,30,.1);}
-.db-subtabs{display:flex;border-top:1px solid var(--rule);}
-.db-st{flex:1;background:transparent;border:none;border-bottom:3px solid transparent;padding:8px;font-family:var(--f-disp);font-size:16px;letter-spacing:.04em;color:var(--muted);cursor:pointer;}
-.db-st.on{color:var(--acc-dk);border-bottom-color:var(--acc);}
 .db-sec{border-bottom:1px solid var(--rule);}
 .db-sec-hd{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;user-select:none;}
 .db-caret{color:var(--acc);font-size:10px;transition:transform .12s;}
