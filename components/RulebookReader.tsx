@@ -242,10 +242,18 @@ export default function RulebookReader({
       className="flex justify-center"
       style={{ height: "100dvh" }}
     >
+      {/* The width column is React's; the reader mounts into its OWN inner div.
+          The reader adds classes to its host (dccpdf — background, layout — plus
+          dccpdf-has-back / dccpdf-toc-open), and React rewrites the whole class
+          attribute whenever className changes. With the spread-dependent width on
+          the host itself, toggling 1↔2 pages stripped those classes and the
+          reader lost its background. This inner div's className never changes,
+          so React never touches it. */}
       <div
-        ref={hostRef}
-        className={`min-h-0 w-full ${spread ? "max-w-[1800px]" : "max-w-[1024px]"} border-[var(--border)] sm:border-x`}
-      />
+        className={`flex min-h-0 w-full flex-col ${spread ? "max-w-[1800px]" : "max-w-[1024px]"} border-[var(--border)] sm:border-x`}
+      >
+        <div ref={hostRef} className="min-h-0 flex-1" />
+      </div>
     </div>
   );
 }
