@@ -365,6 +365,8 @@ body.dark .eq-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 .vitals{grid-template-columns:max-content minmax(0,1.45fr) minmax(0,1fr) minmax(0,1fr);}
 .cond-vital .cond-sum{margin-top:5px;}
 .cond-vital .cs{white-space:normal;text-align:left;line-height:1.25;}
+.cond-vital .cs-half{flex:1 1 calc(50% - 3px);text-align:center;}
+.cond-vital .cs-full{flex:1 1 100%;text-align:center;}
 .hp-nums{flex-wrap:nowrap;gap:2px;margin-top:4px;}
 .hp-nums input{width:46px;height:44px;font-size:30px;padding:0;border-color:transparent;background:transparent;}
 .hp-nums #f-hp{border-color:var(--input-border);background:var(--input-bg);}
@@ -382,8 +384,12 @@ body.sheet-unlocked .hp-nums #f-hpmax{border:1px dashed var(--acc);background:va
 body.sheet-unlocked .sh-ed{display:inline-block;}
 body.sheet-unlocked .sh-vw{display:none;}
 input.sh-ed,select.sh-ed{height:28px;border:1px dashed var(--acc);border-radius:6px;background:var(--input-bg);color:var(--ink);font-family:var(--f-num);font-size:16px;font-weight:600;text-align:center;outline:none;padding:0 2px;}
-.sh-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:8px;padding:8px 10px 2px;}
-.sh-top select{width:100%;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:var(--f-ui);font-size:15px;color:var(--ink);outline:none;padding:3px 0;}
+.sh-top{padding:8px 10px 0;font-family:var(--f-ui);font-size:16px;color:var(--ink);}
+.sh-top .desc{color:var(--muted);font-size:13.5px;margin-left:4px;}
+.sh-empty{padding:10px;}
+body.sheet-locked .sh-none{display:none;}
+.sh-dname{margin-bottom:4px;}
+.sh-dname label{font-family:var(--f-label);font-size:13px;color:#b3a28a;display:block;margin-bottom:3px;}
 .sh-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;padding:8px;}
 .sst{border:1px solid var(--rule);border-radius:9px;background:var(--box);padding:4px 7px 5px;min-width:0;}
 body.dark .sst{background:#1a1212;}
@@ -405,10 +411,8 @@ body.dark .sst{background:#1a1212;}
 .section-bar.sh-sub{font-size:16px;padding:6px 10px 4px;}
 .section-bar.sh-sub .cont-fill{font-size:14px;}
 .sh-ups{padding:2px 10px 6px;}
-.sh-up{display:flex;align-items:flex-start;gap:7px;padding:4px 0;border-bottom:1px solid var(--rule);font-size:13.5px;line-height:1.3;cursor:pointer;}
+.sh-up{display:flex;align-items:center;justify-content:space-between;gap:7px;padding:4px 0;border-bottom:1px solid var(--rule);font-size:13.5px;line-height:1.3;}
 .sh-up:last-child{border-bottom:none;}
-.sh-up input{margin-top:2px;accent-color:var(--acc);width:15px;height:15px;flex-shrink:0;}
-.sh-up small{color:var(--muted);font-family:var(--f-num);}
 .sh-shan{padding:0 10px;}
 .ship-dgrid{grid-template-columns:1fr 1fr!important;}
 
@@ -426,7 +430,8 @@ body.dark .sst{background:#1a1212;}
   .vitals{display:flex;flex-wrap:wrap;gap:5px;padding:6px;}
   .luck-vital{flex:0 0 64px;}
   .cond-vital{flex:1 1 calc(100% - 70px);min-width:0;}
-  .armor-vital,.hp-vital{flex:1 1 40%;}
+  .armor-vital,.hp-vital{flex:1 1 40%;order:1;}
+  .luck-vital,.cond-vital{order:2;}   /* Armor | Hit Points first, then Devil's Luck | Conditions */
   .hp-nums input{width:54px;height:48px;font-size:34px;}
   .luck-vital{padding:6px 4px;}
   .luck-box .small-btn{padding:4px 6px;}
@@ -436,6 +441,10 @@ body.dark .sst{background:#1a1212;}
   .hdr-logo .lg-word{font-size:38px;}
 }
 @media(max-width:768px){.hdr-metarow>*{flex:1 1 22%!important;}}
+/* phone: one column — Status, Abilities, the tabs, then the Ship (the two columns dissolve
+   into .body-row so their cards can be ordered; desktop keeps Abilities + Ship on the left) */
+@media(max-width:768px){.stats-col,.center-col{display:contents;}.status-card{order:1;}.ab-card{order:2;}.tabs-card{order:3;}.ship-card{order:4;}}
+@container (max-width:520px){.stats-col,.center-col{display:contents;}.status-card{order:1;}.ab-card{order:2;}.tabs-card{order:3;}.ship-card{order:4;}}
 @media(max-width:460px){.hdr-metarow>*{flex:1 1 47%!important;}}
 @media (max-width:1024px){.body-row{flex-direction:column;align-items:stretch;}.stats-col,.center-col{width:100%;}.hdr-top{grid-template-columns:1fr;gap:9px;}}
 @media (max-width:768px){
@@ -653,30 +662,31 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
   <div class="body-row">
     <div class="stats-col">
-      <div class="card">
+      <div class="card ab-card">
         <div class="section-bar"><span>Abilities</span></div>
         <div class="ab-grid" id="ab-grid"></div>
       </div>
       <div class="card ship-card" id="ship-card">
-        <div class="section-bar"><span>Ship</span><span class="sb-note" id="ship-note"></span></div>
+        <div class="section-bar"><span>Ship</span><span class="hdr-right"><span class="sb-note" id="ship-note"></span><button class="hdr-btn" id="ship-btn" data-nolock onclick="openShipBtn()">Add</button></span></div>
         <div class="ship-tabs" id="ship-tabs"><button class="ship-tab" data-sub="stats" onclick="setShipSub('stats')">Stats</button><button class="ship-tab" data-sub="cargo" onclick="setShipSub('cargo')">Cargo</button><button class="ship-tab" data-sub="details" onclick="setShipSub('details')">Details</button></div>
         <div class="ship-panel" id="ship-stats"></div>
         <div class="ship-panel" id="ship-cargo"></div>
         <div class="ship-panel" id="ship-details">
           <div class="blk"><div class="blk-grid ship-dgrid">
-            <div class="fld"><label>Captain</label><input type="text" id="sh-captain" onchange="onShip('captain',this.value)"></div>
-            <div class="fld"><label>Flag</label><input type="text" id="sh-flag" onchange="onShip('flag',this.value)"></div>
-            <div class="fld"><label>Home port</label><input type="text" id="sh-port" onchange="onShip('port',this.value)"></div>
-            <div class="fld"><label>Last careened</label><input type="text" id="sh-careen" onchange="onShip('careened',this.value)"></div>
-            <div class="fld" style="grid-column:1/-1;"><label>Crew</label><textarea id="sh-crewnotes" onchange="onShip('crewNotes',this.value)"></textarea></div>
-            <div class="fld" style="grid-column:1/-1;"><label>Notes</label><textarea id="sh-notes" onchange="onShip('notes',this.value)"></textarea></div>
+            <div class="fld"><label>Name</label><input type="text" id="sh-name" data-nolock onchange="onShip('name',this.value)"></div>
+            <div class="fld"><label>Captain</label><input type="text" id="sh-captain" data-nolock onchange="onShip('captain',this.value)"></div>
+            <div class="fld"><label>Flag</label><input type="text" id="sh-flag" data-nolock onchange="onShip('flag',this.value)"></div>
+            <div class="fld"><label>Home port</label><input type="text" id="sh-port" data-nolock onchange="onShip('port',this.value)"></div>
+            <div class="fld"><label>Last careened</label><input type="text" id="sh-careen" data-nolock onchange="onShip('careened',this.value)"></div>
+            <div class="fld" style="grid-column:1/-1;"><label>Crew</label><textarea id="sh-crewnotes" data-nolock onchange="onShip('crewNotes',this.value)"></textarea></div>
+            <div class="fld" style="grid-column:1/-1;"><label>Notes</label><textarea id="sh-notes" data-nolock onchange="onShip('notes',this.value)"></textarea></div>
           </div></div>
         </div>
       </div>
     </div>
 
     <div class="center-col">
-      <div class="card">
+      <div class="card status-card">
         <div class="section-bar"><span>Status</span><span class="hdr-right"><button class="hdr-btn" onclick="openRestPanel()">Rest</button><button class="hdr-btn" onclick="openTimePanel()" title="Hours, dawn and sunset: grog wears off, lights burn down, daily uses reset">Time</button></span></div>
         <div class="dead-banner" id="dead-banner">Dead — down to Davy Jones' Locker</div>
         <div class="broken-banner" id="broken-banner"></div>
@@ -1016,13 +1026,13 @@ function renderStatus(){
   $('dead-banner').classList.toggle('on',!!S.dead);
   var bb=$('broken-banner'); if(S.broken&&!S.dead){ bb.classList.add('on'); setHTML(bb,'<b>Broken — '+esc(S.broken.name)+'</b> · '+esc(S.broken.text)+(S.broken.note?' <span style="color:var(--muted);">('+esc(S.broken.note)+')</span>':'')+' <button class="small-btn ghost" data-nolock onclick="clearBroken()">Recovered</button>'); } else { bb.classList.remove('on'); setHTML(bb,''); }
   var cs=[]; var C=S.cond;
-  var chip=function(on,label,fn,title){ cs.push('<button class="cs'+(on?' on':'')+'" data-nolock onclick="'+fn+'" title="'+esc(title||'')+'">'+label+'</button>'); };
-  chip(C.starving,'Starving'+(C.starving&&num(C.starveDays)?' <b>'+num(C.starveDays)+'d</b>':''),"toggleCond('starving')",'No food or drink: rest restores 0 HP; after two days you lose d4 HP a day');
-  chip(C.infected,'Infected / sick / bleeding / poisoned',"toggleCond('infected')",'Lose d6 HP every morning instead of recovering');
+  var chip=function(on,label,fn,title,cl){ cs.push('<button class="cs'+(cl?' '+cl:'')+(on?' on':'')+'" data-nolock onclick="'+fn+'" title="'+esc(title||'')+'">'+label+'</button>'); };
+  chip(C.starving,'Starving'+(C.starving&&num(C.starveDays)?' <b>'+num(C.starveDays)+'d</b>':''),"toggleCond('starving')",'No food or drink: rest restores 0 HP; after two days you lose d4 HP a day','cs-half');
+  chip(C.stunned,'Stunned',"toggleCond('stunned')",'Lose your next round','cs-half');
+  chip(C.infected,'Infected / sick / bleeding / poisoned',"toggleCond('infected')",'Lose d6 HP every morning instead of recovering','cs-full');   // Starving | Stunned on one line, this one under them
   if(num(C.hemorrhage)) chip(true,'Hemorrhage '+(C.hemorrhage===2?'— last hour':'— first hour'),"cycleHemorrhage()",'Death in d2 hours unless treated (a medical kit treats it). Tests DR16, DR18 the last hour. Click: next hour / treated');
   if(num(C.brain)) chip(true,'Brain injury <b>'+num(C.brain)+'d</b>',"adjBrain(-1)",'PRESENCE −3 for d8 days — click when a day passes');
   if(num(C.out)) chip(true,'Out <b>'+num(C.out)+'</b> rounds',"adjOut(-1)",'Unconscious / can\'t act — click as each round passes');
-  chip(C.stunned,'Stunned',"toggleCond('stunned')",'Lose your next round');
   if(num(S.grog.drinks)) chip(true,'Grog ×<b>'+num(S.grog.drinks)+'</b>',"openTimePanel()",'AGILITY −1 per drink; each wears off after an hour');
   if(S.light) chip(true,esc(S.light.name)+' lit · <b>'+num(S.light.hours)+'</b> h',"douse()",'Click to put it out');
   if(isMerfolk()) chip(C.underwater,'Underwater',"toggleCond('underwater')",'Merfolk: all DRs −4 underwater');
@@ -1235,7 +1245,37 @@ function onShipType(id){ var sh=SH(), def=byId(D('PB_SHIPS'),id); sh.type=id; if
       crewMin:def.crew?num(def.crew.min):0,crewMax:def.crew?num(def.crew.max):0,cargoCap:num(def.cargo),misfired:{broadsides:false,smallArms:false}});
     if(!num(sh.crew)&&def.crew) sh.crew=num(def.crew.min); }
   changed(); }
-function toggleUpgrade(id){ if(needUnlock()) return false; var u=SH().upgrades, i=u.indexOf(id); if(i<0) u.push(id); else u.splice(i,1); changed(); return true; }
+function hasShip(){ var sh=SH(); return !!sh.type||num(sh.hpMax)>0; }
+// The header button: Add (pick a type and name) until there is a ship, then Upgrade.
+function openShipBtn(){ if(hasShip()) openShipUpgrade(); else openShipAdd(); }
+// Ship types with their key stats. Only the boats carry a price in the Core Rules (dinghy,
+// longboat); those get Buy (spends silver) beside Add (free), like the Gear shop.
+function shipAddBody(){ var sh=SH(), h='<div class="sh-dname"><label>Name</label><input id="shd-name" class="m-input" placeholder="The ship\'s name" value="'+esc(sh.name||'')+'"></div>';
+  h+='<div class="brow-meta" style="padding:8px 2px 2px;">Silver: '+num(S.silver)+'s</div>';
+  A(D('PB_SHIPS')).forEach(function(x){ var cost=costOf(x), cur=x.id===sh.type;
+    var meta=['HP '+num(x.hp),'hull '+(x.hull&&x.hull.tier?'−'+DIE_BY_TIER[num(x.hull.tier)]:'—'),'AGILITY '+(x.agility==null?'—':sgn(num(x.agility))),'speed '+num(x.speed),'SKILL '+(x.skill==null?'—':sgn(num(x.skill))),'crew '+(x.crew?num(x.crew.min)+'–'+num(x.crew.max):'—'),'cargo '+(x.cargo==null?'—':num(x.cargo))];
+    var arms=[x.broadsides?'broadsides '+(num(x.broadsidesAttacks,1)>1?x.broadsidesAttacks+' × ':'')+x.broadsides:'',x.smallArms?'small arms '+(num(x.smallArmsAttacks,1)>1?x.smallArmsAttacks+' × ':'')+x.smallArms:'',x.ram?'ram '+x.ram:''].filter(Boolean).join(' · ');
+    var btn=cur?'<button class="brow-add have" disabled>Current</button>':(cost?'<button class="brow-add"'+(cost>num(S.silver)?' disabled title="Not enough silver"':'')+' onclick="pickShip(\''+jsq(x.id)+'\',true)">Buy</button>':'')+'<button class="brow-add ghost" onclick="pickShip(\''+jsq(x.id)+'\',false)">Add</button>';
+    h+='<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(x.name)+(cost!=null?'<span class="brow-cost">'+cost+'s</span>':'')+'</div><div class="brow-meta">'+esc(meta.join(' · '))+'</div>'+(arms?'<div class="brow-meta">'+esc(arms)+'</div>':'')+(x.special?'<div class="brow-desc">'+esc(x.special)+'</div>':'')+'</div><div class="brow-btns row">'+btn+'</div></div>'; });
+  return h; }
+function openShipAdd(){ openDlg(hasShip()?'Change ship':'Add a ship',shipAddBody(),[],false,true); }
+function pickShip(id,buy){ var def=byId(D('PB_SHIPS'),id); if(!def) return; var cost=costOf(def), nm=$('shd-name')?String($('shd-name').value).trim():SH().name;
+  if(buy){ if(cost==null||cost>num(S.silver)){ addLog('Ship','Too expensive',def.name,'normal'); return; } S.silver=num(S.silver)-cost; }
+  var was=SH().type; SH().name=nm; closeDlg(); onShipType(id);
+  addLog('Ship',nm||def.name,(was?'now a ':'')+def.name+(buy?' · bought −'+cost+'s ('+num(S.silver)+'s left)':''),'normal'); }
+// Shipwright upgrades (pg. 77): each once per ship, costing the ship's max HP × the upgrade's multiplier.
+function upgradeCost(u){ return num(SH().hpMax)*num(u.hpMultiplier); }
+function shipUpgradeBody(){ var sh=SH(), left=shipUpgrades().filter(function(u){ return sh.upgrades.indexOf(u.id)<0; });
+  var h='<div class="brow-meta" style="padding:0 2px 4px;">Silver: <b>'+num(S.silver)+'s</b> · cost = ship\'s max HP ('+num(sh.hpMax)+') × the upgrade\'s multiplier · once per ship</div>';
+  h+=left.length?left.map(function(u){ var c=upgradeCost(u), poor=c>num(S.silver);
+    return '<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(u.name)+'<span class="brow-cost">'+c+'s</span></div><div class="brow-meta">'+esc(u.cost||'')+'</div><div class="brow-desc">'+esc(u.effect)+'</div></div><div class="brow-btns row"><button class="brow-add"'+(poor?' disabled title="Not enough silver"':'')+' onclick="buyUpgrade(\''+jsq(u.id)+'\',true)">Buy</button><button class="brow-add ghost" onclick="buyUpgrade(\''+jsq(u.id)+'\',false)" title="Free (found, won or gifted)">Add</button></div></div>'; }).join(''):'<div class="brow-empty">Every upgrade is fitted.</div>';
+  return h; }
+function openShipUpgrade(){ openDlg('Shipwright · '+shipLabel(),shipUpgradeBody(),[{t:'Change ship…',cls:'ghost',f:function(){ openShipAdd(); }}],false,true); }
+function buyUpgrade(id,buy){ var sh=SH(), u=byId(shipUpgrades(),id); if(!u||sh.upgrades.indexOf(id)>=0) return; var c=upgradeCost(u);
+  if(buy){ if(c>num(S.silver)){ addLog('Shipwright','Not enough silver',u.name+': '+c+'s','normal'); return; } S.silver=num(S.silver)-c; }
+  sh.upgrades.push(id); addLog('Shipwright',u.name,u.effect+(buy?' · −'+c+'s ('+num(S.silver)+'s left)':' · added'),'normal'); changed();
+  if($('dlg-overlay').classList.contains('open')) $('dlg-body').innerHTML=shipUpgradeBody(); }   // stays open to buy another, refreshed in place
+function removeUpgrade(id){ if(needUnlock()) return; var u=SH().upgrades, i=u.indexOf(id); if(i<0) return; u.splice(i,1); changed(); }
 function onCargo(u,k,v){ var c=SH().cargo.find(function(x){ return x.uid===u; }); if(!c) return; c[k]=k==='value'?String(v).trim():v; changed(); }
 function removeCargo(u){ var cg=SH().cargo, i=cg.findIndex(function(x){ return x.uid===u; }); if(i<0) return; cg.splice(i,1); changed(); }
 function addCargo(name,value){ name=String(name||'').trim(); if(!name) return; SH().cargo.push({uid:uid(),name:name,value:value||''}); changed(); }
@@ -1254,9 +1294,9 @@ function setShipSub(k){ _shipSub=k; try{ localStorage.setItem('pb_shipsub',k); }
 // a stat that shows as text (or a roll button) while locked and as a field while unlocked
 function shEd(k,v,w,type){ return '<input class="sh-ed'+(type==='number'?' no-spin':'')+'" type="'+(type||'number')+'" style="width:'+(w||40)+'px;" value="'+esc(v)+'" onchange="onShip(\''+k+'\',this.value)">'; }
 function renderShip(){ var sh=SH(), def=shipDef(), hm=num(sh.hpMax), hp=num(sh.hp), mods=shipMods(), h='';
-  var types=A(D('PB_SHIPS')).map(function(x){ return '<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>'; }).join('');
-  h+='<div class="sh-top"><div class="fld"><label>Type</label><select id="sh-type" onchange="onShipType(this.value)"><option value="">—</option>'+types+'</select></div>'+
-     '<div class="fld"><label>Name</label><input type="text" id="sh-name" onchange="onShip(\'name\',this.value)"></div></div>';
+  var none=!hasShip();
+  h+=none?'<div class="cont-empty sh-empty">No ship yet. Use <b>Add</b> to pick one.</div>':'<div class="sh-top"><b>'+esc(sh.name||(def?def.name:'Ship'))+'</b>'+(sh.name&&def?' <span class="desc">'+esc(def.name)+'</span>':'')+'</div>';
+  h+='<div class="'+(none?'sh-none':'sh-body')+'">';   // with no ship the stat fields still show while unlocked (a ship of your own)
   var hull=shipHull();
   h+='<div class="sh-grid">'+
     '<div class="sst sst-hp"><div class="sst-l">HP</div><div class="sst-v"><input type="number" id="sh-hp" class="no-spin sh-hp" data-nolock onchange="onShipHp(this)"><span class="slash">/</span><span class="sh-vw">'+hm+'</span>'+shEd('hpMax',hm,46)+'</div></div>'+
@@ -1276,14 +1316,17 @@ function renderShip(){ var sh=SH(), def=shipDef(), hm=num(sh.hpMax), hp=num(sh.h
      tbtn('Come About','shipAct(\'about\')','ghost','d20 '+sgn(shipAgl())+' AGILITY '+sgn(abil('STRENGTH'))+' STR')+tbtn('Repair','shipAct(\'repair\')','ghost','d20 '+sgn(shipSkill())+' SKILL '+sgn(abil('PRESENCE'))+' PRE; d6 HP')+
      tbtn('Morale','shipAct(\'morale\')','ghost','2d6 '+sgn(shipSkill())+' SKILL')+(hm&&hp<=0?tbtn('Derelict d8','shipAct(\'derelict\')','','The ship is derelict: roll when it takes more damage'):'')+'</div>';
   if(def&&def.special) h+='<div class="sh-special">'+esc(def.special)+'</div>';
+  h+='</div>';
   setHTML($('ship-stats'),h);
-  setVal($('sh-type'),sh.type||''); setVal($('sh-name'),sh.name||''); setVal($('sh-hp'),hp); setVal($('sh-crew'),num(sh.crew));
+  setText($('ship-btn'),none?'Add':'Upgrade'); $('ship-btn').title=none?'Pick your ship\'s type and name':'Shipwright upgrades, bought with silver; change the ship';
+  setVal($('sh-name'),sh.name||''); setVal($('sh-hp'),hp); setVal($('sh-crew'),num(sh.crew));
   // cargo, upgrades, shanties
   var cap=num(sh.cargoCap), used=sh.cargo.length, c='';
   c+='<div class="section-bar sh-sub"><span>Cargo <span class="cont-fill'+(cap&&used>cap?' over':'')+'">('+used+'/'+'<span class="sh-vw">'+cap+'</span><span class="sh-ed">'+shEd('cargoCap',cap,36)+'</span>)</span></span><span class="hdr-right"><button class="hdr-btn" data-nolock onclick="openCargo()">＋ Cargo</button></span></div>';
   c+=used?'<table class="tbl"><tbody>'+sh.cargo.map(function(x){ return '<tr><td><input value="'+esc(x.name)+'" onchange="onCargo(\''+x.uid+'\',\'name\',this.value)"></td><td style="width:80px;white-space:nowrap;"><input class="num" style="width:56px;" value="'+esc(x.value||'')+'" placeholder="s" onchange="onCargo(\''+x.uid+'\',\'value\',this.value)" title="Value in silver"><span class="desc">s</span></td><td style="width:34px;"><button class="row-x" onclick="removeCargo(\''+x.uid+'\')" title="Remove">✕</button></td></tr>'; }).join('')+'</tbody></table>':'<div class="cont-empty">Empty</div>';
-  c+='<div class="section-bar sh-sub"><span>Upgrades</span></div><div class="sh-ups">'+shipUpgrades().map(function(u){ var on=sh.upgrades.indexOf(u.id)>=0;
-    return '<label class="m-check sh-up"><input type="checkbox" data-nolock'+(on?' checked':'')+' onclick="return toggleUpgrade(\''+jsq(u.id)+'\')"><span><b>'+esc(u.name)+'</b> · '+esc(u.effect)+(u.hpMultiplier&&hm?' <small>'+(hm*u.hpMultiplier)+'s</small>':'')+'</span></label>'; }).join('')+'</div>';
+  var owned=shipUpgrades().filter(function(u){ return sh.upgrades.indexOf(u.id)>=0; });
+  c+='<div class="section-bar sh-sub"><span>Upgrades</span></div>'+(owned.length?'<div class="sh-ups">'+owned.map(function(u){
+    return '<div class="sh-up"><span><b>'+esc(u.name)+'</b> · '+esc(u.effect)+'</span><button class="row-x lk-hide" onclick="removeUpgrade(\''+jsq(u.id)+'\')" title="Remove (no refund)">✕</button></div>'; }).join('')+'</div>':'<div class="cont-empty">None'+(hasShip()?' — use <b>Upgrade</b>':'')+'</div>');
   c+='<div class="section-bar sh-sub"><span>Shanties</span><span class="hdr-right"><button class="hdr-btn lk-hide" onclick="openShanty()">＋ Shanty</button></span></div>';
   c+=sh.shanties.length?'<div class="sh-shan">'+sh.shanties.map(function(id,i){ var p=byId(D('PB_SHANTIES'),id)||{name:id,text:''}; var tx=String(p.text||'').replace(/^[^:]*:\s*/,'');
     return '<div class="pb-card"><div class="pb-main"><div class="pb-name">'+esc(p.name)+'</div><div class="pb-sub">'+esc(tx)+'</div></div><div class="pb-btns">'+tbtn('Sing','sing(\''+jsq(id)+'\')','','Crew SKILL test: d20 '+sgn(shipSkill()))+'<button class="row-x lk-hide" onclick="forgetShanty('+i+')" title="Remove">✕</button></div></div>'; }).join('')+'</div>':'<div class="cont-empty">None</div>';
