@@ -743,6 +743,8 @@ var ABS={STRENGTH:'STR',AGILITY:'AGL',PRESENCE:'PRE',TOUGHNESS:'TOU',SPIRIT:'SPI
 var DIE_BY_TIER=[null,'d2','d4','d6'];
 var NONMETAL=/^(unarmed-insults|broken-bottle|belaying-pin|wood-plank|whale-bone|cudgel|heavy-club|cat-o-nine-tails|blowpipe|wooden-knife|rotten-cargo-net|fists)$/;
 
+// The turn's action economy (see the Action tab's turn controller).
+function blankTurn(){ return {acts:0,extra:0,pistols:0,reloaded:false,bayonet:false,knave:0,panic:false}; }
 function blankState(){ return {
   system:'PB', ver:1, name:'', 'class':'', classId:'', baseClassId:'',
   origin:{kind:'', ailment:'', variant:'', ancestry:'', animal:''},
@@ -757,6 +759,7 @@ function blankState(){ return {
   grog:{drinks:0, brewed:0, coated:''},
   prot:[], light:null,
   combat:{on:false, round:1, action:false, side:'', init:null, liars:null, eldritch:'', kills:0, inspire:null, reloaded:false},
+  turn:blankTurn(),
   day:{ghost:false, breath:false, blood:false},
   deck:[], timed:[], built:false, campaign:null }; }
 var S=blankState();
@@ -1336,17 +1339,42 @@ function pf(r,pass,fail){ if(r.crit) return [pass]; if(r.fumble) return [fail]; 
 function finish(o){ o.done=true; closeDlg(true); }
 
 // ═══ ACTION TAB — the turn controller ══════════════════════════════════════
-// Combat is always on: every attack, action and reaction is available at any time — there is
-// no Start Combat, round counter or action tracker (the table keeps the turn order). Per-fight
-// state (Liar's Dice, Eldritch Mind, Inspiring Leader, Blood Frenzy kills) clears on a rest.
+// Combat is always on (no Start Combat or round counter — the table keeps the turn order).
+// A Pirate Borg turn: move and take one action — attack, reload, cast, pray, use a relic or an
+// item. The Action pip shows it; End Turn gives it back. Defending, Devil's Luck and things
+// that "don't take your action" are free. Extra attacks (S.turn): a defense crit's free attack
+// and Eldritch Mind's panic (extra), Knife Knave's second knife (knave), Flintlock Fanatic's
+// 2nd/3rd pistol (pistols), a bayonet on a turn spent reloading (reloaded/bayonet); ASH 12
+// (time slows) gives two actions. Per-fight state (Liar's Dice, Eldritch Mind, Inspiring
+// Leader, Blood Frenzy kills) clears on a rest.
 var DX={breath:0};   // Hold-your-breath round count (not saved)
 function inCombat(){ return true; }
 function incapacitated(){ return S.dead||num(S.cond.out)>0||S.hp<0||timedHas('paralyzed'); }
-function canAct(){ return !incapacitated(); }
-function useAction(){}
-function clearFight(){ S.combat=Object.assign({},S.combat,{on:false,round:1,action:false,acts:0,side:'',init:null,liars:null,eldritch:'',inspire:null,reloaded:false,pistols:0,extra:0,bayonet:false,knave:0,shotAt:false,kills:0}); }
-// A round passes (the Time panel): timed effects tick, "out" counts down, a stun wears off.
-function passRound(){ closeDlg(); if(num(S.cond.out)>0) S.cond.out--; if(S.cond.stunned) S.cond.stunned=false;
+function actsMax(){ return timedHas('acts')?2:1; }
+function canAct(){ return !incapacitated()&&num(S.turn.acts)<actsMax(); }
+function useAction(){ S.turn.acts=num(S.turn.acts)+1; }
+// Which allowance an attack with w would use: 'knave' | 'extra' | 'pistol' | 'bayonet' | 'action' | ''.
+function attackSlot(w){ var t=S.turn; if(incapacitated()) return '';
+  if(isKnave(w)&&num(t.knave)>0) return 'knave';
+  if(num(t.extra)>0) return 'extra';
+  if(has('flintlock-fanatic')&&w.pistol&&num(t.pistols)>0&&num(t.pistols)<3) return 'pistol';
+  if(has('fix-bayonets')&&w.ref==='bayonet'&&t.reloaded&&!t.bayonet) return 'bayonet';
+  return canAct()?'action':''; }
+// Spend the allowance for an attack; returns a label for the log ('' for a plain action).
+function spendAttack(w){ var t=S.turn, slot=attackSlot(w), how='';
+  if(slot==='knave'){ t.knave=0; how='second knife'; }
+  else if(slot==='extra'){ t.extra=num(t.extra)-1; how='extra attack'; }
+  else if(slot==='pistol'){ how='pistol '+(num(t.pistols)+1)+' of 3'; }
+  else if(slot==='bayonet'){ t.bayonet=true; how='bayonet while reloading'; }
+  else { useAction(); if(S.combat.eldritch==='panic'&&!t.panic){ t.panic=true; t.extra=num(t.extra)+1; } }
+  if(w.pistol&&(slot==='action'||slot==='pistol')) t.pistols=num(t.pistols)+1;
+  if(isKnave(w)&&slot!=='knave') t.knave=1;
+  return how; }
+// End Turn (as on the Dragonbane and D&D sheets): your action and any unused extra attacks reset.
+function endTurn(){ S.turn=blankTurn(); changed(); }
+function clearFight(){ S.combat=Object.assign({},S.combat,{on:false,round:1,action:false,acts:0,side:'',init:null,liars:null,eldritch:'',inspire:null,reloaded:false,pistols:0,extra:0,bayonet:false,knave:0,shotAt:false,kills:0}); S.turn=blankTurn(); }
+// A round passes (the Time panel): timed effects tick, "out" counts down, a stun wears off, and a new turn starts.
+function passRound(){ closeDlg(); if(num(S.cond.out)>0) S.cond.out--; if(S.cond.stunned) S.cond.stunned=false; S.turn=blankTurn();
   addLog('A round passes','⌛',A(S.timed).length||num(S.cond.out)?'':'Nothing is running','normal'); tickTime(1); changed(); }
 function rollLiars(quiet){ var r=rollExpr('5d6'); S.combat.liars=r.total%2===0; addLog("Liar's Dice",String(r.total),r.text+(S.combat.liars?' · even: melee −2 DR, defend +2 DR':' · odd'),'normal'); if(!quiet) changed(); }
 // Eldritch Mind: PRESENCE when combat starts. Pass — harness it (attacks −2 DR this combat);
@@ -1387,12 +1415,14 @@ function attackGate(w){ // why this weapon can't attack right now, or ''
   if(w.blackPowder&&!w.loaded) return 'needs reloading';
   if(w.blackPowder&&ammoCount('shot')<=0) return 'out of shot';
   if(w.damageFromAmmo&&!S.items.some(function(x){ return x.kind==='ammo'&&x.dart&&num(x.qty)>0; })) return 'no darts';
+  if(!attackSlot(w)) return NO_ACT;
   return ''; }
+var NO_ACT='no action left this turn';
 function isKnave(w){ return has('knife-knave')&&w.wtype==='melee'&&/knife|dagger/i.test(w.name); }
 // opt: {opt: index into attackSituations(w).opts, chosen: [situations], second: Knife Knave's 2nd knife}
 function doAttack(u,opt){ opt=opt||{}; var w=weaponByUid(u); if(!w) return; var g=opt.second?'':attackGate(w); if(g){ addLog('Attack · '+w.name,'—',g,'normal'); return; }
   var sit=attackSituations(w); var chosen=opt.chosen||(opt.opt!=null&&sit.opts[opt.opt]?[sit.opts[opt.opt]]:[]); var close=chosen.some(function(c){ return c.close; }), thrown=chosen.some(function(c){ return c.thrown; });
-  var how=opt.second?'second knife':'';
+  var how=opt.second?'second knife':spendAttack(w);
   if(w.blackPowder){ var sh=ammoRow('shot'); if(sh){ sh.qty=num(sh.qty)-1; } w.loaded=false; w.prog=0; }
   if(S.cond.invisible&&!opt.second){ S.cond.invisible=false; addLog('Invisible','Ends','You attacked','normal'); }
   var dart=null; if(w.damageFromAmmo){ dart=S.items.find(function(x){ return x.kind==='ammo'&&x.dart&&num(x.qty)>0; }); if(dart) dart.qty=num(dart.qty)-1; }
@@ -1440,7 +1470,8 @@ function attackFumble(w){
   else { it2.broken=true; addLog(w.name,'Broken or lost','Fumble: the weapon breaks or is lost','fumble'); }
   changed(); }
 function reloadWeapon(u){ var w=itemBy(u); if(!w||!w.blackPowder) return; if(w.loaded){ addLog(w.name,'Loaded','Already loaded','normal'); return; }
-  if(!canAct()){ addLog('Reload · '+w.name,'—','You can\'t act','normal'); return; } if(ammoCount('shot')<=0){ addLog('Reload · '+w.name,'Out of shot','','fumble'); return; }
+  if(!canAct()){ addLog('Reload · '+w.name,'—',incapacitated()?'You can\'t act':'Reloading takes your action','normal'); return; } if(ammoCount('shot')<=0){ addLog('Reload · '+w.name,'Out of shot','','fumble'); return; }
+  useAction(); S.turn.reloaded=true;
   var need=reloadRounds(w); w.prog=num(w.prog)+1;
   if(w.prog>=need){ w.loaded=true; w.prog=0; addLog('Reload · '+w.name,'Loaded',need===1?'One round':'Round 2 of 2','normal'); }
   else addLog('Reload · '+w.name,'Round '+w.prog+' of '+need,'','normal');
@@ -1454,7 +1485,7 @@ function doDefend(){
   var o={label:'Defend',ability:'AGILITY',kind:'defense',neutralizeCrit:false,ask:'The GM sets the DR (normally 12): did you dodge it?'};
   o.note=function(res){ return res.crit?'Critical: you get an immediate free attack.':res.fumble?'Fumble: you take double damage — lower your HP — and your armor drops a tier.':'If you are hit, the sheet rolls your armor; lower your HP by what gets through.'; };
   o.onRes=function(res){ showResult(o,res,function(r){
-    if(r.crit) return [{t:'Free attack!',f:function(){ finish(o); addLog('Defense critical','Free attack','Make an immediate free attack','crit'); changed(); }}];
+    if(r.crit) return [{t:'Free attack!',f:function(){ finish(o); S.turn.extra=num(S.turn.extra)+1; addLog('Defense critical','Free attack','Make an immediate free attack','crit'); changed(); }}];
     var hat=wornHat();
     var btns=[{t:r.fumble?'Take double damage':'Hit',cls:'warn',f:function(){ finish(o); defendHit(r.fumble,false); }}];
     if(hat&&hat.sacrifice&&!r.fumble) btns.push({t:'Hit — break my '+String(hat.name).replace(/\s*\(.*\)$/,''),cls:'warn',f:function(){ finish(o); defendHit(false,true); }});
@@ -1479,9 +1510,9 @@ function apparate(){ if(S.day.ghost){ addLog('Apparate','—','Once per night','
 function grogBreath(){ if(S.day.breath){ addLog('Grog Breath','—','Once an hour unless you drink more grog','normal'); return; } if(!canAct()){ addLog('Grog Breath','—','No action left','normal'); return; } useAction(); S.day.breath=true; addLog('Grog Breath','Belch!','An opponent in melee range is stunned for 1 round','normal'); changed(); }
 function inspiringLeader(){ var r=rollExpr('d4'); S.combat.inspire=r.total; addLog('Inspiring Leader','±'+r.total,r.text+' · each ally may add or subtract '+r.total+' to one roll this combat','normal'); changed(); }
 function mastermind(){ test({label:'Military Mastermind',ability:'PRESENCE',kind:'test'}); }
-function skylark(u){ var w=weaponByUid(u)||attackList()[0]; if(!canAct()){ addLog('Skylarker','—','You can\'t act','normal'); return; } var extra=2+(picks('skylarker')>=2?1:0);
+function skylark(u){ var w=weaponByUid(u)||attackList()[0]; var g=attackGate(w); if(g){ addLog('Skylarker','—',g,'normal'); return; } spendAttack(w); var extra=2+(picks('skylarker')>=2?1:0);
   var o={label:'Skylarker · '+w.name,ability:'AGILITY',kind:'test',ask:'The GM sets the DR (normally 10): did you pull it off?'}; o.onRes=function(res){ showResult(o,res,function(r){ return pf(r,{t:'Passed — automatic hit, roll damage',f:function(){ finish(o); attackDamage(w,{crit:r.crit,bonus:extra,bonusLabel:'Skylarker',dmgAuto:attackSituations(w).dmgAuto}); }},{t:'Failed',cls:'ghost',f:function(){ finish(o); addLog('Skylarker','Failed','','normal'); }}); }); }; changed(); test(o); }
-function sneakyBastard(u){ var w=weaponByUid(u)||attackList()[0]; if(!canAct()){ addLog('Sneaky Bastard','—','You can\'t act','normal'); return; }
+function sneakyBastard(u){ var w=weaponByUid(u)||attackList()[0]; var g=attackGate(w); if(g){ addLog('Sneaky Bastard','—',g,'normal'); return; } spendAttack(w);
   var o={label:'Sneaky Bastard · '+w.name,ability:'AGILITY',kind:'test',ask:'The GM sets the DR (normally 12'+(picks('sneaky-bastard')>=2?', −2 for you':'')+'): did you strike unseen?'}; o.onRes=function(res){ showResult(o,res,function(r){ return pf(r,{t:'Passed — automatic critical, roll damage',f:function(){ finish(o); attackDamage(w,{crit:true,dmgAuto:attackSituations(w).dmgAuto}); }},{t:'Failed',cls:'ghost',f:function(){ finish(o); addLog('Sneaky Bastard','Failed','','normal'); }}); }); }; changed(); test(o); }
 function grogPoisonDR(){ var f=featRec('grog-brewer'); return 14+(f&&f.card?num(f.card.dr):0); }
 function grogPoisonDie(){ var f=featRec('grog-brewer'); return dieStep(['d6','d8','d10','d12'],'d6',f&&f.card?num(f.card.step):0); }
@@ -1790,8 +1821,15 @@ function toggleTSec(id){ _tcol[id]=!_tcol[id]; renderTurn(); }
 function tcard(name,sub,btns,dis){ return '<div class="pb-card'+(dis?' disabled':'')+'"><div class="pb-main"><div class="pb-name">'+name+'</div>'+(sub?'<div class="pb-sub">'+sub+'</div>':'')+'</div><div class="pb-btns">'+btns+'</div></div>'; }
 function tbtn(label,fn,cls,title,dis){ return '<button class="pb-do'+(cls?' '+cls:'')+'" onclick="'+fn+'"'+(title?' title="'+esc(title)+'"':'')+(dis?' disabled':'')+'>'+label+'</button>'; }
 function renderTurn(){
-  var el=$('pb-turn'); if(!el) return; var c=S.combat; var act=canAct(); var parts=[];
-  var h='<div class="pb-top"><div class="pb-badges">';
+  var el=$('pb-turn'); if(!el) return; var c=S.combat, t=S.turn; var act=canAct(); var parts=[];
+  // the action economy and End Turn, then the badges (as on the Dragonbane sheet)
+  var h='<div class="pb-top"><div class="pb-row1"><div class="pb-econ">', mx=actsMax(), inc=incapacitated();
+  for(var i=0;i<mx;i++) h+='<span class="pb-pip'+(inc||i<num(t.acts)?' used':'')+'" title="Move and take one action: attack, reload, cast, pray, use a relic or an item">Action'+(mx>1?' '+(i+1):'')+'</span>';
+  if(!inc){ if(num(t.extra)>0) h+='<span class="pb-pip extra" title="A free attack (defense critical'+(c.eldritch==='panic'?' or Eldritch Mind panic':'')+')">+'+num(t.extra)+' attack</span>';
+    if(num(t.knave)>0&&has('knife-knave')) h+='<span class="pb-pip extra" title="Knife Knave: attack with your second knife">+ second knife</span>';
+    if(has('flintlock-fanatic')&&num(t.pistols)>0&&num(t.pistols)<3) h+='<span class="pb-pip extra" title="Flintlock Fanatic: up to three pistols a turn">+'+(3-num(t.pistols))+' pistol'+(3-num(t.pistols)>1?'s':'')+'</span>';
+    if(has('fix-bayonets')&&t.reloaded&&!t.bayonet&&attackList().some(function(w){ return w.ref==='bayonet'; })) h+='<span class="pb-pip extra" title="Fix Bayonets!: attack with the bayonet on a turn spent reloading">+ bayonet</span>'; }
+  h+='</div>'+tbtn('⟳ End Turn','endTurn()','end','Start a new turn — your action comes back')+'</div><div class="pb-badges">';
   if(S.dead) h+='<span class="pb-badge warn">Dead</span>'; else if(S.hp===0) h+='<span class="pb-badge warn">Broken</span>';
   if(num(S.cond.out)) h+='<span class="pb-badge warn">Out '+num(S.cond.out)+' rounds</span>'; if(S.cond.stunned) h+='<span class="pb-badge warn">Stunned</span>';
   if(num(S.cond.hemorrhage)) h+='<span class="pb-badge warn">Hemorrhage'+(S.cond.hemorrhage===2?': last hour':'')+'</span>';
@@ -1818,7 +1856,7 @@ function renderActionTab(act){ var h='';
   // a throw) is its own button on the row, left of Attack, which is always rightmost.
   var a=''; var list=attackList();
   list.forEach(function(w){ var g=attackGate(w); var sit=attackSituations(w); var ab=attackAbility(w);
-    var sub='d20 '+sgn(abil(ab))+' '+esc(ab)+' · <b>'+esc(weaponDamage(w))+'</b>'+(sit.dmgAuto.length?' '+sit.dmgAuto.map(function(x){ return x.v; }).join(' '):'')+(w.reach?' · '+w.reach+'\' reach':'')+(w.range?' · '+w.range+'\'':'')+(w.blackPowder?' · shot '+ammoCount('shot'):'')+(w.trusted?' · trusted':'')+(w.poisoned?' · grog-poisoned':'')+(g?' · <span style="color:var(--red);">'+esc(g)+'</span>':'');
+    var sub='d20 '+sgn(abil(ab))+' '+esc(ab)+' · <b>'+esc(weaponDamage(w))+'</b>'+(sit.dmgAuto.length?' '+sit.dmgAuto.map(function(x){ return x.v; }).join(' '):'')+(w.reach?' · '+w.reach+'\' reach':'')+(w.range?' · '+w.range+'\'':'')+(w.blackPowder?' · shot '+ammoCount('shot'):'')+(w.trusted?' · trusted':'')+(w.poisoned?' · grog-poisoned':'')+(g&&g!==NO_ACT?' · <span style="color:var(--red);">'+esc(g)+'</span>':'');
     var btns='';
     if(has('sneaky-bastard')) btns+=tbtn('Sneaky Bastard','sneakyBastard(\''+w.uid+'\')','ghost','Test AGILITY: automatic critical',!!g);
     if(has('skylarker')) btns+=tbtn('Skylarker','skylark(\''+w.uid+'\')','ghost','Test AGILITY: automatic hit, +'+(2+(picks('skylarker')>=2?1:0))+' damage',!!g);
@@ -1828,7 +1866,8 @@ function renderActionTab(act){ var h='';
     else btns+=tbtn('Attack','doAttack(\''+w.uid+'\',{})','',g,!!g);
     a+=tcard(esc(w.name)+(w.trusted?' <span class="tag">trusted</span>':''),sub,btns,!!g&&!(w.blackPowder&&!w.loaded&&act)); });
   var dropped=items('weapon').filter(function(w){ return w.dropped; }); dropped.forEach(function(w){ a+=tcard(esc(w.name)+' <span class="tag warn">dropped</span>','',tbtn('Pick up','pickUp(\''+w.uid+'\')','ghost')); });
-  h+=tsec('attacks','Attacks',a,list.length);
+  if(!S.dead&&num(S.turn.extra)>0) a='<div class="pb-note good">Extra attack: make it with any weapon below.</div>'+a;
+  h+=tsec('attacks','Attacks',a);
   // Defend sits right under Attacks (it used to be its own sub-tab)
   h+=renderDefendSection();
   // class actions that aren't attacks
@@ -2049,7 +2088,7 @@ function collectSheet(){ var d0=JSON.parse(JSON.stringify(S)); d0.system='PB'; d
   d0.campaign=(typeof _campaign!=='undefined'&&_campaign)?{id:_campaign.id,code:_campaign.code,name:_campaign.name}:null; return d0; }
 function applySheet(d0){
   d0=d0||{}; var b=blankState(); S=Object.assign(b,d0);
-  ['origin','abilities','prayerUses','spellCasts','ritualCasts','conduit','cond','grog','combat','day'].forEach(function(k){ S[k]=Object.assign({},b[k],(d0[k]&&typeof d0[k]==='object'&&!Array.isArray(d0[k]))?d0[k]:{}); });
+  ['origin','abilities','prayerUses','spellCasts','ritualCasts','conduit','cond','grog','combat','turn','day'].forEach(function(k){ S[k]=Object.assign({},b[k],(d0[k]&&typeof d0[k]==='object'&&!Array.isArray(d0[k]))?d0[k]:{}); });
   ['features','prayers','spells','rituals','relics','mishaps','items','prot','deck','timed'].forEach(function(k){ if(!Array.isArray(S[k])) S[k]=[]; });
   S.items.forEach(function(x){ if(!x.uid) x.uid=uid(); }); S.relics.forEach(function(x){ if(!x.uid) x.uid=uid(); });
   // where each item is stowed: x.in = a container's uid. Older saves may carry it as stowedIn,
@@ -2304,7 +2343,6 @@ if(window.PBHB){ try{ window.PBHB.load(function(){ if(_pk) renderPicker(); rende
 /* ── Action tab (turn controller) ── */
 #tab-action{padding:0;}
 .pb-top{background:var(--box);border-bottom:1px solid var(--rule);}
-.pb-top:has(.pb-badges:empty){display:none;}   /* no badges → no empty strip over Attacks */
 body.dark .pb-top{background:#1a1111;}
 .pb-row1{display:flex;align-items:center;gap:10px;padding:10px 12px 6px;flex-wrap:wrap;}
 .pb-round{display:flex;flex-direction:column;align-items:center;justify-content:center;width:46px;height:50px;border-radius:7px;border:2px solid var(--acc);line-height:1;}
@@ -2312,7 +2350,7 @@ body.dark .pb-top{background:#1a1111;}
 .pb-round small{font-family:var(--f-label);font-size:11px;color:var(--muted);}
 .pb-side{font-size:13px;color:var(--muted);}
 .pb-econ{display:flex;gap:6px;flex:1 1 auto;flex-wrap:wrap;align-items:center;}
-.pb-pip{font-family:var(--f-label);font-size:14px;border:1.5px solid var(--acc);color:var(--acc-dk);background:transparent;border-radius:14px;padding:2px 13px;}
+.pb-pip{font-family:var(--f-label);font-size:13px;letter-spacing:.06em;text-transform:uppercase;border:1.5px solid var(--acc);color:var(--acc-dk);background:transparent;border-radius:14px;padding:3px 13px;}
 .pb-pip.used{background:var(--rule);border-color:var(--rule);color:var(--muted);text-decoration:line-through;}
 .pb-pip.extra{border-color:#c9a14a;color:#c9a14a;}
 .pb-do{flex:0 0 auto;background:var(--acc);color:#fff;border:none;border-radius:7px;padding:6px 12px;font-family:var(--f-label);font-size:14px;letter-spacing:.01em;cursor:pointer;white-space:nowrap;}
@@ -2321,7 +2359,7 @@ body.dark .pb-top{background:#1a1111;}
 .pb-do.end{margin-left:auto;padding:8px 16px;font-size:15px;}
 .pb-do:disabled{opacity:.45;cursor:default;filter:none;}
 .pb-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px;}
-.pb-badges{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;}
+.pb-badges{display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 8px;}
 .pb-badges:empty{display:none;}
 .pb-badge{font-family:var(--f-ui);font-size:12.5px;border:1px solid var(--rule);color:var(--muted);border-radius:12px;padding:1px 9px;}
 .pb-badge.warn{border-color:var(--red);color:var(--red);background:rgba(163,18,26,.1);}

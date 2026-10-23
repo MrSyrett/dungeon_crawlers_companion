@@ -195,14 +195,28 @@ export default function RulebookReader({
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
+    // Measured against the page top (not the viewport) so a scrolled window
+    // can't skew it.
     const fit = () => {
-      const top = el.getBoundingClientRect().top;
-      el.style.height = Math.max(240, window.innerHeight - top) + "px";
+      const top = el.getBoundingClientRect().top + window.scrollY;
+      const h = Math.max(240, Math.floor(window.innerHeight - top)) + "px";
+      if (el.style.height !== h) el.style.height = h;
     };
     fit();
+    // The nav above can change height AFTER mount — web fonts finishing, the
+    // nav restyling when opening a book switches the system, the title re-fit —
+    // and a one-time measurement then overshoots, forcing a page scroll. Re-fit
+    // whenever the body's layout changes (setting our own height to the same
+    // value is a no-op, so this can't loop) and once fonts are ready.
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(fit) : null;
+    ro?.observe(document.body);
+    const nav = el.previousElementSibling;
+    if (nav) ro?.observe(nav);
+    document.fonts?.ready.then(fit).catch(() => {});
     window.addEventListener("resize", fit);
     window.addEventListener("orientationchange", fit);
     return () => {
+      ro?.disconnect();
       window.removeEventListener("resize", fit);
       window.removeEventListener("orientationchange", fit);
     };
