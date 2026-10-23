@@ -151,6 +151,15 @@
     var l=m.actualBoundingBoxLeft||0, r=m.actualBoundingBoxRight||m.width||100, a=m.actualBoundingBoxAscent||70, d=m.actualBoundingBoxDescent||0;
     var k=Math.min(maxW/Math.max(l+r,1), maxH/Math.max(a+d,1));
     return {px:100*k, x:cx-(r-l)*k/2, y:cy+(a-d)*k/2}; }
+  // ─── D&D: the 20 on a d20 is the D&D dragon ampersand ───
+  // On a D&D surface (sheet data-system / GM Screen system = DND) every plain d20
+  // takes faceSet 'dnd20': its 20 face is the "&" of the DnDC logo face
+  // (public/fonts/dndc.woff2, @font-face "DnDC" — letters + & only, no digits).
+  var AMP_FACE='DND20', AMP_FONT='"DnDC"';
+  function ampReady(cb){ if(!document.fonts||!document.fonts.load){ cb(); return; }
+    var done=false, go=function(){ if(done) return; done=true; cb(); };
+    try{ document.fonts.load('400 48px "DnDC"','&').then(go,go); }catch(e){ go(); }
+    setTimeout(go, 700); }
   function marvelReady(cb){ if(!document.fonts||!document.fonts.load){ cb(); return; }
     var done=false, go=function(){ if(done) return; done=true; cb(); };
     try{ document.fonts.load('400 48px "Marvel"',MARVEL_WORD).then(go,go); }catch(e){ go(); }
@@ -195,6 +204,8 @@
   function cY(pts){ var s=0; pts.forEach(function(p){s+=p[1];}); return s/pts.length; }
   function pstr(pts){ return pts.map(function(p){return p.join(',');}).join(' '); }
   function numSVG(disp, cx, cy, fs, numColor){
+    if(disp===AMP_FACE){ var af=wordFit(AMP_FONT,'&',cx,cy,fs*1.1,fs*1.15);
+      return '<text x="'+af.x.toFixed(2)+'" y="'+af.y.toFixed(2)+'" font-family="DnDC" font-weight="400" font-size="'+af.px.toFixed(2)+'" fill="'+(numColor||S.num)+'">&amp;</text>'; }
     if(disp===MARVEL_FACE){ var mf=wordFit(MARVEL_FONT,MARVEL_WORD,cx,cy,fs*1.55,fs*0.8);
       return '<text x="'+mf.x.toFixed(2)+'" y="'+mf.y.toFixed(2)+'" font-family="Marvel,Oswald,sans-serif" font-weight="400" font-size="'+mf.px.toFixed(2)+'" fill="'+(numColor||S.num)+'">'+MARVEL_WORD+'</text>'; }
     if(disp===GHOST_FACE){ var gf=ghostFit(cx,cy,fs*1.55);
@@ -502,6 +513,7 @@
     if(faceSet==='units'){ for(i=0;i<N;i++)a.push(String(i%10)); return a; }
     if(faceSet==='tens'){ for(i=0;i<N;i++){ var v=(i%10)*10; a.push(v<10?('0'+v):String(v)); } return a; }
     if(faceSet==='ghost'){ for(i=0;i<N;i++)a.push(i===N-1?GHOST_FACE:String(i+1)); return a; }   // the Ghost Die: its 6 face is the no-ghost logo
+    if(faceSet==='dnd20'){ for(i=0;i<N;i++)a.push(i===N-1?AMP_FACE:String(i+1)); return a; }   // D&D d20: the 20 face is the ampersand
     if(faceSet==='marvel'){ a.push('M'); for(i=1;i<N;i++)a.push(String(i+1)); return a; }   // the Marvel die: the 1 face is the M (Fantastic)
     for(i=0;i<N;i++)a.push(String(i+1)); return a; }
   // Face numbers: an ink layer (the digit, transparent elsewhere) and a bump
@@ -509,6 +521,7 @@
   // number sits IN the face and its rim catches the light — engraved and
   // inked, the way real dice are made, not a sticker.
   function drawDigit(g,s,text){ var px=text.length>1?70:92, fi=fontInfo();
+    if(text===AMP_FACE){ var af=wordFit(AMP_FONT,'&',s/2,s/2,s*0.72,s*0.82); g.font='400 '+af.px+'px '+AMP_FONT; g.textAlign='left'; g.textBaseline='alphabetic'; g.fillText('&',af.x,af.y); return; }
     if(text===MARVEL_FACE){ var mf=wordFit(MARVEL_FONT,MARVEL_WORD,s/2,s/2,s*0.9,s*0.42); g.font='400 '+mf.px+'px '+MARVEL_FONT; g.textAlign='left'; g.textBaseline='alphabetic'; g.fillText(MARVEL_WORD,mf.x,mf.y); return; }
     if(text===GHOST_FACE){ var gf=ghostFit(s/2,s/2,s*0.8); g.font='400 '+gf.px+'px '+GHOST_FONT; g.textAlign='left'; g.textBaseline='alphabetic'; g.fillText('O',gf.x,gf.y); return; }
     if(fi.themed){ var tm=themedMetrics(fi,px,text); g.font=tm.font; g.textAlign='center'; g.textBaseline='alphabetic'; g.fillText(text,s/2,s/2+tm.off); }
@@ -853,16 +866,17 @@
   // it right after when this roll IS inline).
   function clearInline(){ try{ var els=document.querySelectorAll('[data-da-inline]'); for(var i=0;i<els.length;i++) els[i].innerHTML=''; }catch(e){} }
   function play(dice, crit){ if(!S.on || !dice || !dice.length) return; ensureOverlay();
-    var hasGhost=false, hasMarvel=false;
+    var hasGhost=false, hasMarvel=false, hasAmp=false, isDnd=(sysKey()==='DND');
     var rd=dice.map(function(d){ var gh=d.faceSet==='ghost'; if(gh) hasGhost=true; if(d.faceSet==='marvel') hasMarvel=true;
       var disp=(d.display!=null?d.display:d.val); if(gh && String(disp)===String(d.sides||6)) disp=GHOST_FACE;
-      return { sides:d.sides, display:disp, faceSet:d.faceSet||null, wave:d.wave||0,
+      var fs=d.faceSet||null; if(isDnd && d.sides===20 && !fs){ fs='dnd20'; hasAmp=true; if(String(disp)==='20') disp=AMP_FACE; }
+      return { sides:d.sides, display:disp, faceSet:fs, wave:d.wave||0,
         color:(d.color!=null?d.color:(gh?GHOST_COLOR:resolveColor())), numColor:(d.numColor!=null?d.numColor:(gh?GHOST_NUM:null)) }; });
     if(S.sound!==false) playAudio(rd.length);
     clearInline();
-    (hasGhost?ghostReady:function(f){f();})(function(){ (hasMarvel?marvelReady:function(f){f();})(function(){ fontReady(function(){
+    (hasGhost?ghostReady:function(f){f();})(function(){ (hasMarvel?marvelReady:function(f){f();})(function(){ (hasAmp?ampReady:function(f){f();})(function(){ fontReady(function(){
     if(S.mode==='3d' && HAS_WEBGL){ if(threeState===2){ play3D(rd,crit); } else { play2D(rd,crit); if(threeState!==3) loadThree(function(ok){}); } }
-    else { play2D(rd,crit); } }); }); }); }
+    else { play2D(rd,crit); } }); }); }); }); }
   // warm up three.js if 3D is the active mode
   if(S.on && S.mode==='3d' && HAS_WEBGL) setTimeout(function(){ loadThree(function(){}); }, 400);
 

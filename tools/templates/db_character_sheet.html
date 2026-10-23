@@ -235,6 +235,8 @@ body.sheet-unlocked .sk-lvl{display:none;}
 .pool-pip:hover{transform:scale(1.12);}
 .vbig .cur{min-width:1.2em;text-align:right;}
 .vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;grid-column:1 / -1;}
+#derived{grid-template-columns:repeat(4,1fr);}
+@media (max-width:500px){ #derived .dv{padding:5px 3px;} #derived .dl{letter-spacing:.02em;} }
 .vmax{font-family:var(--f-num);font-size:20px;font-weight:600;letter-spacing:0;color:var(--acc-dk);line-height:1;}
 .dv{border:1px solid var(--rule);border-radius:9px;padding:5px 6px;background:var(--box);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:1px;min-width:0;}
 .dv .dl{font-family:var(--f-label);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);line-height:1.15;}
@@ -1008,7 +1010,13 @@ function renderStatus(){
   $('dead-banner').classList.toggle('on',!!S.death.dead);
   // Movement, carrying capacity and the two damage bonuses — computed, never entered
   var sb=dmgBonus(attr('STR')), ab=dmgBonus(attr('AGL'));
-  setHTML($('derived'),'<div class="dv" title="Kin '+((kinDef()||{}).movement||10)+' + AGL '+attr('AGL')+'"><span class="dl">Movement</span><span class="dval">'+movement()+'</span></div>'+
+  // Armor: the same rating takeDamage() soaks (worn armor + worn helmet)
+  var wa=wornArmor(), wh=wornHelmet(), ar=armorRating(), at=[];
+  if(wa) at.push(wa.name+' '+wa.rating); if(wh) at.push(wh.name+' '+wh.rating);
+  var atip=at.length?at.join(' + '):'No armor or helmet worn';
+  if(S.opts.damageTypes&&wa&&wa.bonusVs) Object.keys(wa.bonusVs).forEach(function(t){ atip+=' · +'+wa.bonusVs[t]+' vs '+t; });
+  morphHTML($('derived'),'<div class="dv" id="dv-armor" title="'+esc(atip)+'"><span class="dl">Armor</span><span class="dval">'+(ar||'—')+'</span></div>'+
+    '<div class="dv" title="Kin '+((kinDef()||{}).movement||10)+' + AGL '+attr('AGL')+'"><span class="dl">Movement</span><span class="dval">'+movement()+'</span></div>'+
     '<div class="dv" title="STR '+attr('STR')+'"><span class="dl">Damage Bonus STR</span><span class="dval">'+(sb?'+'+sb:'—')+'</span></div>'+
     '<div class="dv" title="AGL '+attr('AGL')+'"><span class="dl">Damage Bonus AGL</span><span class="dval">'+(ab?'+'+ab:'—')+'</span></div>');
   var ij=''; S.injuries.forEach(function(x,i){ ij+='<button type="button" class="inj-badge" onclick="showInjury('+i+')" title="Details">'+esc(x.name)+'</button>'; });
@@ -1602,9 +1610,9 @@ function renderTurn(){
   h+='<span class="db-pip'+(t.action||t.done?' used':'')+'" title="One action per turn">Action</span><span class="db-pip extra'+(t.extra>0?'':' off')+'" title="'+(t.dual?'Dual Wield: one extra attack with your other one-handed weapon, at a bane':'Critical hit: one free extra attack against another enemy')+'">+'+Math.max(1,num(t.extra))+' attack</span>';
   h+='</div>';
   h+=tbtn('⟳ End Turn','endTurn()','end','Start a new turn — your action and reaction come back');
-  // Status badges: always one line (it scrolls sideways when full), led by your movement, so a
-  // badge coming or going never changes the height above the cards.
-  h+='</div><div class="db-badges"><span class="db-badge">Move '+movement()+' m</span>';
+  // Status badges: always one line (it scrolls sideways when full) with a fixed height, even when
+  // empty, so a badge coming or going never changes the height above the cards.
+  h+='</div><div class="db-badges">';
   CONDS.forEach(function(c){ if(S.cond[c]) h+='<span class="db-badge warn" title="Bane on '+COND_ATTR[c]+' rolls">'+c+'</span>'; });
   if(S.death.dead) h+='<span class="db-badge warn">Dead</span>'; else if(S.hp<=0) h+='<span class="db-badge warn">0 HP — '+(S.death.rallied?'rallied, still making death rolls':'death roll on your turn')+'</span>';
   if(S.berserk) h+='<span class="db-badge warn">Berserk</span>'; if(overEnc()) h+='<span class="db-badge warn">Over-encumbered</span>';
@@ -2128,9 +2136,9 @@ body.dark .db-top{background:#1c1c21;}
 .db-do.ghost{background:transparent;color:var(--acc-dk);border:1px solid var(--acc);}
 .db-do.end{margin-left:auto;padding:8px 16px;font-size:14px;}
 .db-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px;}
-.db-badges{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:0 12px 8px;}
+.db-badges{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:0 12px 8px;box-sizing:content-box;height:20px;min-height:20px;}
 .db-badges::-webkit-scrollbar{display:none;}
-.db-badge{flex:0 0 auto;white-space:nowrap;font-family:var(--f-label);font-size:12px;letter-spacing:.03em;border:1px solid var(--rule);color:var(--muted);border-radius:12px;padding:1px 9px;}
+.db-badge{flex:0 0 auto;box-sizing:border-box;height:20px;line-height:18px;white-space:nowrap;font-family:var(--f-label);font-size:12px;letter-spacing:.03em;border:1px solid var(--rule);color:var(--muted);border-radius:12px;padding:1px 9px;}
 .db-badge.warn{border-color:var(--red);color:var(--red);background:rgba(179,38,30,.1);}
 .db-sec{border-bottom:1px solid var(--rule);}
 .db-sec-hd{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;user-select:none;}
