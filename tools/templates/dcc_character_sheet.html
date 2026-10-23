@@ -249,6 +249,7 @@ body.dark .atk-formula input[readonly]{color:#8fc4ec;}
 .skill-check{width:18px;height:18px;cursor:pointer;accent-color:var(--red);}
 .skill-roll-btn{height:24px;min-width:32px;padding:0 7px;background:transparent;border:1px solid var(--red);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--red);white-space:nowrap;}
 .skill-roll-btn:hover{background:var(--red);border-color:var(--red);color:white;}
+.skill-roll-btn.no-mana,.skill-roll-btn.no-mana:hover{opacity:.35;cursor:not-allowed;background:transparent;color:var(--red);}
 .hot-pin{background:transparent;border:none;cursor:pointer;font-size:15px;line-height:1;color:var(--muted);padding:0 3px;vertical-align:middle;}
 .hot-pin:hover{color:var(--red);}
 .hot-pin.on{color:var(--red);}
@@ -1747,7 +1748,31 @@ function refreshSkillRowRules() {
     chk.style.visibility = fixed ? 'hidden' : '';
     if(fixed && chk.checked) chk.checked = false;
   });
+  refreshSpellManaState();
 }
+// A spell skill can't be rolled without the Mana to cast it: its Roll button is
+// disabled (greyed, with the cost in the tooltip) while current Mana is short.
+function refreshSpellManaState() {
+  const tbody = document.getElementById('skills-body');
+  if(!tbody || typeof spellManaOf !== 'function') return;
+  const cur = parseInt((document.getElementById('mana-current') || {}).value, 10) || 0;
+  tbody.querySelectorAll('tr').forEach(tr => {
+    const btn = tr.querySelector('.skill-roll-btn');
+    if(!btn) return;
+    const cost = spellManaOf(tr);
+    const short = cost > 0 && cur < cost;
+    btn.disabled = short;
+    btn.classList.toggle('no-mana', short);
+    btn.title = short ? 'Not enough Mana — costs ' + cost + ', you have ' + cur : 'Roll skill';
+  });
+}
+(function () {
+  let q = 0;
+  const later = () => { if(q) return; q = requestAnimationFrame(() => { q = 0; refreshSpellManaState(); }); };
+  ['input', 'change', 'click'].forEach(ev => document.addEventListener(ev, later, true));
+  document.addEventListener('DOMContentLoaded', later);
+  window.addEventListener('load', later);
+})();
 // Float any Heal row to the very top. Called on load / after adds — NOT on every
 // keystroke, which would yank a row the player is mid-typing.
 function floatHealToTop() {
