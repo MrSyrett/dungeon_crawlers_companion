@@ -1,7 +1,7 @@
 // Dragonbane advancement (window.DBADV) — there are no levels or experience points.
 // End of session: answer the book's questions (one advancement mark each; giving
 // in to your weakness is one more, overcoming it two), place the marks on skills,
-// then roll a D20 for every marked skill — a result above the current level raises
+// (or extra ones the GM grants), then roll a D20 for every marked skill — a result above the current level raises
 // it by one (to 18). Marks are erased. A skill reaching 18 grants a heroic ability
 // of your choice (requirement checked). Also: an extra roll from a teacher, a rare
 // GM-reward heroic ability, and learning spells, tricks or a new school.
@@ -19,20 +19,21 @@
   function skills() { return A(window.DB_SKILLS).filter(function (s) { return s.type !== 'secondary' || SH().knownSchools().indexOf(s.name) >= 0; }); }
   function marked() { var st = S(); return skills().filter(function (s) { return st.skills[s.name] && st.skills[s.name].mark; }).map(function (s) { return s.name; }); }
   function setMark(n, on) { var st = S(); (st.skills[n] = st.skills[n] || {}).mark = !!on; }
-  function earned() { var n = 0; V.q.forEach(function (on, i) { if (on && i < 4) n++; }); if (V.weak === 'gave') n += 1; if (V.weak === 'overcame') n += 2; return n; }
+  function earned() { var n = 0; V.q.forEach(function (on, i) { if (on && i < 4) n++; }); if (V.weak === 'gave') n += 1; if (V.weak === 'overcame') n += 2; return n + (V.extra || 0); }
   function show(title, body, ft) { $('advance-title').textContent = title; $('advance-body').innerHTML = body; $('advance-ft').innerHTML = ft || '<button class="m-btn ghost" onclick="DBADV.close()">Close</button>'; $('advance-overlay').classList.add('open'); }
   function tabs(active) { return '<div class="m-row" style="margin-bottom:12px;">' + [['session', 'End of Session'], ['teacher', 'Teacher'], ['magic', 'Learn Magic'], ['reward', 'GM Reward']].map(function (t) { return '<button class="chip' + (active === t[0] ? ' sel' : '') + '" onclick="DBADV.tab(\'' + t[0] + '\')">' + t[1] + '</button>'; }).join('') + '</div>'; }
 
   function renderSession() {
     var qs = A((window.DB_ADVANCEMENT || {}).sessionQuestions); var st = S();
-    var h = tabs('session') + '<p class="m-hint">Answer for this session. Each “yes” is an advancement mark to place on a skill you haven\'t marked yet. Skills you rolled a Dragon or Demon on are already marked.</p>';
+    var h = tabs('session') + '<p class="m-hint">Answer for this session. Each “yes” is an advancement mark to place on a skill you haven\'t marked yet. Skills you rolled a Dragon or Demon on are already marked (✓ on the sheet) — click one here to take back a mark that shouldn\'t count. The sheet has no mark boxes: every manual mark is placed here.</p>';
     qs.slice(0, 4).forEach(function (q, i) { h += '<label class="m-check"><input type="checkbox" ' + (V.q[i] ? 'checked' : '') + ' onchange="DBADV.q(' + i + ',this.checked)"><span>' + esc(q) + '</span></label>'; });
     h += '<div class="m-lbl">Weakness' + (st.weakness ? ' — ' + esc(st.weakness) : ' (none)') + '</div><div class="m-row">' +
       [['none', 'Neither'], ['gave', 'Gave in to it (+1 mark)'], ['overcame', 'Clearly overcame it (+2 marks, weakness removed)']].map(function (o) { return '<button class="chip' + (V.weak === o[0] ? ' sel' : '') + '"' + (!st.weakness && o[0] !== 'none' ? ' disabled' : '') + ' onclick="DBADV.weak(\'' + o[0] + '\')">' + o[1] + '</button>'; }).join('') + '</div>';
+    h += '<div class="m-lbl">Other marks — granted by the GM</div><div class="m-row" style="align-items:center;"><button class="chip" onclick="DBADV.extra(-1)"' + (V.extra > 0 ? '' : ' disabled') + '>−</button><b style="min-width:22px;text-align:center;">' + V.extra + '</b><button class="chip" onclick="DBADV.extra(1)">+</button></div>';
     var left = earned() - V.placed.length;
     h += '<div class="m-lbl">Place marks — ' + earned() + ' earned, <b style="color:#f3dca8;">' + Math.max(0, left) + '</b> left</div><div class="m-row">';
     skills().forEach(function (s) { var pre = st.skills[s.name] && st.skills[s.name].mark && V.placed.indexOf(s.name) < 0; var on = V.placed.indexOf(s.name) >= 0;
-      h += '<button class="chip' + (on || pre ? ' sel' : '') + '"' + (pre ? ' disabled title="Already marked"' : (!on && left <= 0 ? ' disabled' : '')) + ' onclick="DBADV.place(\'' + jsq(s.name) + '\')">' + esc(s.name) + ' <small>' + SH().skillLevel(s.name) + '</small>' + (pre ? ' ✓' : '') + '</button>'; });
+      h += '<button class="chip' + (on || pre ? ' sel' : '') + '"' + (pre ? ' title="Marked by a Dragon or Demon — click to remove the mark"' : (!on && left <= 0 ? ' disabled' : '')) + ' onclick="DBADV.' + (pre ? 'unmark' : 'place') + '(\'' + jsq(s.name) + '\')">' + esc(s.name) + ' <small>' + SH().skillLevel(s.name) + '</small>' + (pre ? ' ✓' : '') + '</button>'; });
     h += '</div>';
     var m = marked().length;
     show('Advancement', h, '<button class="m-btn ghost" onclick="DBADV.close()">Close</button><button class="m-btn" onclick="DBADV.rollAll()"' + (m ? '' : ' disabled') + '>Roll for ' + m + ' marked skill' + (m === 1 ? '' : 's') + '</button>');
@@ -44,7 +45,7 @@
       st.skills[n].mark = false; res.push({ n: n, lv: lv, r: r, up: up });
       SH().addLog('Advance · ' + n, up ? (lv + ' → ' + (lv + 1)) : 'No change', 'd20(' + r + ') vs ' + lv + (up ? ' · higher: +1' : ''), up && lv + 1 === 18 ? 'crit' : 'normal'); });
     if (V.weak === 'overcame') { SH().addLog('Weakness overcome', '✓', st.weakness + ' — play a full session without one, then you may pick a new one'); st.weakness = ''; }
-    V.q = [false, false, false, false]; V.weak = 'none'; V.placed = []; SH().changed();
+    V.q = [false, false, false, false]; V.weak = 'none'; V.placed = []; V.extra = 0; SH().changed();
     var h = '<div class="res-box">' + res.map(function (x) { return '<b>' + esc(x.n) + '</b>: rolled ' + x.r + ' vs ' + x.lv + ' — ' + (x.up ? '<b style="color:#9fdcae;">' + x.lv + ' → ' + (x.lv + 1) + '</b>' : 'no change'); }).join('<br>') + '</div><p class="m-hint" style="margin-top:8px;">All advancement marks are erased.</p>';
     V.pending18 = hit18.length;
     if (hit18.length) h += '<div class="res-box" style="border-color:#c9a14a;"><b>' + esc(hit18.join(', ')) + ' reached 18!</b> Choose a heroic ability.</div>';
@@ -94,11 +95,13 @@
     if (r.ok) { st.skills[s] = { trained: true, lvl: SH().baseChance(st.attrs.INT) }; SH().addLog('New school', s, 'Level ' + SH().baseChance(st.attrs.INT) + ' (INT base chance)', 'crit'); SH().changed(); renderMagic(); }
     else SH().addLog('New school', 'Not yet', 'Study another week and try again'); } }); }
   var api = {
-    open: function () { if (!SH()) return; V = { q: [false, false, false, false], weak: 'none', placed: [], pending18: 0, tab: 'session' }; renderSession(); },
+    open: function () { if (!SH()) return; V = { q: [false, false, false, false], weak: 'none', placed: [], extra: 0, pending18: 0, tab: 'session' }; renderSession(); },
     close: function () { $('advance-overlay').classList.remove('open'); },
     tab: function (t) { V.tab = t; if (t === 'session') renderSession(); else if (t === 'teacher') renderTeacher(); else if (t === 'magic') renderMagic(); else pickAbility('gm'); },
     q: function (i, on) { V.q[i] = !!on; trim(); renderSession(); },
     weak: function (w) { V.weak = w; trim(); renderSession(); },
+    extra: function (d) { V.extra = Math.max(0, (V.extra || 0) + d); trim(); renderSession(); },
+    unmark: function (n) { setMark(n, false); SH().changed(); renderSession(); },
     place: function (n) { var i = V.placed.indexOf(n); if (i >= 0) { V.placed.splice(i, 1); setMark(n, false); } else if (V.placed.length < earned()) { V.placed.push(n); setMark(n, true); } SH().changed(); renderSession(); },
     rollAll: rollAll, pickAbility: pickAbility, takeAbility: takeAbility, teach: teach, learn: learn, trick: trick, school: school
   };

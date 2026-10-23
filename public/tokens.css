@@ -1366,18 +1366,18 @@ body {
   background-size: cover;
 }
 
-/* --- Dragonbane (green and gold on green-black parchment) ----------------- */
+/* --- Dragonbane (green and gold, neutral panels on dark green parchment) ----------------- */
 :root[data-themed][data-system="DB"] {
   --sub-color: #e3d2ad;
   --section-hdr-dark: var(--db-gold);
   --sys-display: "Hideout", "EB Garamond", ui-serif, Georgia, serif;
   --sys-text: "EB Garamond", ui-serif, Georgia, serif;
   --sys-label: "Minion Pro", "EB Garamond", ui-serif, Georgia, serif;
-  /* Green-tinted near-black to sit on the green parchment. --ui-text 12.4:1,
-     --ui-muted 6.6:1, --ui-accent 6.6:1 on --ui-panel. */
-  --ui-bg: #161b19;
-  --ui-panel: #1d2421;
-  --ui-border: #34403a;
+  /* Neutral near-black panels (the D&D greys) on the dark green parchment;
+     only the page ground is green. --ui-text 12.6:1, --ui-muted 6.7:1 on --ui-panel. */
+  --ui-bg: #1a1918;
+  --ui-panel: #232120;
+  --ui-border: #3f3a35;
   --ui-text: #eee3cc;
   --ui-muted: #b5a68c;
   --ui-accent: var(--db-ink);
@@ -1386,11 +1386,11 @@ body {
 }
 :root[data-themed][data-system="DB"] body,
 :root[data-themed][data-system="DB"] .preview-area {
-  background-color: #0d110f;
+  background-color: #0f0e0d;
   background-image:
-    radial-gradient(130% 98% at 50% 42%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.66) 100%),
+    radial-gradient(130% 98% at 50% 42%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.32) 100%),
     radial-gradient(70% 46% at 50% 0%, rgba(35, 104, 85, 0.1) 0%, rgba(35, 104, 85, 0) 70%),
-    url("/themes/db-parchment.webp");
+    url("/themes/db-parchment.webp?v=2026-10-22b");
   background-attachment: fixed;
   background-position: center;
   background-repeat: no-repeat;

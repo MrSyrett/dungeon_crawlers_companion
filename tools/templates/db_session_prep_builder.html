@@ -71,7 +71,7 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
     --accent-red: #236855; --accent-red-dark: #1e5842;
     --muted: #6e5b45; --rule: #d3bf96; --box-bg: #e9dab7; --read-bg: #2a1d14;
     --read-text: #f3e7cc; --highlight: #c9a14a; --green: #4f6a2f; --blue-npc: #2f4f6f;
-    --section-hdr: #1e5842; --table-hdr: #1e5842; --preview-bg: #0d110f;
+    --section-hdr: #1e5842; --table-hdr: #1e5842; --preview-bg: #0f0e0d;
     --gold: #c9a14a; --gold-lift: #e3c27a; --db: #236855; --db-ink: #5cb894;
     /* The logo red: every Hideout title is lettered in it inside a --gold stroke. */
     --db-logo: #e42a32;
@@ -80,8 +80,8 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
     --font-body: "EB Garamond", Georgia, serif;
     /* Masthead banner — green-black into the book's green, with the title as the logo (red, gold outline) */
     --banner-a: #0b1f18; --banner-b: #236855; --title-color: #e42a32; --title-weight: 400; --sub-color: #e3d2ad;
-    /* UI (sidebar) — green-tinted near-black */
-    --ui-bg: #161b19; --ui-panel: #1d2421; --ui-border: #34403a;
+    /* UI (sidebar) — neutral near-black (only the preview ground is green parchment) */
+    --ui-bg: #1a1918; --ui-panel: #232120; --ui-border: #3f3a35;
     --ui-text: #eee3cc; --ui-muted: #b5a68c; --ui-accent: #5cb894; --ui-highlight: #236855;
   }
   body { font-family: 'Barlow', sans-serif; background: var(--ui-bg); color: var(--ui-text); display: flex; height: 100vh; overflow: hidden; }
@@ -681,7 +681,7 @@ body.flow-mode .page + .page {
 .page.dark-mode .sl, .page.dark-mode .sb-name { color: var(--db-logo); -webkit-text-stroke: var(--db-stroke, .11em) var(--gold); paint-order: stroke fill; }
 .adventure-title { --db-stroke: .09em; }
 .sb-type, .entry-meta, .loc-tag { color: var(--accent-dark); }
-.read-aloud, .sb-flavor { background: linear-gradient(180deg, #17302a, #10221d); border-left: 4px solid var(--db); }
+.read-aloud, .sb-flavor { background: linear-gradient(180deg, #262422, #1b1a19); border-left: 4px solid var(--db); }
 .read-aloud p, .sb-flavor { color: #f3e7cc; font-size: 10px; }
 .stat-block { background: #eadbb8; border-top-color: var(--db); }
 .sb-table th { background: var(--table-hdr); color: #f3e2bd; font-family: var(--font-label); font-weight: 400; letter-spacing: .04em; }
@@ -715,15 +715,15 @@ body.flow-mode .page + .page {
 .db-tbl td { font-size: 9.6px !important; }
 .db-dmg { font-family: var(--font-display); font-size: 9px; color: #fff; background: var(--db); border-radius: 3px; padding: 0 4px; }
 .db-src { color: var(--muted); font-size: 9px; }
-/* Dark page: green-tinted near-black, cream text */
-.page.dark-mode { background: radial-gradient(120% 90% at 50% 40%, #1e2522 0%, #161b19 70%, #0f1311 100%); }
+/* Dark page: neutral near-black, cream text */
+.page.dark-mode { background: radial-gradient(120% 90% at 50% 40%, #222120 0%, #1a1918 70%, #121110 100%); }
 .page.dark-mode .p-text, .page.dark-mode .loc-desc, .page.dark-mode .entry-desc, .page.dark-mode .sb-ability, .page.dark-mode .columns { color: #e9dcc0; }
 .page.dark-mode .entry-name { color: #f0d9a8; }
-.page.dark-mode .stat-block, .page.dark-mode .npc-block, .page.dark-mode .mob-block { background: #212926; }
-.page.dark-mode .sb-table td { background: #1a201e; color: #e9dcc0; }
-.page.dark-mode .clue-item { background: #212926; color: #e9dcc0; }
-.page.dark-mode .db-box { background: rgba(8,12,10,.55); border-color: #34403a; }
-.page.dark-mode .db-badge { background: #212926; color: #eee3cc; border-color: #4a5a52; }
+.page.dark-mode .stat-block, .page.dark-mode .npc-block, .page.dark-mode .mob-block { background: #262422; }
+.page.dark-mode .sb-table td { background: #1e1c1a; color: #e9dcc0; }
+.page.dark-mode .clue-item { background: #262422; color: #e9dcc0; }
+.page.dark-mode .db-box { background: rgba(10,10,9,.55); border-color: #3f3a35; }
+.page.dark-mode .db-badge { background: #262422; color: #eee3cc; border-color: #5a5248; }
 .page.dark-mode .db-badge > span, .page.dark-mode .db-route, .page.dark-mode .sb-ability.sb-matk strong { color: var(--gold-lift); }
 .page.dark-mode .db-badge.gold { background: #3a2e15; border-color: var(--gold); }
 .page.dark-mode .db-note { color: #e2a27a; } .page.dark-mode .db-note.dim, .page.dark-mode .db-src { color: #b5a68c; }

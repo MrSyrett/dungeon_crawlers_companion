@@ -1439,8 +1439,9 @@ body {
 /* --- Dragonbane: green and gold on dark parchment --------------------------
    Hideout letters the titles as the logo does — red inside a gold outline; Minion Pro takes the labels in old
    gold; EB Garamond carries the reading. The ground is an original aged-parchment
-   texture taken down to near-black with a dark green tint for dark mode
-   (public/themes/db-parchment.webp), under a faint green glow from above.
+   texture recoloured to a deep forest green for dark mode
+   (public/themes/db-parchment.webp), under a faint green glow from above and a
+   light edge scrim; panels and cards sit on it in neutral near-black greys.
    Green (the book's banners and boxes) is the accent, gold the second colour;
    the red belongs to the Hideout wordmark alone. */
 :root[data-system="DB"]:not([data-chrome]) body {
@@ -1449,22 +1450,22 @@ body {
   --sys-link: var(--db-ink);
   --sys-hilite: var(--db);
   --sys-action: var(--db);
-  /* Green-tinted near-black to sit on the green parchment. Text contrast on
-     --panel-2: --text 12.4:1, --muted 6.6:1, --db-ink 6.6:1, --db-gold 6.5:1. */
-  --panel: #161b19;
-  --panel-2: #1d2421;
-  --border: #34403a;
+  /* Neutral near-black panels (the D&D greys); only the page ground is green.
+     Text contrast on --panel-2: --text 12.6:1, --muted 6.7:1, --db-ink 6.7:1. */
+  --panel: #1a1918;
+  --panel-2: #232120;
+  --border: #3f3a35;
   --text: #eee3cc;
   --muted: #b5a68c;
   --gold: var(--db-gold);
   --sys-display: "Hideout";
   --sys-text: var(--font-garamond);
   --sys-label: "Minion Pro";
-  background-color: #0d110f;
+  background-color: #0f0e0d;
   background-image:
-    radial-gradient(130% 98% at 50% 42%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.66) 100%),
+    radial-gradient(130% 98% at 50% 42%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.32) 100%),
     radial-gradient(70% 46% at 50% 0%, rgba(35, 104, 85, 0.1) 0%, rgba(35, 104, 85, 0) 70%),
-    url("/themes/db-parchment.webp");
+    url("/themes/db-parchment.webp?v=2026-10-22b");
   background-attachment: fixed;
   background-position: center;
   background-repeat: no-repeat;
@@ -1906,7 +1907,7 @@ body {
 [data-sys="MYZ"],   .home-tile[data-sys="MYZ"]   { --tile-accent: var(--myz);         --tile-sub: var(--myz-steel);   --tile-namefont: var(--font-anton);      --tile-face: var(--font-anton); --tile-bg: #100c0a; --tile-tex: url("/themes/myz-metal.webp"); --tile-scrim: 0.18; }
 [data-sys="VAE"],   .home-tile[data-sys="VAE"]   { --tile-accent: var(--vae);         --tile-sub: var(--vae-bone);    --tile-namefont: var(--font-fraunces);   --tile-face: var(--font-fraunces); --tile-bg: #0c0a07; --tile-tex: url("/themes/vae-paper.webp"); --tile-scrim: 0.16; }
 [data-sys="LOTR"],  .home-tile[data-sys="LOTR"]  { --tile-accent: var(--lotr-ink);    --tile-sub: #b9cfa6;            --tile-namefont: var(--font-garamond);   --tile-face: "Ringbearer", var(--font-garamond); --tile-bg: #07120c; --tile-tex: url("/themes/lotr-mist.webp"); --tile-zoom: 1.4; --tile-scrim: 0.12; }
-[data-sys="DB"],    .home-tile[data-sys="DB"]    { --tile-accent: var(--db-ink);      --tile-ink: var(--db-logo);     --tile-sub: var(--db-gold);     --tile-namefont: var(--font-garamond);   --tile-face: "Hideout", var(--font-garamond); --tile-bg: #0d110f; --tile-tex: url("/themes/db-parchment.webp"); --tile-zoom: 1.2; --tile-scrim: 0.14; }
+[data-sys="DB"],    .home-tile[data-sys="DB"]    { --tile-accent: var(--db-ink);      --tile-ink: var(--db-logo);     --tile-sub: var(--db-gold);     --tile-namefont: var(--font-garamond);   --tile-face: "Hideout", var(--font-garamond); --tile-bg: #0f0e0d; --tile-tex: url("/themes/db-parchment.webp?v=2026-10-22b"); --tile-zoom: 1.2; --tile-scrim: 0.14; }
 [data-sys="PB"],    .home-tile[data-sys="PB"]    { --tile-accent: var(--pb-ink);      --tile-ink: #ffffff;            --tile-sub: var(--pb-bone);     --tile-namefont: var(--font-garamond);   --tile-face: "JSL Blackletter", var(--font-garamond); --tile-bg: #0a0808; --tile-tex: url("/themes/pb-splatter.webp"); --tile-zoom: 1.15; --tile-scrim: 0.2; }
 
 /* Dragonbane's wordmark everywhere it is lettered on its own — the game tile,

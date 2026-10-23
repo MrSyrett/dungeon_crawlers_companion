@@ -23,7 +23,7 @@
    levels, and session-end advancement instead of levels.
    Data: /tools-data/db-data.js (window.DB_*). Builder: db-sheet-builder.js (window.DBB);
    advancement: db-advance.js (window.DBADV); homebrew loader: db-homebrew.js (window.DBHB).
-   Palette: neutral greys in light mode, green-tinted near-blacks in dark, with the core
+   Palette: neutral greys (the D&D sheet's panel greys) in light and dark, with the core
    book's green (#236855) as the accent and its gold (#c9a14a) second; red is the logo's
    alone, plus the semantic reds (banes, Demon rolls, death, warnings); dark is the default, the theme follows the account page (db_dark, seeded by
    the injected head — no toggle on the sheet).
@@ -41,13 +41,13 @@
   /* The "Dragonbane" wordmark: the logo's red fill (--db-logo) with a gold stroke. paint-order
      puts the stroke behind the fill, so only half its width shows — thin at small sizes. */
   --hd-fill:#e42a32;--hd-stroke:#c9a14a;
-  --log-bg:#101412;--log-text:#e9e7e3;--log-card:#1a211e;--log-line:#2f3a35;--log-muted:#a09d96;
+  --log-bg:#131316;--log-text:#e9e7e3;--log-card:#1f1f24;--log-line:#3a3a41;--log-muted:#a09d96;
 }
 body.dark{
-  --bg:#111614;--paper:#101412;--card:#1b2220;--box:#212926;--ink:#e9e7e3;--muted:#a09d94;--rule:#34403a;
+  --bg:#141417;--paper:#121215;--card:#22222a;--box:#28282e;--ink:#e9e7e3;--muted:#9b988f;--rule:#3a3a41;
   --acc:#236855;--acc-dk:#5cb894;--acc-lt:#1f3a30;--on-acc:#eef6f1;--gold:#c9a14a;--gold-lt:#e2c37a;
   --green:#5fae76;--red:#e0614f;--blue:#7fa8de;
-  --border:#34403a;--input-bg:#141917;--input-border:#34403a;
+  --border:#3a3a41;--input-bg:#171719;--input-border:#3a3a41;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:var(--f-ui);font-variant-numeric:lining-nums;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;}
@@ -67,7 +67,7 @@ input,select,textarea,button{font-family:var(--f-ui);font-variant-numeric:lining
 #log-collapse-btn::after{content:"\25C0";}
 .roll-log.collapsed #log-collapse-btn{right:0;}
 .roll-log.collapsed #log-collapse-btn::after{content:"\25B6";}
-.log-header{padding:12px 14px 10px;background:#161d1a;border-bottom:2px solid var(--acc);display:flex;justify-content:space-between;align-items:center;}
+.log-header{padding:12px 14px 10px;background:#1b1b1f;border-bottom:2px solid var(--acc);display:flex;justify-content:space-between;align-items:center;}
 .log-title{font-family:var(--f-disp);font-weight:400;font-size:19px;letter-spacing:.06em;color:#5cb894;}
 .log-clear{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.4);color:#fff;font-family:var(--f-label);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;cursor:pointer;border-radius:6px;}
 .log-clear:hover{background:rgba(255,255,255,.32);}
@@ -80,7 +80,7 @@ input,select,textarea,button{font-family:var(--f-ui);font-variant-numeric:lining
 .log-push:hover{filter:brightness(1.15);}
 .log-entry.crit{border-color:#d9a84a;}.log-entry.crit .roll-result{color:#f0c56a;}
 .log-entry.fumble{border-color:#e0614f;}.log-entry.fumble .roll-result{color:#ff7d6a;}
-.log-entry.remote{border-left:3px solid #c9a14a;background:#161d1a;}
+.log-entry.remote{border-left:3px solid #c9a14a;background:#1b1b1f;}
 /* the GM's initiative deal: a row per combatant, cards as chips (your own row highlighted) */
 .dbdeal{display:grid;grid-template-columns:max-content 1fr;gap:3px 8px;margin-top:5px;align-items:center;}
 .dbd-row{display:contents;}
@@ -93,7 +93,7 @@ input,select,textarea,button{font-family:var(--f-ui);font-variant-numeric:lining
 .dbd-row.me .dbd-name{color:#f0c56a;}
 .dbd-note{display:block;font-size:10.5px;color:var(--log-muted);}
 .dbd-foot{grid-column:1/-1;font-size:10.5px;color:var(--log-muted);margin-top:2px;}
-.log-hint{color:#6f7d76;font-size:12px;font-family:var(--f-label);text-align:center;padding:20px 10px;letter-spacing:.04em;}
+.log-hint{color:#7a766f;font-size:12px;font-family:var(--f-label);text-align:center;padding:20px 10px;letter-spacing:.04em;}
 .log-actions{display:flex;flex-wrap:nowrap;gap:4px;padding:8px 10px;border-bottom:1px solid #2c2c32;}
 .log-action-btn{flex:1 1 0;min-width:0;padding:5px 2px;border:none;cursor:pointer;font-family:var(--f-label);font-size:12px;letter-spacing:.02em;text-transform:uppercase;border-radius:6px;white-space:nowrap;overflow:hidden;text-overflow:clip;}
 .log-action-btn.campaign{flex:0 0 auto;padding:5px 7px;background:transparent;color:#a09d96;border:1px solid #3a3a41;}
@@ -119,7 +119,7 @@ input,select,textarea,button{font-family:var(--f-ui);font-variant-numeric:lining
 .lb-actions{margin-top:6px;}
 
 /* dice tray */
-.dice-tray{border-top:1px solid #26302c;padding:10px;display:flex;flex-direction:column;gap:7px;background:#0c100e;}
+.dice-tray{border-top:1px solid #2c2c32;padding:10px;display:flex;flex-direction:column;gap:7px;background:#0e0e11;}
 .tray-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
 .tray-label{font-family:var(--f-label);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#a09d96;flex-shrink:0;}
 .bb-ctl{display:inline-flex;align-items:center;border:1px solid #3a3a41;border-radius:7px;overflow:hidden;}
@@ -199,7 +199,9 @@ body.sheet-locked .sk-pip{cursor:default;}
 /* locked: the score is a number you click to roll, not a field */
 body.sheet-locked .sk-lvl{border-color:transparent;background:transparent;cursor:pointer;caret-color:transparent;user-select:none;}
 body.sheet-locked .sk-lvl:hover{border-color:var(--acc);background:var(--acc-lt);}
-.sk-mark{width:16px;height:16px;accent-color:var(--acc);cursor:pointer;margin:0;}
+/* Advancement mark: no checkbox — a small green tick appears on its own when a Dragon or Demon
+   marks the skill; extra marks (session questions, GM) are placed in the Level dialog. */
+.sk-mark{display:block;text-align:center;font-size:13px;font-weight:700;line-height:1;color:var(--green);user-select:none;}
 .sk-bane{font-size:10px;color:var(--red);font-family:var(--f-label);margin-left:4px;font-weight:400;}
 .sk-school-off .sk-name{opacity:.6;}
 
@@ -218,6 +220,9 @@ body.sheet-locked .sk-lvl:hover{border-color:var(--acc);background:var(--acc-lt)
 .pool-pips{--pp:18px;display:grid;grid-template-columns:repeat(10,minmax(0,var(--pp)));gap:4px;margin-top:6px;}
 .pool-pip{width:100%;height:auto;aspect-ratio:1;border:1.5px solid var(--acc);border-radius:50%;background:transparent;cursor:pointer;padding:0;}
 .pool-pip.on{background:var(--acc);box-shadow:inset 0 0 0 2px var(--box);}
+/* HP pips stay red (the sheet's semantic red); WP pips blue. */
+.pool-pips.hp .pool-pip{border-color:#b3261e;}
+.pool-pips.hp .pool-pip.on{background:#b3261e;}
 .pool-pips.wp .pool-pip{border-color:#4a6fb3;}
 .pool-pips.wp .pool-pip.on{background:#4a6fb3;}
 .pool-pip:hover{transform:scale(1.12);}
@@ -250,7 +255,7 @@ body.sheet-locked .sk-lvl:hover{border-color:var(--acc);background:var(--acc-lt)
 
 /* tabs */
 .tabs-bar{display:flex;gap:0;background:var(--box);border-bottom:2px solid var(--acc-lt);flex-wrap:wrap;}
-body.dark .tabs-bar{background:#161d1a;}
+body.dark .tabs-bar{background:#1a1a1f;}
 .tab-btn{flex:1 1 auto;padding:9px 10px;background:transparent;color:var(--muted);border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:var(--f-label);font-size:14px;letter-spacing:.06em;white-space:nowrap;}
 .tab-btn:hover{color:var(--ink);}
 .tab-btn.on{color:var(--acc-dk);border-bottom-color:var(--acc);background:var(--acc-lt);}
@@ -302,7 +307,7 @@ body.dark .prep-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 /* picker / modals */
 .ov{display:none;position:fixed;inset:var(--dd-bar-h,0px) 0 0 0;background:rgba(0,0,0,.75);z-index:1000;align-items:center;justify-content:center;padding:16px;}
 .ov.open{display:flex;}
-.modal{background:#18201c;border:2px solid var(--acc);border-radius:10px;max-width:600px;width:100%;max-height:92vh;display:flex;flex-direction:column;color:#e9e7e3;font-family:var(--f-ui);}
+.modal{background:#1c1c21;border:2px solid var(--acc);border-radius:10px;max-width:600px;width:100%;max-height:92vh;display:flex;flex-direction:column;color:#e9e7e3;font-family:var(--f-ui);}
 .modal.wide{max-width:880px;}
 .modal-hd{background:#121215;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-radius:8px 8px 0 0;}
 .modal-hd .ttl{font-family:var(--f-disp);font-weight:400;font-size:21px;letter-spacing:.03em;line-height:1;color:#5cb894;}
@@ -374,7 +379,7 @@ body.dark .prep-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 .opt-row .opt-note{font-size:13px;color:#a09d96;line-height:1.35;margin-top:2px;}
 .res-box{background:#131316;border:1px solid #3a3a41;border-radius:8px;padding:10px 12px;margin-top:10px;font-size:14px;line-height:1.5;}
 .res-box b{color:#f3dca8;}
-#roll-toast{display:none;position:fixed;bottom:52px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(10,16,13,.95);border:2px solid var(--acc);border-radius:9px;padding:10px 20px;text-align:center;min-width:170px;max-width:84vw;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,.7);}
+#roll-toast{display:none;position:fixed;bottom:52px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(16,16,19,.95);border:2px solid var(--acc);border-radius:9px;padding:10px 20px;text-align:center;min-width:170px;max-width:84vw;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,.7);}
 #roll-toast.show{display:block;}
 #roll-toast.crit{border-color:#d9a84a;}#roll-toast.fumble{border-color:#e0614f;}
 #roll-toast .t-label{font-family:var(--f-label);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#a09d96;margin-bottom:3px;}
@@ -432,7 +437,7 @@ body.dark .prep-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
   .skill-row{grid-template-columns:22px 18px minmax(0,1fr) 26px 46px;padding:3px 4px;}
   .sk-lvl{height:32px;width:46px;font-size:16px;}
   .sk-pip{width:18px;height:18px;}
-  .sk-mark{width:20px;height:20px;}
+  .sk-mark{font-size:15px;}
   .pool-pips{--pp:24px;}
   .m-btn{min-height:44px;}
   .brow-add{min-height:40px;}
@@ -465,6 +470,22 @@ select option{background:var(--input-bg);color:var(--ink);}
 /* dd-no-spin-global — hide number-input spinner arrows everywhere */
 input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none;margin:0;}
+/* Roll log: every piece of chrome, and each entry's label and result, stays on one line.
+   A long label or result ends in an ellipsis; the full text is in its title tooltip
+   (set by the observer in the script below). The detail line underneath may still wrap. */
+.log-header{gap:8px;}
+.log-title{white-space:nowrap;flex-shrink:0;}
+.log-header>div{flex-wrap:nowrap;flex-shrink:0;}
+.log-clear,.log-lock{white-space:nowrap;flex-shrink:0;}
+.log-action-btn{white-space:nowrap;text-overflow:ellipsis;}
+.log-entry .roll-label,.log-entry .roll-result,.fl-name,.lb-name,.fl-head,.sys-head,.lb-head{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.log-entry .roll-result{line-height:1.15;}
+.tray-row{flex-wrap:nowrap;}
+.tray-label,.tray-toggle,.bb-ctl .bb-val{white-space:nowrap;}
+.log-action-btn{font-size:11px;letter-spacing:0;padding:5px 1px;}
+.log-header{padding:12px 10px 10px 12px;gap:6px;}
+.log-title{font-size:18px;letter-spacing:.03em;}
+.log-action-btn.campaign{padding:5px 6px;}
 </style>
 </head>
 <body class="dark">
@@ -846,7 +867,7 @@ function renderSkills(){
       var badge=nb>0?'<span class="sk-bane" title="'+esc(m.banes.join(', '))+'">'+(nb>1?nb+'× ':'')+'bane</span>':nb<0?'<span class="sk-bane" style="color:var(--green);" title="'+esc(m.boons.join(', '))+'">boon</span>':'';
       var custom=(r.lvl!=null&&r.lvl!=='');
       h+='<div class="skill-row'+(r.trained?'':' untrained')+(sch&&!r.trained?' sk-school-off':'')+'">'+
-        '<input type="checkbox" class="sk-mark" data-nolock title="Advancement mark — ticked automatically on a Dragon or Demon; roll for it at the end of the session (Level)" '+(r.mark?'checked':'')+' onchange="onMark(\''+q+'\',this.checked)">'+
+        '<span class="sk-mark"'+(r.mark?' title="Advancement mark — roll for it at the end of the session (Level)">&#10003;':'>')+'</span>'+
         '<button class="sk-pip'+(r.trained?' on':'')+'" title="Trained skill ('+(r.trained?'yes':'no')+') — unlock the sheet to change" onclick="toggleTrained(\''+q+'\')"></button>'+
         '<span class="sk-name" onclick="rollSkill(\''+q+'\')" title="'+esc(s.text||'')+'">'+esc(s.name)+badge+'</span>'+
         '<span class="sk-attr">'+s.attribute+'</span>'+
@@ -958,7 +979,6 @@ function onAge(v){ S.age=v; changed(); }
 function toggleCond(c){ S.cond[c]=!S.cond[c]; addLog(c, S.cond[c]?'Gained':'Healed', S.cond[c]?('Bane on '+COND_ATTR[c]+' and '+COND_ATTR[c]+'-based skills'):'', 'normal'); changed(); }
 function toggleTrained(n){ if(needUnlock()) return; var r=skRec(n); r.trained=!r.trained; delete r.lvl; changed(); }
 function onSkillLvl(n,v){ var r=skRec(n); var d=skillDef(n); var b=d?baseChance(attr(d.attribute)):0; var def=r.trained?2*b:(isSchool(n)?0:b); var x=Math.max(0,Math.min(18,num(v,def))); if(x===def) delete r.lvl; else r.lvl=x; changed(); }
-function onMark(n,on){ skRec(n).mark=!!on; changed(); }
 // HP / WP pips: click a filled pip to lose points down to the one before it, an empty one to recover up to it.
 function setHpPip(i){ var was=num(S.hp); S.hp=Math.max(0,Math.min(hpMax(),i<=was?i-1:i)); if(S.hp>0&&was<=0){ S.death.s=0; S.death.f=0; S.death.rallied=false; } if(S.hp===0&&was>0){ S.death.s=0; S.death.f=0; S.death.rallied=false; } changed(); }
 function setWpPip(i){ var was=num(S.wp); S.wp=Math.max(0,Math.min(wpMax(),i<=was?i-1:i)); changed(); }
@@ -1918,7 +1938,7 @@ window.openCampaign=openCampaign; window.closeCampaign=closeCampaign; window.cam
 /* ── Action tab (turn controller) ── */
 #tab-action{padding:0;}
 .db-top{background:var(--box);border-bottom:1px solid var(--rule);}
-body.dark .db-top{background:#18201c;}
+body.dark .db-top{background:#1c1c21;}
 .db-row1{display:flex;align-items:center;gap:10px;padding:10px 12px 6px;flex-wrap:wrap;}
 .db-econ{display:flex;gap:6px;flex:1 1 auto;flex-wrap:wrap;align-items:center;}
 .db-pip{font-family:var(--f-label);font-size:13px;letter-spacing:.06em;text-transform:uppercase;border:1.5px solid var(--acc);color:var(--acc-dk);background:transparent;border-radius:14px;padding:3px 13px;}
@@ -2025,5 +2045,13 @@ input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-butto
 })();
 </script>
 
+<script>
+/* Roll log: give each one-line label/result its full text as a tooltip (they ellipsize). */
+(function(){var box=document.getElementById('log-entries'); if(!box||!window.MutationObserver) return;
+  var SEL='.roll-label,.roll-result,.fl-name,.lb-name,.fl-head,.sys-head,.lb-head';
+  function tip(root){ (root.querySelectorAll?root.querySelectorAll(SEL):[]).forEach(function(el){ if(!el.title) el.title=el.textContent.trim(); }); }
+  tip(box); new MutationObserver(function(ms){ ms.forEach(function(m){ m.addedNodes.forEach(function(n){ if(n.nodeType===1) tip(n); }); }); }).observe(box,{childList:true,subtree:true});
+})();
+</script>
 </body>
 </html>

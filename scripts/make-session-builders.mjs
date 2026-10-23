@@ -137,7 +137,7 @@ const SYSTEMS = [
     file: "db_session_prep_builder.html", key: "db_session", ls: "db_builder_v1", cfg: "db", random: "Random Monster", handBuilt: true,
     name: "Dragonbane", title: "Dragonbane — Adventure",
     accent: "#236855", accentDark: "#1e5842", red: "#236855", redDark: "#1e5842", highlight: "#c9a14a", boxBg: "#e9dab7",
-    paper: "#efe2c4", previewBg: "#0d110f", displayFont: '"Hideout", "EB Garamond", Georgia, serif',
+    paper: "#efe2c4", previewBg: "#0f0e0d", displayFont: '"Hideout", "EB Garamond", Georgia, serif',
     chapter: "Chapter", chapterPh: "Chapter 1", session: "Session", mobs: "Monsters/NPCs", mobsHeading: "Monsters &amp; NPCs",
     mob: "Monster", boss: "Boss", npc: "NPC", typePh: "MONSTER // LARGE // FEROCITY 2", titlePh: "e.g. The Sinking Tower", subtitlePh: "e.g. A Dragonbane adventure",
   },

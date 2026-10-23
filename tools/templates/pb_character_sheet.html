@@ -420,6 +420,18 @@ select option{background:var(--input-bg);color:var(--ink);}
 /* dd-no-spin-global — hide number-input spinner arrows everywhere */
 input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none;margin:0;}
+/* Roll log: every piece of chrome, and each entry's label and result, stays on one line.
+   A long label or result ends in an ellipsis; the full text is in its title tooltip
+   (set by the observer in the script below). The detail line underneath may still wrap. */
+.log-header{gap:8px;}
+.log-title{white-space:nowrap;flex-shrink:0;}
+.log-header>div{flex-wrap:nowrap;flex-shrink:0;}
+.log-clear,.log-lock{white-space:nowrap;flex-shrink:0;}
+.log-action-btn{white-space:nowrap;text-overflow:ellipsis;}
+.log-entry .roll-label,.log-entry .roll-result,.fl-name,.lb-name,.fl-head,.sys-head,.lb-head{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.log-entry .roll-result{line-height:1.15;}
+.tray-row{flex-wrap:nowrap;}
+.tray-label,.tray-toggle,.bb-ctl .bb-val{white-space:nowrap;}
 </style>
 </head>
 <body class="dark">
@@ -2280,5 +2292,13 @@ input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-butto
 })();
 </script>
 
+<script>
+/* Roll log: give each one-line label/result its full text as a tooltip (they ellipsize). */
+(function(){var box=document.getElementById('log-entries'); if(!box||!window.MutationObserver) return;
+  var SEL='.roll-label,.roll-result,.fl-name,.lb-name,.fl-head,.sys-head,.lb-head';
+  function tip(root){ (root.querySelectorAll?root.querySelectorAll(SEL):[]).forEach(function(el){ if(!el.title) el.title=el.textContent.trim(); }); }
+  tip(box); new MutationObserver(function(ms){ ms.forEach(function(m){ m.addedNodes.forEach(function(n){ if(n.nodeType===1) tip(n); }); }); }).observe(box,{childList:true,subtree:true});
+})();
+</script>
 </body>
 </html>

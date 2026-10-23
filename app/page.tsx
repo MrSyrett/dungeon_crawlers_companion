@@ -50,10 +50,13 @@ const TILE_ART = [
   "mmrpg-burst", "jlu-skyline", "gb-ectoplasm", "sw-starfield", "ace-speedlines",
   "d62e-blueprint", "yze-raster", "twd-grunge", "myz-metal", "vae-paper", "tool-map", "tool-token",
 ];
+// Cache-bust for art replaced under the same name (/themes/* is cached for a day
+// and served stale for a week); must match the url() in app/globals.css.
+const TILE_ART_VER: Record<string, string> = { "db-parchment": "?v=2026-10-22b" };
 
 export default async function Home() {
   for (const href of TILE_FONTS) preload(href, { as: "font", type: "font/woff2", crossOrigin: "anonymous" });
-  for (const name of TILE_ART) preload(`/themes/${name}.webp`, { as: "image", type: "image/webp" });
+  for (const name of TILE_ART) preload(`/themes/${name}.webp${TILE_ART_VER[name] ?? ""}`, { as: "image", type: "image/webp" });
 
   const user = await getCurrentUser();
   if (!user) redirect("/login");

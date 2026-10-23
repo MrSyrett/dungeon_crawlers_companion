@@ -46,6 +46,11 @@ declare global {
 
 const posKey = (file: string) => `dcc-rule-pos:${file}`;
 
+// /vendor is cached for a day (+ a week stale-while-revalidate) under a fixed
+// name, so a changed reader can keep serving the old copy. Bump this whenever
+// public/vendor/dcc-pdf-reader.js changes (the GM Screen loader uses the same).
+const READER_V = "2026-10-22";
+
 // Load a script once and resolve when ready (idempotent across remounts).
 function loadScript(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -105,7 +110,7 @@ export default function RulebookReader({
     (async () => {
       try {
         await loadScript("/vendor/pdfjs/pdf.min.js");
-        await loadScript("/vendor/dcc-pdf-reader.js");
+        await loadScript(`/vendor/dcc-pdf-reader.js?v=${READER_V}`);
       } catch {
         return; // scripts blocked; nothing we can do here
       }
