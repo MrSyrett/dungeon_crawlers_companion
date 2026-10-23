@@ -690,6 +690,8 @@ function rollDice(label,baseDice){
   var sum=normals.reduce(function(a,b){return a+b;},0)+(isGhost?0:ghost);
   var faces=normals.concat([ghost]);
   var detail=n+'d6('+faces.join(',')+')'+(isGhost?' · Ghost=0':'')+(extra?' · +'+extra+' BP':'');
+  // Dice animation: the last die is the Ghost Die (white, no-ghost logo on its 6).
+  window.__daNext={ dice: normals.map(function(v){ return {sides:6,display:String(v)}; }).concat([{sides:6,display:String(ghost),faceSet:'ghost'}]) };
   addLog((S.name||'Ghostbuster')+' · '+label, sum+(isGhost?'':''), detail, isGhost?'ghost':'normal');
 }
 function rollTrait(k){rollDice(k+' ('+tval(k)+'d)', tval(k));}

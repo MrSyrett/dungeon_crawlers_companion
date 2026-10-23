@@ -123,6 +123,25 @@
     setTimeout(go, 700); }
   if(S.font==='themed') setTimeout(function(){ fontReady(function(){}); }, 300);
 
+  // ─── Ghostbusters: the Ghost Die ───
+  // One die of every Ghostbusters pool is the Ghost Die. A sheet (or the GM
+  // Screen) marks it with faceSet:'ghost'; it is drawn WHITE with BLACK numbers
+  // whatever the dice colour setting, and its 6 face is the no-ghost logo — the
+  // capital O of the Ghostbusters font (public/fonts/ghostbusters.woff2,
+  // @font-face in tokens.css). GHOST_FACE is that face's internal label.
+  var GHOST_FACE='GB6', GHOST_COLOR='#ffffff', GHOST_NUM='#000000', GHOST_FONT='"Ghostbusters"';
+  // Ink box of the logo glyph at 100px, so it can be scaled and centred exactly.
+  function ghostBox(){ var m=measure('400 100px '+GHOST_FONT,'O');
+    var l=m.actualBoundingBoxLeft||0, r=m.actualBoundingBoxRight||m.width||100, a=m.actualBoundingBoxAscent||70, d=m.actualBoundingBoxDescent||0;
+    return {l:l,r:r,a:a,d:d,w:l+r,h:a+d}; }
+  // Size (px) and pen position that fit the logo into a target box centred on (cx,cy).
+  function ghostFit(cx,cy,target){ var b=ghostBox(), k=target/Math.max(b.w,b.h,1), px=100*k;
+    return {px:px, x:cx-(b.r-b.l)*k/2, y:cy+(b.a-b.d)*k/2}; }
+  function ghostReady(cb){ if(!document.fonts||!document.fonts.load){ cb(); return; }
+    var done=false, go=function(){ if(done) return; done=true; cb(); };
+    try{ document.fonts.load('400 48px '+GHOST_FONT,'O').then(go,go); }catch(e){ go(); }
+    setTimeout(go, 700); }
+
   // ─── colour helpers ───
   function hx(n){ n=Math.max(0,Math.min(255,Math.round(n))).toString(16); return n.length<2?'0'+n:n; }
   function toRgb(h){ h=(h||'#d8b24a').replace('#',''); if(h.length===3) h=h.split('').map(function(c){return c+c;}).join(''); return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]; }
@@ -161,7 +180,10 @@
   DICE[100]=DICE[10];
   function cY(pts){ var s=0; pts.forEach(function(p){s+=p[1];}); return s/pts.length; }
   function pstr(pts){ return pts.map(function(p){return p.join(',');}).join(' '); }
-  function numSVG(disp, cx, cy, fs, numColor){ var y=cy+fs*0.355, nc=numColor||S.num, fi=fontInfo(), fam='Montserrat,Barlow Condensed,Arial,sans-serif', fw=800, tfs=fs;
+  function numSVG(disp, cx, cy, fs, numColor){
+    if(disp===GHOST_FACE){ var gf=ghostFit(cx,cy,fs*1.55);
+      return '<text x="'+gf.x.toFixed(2)+'" y="'+gf.y.toFixed(2)+'" font-family="Ghostbusters" font-weight="400" font-size="'+gf.px.toFixed(2)+'" fill="'+(numColor||S.num)+'">O</text>'; }
+    var y=cy+fs*0.355, nc=numColor||S.num, fi=fontInfo(), fam='Montserrat,Barlow Condensed,Arial,sans-serif', fw=800, tfs=fs;
     if(fi.themed){ var tm=themedMetrics(fi,fs,String(disp)); tfs=+tm.px.toFixed(2); y=+(cy+tm.off).toFixed(2); fam=fi.stack.replace(/"/g,"'"); fw=fi.w; }
     var t='<text x="'+cx+'" y="'+y+'" text-anchor="middle" font-family="'+fam+'" font-weight="'+fw+'" font-size="'+tfs+'" fill="'+nc+'">'+disp+'</text>';
     if(disp==='6'||disp==='9'){ var uw=fs*0.36; t+='<rect x="'+(cx-uw/2).toFixed(1)+'" y="'+(y+fs*0.12).toFixed(1)+'" width="'+uw.toFixed(1)+'" height="'+(fs*0.11).toFixed(1)+'" rx="'+(fs*0.055).toFixed(1)+'" fill="'+nc+'"/>'; }
@@ -463,6 +485,7 @@
   function labelSet(faceSet,N){ var a=[],i;
     if(faceSet==='units'){ for(i=0;i<N;i++)a.push(String(i%10)); return a; }
     if(faceSet==='tens'){ for(i=0;i<N;i++){ var v=(i%10)*10; a.push(v<10?('0'+v):String(v)); } return a; }
+    if(faceSet==='ghost'){ for(i=0;i<N;i++)a.push(i===N-1?GHOST_FACE:String(i+1)); return a; }   // the Ghost Die: its 6 face is the no-ghost logo
     if(faceSet==='marvel'){ a.push('M'); for(i=1;i<N;i++)a.push(String(i+1)); return a; }   // the Marvel die: the 1 face is the M (Fantastic)
     for(i=0;i<N;i++)a.push(String(i+1)); return a; }
   // Face numbers: an ink layer (the digit, transparent elsewhere) and a bump
@@ -470,6 +493,7 @@
   // number sits IN the face and its rim catches the light — engraved and
   // inked, the way real dice are made, not a sticker.
   function drawDigit(g,s,text){ var px=text.length>1?70:92, fi=fontInfo();
+    if(text===GHOST_FACE){ var gf=ghostFit(s/2,s/2,s*0.8); g.font='400 '+gf.px+'px '+GHOST_FONT; g.textAlign='left'; g.textBaseline='alphabetic'; g.fillText('O',gf.x,gf.y); return; }
     if(fi.themed){ var tm=themedMetrics(fi,px,text); g.font=tm.font; g.textAlign='center'; g.textBaseline='alphabetic'; g.fillText(text,s/2,s/2+tm.off); }
     else { g.font='bold '+px+'px Montserrat,sans-serif'; g.textAlign='center'; g.textBaseline='middle'; g.fillText(text,s/2,s/2+4); }
     if(text==='6'||text==='9'){ g.fillRect(s/2-24, s/2+42, 48, 8); } }
@@ -812,12 +836,16 @@
   // it right after when this roll IS inline).
   function clearInline(){ try{ var els=document.querySelectorAll('[data-da-inline]'); for(var i=0;i<els.length;i++) els[i].innerHTML=''; }catch(e){} }
   function play(dice, crit){ if(!S.on || !dice || !dice.length) return; ensureOverlay();
-    var rd=dice.map(function(d){ return { sides:d.sides, display:(d.display!=null?d.display:d.val), faceSet:d.faceSet||null, wave:d.wave||0, color:(d.color!=null?d.color:resolveColor()), numColor:(d.numColor!=null?d.numColor:null) }; });
+    var hasGhost=false;
+    var rd=dice.map(function(d){ var gh=d.faceSet==='ghost'; if(gh) hasGhost=true;
+      var disp=(d.display!=null?d.display:d.val); if(gh && String(disp)===String(d.sides||6)) disp=GHOST_FACE;
+      return { sides:d.sides, display:disp, faceSet:d.faceSet||null, wave:d.wave||0,
+        color:(d.color!=null?d.color:(gh?GHOST_COLOR:resolveColor())), numColor:(d.numColor!=null?d.numColor:(gh?GHOST_NUM:null)) }; });
     if(S.sound!==false) playAudio(rd.length);
     clearInline();
-    fontReady(function(){
+    (hasGhost?ghostReady:function(f){f();})(function(){ fontReady(function(){
     if(S.mode==='3d' && HAS_WEBGL){ if(threeState===2){ play3D(rd,crit); } else { play2D(rd,crit); if(threeState!==3) loadThree(function(ok){}); } }
-    else { play2D(rd,crit); } }); }
+    else { play2D(rd,crit); } }); }); }
   // warm up three.js if 3D is the active mode
   if(S.on && S.mode==='3d' && HAS_WEBGL) setTimeout(function(){ loadThree(function(){}); }, 400);
 
@@ -886,7 +914,11 @@
   // GM screen: the GM's own rolls run through GMCamp.broadcast (no addLog there)
   if(window.GMCamp && typeof window.GMCamp.broadcast==='function'){
     var _bc=window.GMCamp.broadcast;
-    window.GMCamp.broadcast=function(entry){ try{ if(S.on && entry && entry.detail){ var dice=parseGM(entry.detail); if(dice.length) play(dice, entry.crit||'normal'); } }catch(e){} return _bc.apply(this,arguments); };
+    // A GM tray can set window.__daNext (same shape as on the sheets) right before
+    // it logs, e.g. to mark the Ghostbusters Ghost Die; otherwise parse the detail.
+    window.GMCamp.broadcast=function(entry){ try{ var spec=window.__daNext; window.__daNext=null;
+      if(S.on && entry){ if(spec && spec.dice && spec.dice.length){ play(spec.dice, spec.glow||entry.crit||'normal'); }
+        else if(entry.detail){ var dice=parseGM(entry.detail); if(dice.length) play(dice, entry.crit||'normal'); } } }catch(e){} return _bc.apply(this,arguments); };
   }
   // delegated open for a gear placed in markup (e.g. the GM dice tool toolbar)
   document.addEventListener('click', function(e){ var t=e.target; var g=t&&t.closest?t.closest('[data-da-gear]'):null; if(g){ e.preventDefault(); togglePop(g); } });

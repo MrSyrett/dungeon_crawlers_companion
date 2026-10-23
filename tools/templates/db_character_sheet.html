@@ -938,6 +938,25 @@ function rollExpr(expr){ var parts=parseDice(expr), total=0, txt=[];
 // has no scroll anchoring). Edits that clamp a typed value call invalidate() so the field shows
 // the clamped number even when the markup would come out the same.
 function setHTML(el,h){ if(!el) return false; if(el.__h===h) return false; el.innerHTML=h; el.__h=h; return true; }
+// The Action tab is patched in place, not rebuilt: a tap that uses your action greys the cards and
+// crosses off the pip by changing attributes / text on the nodes already there. Replacing the tapped
+// button (or the region holding it) makes iOS Safari — which has no scroll anchoring — jump the page.
+function morphHTML(el,h){ if(!el) return false; if(el.__h===h) return false; var t=document.createElement('template'); t.innerHTML=h; morphKids(el,t.content); el.__h=h; return true; }
+function morphKids(a,b){
+  var bn=b.firstChild, an=a.firstChild;
+  while(bn){ var next=bn.nextSibling;
+    if(!an){ a.appendChild(bn); }
+    else if(an.nodeType===bn.nodeType&&(an.nodeType!==1||(an.tagName===bn.tagName&&(an.id||'')===(bn.id||'')))){
+      if(an.nodeType===1){ morphAttrs(an,bn); morphKids(an,bn); } else if(an.nodeValue!==bn.nodeValue) an.nodeValue=bn.nodeValue;
+      an=an.nextSibling; }
+    else { var cur=an; an=an.nextSibling; a.replaceChild(bn,cur); }
+    bn=next; }
+  while(an){ var nx=an.nextSibling; a.removeChild(an); an=nx; }
+}
+function morphAttrs(a,b){ var i, at;
+  for(i=a.attributes.length-1;i>=0;i--){ at=a.attributes[i]; if(!b.hasAttribute(at.name)) a.removeAttribute(at.name); }
+  for(i=0;i<b.attributes.length;i++){ at=b.attributes[i]; if(a.getAttribute(at.name)!==at.value) a.setAttribute(at.name,at.value); }
+}
 function invalidate(id){ var el=$(id); if(el) el.__h=null; }
 function fillSelect(sel,opts,val,blank){ var h=blank!=null?'<option value="">'+esc(blank)+'</option>':''; opts.forEach(function(o){ h+='<option value="'+esc(o.v)+'">'+esc(o.t)+'</option>'; }); setHTML(sel,h); sel.value=val||''; }
 function renderHeader(){
@@ -1307,7 +1326,7 @@ function useAction(){ if(S.turn.action&&S.turn.extra>0){ S.turn.extra--; return;
 function useReaction(){ S.turn.done=true; }
 function canAttack(){ return canAct()||(S.turn.extra>0&&!S.death.dead); }
 // End Turn (as on the D&D sheet): your action, any spent reaction and extra attacks come back.
-function endTurn(){ S.turn.action=false; S.turn.done=false; S.turn.extra=0; S.turn.dual=false; changed(); }
+function endTurn(){ S.turn.action=false; S.turn.done=false; S.turn.extra=0; S.turn.dual=false; S.turn.gone=null; changed(); }
 // A stretch or shift rest ends the fight: the turn starts fresh.
 function leaveCombat(quiet){ S.turn={action:false,done:false,extra:0,prone:S.turn.prone}; if(S.berserk) endBerserk(true); if(!quiet){ addLog('Combat over','✓','','normal'); changed(); } }
 function toggleProneTarget(on){ S.proneTarget=!!on; renderTurn(); scheduleAutosave(); }
@@ -1439,7 +1458,7 @@ function reactAbility(n){ var def=abilityDef(n)||{}; if(!spendWp(def.wp,n)) retu
 function doDash(){ if(!canAct()){ addLog('Dash','—','No action left','normal'); return; } useAction(); addLog('Dash','Action','You use your action to run','normal'); changed(); }
 function doHelp(){ if(!canAct()){ addLog('Help','—','No action left','normal'); return; } useAction(); addLog('Help','Action','Your ally gets a boon on the roll you help with','normal'); changed(); }
 function bandageRow(){ return S.inventory.find(function(r){ return /bandage/i.test(r.name)&&(r.uses==null?num(r.qty,1)>0:num(r.uses)>0); })||null; }
-function useBandage(){ var b=bandageRow(); if(!b) return false; if(b.uses!=null){ b.uses=num(b.uses)-1; if(b.uses<=0){ if(num(b.qty,1)>1){ b.qty=num(b.qty,1)-1; b.uses=10; } else S.inventory.splice(S.inventory.indexOf(b),1); } } else { b.qty=num(b.qty,1)-1; if(b.qty<=0) S.inventory.splice(S.inventory.indexOf(b),1); } return true; }
+function useBandage(){ var b=bandageRow(); if(!b) return false; if(b.uses!=null){ b.uses=num(b.uses)-1; if(b.uses<=0){ if(num(b.qty,1)>1){ b.qty=num(b.qty,1)-1; b.uses=10; } else S.inventory.splice(S.inventory.indexOf(b),1); } } else { b.qty=num(b.qty,1)-1; if(b.qty<=0) S.inventory.splice(S.inventory.indexOf(b),1); } if(!bandageRow()) markGone('bandage',b); return true; }
 function doFirstAid(){ if(!canAct()){ addLog('First Aid','—','No action left','normal'); return; } var hasB=!!bandageRow(); useAction(); if(hasB) useBandage();
   testRoll({label:'First Aid (Healing)',target:skillLevel('Healing'),skill:'Healing',banes:hasB?[]:['No bandages'],onDone:function(r){ if(r.ok){ var h=rollExpr('D6'); addLog('Life saved','+'+h.total+' HP',h.text+' · they stop making death rolls','normal'); } }});
   changed(); }
@@ -1449,8 +1468,13 @@ function doPickLock(){ if(!canAct()){ addLog('Pick Lock','—','No action left',
 function roundRestAction(){ if(S.rests.round){ addLog('Round Rest','—','Already used this shift','normal'); return; } if(!canAct()){ addLog('Round Rest','—','No action left','normal'); return; } doRoundRest(); }
 
 // ── equipment (consumables with a set effect) ──
+// A card whose item was used up keeps its place (greyed, ×0) until the turn changes, so the
+// tapped button isn't pulled out from under the finger. sec: 'heal' | 'bandage' | 'light'.
+function markGone(sec,r,i){ S.turn.gone={sec:sec,name:r.name,i:i}; }
+function goneCard(sec,i){ var g=S.turn&&S.turn.gone; if(!g||g.sec!==sec||(i!=null&&g.i!==i)) return '';
+  var lbl={heal:'Use',bandage:'First Aid',light:'Light'}[sec]; return tcard(esc(g.name)+' <span class="db-qty">'+(sec==='bandage'?'0 left':'×0')+'</span>','Used up',(sec==='light'?tbtn('Check','','ghost'):'')+tbtn(lbl,'',sec==='light'?'sw':''),true); }
 function useItem(idx){ var r=S.inventory[idx]; if(!r) return; var g=gearDef(r.name)||{};
-  if(g.heal){ if(!canAct()){ addLog(r.name,'—','No action left','normal'); return; } useAction(); var h=rollExpr(g.heal); r.qty=num(r.qty,1)-1; if(r.qty<=0) S.inventory.splice(idx,1); healHp(h.total,r.name+' ('+h.text+')'); return; }
+  if(g.heal){ if(!canAct()){ addLog(r.name,'—','No action left','normal'); return; } useAction(); var h=rollExpr(g.heal); r.qty=num(r.qty,1)-1; if(r.qty<=0){ S.inventory.splice(idx,1); markGone('heal',r,idx); } healHp(h.total,r.name+' ('+h.text+')'); return; }
 }
 function lightSources(){ return S.inventory.map(function(r,i){ return {r:r,i:i,g:gearDef(r.name)}; }).filter(function(x){ return x.g&&x.g.light&&num(x.r.qty,1)>0; }); }
 function oilRow(){ return S.inventory.find(function(r){ return /lamp oil/i.test(r.name)&&num(r.uses==null?r.qty:r.uses)>0; })||null; }
@@ -1461,7 +1485,7 @@ function lightUp(idx){ var r=S.inventory[idx]; if(!r) return; var g=gearDef(r.na
   useAction(); S.light={name:r.name,die:g.light.die,radius:g.light.radius};
   addLog('Light',r.name,g.light.radius+' m radius'+(needsOil?' · used a dose of lamp oil':'')+' · roll '+g.light.die+' after each stretch','normal'); changed(); }
 function lightCheck(silentIfOk){ if(!S.light) return; var die=S.light.die||'D6'; var n=d(num(String(die).replace(/\D/g,''),6)); var out=n===1;
-  if(out){ var name=S.light.name; S.light=null; if(/torch|candle/i.test(name)){ var r=S.inventory.find(function(x){ return x.name===name; }); if(r){ r.qty=num(r.qty,1)-1; if(r.qty<=0) S.inventory.splice(S.inventory.indexOf(r),1); } }
+  if(out){ var name=S.light.name; S.light=null; if(/torch|candle/i.test(name)){ var r=S.inventory.find(function(x){ return x.name===name; }); if(r){ r.qty=num(r.qty,1)-1; if(r.qty<=0){ var ri=S.inventory.indexOf(r); S.inventory.splice(ri,1); markGone('light',r,ri); } } }
     addLog('Light check',name+' goes out',die.toLowerCase()+'('+n+')'+(/torch|candle/i.test(name)?' · burned up':' · refill and relight (an action)'),'fumble'); changed(); return; }
   if(!silentIfOk) addLog('Light check','Still burning',die.toLowerCase()+'('+n+') · '+S.light.name,'normal'); }
 function douse(){ if(!S.light) return; addLog('Light','Put out',S.light.name,'normal'); S.light=null; changed(); }
@@ -1574,17 +1598,20 @@ function renderTurn(){
   // Initiative is dealt by the GM (it shows in the Roll Log): the top row is the action economy and End Turn.
   var h='<div class="db-top"><div class="db-row1">';
   h+='<div class="db-econ">';
-  h+='<span class="db-pip'+(t.action||t.done?' used':'')+'" title="One action per turn">Action</span>'+(t.extra>0?'<span class="db-pip extra">+'+t.extra+' attack</span>':'');
+  // The pip row never changes size: the extra-attack pip keeps its slot (hidden) when there's none.
+  h+='<span class="db-pip'+(t.action||t.done?' used':'')+'" title="One action per turn">Action</span><span class="db-pip extra'+(t.extra>0?'':' off')+'" title="'+(t.dual?'Dual Wield: one extra attack with your other one-handed weapon, at a bane':'Critical hit: one free extra attack against another enemy')+'">+'+Math.max(1,num(t.extra))+' attack</span>';
   h+='</div>';
   h+=tbtn('⟳ End Turn','endTurn()','end','Start a new turn — your action and reaction come back');
-  h+='</div><div class="db-badges">';
+  // Status badges: always one line (it scrolls sideways when full), led by your movement, so a
+  // badge coming or going never changes the height above the cards.
+  h+='</div><div class="db-badges"><span class="db-badge">Move '+movement()+' m</span>';
   CONDS.forEach(function(c){ if(S.cond[c]) h+='<span class="db-badge warn" title="Bane on '+COND_ATTR[c]+' rolls">'+c+'</span>'; });
   if(S.death.dead) h+='<span class="db-badge warn">Dead</span>'; else if(S.hp<=0) h+='<span class="db-badge warn">0 HP — '+(S.death.rallied?'rallied, still making death rolls':'death roll on your turn')+'</span>';
   if(S.berserk) h+='<span class="db-badge warn">Berserk</span>'; if(overEnc()) h+='<span class="db-badge warn">Over-encumbered</span>';
   if(S.light) h+='<span class="db-badge">'+esc(S.light.name)+' lit</span>'; if(S.prey) h+='<span class="db-badge">Prey: '+esc(S.prey)+'</span>';
   h+='</div></div>';
   h+=renderActions(act,atk,react);
-  setHTML(el,h);
+  morphHTML(el,h);
 }
 function renderActions(act,atk,react){
   var h='';
@@ -1597,7 +1624,8 @@ function renderActions(act,atk,react){
     var sub=esc(sk)+' <b>'+skillLevel(sk)+'</b> · '+esc(dd.damage||'D6')+(b?' + '+b:'')+(dd.ranged?' · range '+esc(dd.range)+' m':'')+(hasFeat(dd,'Long')?' · reach 4 m':'')+(nb>0?' · <span style="color:var(--red);">'+nb+' bane'+(nb>1?'s':'')+'</span>':'');
     // right to left: Attack, Sneak Attack, Backstab, then the ability attacks
     var bt='';
-    if(melee&&dd.grip==='1H'&&hasAbility('Dual Wield')&&!S.turn.dual) bt+=tbtn('Dual Wield · 3 WP','doAttack('+x.i+',{offhand:true})','ghost','A one-handed weapon in each hand: after this attack, an extra one with the other, at a bane');
+    // (greyed, not removed, once it's active: the tapped button stays where it was)
+    if(melee&&dd.grip==='1H'&&hasAbility('Dual Wield')) bt+=tbtn('Dual Wield · 3 WP','doAttack('+x.i+',{offhand:true})','ghost'+(S.turn.dual?' dis':''),'A one-handed weapon in each hand: after this attack, an extra one with the other, at a bane');
     if(melee&&hasFeat(dd,'Slashing')&&hasAbility('Double Slash')) bt+=tbtn('Double Slash · 3 WP','doAttack('+x.i+',{double:true})','ghost','Strike two enemies within 2 m with one roll');
     if(melee&&dd.grip==='1H'&&!dd._unarmed&&hasAbility('Throwing Arm')) bt+=tbtn('Throw · 2 WP','doAttack('+x.i+',{throw:true})','ghost','Throwing Arm: hurl it up to your STR in metres');
     if(dd.ranged&&hasAbility('Eagle Eye')) bt+=tbtn('Eagle Eye · 2 WP','doAttack('+x.i+',{eagle:true})','ghost','Shoot beyond range (up to double) without the bane');
@@ -1607,7 +1635,8 @@ function renderActions(act,atk,react){
       tbtn('Attack','doAttack('+x.i+',{})','',(atk?'':'No action left'));
     a+=tcard(esc(dd.name)+(dd.shield?' <span class="tag">shield</span>':''),sub,bt,!atk); });
   a='<div class="db-rx" style="padding:4px 2px 2px;justify-content:flex-end;"><button type="button" class="db-tog'+(S.proneTarget?' on':'')+'" aria-pressed="'+(!!S.proneTarget)+'" onclick="toggleProneTarget(!S.proneTarget)" title="Melee against a prone target: a boon and +D6 damage (applies to your next attack)"><span class="db-tog-box"></span>Target is prone</button></div>'+a;
-  if(S.turn.extra>0) a='<div class="db-note good">'+(S.turn.dual?'Dual Wield: one extra attack with your other one-handed weapon, at a bane.':'Critical hit: one free extra attack against another enemy.')+'</div>'+a;
+  // after the weapon cards, not above them (nothing above a tapped button may grow)
+  if(S.turn.extra>0) a+='<div class="db-note good">'+(S.turn.dual?'Dual Wield: one extra attack with your other one-handed weapon, at a bane.':'Critical hit: one free extra attack against another enemy.')+'</div>';
   h+=tsec('attacks','Attacks',a);
   var sp=tcard('Topple','Weapon skill vs Evade — a boon with a toppling weapon',tbtn('Roll','specialAttack(\'Topple\')'),!atk)+
     tcard('Disarm','Weapon skill vs their weapon skill',tbtn('Roll','specialAttack(\'Disarm\')'),!atk)+
@@ -1625,17 +1654,21 @@ function renderActions(act,atk,react){
   // abilities
   var ab=''; S.abilities.forEach(function(x,i){ var def=abilityDef(x.name)||{}; if(!(def.timing==='action'||def.timing==='free')||def.wp==null) return;
     if(/^(Assassin|Dragonslayer|Iron Fist|Massive Blow|Backstabbing|Twin Shot|Double Slash|Dual Wield|Throwing Arm|Eagle Eye|Iron Grip)$/.test(x.name)) return; // buttons on the weapon cards, or offered in the damage step
-    ab+=tcard(esc(x.name)+' <span class="tag">'+(def.timing==='action'?'action':'free')+'</span>',esc(def.text||''),tbtn(esc(def.wp)+' WP','activateAbility('+i+')'),def.timing==='action'&&!act); });
+    // Raging, the card turns into its own off switch (same text, so it keeps its height)
+    if(x.name==='Berserker'&&S.berserk){ ab+=tcard(esc(x.name)+' <span class="tag ok">raging</span>',esc(def.text||''),tbtn('Calm','endBerserk()','sw','End the rage. Berserk: a boon on melee attacks, no parrying or dodging'),false); return; }
+    ab+=tcard(esc(x.name)+' <span class="tag">'+(def.timing==='action'?'action':'free')+'</span>',esc(def.text||''),tbtn(esc(def.wp)+' WP','activateAbility('+i+')',x.name==='Berserker'?'sw':''),def.timing==='action'&&!act); });
   if(S.prey&&hasAbility('Hunting Instincts')) ab+=tcard('Attack your prey <span class="tag">free</span>','1 WP: a boon on your next attack against '+esc(S.prey),tbtn('1 WP','preyBoon()'));
-  if(S.berserk) ab='<div class="db-note">Berserk: a boon on melee attacks, no parrying or dodging. '+tbtn('End rage','endBerserk()','ghost')+'</div>'+ab;
   var inAtk=S.abilities.filter(function(x){ return /^(Assassin|Dragonslayer|Iron Fist|Massive Blow)$/.test(x.name); }).map(function(x){ return x.name; });
   if(ab) h+=tsec('abilities','Activate Ability',ab);
   // equipment
-  var eq=''; S.inventory.forEach(function(r,i){ var g=gearDef(r.name); if(g&&g.heal&&num(r.qty,1)>0) eq+=tcard(esc(r.name)+' <span class="db-qty">×'+num(r.qty,1)+'</span>','Action: heals '+esc(g.heal)+' HP',tbtn('Use','useItem('+i+')'),!act); });
-  var bd=bandageRow(); if(bd) eq+=tcard(esc(bd.name)+' <span class="db-qty">'+(bd.uses!=null?bd.uses+' left':'×'+num(bd.qty,1))+'</span>','First Aid without a bane — one per attempt',tbtn('First Aid','doFirstAid()'),!act);
-  lightSources().forEach(function(x){ var lit=S.light&&S.light.name===x.r.name; var oil=/lantern|oil lamp/i.test(x.r.name); var o=oilRow();
+  // An item used up this turn keeps a greyed "×0" card where it was until End Turn (see goneCard).
+  var eq=''; S.inventory.forEach(function(r,i){ eq+=goneCard('heal',i); var g=gearDef(r.name); if(g&&g.heal&&num(r.qty,1)>0) eq+=tcard(esc(r.name)+' <span class="db-qty">×'+num(r.qty,1)+'</span>','Action: heals '+esc(g.heal)+' HP',tbtn('Use','useItem('+i+')'),!act); }); eq+=goneCard('heal',S.inventory.length);
+  var bd=bandageRow(); if(bd) eq+=tcard(esc(bd.name)+' <span class="db-qty">'+(bd.uses!=null?bd.uses+' left':'×'+num(bd.qty,1))+'</span>','First Aid without a bane — one per attempt',tbtn('First Aid','doFirstAid()'),!act); else eq+=goneCard('bandage');
+  var _ls=lightSources(), _lg=S.turn.gone&&S.turn.gone.sec==='light'?S.turn.gone.i:-1; if(_lg>=0&&!_ls.some(function(x){ return x.i>=_lg; })) _ls.push({gone:true,i:_lg});
+  _ls.forEach(function(x){ if(_lg>=0&&x.i>=_lg){ eq+=goneCard('light'); _lg=-1; } if(x.gone) return; var lit=S.light&&S.light.name===x.r.name; var oil=/lantern|oil lamp/i.test(x.r.name); var o=oilRow();
     eq+=tcard(esc(x.r.name)+' <span class="db-qty">×'+num(x.r.qty,1)+'</span>'+(lit?' <span class="tag ok">lit</span>':''),x.g.light.radius+' m · roll '+x.g.light.die+' after each stretch'+(oil?' · lamp oil: '+(o?(o.uses!=null?o.uses+' doses':'×'+num(o.qty,1)):'<b style="color:var(--red);">none</b>'):''),
-      lit?tbtn('Check','lightCheck()','ghost','Roll the light die: a 1 puts it out')+tbtn('Douse','douse()','ghost'):tbtn('Light','lightUp('+x.i+')','',oil?'Uses a dose of lamp oil':''),(!lit&&inCombat()&&!act)||(!lit&&oil&&!o)); });
+      // two buttons lit or not (Check greyed while it's out), so lighting it doesn't re-flow the card
+      tbtn('Check','lightCheck()','ghost'+(lit?'':' dis'),'Roll the light die: a 1 puts it out')+(lit?tbtn('Douse','douse()','ghost sw'):tbtn('Light','lightUp('+x.i+')','sw',oil?'Uses a dose of lamp oil':'')),(!lit&&inCombat()&&!act)||(!lit&&oil&&!o)); });
   if(eq) h+=tsec('equipment','Use Item',eq);
   // other actions
   var ot=tcard('Dash','Use your action to run',tbtn('Dash','doDash()'),!act)+
@@ -1794,6 +1827,7 @@ function applySheet(d){
   ['attrs','cond','death','rests','coins','opts','turn'].forEach(function(k){ S[k]=Object.assign({},b[k],(d[k]&&typeof d[k]==='object')?d[k]:{}); });
   // Older saves kept a drawn initiative card on the sheet; the GM deals initiative now.
   delete S.turn.card; delete S.turn.prev; delete S.turn.round;
+  delete S.turn.gone;   // a used-up item's greyed placeholder only lasts for the turn it was used in
   delete S.subtab;   // the Action/Reaction sub-tabs are gone: Reactions is a section of the Action tab
   ['skills'].forEach(function(k){ if(!S[k]||typeof S[k]!=='object'||Array.isArray(S[k])) S[k]={}; });
   ['abilities','spells','tricks','inventory','injuries'].forEach(function(k){ if(!Array.isArray(S[k])) S[k]=[]; });
@@ -2085,15 +2119,18 @@ body.dark .db-top{background:#1c1c21;}
 .db-pip{font-family:var(--f-label);font-size:13px;letter-spacing:.06em;text-transform:uppercase;border:1.5px solid var(--acc);color:var(--acc-dk);background:transparent;border-radius:14px;padding:3px 13px;}
 .db-pip.used{background:var(--rule);border-color:var(--rule);color:var(--muted);text-decoration:line-through;}
 .db-pip.extra{border-color:var(--gold);color:var(--gold);}
+.db-pip.off{visibility:hidden;}
+.db-do.sw{min-width:62px;}   /* a button that flips label (Light/Douse, 3 WP/Calm) keeps its width */
+.db-do.dis{background:transparent;border-color:var(--rule);color:var(--muted);cursor:default;pointer-events:none;opacity:.6;}
 .db-do{flex:0 0 auto;background:var(--acc);color:#fff;border:none;border-radius:7px;padding:6px 12px;font-family:var(--f-label);font-size:13px;letter-spacing:.03em;cursor:pointer;white-space:nowrap;}
 .db-do:hover{filter:brightness(1.12);}
 .db-do.up{padding-left:9px;padding-right:9px;background:transparent;color:var(--acc-dk);border:1px solid var(--acc);font-size:15px;line-height:1;}
 .db-do.ghost{background:transparent;color:var(--acc-dk);border:1px solid var(--acc);}
 .db-do.end{margin-left:auto;padding:8px 16px;font-size:14px;}
 .db-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px;}
-.db-badges{display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 8px;}
-.db-badges:empty{display:none;}
-.db-badge{font-family:var(--f-label);font-size:12px;letter-spacing:.03em;border:1px solid var(--rule);color:var(--muted);border-radius:12px;padding:1px 9px;}
+.db-badges{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:0 12px 8px;}
+.db-badges::-webkit-scrollbar{display:none;}
+.db-badge{flex:0 0 auto;white-space:nowrap;font-family:var(--f-label);font-size:12px;letter-spacing:.03em;border:1px solid var(--rule);color:var(--muted);border-radius:12px;padding:1px 9px;}
 .db-badge.warn{border-color:var(--red);color:var(--red);background:rgba(179,38,30,.1);}
 .db-sec{border-bottom:1px solid var(--rule);}
 .db-sec-hd{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;user-select:none;}
@@ -2112,6 +2149,11 @@ body.dark .db-top{background:#1c1c21;}
 .db-btns{display:flex;gap:5px;flex:0 0 auto;flex-wrap:wrap;justify-content:flex-end;}
 .db-qty{font-family:var(--f-label);font-size:12px;color:var(--muted);font-weight:400;}
 .db-card.disabled{opacity:.45;}
+/* A card's buttons sit at its top, and a tag never makes its name line taller: a card whose text
+   re-flows after a tap (a "lit" tag, "· used", "bane without bandages") grows downward only, so the
+   button under the finger stays put. */
+.db-card .db-btns{align-self:flex-start;}
+.db-name .tag{line-height:13px;margin-top:0;margin-bottom:0;vertical-align:1px;}
 #tab-magic .mg-list{padding:0 12px 6px;}
 .mg-card{align-items:flex-start;}
 .mg-card .db-btns{align-items:center;}
@@ -2134,6 +2176,7 @@ body.sheet-locked .sk-school-off{display:none;}
   .db-row1{gap:8px;}
   .db-do{padding:9px 12px;font-size:13px;}
   .db-card{flex-wrap:wrap;}
+  .db-main{flex:1 1 90px;}   /* too many buttons for one line (Dual Wield + Sneak Attack + Attack): they wrap under the name */
   .db-btns{margin-left:auto;}
 }
 </style>

@@ -17833,6 +17833,7 @@ function init_dice(root) {
     const ghost = d6(), isGhost = (ghost === 6);
     const sum = normals.reduce((a, b) => a + b, 0) + (isGhost ? 0 : ghost);
     const detail = n + 'd6(' + normals.concat([ghost]).join(',') + ')' + (isGhost ? ' · Ghost = 0' : '');
+    window.__daNext = { dice: normals.map(v => ({ sides: 6, display: String(v) })).concat([{ sides: 6, display: String(ghost), faceSet: 'ghost' }]) };   // the Ghost Die, for the dice animation
     gmLog('Ghost pool', sum + (isGhost ? ' · 👻 GHOST' : ''), detail, isGhost ? 'fumble' : '');
   }
 
@@ -18264,6 +18265,7 @@ function init_dice(root) {
       const reg = []; for(let i = 0; i < n - 1; i++) reg.push(d6());
       const g = d6(), isGhost = (g === 6);
       const total = reg.reduce((a, b) => a + b, 0) + (isGhost ? 0 : g);
+      window.__daNext = { dice: reg.map(v => ({ sides: 6, display: String(v) })).concat([{ sides: 6, display: String(g), faceSet: 'ghost' }]) };   // the Ghost Die, for the dice animation
       return gmLog(label, total + (isGhost ? ' · 👻 GHOST' : ''), n + 'd6(' + reg.concat([g]).join(',') + ')' + (isGhost ? ' · Ghost = 0 — for a spook it still helps: spectacular on a success, a silver lining on a failure' : ''), isGhost ? 'crit' : '');
     }
     if(kind === 'swplain' && pool) {
