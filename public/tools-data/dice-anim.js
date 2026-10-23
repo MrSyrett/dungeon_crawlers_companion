@@ -68,27 +68,34 @@
   function persistLocal(){ try{ localStorage.setItem(LS, JSON.stringify(S)); }catch(e){} }
   function persist(){ persistLocal(); if(typeof window.saveSheet==='function'){ try{ window.saveSheet(true); }catch(e){} } }
 
-  // ─── number font: Standard (Montserrat) or Themed (the system's label face) ───
-  // Themed uses each system's SECOND accent face — its --sys-label in
-  // public/tokens.css — not the display face, which is often too decorative to
-  // read at die size. A themed sheet (<html data-themed data-system>) exposes it
-  // as --sys-label; the GM Screen isn't skinned, so it falls back to this copy of
-  // the same table, keyed by its current system (data-gm-sys / GM_SYSTEM).
-  // KEEP IN STEP with the --sys-label lines in public/tokens.css.
-  var SYS_LABEL_FONT={
-    SD:'"Montserrat",sans-serif', DND:'"Cinzel",serif', DCC:'"Share Tech Mono",monospace',
-    SW:'"Libre Franklin",sans-serif', MMRPG:'"Oswald",sans-serif', ACE:'"Nunito",sans-serif',
-    KOB:'"Mulish",sans-serif', D62E:'"Saira Condensed",sans-serif', GB:'"Asap",sans-serif',
-    CO:'"Lora",Georgia,serif', NIM:'"Figtree",sans-serif', ICRPG:'"Archivo",sans-serif',
-    YZE:'"Archivo Narrow",sans-serif', TWD:'"Oswald",sans-serif', MYZ:'"Barlow Condensed",sans-serif',
-    VAE:'"Cormorant Garamond",Georgia,serif', LOTR:'"Aniron","EB Garamond",Georgia,serif',
-    DB:'"Minion Pro","EB Garamond",Georgia,serif', PB:'"1651 Alchemy","EB Garamond",Georgia,serif',
-    JLU:'"Rubik",sans-serif' };
+  // ─── number font: Standard (Montserrat) or Themed (the system's second accent) ───
+  // Themed uses each system's SECOND accent face — not the headline/logo face
+  // (often too decorative, or missing digits, at die size) and not the body
+  // face. Where a system has only one accent face, that face is used.
+  //   SD: blackletter → Old Newspaper     DND: DnDC → Cinzel
+  //   SW: Star Jedi → Archivo Black       MMRPG: Marvel → Oswald
+  //   GB: Ghostbusters → Anton            DCC: Anton → Share Tech Mono
+  //   TWD: Dead Kansas → Oswald           MYZ: Anton → Barlow Condensed
+  //   VAE: Fraunces → Cormorant Garamond  LOTR: Ringbearer → Aniron
+  //   DB: Hideout → Minion Pro            PB: blackletter → 1651 Alchemy
+  // One accent face only: ACE Lilita One, KOB Dreadful, D62E Saira Condensed,
+  // CO Cormorant Garamond, NIM Fraunces, ICRPG Permanent Marker, YZE Archivo
+  // Narrow, JLU Russo One. Every family here is self-hosted in public/tokens.css
+  // (which every sheet and the GM Screen link), so it can be loaded on demand.
+  // The system comes from <html data-system> on a sheet, or data-gm-sys /
+  // GM_SYSTEM on the GM Screen (so it follows a mid-session system switch).
+  var SYS_ACCENT2_FONT={
+    SD:'"Old Newspaper","Old newspaper font",Georgia,serif', DND:'"Cinzel",Georgia,serif',
+    DCC:'"Share Tech Mono",monospace', SW:'"Archivo Black",sans-serif', MMRPG:'"Oswald",sans-serif',
+    ACE:'"Lilita One",sans-serif', KOB:'"Dreadful",sans-serif', D62E:'"Saira Condensed",sans-serif',
+    GB:'"Anton",sans-serif', CO:'"Cormorant Garamond",Georgia,serif', NIM:'"Fraunces",Georgia,serif',
+    ICRPG:'"Permanent Marker",sans-serif', YZE:'"Archivo Narrow",sans-serif', TWD:'"Oswald",sans-serif',
+    MYZ:'"Barlow Condensed",sans-serif', VAE:'"Cormorant Garamond",Georgia,serif',
+    LOTR:'"Aniron","EB Garamond",Georgia,serif', DB:'"Minion Pro","EB Garamond",Georgia,serif',
+    PB:'"1651 Alchemy","EB Garamond",Georgia,serif', JLU:'"Russo One",sans-serif' };
   var STD_STACK='Montserrat,"Barlow Condensed",Arial,sans-serif';
   function sysKey(){ var d=document.documentElement; return String(d.getAttribute('data-system')||d.getAttribute('data-gm-sys')||window.GM_SYSTEM||'').toUpperCase(); }
-  function themedStack(){ var d=document.documentElement;
-    if(d.hasAttribute('data-themed')){ try{ var v=getComputedStyle(d).getPropertyValue('--sys-label').trim(); if(v) return v; }catch(e){} }
-    return SYS_LABEL_FONT[sysKey()]||null; }
+  function themedStack(){ return SYS_ACCENT2_FONT[sysKey()]||null; }
   // Use a real bold only when the face ships one; synthetic bold smears the
   // decorative faces (Aniron, Alchemy).
   function hasBold(fam){ var ok=false; try{ document.fonts.forEach(function(f){ if(String(f.family).replace(/["']/g,'')===fam){ var hi=parseInt(String(f.weight).split(' ').pop(),10)||400; if(hi>=600) ok=true; } }); }catch(e){} return ok; }
