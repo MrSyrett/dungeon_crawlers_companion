@@ -565,8 +565,8 @@ input[type="number"] { -moz-appearance: textfield; }
 .advh-co-row .n { font-family: 'Geist', sans-serif; font-weight: 800; font-size: 10px; color: var(--dim); width: 14px; text-align: center; flex: 0 0 auto; }
 .advh-co-row .nm { font-family: 'Geist', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: .02em; color: var(--light); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; }
 .advh-co-row.on .nm { color: var(--white); }
-.advh-tabs { display: flex; gap: 2px; padding: 6px 8px 0; border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; }
-.advh-tab { flex: 0 0 auto; background: transparent; border: 0; border-bottom: 2px solid transparent; color: var(--dim); font-family: 'Geist', sans-serif; font-weight: 800; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; padding: 6px 9px; cursor: pointer; white-space: nowrap; }
+.advh-tabs { display: flex; flex-wrap: wrap; gap: 0 1px; padding: 5px 6px 0; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.advh-tab { flex: 1 1 auto; background: transparent; border: 0; border-bottom: 2px solid transparent; color: var(--dim); font-family: 'Geist', sans-serif; font-weight: 800; font-size: 10px; letter-spacing: .03em; text-transform: uppercase; padding: 6px 4px; cursor: pointer; white-space: nowrap; text-align: center; }
 .advh-tab:hover { color: var(--light); }
 .advh-tab.on { color: var(--white); border-bottom-color: var(--accent); }
 .advh-tab[data-empty="1"] { opacity: .45; }
@@ -8280,14 +8280,12 @@ function wireSessionPrepLoader(root) {
     if(!hub || !prep) return;
     const c = counts();
     const multi = prepChapters.length > 1;
-    const meta = [prep.floor, prep.session ? 'Session ' + prep.session : '', prep.players ? prep.players + ' players' : '', prep.duration].map(s => String(s || '').trim()).filter(Boolean).join(' · ');
     // The eight baseline tabs (with each system's flavour names), plus the
     // hand-built LotR / Dragonbane / Pirate Borg sections after Scenes. Only tabs
     // with something in them show; the first tab is always there.
-    const ALL = ['adventure', 'clues', 'scenes', 'lotr', 'db', 'pb', 'cast', 'treasure', 'maps', 'tables', 'notes'];
+    const ALL = ['adventure', 'tables', 'clues', 'treasure', 'scenes', 'lotr', 'db', 'pb', 'cast', 'maps', 'notes'];
     const TABS = ALL.filter(k => k === 'adventure' || c[k]).map(k => [k, lab(k)]);
     if(!TABS.some(([k]) => k === activeSec)) activeSec = 'adventure';
-    const NOCOUNT = { adventure: 1, notes: 1 };
     const advTitle = (prepChapters[0] && prepChapters[0].title) || prep.title || prep._docTitle || 'Adventure';
     const D = DET();
     // Pinned strip: the goal and the prize, a reminder of why the heroes are here.
@@ -8296,7 +8294,6 @@ function wireSessionPrepLoader(root) {
       + '<div class="advh-titlerow"><div><div class="advh-title">' + advEsc(advTitle) + '</div>'
       + (!multi && prep.subtitle ? '<div class="advh-sub">' + advEsc(prep.subtitle) + '</div>' : '') + '</div>'
       + '<button class="btn small advh-full" title="Open the full printable prep in this pane">Full prep</button></div>'
-      + (meta ? '<div class="advh-meta">' + advEsc(meta) + '</div>' : '')
       + (pin ? '<div class="advh-pin">' + pin + '</div>' : '')
       + '</div>';
     if(multi) {
@@ -8308,8 +8305,7 @@ function wireSessionPrepLoader(root) {
         + '</div></div>';
     }
     h += '<div class="advh-tabs">' + TABS.map(([k, l]) =>
-      '<button class="advh-tab' + (k === activeSec ? ' on' : '') + '" data-sec="' + k + '"' + (!c[k] ? ' data-empty="1"' : '') + '>' + advEsc(l)
-      + (!NOCOUNT[k] && c[k] ? ' <span class="advh-n">' + c[k] + '</span>' : '') + '</button>').join('') + '</div>';
+      '<button class="advh-tab' + (k === activeSec ? ' on' : '') + '" data-sec="' + k + '"' + (!c[k] ? ' data-empty="1"' : '') + ' title="' + advEsc(l) + (c[k] && k !== 'adventure' && k !== 'notes' ? ' (' + c[k] + ')' : '') + '">' + advEsc(l) + '</button>').join('') + '</div>';
     h += '<div class="advh-body">' + sectionHtml(activeSec) + '</div>';
     hub.innerHTML = h;
     wireHub();

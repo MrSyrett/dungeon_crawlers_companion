@@ -717,12 +717,12 @@ body.flow-mode .page + .page {
   <div class="chapter-outline" id="chapter-tabs"></div>
   <div class="sidebar-tabs" id="sidebar-tabs">
     <button class="tab-btn active" data-tab="adventure" onclick="switchTab('adventure')">Adventure</button>
+    <button class="tab-btn" data-tab="tables" onclick="switchTab('tables')">Tables</button>
     <button class="tab-btn" data-tab="clues" onclick="switchTab('clues')">Clues</button>
+    <button class="tab-btn" data-tab="treasure" onclick="switchTab('treasure')">Treasure</button>
     <button class="tab-btn" data-tab="scenes" onclick="switchTab('scenes')">Scenes</button>
     <button class="tab-btn" data-tab="cast" onclick="switchTab('cast')">Zone Threats/NPCs</button>
-    <button class="tab-btn" data-tab="treasure" onclick="switchTab('treasure')">Treasure</button>
     <button class="tab-btn" data-tab="maps" onclick="switchTab('maps')">Maps</button>
-    <button class="tab-btn" data-tab="tables" onclick="switchTab('tables')">Tables</button>
     <button class="tab-btn" data-tab="notes" onclick="switchTab('notes')">Notes</button>
   </div>
   <div class="sidebar-content">
@@ -735,16 +735,8 @@ body.flow-mode .page + .page {
         <input type="text" id="f-title" placeholder="e.g. The Dawn Vault" oninput="autosave()">
       </div>
       <div class="field-group">
-        <label class="field-label">Subtitle</label>
-        <input type="text" id="f-subtitle" placeholder="e.g. A Mutant: Year Zero expedition" oninput="autosave()">
-      </div>
-      <div style="display:flex; gap:8px;" class="field-group">
-        <div style="flex:1"><label class="field-label">Sector</label><input type="text" id="f-floor" placeholder="Sector A3" oninput="autosave()"></div>
-        <div style="flex:1"><label class="field-label">Session</label><input type="text" id="f-session" placeholder="01" oninput="autosave()"></div>
-      </div>
-      <div style="display:flex; gap:8px;" class="field-group">
-        <div style="flex:1"><label class="field-label">Players</label><input type="text" id="f-players" placeholder="3–5" oninput="autosave()"></div>
-        <div style="flex:1"><label class="field-label">Duration</label><input type="text" id="f-duration" placeholder="~3 HRS" oninput="autosave()"></div>
+        <label class="field-label">Chapter</label>
+        <input type="text" id="f-subtitle" placeholder="e.g. Chapter 1 — The Gatehouse" oninput="autosave()">
       </div>
 
       <div class="section-divider">Overview</div>
@@ -963,12 +955,12 @@ body.flow-mode .page + .page {
     <div class="page-bottom-band"></div>
   </div>
 
-  <!-- PAGE 4: Stat Blocks -->
+  <!-- PAGE 4: Notes (the session log) — printed last, after the maps -->
   <div class="page" id="page-four">
     <div class="page-banner">
       <div>
         <div class="adventure-title" id="p4-title">Adventure Title</div>
-        <div class="adventure-subtitle" id="p4-subtitle">Stat Blocks</div>
+        <div class="adventure-subtitle" id="p4-subtitle">Notes</div>
       </div>
       <div class="header-meta">
         <span id="p4-floor"></span><span id="p4-session"></span>
@@ -1323,8 +1315,9 @@ function paginatePages() {
   const locsEl=document.getElementById('p-locations');
   if(locsEl) runPagination(locsEl,COL_H*2,'p2',isDark,null,document.getElementById('page-two'),false);
 
-  // PAGE 4: Stat blocks
-  // Stat blocks render inline on the main pages; page-four pagination no longer needed
+  // PAGE 4: Notes (session log)
+  const notesEl=document.getElementById('p-statblocks');
+  if(notesEl && notesEl.innerHTML) runPagination(notesEl,USABLE_H,'p4N',isDark,null,document.getElementById('page-four'),false);
 
   // PAGE 3: Maps
   const mapsEl=document.getElementById('p-maps-container');
@@ -1600,8 +1593,6 @@ function escA(s){return(s||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
 function readFields() {
   state.title=v('f-title'); state.subtitle=v('f-subtitle');
-  state.floor=v('f-floor'); state.session=v('f-session');
-  state.players=v('f-players'); state.duration=v('f-duration');
   state.overview=v('f-overview');
   state.details={ questgiver:v('f-d-questgiver'), hooks:v('f-d-hooks'), goal:v('f-d-goal'), prize:v('f-d-prize'), stakes:v('f-d-stakes'), opposition:v('f-d-opposition') };
   state.trackers=readTrackers(document.getElementById('trackers-list'));
@@ -2497,28 +2488,12 @@ function fmtText(str) {
 function renderPreview() {
   setText('p-title',state.title||'Adventure Title');
   setText('p-subtitle',state.subtitle);
-  setText('p-floor',state.floor?'SECTOR: '+state.floor:'');
-  setText('p-session',state.session?'SESSION: '+state.session:'');
-  setText('p-players',state.players?'PLAYERS: '+state.players:'');
-  setText('p-duration',state.duration?'DURATION: '+state.duration:'');
   // Page 2
   setText('p2-title',state.title||'Adventure Title');
-  setText('p2-floor',state.floor?'SECTOR: '+state.floor:'');
-  setText('p2-session',state.session?'SESSION: '+state.session:'');
-  setText('p2-players',state.players?'PLAYERS: '+state.players:'');
-  setText('p2-duration',state.duration?'DURATION: '+state.duration:'');
   // Page 3
   setText('p3-title',state.title||'Adventure Title');
-  setText('p3-floor',state.floor?'SECTOR: '+state.floor:'');
-  setText('p3-session',state.session?'SESSION: '+state.session:'');
-  setText('p3-players',state.players?'PLAYERS: '+state.players:'');
-  setText('p3-duration',state.duration?'DURATION: '+state.duration:'');
   // Page 4
   setText('p4-title',state.title||'Adventure Title');
-  setText('p4-floor',state.floor?'SECTOR: '+state.floor:'');
-  setText('p4-session',state.session?'SESSION: '+state.session:'');
-  setText('p4-players',state.players?'PLAYERS: '+state.players:'');
-  setText('p4-duration',state.duration?'DURATION: '+state.duration:'');
   // Overview with formatting
   // Build all p1 items, measure, fill left then right
   (function() {
@@ -2548,12 +2523,30 @@ function renderPreview() {
       sections.push('<div class="p-section"><div class="sl">GM Notes</div><p class="p-text">'+fmtText(state.notes)+'</p></div>');
     }
 
+    // TABLES
+    (state.rollTables||[]).forEach(t=>{
+      if(!(t.title||(t.rows||[]).length)) return;
+      let h='<div class="p-section rt-block"><div class="sl">'+escH(t.title||'Roll Table')+(t.die?' <span class="rt-die">'+escH(t.die)+'</span>':'')+'</div><table class="rt-table"><tbody>';
+      (t.rows||[]).forEach(r=>{ h+='<tr><td class="rt-roll">'+escH(r.roll||'')+'</td><td class="rt-result">'+fmtText(r.result||'')+'</td></tr>'; });
+      sections.push(h+'</tbody></table></div>');
+    });
+
     // CLUES
     if((state.clues||[]).length){
       let h='<div class="p-section"><div class="sl">Secrets &amp; Clues</div>';
       (state.clues||[]).forEach(c=>{
         const meta=[c.where?'<b>Found:</b> '+escH(c.where):'', c.leads?'<b>Leads to:</b> '+escH(c.leads):''].filter(Boolean).join(' · ');
         h+='<div class="clue-item">'+(c.header?'<span class="clue-hdr">'+escH(c.header)+'</span>'+(c.text?' — ':''): '')+fmtText(c.text)+(meta?'<div class="loc-links">'+meta+'</div>':'')+'</div>';
+      });
+      sections.push(h+'</div>');
+    }
+
+    // TREASURE
+    if((state.rewards||[]).length){
+      let h='<div class="p-section"><div class="sl gold">'+escH(L('treasure'))+'</div>';
+      (state.rewards||[]).forEach(r=>{
+        const meta=[r.value?'<b>Value:</b> '+escH(r.value):'', r.where?'<b>Found in:</b> '+escH(r.where):''].filter(Boolean).join(' · ');
+        h+='<div class="npc-block" style="border-left-color:var(--accent-dark);"><div class="entry-name">'+escH(r.name)+'</div>'+(r.flavor?'<div class="sb-flavor" style="margin-bottom:5px;padding:5px 7px;">'+fmtText(r.flavor)+'</div>':'')+(r.stats?'<p class="entry-desc reward-stats" style="font-family:Share Tech Mono,monospace;font-size:8px;margin-top:3px;">'+fmtText(r.stats)+'</p>':'')+(meta?'<div class="loc-links">'+meta+'</div>':'')+'</div>';
       });
       sections.push(h+'</div>');
     }
@@ -2587,29 +2580,6 @@ function renderPreview() {
         sbDiv.style.marginBottom='8px';
         sections.push(sbDiv.outerHTML);
       });
-    }
-
-    // TREASURE
-    if((state.rewards||[]).length){
-      let h='<div class="p-section"><div class="sl gold">'+escH(L('treasure'))+'</div>';
-      (state.rewards||[]).forEach(r=>{
-        const meta=[r.value?'<b>Value:</b> '+escH(r.value):'', r.where?'<b>Found in:</b> '+escH(r.where):''].filter(Boolean).join(' · ');
-        h+='<div class="npc-block" style="border-left-color:var(--accent-dark);"><div class="entry-name">'+escH(r.name)+'</div>'+(r.flavor?'<div class="sb-flavor" style="margin-bottom:5px;padding:5px 7px;">'+fmtText(r.flavor)+'</div>':'')+(r.stats?'<p class="entry-desc reward-stats" style="font-family:Share Tech Mono,monospace;font-size:8px;margin-top:3px;">'+fmtText(r.stats)+'</p>':'')+(meta?'<div class="loc-links">'+meta+'</div>':'')+'</div>';
-      });
-      sections.push(h+'</div>');
-    }
-
-    // TABLES
-    (state.rollTables||[]).forEach(t=>{
-      if(!(t.title||(t.rows||[]).length)) return;
-      let h='<div class="p-section rt-block"><div class="sl">'+escH(t.title||'Roll Table')+(t.die?' <span class="rt-die">'+escH(t.die)+'</span>':'')+'</div><table class="rt-table"><tbody>';
-      (t.rows||[]).forEach(r=>{ h+='<tr><td class="rt-roll">'+escH(r.roll||'')+'</td><td class="rt-result">'+fmtText(r.result||'')+'</td></tr>'; });
-      sections.push(h+'</tbody></table></div>');
-    });
-
-    // NOTES — the session log
-    if(state.log && state.log.trim()){
-      sections.push('<div class="p-section"><div class="sl">Session Log</div><p class="p-text">'+fmtText(state.log)+'</p></div>');
     }
 
     // Put all items in left first to measure real heights
@@ -2682,9 +2652,11 @@ function renderPreview() {
   const _p3 = document.getElementById('page-three');
   const _p4 = document.getElementById('page-four');
   if(_p3) _p3.style.display = (state.maps||[]).length ? '' : 'none';
-  if(_p4) _p4.style.display = 'none';
+  // Page 4: the Notes tab's session log, after the maps.
+  const hasLog = !!(state.log && state.log.trim());
+  if(_p4) _p4.style.display = hasLog ? '' : 'none';
   const sbEl=document.getElementById('p-statblocks');
-  if(sbEl) sbEl.innerHTML='';
+  if(sbEl) sbEl.innerHTML = hasLog ? '<div class="p-section"><div class="sl">Session Log</div><p class="p-text">'+fmtText(state.log)+'</p></div>' : '';
   applyGradients();
   // Run pagination after DOM has painted
   requestAnimationFrame(()=>requestAnimationFrame(paginatePages));

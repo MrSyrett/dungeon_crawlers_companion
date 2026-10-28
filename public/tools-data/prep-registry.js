@@ -6,9 +6,10 @@
 // always agree. Systems are keyed by the code in lib/tools.ts (DCC, SD, NIM, …).
 (function () {
   'use strict';
-  // The baseline: eight tabs, same order in every system.
-  var TABS = ['adventure', 'clues', 'scenes', 'cast', 'treasure', 'maps', 'tables', 'notes'];
-  var LABELS = { adventure: 'Adventure', clues: 'Clues', scenes: 'Scenes', cast: 'Cast', treasure: 'Treasure', maps: 'Maps', tables: 'Tables', notes: 'Notes' };
+  // The baseline: eight tabs, same order in every system — the builder's tabs, the
+  // GM Screen's Hub tabs and the printed prep all follow it.
+  var TABS = ['adventure', 'tables', 'clues', 'treasure', 'scenes', 'cast', 'maps', 'notes'];
+  var LABELS = { adventure: 'Adventure', tables: 'Tables', clues: 'Clues', treasure: 'Treasure', scenes: 'Encounters', cast: 'Monsters/NPCs', maps: 'Maps', notes: 'Notes' };
   // Flavour names (kept per system), loot drops, and the shared modules each system
   // turns on. Modules are set per system, never per adventure: an empty one simply
   // shows nothing on the GM Screen.
