@@ -1,0 +1,9 @@
+    /* Shadowdark RPG palette — high contrast, clean, brutal */
+    --ink: #0a0a0a; --paper: #f8f8f6; --accent: #1a1a1a; --accent-dark: #000000;
+    --accent-red: #1a1a1a; --accent-red-dark: #000000;
+    --muted: #444; --rule: #c0c0c0; --box-bg: #efefed; --read-bg: #1a1a1a;
+    --read-text: #f8f8f6; --highlight: #e8c84a; --green: #1a3a1a; --blue-npc: #1a2a3a;
+    --section-hdr: #0a0a0a; --table-hdr: #1a1a1a;
+    /* UI sidebar — dark stone */
+    --ui-bg: #111112; --ui-panel: #1a1a1c; --ui-border: #2e2e32;
+    --ui-text: #e8e8e4; --ui-muted: #7a7a7a; --ui-accent: #e8c84a; --ui-highlight: #e8c84a;

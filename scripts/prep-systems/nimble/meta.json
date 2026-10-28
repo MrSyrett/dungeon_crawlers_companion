@@ -1,0 +1,21 @@
+{
+  "cfg": "nimble",
+  "file": "nimble_session_prep_builder.html",
+  "code": "NIM",
+  "name": "Nimble",
+  "title": "Adventure Prep Builder — Nimble",
+  "sessionKey": "nimble_session",
+  "lsKey": "nimble_builder_v1",
+  "chapterLabel": "Level",
+  "chapterPh": "Level 3 heroes",
+  "chapterUpper": "LEVEL",
+  "titlePh": "e.g. Goblins of the Crystal Crag",
+  "subtitlePh": "e.g. A Nimble one-shot for level 2 heroes",
+  "castTab": "Monsters/NPCs",
+  "castHeading": "Monsters &amp; NPCs",
+  "mobLabel": "Monster",
+  "bossLabel": "Legendary",
+  "randomLabel": "Random Monster",
+  "sessionLabel": "Session",
+  "pickerComment": "<!-- Shared dungeon-map engine (Map generator) + the DCC bestiary (mob picker). -->"
+}

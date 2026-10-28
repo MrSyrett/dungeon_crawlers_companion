@@ -1,0 +1,21 @@
+{
+  "cfg": "gb",
+  "file": "gb_session_prep_builder.html",
+  "code": "GB",
+  "name": "Ghostbusters",
+  "title": "Adventure Prep Builder — Ghostbusters",
+  "sessionKey": "gb_session",
+  "lsKey": "gb_builder_v1",
+  "chapterLabel": "Scene",
+  "chapterPh": "Scene 1",
+  "chapterUpper": "SCENE",
+  "titlePh": "e.g. The Kane House Haunting",
+  "subtitlePh": "e.g. A Ghostbusters one-shot",
+  "castTab": "Ghosts/Extras",
+  "castHeading": "Ghosts &amp; Extras",
+  "mobLabel": "Ghost",
+  "bossLabel": "Big Bad",
+  "randomLabel": "Random Extra",
+  "sessionLabel": "Session",
+  "pickerComment": "<!-- Shared dungeon-map engine (Map generator) + the DCC bestiary (mob picker). -->"
+}

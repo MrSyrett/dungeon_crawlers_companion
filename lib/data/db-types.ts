@@ -7,7 +7,7 @@
 // `metal`, `flying`, `poison`…) stay typed as `unknown` rather than failing excess-property checks.
 
 export type DbAttr = "STR" | "CON" | "AGL" | "INT" | "WIL" | "CHA";
-export type DbSource = "core" | "bestiary" | "magic" | "Homebrew";
+export type DbSource = "core" | "bestiary" | "magic" | "pathofglory" | "Homebrew";
 export type DbSupply = "Common" | "Uncommon" | "Rare" | "Unique";
 export type DbCoinUnit = "gold" | "silver" | "copper";
 export interface DbCost { amount: number; unit: DbCoinUnit; per?: string; note?: string }
@@ -74,7 +74,7 @@ export interface DbGear {
 
 export interface DbMonsterAttack {
   roll: number; name: string; damage: string | null; type: string | null; targets: string; range: number;
-  fear: boolean | string; conditions: string[]; prone: boolean; parry: boolean; dodge: boolean; text: string;
+  fear: boolean | string; conditions: string[]; prone: boolean; parry: boolean; dodge: boolean | string; text: string;
   [k: string]: unknown;
 }
 export interface DbMonster {
@@ -83,7 +83,7 @@ export interface DbMonster {
   traits: { name: string; text: string }[]; attacks: DbMonsterAttack[]; source?: DbSource;
   [k: string]: unknown;
 }
-export interface DbNpcWeapon { name: string; skill: number; damage: string; qty?: number }
+export interface DbNpcWeapon { name: string; skill: number | string; damage: string; qty?: number }
 export interface DbNpc {
   id: string; name: string; kind: string; page: number; boss?: boolean; movement?: number;
   damageBonus: Partial<Record<"STR" | "AGL", string>> | null; hp: number; wp: number | null;

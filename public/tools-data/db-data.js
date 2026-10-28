@@ -5215,6 +5215,270 @@ var DB_GEAR = [
   "rank": 5,
   "page": 113,
   "source": "magic"
+ },
+ {
+  "id": "the-seashell-horn",
+  "category": "Magic Items",
+  "name": "The Seashell Horn",
+  "cost": null,
+  "supply": "Unique",
+  "weight": 1,
+  "effect": "A horn carved from a 30 cm seashell — one of the three keys to the Gates of Power. The elven poem (“from the shell each season calls”) hints at its use; see the Gates of Power for how the keys open the gate.",
+  "source": "pathofglory",
+  "page": 35,
+  "key": true
+ },
+ {
+  "id": "the-white-pearl",
+  "category": "Magic Items",
+  "name": "The White Pearl",
+  "cost": null,
+  "supply": "Unique",
+  "weight": 0,
+  "effect": "A sparkling white pearl the size of a fist — the “moonshine bright” key to the Gates of Power named in the elven poem; see the Gates of Power for its use.",
+  "source": "pathofglory",
+  "page": 29,
+  "key": true
+ },
+ {
+  "id": "the-black-pearl",
+  "category": "Magic Items",
+  "name": "The Black Pearl",
+  "cost": null,
+  "supply": "Unique",
+  "weight": 0,
+  "effect": "A fist-sized pearl black as ebony — the “sleek ebony” key to the Gates of Power named in the elven poem; see the Gates of Power for its use.",
+  "source": "pathofglory",
+  "page": 49,
+  "key": true
+ },
+ {
+  "id": "the-elven-pendant",
+  "category": "Magic Items",
+  "name": "The Elven Pendant",
+  "cost": null,
+  "supply": "Unique",
+  "weight": 0,
+  "effect": "A golden pendant the elves forged for the key bearers, engraved with the four-line poem that explains how to use the three keys on the Gates of Power. Kept by the hermit Ulat-A'ar.",
+  "source": "pathofglory",
+  "page": 51
+ },
+ {
+  "id": "silver-headband-of-the-consort",
+  "category": "Magic Items",
+  "name": "Silver Headband of the Consort",
+  "cost": null,
+  "supply": "Unique",
+  "weight": 0,
+  "effect": "Elven-inscribed silver headband imbued with PROTECTOR, MAGIC SEAL and PERMANENCE at power level 2: the wearer casts PROTECTOR from it without a roll (can't fail) for 4 WP per use.",
+  "source": "pathofglory",
+  "page": 31
+ },
+ {
+  "id": "golden-headband-of-the-knight",
+  "category": "Magic Items",
+  "name": "Golden Headband of the Knight",
+  "cost": null,
+  "supply": "Unique",
+  "weight": 0,
+  "effect": "Solid gold headband set with gems, imbued with FARSIGHT, DIVINATION, SCRYING, MAGIC SEAL and PERMANENCE at power level 2: each of the three spells can be cast from it for 4 WP per use.",
+  "source": "pathofglory",
+  "page": 33
+ },
+ {
+  "id": "elusias-ring",
+  "category": "Magic Items",
+  "name": "Elusia's Ring",
+  "cost": null,
+  "supply": "Unique",
+  "weight": 0,
+  "effect": "Gold ring set with a sparkling blue stone, holding 20 WP stored with CHARGE and PERMANENCE that its wearer can draw on for magic.",
+  "source": "pathofglory",
+  "page": 28
+ },
+ {
+  "id": "the-unity-of-everything",
+  "category": "Magic Items",
+  "name": "The Unity of Everything",
+  "cost": null,
+  "supply": "Unique",
+  "weight": 1,
+  "effect": "A treatise on cosmic balance and harmony. A mage who studies it for at least a shift and passes a LANGUAGES roll gains the heroic ability Focused (+2 WP).",
+  "source": "pathofglory",
+  "page": 39
+ },
+ {
+  "id": "stormhands-grimoire",
+  "category": "Magic Items",
+  "name": "Stormhand's Grimoire",
+  "cost": null,
+  "supply": "Unique",
+  "weight": 1,
+  "effect": "Stormhand's personal spellbook, holding every spell he knows (see his stat block). A mage can learn spells from it; Stormhand will defend it with his life.",
+  "source": "pathofglory",
+  "page": 39,
+  "grimoire": true
+ },
+ {
+  "id": "potion-of-animal-whisperer",
+  "category": "Magic Items",
+  "name": "Potion of Animal Whisperer",
+  "cost": {
+   "amount": 50,
+   "unit": "gold"
+  },
+  "supply": "Unique",
+  "weight": 1,
+  "effect": "One dose; drinking it gives the effect of the ANIMAL WHISPERER spell. Elusia sells hers for 50 gold.",
+  "source": "pathofglory",
+  "page": 29,
+  "consumable": true
+ },
+ {
+  "id": "potion-of-levitation",
+  "category": "Magic Items",
+  "name": "Potion of Levitation",
+  "cost": null,
+  "supply": "Unique",
+  "weight": 1,
+  "effect": "One dose; drinking it gives the effect of the LEVITATE spell. Two are in Stormhand's laboratory.",
+  "source": "pathofglory",
+  "page": 39,
+  "consumable": true
+ },
+ {
+  "id": "lefaleth",
+  "category": "Magic Items",
+  "name": "Lefaleth",
+  "cost": null,
+  "supply": "Unique",
+  "weight": 0,
+  "source": "pathofglory",
+  "page": 84,
+  "effect": "Elven amulet of life: a drop-shaped sapphire in a golden rose holding Heal Wound (power level 2) with Magic Seal and Permanence. Runes explain its use (LANGUAGES, a stretch; boon for elves).",
+  "spell": "Heal Wound",
+  "powerLevel": 2
+ },
+ {
+  "id": "wayfinder",
+  "category": "Magic Items",
+  "name": "Wayfinder",
+  "cost": null,
+  "supply": "Unique",
+  "weight": 0,
+  "source": "pathofglory",
+  "page": 84,
+  "effect": "Halfling ring of the road: red gold set with a pearl, holding Teleport (power level 2) with Magic Seal and Permanence. Runes explain its use (LANGUAGES, a stretch; boon for halflings).",
+  "spell": "Teleport",
+  "powerLevel": 2
+ },
+ {
+  "id": "headband-of-farsight",
+  "category": "Magic Items",
+  "name": "Headband of Farsight",
+  "cost": null,
+  "supply": "Unique",
+  "weight": 0,
+  "source": "pathofglory",
+  "page": 77,
+  "effect": "White-gold headband set with sapphires (tiny item) holding Farsight (power level 2) with Magic Seal and Permanence. An Old High Dwarvish inscription reveals the magic (LANGUAGES).",
+  "spell": "Farsight",
+  "powerLevel": 2
+ },
+ {
+  "id": "silver-staff-of-the-gnome",
+  "category": "Magic Items",
+  "name": "Silver Staff of the Gnome",
+  "cost": null,
+  "supply": "Unique",
+  "weight": 1,
+  "source": "pathofglory",
+  "page": 77,
+  "effect": "Half-metre silver staff holding Gnome (power level 3) with Magic Seal and Permanence. Winding runes along the shaft reveal the magic (LANGUAGES).",
+  "spell": "Gnome",
+  "powerLevel": 3
+ },
+ {
+  "id": "dwarven-healing-draught",
+  "category": "Magic Items",
+  "name": "Dwarven Healing Draught",
+  "cost": null,
+  "supply": "Unique",
+  "weight": 1,
+  "source": "pathofglory",
+  "page": 77,
+  "effect": "Corked, wax-sealed bottle of milky pink, spicy-smelling liquid (HEALING identifies it). Drinking one heals 3D6 HP and as many WP. The chest in #29 holds one fewer than the number of heroes (at least one).",
+  "consumable": true,
+  "heal": "3D6"
+ },
+ {
+  "id": "iron-tablet-of-fire-blast",
+  "category": "Magic Items",
+  "name": "Iron Tablet of Fire Blast",
+  "cost": null,
+  "supply": "Unique",
+  "weight": 1,
+  "source": "pathofglory",
+  "page": 75,
+  "effect": "Small iron tablet carved with dwarven symbols, hidden in the fire master's murals (#24). Works as a grimoire holding the Fire Blast spell.",
+  "spell": "Fire Blast"
+ },
+ {
+  "id": "dwarven-brandy",
+  "category": "Magic Items",
+  "name": "Dwarven Brandy",
+  "cost": null,
+  "supply": "Unique",
+  "weight": 1,
+  "source": "pathofglory",
+  "page": 79,
+  "effect": "Smoked or mushroom-spiced brandy from the beverage storeroom (#35). A dose heals one condition of choice except Dazed, then roll CON — failure means Dazed. More than one dose per shift: automatically Dazed and no benefit.",
+  "consumable": true
+ },
+ {
+  "id": "telvins-ringmail",
+  "category": "Magic Items",
+  "name": "Telvin's Ringmail",
+  "cost": null,
+  "supply": "Unique",
+  "weight": 1,
+  "page": 121,
+  "source": "pathofglory",
+  "effect": "Heirloom armor kept in Otag's armory. Counts as studded leather (armor 2), but its rating is 2 higher against slashing damage."
+ },
+ {
+  "id": "spider-silk-tunic-with-winged-cloak",
+  "category": "Magic Items",
+  "name": "Spider Silk Tunic with Winged Cloak",
+  "cost": null,
+  "supply": "Unique",
+  "weight": 1,
+  "page": 107,
+  "source": "pathofglory",
+  "effect": "Ankh-Tah-Leh's assassin garb. Protects as chainmail (armor 4) without the bane on Sneaking and Evade; the attached winged cloak lets the wearer glide at double movement."
+ },
+ {
+  "id": "the-heart-of-darkness",
+  "category": "Magic Items",
+  "name": "The Heart of Darkness",
+  "cost": null,
+  "supply": "Unique",
+  "weight": 0,
+  "source": "pathofglory",
+  "page": 145,
+  "effect": "Sathmog's shrunken, still-beating heart (a tiny item) kept in a black stone box. Its bearer gets a boon on every roll, is warded as by PROTECTOR at power level 2, and can draw on 24 WP stored in it, refilled each midnight. Touching the box first forces a WIL roll vs fear (success heals all conditions). Only a dagger holding a death wight's soul can destroy it, on the altar of the Temple of Winds."
+ },
+ {
+  "id": "muriels-grimoire",
+  "category": "Magic Items",
+  "name": "Muriel's Grimoire",
+  "cost": null,
+  "supply": "Unique",
+  "weight": 1,
+  "source": "pathofglory",
+  "page": 133,
+  "grimoire": true,
+  "effect": "Leather grimoire of the elven animist Muriel holding PURGE, HEAL WOUND, ENGULFING FOREST and SLEEP. Its pages are coated with a lethal contact poison (potency 15); leafing through it bare-handed exposes the reader — use tweezers or similar to read it safely."
  }
 ];
 window.DB_GEAR = DB_GEAR;
@@ -17155,6 +17419,2732 @@ var DB_MONSTERS = [
   "encounter": "The party camps in an ancient ruin; Myths & Legends reveals it was a stone circle for magic rituals. That night they all dream of a monster of darkness tearing at the world — their sleep doesn't count as rest, and they had best move on at once.",
   "seed": "Archmage Gabril of Berg lies in an unbreakable sleep, thrashing and muttering of monsters, stars and nameless gods. Exploring her tower, the party finds signs of a failed ritual that let something through from the demonic realm: a shadow demon hiding in the darkest corners, emerging at night to feed on her suffering. Only banishing it will save her.",
   "source": "bestiary"
+ },
+ {
+  "id": "ketolus",
+  "category": "Path of Glory",
+  "source": "pathofglory",
+  "name": "Ketolus",
+  "page": 21,
+  "ferocity": 2,
+  "size": "Large",
+  "movement": 20,
+  "armor": null,
+  "hp": 28,
+  "gear": [
+   "Short Spear",
+   "Longbow",
+   "Quiver"
+  ],
+  "text": "The Dead Forest's one and only centaur, a lonely hunter who brings game to the animist Elusia every dawn and is quietly in love with her. Wary of outsiders; knows the forest's paths and folk better than anyone and will ride to Elusia's defence in an instant.",
+  "traits": [
+   {
+    "name": "Alcohol Tolerance",
+    "text": "Can put away vast amounts of wine and beer without getting particularly drunk."
+   },
+   {
+    "name": "Typical Gear",
+    "text": "Short spear, longbow and a quiver of arrows."
+   },
+   {
+    "name": "Suspicious",
+    "text": "Strangers must pass PERSUASION or BLUFFING before he shares rumors or leads them to Elusia."
+   }
+  ],
+  "attacks": [
+   {
+    "damage": "2D6",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "roll": 1,
+    "name": "Horse Kick",
+    "text": "Kicks backwards, throwing the victim 2D6 m for the same bludgeoning damage; they land prone."
+   },
+   {
+    "damage": "2D10",
+    "type": "piercing",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": true,
+    "dodge": true,
+    "roll": 2,
+    "name": "Spear Thrust",
+    "weapon": true,
+    "text": "Thrusts its short spear for 2D10 piercing. Can be parried."
+   },
+   {
+    "damage": "2D6",
+    "type": "bludgeoning",
+    "targets": "two within 2 m of each other",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "roll": 3,
+    "name": "Crushing Hooves",
+    "text": "Rears and stamps on two characters within 2 m of each other: 2D6 bludgeoning each."
+   },
+   {
+    "damage": "D12",
+    "type": "piercing",
+    "targets": "one",
+    "range": 30,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "roll": 4,
+    "name": "Quick Shot",
+    "ranged": true,
+    "text": "Looses an arrow at someone within 30 m — preferably a mage or archer — for D12 piercing."
+   },
+   {
+    "damage": "2D10",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "roll": 5,
+    "name": "Ramming Attack",
+    "text": "Slams its full weight into one foe: 2D10 bludgeoning and knocked down."
+   },
+   {
+    "damage": null,
+    "type": null,
+    "targets": "all enemies within 10 m",
+    "range": 10,
+    "fear": false,
+    "conditions": [
+     "Angry"
+    ],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "roll": 6,
+    "name": "Mocking Laughter",
+    "text": "Deafening, scornful laughter: every enemy within 10 m rolls WIL or becomes Angry; anyone already Angry takes another condition of their choice."
+   }
+  ]
+ },
+ {
+  "id": "grim",
+  "category": "Path of Glory",
+  "source": "pathofglory",
+  "name": "Grim",
+  "page": 22,
+  "ferocity": 2,
+  "size": "Large",
+  "movement": 16,
+  "armor": null,
+  "hp": 32,
+  "gear": [
+   "Two-Handed Axe"
+  ],
+  "text": "One of the minotaur brothers Grim and Grum, the worst brutes of the Dead Forest, who live only to fight anyone able to put up the slightest resistance — bellowing their war cry “We get glory!” Usually met together with his brother Grum.",
+  "traits": [
+   {
+    "name": "Glory Seeker",
+    "text": "Once roused it can't be stopped — unless a target convinces it there's no honor in beating someone so feeble and pathetic (PERSUASION roll)."
+   },
+   {
+    "name": "Gear",
+    "text": "Two-handed axe."
+   }
+  ],
+  "attacks": [
+   {
+    "damage": "2D6",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [
+     "Dazed"
+    ],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "roll": 1,
+    "name": "Bull Fist",
+    "text": "A full-force punch: 2D6 bludgeoning and Dazed even if armor stops the damage."
+   },
+   {
+    "damage": "2D6",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "roll": 2,
+    "name": "Hoof Kick",
+    "text": "Kicks the victim 2D6 m away for the same bludgeoning damage; they land prone."
+   },
+   {
+    "damage": "2D8",
+    "type": "piercing",
+    "targets": "two within 2 m of each other",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "roll": 3,
+    "name": "Horn Rush",
+    "text": "Charges two enemies within 2 m of each other: 2D8 piercing each and knocked down."
+   },
+   {
+    "damage": "weapon+D10",
+    "type": null,
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": true,
+    "dodge": true,
+    "roll": 4,
+    "name": "Cleaving Chop",
+    "weapon": true,
+    "text": "An overhead chop for weapon damage plus D10. Can be parried."
+   },
+   {
+    "damage": "weapon",
+    "type": null,
+    "targets": "all within 2 m",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "roll": 5,
+    "name": "Sweeping Attack",
+    "weapon": true,
+    "text": "A wide sweep hits everyone within 2 m for weapon damage."
+   },
+   {
+    "damage": "2D10",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "roll": 6,
+    "name": "Stomping Attack",
+    "text": "Leaps and lands on one adventurer: 2D10 bludgeoning and knocked down."
+   }
+  ]
+ },
+ {
+  "id": "grum",
+  "category": "Path of Glory",
+  "source": "pathofglory",
+  "name": "Grum",
+  "page": 22,
+  "ferocity": 2,
+  "size": "Large",
+  "movement": 16,
+  "armor": null,
+  "hp": 32,
+  "gear": [
+   "Two-Handed Axe"
+  ],
+  "text": "One of the minotaur brothers Grim and Grum, the worst brutes of the Dead Forest, who live only to fight anyone able to put up the slightest resistance — bellowing their war cry “We get glory!” Usually met together with his brother Grim.",
+  "traits": [
+   {
+    "name": "Glory Seeker",
+    "text": "Once roused it can't be stopped — unless a target convinces it there's no honor in beating someone so feeble and pathetic (PERSUASION roll)."
+   },
+   {
+    "name": "Gear",
+    "text": "Two-handed axe."
+   }
+  ],
+  "attacks": [
+   {
+    "damage": "2D6",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [
+     "Dazed"
+    ],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "roll": 1,
+    "name": "Bull Fist",
+    "text": "A full-force punch: 2D6 bludgeoning and Dazed even if armor stops the damage."
+   },
+   {
+    "damage": "2D6",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "roll": 2,
+    "name": "Hoof Kick",
+    "text": "Kicks the victim 2D6 m away for the same bludgeoning damage; they land prone."
+   },
+   {
+    "damage": "2D8",
+    "type": "piercing",
+    "targets": "two within 2 m of each other",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "roll": 3,
+    "name": "Horn Rush",
+    "text": "Charges two enemies within 2 m of each other: 2D8 piercing each and knocked down."
+   },
+   {
+    "damage": "weapon+D10",
+    "type": null,
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": true,
+    "dodge": true,
+    "roll": 4,
+    "name": "Cleaving Chop",
+    "weapon": true,
+    "text": "An overhead chop for weapon damage plus D10. Can be parried."
+   },
+   {
+    "damage": "weapon",
+    "type": null,
+    "targets": "all within 2 m",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "roll": 5,
+    "name": "Sweeping Attack",
+    "weapon": true,
+    "text": "A wide sweep hits everyone within 2 m for weapon damage."
+   },
+   {
+    "damage": "2D10",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "roll": 6,
+    "name": "Stomping Attack",
+    "text": "Leaps and lands on one adventurer: 2D10 bludgeoning and knocked down."
+   }
+  ]
+ },
+ {
+  "id": "the-knight-in-black",
+  "category": "Path of Glory",
+  "source": "pathofglory",
+  "name": "The Knight in Black",
+  "page": 25,
+  "ferocity": 2,
+  "size": "Large",
+  "movement": 24,
+  "armor": 6,
+  "hp": 42,
+  "gear": [
+   "Lance",
+   "Morningstar",
+   "Black plate armor",
+   "Armored black warhorse"
+  ],
+  "text": "A towering knight in black plate on a huge black warhorse, lance lowered at all he meets. Once a dragon knight of Emperor Eledain, his mind was twisted by the necromancer Dakoth, who sent him to the Dead Forest to slay anyone who might find or open the Gates of Power. He barely speaks and never heeds pleas for mercy.",
+  "traits": [
+   {
+    "name": "Mounted",
+    "text": "Fights as a monster and never leaves his horse; rider and steed are one stat block."
+   },
+   {
+    "name": "Opening Charge",
+    "text": "His first monster attack is always #1 (Lance Blow); after that roll randomly."
+   },
+   {
+    "name": "Retreat",
+    "text": "Tries to escape once he has lost half his HP. If he survives, he can return later at full HP."
+   },
+   {
+    "name": "Merciless",
+    "text": "Leaves defeated foes lying to die."
+   }
+  ],
+  "attacks": [
+   {
+    "roll": 1,
+    "name": "Lance Blow",
+    "damage": "3D10",
+    "type": "piercing",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": true,
+    "dodge": true,
+    "shieldOnly": true,
+    "text": "Charges at full gallop and runs one character through with his lance: 3D10 piercing. Can be parried only with a shield, not a weapon."
+   },
+   {
+    "roll": 2,
+    "name": "Hissing Threat",
+    "damage": null,
+    "type": null,
+    "targets": "all player characters",
+    "range": 10,
+    "fear": true,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Halts and calls on the horrors of the Outer Darkness in an alien tongue: every player character within 10 m rolls WIL against fear."
+   },
+   {
+    "roll": 3,
+    "name": "Strike From Above",
+    "damage": "3D8",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": true,
+    "dodge": true,
+    "text": "Rides at one character and brings his heavy morningstar down from the saddle: 3D8 bludgeoning. Can be parried."
+   },
+   {
+    "roll": 4,
+    "name": "Horse Kick",
+    "damage": "D10",
+    "type": null,
+    "targets": "two within 2 m of each other",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "The warhorse lashes out at two characters within 2 m of each other: D10 damage each, and both are knocked down."
+   },
+   {
+    "roll": 5,
+    "name": "Iron Grip",
+    "damage": "2D10",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "Seizes a character and drags them 2D10 m along the ground, dealing that many points of bludgeoning damage; they end up prone."
+   },
+   {
+    "roll": 6,
+    "name": "Escape",
+    "damage": null,
+    "type": null,
+    "targets": "self",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": false,
+    "text": "He pauses as if scenting something on the wind, wheels his horse and gallops away. The fight ends."
+   }
+  ]
+ },
+ {
+  "id": "the-knights-consort",
+  "category": "Path of Glory",
+  "source": "pathofglory",
+  "name": "The Knight's Consort",
+  "page": 31,
+  "ferocity": 2,
+  "size": "Normal",
+  "movement": 12,
+  "armor": null,
+  "hp": 27,
+  "text": "The vengeful ghost of the barrow knight's wife, buried beside him in the Old Barrow. She manifests the moment anyone touches her bones or grave goods and attacks at once; there's no reasoning with her.",
+  "traits": [
+   {
+    "name": "Immunity",
+    "text": "Immune to all damage except magic and fire. Defeating her only banishes her for a shift before she returns; only PURGE ends her for good."
+   },
+   {
+    "name": "Implacable",
+    "text": "Can't be persuaded or reasoned with."
+   }
+  ],
+  "immunities": [
+   "All damage except magic and fire"
+  ],
+  "attacks": [
+   {
+    "roll": 1,
+    "name": "Ghost Strike",
+    "damage": "2D6",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 10,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "Lunges at a player character within 10 m, hurling them 2D6 m back for the same bludgeoning damage; they land prone."
+   },
+   {
+    "roll": 2,
+    "name": "Touch of Death",
+    "damage": "2D10",
+    "type": null,
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [
+     "Scared"
+    ],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Reaches into the victim's chest and grips the heart: 2D10 damage, armor doesn't help, and they become Scared.",
+    "ignoresArmor": true
+   },
+   {
+    "roll": 3,
+    "name": "Ghost Scream",
+    "damage": null,
+    "type": null,
+    "targets": "all player characters within 10 m",
+    "range": 10,
+    "fear": true,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "A soul-chilling scream: every player character within 10 m rolls WIL against fear."
+   },
+   {
+    "roll": 4,
+    "name": "Death Stare",
+    "damage": null,
+    "type": null,
+    "targets": "one",
+    "range": 2,
+    "fear": "bane",
+    "conditions": [
+     "Scared"
+    ],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Stares into one character's soul with visions of the dead: they become Scared and suffer a fear attack with a bane on the WIL roll."
+   },
+   {
+    "roll": 5,
+    "name": "Ghostly Embrace",
+    "damage": "3D6",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 10,
+    "fear": false,
+    "conditions": [
+     "Dazed"
+    ],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Appears in front of someone within 10 m and smothers them: 3D6 bludgeoning and Dazed."
+   },
+   {
+    "roll": 6,
+    "name": "Cold Strike",
+    "damage": "2D8",
+    "type": null,
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "The chill of death: 2D8 damage, armor doesn't help, and no HP or WP healing until they spend a shift somewhere warm.",
+    "ignoresArmor": true
+   }
+  ]
+ },
+ {
+  "id": "the-knight",
+  "category": "Path of Glory",
+  "source": "pathofglory",
+  "name": "The Knight",
+  "page": 33,
+  "ferocity": 2,
+  "size": "Normal",
+  "movement": 10,
+  "armor": "as worn",
+  "armorValue": 4,
+  "hp": 38,
+  "gear": [
+   "Longsword",
+   "Chainmail"
+  ],
+  "text": "The ancient knight buried in the Old Barrow, his skull split from above and held together by a jeweled gold headband. Now a wight, he rises the instant anyone disturbs his coffin, his body or his treasure.",
+  "traits": [
+   {
+    "name": "Resistance",
+    "text": "Half damage from non-magical weapons; fire deals normal damage."
+   },
+   {
+    "name": "Gear",
+    "text": "Enchanted longsword (2D8) and rusted chainmail (armor 4). The sword's enchantment doesn't apply to his monster attacks."
+   }
+  ],
+  "resistances": [
+   "Non-magical weapons (fire excepted)"
+  ],
+  "attacks": [
+   {
+    "roll": 1,
+    "name": "Unholy Roar",
+    "damage": null,
+    "type": null,
+    "targets": "all within 10 m",
+    "range": 10,
+    "fear": true,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "A ghastly scream: everyone within 10 m rolls WIL against fear."
+   },
+   {
+    "roll": 2,
+    "name": "Dreadful Gaze",
+    "damage": null,
+    "type": null,
+    "targets": "one",
+    "range": 2,
+    "fear": "bane",
+    "conditions": [
+     "Scared"
+    ],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "One victim meets its eyes: they become Scared and suffer a fear attack with a bane on the WIL roll."
+   },
+   {
+    "roll": 3,
+    "name": "Hand of the Dead",
+    "damage": "2D4",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 10,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": false,
+    "text": "A gesture flings a foe within 10 m 2D4 m away for the same bludgeoning damage; they land prone. Can't be dodged."
+   },
+   {
+    "roll": 4,
+    "name": "Sweeping Attack",
+    "damage": "weapon",
+    "type": null,
+    "targets": "all within 2 m",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": true,
+    "dodge": true,
+    "text": "A sudden sweep of its weapon hits every opponent within 2 m for weapon damage. Can be parried.",
+    "weapon": true
+   },
+   {
+    "roll": 5,
+    "name": "Crippling Cold",
+    "damage": "D6",
+    "type": null,
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Grabs a victim: D6 damage ignoring armor; on their next turn they must pass Evade (not an action) to act at all, retrying each turn. They also become cold (Rulebook p.54) and can't heal HP or WP until warm.",
+    "ignoresArmor": true
+   },
+   {
+    "roll": 6,
+    "name": "Power Attack",
+    "damage": "weapon×2",
+    "type": null,
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": true,
+    "dodge": true,
+    "text": "A mighty swing rolling double the weapon's damage dice that knocks the victim down. Can be parried.",
+    "weapon": true
+   }
+  ]
+ },
+ {
+  "id": "laurinde-the-swan-maiden",
+  "category": "Path of Glory",
+  "source": "pathofglory",
+  "name": "Laurinde the Swan Maiden",
+  "page": 38,
+  "ferocity": 1,
+  "size": "Normal",
+  "movement": 14,
+  "flying": true,
+  "armor": null,
+  "hp": 16,
+  "text": "An elf swan maiden whom Stormhand caught and caged in his lair for study. She stays in swan form and silent until sure her rescuers aren't the mage's servants, then demands her freedom and swears to aid them in need — or becomes their sworn enemy if they side with Stormhand.",
+  "traits": [
+   {
+    "name": "Shapeshifter",
+    "text": "Changes between elf and white swan (either way) as an action. In elf form she's an ordinary NPC; in swan form a monster that can still speak. Clothes and gear change with her unless metal or heavier than half her carrying capacity."
+   },
+   {
+    "name": "Wings",
+    "text": "In swan form she flies freely."
+   },
+   {
+    "name": "Ally",
+    "text": "Fighting beside the player characters in swan form she doesn't roll on her table — she always uses attack #1 or #2 against their enemies."
+   }
+  ],
+  "attacks": [
+   {
+    "damage": "D8",
+    "type": "bludgeoning",
+    "targets": "all within 4 m",
+    "range": 4,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "roll": 1,
+    "name": "Wingbeat",
+    "text": "A gust from her wings: every creature up to human size within 4 m is hurled D8 m, takes the same in bludgeoning and lands prone."
+   },
+   {
+    "damage": "2D8",
+    "type": "slashing",
+    "targets": "one",
+    "range": 2,
+    "fear": true,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "roll": 2,
+    "name": "Pecking Attack",
+    "text": "Repeated pecks: 2D8 slashing and a fear attack (WIL roll)."
+   },
+   {
+    "damage": null,
+    "type": null,
+    "targets": "all within 10 m",
+    "range": 10,
+    "fear": false,
+    "conditions": [
+     "Disheartened"
+    ],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "roll": 3,
+    "name": "Swan Song",
+    "text": "A lament for the fallen: everyone within 10 m becomes Disheartened, or takes another condition of their choice if already Disheartened."
+   },
+   {
+    "damage": "2D4",
+    "type": "slashing",
+    "targets": "all enemies within 10 m",
+    "range": 10,
+    "fear": true,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "roll": 4,
+    "name": "Flock of Swans",
+    "text": "Summoned swans mob her foes: every enemy within 10 m takes 2D4 slashing and a fear attack."
+   },
+   {
+    "damage": null,
+    "type": null,
+    "targets": "one",
+    "range": 10,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": false,
+    "roll": 5,
+    "name": "Pleading Gaze",
+    "text": "Begs someone within 10 m to stop fighting: they roll WIL or immediately take a movement and an action (no WP) of the GM's choosing, and lose their turn this round if they haven't acted."
+   },
+   {
+    "damage": null,
+    "type": null,
+    "targets": "one",
+    "range": 10,
+    "fear": "bane",
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": false,
+    "roll": 6,
+    "name": "Gift of the Gods",
+    "text": "Curses a foe within 10 m with chaotic visions of ancient times: fear attack with a bane on the WIL roll."
+   }
+  ]
+ },
+ {
+  "id": "obald",
+  "category": "Path of Glory",
+  "source": "pathofglory",
+  "name": "Obald",
+  "page": 45,
+  "ferocity": 2,
+  "size": "Large",
+  "movement": 12,
+  "armor": 2,
+  "hp": 42,
+  "regeneration": "D6",
+  "weaknesses": [
+   "Sunlight"
+  ],
+  "text": "One of the two cave trolls (Obald and Stoka) living apart from the hobgoblins in the Chasm of Caves — ravenous brutes who see every creature as a meal, though a PERSUASION roll plus a gift of valuables can calm them. Hunts alone at night and may ambush travelers in the forest.",
+  "traits": [
+   {
+    "name": "Sensitive to Sunlight",
+    "text": "Takes D6 damage per round in direct sunlight and can't regenerate; a troll brought to zero HP this way turns to stone. Thick cloud or full-cover clothing protects it."
+   },
+   {
+    "name": "Regeneration",
+    "text": "Heals D6 HP each turn in combat, unless it is at zero HP."
+   },
+   {
+    "name": "Treasure Eater",
+    "text": "Craves gold coins and small gold items above all food; its belly usually holds D12 gold coins."
+   }
+  ],
+  "attacks": [
+   {
+    "roll": 1,
+    "name": "Rolling Attack",
+    "damage": "2D8",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "Curls into a boulder and rolls into one enemy: 2D8 bludgeoning, knocked down."
+   },
+   {
+    "roll": 2,
+    "name": "Cave Bats",
+    "damage": null,
+    "type": null,
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": false,
+    "summons": "Vampiric Bats",
+    "text": "Stirs up a flock of cave bats that attack its enemies for D3 rounds (use the vampiric bats, Rulebook p.99)."
+   },
+   {
+    "roll": 3,
+    "name": "Head to Head",
+    "damage": "2D6",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [
+     "Dazed"
+    ],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "helmetOnly": true,
+    "text": "Headbutt: 2D6 bludgeoning and Dazed. Only a helmet reduces the damage."
+   },
+   {
+    "roll": 4,
+    "name": "Gobble",
+    "damage": "2D8",
+    "type": "piercing",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Bites for 2D8 piercing and holds the victim in its maw: they must roll STR (an action) each round to break free, taking another 2D8 on a failure."
+   },
+   {
+    "roll": 5,
+    "name": "Golden Spit",
+    "damage": "D10",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 6,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "ranged": true,
+    "text": "Spits a gold coin at someone within 6 m: D10 bludgeoning, a condition of the victim's choice — and they are 1 gold richer."
+   },
+   {
+    "roll": 6,
+    "name": "Troll Throw",
+    "damage": "2D8",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "Hurls a character 2D8 m in a random direction for the same bludgeoning damage; they land prone."
+   }
+  ]
+ },
+ {
+  "id": "stoka",
+  "category": "Path of Glory",
+  "source": "pathofglory",
+  "name": "Stoka",
+  "page": 45,
+  "ferocity": 2,
+  "size": "Large",
+  "movement": 12,
+  "armor": 2,
+  "hp": 42,
+  "regeneration": "D6",
+  "weaknesses": [
+   "Sunlight"
+  ],
+  "text": "One of the two cave trolls (Obald and Stoka) living apart from the hobgoblins in the Chasm of Caves — ravenous brutes who see every creature as a meal, though a PERSUASION roll plus a gift of valuables can calm them. Sleeps in the troll lair by day and roams out at night.",
+  "traits": [
+   {
+    "name": "Sensitive to Sunlight",
+    "text": "Takes D6 damage per round in direct sunlight and can't regenerate; a troll brought to zero HP this way turns to stone. Thick cloud or full-cover clothing protects it."
+   },
+   {
+    "name": "Regeneration",
+    "text": "Heals D6 HP each turn in combat, unless it is at zero HP."
+   },
+   {
+    "name": "Treasure Eater",
+    "text": "Craves gold coins and small gold items above all food; its belly usually holds D12 gold coins."
+   }
+  ],
+  "attacks": [
+   {
+    "roll": 1,
+    "name": "Rolling Attack",
+    "damage": "2D8",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "Curls into a boulder and rolls into one enemy: 2D8 bludgeoning, knocked down."
+   },
+   {
+    "roll": 2,
+    "name": "Cave Bats",
+    "damage": null,
+    "type": null,
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": false,
+    "summons": "Vampiric Bats",
+    "text": "Stirs up a flock of cave bats that attack its enemies for D3 rounds (use the vampiric bats, Rulebook p.99)."
+   },
+   {
+    "roll": 3,
+    "name": "Head to Head",
+    "damage": "2D6",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [
+     "Dazed"
+    ],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "helmetOnly": true,
+    "text": "Headbutt: 2D6 bludgeoning and Dazed. Only a helmet reduces the damage."
+   },
+   {
+    "roll": 4,
+    "name": "Gobble",
+    "damage": "2D8",
+    "type": "piercing",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Bites for 2D8 piercing and holds the victim in its maw: they must roll STR (an action) each round to break free, taking another 2D8 on a failure."
+   },
+   {
+    "roll": 5,
+    "name": "Golden Spit",
+    "damage": "D10",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 6,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "ranged": true,
+    "text": "Spits a gold coin at someone within 6 m: D10 bludgeoning, a condition of the victim's choice — and they are 1 gold richer."
+   },
+   {
+    "roll": 6,
+    "name": "Troll Throw",
+    "damage": "2D8",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "Hurls a character 2D8 m in a random direction for the same bludgeoning damage; they land prone."
+   }
+  ]
+ },
+ {
+  "id": "mogdath",
+  "category": "Path of Glory",
+  "name": "Mogdath",
+  "source": "pathofglory",
+  "page": 59,
+  "boss": true,
+  "ferocity": 2,
+  "size": "Normal",
+  "movement": 10,
+  "armor": 6,
+  "hp": 64,
+  "undead": true,
+  "gear": [
+   "Aleth-Kheloch",
+   "Plate Armor",
+   "Keys (#11, #17, #29 chest)"
+  ],
+  "text": "A death wight — once a power-hungry knight of Eledain, raised by Dakoth as a fully material knight of living darkness with ember-red eyes, black plate and a black cloak. Unlike common wights it is not tied to one place but goes where its master sends it. Paranoid, quick to rage, cowardly and terrified of fire.",
+  "traits": [
+   {
+    "name": "Resistance",
+    "text": "Non-magical weapons deal half damage; fire, magic and magical weapons deal full damage."
+   },
+   {
+    "name": "Sensitive to Sunlight",
+    "text": "Takes D6 damage per stretch in direct sunlight; cloud cover is enough to stop it, but Mogdath prefers to move at night above ground."
+   },
+   {
+    "name": "Immortal",
+    "text": "No ordinary means (magic included) can end him: at zero HP he rises again with full HP one shift later — unless his spirit is bound into Tefalas' Dagger."
+   },
+   {
+    "name": "Wary of the Dagger",
+    "text": "Knows Tefalas' Dagger on sight; whenever he has a turn left in the round he always parries its attacks, rolling against 15."
+   },
+   {
+    "name": "Aleth-Kheloch",
+    "text": "Mastercrafted two-handed sword with a permanent Enchant Weapon (power level 1); damage 2D10. A living wielder is automatically Disheartened in direct sunlight and can't shake it there."
+   },
+   {
+    "name": "Farsight",
+    "text": "Regularly spies on far parts of the realm with a form of Farsight, appearing there as a shimmering blue phantom of himself (run through random events)."
+   },
+   {
+    "name": "Keys",
+    "text": "Carries the keys to the spiral-stair doors (#10/#11), the council chamber doors (#16/#17) and the locked chest in the Lord Councilor's chamber (#29)."
+   }
+  ],
+  "resistances": [
+   "Non-magical weapons (fire, magic and magical weapons deal full damage)"
+  ],
+  "attacks": [
+   {
+    "roll": 1,
+    "name": "Ghost Scream",
+    "damage": null,
+    "type": null,
+    "targets": "all within 20 m",
+    "range": 20,
+    "fear": "bane",
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "A shriek like a rusty blade through the soul: everyone within 20 m suffers a fear attack with a bane on the WIL roll."
+   },
+   {
+    "roll": 2,
+    "name": "Dreadful Gaze",
+    "damage": null,
+    "type": null,
+    "targets": "one",
+    "range": 10,
+    "fear": "bane",
+    "conditions": [
+     "Scared"
+    ],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "A victim within 10 m is caught by the burning red eyes: they become Scared and suffer a fear attack with a bane on the WIL roll."
+   },
+   {
+    "roll": 3,
+    "name": "Domination",
+    "damage": null,
+    "type": null,
+    "targets": "one",
+    "range": 10,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "A spell seizes a victim within 10 m: unless they pass a WIL roll with a bane (not an action) they immediately make a movement and an action of the GM's choosing, and lose their own turn this round if it hasn't come yet."
+   },
+   {
+    "roll": 4,
+    "name": "Sweeping Attack",
+    "damage": "2D10",
+    "type": null,
+    "targets": "all within 2 m",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": true,
+    "dodge": true,
+    "text": "Sweeps through the party like a dark cloud: everyone within 2 m takes weapon damage (2D10). Can be parried.",
+    "weapon": true
+   },
+   {
+    "roll": 5,
+    "name": "Life Drain",
+    "damage": "D10",
+    "type": null,
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Grabs a victim and draws out their life: they lose D10 HP and the same amount of WP (armor doesn't help), and Mogdath heals that many HP.",
+    "ignoresArmor": true,
+    "drain": true,
+    "wpDamage": "D10"
+   },
+   {
+    "roll": 6,
+    "name": "Power Attack",
+    "damage": "4D10",
+    "type": null,
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": true,
+    "dodge": true,
+    "text": "A silent, crushing swing at one character for double weapon damage (4D10); the victim is knocked down. Can be parried.",
+    "weapon": true
+   }
+  ]
+ },
+ {
+  "id": "daz",
+  "category": "Path of Glory",
+  "name": "Daz",
+  "source": "pathofglory",
+  "page": 60,
+  "ferocity": 2,
+  "size": "Normal",
+  "movement": 12,
+  "armor": null,
+  "hp": 32,
+  "undead": true,
+  "text": "A shadow wraith — a featureless, jet-black silhouette, tall, with a cloak that stirs in still air. Mogdath's second-in-command, a necromancer in life who still studies the Outer Darkness for Dakoth. Rules the forge orcs and mine ogres through fear; cold, calculating, fond of frost spells cast from ambush.",
+  "traits": [
+   {
+    "name": "Resistance",
+    "text": "Non-magical weapons and attacks deal half damage; fire deals full damage."
+   },
+   {
+    "name": "Sensitive to Sunlight",
+    "text": "Takes D6 damage per stretch in direct sunlight."
+   },
+   {
+    "name": "Shadow Form",
+    "text": "Half-material and hovering, but cannot pass through solid matter; moves objects by will alone."
+   },
+   {
+    "name": "Variant",
+    "text": "Daz's Frostbite deals 3D6; her Life Drain is D8 HP and D6 WP."
+   }
+  ],
+  "resistances": [
+   "Non-magical weapons and attacks (fire excepted)"
+  ],
+  "attacks": [
+   {
+    "roll": 1,
+    "name": "Touch of Death",
+    "damage": "2D10",
+    "type": null,
+    "targets": "one",
+    "range": 4,
+    "fear": false,
+    "conditions": [
+     "Scared"
+    ],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Plunges a shadow hand into the chest of a victim within 4 m and squeezes the heart: 2D10 damage, armor doesn't help, and the victim becomes Scared.",
+    "ignoresArmor": true
+   },
+   {
+    "roll": 2,
+    "name": "Ghost Scream",
+    "damage": null,
+    "type": null,
+    "targets": "all within 20 m",
+    "range": 20,
+    "fear": true,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "The silhouette swells and shrieks: everyone within 20 m suffers a fear attack."
+   },
+   {
+    "roll": 3,
+    "name": "Crippling Cold",
+    "damage": "D8",
+    "type": null,
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Seizes a victim and freezes them stiff: D8 damage ignoring armor; on their next turn they must pass EVADE (not an action) to act at all, retrying each turn. They are also cold (core p.54) and heal no HP or WP until warmed.",
+    "ignoresArmor": true
+   },
+   {
+    "roll": 4,
+    "name": "Frostbite",
+    "damage": "3D6",
+    "type": "cold",
+    "targets": "two within 2 m of each other",
+    "range": 10,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "A cold spell coats two characters within 10 m (no more than 2 m apart) in ice: 3D6 damage each, armor doesn't help.",
+    "ignoresArmor": true
+   },
+   {
+    "roll": 5,
+    "name": "Life Drain",
+    "damage": "D8",
+    "type": null,
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Grips a victim with both hands and feeds: they lose D8 HP and D6 WP (armor doesn't help) and the wraith heals the HP lost.",
+    "ignoresArmor": true,
+    "drain": true,
+    "wpDamage": "D6"
+   },
+   {
+    "roll": 6,
+    "name": "Cloud of Darkness",
+    "damage": null,
+    "type": null,
+    "targets": "all within 10 m",
+    "range": 10,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Dissolves into a black cloud covering everyone within 10 m: total darkness (core p.52) this round and the next that mundane light can't pierce. It can keep making monster attacks in this form."
+   }
+  ]
+ },
+ {
+  "id": "gozar",
+  "category": "Path of Glory",
+  "name": "Gozar",
+  "source": "pathofglory",
+  "page": 60,
+  "ferocity": 2,
+  "size": "Normal",
+  "movement": 12,
+  "armor": null,
+  "hp": 38,
+  "undead": true,
+  "text": "A shadow wraith — a short, stocky black silhouette. Once Daz's pupil, he chose death for magical insight and regretted it too late. Consumed by hatred for the living, he vents it on the orcs unless Mogdath or Daz rein him in, and loves draining victims to husks.",
+  "traits": [
+   {
+    "name": "Resistance",
+    "text": "Non-magical weapons and attacks deal half damage; fire deals full damage."
+   },
+   {
+    "name": "Sensitive to Sunlight",
+    "text": "Takes D6 damage per stretch in direct sunlight."
+   },
+   {
+    "name": "Shadow Form",
+    "text": "Half-material and hovering, but cannot pass through solid matter; moves objects by will alone."
+   },
+   {
+    "name": "Variant",
+    "text": "Gozar's Frostbite deals 2D6; his Life Drain is D10 HP and D10 WP."
+   }
+  ],
+  "resistances": [
+   "Non-magical weapons and attacks (fire excepted)"
+  ],
+  "attacks": [
+   {
+    "roll": 1,
+    "name": "Touch of Death",
+    "damage": "2D10",
+    "type": null,
+    "targets": "one",
+    "range": 4,
+    "fear": false,
+    "conditions": [
+     "Scared"
+    ],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Plunges a shadow hand into the chest of a victim within 4 m and squeezes the heart: 2D10 damage, armor doesn't help, and the victim becomes Scared.",
+    "ignoresArmor": true
+   },
+   {
+    "roll": 2,
+    "name": "Ghost Scream",
+    "damage": null,
+    "type": null,
+    "targets": "all within 20 m",
+    "range": 20,
+    "fear": true,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "The silhouette swells and shrieks: everyone within 20 m suffers a fear attack."
+   },
+   {
+    "roll": 3,
+    "name": "Crippling Cold",
+    "damage": "D8",
+    "type": null,
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Seizes a victim and freezes them stiff: D8 damage ignoring armor; on their next turn they must pass EVADE (not an action) to act at all, retrying each turn. They are also cold (core p.54) and heal no HP or WP until warmed.",
+    "ignoresArmor": true
+   },
+   {
+    "roll": 4,
+    "name": "Frostbite",
+    "damage": "2D6",
+    "type": "cold",
+    "targets": "two within 2 m of each other",
+    "range": 10,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "A cold spell coats two characters within 10 m (no more than 2 m apart) in ice: 2D6 damage each, armor doesn't help.",
+    "ignoresArmor": true
+   },
+   {
+    "roll": 5,
+    "name": "Life Drain",
+    "damage": "D10",
+    "type": null,
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Grips a victim with both hands and feeds: they lose D10 HP and D10 WP (armor doesn't help) and the wraith heals the HP lost.",
+    "ignoresArmor": true,
+    "drain": true,
+    "wpDamage": "D10"
+   },
+   {
+    "roll": 6,
+    "name": "Cloud of Darkness",
+    "damage": null,
+    "type": null,
+    "targets": "all within 10 m",
+    "range": 10,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Dissolves into a black cloud covering everyone within 10 m: total darkness (core p.52) this round and the next that mundane light can't pierce. It can keep making monster attacks in this form."
+   }
+  ]
+ },
+ {
+  "id": "sharch",
+  "category": "Path of Glory",
+  "name": "Sharch",
+  "source": "pathofglory",
+  "page": 62,
+  "ferocity": 3,
+  "size": "Large",
+  "movement": 16,
+  "armor": 2,
+  "hp": 58,
+  "undead": true,
+  "text": "A nightwarg — an undead, pitch-black two-headed wolf with glowing blue eyes, made by binding a spirit into two fused wolf bodies; one mind, two mouths. Mogdath's solitary, savage and rather dim hound, left to roam the halls and kill whatever lives.",
+  "traits": [
+   {
+    "name": "Resistance",
+    "text": "Non-magical weapons and attacks deal half damage; fire deals full damage."
+   },
+   {
+    "name": "Sensitive to Sunlight",
+    "text": "Takes D6 damage per stretch in direct sunlight."
+   }
+  ],
+  "resistances": [
+   "Non-magical weapons and attacks (fire excepted)"
+  ],
+  "attacks": [
+   {
+    "roll": 1,
+    "name": "Dreadful Howl",
+    "damage": null,
+    "type": null,
+    "targets": "all within 20 m",
+    "range": 20,
+    "fear": true,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "One head throws back and howls: every player character within 20 m rolls WIL against fear."
+   },
+   {
+    "roll": 2,
+    "name": "Focused Bite",
+    "damage": "2D8",
+    "type": "piercing",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Both heads bite the same character: two separate hits of 2D8 piercing, each with lethal poison (potency 13).",
+    "hits": 2,
+    "poison": {
+     "type": "lethal",
+     "potency": 13
+    }
+   },
+   {
+    "roll": 3,
+    "name": "Double Bite",
+    "damage": "2D8",
+    "type": "piercing",
+    "targets": "two within 2 m of each other",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Each head bites a different character (within 2 m of each other): 2D8 piercing and lethal poison (potency 13) for each.",
+    "poison": {
+     "type": "lethal",
+     "potency": 13
+    }
+   },
+   {
+    "roll": 4,
+    "name": "Warg Throw",
+    "damage": "2D6",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "Snatches a character in its jaws and flings them: 2D6 bludgeoning, landing prone that many metres away."
+   },
+   {
+    "roll": 5,
+    "name": "Sudden Pounce",
+    "damage": "2D8",
+    "type": "slashing",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "A wild leap and raking claws: 2D8 slashing and the victim is knocked down."
+   },
+   {
+    "roll": 6,
+    "name": "Toxic Drool",
+    "damage": null,
+    "type": null,
+    "targets": "all within 4 m in front",
+    "range": 4,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Spits venomous slaver from both jaws: everyone within 4 m in front of it is exposed to lethal poison (potency 13).",
+    "poison": {
+     "type": "lethal",
+     "potency": 13
+    }
+   }
+  ]
+ },
+ {
+  "id": "bone-golem",
+  "category": "Path of Glory",
+  "name": "Bone Golem",
+  "source": "pathofglory",
+  "page": 76,
+  "ferocity": 3,
+  "size": "Large",
+  "movement": 6,
+  "armor": null,
+  "hp": 46,
+  "regeneration": "3",
+  "undead": true,
+  "text": "A three-metre heap of creaking dwarven bones animated by Mogdath, with four or five arm-like limbs gripping broken swords and axes and three grinning skulls on top. Jerky and clumsy; it kills any living thing in the east parlor (#26) but never leaves the room. A dented white-gold crown (25 gold) sits on one skull.",
+  "traits": [
+   {
+    "name": "Resistance",
+    "text": "Piercing weapons deal half damage."
+   },
+   {
+    "name": "Regeneration",
+    "text": "Heals 3 HP at the start of every round."
+   },
+   {
+    "name": "Bound to the Room",
+    "text": "Wakes when a living creature comes within 2 m of the bone pile; never leaves the parlor."
+   }
+  ],
+  "resistances": [
+   "Piercing"
+  ],
+  "attacks": [
+   {
+    "roll": 1,
+    "name": "Double Strike",
+    "damage": "2D8",
+    "type": "slashing",
+    "targets": "two within 2 m of each other",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Strikes two opponents standing within 2 m of each other: 2D8 slashing each."
+   },
+   {
+    "roll": 2,
+    "name": "Bone Lance",
+    "damage": "3D6",
+    "type": "piercing",
+    "targets": "one",
+    "range": 6,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Shapes a spear of bone that shoots out at a foe within 6 m: 3D6 piercing."
+   },
+   {
+    "roll": 3,
+    "name": "Flurry of Bones",
+    "damage": "2D6",
+    "type": "slashing",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "A storm of swinging bone limbs: three hits of 2D6 slashing in a row on one opponent, who is then knocked down.",
+    "hits": 3
+   },
+   {
+    "roll": 4,
+    "name": "Voice from the Grave",
+    "damage": null,
+    "type": null,
+    "targets": "all within 10 m",
+    "range": 10,
+    "fear": true,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "All three skulls screech like bone under a saw: every opponent within 10 m suffers a fear attack."
+   },
+   {
+    "roll": 5,
+    "name": "Death's Embrace",
+    "damage": "D6",
+    "type": null,
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Engulfs a player character: on their turn they can only try to break free (STR roll, an action), and they take D6 damage, ignoring armor, each time the golem has a turn.",
+    "ignoresArmor": true
+   },
+   {
+    "roll": 6,
+    "name": "Bone Storm",
+    "damage": "2D6",
+    "type": "slashing",
+    "targets": "all within 4 m",
+    "range": 4,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Whirls into a maelstrom of bone: every opponent within 4 m takes 2D6 slashing."
+   }
+  ]
+ },
+ {
+  "id": "the-brandy-dragon",
+  "category": "Path of Glory",
+  "name": "The Brandy Dragon",
+  "source": "pathofglory",
+  "page": 78,
+  "ferocity": 2,
+  "size": "Large",
+  "movement": 8,
+  "armor": 3,
+  "hp": 36,
+  "text": "A horse-sized dragon with black-green scales and stubby flightless wings that crept down a brewery flue as a hatchling and grew too big to leave. Lazy, mildly clever and good-natured; speaks dragon tongue and some ancient Dwarvish (LANGUAGES to talk). Loves dwarves, fire and brandy; hates orcs and undead.",
+  "traits": [
+   {
+    "name": "Wary Host",
+    "text": "Attacks orcs and undead on sight. Others may pass with PERSUASION or BLUFFING — a boon for anyone carrying a torch, since it adores fire."
+   },
+   {
+    "name": "Ally",
+    "text": "Light its fireplaces and it stays awake and content for a shift, keeping Mogdath's forces out so the heroes can take a shift rest (once only)."
+   }
+  ],
+  "attacks": [
+   {
+    "roll": 1,
+    "name": "Claw Attack",
+    "damage": "2D8",
+    "type": "slashing",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "A lightning-fast swipe at one character: 2D8 slashing."
+   },
+   {
+    "roll": 2,
+    "name": "Double Slash",
+    "damage": "2D6",
+    "type": "slashing",
+    "targets": "two",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Rakes its claws across two opponents: 2D6 slashing each."
+   },
+   {
+    "roll": 3,
+    "name": "Tail Strike",
+    "damage": "2D6",
+    "type": "bludgeoning",
+    "targets": "all behind it",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "Swings its spiked tail: everyone behind the dragon takes 2D6 bludgeoning and is knocked down."
+   },
+   {
+    "roll": 4,
+    "name": "Jaw Grip",
+    "damage": "2D8",
+    "type": "piercing",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "Clamps a foe in its jaws and shakes them: 2D8 piercing, they drop a weapon in hand (GM's pick) and land prone."
+   },
+   {
+    "roll": 5,
+    "name": "Ramming Lunge",
+    "damage": "2D6",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "Barrels into a foe, hurling them 2D6 m back (or into the nearest wall) for the same bludgeoning damage; they land prone."
+   },
+   {
+    "roll": 6,
+    "name": "Fire Breath",
+    "damage": "2D10",
+    "type": "fire",
+    "targets": "all in a 4 m cone",
+    "range": 4,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Breathes a 4 m cone of flame (as wide at each point as its distance from the mouth): everyone caught takes 2D10, armor doesn't help.",
+    "ignoresArmor": true
+   }
+  ]
+ },
+ {
+  "id": "stone-guardian",
+  "category": "Path of Glory",
+  "name": "Stone Guardian",
+  "source": "pathofglory",
+  "page": 84,
+  "ferocity": 2,
+  "size": "Large",
+  "movement": 4,
+  "armor": 6,
+  "hp": 60,
+  "text": "A three-metre statue of a rough, rock-grown dwarf-like figure — a variant of the earth elemental gnome, bound by stone magic to guard the treasure trove (#45). It questions intruders first (in ancient Dwarvish, then the common tongue) but attacks anyone who takes anything. Very slow; chases thieves but never leaves the City.",
+  "traits": [
+   {
+    "name": "Guardian",
+    "text": "Demands an explanation before fighting; immediately attacks anyone removing an item from the podium."
+   },
+   {
+    "name": "Last Resort",
+    "text": "At 30 HP or less it stops fighting and smashes one corner pillar per turn; that starts a chain reaction that brings the ceiling down on the southern City three rounds later (see #45)."
+   }
+  ],
+  "attacks": [
+   {
+    "roll": 1,
+    "name": "Crush",
+    "damage": "2D8",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "Hurls its bulk onto a character: 2D8 bludgeoning and knocked down."
+   },
+   {
+    "roll": 2,
+    "name": "Whirling Fists",
+    "damage": "2D6",
+    "type": "bludgeoning",
+    "targets": "all within 2 m",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Swings both fists around: every opponent within 2 m takes 2D6 bludgeoning."
+   },
+   {
+    "roll": 3,
+    "name": "Throw",
+    "damage": "2D6",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "Grabs a foe and flings them 2D6 m for the same bludgeoning damage; they land prone."
+   },
+   {
+    "roll": 4,
+    "name": "Two in One Hit",
+    "damage": "2D6",
+    "type": "bludgeoning",
+    "targets": "two",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "Grabs one opponent and smashes them into a companion: both take 2D6 bludgeoning and are knocked down."
+   },
+   {
+    "roll": 5,
+    "name": "Rock Storm",
+    "damage": "3D6",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": "bane",
+    "text": "Tries to pound a victim flat with its fists: 3D6 bludgeoning, and dodging it is rolled with a bane."
+   },
+   {
+    "roll": 6,
+    "name": "Recovery",
+    "damage": null,
+    "type": null,
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": false,
+    "text": "Kneels and half-merges with the floor, drawing strength from the stone: it heals D10 HP.",
+    "heal": "D10"
+   }
+  ]
+ },
+ {
+  "id": "azarizag",
+  "category": "Path of Glory",
+  "name": "Azarizag",
+  "page": 111,
+  "source": "pathofglory",
+  "ferocity": 2,
+  "size": "Large",
+  "movement": 18,
+  "armor": null,
+  "hp": 64,
+  "text": "A fire demon bound to the bitter old priest Gultrub; the two are united only by their loathing of Sathmog. She appears in smoke whenever Gultrub calls, or when anyone touches the warded trapdoor to his ritual cellar. Same profile as the Bestiary fire demon.",
+  "traits": [
+   {
+    "name": "Scorching Body",
+    "text": "Touching her deals D6 damage that armor doesn't stop; the heat gives every opponent a bane on melee attacks against her."
+   },
+   {
+    "name": "Immunity",
+    "text": "Fire damage has no effect on her."
+   },
+   {
+    "name": "Vulnerability",
+    "text": "Water-based magic deals double damage. A thrown bucket of water deals D10, a tankard of ale or jug of wine D8, spitting 1 point; roll Brawling to hit with these."
+   }
+  ],
+  "immunities": [
+   "fire"
+  ],
+  "weaknesses": [
+   "water (double damage from water magic; bucket D10, ale/wine D8, spit 1 — Brawling to hit)"
+  ],
+  "attacks": [
+   {
+    "roll": 1,
+    "name": "Sweeping Staff",
+    "damage": "2D6",
+    "type": "bludgeoning",
+    "targets": "all within 2 m",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "extraDamage": {
+     "dice": "D6",
+     "ignoresArmor": true
+    },
+    "text": "Her red-hot iron staff sweeps every foe within 2 m: 2D6 bludgeoning plus D6 heat damage that ignores armor; all are knocked down."
+   },
+   {
+    "roll": 2,
+    "name": "Imps",
+    "damage": null,
+    "type": null,
+    "targets": "all within 10 m",
+    "range": 10,
+    "fear": false,
+    "conditions": [
+     "Angry"
+    ],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "A cloud of burning, jeering imps whirls out: everyone within 10 m becomes Angry."
+   },
+   {
+    "roll": 3,
+    "name": "Flaming Flail",
+    "damage": "2D8",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [
+     "Dazed"
+    ],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "extraDamage": {
+     "dice": "D8",
+     "type": "fire",
+     "ignoresArmor": true
+    },
+    "text": "A flail strike on one foe: 2D8 bludgeoning plus D8 fire that ignores armor; the victim is Dazed."
+   },
+   {
+    "roll": 4,
+    "name": "Fire Whirl",
+    "damage": "2D8",
+    "type": "fire",
+    "targets": "all within 4 m",
+    "range": 4,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "ignoresArmor": true,
+    "text": "She spins the flail into a column of fire: everyone within 4 m takes 2D8 fire (armor doesn't help) and is knocked down."
+   },
+   {
+    "roll": 5,
+    "name": "Crushing Kick",
+    "damage": "2D6",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "A sudden kick hurls a foe 2D6 m away for the same amount of bludgeoning damage; they land prone."
+   },
+   {
+    "roll": 6,
+    "name": "Fire Breath",
+    "damage": "2D10",
+    "type": "fire",
+    "targets": "cone",
+    "range": 10,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "ignoresArmor": true,
+    "text": "A 10 m cone of flame (as wide as its distance from her): all caught take 2D10 fire, armor doesn't help."
+   }
+  ],
+  "variantOf": "Fire Demon"
+ },
+ {
+  "id": "pog-iskolde",
+  "category": "Path of Glory",
+  "source": "pathofglory",
+  "name": "Iskolde",
+  "page": 133,
+  "ferocity": 2,
+  "size": "Normal",
+  "movement": 6,
+  "armor": null,
+  "hp": 48,
+  "text": "The embalmed elven shieldmaiden who held the line against Sathmog's demons, wrapped tight in her tomb on Is-Hel. She rises in fury the moment anyone lays a hand on her shield.",
+  "traits": [
+   {
+    "name": "Resistance",
+    "text": "No internal organs: half damage from piercing weapons."
+   },
+   {
+    "name": "Flammable",
+    "text": "Tinder-dry: double damage from fire."
+   },
+   {
+    "name": "The Battle Shield Iskolde",
+    "text": "Her mastercrafted large shield (durability 18) holds a variant MAGIC SHIELD. Whoever bears it can parry an incoming spell with any weapon skill; on success the spell is fully blocked at no WP cost and the bearer gains WP equal to its power level. Iskolde spends actions on this against spells when she can. Heroes who take it must first decipher its inscriptions (Rulebook p.59)."
+   }
+  ],
+  "resistances": [
+   "piercing"
+  ],
+  "weaknesses": [
+   "fire (double damage)"
+  ],
+  "gear": [
+   "The Battle Shield Iskolde (mastercrafted large shield)"
+  ],
+  "attacks": [
+   {
+    "roll": 1,
+    "name": "Curse",
+    "damage": null,
+    "type": null,
+    "targets": "all player characters within 10 m",
+    "range": 10,
+    "fear": true,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Hisses a dread curse: every player character within 10 m must roll WIL against fear."
+   },
+   {
+    "roll": 2,
+    "name": "Shield Bash",
+    "damage": "3D6",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "Smashes a player character with her shield: 3D6 bludgeoning, knocked down."
+   },
+   {
+    "roll": 3,
+    "name": "Shield Throw",
+    "damage": "2D8",
+    "type": "bludgeoning",
+    "targets": "player character with the lowest STR within 10 m",
+    "range": 10,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Flings her shield at the lowest-STR player character within 10 m for 2D8 bludgeoning, then walks over to retrieve it."
+   },
+   {
+    "roll": 4,
+    "name": "Shield Slam",
+    "damage": null,
+    "type": null,
+    "targets": "all player characters within 10 m",
+    "range": 10,
+    "fear": false,
+    "conditions": [
+     "Dazed"
+    ],
+    "prone": false,
+    "parry": false,
+    "dodge": false,
+    "text": "Drives her shield into the floor: every player character within 10 m is dazed and must roll EVADE (no action) or lose their turn this round if not yet taken. Can't be dodged.",
+    "losesTurn": "EVADE"
+   },
+   {
+    "roll": 5,
+    "name": "Deadly Throw",
+    "damage": "2D6",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "Hurls a player character 2D6 m; they land prone and take the same in bludgeoning damage."
+   },
+   {
+    "roll": 6,
+    "name": "Strangulation",
+    "damage": "D10",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Seizes a throat: D10 bludgeoning (armor doesn't help) and D10 more on each of her turns. The victim can't move or take movement actions except to break free (STR with a bane; others may help). She makes no other monster attacks until the victim breaks free or drops to zero HP.",
+    "ignoresArmor": true,
+    "ongoing": "D10",
+    "grapple": {
+     "breakFree": "STR",
+     "bane": true,
+     "help": true
+    }
+   }
+  ]
+ },
+ {
+  "id": "pog-demonic-seed-pods",
+  "category": "Path of Glory",
+  "source": "pathofglory",
+  "name": "Demonic Seed Pods",
+  "page": 139,
+  "ferocity": 2,
+  "size": "Swarm",
+  "movement": 24,
+  "armor": null,
+  "hp": 38,
+  "text": "A whirling cloud of winged, thorned seeds shed by the Ur-Fang of Fang-Forren, buzzing down on travelers like a hunting swarm.",
+  "traits": [
+   {
+    "name": "Swarm",
+    "text": "Treated as one monster. Physical damage other than fire is halved (rounded up)."
+   }
+  ],
+  "resistances": [
+   "All physical damage except fire"
+  ],
+  "attackDie": "D6",
+  "attackRolls": [
+   [
+    1,
+    2
+   ],
+   [
+    3,
+    4
+   ],
+   [
+    5,
+    6
+   ]
+  ],
+  "attacks": [
+   {
+    "roll": 1,
+    "name": "Swirling Attack",
+    "damage": "D10",
+    "type": "piercing",
+    "targets": "all player characters within 10 m",
+    "range": 10,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Thorny pods spin around everyone within 10 m: D10 piercing each; anyone whose armor is penetrated is also injected with paralyzing poison (potency 12).",
+    "rolls": [
+     1,
+     2
+    ],
+    "poison": {
+     "type": "paralyzing",
+     "potency": 12,
+     "ifPenetrates": true
+    }
+   },
+   {
+    "roll": 3,
+    "name": "Focused Attack",
+    "damage": "2D8",
+    "type": "piercing",
+    "targets": "player character with the highest CON",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "The whole swarm converges on the highest-CON player character: 2D8 piercing, plus paralyzing poison (potency 12) if it gets through armor.",
+    "rolls": [
+     3,
+     4
+    ],
+    "poison": {
+     "type": "paralyzing",
+     "potency": 12,
+     "ifPenetrates": true
+    }
+   },
+   {
+    "roll": 5,
+    "name": "Demonic Control",
+    "damage": "D3",
+    "type": null,
+    "targets": "player character with the lowest WIL",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "The pods smother the lowest-WIL player character: D3 damage (armor doesn't help) and a WIL roll. On failure the victim must at once move to the nearest player character and make a melee attack, and loses their turn this round (or next round if it has passed).",
+    "rolls": [
+     5,
+     6
+    ],
+    "ignoresArmor": true
+   }
+  ]
+ },
+ {
+  "id": "pog-ur-fang",
+  "category": "Path of Glory",
+  "source": "pathofglory",
+  "name": "Ur-Fang",
+  "page": 140,
+  "ferocity": 2,
+  "size": "Large",
+  "movement": 8,
+  "armor": 6,
+  "hp": 64,
+  "text": "Demonic walking trees, the true masters of Fang-Forren. They string captives up in thorny vines and keep them alive until more of their kind arrive to drink their blood.",
+  "traits": [
+   {
+    "name": "Flammable",
+    "text": "Double damage from fire-based attacks; it does everything it can to stop foes using fire."
+   },
+   {
+    "name": "Resistance",
+    "text": "Half damage from piercing and bludgeoning weapons, after armor."
+   },
+   {
+    "name": "Demonic",
+    "text": "Counts as a demon for all rules purposes."
+   }
+  ],
+  "resistances": [
+   "piercing",
+   "bludgeoning"
+  ],
+  "weaknesses": [
+   "Fire (double damage)"
+  ],
+  "demon": true,
+  "attacks": [
+   {
+    "roll": 1,
+    "name": "Seed Pods",
+    "damage": "D10",
+    "type": "piercing",
+    "targets": "all opponents within 10 m",
+    "range": 10,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Shakes loose a shower of seed pods over every foe within 10 m: D10 piercing each, plus paralyzing poison (potency 12) for anyone whose armor is penetrated.",
+    "poison": {
+     "type": "paralyzing",
+     "potency": 12,
+     "ifPenetrates": true
+    }
+   },
+   {
+    "roll": 2,
+    "name": "Spear Thrust",
+    "damage": "2D10",
+    "type": "piercing",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": true,
+    "dodge": true,
+    "text": "Grows a branch into a spear and drives it at a foe: 2D10 piercing. Can be parried."
+   },
+   {
+    "roll": 3,
+    "name": "Crushing Blow",
+    "damage": "2D10",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "Brings its thickest bough down on a foe's head: 2D10 bludgeoning, knocked down."
+   },
+   {
+    "roll": 4,
+    "name": "Up, Up and Away",
+    "damage": "2D8",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "Grabs a foe and throws them 2D8 m; they take the same in bludgeoning damage and land prone."
+   },
+   {
+    "roll": 5,
+    "name": "Hang Them High",
+    "damage": "2D6",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Loops a branch round a foe's neck: 2D6 bludgeoning and 2D6 more on each of the victim's turns. They can't move or take movement actions except to break free (an action, STR with a bane; others may help). Ur-Fang can keep acting meanwhile.",
+    "ongoing": "2D6",
+    "grapple": {
+     "breakFree": "STR",
+     "bane": true,
+     "help": true,
+     "action": true
+    }
+   },
+   {
+    "roll": 6,
+    "name": "Demonic Control",
+    "damage": "D6",
+    "type": null,
+    "targets": "player character with the lowest WIL within 10 m",
+    "range": 10,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Stabs its roots into the lowest-WIL player character within 10 m: D6 damage (armor doesn't help), then WIL (with a bane); if that fails, the victim must at once move to the nearest player character and make a melee attack, and loses their turn this round (or next if it has passed).",
+    "ignoresArmor": true
+   }
+  ]
+ },
+ {
+  "id": "pog-morgasa",
+  "category": "Path of Glory",
+  "source": "pathofglory",
+  "name": "Morgasa",
+  "page": 146,
+  "ferocity": 2,
+  "size": "Large",
+  "movement": 12,
+  "armor": null,
+  "hp": 44,
+  "regeneration": "D6",
+  "text": "Troll witch left by Sathmog to guard the Demon Tower and the Heart of Darkness. She spies through ravens and often wears the shape of a great blue-sheened raven herself; she loathes the undead.",
+  "traits": [
+   {
+    "name": "Raven Form",
+    "text": "Movement 24 and free flight while shaped as a raven."
+   },
+   {
+    "name": "Regeneration",
+    "text": "Heals D6 HP each turn in combat unless already at zero HP."
+   },
+   {
+    "name": "Stench",
+    "text": "Anyone coming within 10 m rolls CON (not an action) or becomes Dazed."
+   },
+   {
+    "name": "Insensitive to Sunlight",
+    "text": "Unlike other trolls, sunlight does not harm her."
+   }
+  ],
+  "gear": [
+   "Huge club"
+  ],
+  "attacks": [
+   {
+    "roll": 1,
+    "name": "Hex",
+    "damage": null,
+    "type": null,
+    "targets": "player character with the lowest WIL within 10 m",
+    "range": 10,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": false,
+    "text": "Curses the lowest-WIL player character within 10 m, who rolls WIL to resist; if cursed they lose D8 WP and suffer a bane on all rolls for a stretch. Can't be dodged.",
+    "curse": true
+   },
+   {
+    "roll": 2,
+    "name": "Rotten Breath",
+    "damage": null,
+    "type": null,
+    "targets": "one",
+    "range": 4,
+    "fear": false,
+    "conditions": [
+     "Sickly"
+    ],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Breathes on a foe within 4 m: they become Sickly and must roll CON (with a bane) or lose their turn this round if not yet taken.",
+    "losesTurn": "CON"
+   },
+   {
+    "roll": 3,
+    "name": "A Murder of Ravens",
+    "damage": "D8",
+    "type": "piercing",
+    "targets": "all player characters within 10 m",
+    "range": 10,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Her raven flock descends on every player character within 10 m: D8 piercing each."
+   },
+   {
+    "roll": 4,
+    "name": "Stomping Attack",
+    "damage": "2D6",
+    "type": "bludgeoning",
+    "targets": "all opponents within 2 m",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "Stamps wildly at every foe within 2 m: 2D6 bludgeoning and knocked down."
+   },
+   {
+    "roll": 5,
+    "name": "Beak and Talons",
+    "damage": "3D8",
+    "type": "piercing",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "Turns raven and tears into a player character: 3D8 piercing, knocked down; then she returns to troll shape."
+   },
+   {
+    "roll": 6,
+    "name": "Bludgeoning Club",
+    "damage": "4D6",
+    "type": "bludgeoning",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [
+     "Dazed"
+    ],
+    "prone": false,
+    "parry": true,
+    "dodge": true,
+    "text": "Her heaviest club blow: 4D6 bludgeoning and the victim is Dazed. Can be parried."
+   }
+  ]
+ },
+ {
+  "id": "pog-karlak-ash-ark-afar",
+  "category": "Path of Glory",
+  "source": "pathofglory",
+  "name": "Karlak Sol-Tar & Ash-Ark-Afar",
+  "page": 150,
+  "ferocity": 3,
+  "size": "Huge",
+  "movement": 24,
+  "flying": true,
+  "armor": 6,
+  "hp": 84,
+  "text": "A dragon knight of Immer-Drak beyond the Sea of Dreams, sworn to destroy the Heart of Darkness, riding the dragon Ash-Ark-Afar. He can be talked round — he can't actually burn the heart.",
+  "traits": [
+   {
+    "name": "Rider and Mount",
+    "text": "One monster with two HP pools. Ash-Ark-Afar: HP 84, armor 6, Movement 24. Karlak Sol-Tar: HP 48, armor 8, WP 24, Movement 10; while mounted he can only be hit by ranged attacks or long melee weapons. Players choose which to attack."
+   },
+   {
+    "name": "Wings",
+    "text": "The dragon flies freely."
+   },
+   {
+    "name": "Heroic Abilities (rider)",
+    "text": "Defensive, Robust ×15."
+   },
+   {
+    "name": "If One Falls",
+    "text": "If the dragon dies, Karlak fights on alone as a regular NPC to the death. If Karlak falls, the dragon stops fighting, picks him up and flies home east."
+   }
+  ],
+  "gear": [
+   "Longsword (mastercrafted)",
+   "Plate armor",
+   "Great helm",
+   "Cloak",
+   "Eight rations of food"
+  ],
+  "rider": {
+   "name": "Karlak Sol-Tar",
+   "hp": 48,
+   "armor": 8,
+   "wp": 24,
+   "movement": 10,
+   "abilities": [
+    "Defensive",
+    "Robust ×15"
+   ]
+  },
+  "mount": {
+   "name": "Ash-Ark-Afar",
+   "hp": 84,
+   "armor": 6,
+   "movement": 24,
+   "flying": true
+  },
+  "attacks": [
+   {
+    "roll": 1,
+    "name": "Dragon Roar",
+    "damage": null,
+    "type": null,
+    "targets": "everyone within 20 m",
+    "range": 20,
+    "fear": "bane",
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": false,
+    "text": "Ash-Ark-Afar roars: everyone within 20 m faces a fear attack, rolling WIL with a bane."
+   },
+   {
+    "roll": 2,
+    "name": "Sword Swing",
+    "damage": "2D8+D6",
+    "type": "slashing",
+    "targets": "two opponents within 4 m of each other",
+    "range": 4,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": true,
+    "dodge": true,
+    "text": "Karlak sweeps his blade across two foes within 4 m of each other: 2D8+D6 slashing each. Can be parried."
+   },
+   {
+    "roll": 3,
+    "name": "Dragon Wind",
+    "damage": "2D6",
+    "type": "bludgeoning",
+    "targets": "everyone within 10 m",
+    "range": 10,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "Wingbeats raise a gale over everyone within 10 m: human-sized or smaller creatures and loose objects fly 2D6 m, take that much bludgeoning damage and land prone. Someone about to go over the roof edge gets an EVADE roll (no action) to catch themselves; failing that, an ACROBATICS roll to grab hold, then another ACROBATICS roll to climb back up."
+   },
+   {
+    "roll": 4,
+    "name": "Tail Strike",
+    "damage": "2D8",
+    "type": "bludgeoning",
+    "targets": "everyone within 6 m",
+    "range": 6,
+    "fear": false,
+    "conditions": [],
+    "prone": true,
+    "parry": false,
+    "dodge": true,
+    "text": "Ash-Ark-Afar lashes its spiked tail: everyone within 6 m takes 2D8 bludgeoning and is knocked down."
+   },
+   {
+    "roll": 5,
+    "name": "Mighty Blow",
+    "damage": "4D8+D6",
+    "type": "slashing",
+    "targets": "one",
+    "range": 2,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": true,
+    "dodge": true,
+    "text": "Karlak puts everything into one sword stroke at a player character: 4D8+D6 slashing. Can be parried."
+   },
+   {
+    "roll": 6,
+    "name": "Fire Breath",
+    "damage": "3D10",
+    "type": "fire",
+    "targets": "everyone in a 10 m cone",
+    "range": 10,
+    "fear": false,
+    "conditions": [],
+    "prone": false,
+    "parry": false,
+    "dodge": true,
+    "text": "Ash-Ark-Afar exhales fire in a 10 m cone (as wide at each point as its distance from the mouth): 3D10 fire damage to everyone in it, armor doesn't help.",
+    "ignoresArmor": true
+   }
+  ]
  }
 ];
 window.DB_MONSTERS = DB_MONSTERS;
@@ -18302,6 +21292,1380 @@ var DB_NPCS = [
   ],
   "nonMonster": true,
   "source": "bestiary"
+ },
+ {
+  "id": "dregil",
+  "source": "pathofglory",
+  "abilities": [],
+  "weapons": [
+   {
+    "name": "Knife",
+    "skill": 12,
+    "damage": "D8"
+   }
+  ],
+  "name": "Dregil",
+  "kind": "Path of Glory",
+  "page": 14,
+  "movement": 8,
+  "damageBonus": null,
+  "hp": 9,
+  "wp": null,
+  "armor": null,
+  "skills": {
+   "Bartering": 15
+  },
+  "notes": "Weepy wine merchant at the Hungry Hobgoblin. Hobgoblins robbed his caravan of wine and his black pearl (which he claims to have inherited — a lie; he found it in a forest stream)."
+ },
+ {
+  "id": "ivil",
+  "source": "pathofglory",
+  "abilities": [
+   "Fast Footwork"
+  ],
+  "weapons": [
+   {
+    "name": "Knife",
+    "skill": 15,
+    "damage": "D8"
+   }
+  ],
+  "name": "Ivil",
+  "kind": "Path of Glory",
+  "page": 15,
+  "movement": 12,
+  "damageBonus": {
+   "AGL": "D4"
+  },
+  "hp": 13,
+  "wp": 12,
+  "armor": null,
+  "skills": {
+   "Evade": 14
+  },
+  "notes": "Short, muscular crook; one of the two 'pathfinders' offering a treasure map to the Old Barrows. Plans to rob the party at night and flee; avoids fighting at all costs."
+ },
+ {
+  "id": "filundrus",
+  "source": "pathofglory",
+  "abilities": [
+   "Fast Footwork"
+  ],
+  "weapons": [
+   {
+    "name": "Knife",
+    "skill": 15,
+    "damage": "D8"
+   }
+  ],
+  "name": "Filundrus",
+  "kind": "Path of Glory",
+  "page": 15,
+  "movement": 12,
+  "damageBonus": {
+   "AGL": "D4"
+  },
+  "hp": 13,
+  "wp": 12,
+  "armor": null,
+  "skills": {
+   "Evade": 14
+  },
+  "notes": "Tall, lanky, pleasant-looking crook; one of the two 'pathfinders' offering a treasure map to the Old Barrows. Plans to rob the party at night and flee; avoids fighting at all costs."
+ },
+ {
+  "id": "doriath",
+  "source": "pathofglory",
+  "abilities": [
+   "Fast Footwork",
+   "Focused ×10",
+   "Lightning Fast",
+   "Master Spellcaster",
+   "Robust ×10"
+  ],
+  "weapons": [
+   {
+    "name": "Dagger",
+    "skill": 13,
+    "damage": "D8"
+   }
+  ],
+  "name": "Doriath",
+  "kind": "Path of Glory",
+  "page": 17,
+  "boss": true,
+  "movement": 12,
+  "damageBonus": {
+   "AGL": "D4"
+  },
+  "hp": 34,
+  "wp": 38,
+  "armor": null,
+  "skills": {
+   "Brawling": 13,
+   "Evade": 14,
+   "Performance": 11,
+   "Mentalism": 16
+  },
+  "tricks": [
+   "Fetch",
+   "Flick",
+   "Light",
+   "Open/Close",
+   "Sense Magic",
+   "Lock/Unlock",
+   "Slow Fall"
+  ],
+  "spells": [
+   "Magic Shield",
+   "Transfer",
+   "Levitate",
+   "Longstrider",
+   "Power Fist",
+   "Stone Skin",
+   "Mental Strike",
+   "Telepathy",
+   "Dominate",
+   "Flight"
+  ],
+  "aliases": [
+   "Tuvinel"
+  ],
+  "notes": "Dark sorceress (mentalist), sister of Dakoth, posing as the bard Tuvinel at the Hungry Hobgoblin. Wants Stormhand's seashell horn and every other key; allies only until she can betray."
+ },
+ {
+  "id": "eldur",
+  "source": "pathofglory",
+  "abilities": [],
+  "weapons": [
+   {
+    "name": "Broadsword",
+    "skill": 14,
+    "damage": "2D6"
+   },
+   {
+    "name": "Longbow",
+    "skill": 16,
+    "damage": "D12"
+   }
+  ],
+  "name": "Eldur",
+  "kind": "Elf",
+  "page": 24,
+  "movement": 12,
+  "damageBonus": {
+   "AGL": "D4"
+  },
+  "hp": 13,
+  "wp": 15,
+  "armor": null,
+  "skills": {
+   "Evade": 14
+  },
+  "notes": "Elf fighter of the band of four journeying to the Temple of Winds. A stretch of their company heals each player character of one condition."
+ },
+ {
+  "id": "fenor",
+  "source": "pathofglory",
+  "abilities": [],
+  "weapons": [
+   {
+    "name": "Broadsword",
+    "skill": 14,
+    "damage": "2D6"
+   },
+   {
+    "name": "Longbow",
+    "skill": 16,
+    "damage": "D12"
+   }
+  ],
+  "name": "Fenor",
+  "kind": "Elf",
+  "page": 24,
+  "movement": 12,
+  "damageBonus": {
+   "AGL": "D4"
+  },
+  "hp": 13,
+  "wp": 15,
+  "armor": null,
+  "skills": {
+   "Evade": 14
+  },
+  "notes": "Elf fighter of the band of four journeying to the Temple of Winds. A stretch of their company heals each player character of one condition."
+ },
+ {
+  "id": "giljath",
+  "source": "pathofglory",
+  "abilities": [],
+  "weapons": [
+   {
+    "name": "Broadsword",
+    "skill": 14,
+    "damage": "2D6"
+   },
+   {
+    "name": "Longbow",
+    "skill": 16,
+    "damage": "D12"
+   }
+  ],
+  "name": "Giljath",
+  "kind": "Elf",
+  "page": 24,
+  "movement": 12,
+  "damageBonus": {
+   "AGL": "D4"
+  },
+  "hp": 13,
+  "wp": 15,
+  "armor": null,
+  "skills": {
+   "Evade": 14
+  },
+  "notes": "Elf fighter of the band of four journeying to the Temple of Winds. A stretch of their company heals each player character of one condition."
+ },
+ {
+  "id": "tirinar",
+  "source": "pathofglory",
+  "abilities": [],
+  "weapons": [],
+  "name": "Tirinar",
+  "kind": "Elf",
+  "page": 24,
+  "movement": 12,
+  "damageBonus": {
+   "AGL": "D4"
+  },
+  "hp": 13,
+  "wp": 15,
+  "armor": null,
+  "skills": {
+   "Animism": 15,
+   "Evade": 14
+  },
+  "spells": [
+   "Banish",
+   "Ensnaring Roots",
+   "Lightning Flash",
+   "Treat Wound"
+  ],
+  "notes": "Elf mage of the band of four journeying to the Temple of Winds. Carries no weapons."
+ },
+ {
+  "id": "tefalas",
+  "source": "pathofglory",
+  "abilities": [],
+  "weapons": [
+   {
+    "name": "Staff",
+    "skill": 12,
+    "damage": "D8"
+   }
+  ],
+  "name": "Tefalas",
+  "kind": "Path of Glory",
+  "page": 24,
+  "movement": 8,
+  "damageBonus": null,
+  "hp": 8,
+  "wp": null,
+  "armor": null,
+  "skills": {
+   "Beast Lore": 15,
+   "Healing": 15,
+   "Languages": 16,
+   "Myths & Legends": 17
+  },
+  "gear": [
+   "Sleeping Pelt",
+   "Bandages (10)"
+  ],
+  "notes": "Elderly monk of the Keepers of the Immaculate Flame (burgundy robe with Eledain's dragon). Knows what the keys are and of the hermit; warns of the Knight in Black. Must survive this adventure."
+ },
+ {
+  "id": "elusia",
+  "source": "pathofglory",
+  "abilities": [],
+  "weapons": [
+   {
+    "name": "Dagger (silvered)",
+    "skill": 13,
+    "damage": "D8"
+   }
+  ],
+  "name": "Elusia",
+  "kind": "Path of Glory",
+  "page": 28,
+  "movement": 10,
+  "damageBonus": null,
+  "hp": 13,
+  "wp": 17,
+  "armor": null,
+  "skills": {
+   "Animism": 18,
+   "Evade": 12,
+   "Healing": 17
+  },
+  "spells": [
+   "Dispel",
+   "Magic Shield",
+   "Transfer",
+   "Charge",
+   "Permanence",
+   "Animal Whisperer",
+   "Engulfing Forest",
+   "Sleep",
+   "Restoration",
+   "Resurrection"
+  ],
+  "gear": [
+   "Herbal concoction",
+   "Bandages (10)",
+   "Elusia's Ring"
+  ],
+  "notes": "Reclusive animist of Little Lake who keeps the white pearl. Helps anyone in need; may give the pearl to worthy heroes. Her ring holds 20 WP."
+ },
+ {
+  "id": "the-knights-squire",
+  "source": "pathofglory",
+  "abilities": [
+   "Veteran",
+   "Defensive",
+   "Double Slash",
+   "Robust ×6"
+  ],
+  "weapons": [
+   {
+    "name": "Two-Handed Axe (mastercrafted)",
+    "skill": 16,
+    "damage": "2D10"
+   }
+  ],
+  "name": "The Knight's Squire",
+  "kind": "Skeleton",
+  "page": 32,
+  "boss": true,
+  "movement": 10,
+  "damageBonus": {
+   "STR": "D6"
+  },
+  "hp": 28,
+  "wp": 15,
+  "armor": {
+   "name": "Chainmail",
+   "rating": 4
+  },
+  "skills": {
+   "Awareness": 12,
+   "Evade": 8
+  },
+  "traits": [
+   "Skeleton"
+  ],
+  "notes": "Skeleton of a big warrior in the Old Barrow; rises if his body or belongings are touched. Book lists Resistance: piercing damage halved (rounded up)."
+ },
+ {
+  "id": "the-knights-servants",
+  "source": "pathofglory",
+  "abilities": [],
+  "weapons": [
+   {
+    "name": "Short Sword (mastercrafted)",
+    "skill": 12,
+    "damage": "D10"
+   }
+  ],
+  "name": "The Knight's Servants",
+  "kind": "Skeleton",
+  "page": 33,
+  "movement": 8,
+  "damageBonus": null,
+  "hp": 8,
+  "wp": null,
+  "armor": null,
+  "skills": {},
+  "traits": [
+   "Skeleton"
+  ],
+  "notes": "Four small skeletons in rotting silk in the Old Barrow; all rise together when one is disturbed. Resistance: piercing damage halved (rounded up)."
+ },
+ {
+  "id": "stormhand",
+  "source": "pathofglory",
+  "abilities": [
+   "Fast Footwork",
+   "Focused ×10",
+   "Lightning Fast",
+   "Master Spellcaster",
+   "Magic Talent",
+   "Robust ×10"
+  ],
+  "weapons": [
+   {
+    "name": "Staff",
+    "skill": 13,
+    "damage": "D8"
+   }
+  ],
+  "name": "Stormhand",
+  "kind": "Path of Glory",
+  "page": 35,
+  "boss": true,
+  "movement": 10,
+  "damageBonus": null,
+  "hp": 32,
+  "wp": 37,
+  "armor": null,
+  "skills": {
+   "Elementalism": 17,
+   "Evade": 14,
+   "Mentalism": 16
+  },
+  "tricks": [
+   "Fetch",
+   "Flick",
+   "Light",
+   "Open/Close",
+   "Sense Magic",
+   "Heat/Chill",
+   "Ignite",
+   "Puff of Smoke"
+  ],
+  "spells": [
+   "Dispel",
+   "Magic Shield",
+   "Transfer",
+   "Magic Seal",
+   "Charge",
+   "Permanence",
+   "Gust of Wind",
+   "Stone Shield",
+   "Stonewall",
+   "Tidal Wave",
+   "Whirlwind",
+   "Firebird",
+   "Firestorm",
+   "Gnome",
+   "Salamander",
+   "Sylph",
+   "Undine",
+   "Farsight",
+   "Levitate",
+   "Teleport"
+  ],
+  "gear": [
+   "The Seashell Horn",
+   "Key to the prison cells"
+  ],
+  "notes": "Bald, shrill, gesturing elementalist in a red robe and green slouch hat; holds the seashell horn. Teleports to escape; recharges WP at his pentagram (30 WP) or statue (20 WP). Not suicidal — negotiates, allies, betrays."
+ },
+ {
+  "id": "undine",
+  "source": "pathofglory",
+  "abilities": [],
+  "weapons": [
+   {
+    "name": "Wet Embrace (ignores armor)",
+    "skill": "auto",
+    "damage": "3D6"
+   }
+  ],
+  "name": "Undine",
+  "kind": "Elemental",
+  "page": 37,
+  "movement": 12,
+  "damageBonus": null,
+  "hp": 15,
+  "wp": 6,
+  "armor": null,
+  "skills": {},
+  "spells": [
+   "Tidal Wave"
+  ],
+  "notes": "Water elemental bound by Stormhand's magic seal in his pond and tunnels. Wet embrace hits automatically in melee (can be dodged), 3D6, armor doesn't help. Can cast TIDAL WAVE once at power level 3 (its 6 WP). Resistance: piercing damage halved (rounded up)."
+ },
+ {
+  "id": "hobgoblin-bodyguard",
+  "source": "pathofglory",
+  "abilities": [],
+  "weapons": [
+   {
+    "name": "Long Spear",
+    "skill": 13,
+    "damage": "2D8"
+   }
+  ],
+  "name": "Hobgoblin Bodyguard",
+  "kind": "Hobgoblin",
+  "page": 42,
+  "movement": 10,
+  "damageBonus": {
+   "STR": "D4"
+  },
+  "hp": 16,
+  "wp": null,
+  "armor": {
+   "name": "Studded Leather",
+   "rating": 2
+  },
+  "skills": {
+   "Awareness": 10,
+   "Evade": 12,
+   "Sneaking": 10
+  },
+  "traits": [
+   "Nocturnal"
+  ],
+  "nonMonster": true,
+  "notes": "Bloodhand's personal guard (Chasm of Caves, room 11). Wears full-cover clothing by day."
+ },
+ {
+  "id": "bloodhand",
+  "source": "pathofglory",
+  "abilities": [
+   "Defensive",
+   "Double Slash",
+   "Dual Wield",
+   "Fast Footwork"
+  ],
+  "weapons": [
+   {
+    "name": "Scimitar",
+    "qty": 2,
+    "skill": 17,
+    "damage": "2D6"
+   }
+  ],
+  "name": "Bloodhand",
+  "kind": "Hobgoblin",
+  "page": 42,
+  "boss": true,
+  "movement": 12,
+  "damageBonus": {
+   "STR": "D4"
+  },
+  "hp": 17,
+  "wp": 14,
+  "armor": {
+   "name": "Studded Leather",
+   "rating": 2
+  },
+  "skills": {
+   "Awareness": 14,
+   "Evade": 15,
+   "Sneaking": 10
+  },
+  "gear": [
+   "Key to the chest in room 15"
+  ],
+  "traits": [
+   "Nocturnal"
+  ],
+  "nonMonster": true,
+  "notes": "Hobgoblin robber chief of the Chasm of Caves; owns the black pearl (taken from Dregil) and loves it as treasure without knowing its purpose. Flees with the pearl or surrenders and schemes if outmatched."
+ },
+ {
+  "id": "ulat-aar",
+  "source": "pathofglory",
+  "abilities": [
+   "Focused ×10"
+  ],
+  "weapons": [],
+  "name": "Ulat-A'ar",
+  "kind": "Path of Glory",
+  "page": 51,
+  "movement": 6,
+  "damageBonus": null,
+  "hp": 7,
+  "wp": 36,
+  "armor": null,
+  "skills": {
+   "Animism": 18,
+   "Mentalism": 18
+  },
+  "spells": [
+   "Dispel",
+   "Magic Shield",
+   "Transfer",
+   "Restoration",
+   "Resurrection",
+   "Farsight",
+   "Divination",
+   "Scrying",
+   "Dominate"
+  ],
+  "notes": "Ancient, sinister-looking but kindly hermit on a raft-tent in Deepmire. Keeper of the elven pendant; gives it to those who are not greedy (PERSUASION). Knows where the Gates of Power are."
+ },
+ {
+  "id": "blacktooth",
+  "name": "Blacktooth",
+  "kind": "Path of Glory",
+  "source": "pathofglory",
+  "page": 86,
+  "boss": true,
+  "movement": 12,
+  "damageBonus": {
+   "STR": "D6"
+  },
+  "hp": 24,
+  "wp": 16,
+  "armor": {
+   "name": "Chainmail",
+   "rating": 4
+  },
+  "skills": {
+   "Awareness": 15,
+   "Brawling": 12,
+   "Evade": 12
+  },
+  "abilities": [
+   "Defensive",
+   "Robust ×4",
+   "Veteran"
+  ],
+  "weapons": [
+   {
+    "name": "Morningstar",
+    "skill": 16,
+    "damage": "2D8"
+   }
+  ],
+  "gear": [
+   "Shield, Large"
+  ],
+  "traits": [],
+  "notes": "Burly orc commander in black scale mail with huge black fangs; Dakoth's man since youth and the only orc officer to survive the cave-ins. Terrified of Mogdath, so he tyrannizes his own troops. Holds the key to his room (#50); spies on #43/#49 through peepholes."
+ },
+ {
+  "id": "orc-mercenary",
+  "name": "Orc Mercenary",
+  "kind": "Orc",
+  "source": "pathofglory",
+  "page": 81,
+  "movement": 10,
+  "damageBonus": {
+   "STR": "D4"
+  },
+  "hp": 12,
+  "wp": null,
+  "armor": {
+   "name": "Chainmail",
+   "rating": 4
+  },
+  "skills": {
+   "Awareness": 10,
+   "Evade": 8
+  },
+  "abilities": [],
+  "weapons": [
+   {
+    "name": "Scimitar",
+    "skill": 14,
+    "damage": "2D6"
+   }
+  ],
+  "traits": [],
+  "notes": "Dakoth's hired orcs in the Gates of Power (City, Forge). Armor and weapons as listed unless the location says otherwise (forge workers: leather or none, pickaxes and sledgehammers as light/heavy blunt objects). Hate the wraiths and Blacktooth; open to PERSUASION or BLUFFING."
+ },
+ {
+  "id": "ogre-laborer",
+  "name": "Ogre Laborer",
+  "kind": "Ogre",
+  "source": "pathofglory",
+  "page": 87,
+  "movement": 10,
+  "damageBonus": {
+   "STR": "D6"
+  },
+  "hp": 16,
+  "wp": null,
+  "armor": {
+   "name": "Leather",
+   "rating": 1
+  },
+  "skills": {
+   "Awareness": 8,
+   "Brawling": 12,
+   "Evade": 6
+  },
+  "abilities": [],
+  "weapons": [
+   {
+    "name": "Wooden Club, Large",
+    "skill": 13,
+    "damage": "2D8"
+   }
+  ],
+  "traits": [
+   "Large",
+   "Nocturnal"
+  ],
+  "notes": "Ogres pressed into mining for Mogdath; moody, touchy, often hungover or toothsore."
+ },
+ {
+  "id": "knight-of-eledain",
+  "name": "Knight of Eledain",
+  "kind": "Human",
+  "page": 100,
+  "movement": 10,
+  "damageBonus": {
+   "STR": "D4"
+  },
+  "hp": 15,
+  "wp": 14,
+  "armor": {
+   "name": "Plate Armor",
+   "rating": 6
+  },
+  "skills": {
+   "Awareness": 10,
+   "Brawling": 14,
+   "Evade": 12
+  },
+  "abilities": [
+   "Defensive",
+   "Double Slash",
+   "Veteran"
+  ],
+  "weapons": [
+   {
+    "name": "Longsword",
+    "skill": 16,
+    "damage": "2D8"
+   },
+   {
+    "name": "Shield, Large",
+    "skill": 16,
+    "damage": "D8"
+   }
+  ],
+  "gear": [
+   "Sleeping Pelt"
+  ],
+  "nonMonster": true,
+  "notes": "Shared block for the knight-monks Anbel, Tylrod and Pilos (Keepers of the Immaculate Flame). Ride horses.",
+  "source": "pathofglory"
+ },
+ {
+  "id": "altfoss-dregel",
+  "name": "Altfoss Dregel",
+  "kind": "Path of Glory",
+  "boss": true,
+  "page": 101,
+  "movement": 10,
+  "damageBonus": {
+   "STR": "D4"
+  },
+  "hp": 20,
+  "wp": 12,
+  "armor": {
+   "name": "Chainmail",
+   "rating": 4
+  },
+  "skills": {
+   "Awareness": 14,
+   "Evade": 16
+  },
+  "abilities": [
+   "Defensive",
+   "Robust ×4"
+  ],
+  "weapons": [
+   {
+    "name": "Broadsword",
+    "skill": 16,
+    "damage": "2D6"
+   },
+   {
+    "name": "Dagger",
+    "skill": 14,
+    "damage": "D8"
+   }
+  ],
+  "nonMonster": true,
+  "notes": "Former mayor of burned Fossfirth, now leader of a guerrilla band against Dakoth.",
+  "source": "pathofglory"
+ },
+ {
+  "id": "dregels-fighter",
+  "name": "Dregel's Fighter",
+  "kind": "Human",
+  "page": 101,
+  "movement": 12,
+  "damageBonus": {
+   "STR": "D4"
+  },
+  "hp": 16,
+  "wp": null,
+  "armor": {
+   "name": "Chainmail",
+   "rating": 4
+  },
+  "skills": {
+   "Awareness": 12,
+   "Evade": 10
+  },
+  "weapons": [
+   {
+    "name": "Short Bow",
+    "skill": 13,
+    "damage": "D10"
+   },
+   {
+    "name": "Short Spear",
+    "skill": 14,
+    "damage": "D10"
+   },
+   {
+    "name": "Shield, Small",
+    "skill": 14,
+    "damage": "D8"
+   }
+  ],
+  "nonMonster": true,
+  "source": "pathofglory",
+  "abilities": []
+ },
+ {
+  "id": "orc-crossbowman",
+  "name": "Orc Crossbowman",
+  "kind": "Orc",
+  "page": 106,
+  "movement": 12,
+  "damageBonus": {
+   "AGL": "D4"
+  },
+  "hp": 10,
+  "wp": null,
+  "armor": {
+   "name": "Leather",
+   "rating": 1
+  },
+  "skills": {
+   "Awareness": 10,
+   "Evade": 12
+  },
+  "weapons": [
+   {
+    "name": "Crossbow, Light",
+    "skill": 14,
+    "damage": "2D6"
+   },
+   {
+    "name": "Dagger",
+    "skill": 12,
+    "damage": "D8"
+   }
+  ],
+  "gear": [
+   "Horn"
+  ],
+  "traits": [
+   "Nocturnal"
+  ],
+  "nonMonster": true,
+  "notes": "Book lists 'crossbow' (mapped to Crossbow, Light); crossbows take no damage bonus.",
+  "source": "pathofglory",
+  "abilities": []
+ },
+ {
+  "id": "ankh-tah-leh",
+  "name": "Ankh-Tah-Leh",
+  "kind": "Path of Glory",
+  "boss": true,
+  "page": 107,
+  "movement": 12,
+  "damageBonus": {
+   "AGL": "D6"
+  },
+  "hp": 16,
+  "wp": 12,
+  "armor": {
+   "name": "Spider Silk Tunic",
+   "rating": 4
+  },
+  "skills": {
+   "Acrobatics": 15,
+   "Awareness": 17,
+   "Bluffing": 12,
+   "Evade": 16,
+   "Sleight of Hand": 15,
+   "Sneaking": 18,
+   "Swimming": 18
+  },
+  "kinAbility": "Ill-Tempered, Webbed Feet",
+  "abilities": [
+   "Assassin",
+   "Backstabbing",
+   "Catlike",
+   "Deflect Arrow",
+   "Double Slash",
+   "Dual Wield",
+   "Eagle Eye",
+   "Fast Footwork",
+   "Fearless",
+   "Lightning Fast",
+   "Veteran"
+  ],
+  "weapons": [
+   {
+    "name": "Dagger",
+    "qty": 2,
+    "skill": 18,
+    "damage": "D8"
+   },
+   {
+    "name": "Crossbow, Hand",
+    "skill": 16,
+    "damage": "2D6"
+   }
+  ],
+  "gear": [
+   "Spider Silk Tunic with Winged Cloak",
+   "Sleeping poison (potency 15)"
+  ],
+  "nonMonster": true,
+  "notes": "Mallard assassin of the Ank-Tar guild. Spider silk tunic: armor 4 like chainmail but no bane on Sneaking or Evade; winged cloak lets her glide at double speed.",
+  "source": "pathofglory"
+ },
+ {
+  "id": "uhuluk",
+  "name": "Uhuluk",
+  "kind": "Path of Glory",
+  "boss": true,
+  "page": 109,
+  "movement": 10,
+  "damageBonus": {
+   "STR": "D6"
+  },
+  "hp": 24,
+  "wp": 15,
+  "armor": {
+   "name": "Plate Armor",
+   "rating": 6
+  },
+  "skills": {
+   "Awareness": 10,
+   "Evade": 14
+  },
+  "abilities": [
+   "Defensive",
+   "Double Slash",
+   "Veteran",
+   "Robust ×4"
+  ],
+  "weapons": [
+   {
+    "name": "Scimitar",
+    "skill": 16,
+    "damage": "2D6"
+   },
+   {
+    "name": "Shield, Large",
+    "skill": 16,
+    "damage": "D8"
+   }
+  ],
+  "traits": [
+   "Nocturnal"
+  ],
+  "nonMonster": true,
+  "notes": "Rebel orc chieftain holding Stonemouth; tuskless jaw, metal plate in his skull.",
+  "source": "pathofglory"
+ },
+ {
+  "id": "fidelia",
+  "name": "Fidelia",
+  "kind": "Path of Glory",
+  "boss": true,
+  "page": 110,
+  "movement": 12,
+  "damageBonus": {
+   "AGL": "D4"
+  },
+  "hp": 14,
+  "wp": 18,
+  "armor": null,
+  "skills": {
+   "Animism": 16,
+   "Evade": 14,
+   "Healing": 15
+  },
+  "spells": [
+   "Ensnaring Roots",
+   "Heal Wound",
+   "Purge",
+   "Sleep",
+   "Resurrection"
+  ],
+  "weapons": [
+   {
+    "name": "Dagger",
+    "skill": 15,
+    "damage": "D8"
+   }
+  ],
+  "nonMonster": true,
+  "notes": "High priest of Sathmog in Stonemouth. Her 'Animism' is really commerce with demonic beings.",
+  "source": "pathofglory",
+  "abilities": []
+ },
+ {
+  "id": "gultrub",
+  "name": "Gultrub",
+  "kind": "Path of Glory",
+  "boss": true,
+  "page": 110,
+  "movement": 10,
+  "damageBonus": null,
+  "hp": 32,
+  "wp": 38,
+  "armor": null,
+  "skills": {
+   "Demonology": 17,
+   "Evade": 14
+  },
+  "spells": [
+   "Dispel",
+   "Magic Shield",
+   "Transfer",
+   "Beetle Swarm",
+   "Gutworm",
+   "Summon Champion",
+   "Demonic Exile"
+  ],
+  "abilities": [
+   "Fast Footwork",
+   "Focused ×10",
+   "Master Spellcaster",
+   "Robust ×10"
+  ],
+  "weapons": [
+   {
+    "name": "Staff",
+    "skill": 14,
+    "damage": "D8"
+   }
+  ],
+  "nonMonster": true,
+  "notes": "Senile dwarf ex-high priest, traitor to Dakoth. Book spell names: Gut Worm (= Gutworm, book version: D10 per round, no opposed roll, can't be dodged), Summon Demon (≈ Summon Champion), Demonic Displacement (≈ Demonic Exile: 2D10 on return). Allied with the fire demon Azarizag.",
+  "source": "pathofglory"
+ },
+ {
+  "id": "stonemouth-villager",
+  "name": "Stonemouth Villager",
+  "kind": "Human",
+  "page": 110,
+  "movement": 10,
+  "damageBonus": null,
+  "hp": 12,
+  "wp": null,
+  "armor": null,
+  "skills": {
+   "Awareness": 10,
+   "Evade": 12
+  },
+  "weapons": [
+   {
+    "name": "Short Sword",
+    "skill": 13,
+    "damage": "D10"
+   }
+  ],
+  "nonMonster": true,
+  "notes": "Humans and dwarves of the Sathmog congregation.",
+  "source": "pathofglory",
+  "abilities": []
+ },
+ {
+  "id": "stonemouth-wall-guard",
+  "name": "Stonemouth Wall Guard",
+  "kind": "Human",
+  "page": 110,
+  "movement": 10,
+  "damageBonus": null,
+  "hp": 12,
+  "wp": null,
+  "armor": {
+   "name": "Studded Leather",
+   "rating": 2
+  },
+  "skills": {
+   "Awareness": 10,
+   "Evade": 12
+  },
+  "weapons": [
+   {
+    "name": "Short Sword",
+    "skill": 13,
+    "damage": "D10"
+   },
+   {
+    "name": "Short Bow",
+    "skill": 13,
+    "damage": "D10"
+   }
+  ],
+  "nonMonster": true,
+  "notes": "Villager block, as worn by the guards on the citadel walls.",
+  "source": "pathofglory",
+  "abilities": []
+ },
+ {
+  "id": "balozar",
+  "name": "Balozar",
+  "kind": "Path of Glory",
+  "boss": true,
+  "page": 118,
+  "movement": 10,
+  "damageBonus": {
+   "STR": "D6"
+  },
+  "hp": 36,
+  "wp": 15,
+  "armor": {
+   "name": "Plate Armor",
+   "rating": 6
+  },
+  "skills": {
+   "Awareness": 6,
+   "Evade": 8
+  },
+  "abilities": [
+   "Berserker",
+   "Defensive",
+   "Double Slash",
+   "Massive Blow",
+   "Robust ×10"
+  ],
+  "weapons": [
+   {
+    "name": "Greatsword",
+    "skill": 16,
+    "damage": "2D10"
+   }
+  ],
+  "gear": [
+   "Key to Godvindel's cage"
+  ],
+  "traits": [
+   "Skeleton"
+  ],
+  "nonMonster": true,
+  "notes": "Skeleton champion left in command of Otag. Book gear says 'key to the cage in room #18' — the cage is in the temple hall (#25).",
+  "source": "pathofglory"
+ },
+ {
+  "id": "bunkh",
+  "name": "Bunkh",
+  "kind": "Path of Glory",
+  "page": 122,
+  "movement": 10,
+  "damageBonus": {
+   "STR": "D4"
+  },
+  "hp": 12,
+  "wp": null,
+  "armor": null,
+  "skills": {
+   "Awareness": 10,
+   "Evade": 8
+  },
+  "weapons": [
+   {
+    "name": "Unarmed",
+    "skill": 14,
+    "damage": "D6"
+   }
+  ],
+  "nonMonster": true,
+  "notes": "Orc scout imprisoned at Otag; wants to rejoin Dakoth. (Block lists no Nocturnal rule.)",
+  "source": "pathofglory",
+  "abilities": []
+ },
+ {
+  "id": "otis",
+  "name": "Otis",
+  "kind": "Path of Glory",
+  "page": 125,
+  "movement": 10,
+  "damageBonus": null,
+  "hp": 8,
+  "wp": null,
+  "armor": null,
+  "skills": {
+   "Acrobatics": 12,
+   "Awareness": 8,
+   "Seamanship": 14,
+   "Sneaking": 10
+  },
+  "kinAbility": "Leaping",
+  "abilities": [],
+  "weapons": [
+   {
+    "name": "Short Spear",
+    "skill": 10,
+    "damage": "D10"
+   }
+  ],
+  "traits": [
+   "Non-Monster"
+  ],
+  "notes": "Old, nearly deaf frog-person fisherman of Pikewater; owns the two rowing boats on the west jetty. Leaping: jump horizontally up to Movement, vertically up to half.",
+  "source": "pathofglory"
+ },
+ {
+  "id": "voley",
+  "name": "Voley",
+  "kind": "Path of Glory",
+  "page": 125,
+  "movement": 10,
+  "damageBonus": null,
+  "hp": 8,
+  "wp": null,
+  "armor": null,
+  "skills": {
+   "Acrobatics": 12,
+   "Awareness": 8,
+   "Seamanship": 14,
+   "Sneaking": 10
+  },
+  "kinAbility": "Leaping",
+  "abilities": [],
+  "weapons": [
+   {
+    "name": "Knife",
+    "skill": 10,
+    "damage": "D8"
+   }
+  ],
+  "traits": [
+   "Non-Monster"
+  ],
+  "notes": "Old, half-blind frog-person fisherman of Pikewater; owns the two sailing boats on the east jetty and hates Otis. Leaping: jump horizontally up to Movement, vertically up to half.",
+  "source": "pathofglory"
+ },
+ {
+  "id": "dakoth",
+  "name": "Dakoth",
+  "kind": "Path of Glory",
+  "page": 148,
+  "boss": true,
+  "movement": 12,
+  "damageBonus": null,
+  "hp": 44,
+  "wp": 48,
+  "armor": null,
+  "skills": {
+   "Necromancy": 18,
+   "Mentalism": 17,
+   "Elementalism": 16,
+   "Brawling": 14,
+   "Evade": 15
+  },
+  "abilities": [
+   "Fast Footwork",
+   "Fearless",
+   "Focused ×15",
+   "Master Spellcaster",
+   "Robust ×15",
+   "Weasel"
+  ],
+  "spells": [
+   "Terrify",
+   "Hand of Death",
+   "Drain Life",
+   "Magic Shield",
+   "Transfer",
+   "Frost",
+   "Stone Skin",
+   "Dominate"
+  ],
+  "weapons": [],
+  "gear": [
+   "Dakoth's Staff (mastercrafted; CHARGE + PERMANENCE, 18 extra WP)"
+  ],
+  "notes": "Opens combat by casting STONE SKIN (power level 3) on himself; Master Spellcaster, two spells per turn; uses MAGIC SHIELD as a reaction against spells; saves DRAIN LIFE until he has been hurt. Book versions of his spells (p.148): Terrify — one target within 20 m rolls WIL vs fear (boon at PL1, normal PL2, bane PL3). Drain Life — parryable freezing grip, WIL or 2D6 damage (armor doesn't help) + Sickly, he heals the same, +D6 per PL above 1. Hand of Death — target within 20 m takes 2D6 + Sickly, no armor, no dodge or parry; each PL above 1 adds another round of 2D6 on his turn, even if he dies.",
+  "source": "pathofglory"
+ },
+ {
+  "id": "dakoths-bodyguards",
+  "name": "Dakoth's Bodyguards",
+  "kind": "Skeleton",
+  "page": 149,
+  "boss": true,
+  "movement": 10,
+  "damageBonus": {
+   "STR": "D6"
+  },
+  "hp": 36,
+  "wp": 15,
+  "armor": {
+   "name": "Plate",
+   "rating": 6
+  },
+  "skills": {
+   "Awareness": 6,
+   "Evade": 8
+  },
+  "abilities": [
+   "Berserker",
+   "Defensive",
+   "Double Slash",
+   "Guardian",
+   "Robust ×10"
+  ],
+  "weapons": [
+   {
+    "name": "Longsword",
+    "skill": 16,
+    "damage": "2D8"
+   },
+   {
+    "name": "Shield, Large",
+    "skill": 16,
+    "damage": "D8"
+   }
+  ],
+  "traits": [
+   "Skeleton"
+  ],
+  "notes": "Two tall armored skeletons who guard Dakoth: heroes can't easily reach him in melee and get a bane on ranged attacks at him. They use Guardian and their other abilities until out of WP. The shield's skill level is not printed (assumed equal to the longsword).",
+  "source": "pathofglory"
+ },
+ {
+  "id": "karlak-sol-tar",
+  "name": "Karlak Sol-Tar",
+  "kind": "Path of Glory",
+  "page": 150,
+  "boss": true,
+  "movement": 10,
+  "damageBonus": {
+   "STR": "D6"
+  },
+  "hp": 48,
+  "wp": 24,
+  "armor": {
+   "name": "Plate Armor + Great Helm",
+   "rating": 8
+  },
+  "skills": {},
+  "abilities": [
+   "Defensive",
+   "Robust ×15"
+  ],
+  "weapons": [],
+  "gear": [
+   "Longsword (mastercrafted, 2D8)",
+   "Plate Armor",
+   "Great Helm",
+   "Cloak",
+   "Rations ×8"
+  ],
+  "notes": "The dragon knight on foot, after Ash-Ark-Afar falls (then he fights to the death). The book gives no skill levels; his sword strikes in the monster table deal 2D8+D6 (two targets) and 4D8+D6 (Mighty Blow). Damage bonus D6 inferred from those.",
+  "source": "pathofglory"
  }
 ];
 window.DB_NPCS = DB_NPCS;
@@ -28666,6 +33030,262 @@ var DB_WEAPONS = [
   "source": "magic",
   "page": 128,
   "note": "Stats given for the Tongue of Bahlbadash; grip, STR, cost and supply not stated (1H assumed)."
+ },
+ {
+  "id": "the-knights-longsword",
+  "name": "The Knight's Longsword",
+  "grip": "1H",
+  "str": 13,
+  "range": 2,
+  "damage": "2D8",
+  "durability": 15,
+  "cost": null,
+  "supply": "Unique",
+  "features": [
+   "Piercing",
+   "Slashing"
+  ],
+  "skill": "Swords",
+  "melee": true,
+  "metal": true,
+  "magic": true,
+  "effect": "Imbued with ENCHANT WEAPON and PERMANENCE at power level 1: a roll of 1–2 counts as a dragon when attacking or parrying with it.",
+  "source": "pathofglory",
+  "page": 33
+ },
+ {
+  "id": "the-knights-gilded-shield",
+  "name": "The Knight's Gilded Shield",
+  "grip": "1H",
+  "str": 7,
+  "range": 2,
+  "damage": "D8",
+  "durability": 15,
+  "cost": null,
+  "supply": "Unique",
+  "features": [
+   "Bludgeoning"
+  ],
+  "skill": null,
+  "melee": true,
+  "metal": true,
+  "magic": true,
+  "effect": "Gilded small shield imbued with DISPEL, MAGIC SHIELD, MAGIC SEAL and PERMANENCE at power level 3: each spell can be cast from it for 6 WP per use. Works as a small shield in combat.",
+  "source": "pathofglory",
+  "page": 33,
+  "shield": true,
+  "skillAny": "strMelee"
+ },
+ {
+  "id": "tefalas-dagger",
+  "name": "Tefalas' Dagger",
+  "grip": "1H",
+  "str": null,
+  "range": "STR",
+  "damage": "D8",
+  "durability": 12,
+  "cost": null,
+  "supply": "Unique",
+  "features": [
+   "Subtle",
+   "Piercing",
+   "Slashing",
+   "Can be thrown"
+  ],
+  "skill": "Knives",
+  "melee": true,
+  "metal": true,
+  "magic": true,
+  "mastercrafted": true,
+  "source": "pathofglory",
+  "page": 56,
+  "effect": "Godvindel's mastercrafted spirit-binding blade. Boon on all attacks against undead; the bearer is immune to undead fear attacks and undead magical attacks. The first hit that deals 1+ HP to a death wight severs its ties to the world and draws its spirit into the blade (one wight, once): the bearer loses D6 WP (no WP = no capture), then 1 WP each night, and can't recover WP except by magic. At 5 WP the bearer feels the wight creeping up their arm; at 0 WP the bearer's spirit is swapped into the blade and the wight takes their body. Letting go ends the drain, but the wight escapes after a shift; a new bearer loses D6 WP at once. Indestructible by the heroes."
+ },
+ {
+  "id": "aleth-kheloch",
+  "name": "Aleth-Kheloch",
+  "grip": "2H",
+  "str": 13,
+  "range": 2,
+  "damage": "2D10",
+  "durability": 18,
+  "cost": null,
+  "supply": "Unique",
+  "features": [
+   "Piercing",
+   "Slashing"
+  ],
+  "skill": "Swords",
+  "melee": true,
+  "metal": true,
+  "magic": true,
+  "mastercrafted": true,
+  "source": "pathofglory",
+  "page": 59,
+  "effect": "Mogdath's mastercrafted two-handed sword (greatsword), permanently imbued with Enchant Weapon (power level 1). A living wielder is automatically Disheartened in direct sunlight and can't recover from it while in the sun."
+ },
+ {
+  "id": "ish-taloch",
+  "name": "Ish-Taloch",
+  "grip": "1H",
+  "str": 7,
+  "range": 2,
+  "damage": "2D6",
+  "durability": 15,
+  "cost": null,
+  "supply": "Unique",
+  "features": [
+   "Toppling",
+   "Slashing"
+  ],
+  "skill": "Swords",
+  "melee": true,
+  "metal": true,
+  "magic": true,
+  "mastercrafted": true,
+  "source": "pathofglory",
+  "page": 84,
+  "effect": "Orcish sword of frost: a mastercrafted scimitar holding Frost (power level 2) with Magic Seal and Permanence. Runes explain its use (LANGUAGES, a stretch; boon for orcs)."
+ },
+ {
+  "id": "absor",
+  "name": "Absor",
+  "grip": "1H",
+  "str": 10,
+  "range": 2,
+  "damage": "D8",
+  "durability": 21,
+  "cost": null,
+  "supply": "Unique",
+  "features": [
+   "Bludgeoning"
+  ],
+  "skill": null,
+  "melee": true,
+  "shield": true,
+  "skillAny": "strMelee",
+  "magic": true,
+  "mastercrafted": true,
+  "source": "pathofglory",
+  "page": 84,
+  "effect": "Dwarven shield of the mountain: a mastercrafted large oak shield with silvery fittings holding Stone Shield (power level 2) with Magic Seal and Permanence. Runes explain its use (LANGUAGES, a stretch; boon for dwarves)."
+ },
+ {
+  "id": "the-battle-shield-iskolde",
+  "name": "The Battle Shield Iskolde",
+  "grip": "1H",
+  "str": 10,
+  "range": 2,
+  "damage": "D8",
+  "durability": 18,
+  "cost": null,
+  "supply": "Unique",
+  "features": [
+   "Bludgeoning",
+   "Mastercrafted",
+   "Magic"
+  ],
+  "skill": null,
+  "melee": true,
+  "shield": true,
+  "skillAny": "strMelee",
+  "magic": true,
+  "source": "pathofglory",
+  "page": 133,
+  "effect": "Mastercrafted large shield bound with a version of MAGIC SHIELD. Parry an incoming spell with any weapon skill: on success the spell is blocked completely, no WP is spent, and the bearer gains WP equal to its power level. Its inscriptions must be read (Rulebook p.59) before a new owner can use it."
+ },
+ {
+  "id": "mithrindel",
+  "name": "Mithrindel",
+  "grip": "2H",
+  "str": 13,
+  "range": 100,
+  "damage": "D12",
+  "durability": 6,
+  "cost": null,
+  "supply": "Unique",
+  "features": [
+   "Piercing",
+   "Requires quiver",
+   "Magic"
+  ],
+  "skill": "Bows",
+  "ranged": true,
+  "magic": true,
+  "source": "pathofglory",
+  "page": 131,
+  "effect": "Elven longbow of Prince Gloriman, permanently enchanted with ENCHANT WEAPON (power level 1, PERMANENCE): counts as magical and rolls of 1–2 count as a Dragon when attacking or parrying with it. Elves recognise it and will demand its return to the tomb."
+ },
+ {
+  "id": "eloril",
+  "name": "Eloril",
+  "grip": "1H",
+  "str": 13,
+  "range": 2,
+  "damage": "2D8",
+  "durability": null,
+  "cost": null,
+  "supply": "Unique",
+  "features": [
+   "Bludgeoning",
+   "Toppling",
+   "Cannot be used for parrying",
+   "Magic"
+  ],
+  "skill": "Hammers",
+  "melee": true,
+  "metal": true,
+  "noParry": true,
+  "magic": true,
+  "source": "pathofglory",
+  "page": 131,
+  "effect": "Elven flail of Princess Glorial, permanently enchanted with ENCHANT WEAPON (power level 1, PERMANENCE): counts as magical and rolls of 1–2 count as a Dragon when attacking with it. Elves recognise it and will demand its return to the tomb."
+ },
+ {
+  "id": "garibalders-staff",
+  "name": "Garibalder's Staff",
+  "grip": "2H",
+  "str": 4,
+  "range": 2,
+  "damage": "D8",
+  "durability": 12,
+  "cost": null,
+  "supply": "Unique",
+  "features": [
+   "Bludgeoning",
+   "Toppling",
+   "Mastercrafted",
+   "Magic"
+  ],
+  "skill": "Staves",
+  "melee": true,
+  "magic": true,
+  "source": "pathofglory",
+  "page": 145,
+  "effect": "Wickedly carved mastercrafted wooden staff of the high priest Garibalder, imbued with CHARGE and PERMANENCE. Holds 20 WP that anyone holding it can draw on; once spent they are gone."
+ },
+ {
+  "id": "dakoths-staff",
+  "name": "Dakoth's Staff",
+  "grip": "2H",
+  "str": 4,
+  "range": 2,
+  "damage": "D8",
+  "durability": 12,
+  "cost": null,
+  "supply": "Unique",
+  "features": [
+   "Bludgeoning",
+   "Toppling",
+   "Mastercrafted",
+   "Magic"
+  ],
+  "skill": "Staves",
+  "melee": true,
+  "magic": true,
+  "source": "pathofglory",
+  "page": 148,
+  "effect": "Black, skull-crowned mastercrafted staff imbued with CHARGE and PERMANENCE; holds 18 extra WP its wielder can draw on."
  }
 ];
 window.DB_WEAPONS = DB_WEAPONS;

@@ -1,0 +1,21 @@
+{
+  "cfg": "sd",
+  "file": "sd_session_prep_builder.html",
+  "code": "SD",
+  "name": "Shadowdark",
+  "title": "Adventure Prep Builder — Shadowdark RPG",
+  "sessionKey": "sd_session",
+  "lsKey": "dcw_builder_v5",
+  "chapterLabel": "Chapter",
+  "chapterPh": "",
+  "chapterUpper": "CHAPTER",
+  "sessionLabel": "Session",
+  "titlePh": "e.g. The Lost Citadel",
+  "subtitlePh": "e.g. A one-session Shadowdark adventure",
+  "castTab": "Monsters",
+  "castHeading": "NPCs &amp; Mobs",
+  "mobLabel": "Mob",
+  "bossLabel": "Boss",
+  "randomLabel": "Random Monster",
+  "pickerComment": "<!-- Shared dungeon-map engine (Map generator) + the Shadowdark bestiary (monster picker). -->"
+}

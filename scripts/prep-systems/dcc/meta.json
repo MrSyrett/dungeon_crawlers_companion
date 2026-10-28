@@ -1,0 +1,21 @@
+{
+  "cfg": "dcc",
+  "file": "dcc_session_prep_builder.html",
+  "code": "DCC",
+  "name": "Dungeon Crawler Carl",
+  "title": "Adventure Prep Builder — Dungeon Crawler Carl RPG",
+  "sessionKey": "dcc_session",
+  "lsKey": "dcw_builder_v5",
+  "chapterLabel": "Floor",
+  "chapterPh": "01 OF 06",
+  "chapterUpper": "FLOOR",
+  "titlePh": "e.g. Crawler's First Steps",
+  "subtitlePh": "e.g. A One-Session Adventure...",
+  "castTab": "NPCs/Mobs",
+  "castHeading": "NPCs &amp; Mobs",
+  "mobLabel": "Mob",
+  "bossLabel": "Boss",
+  "randomLabel": "Random Mob",
+  "sessionLabel": "Session",
+  "pickerComment": "<!-- Shared dungeon-map engine (Map generator) + the DCC bestiary (mob picker). -->"
+}

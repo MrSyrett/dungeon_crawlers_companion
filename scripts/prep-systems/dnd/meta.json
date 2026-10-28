@@ -1,0 +1,21 @@
+{
+  "cfg": "dnd",
+  "file": "dnd_session_prep_builder.html",
+  "code": "DND",
+  "name": "D&D",
+  "title": "Adventure Prep Builder — D&D 2024",
+  "sessionKey": "dnd_session",
+  "lsKey": "dnd_builder_v1",
+  "chapterLabel": "Chapter",
+  "chapterPh": "Chapter 1",
+  "chapterUpper": "CHAPTER",
+  "titlePh": "e.g. The Sunless Citadel",
+  "subtitlePh": "e.g. A D&D adventure for level 1–3",
+  "castTab": "Monsters/NPCs",
+  "castHeading": "Monsters &amp; NPCs",
+  "mobLabel": "Monster",
+  "bossLabel": "Boss",
+  "randomLabel": "Random Monster",
+  "sessionLabel": "Session",
+  "pickerComment": "<!-- Shared dungeon-map engine (Map generator) + the DCC bestiary (mob picker). -->"
+}

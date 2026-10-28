@@ -1,0 +1,21 @@
+{
+  "cfg": "ace",
+  "file": "ace_session_prep_builder.html",
+  "code": "ACE",
+  "name": "ACE!",
+  "title": "Adventure Prep Builder — ACE! (Awfully Cheerful Engine)",
+  "sessionKey": "ace_session",
+  "lsKey": "ace_builder_v1",
+  "chapterLabel": "Adventure",
+  "chapterPh": "Spirits of Manhattan",
+  "chapterUpper": "ADVENTURE",
+  "titlePh": "e.g. Ghosts of the Ninth Precinct",
+  "subtitlePh": "e.g. A one-session ACE! adventure",
+  "castTab": "Extras",
+  "castHeading": "Extras &amp; Villains",
+  "mobLabel": "Extra",
+  "bossLabel": "Villain",
+  "randomLabel": "Random Extra",
+  "sessionLabel": "Session",
+  "pickerComment": "<!-- Shared dungeon-map engine (Map generator) + the DCC bestiary (mob picker). -->"
+}

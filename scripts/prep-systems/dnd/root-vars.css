@@ -1,0 +1,12 @@
+    /* DCW GM Toolkit + Rules for Survival combined palette */
+    --ink: #1a1a1a; --paper: #f3e7cf; --accent: #c8102e; --accent-dark: #8a0f1e;
+    --accent-red: #9b1b22; --accent-red-dark: #6f1119;
+    --muted: #555; --rule: #d8d0c0; --box-bg: #f0d9d0; --read-bg: #2a1a08;
+    --read-text: #ffffff; --highlight: #f0c020; --green: #2d6a2d; --blue-npc: #1a4a8a;
+    --section-hdr: var(--accent-dark); --table-hdr: #4a4a4a; --preview-bg: #000000;
+    --font-display: 'Barlow Condensed', sans-serif;
+    /* Masthead banner — ported from the system's character-sheet header (.hdr-row/.lg-word/.lg-sub) */
+    --banner-a: #7a1119; --banner-b: #9b1b22; --title-color: var(--highlight); --title-weight: 900; --sub-color: #f0cf8a;
+    /* UI (sidebar) stays dark */
+    --ui-bg: #1c1c1e; --ui-panel: #2a2a2d; --ui-border: #3a3a3e;
+    --ui-text: #e8e4dc; --ui-muted: #888; --ui-accent: #c8102e; --ui-highlight: #f0c020;

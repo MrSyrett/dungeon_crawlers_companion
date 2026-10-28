@@ -15,7 +15,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const part = (n) => import(pathToFileURL(join(ROOT, "data", "db", "parts", n + ".mjs")).href);
 
-const mods = await Promise.all(["core", "professions", "abilities", "magic", "gear", "bestiary", "tables", "bestiary-book", "magic-book"].map(part));
+const mods = await Promise.all(["core", "professions", "abilities", "magic", "gear", "bestiary", "tables", "bestiary-book", "magic-book", "path-of-glory"].map(part));
 const all = Object.assign({}, ...mods);
 
 const slug = (s) => String(s).toLowerCase().replace(/&/g, "and").replace(/['’()]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -74,12 +74,18 @@ all.DB_MAGIC_RULES.schools = schools.map((s) => s.name);
 all.DB_MAGIC_RULES.creationSchools = Object.fromEntries(["Mage", "Bard"].map((p) => [p, schools.filter((s) => s.creation && (s.professions || []).includes(p)).map((s) => s.name)]));
 const mage = all.DB_PROFESSIONS.find((p) => p.mage);
 for (const sc of schools) if (sc.creation && (sc.professions || []).includes("Mage") && sc.startingSkills?.length) mage.schoolSkills[sc.name] = sc.startingSkills;
+// Path of Glory (campaign): its own creatures, NPCs and magic items (source "pathofglory").
+all.DB_MONSTERS = [...all.DB_MONSTERS, ...all.DB_MONSTERS_POG.map((m) => ({ category: "Path of Glory", ...m, source: "pathofglory" }))];
+all.DB_NPCS = [...all.DB_NPCS, ...all.DB_NPCS_POG.map((n) => ({ ...n, source: "pathofglory" }))];
+Object.assign(all.DB_NPC_TRAITS, all.DB_NPC_TRAITS_POG || {});
+all.DB_GEAR_EXPANSION = [...all.DB_GEAR_EXPANSION, ...all.DB_GEAR_POG.map((g) => ({ ...g, source: "pathofglory" }))];
+all.DB_WEAPONS_EXPANSION = [...all.DB_WEAPONS_EXPANSION, ...all.DB_WEAPONS_POG.map((w) => ({ ...w, source: "pathofglory" }))];
 // Gear from the Book of Magic: laboratories, alchemy ingredients and substances, the whip.
 all.DB_GEAR = [...tag(all.DB_GEAR, "core"), ...all.DB_GEAR_EXPANSION];
 all.DB_WEAPONS = [...tag(all.DB_WEAPONS, "core"), ...all.DB_WEAPONS_EXPANSION];
 for (const k of ["DB_ARMOR", "DB_HELMETS", "DB_HEROIC_ABILITIES", "DB_PROFESSIONS", "DB_SUMMONS", "DB_ANIMALS"]) all[k] = tag(all[k], "core");
 all.DB_SKILLS = tag(all.DB_SKILLS, "core");
-for (const k of ["DB_KIN_EXPANSION", "DB_MONSTERS_EXPANSION", "DB_NPCS_EXPANSION", "DB_NPC_TRAITS_EXTRA", "DB_SPELLS_EXPANSION", "DB_MAGIC_TRICKS_EXPANSION", "DB_GEAR_EXPANSION", "DB_WEAPONS_EXPANSION"]) delete all[k];
+for (const k of ["DB_KIN_EXPANSION", "DB_MONSTERS_EXPANSION", "DB_NPCS_EXPANSION", "DB_NPC_TRAITS_EXTRA", "DB_SPELLS_EXPANSION", "DB_MAGIC_TRICKS_EXPANSION", "DB_GEAR_EXPANSION", "DB_WEAPONS_EXPANSION", "DB_MONSTERS_POG", "DB_NPCS_POG", "DB_NPC_TRAITS_POG", "DB_GEAR_POG", "DB_WEAPONS_POG"]) delete all[k];
 
 const ID_LISTS = ["DB_SKILLS", "DB_KIN", "DB_PROFESSIONS", "DB_HEROIC_ABILITIES", "DB_SPELLS", "DB_MAGIC_TRICKS", "DB_SUMMONS",
   "DB_ARMOR", "DB_HELMETS", "DB_WEAPONS", "DB_GEAR", "DB_MONSTERS", "DB_NPCS", "DB_ANIMALS"];

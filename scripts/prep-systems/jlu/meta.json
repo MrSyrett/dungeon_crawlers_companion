@@ -1,0 +1,21 @@
+{
+  "cfg": "jlu",
+  "file": "jlu_session_prep_builder.html",
+  "code": "JLU",
+  "name": "Justice League Unlimited",
+  "title": "Adventure Prep Builder — Justice League Unlimited",
+  "sessionKey": "jlu_session",
+  "lsKey": "jlu_builder_v1",
+  "chapterLabel": "Issue",
+  "chapterPh": "Issue #1",
+  "chapterUpper": "ISSUE",
+  "titlePh": "e.g. Lines of Defense",
+  "subtitlePh": "e.g. A JLU one-shot for Tier C heroes",
+  "castTab": "Villains/NPCs",
+  "castHeading": "Villains &amp; Threats",
+  "mobLabel": "Villain",
+  "bossLabel": "Threat",
+  "randomLabel": "Random Villain",
+  "sessionLabel": "Session",
+  "pickerComment": "<!-- Shared dungeon-map engine (Map generator) + the DCC bestiary (mob picker). -->"
+}

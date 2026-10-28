@@ -1,0 +1,6 @@
+  /* Keep the prep UI on Oswald. The shared TWD skin (public/tokens.css) sets
+     --font-display to the Dead Kansas display face for the whole themed surface,
+     which is right for the Adventure Title (opts in below) but unreadable on the
+     small sidebar and preview labels. Re-pin the UI font to Oswald here; this
+     matches tokens.css's specificity and wins on source order. */
+  :root[data-themed][data-system="TWD"] { --font-display: 'Oswald', sans-serif; }

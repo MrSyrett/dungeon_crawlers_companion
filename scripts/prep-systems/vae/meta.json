@@ -1,0 +1,21 @@
+{
+  "cfg": "vae",
+  "file": "vae_session_prep_builder.html",
+  "code": "VAE",
+  "name": "Vaesen",
+  "title": "Adventure Prep Builder — Vaesen",
+  "sessionKey": "vae_session",
+  "lsKey": "vae_builder_v1",
+  "chapterLabel": "Scene",
+  "chapterPh": "Scene 1",
+  "chapterUpper": "SCENE",
+  "titlePh": "e.g. The Dance of Dreams",
+  "subtitlePh": "e.g. A Vaesen mystery",
+  "castTab": "Vaesen/NPCs",
+  "castHeading": "Vaesen &amp; NPCs",
+  "mobLabel": "Adversary",
+  "bossLabel": "Threat",
+  "randomLabel": "Random Vaesen",
+  "sessionLabel": "Mystery",
+  "pickerComment": "<!-- Shared dungeon-map engine (Map generator) + the DCC bestiary (mob picker). -->"
+}

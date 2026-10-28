@@ -1,0 +1,21 @@
+{
+  "cfg": "twd",
+  "file": "twd_session_prep_builder.html",
+  "code": "TWD",
+  "name": "The Walking Dead",
+  "title": "Adventure Prep Builder — The Walking Dead",
+  "sessionKey": "twd_session",
+  "lsKey": "yze_builder_v1",
+  "chapterLabel": "Scene",
+  "chapterPh": "Scene 1",
+  "chapterUpper": "SCENE",
+  "titlePh": "e.g. The Cold Below",
+  "subtitlePh": "e.g. A Walking Dead one-shot",
+  "castTab": "Adversaries/NPCs",
+  "castHeading": "Adversaries &amp; NPCs",
+  "mobLabel": "Adversary",
+  "bossLabel": "Threat",
+  "randomLabel": "Random Adversary",
+  "sessionLabel": "Session",
+  "pickerComment": "<!-- Shared dungeon-map engine (Map generator) + the TWD bestiary (NPC/animal/walker picker). -->"
+}

@@ -187,7 +187,7 @@ const DB_SCHOOL_OPTS: readonly Opt[] = [["General", "General Magic"], ["Animism"
 const DB_TIMING_OPTS: readonly Opt[] = [["action", "Action"], ["free", "Free / no action"], ["reaction", "Reaction"], ["passive", "Passive"], ["downtime", "Downtime (stretch/shift)"], ["roundStart", "Start of round"]];
 const DB_SIZE_OPTS: readonly Opt[] = [["Small", "Small"], ["Normal", "Normal"], ["Large", "Large"], ["Huge", "Huge"], ["Swarm", "Swarm"]];
 const DB_DMG_OPTS: readonly Opt[] = [["", "—"], ["slashing", "Slashing"], ["piercing", "Piercing"], ["bludgeoning", "Bludgeoning"], ["fire", "Fire"], ["cold", "Cold"], ["magic", "Magic"], ["other", "Other"]];
-const DB_GEAR_CAT_OPTS: readonly Opt[] = ["Clothes", "Musical Instruments", "Trade Goods", "Studies & Magic", "Light Sources", "Tools", "Containers", "Medicine", "Services", "Hunting & Fishing", "Means of Travel", "Animals", "Alchemy Ingredients", "Alchemical Substances"].map((x) => [x, x] as const);
+const DB_GEAR_CAT_OPTS: readonly Opt[] = ["Clothes", "Musical Instruments", "Trade Goods", "Studies & Magic", "Light Sources", "Tools", "Containers", "Medicine", "Services", "Hunting & Fishing", "Means of Travel", "Animals", "Alchemy Ingredients", "Alchemical Substances", "Magic Items"].map((x) => [x, x] as const);
 const dbCostForm = (d: Data): Data => { const c = (d.cost ?? {}) as Data; return { costAmount: c.amount ?? "", costUnit: c.unit ?? "silver" }; };
 const dbCostTxt = (d: Data): string => { const c = (d.cost ?? null) as Data | null; return c && c.amount != null ? `${c.amount} ${c.unit}` : "—"; };
 

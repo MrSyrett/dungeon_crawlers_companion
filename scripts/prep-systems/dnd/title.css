@@ -1,0 +1,13 @@
+  /* The D&D logo face. Declared in this file on purpose: lib/inject.ts does NOT
+     inject public/tokens.css when previewOnly is set (the GM Screen's Adventure
+     pane), so a title relying on the injected copy would quietly fall back to
+     Cinzel there. Same woff2, same origin, so no extra request in practice.
+     Cinzel stands behind it because DnDC has no digits. */
+  @font-face {
+    font-family: "DnDC";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("/fonts/dndc.woff2") format("woff2");
+  }
+  .adventure-title { font-family: "DnDC", "Cinzel", Georgia, serif; font-size: 28px; font-weight: var(--title-weight); color: var(--title-color); line-height: 0.95; text-transform: uppercase; letter-spacing: 0.02em; }

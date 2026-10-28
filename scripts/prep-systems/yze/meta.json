@@ -1,0 +1,21 @@
+{
+  "cfg": "yze",
+  "file": "yze_session_prep_builder.html",
+  "code": "YZE",
+  "name": "Alien RPG",
+  "title": "Adventure Prep Builder — Alien RPG",
+  "sessionKey": "yze_session",
+  "lsKey": "yze_builder_v1",
+  "chapterLabel": "Scene",
+  "chapterPh": "Scene 1",
+  "chapterUpper": "SCENE",
+  "titlePh": "e.g. The Cold Below",
+  "subtitlePh": "e.g. An Alien RPG one-shot",
+  "castTab": "Adversaries/NPCs",
+  "castHeading": "Adversaries &amp; NPCs",
+  "mobLabel": "Adversary",
+  "bossLabel": "Threat",
+  "randomLabel": "Random Adversary",
+  "sessionLabel": "Session",
+  "pickerComment": "<!-- Shared dungeon-map engine (Map generator) + the DCC bestiary (mob picker). -->"
+}

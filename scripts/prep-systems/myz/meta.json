@@ -1,0 +1,21 @@
+{
+  "cfg": "myz",
+  "file": "myz_session_prep_builder.html",
+  "code": "MYZ",
+  "name": "Mutant: Year Zero",
+  "title": "Adventure Prep Builder — Mutant: Year Zero",
+  "sessionKey": "myz_session",
+  "lsKey": "myz_builder_v1",
+  "chapterLabel": "Sector",
+  "chapterPh": "Sector A3",
+  "chapterUpper": "SECTOR",
+  "titlePh": "e.g. The Dawn Vault",
+  "subtitlePh": "e.g. A Mutant: Year Zero expedition",
+  "castTab": "Zone Threats/NPCs",
+  "castHeading": "Zone Threats &amp; NPCs",
+  "mobLabel": "Adversary",
+  "bossLabel": "Threat",
+  "randomLabel": "Random Zone Threat",
+  "sessionLabel": "Session",
+  "pickerComment": "<!-- Shared dungeon-map engine (Map generator) + the DCC bestiary (mob picker). -->"
+}

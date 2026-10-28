@@ -1,0 +1,21 @@
+{
+  "cfg": "d62e",
+  "file": "d62e_session_prep_builder.html",
+  "code": "D62E",
+  "name": "D6 System 2e",
+  "title": "Adventure Prep Builder — D6 System: Second Edition",
+  "sessionKey": "d62e_session",
+  "lsKey": "d62e_builder_v1",
+  "chapterLabel": "Scene",
+  "chapterPh": "Scene 1",
+  "chapterUpper": "SCENE",
+  "titlePh": "e.g. The Heist Goes Sideways",
+  "subtitlePh": "e.g. A D62e one-shot for 4 heroes",
+  "castTab": "Foes/NPCs",
+  "castHeading": "Foes &amp; NPCs",
+  "mobLabel": "Foe",
+  "bossLabel": "Villain",
+  "randomLabel": "Random Foe",
+  "sessionLabel": "Session",
+  "pickerComment": "<!-- Shared dungeon-map engine (Map generator) + the DCC bestiary (mob picker). -->"
+}

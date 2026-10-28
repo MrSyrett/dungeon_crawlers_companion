@@ -1,0 +1,21 @@
+{
+  "cfg": "icrpg",
+  "file": "icrpg_session_prep_builder.html",
+  "code": "ICRPG",
+  "name": "Index Card RPG",
+  "title": "Adventure Prep Builder — Index Card RPG",
+  "sessionKey": "icrpg_session",
+  "lsKey": "icrpg_builder_v1",
+  "chapterLabel": "Room",
+  "chapterPh": "Room 1",
+  "chapterUpper": "ROOM",
+  "titlePh": "e.g. The Grey Hill Inferno",
+  "subtitlePh": "e.g. An ICRPG one-shot, TARGET 12",
+  "castTab": "Monsters",
+  "castHeading": "Monsters",
+  "mobLabel": "Monster",
+  "bossLabel": "Boss",
+  "randomLabel": "Random Monster",
+  "sessionLabel": "Session",
+  "pickerComment": "<!-- Shared dungeon-map engine (Map generator) + the DCC bestiary (mob picker). -->"
+}

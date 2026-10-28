@@ -1,0 +1,21 @@
+{
+  "cfg": "kob",
+  "file": "kob_session_prep_builder.html",
+  "code": "KOB",
+  "name": "Kids on Bikes",
+  "title": "Adventure Prep Builder — Kids on Bikes",
+  "sessionKey": "kob_session",
+  "lsKey": "kob_builder_v1",
+  "chapterLabel": "Episode",
+  "chapterPh": "01",
+  "chapterUpper": "EPISODE",
+  "titlePh": "e.g. The Lights Over Perkins",
+  "subtitlePh": "e.g. A Kids on Bikes mystery",
+  "castTab": "NPCs/Threats",
+  "castHeading": "NPCs &amp; Threats",
+  "mobLabel": "Threat",
+  "bossLabel": "Powered",
+  "randomLabel": "Random NPC",
+  "sessionLabel": "Session",
+  "pickerComment": "<!-- Shared dungeon-map engine (Map generator) + the DCC bestiary (mob picker). -->"
+}

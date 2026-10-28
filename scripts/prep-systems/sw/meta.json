@@ -1,0 +1,21 @@
+{
+  "cfg": "sw",
+  "file": "sw_session_prep_builder.html",
+  "code": "SW",
+  "name": "Star Wars",
+  "title": "Adventure Prep Builder — Star Wars: The Roleplaying Game",
+  "sessionKey": "sw_session",
+  "lsKey": "sw_builder_v1",
+  "chapterLabel": "Episode",
+  "chapterPh": "IV",
+  "chapterUpper": "EPISODE",
+  "titlePh": "e.g. Rebel Breakout",
+  "subtitlePh": "e.g. A Star Wars adventure for 4–6 Rebels",
+  "castTab": "Imperials/NPCs",
+  "castHeading": "Imperials, Aliens &amp; NPCs",
+  "mobLabel": "Trooper",
+  "bossLabel": "Villain",
+  "randomLabel": "Random NPC",
+  "sessionLabel": "Session",
+  "pickerComment": "<!-- Shared dungeon-map engine (Map generator) + the DCC bestiary (mob picker). -->"
+}

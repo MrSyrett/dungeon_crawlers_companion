@@ -618,6 +618,37 @@ input[type="number"] { -moz-appearance: textfield; }
 .advh-trow > span:last-child { min-width: 0; overflow-wrap: anywhere; }
 .advh-trow.hit { background: rgba(84,144,196,.14); color: var(--white); }
 .advh-troll { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--accent); flex-shrink: 0; min-width: 34px; }
+/* Eight-tab Hub: pinned goal/prize, details, Run Scene bar, session ticks, trackers. */
+.advh-pin { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; font-size: 12px; color: var(--light); line-height: 1.4; }
+.advh-pin b { font-family: 'Geist', sans-serif; font-weight: 800; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin-right: 4px; }
+.advh-progress { font-size: 11.5px; color: var(--dim); letter-spacing: .02em; }
+.advh-det { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; margin-top: 6px; font-size: 12.5px; line-height: 1.45; color: var(--light); }
+.advh-det-k { font-family: 'Geist', sans-serif; font-weight: 800; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); padding-top: 2px; white-space: nowrap; }
+.advh-det-v { min-width: 0; overflow-wrap: anywhere; }
+.advh-hooks { margin: 0; padding-left: 16px; }
+.advh-scene-top { display: flex; align-items: flex-start; gap: 8px; }
+.advh-scene-top .advh-scene-hd { flex: 1; }
+.advh-chk { display: inline-flex; align-items: center; gap: 4px; font-family: 'Geist', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); cursor: pointer; flex-shrink: 0; white-space: nowrap; }
+.advh-chk input { margin: 0; accent-color: var(--accent); }
+.advh-scene.done { opacity: .62; }
+.advh-scene.done .advh-row-name { text-decoration: line-through; text-decoration-color: var(--dim); }
+.advh-run { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed var(--border); }
+.advh-run .btn { margin: 0; }
+.advh-run-res { margin: -2px 0 8px; }
+.advh-haz { font-size: 12px; line-height: 1.45; color: var(--light); border-left: 3px solid var(--red); padding: 3px 8px; margin-top: 4px; border-radius: 0 6px 6px 0; background: rgba(214,58,48,.07); }
+.advh-haz .dim { color: var(--dim); }
+.advh-loot-hd { display: flex; align-items: flex-start; gap: 8px; justify-content: space-between; }
+.advh-loot.handed, .advh-clue.revealed { opacity: .7; }
+.advh-actions { display: flex; gap: 6px; margin-top: 7px; flex-wrap: wrap; }
+.advh-actions .btn { margin: 0; }
+.advh-scene-body .advh-card { background: var(--panel); margin-top: 5px; }
+.advh-trk { display: flex; align-items: flex-start; gap: 10px; padding: 6px 8px; margin-top: 5px; border: 1px solid var(--border); border-left: 3px solid #5490c4; border-radius: 7px; background: var(--panel); }
+.advh-trk-main { flex: 1; min-width: 0; }
+.advh-trk-name { font-family: 'Geist', sans-serif; font-weight: 700; font-size: 13px; color: var(--white); }
+.advh-trk .btn { margin: 0; flex-shrink: 0; }
+.advh-alert { margin: 6px 8px 0; padding: 7px 30px 7px 10px; border-radius: 8px; background: rgba(214,58,48,.12); border: 1px solid var(--red-light); color: var(--white); font-size: 12.5px; line-height: 1.45; position: relative; flex-shrink: 0; }
+.advh-alert-x { position: absolute; top: 4px; right: 6px; background: none; border: 0; color: var(--dim); cursor: pointer; font-size: 12px; }
+.advh-talk .advh-desc b { color: var(--dim); font-weight: 700; }
 .advh-map { display: flex; gap: 10px; align-items: center; }
 .advh-map-thumb { width: 72px; height: 54px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); flex-shrink: 0; }
 .advh-map-none { display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--dim); background: var(--panel); }
@@ -2111,6 +2142,15 @@ body[data-cview="free"] .cst-log-rail{display:none}
 .tracker-kind-tag{font-family:'Geist',sans-serif;font-weight:800;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);border:1px solid var(--border);border-radius:6px;padding:3px 8px;white-space:nowrap}
 /* Ticks tracker (a labelled row of tick boxes — Alarm Level, NPC Mood, …) */
 .tmr-card.ticks{border-left-color:#5bbf9a}
+/* Trackers started from an Adventure Prep: where it came from, what happens when it ends. */
+.tmr-src{font-family:'Geist',sans-serif;font-size:10px;color:var(--dim);margin-top:-4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tmr-src b{color:var(--light);font-weight:700}
+.tmr-flags{font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+.tmr-finish{font-size:11.5px;line-height:1.4;color:var(--light);border-top:1px dashed var(--border);padding-top:6px;display:flex;gap:8px;align-items:flex-start}
+.tmr-finish.dim{color:var(--dim)}
+.tmr-finish .tmr-fin-txt{flex:1;min-width:0}
+.tmr-card.expired .tmr-finish{color:var(--white)}
+.tmr-roll-res{font-size:11.5px;color:var(--light);background:var(--panel-2);border-radius:6px;padding:5px 7px}
 .tmr-kind.tk{color:#5bbf9a;border-color:#5bbf9a}
 .tmr-count{width:52px;background:var(--panel);border:1px solid var(--border);border-radius:6px;color:var(--white);font-family:'Geist Mono',monospace;font-size:13px;padding:5px 6px;text-align:center}
 .tmr-ticks{flex-wrap:wrap;gap:6px}
@@ -6001,6 +6041,8 @@ GMScenes.renderPins();
 
 <!-- DCC data layer — bestiary, items, and loot tables for the DCC generators
      and the Trackers monster picker. Generated from data/dcc/*.json. -->
+<!-- Adventure Prep registry: tab names per system, item lists, old-prep migration (shared with the prep builders). -->
+<script src="/tools-data/prep-registry.js"></script>
 <script src="/tools-data/dcc-monsters.js"></script>
 <script src="/tools-data/dcc-items.js"></script>
 <script src="/tools-data/dcc-loot.js"></script>
@@ -6755,9 +6797,10 @@ function gmcCombatNode(){
 // ── Round control (Monitor bar): advance the combat round + step round timers. ──
 function gmcNextRound(){
   const cbt = gmcCombatNode();
+  // The combat tracker's nextRound steps the Trackers tool's round countdowns
+  // itself; step them here only when there is no combat tracker to do it.
   if(cbt && cbt._nextRound) { try { cbt._nextRound(); } catch(e){} }
-  const tmr = gmcPopNodes && gmcPopNodes['timers'];
-  if(tmr && tmr._stepRounds) { try { tmr._stepRounds(); } catch(e){} }
+  else { const tmr = gmcPopNodes && gmcPopNodes['timers']; if(tmr && tmr._stepRounds) { try { tmr._stepRounds(); } catch(e){} } }
   try { renderTimers(); } catch(e){}
   gmcUpdateRound();
 }
@@ -7920,6 +7963,9 @@ function initDocTool(root) {
       // Adventure only: which session-prep the hub had open, so a refresh
       // restores the interactive hub, not just the printable preview.
       advPrep: root._advPrepDoc || null,
+      // Adventure only: done scenes / revealed clues / handed-out treasure per prep
+      // (the eight most recently used preps, so the save stays small).
+      advRun: (function(){ const r = root._advRun; if(!r) return null; const ids = Object.keys(r).sort((a, b) => ((r[b] && r[b]._t) || 0) - ((r[a] && r[a]._t) || 0)).slice(0, 8); const o = {}; ids.forEach(k => { o[k] = r[k]; }); return o; })(),
       // Adventure only: the Library shelf/book laid over the pane (book + page).
       advLib: root._advLibState ? root._advLibState() : null,
     };
@@ -7953,6 +7999,7 @@ function initDocTool(root) {
     // Adventure: a Library book open over the pane comes back on top of whatever
     // is restored beneath it.
     if(s && s.advLib && root._advLibSetState) root._advLibSetState(s.advLib);
+    if(s && s.advRun && typeof s.advRun === 'object') root._advRun = s.advRun;
     // Adventure: a saved hub takes precedence over a saved preview file — re-open
     // the prep into the hub (async fetch; the hub shows its own loading state).
     if(s && s.advPrep && s.advPrep.id && typeof root._advLoadPrep === 'function') {
@@ -8037,7 +8084,7 @@ function wireSessionPrepLoader(root) {
   let prepChaptersCollapsed = true;   // chapters outline starts collapsed
   let prepMeta = null;     // { docTool, docId, docTitle } for the loaded doc
   let prepSys = '';        // system key (DND, SD, …) for statblock mapping
-  let activeSec = 'overview';
+  let activeSec = 'adventure';
 
   // A "← Hub" button that overlays the pane while the full printable prep is
   // showing, so the GM can always get back to the interactive hub.
@@ -8084,12 +8131,14 @@ function wireSessionPrepLoader(root) {
           prepChapters = [raw];
           prepActiveChapter = 0;
         }
+        // Old preps (any builder, any age) → the eight-tab shape, same as the builders do.
+        if(window.PREP_REGISTRY) prepChapters = prepChapters.map(ch => window.PREP_REGISTRY.migrate(ch));
         prepSys = String(d.system || doc.system || window.GM_SYSTEM || '').toUpperCase();
         prepMeta = { docTool: doc.tool, docId: doc.id, docTitle: doc.title };
         // Remember which prep is loaded so a page refresh can restore the hub
         // (not just the printable preview).
         root._advPrepDoc = { id: doc.id, tool: doc.tool, title: doc.title, system: prepSys };
-        activeSec = 'overview';
+        activeSec = 'adventure'; openScenes = {};
         setPrepChapter(prepActiveChapter);
         // The auto-save that fired on the picker click snapshotted state BEFORE
         // this async load finished (so it missed _advPrepDoc). Persist again now
@@ -8106,14 +8155,15 @@ function wireSessionPrepLoader(root) {
     prepActiveChapter = Math.min(Math.max(0, i), prepChapters.length - 1);
     prep = prepChapters[prepActiveChapter] || {};
     if(prepMeta) { prep._docTool = prepMeta.docTool; prep._docId = prepMeta.docId; prep._docTitle = prepMeta.docTitle; }
-    activeSec = 'overview';
+    activeSec = 'adventure'; openScenes = {};
     renderHub();
     try { if(window.__ddScheduleSave) window.__ddScheduleSave(); } catch(e) {}
   }
   function chapterName(ch, i){ return (ch && ch.subtitle && String(ch.subtitle).trim()) ? String(ch.subtitle).trim() : ('Chapter ' + (i + 1)); }
 
-  // Scenes = locations (+ SD strongopen). Tables = rollTables/rolltables/tables
-  // (+ SD randenc). Maps = maps[] (+ the legacy single mappath).
+  // ── What the prep holds (after PREP_REGISTRY.migrate) ──
+  // Scenes = locations (SD's Strong Start is folded in by the migration). Tables =
+  // rollTables (+ any legacy key). Maps = maps[] (+ the legacy single mappath).
   function scenes(){ return [].concat(prep.strongopen || [], prep.locations || []).filter(x => x && (x.name || x.readaloud || x.desc || x.tag || x.consequences || x.notes)); }
   function tables(){
     const t = [].concat(prep.rollTables || [], prep.rolltables || [], prep.tables || []);
@@ -8125,10 +8175,12 @@ function wireSessionPrepLoader(root) {
     if(prep.mappath && prep.mappath !== '__has_map__') m.push({ title: 'Map', src: prep.mappath });
     return m.filter(x => x && x.src);
   }
+  const DET = () => prep.details || {};
+  const hasDetails = () => ['questgiver','hooks','goal','prize','stakes','opposition'].some(k => String(DET()[k] || '').trim());
   function counts(){
-    return { overview: prep.overview ? 1 : 0, scenes: scenes().length, notes: (prep.notes && prep.notes.trim()) ? 1 : 0,
-             clues: (prep.clues || []).length, loot: (prep.rewards || []).length, tables: tables().length,
-             npcs: (prep.statblocks || []).length, maps: maps().length,
+    return { adventure: (prep.overview || hasDetails() || (prep.trackers || []).length || (prep.notes && prep.notes.trim())) ? 1 : 0,
+             scenes: scenes().length, clues: (prep.clues || []).length, treasure: (prep.rewards || []).length, tables: tables().length,
+             cast: (prep.statblocks || []).length, maps: maps().length, notes: (prep.log && String(prep.log).trim()) ? 1 : 0,
              // The Lord of the Rings prep: journeys, councils, landmarks, hoards, schemes, rumours.
              lotr: ['journeys','councils','landmarks','hoards','schemes','rumours'].reduce((n, k) => n + (Array.isArray(prep[k]) ? prep[k].length : 0), 0),
              // Dragonbane prep: the quest, the adventure site, journey legs, traps, leaving the site.
@@ -8141,32 +8193,112 @@ function wireSessionPrepLoader(root) {
                + ['pbVoyages','pbShips','pbTraps'].reduce((n, k) => n + (Array.isArray(prep[k]) ? prep[k].length : 0), 0) };
   }
 
+  // ── Tab labels: the same registry the builders use, so the names match ──
+  // LotR / Dragonbane / Pirate Borg are still hand-built preps with their own
+  // Phase / Quest / Voyage sections, so they keep plain labels until they move.
+  const HAND_BUILT = { LOTR: 1, DB: 1, PB: 1 };
+  const PLAIN = { adventure: 'Overview', clues: 'Clues', scenes: 'Scenes', cast: 'NPCs', treasure: 'Loot', maps: 'Maps', tables: 'Tables', notes: 'Notes' };
+  function lab(k){
+    const R = window.PREP_REGISTRY;
+    if(k === 'lotr') return 'Phase'; if(k === 'db') return 'Quest'; if(k === 'pb') return 'Voyage';
+    if(!R || HAND_BUILT[prepSys]) return PLAIN[k] || k;
+    return R.label(prepSys, k);
+  }
+  const lootOn = () => !window.PREP_REGISTRY || window.PREP_REGISTRY.loot(prepSys);
+
+  // ── Session state: done scenes, revealed clues, handed-out treasure ──
+  // Lives on the GM Screen (saved with the Adventure pane), never in the prep, so
+  // the prep stays reusable. Keyed by doc → chapter → item name.
+  function run(){
+    root._advRun = root._advRun || {};
+    const id = (prepMeta && prepMeta.docId) || '_';
+    const d = root._advRun[id] = root._advRun[id] || {};
+    d._t = Date.now();
+    return d[prepActiveChapter] = d[prepActiveChapter] || { done: {}, clues: {}, handed: {} };
+  }
+  function runSave(){ try { if(window.__ddScheduleSave) window.__ddScheduleSave(); } catch(e) {} }
+  const kOf = (name, i) => (name && String(name).trim()) ? String(name).trim().toLowerCase() : '#' + i;
+  const isDone = (s, i) => !!run().done[kOf(s.name, i)];
+  const isRevealed = (c, i) => !!run().clues[kOf(c.header, i)];
+  const isHanded = (r, i) => !!run().handed[kOf(r.name, i)];
+
+  // ── Trackers: a prep's clocks go to the Trackers tool when the GM presses Start ──
+  function timersNode(){ try { return (typeof sharedToolNode === 'function') ? sharedToolNode('timers') : (gmcPopNodes && gmcPopNodes['timers']); } catch(e) { return null; } }
+  function trkKey(scope, t, i){ return 'prep:' + ((prepMeta && prepMeta.docId) || '') + ':' + prepActiveChapter + ':' + scope + ':' + kOf(t.name, i); }
+  function trkStarted(scope, t, i){ const n = timersNode(); return !!(n && n._findBySrc && n._findBySrc(trkKey(scope, t, i))); }
+  function startTracker(scope, t, i, srcLabel){
+    const n = timersNode(); const R = window.PREP_REGISTRY;
+    if(!n || !n._addTracker || !R) return false;
+    const spec = Object.assign(R.trackerToTool(t), { src: srcLabel, srcKey: trkKey(scope, t, i), finish: t.finish || '', repeat: !!t.repeat, players: !!t.players });
+    if(t.table) { const tb = tables().find(x => String(x.title || '').trim() === String(t.table).trim()); if(tb) spec.table = { title: tb.title, rows: (tb.rows || []).map(r => ({ roll: String(r.roll || r.range || ''), result: String(r.result || '') })) }; }
+    n._addTracker(spec);
+    return true;
+  }
+  function trackersHtml(list, scope){
+    return (list || []).map((t, i) => {
+      const on = trkStarted(scope, t, i), sz = parseInt(t.size, 10) || 0;
+      const kind = t.kind === 'time' ? (sz || 10) + ' min' : t.kind === 'round' ? (sz || 3) + ' rounds' : (sz || 4) + ' boxes';
+      const meta = [kind, t.repeat ? 'repeats' : '', t.table ? 'rolls ' + t.table : '', t.players ? 'players see it' : ''].filter(Boolean).join(' · ');
+      return '<div class="advh-trk" data-scope="' + advEsc(scope) + '" data-i="' + i + '"><div class="advh-trk-main"><div class="advh-trk-name">' + advEsc(t.name || 'Tracker') + '</div>'
+        + '<div class="advh-desc dim" style="margin-top:1px">' + advEsc(meta) + '</div>' + (t.finish ? '<div class="advh-desc" style="margin-top:2px">' + advEsc(t.finish) + '</div>' : '') + '</div>'
+        + '<button type="button" class="btn small ' + (on ? '' : 'primary ') + 'advh-trk-start"' + (on ? ' disabled' : '') + '>' + (on ? '✓ Running' : '▶ Start') + '</button></div>';
+    }).join('');
+  }
+
+  // ── Treasure → character sheets: the same claimable drop as the Treasure panels ──
+  function canDrop(){ return lootOn() && typeof GMCamp !== 'undefined' && GMCamp.get(); }
+  function dropLoot(items, title){
+    if(!canDrop() || !items.length) return false;
+    const rows = items.slice(0, 14).map(r => { const o = { item: String(r.name || 'Item').slice(0, 80), qty: 1, notes: String([r.stats, r.value].filter(Boolean).join(' · ')).slice(0, 160) }; if(r.cat) o.cat = r.cat; return o; });
+    let detail;
+    for(let n = rows.length; n > 0; n--) { detail = JSON.stringify({ dropId: 'fl-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), mode: 'claim', to: '', items: rows.slice(0, n), sys: prepSys.toLowerCase() }); if(detail.length <= 2000) break; }
+    if(!detail || detail.length > 2000) return false;
+    GMCamp.send({ type: 'foundloot', label: String(lab('treasure') || 'Treasure').toUpperCase(), result: title || 'Treasure', detail });
+    return true;
+  }
+  function treasureRow(r, i){
+    const handed = isHanded(r, i);
+    return '<div class="advh-card advh-loot' + (handed ? ' handed' : '') + '" data-ri="' + i + '"><div class="advh-loot-hd"><div class="advh-card-h">' + advEsc(r.name || 'Treasure') + '</div>'
+      + '<label class="advh-chk" title="Ticked once it has been handed out"><input type="checkbox" class="advh-handed"' + (handed ? ' checked' : '') + '> Handed out</label></div>'
+      + (r.flavor ? '<div class="advh-desc">' + advText(r.flavor) + '</div>' : '')
+      + (r.stats ? '<div class="advh-desc dim">' + advText(r.stats) + '</div>' : '')
+      + ((r.value || r.where) ? '<div class="advh-desc dim">' + advEsc([r.value ? 'Value ' + r.value : '', r.where ? 'Found in ' + r.where : ''].filter(Boolean).join(' · ')) + '</div>' : '')
+      + (lootOn() ? '<div class="advh-actions"><button type="button" class="btn small advh-drop" title="' + (canDrop() ? 'Send to the players as a claimable drop' : 'Link a campaign first (top bar)') + '"' + (canDrop() ? '' : ' disabled') + '>🎁 Drop to players</button></div>' : '')
+      + '</div>';
+  }
+  function clueRow(c, i){
+    const on = isRevealed(c, i);
+    return '<div class="advh-card advh-clue' + (on ? ' revealed' : '') + '" data-ci="' + i + '"><div class="advh-loot-hd"><div class="advh-card-h">' + advEsc(c.header || 'Clue') + '</div>'
+      + '<label class="advh-chk"><input type="checkbox" class="advh-revealed"' + (on ? ' checked' : '') + '> Revealed</label></div>'
+      + (c.text ? '<div class="advh-desc">' + advText(c.text) + '</div>' : '')
+      + ((c.where || c.leads) ? '<div class="advh-desc dim">' + advEsc([c.where ? 'Found at ' + c.where : '', c.leads ? 'Leads to ' + c.leads : ''].filter(Boolean).join(' · ')) + '</div>' : '')
+      + '</div>';
+  }
+  const eqName = (a, b) => String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
+
   function renderHub(){
     if(!hub || !prep) return;
     const c = counts();
     const multi = prepChapters.length > 1;
     const meta = [prep.floor, prep.session ? 'Session ' + prep.session : '', prep.players ? prep.players + ' players' : '', prep.duration].map(s => String(s || '').trim()).filter(Boolean).join(' · ');
-    // Overview · Scenes · Clues · Loot · Tables · NPCs · Maps — but only the
-    // sections this adventure actually has. An empty tab was a dead end to
-    // click into (and a dimmed row of eight on a phone), so a prep with no
-    // tables simply has no Tables tab. Overview is always there: it is the
-    // landing tab, and it now carries the GM notes too (see sectionHtml), so a
-    // prep that is only notes still has somewhere to show them.
-    const ALL = [['overview','Overview'],['lotr','Phase'],['db','Quest'],['pb','Voyage'],['scenes','Scenes'],['clues','Clues'],['loot','Loot'],['tables','Tables'],['npcs','NPCs'],['maps','Maps']];
-    const TABS = ALL.filter(([k]) => k === 'overview' || c[k]);
-    if(!TABS.some(([k]) => k === activeSec)) activeSec = 'overview';   // the chapter just switched to lacks the open tab
-    // Overview shows no count badge, just dims when there is nothing to read.
-    const NOCOUNT = { overview: 1 };
-    // The adventure title is shared across chapters; the current chapter's name is
-    // its Subtitle (shown in the switcher when there's more than one chapter).
+    // The eight baseline tabs (with each system's flavour names), plus the
+    // hand-built LotR / Dragonbane / Pirate Borg sections after Scenes. Only tabs
+    // with something in them show; the first tab is always there.
+    const ALL = ['adventure', 'clues', 'scenes', 'lotr', 'db', 'pb', 'cast', 'treasure', 'maps', 'tables', 'notes'];
+    const TABS = ALL.filter(k => k === 'adventure' || c[k]).map(k => [k, lab(k)]);
+    if(!TABS.some(([k]) => k === activeSec)) activeSec = 'adventure';
+    const NOCOUNT = { adventure: 1, notes: 1 };
     const advTitle = (prepChapters[0] && prepChapters[0].title) || prep.title || prep._docTitle || 'Adventure';
+    const D = DET();
+    // Pinned strip: the goal and the prize, a reminder of why the heroes are here.
+    const pin = [D.goal ? '<span><b>Goal</b> ' + advEsc(D.goal) + '</span>' : '', D.prize ? '<span><b>Prize</b> ' + advEsc(D.prize) + '</span>' : ''].filter(Boolean).join('');
     let h = '<div class="advh-head">'
       + '<div class="advh-titlerow"><div><div class="advh-title">' + advEsc(advTitle) + '</div>'
       + (!multi && prep.subtitle ? '<div class="advh-sub">' + advEsc(prep.subtitle) + '</div>' : '') + '</div>'
       + '<button class="btn small advh-full" title="Open the full printable prep in this pane">Full prep</button></div>'
       + (meta ? '<div class="advh-meta">' + advEsc(meta) + '</div>' : '')
+      + (pin ? '<div class="advh-pin">' + pin + '</div>' : '')
       + '</div>';
-    // Chapter switcher — a collapsible outline (table of contents).
     if(multi) {
       h += '<div class="advh-outline' + (prepChaptersCollapsed ? ' collapsed' : '') + '">'
         + '<div class="advh-co-head" data-cotoggle><span class="caret">▾</span><span class="ttl">Chapters</span><span class="cnt">(' + prepChapters.length + ')</span></div>'
@@ -8176,7 +8308,7 @@ function wireSessionPrepLoader(root) {
         + '</div></div>';
     }
     h += '<div class="advh-tabs">' + TABS.map(([k, l]) =>
-      '<button class="advh-tab' + (k === activeSec ? ' on' : '') + '" data-sec="' + k + '"' + (!c[k] && !c.notes ? ' data-empty="1"' : '') + '>' + l
+      '<button class="advh-tab' + (k === activeSec ? ' on' : '') + '" data-sec="' + k + '"' + (!c[k] ? ' data-empty="1"' : '') + '>' + advEsc(l)
       + (!NOCOUNT[k] && c[k] ? ' <span class="advh-n">' + c[k] + '</span>' : '') + '</button>').join('') + '</div>';
     h += '<div class="advh-body">' + sectionHtml(activeSec) + '</div>';
     hub.innerHTML = h;
@@ -8184,41 +8316,68 @@ function wireSessionPrepLoader(root) {
   }
 
   function sectionHtml(sec){
-    if(sec === 'overview'){
-      // Overview first, then the GM notes under their own small heading. Notes
-      // used to be a tab of their own; they are the GM's asides on the same
-      // material, so they read better directly under it than a click away.
-      const hasNotes = !!(prep.notes && prep.notes.trim());
-      let h = prep.overview ? '<div class="advh-prose">' + advText(prep.overview) + '</div>'
-            : (hasNotes ? '' : '<div class="advh-empty">No overview written for this adventure.</div>');
-      if(hasNotes) h += '<div class="advh-notes"><div class="advh-scene-lbl">GM notes</div><div class="advh-prose">' + advText(prep.notes) + '</div></div>';
-      return h;
+    if(sec === 'adventure'){
+      const D = DET(), R = run();
+      const sc = scenes(), cl = prep.clues || [], tr = prep.rewards || [];
+      const nDone = sc.filter((s, i) => isDone(s, i)).length, nRev = cl.filter((x, i) => isRevealed(x, i)).length, nHand = tr.filter((x, i) => isHanded(x, i)).length;
+      const prog = [sc.length ? nDone + ' of ' + sc.length + ' ' + lab('scenes').toLowerCase() + ' done' : '', cl.length ? nRev + ' of ' + cl.length + ' clues revealed' : '', tr.length ? nHand + ' of ' + tr.length + ' ' + lab('treasure').toLowerCase() + ' handed out' : ''].filter(Boolean);
+      let h = prog.length ? '<div class="advh-progress">' + prog.map(advEsc).join(' · ') + '</div>' : '';
+      const row = (k, v) => (v && String(v).trim()) ? '<div class="advh-det-k">' + k + '</div><div class="advh-det-v">' + v + '</div>' : '';
+      const hooks = String(D.hooks || '').split('\n').map(x => x.trim()).filter(Boolean);
+      const det = row('Quest giver', advEsc(D.questgiver)) + row(hooks.length > 1 ? 'Hooks' : 'Hook', hooks.length > 1 ? '<ul class="advh-hooks">' + hooks.map(x => '<li>' + advEsc(x) + '</li>').join('') + '</ul>' : advEsc(hooks[0] || ''))
+        + row('Goal', advEsc(D.goal)) + row('Prize', advEsc(D.prize)) + row('Stakes', advText(D.stakes || '')) + row('Opposition', advEsc(D.opposition));
+      if(det) h += '<div class="advh-card"><div class="advh-card-h">Adventure Details</div><div class="advh-det">' + det + '</div></div>';
+      if(prep.overview) h += '<div class="advh-prose">' + advText(prep.overview) + '</div>';
+      if((prep.trackers || []).length) h += '<div class="advh-notes"><div class="advh-scene-lbl">Trackers</div>' + trackersHtml(prep.trackers, 'adv') + '</div>';
+      if(prep.notes && prep.notes.trim()) h += '<div class="advh-notes"><div class="advh-scene-lbl">GM notes</div><div class="advh-prose">' + advText(prep.notes) + '</div></div>';
+      return h || '<div class="advh-empty">No overview written for this adventure.</div>';
     }
     if(sec === 'scenes'){
       const list = scenes();
       if(!list.length) return '<div class="advh-empty">No scenes or encounters in this prep.</div>';
+      const SB = prep.statblocks || [], CL = prep.clues || [], RW = prep.rewards || [], HZ = prep.hazards || [];
       return list.map((s, i) => {
         const typ = (s.type || '').toLowerCase();
         const dot = typ === 'combat' ? '#d63a30' : typ === 'npc' ? '#c8a020' : 'var(--accent)';
-        // Collapsed row is two lines: name on top, the Dramatic Question (or type) below.
         const typName = typ === 'npc' ? 'Social' : (typ ? typ.charAt(0).toUpperCase() + typ.slice(1) : '');
         const sub = s.tag || typName;
-        const scnSec = (label, val) => (val && String(val).trim())
-          ? '<div class="advh-scene-sec"><div class="advh-scene-lbl">' + label + '</div><div class="advh-desc">' + advFmt(val) + '</div></div>'
-          : '';
+        const L = s.links || {};
+        const scnSec = (label, val) => (val && String(val).trim()) ? '<div class="advh-scene-sec"><div class="advh-scene-lbl">' + label + '</div><div class="advh-desc">' + advFmt(val) + '</div></div>' : '';
+        // What this scene links to (and what the other tabs say is found here).
+        const cast = (L.cast || []).map(n => SB.find(b => eqName(b.name, n))).filter(Boolean);
+        const nFoes = cast.filter(b => b.sbtype !== 'talk').reduce((a, b) => a + Math.max(1, parseInt(b.qty, 10) || 1), 0);
+        const mp = L.map ? maps().find(m => eqName(m.title, L.map)) : null;
+        const tbs = (L.tables || []).map(n => tables().findIndex(t => eqName(t.title, n))).filter(x => x >= 0);
+        const hz = HZ.filter(z => (L.hazards || []).some(n => eqName(n, z.name)) || eqName(z.where, s.name));
+        const cls = CL.map((x, ci) => [x, ci]).filter(([x]) => (L.clues || []).some(n => eqName(n, x.header)) || eqName(x.where, s.name));
+        const rws = RW.map((x, ri) => [x, ri]).filter(([x]) => eqName(x.where, s.name));
+        const done = isDone(s, i);
+        let runBar = '';
+        if(nFoes) runBar += '<button type="button" class="btn small advh-send-combat advh-run-combat" title="' + advEsc(cast.filter(b => b.sbtype !== 'talk').map(b => (parseInt(b.qty, 10) > 1 ? b.qty + '× ' : '') + b.name).join(', ')) + '">⚔ Add ' + nFoes + ' to combat</button>';
+        if(mp) runBar += '<button type="button" class="btn small advh-run-map" data-map="' + advEsc(mp.title || '') + '">🗺 ' + advEsc(mp.title || 'Map') + (L.mapkey ? ' #' + advEsc(L.mapkey) : '') + '</button>';
+        tbs.forEach(ti => { runBar += '<button type="button" class="btn small advh-run-roll" data-ti="' + ti + '">🎲 ' + advEsc(tables()[ti].title || 'Roll') + '</button>'; });
+        let extra = '';
+        if(cast.length) extra += '<div class="advh-scene-sec"><div class="advh-scene-lbl">Cast here</div><div class="advh-desc">' + cast.map(b => advEsc((parseInt(b.qty, 10) > 1 ? b.qty + '× ' : '') + b.name) + (b.sbtype === 'talk' ? ' <span class="advh-tag">talk</span>' : '')).join(', ') + '</div></div>';
+        if(hz.length) extra += '<div class="advh-scene-sec"><div class="advh-scene-lbl">Hazards &amp; traps</div>' + hz.map(z => '<div class="advh-haz"><b>' + advEsc(z.name || 'Hazard') + '</b>' + (z.trigger ? ' — ' + advEsc(z.trigger) : '') + (z.effect ? '<div>' + advText(z.effect) + '</div>' : '') + (z.spot ? '<div class="dim">Spot / disarm: ' + advEsc(z.spot) + '</div>' : '') + '</div>').join('') + '</div>';
+        if(cls.length) extra += '<div class="advh-scene-sec"><div class="advh-scene-lbl">Clues here</div>' + cls.map(([x, ci]) => clueRow(x, ci)).join('') + '</div>';
+        if(rws.length) extra += '<div class="advh-scene-sec"><div class="advh-scene-lbl">' + advEsc(lab('treasure')) + ' here</div>' + rws.map(([x, ri]) => treasureRow(x, ri)).join('') + '</div>';
+        if((s.trackers || []).length) extra += '<div class="advh-scene-sec"><div class="advh-scene-lbl">Scene trackers</div>' + trackersHtml(s.trackers, 'scene' + i) + '</div>';
         const hasBody = s.readaloud || s.desc || s.consequences || s.notes;
-        return '<div class="advh-scene" data-i="' + i + '">'
-          + '<button class="advh-row advh-scene-hd"><span class="advh-dot" style="background:' + dot + '"></span>'
+        return '<div class="advh-scene' + (done ? ' done' : '') + '" data-i="' + i + '">'
+          + '<div class="advh-scene-top"><button class="advh-row advh-scene-hd"><span class="advh-dot" style="background:' + dot + '"></span>'
           + '<span class="advh-2l"><span class="advh-row-name">' + advEsc(s.name || 'Scene ' + (i + 1)) + '</span>'
           + '<span class="advh-subhdr">' + advEsc(sub || 'Scene') + '</span></span>'
           + '<span class="advh-chev">▾</span></button>'
+          + '<label class="advh-chk advh-done-chk" title="Mark this scene done"><input type="checkbox" class="advh-done"' + (done ? ' checked' : '') + '> Done</label></div>'
           + '<div class="advh-scene-body" style="display:none;">'
+          + (runBar ? '<div class="advh-run">' + runBar + '</div><div class="advh-result advh-run-res" style="display:none;"></div>' : '')
           + (s.tag ? '<div class="advh-scene-dq">' + advEsc(s.tag) + '</div>' : '')
           + (s.readaloud ? '<div class="advh-readaloud">' + advFmt(s.readaloud) + '</div>' : '')
           + scnSec('Interactions', s.desc)
           + scnSec('Consequences', s.consequences)
           + scnSec('Notes', s.notes)
-          + (!hasBody ? '<div class="advh-desc dim">No details recorded.</div>' : '')
+          + extra
+          + (!hasBody && !extra && !runBar ? '<div class="advh-desc dim">No details recorded.</div>' : '')
           + '</div></div>';
       }).join('');
     }
@@ -8313,36 +8472,42 @@ function wireSessionPrepLoader(root) {
       (prep.pbTraps || []).forEach(t => { h += card('Trap — ' + (t.name || ''), ln('Where', t.where) + ln('Effect', t.text) + ln('Damage', t.damage) + ln('Test', t.test) + ln('Bait', t.bait) + ln('Trigger', t.trigger) + ln('State', t.state) + ln('Complication', t.complication)); });
       return h || '<div class="advh-empty">No job, voyage, ship or trap notes in this prep.</div>';
     }
-    if(sec === 'npcs'){
+    if(sec === 'cast'){
       const list = prep.statblocks || [];
       if(!list.length) return '<div class="advh-empty">No NPCs, mobs, or bosses in this prep.</div>';
-      // Slots only — the read-only combat card is mounted into each in wireHub().
-      return list.map((sb, i) => '<div class="advh-npc advh-collapsed" data-i="' + i + '"></div>').join('');
+      // Talk-only cast get a small card; everyone else the read-only combat card.
+      return list.map((sb, i) => sb.sbtype === 'talk'
+        ? '<div class="advh-card advh-talk" data-i="' + i + '"><div class="advh-card-h">' + advEsc(sb.name || 'NPC') + ' <span class="advh-tag">talk-only</span></div>'
+          + (sb.flavor ? '<div class="advh-desc">' + advText(sb.flavor) + '</div>' : '')
+          + ['wants', 'quirks', 'info', 'inventory'].map(k => sb[k] ? '<div class="advh-desc"><b>' + ({ wants: 'Wants', quirks: 'Quirks', info: 'Knows', inventory: 'Carries' })[k] + ':</b> ' + advText(sb[k]) + '</div>' : '').join('')
+          + '<div class="advh-actions"><button type="button" class="btn small advh-send-social advh-talk-social">&rarr; Social</button></div></div>'
+        : '<div class="advh-npc advh-collapsed" data-i="' + i + '"></div>').join('');
     }
     if(sec === 'clues'){
       const list = prep.clues || [];
       if(!list.length) return '<div class="advh-empty">No secrets or clues in this prep.</div>';
-      return list.map(cl => '<div class="advh-card"><div class="advh-card-h">' + advEsc(cl.header || 'Clue') + '</div>'
-        + (cl.text ? '<div class="advh-desc">' + advText(cl.text) + '</div>' : '') + '</div>').join('');
+      return list.map((cl, i) => clueRow(cl, i)).join('');
     }
-    if(sec === 'loot'){
+    if(sec === 'treasure'){
       const list = prep.rewards || [];
-      if(!list.length) return '<div class="advh-empty">No loot or rewards in this prep.</div>';
-      return list.map(r => '<div class="advh-card"><div class="advh-card-h">' + advEsc(r.name || 'Reward') + '</div>'
-        + (r.flavor ? '<div class="advh-desc">' + advText(r.flavor) + '</div>' : '')
-        + (r.stats ? '<div class="advh-desc dim">' + advText(r.stats) + '</div>' : '') + '</div>').join('');
+      if(!list.length) return '<div class="advh-empty">No treasure in this prep.</div>';
+      const left = list.filter((r, i) => !isHanded(r, i)).length;
+      return (lootOn() && list.length > 1 ? '<div class="advh-actions" style="margin:0 0 2px"><button type="button" class="btn small primary advh-drop-all"' + (canDrop() && left ? '' : ' disabled') + ' title="' + (canDrop() ? 'Send everything not yet handed out as one claimable drop' : 'Link a campaign first (top bar)') + '">🎁 Drop the rest (' + left + ')</button></div>' : '')
+        + list.map((r, i) => treasureRow(r, i)).join('');
     }
     if(sec === 'tables'){
       const list = tables();
       if(!list.length) return '<div class="advh-empty">No roll tables in this prep.</div>';
       return list.map((t, i) => {
         const rows = (t.rows || []).map((row, ri) => {
-          const lab = row.roll || row.range || (ri + 1);
-          return '<div class="advh-trow" data-ri="' + ri + '"><span class="advh-troll">' + advEsc(String(lab)) + '</span><span>' + advText(row.result || '') + '</span></div>';
+          const lb = row.roll || row.range || (ri + 1);
+          return '<div class="advh-trow" data-ri="' + ri + '"><span class="advh-troll">' + advEsc(String(lb)) + '</span><span>' + advText(row.result || '') + '</span></div>';
         }).join('');
+        const usedIn = scenes().filter(s => ((s.links || {}).tables || []).some(n => eqName(n, t.title))).map(s => s.name).filter(Boolean);
         return '<div class="advh-table" data-i="' + i + '"><div class="advh-row advh-table-hd">'
           + '<span class="advh-row-name">' + advEsc(t.title || 'Table') + (t.die ? ' <span class="advh-tag">' + advEsc(t.die) + '</span>' : '') + '</span>'
           + (t.rows && t.rows.length ? '<button class="btn small advh-roll">🎲 Roll</button>' : '') + '</div>'
+          + (usedIn.length ? '<div class="advh-desc dim" style="margin-top:2px">Used in ' + advEsc(usedIn.join(', ')) + '</div>' : '')
           + '<div class="advh-result" style="display:none;"></div>'
           + '<div class="advh-trows">' + rows + '</div></div>';
       }).join('');
@@ -8353,7 +8518,11 @@ function wireSessionPrepLoader(root) {
       return list.map((mp, i) => '<div class="advh-map" data-i="' + i + '">'
         + (mp.src && mp.src !== '__has_map__' ? '<img class="advh-map-thumb" src="' + advEsc(mp.src) + '" alt="">' : '<div class="advh-map-thumb advh-map-none">No image</div>')
         + '<div class="advh-map-main"><div class="advh-row-name">' + advEsc(mp.title || 'Map ' + (i + 1)) + '</div>'
+        + (mp.keys ? '<div class="advh-desc dim">' + advFmt(mp.keys) + '</div>' : '')
         + (mp.src && mp.src !== '__has_map__' ? '<button class="btn small primary advh-map-send">&rarr; Maps</button>' : '<span class="advh-desc dim">Stored without image data.</span>') + '</div></div>').join('');
+    }
+    if(sec === 'notes'){
+      return (prep.log && String(prep.log).trim()) ? '<div class="advh-prose">' + advText(prep.log) + '</div>' : '<div class="advh-empty">No session notes yet.</div>';
     }
     return '';
   }
@@ -8392,6 +8561,21 @@ function wireSessionPrepLoader(root) {
     slot.appendChild(card);
   }
 
+  function sendMap(mp, btn){
+    if(!(mp && mp.src && mp.src !== '__has_map__')) return;
+    try {
+      const node = (typeof ensureToolWindow === 'function') ? ensureToolWindow('maps') : null;
+      if(node && typeof node._loadDataUrl === 'function'){ node._loadDataUrl(mp.src, (mp.title || 'Map') + '.png'); if(btn){ const t = btn.innerHTML; btn.innerHTML = '✓ Sent'; setTimeout(() => btn.innerHTML = t, 1400); } }
+    } catch(e) {}
+  }
+  function rollInto(t, box, resEl){
+    const rows = (t.rows || []); if(!rows.length) return;
+    const pick = Math.floor(Math.random() * rows.length); const row = rows[pick];
+    if(box) box.querySelectorAll('.advh-trow').forEach(tr => tr.classList.toggle('hit', +tr.dataset.ri === pick));
+    if(resEl){ resEl.style.display = 'block'; resEl.innerHTML = (t.title ? '<span class="advh-tag">' + advEsc(t.title) + '</span> ' : '') + '<span class="advh-troll">' + advEsc(String(row.roll || row.range || (pick + 1))) + '</span> ' + advText(row.result || ''); }
+  }
+  function flash(btn, txt){ const t = btn.innerHTML; btn.innerHTML = txt; btn.disabled = true; setTimeout(() => { btn.innerHTML = t; btn.disabled = false; }, 1400); }
+
   function wireHub(){
     hub.querySelectorAll('.advh-tab').forEach(b => b.addEventListener('click', () => { activeSec = b.dataset.sec; renderHub(); }));
     hub.querySelectorAll('.advh-co-row').forEach(b => b.addEventListener('click', () => { setPrepChapter(+b.dataset.chap); }));
@@ -8404,10 +8588,65 @@ function wireSessionPrepLoader(root) {
       showPreview();
       root._loadDataUrl('/tools/' + prep._docTool + '/' + prep._docId + '?view=preview', (prep._docTitle || 'Adventure') + '.html');
     });
-    // Scene accordion (2-line collapsed → read-aloud + notes).
+    // Scene accordion; remember which are open across re-renders.
     hub.querySelectorAll('.advh-scene-hd').forEach(b => b.addEventListener('click', () => {
-      const bd = b.parentElement.querySelector('.advh-scene-body'); if(bd) bd.style.display = bd.style.display === 'none' ? 'block' : 'none';
-      const ch = b.querySelector('.advh-chev'); if(ch) ch.textContent = (bd && bd.style.display === 'none') ? '▾' : '▴';
+      const sc = b.closest('.advh-scene'); const bd = sc.querySelector('.advh-scene-body'); if(!bd) return;
+      const open = bd.style.display === 'none'; bd.style.display = open ? 'block' : 'none';
+      const ch = b.querySelector('.advh-chev'); if(ch) ch.textContent = open ? '▴' : '▾';
+      openScenes[sc.dataset.i] = open;
+    }));
+    hub.querySelectorAll('.advh-scene').forEach(sc => { if(openScenes[sc.dataset.i]) { const bd = sc.querySelector('.advh-scene-body'); if(bd) bd.style.display = 'block'; const ch = sc.querySelector('.advh-chev'); if(ch) ch.textContent = '▴'; } });
+    // Done / revealed / handed-out ticks → session state.
+    hub.querySelectorAll('.advh-done').forEach(cb => cb.addEventListener('change', () => {
+      const i = +cb.closest('.advh-scene').dataset.i, s = scenes()[i]; if(!s) return;
+      const R = run(), k = kOf(s.name, i);
+      if(cb.checked) {
+        R.done[k] = 1;
+        // Offer to clear this scene's running trackers.
+        const n = timersNode();
+        if((s.trackers || []).some((t, ti) => trkStarted('scene' + i, t, ti)) && n && n._removeBySrc && confirm('Scene done. Remove its trackers from the Trackers tool?')) n._removeBySrc('prep:' + ((prepMeta && prepMeta.docId) || '') + ':' + prepActiveChapter + ':scene' + i + ':');
+      } else delete R.done[k];
+      runSave(); renderHub();
+    }));
+    hub.querySelectorAll('.advh-revealed').forEach(cb => cb.addEventListener('change', () => {
+      const i = +cb.closest('.advh-clue').dataset.ci, c = (prep.clues || [])[i]; if(!c) return;
+      const R = run(), k = kOf(c.header, i); if(cb.checked) R.clues[k] = 1; else delete R.clues[k];
+      runSave(); renderHub();
+    }));
+    hub.querySelectorAll('.advh-handed').forEach(cb => cb.addEventListener('change', () => {
+      const i = +cb.closest('.advh-loot').dataset.ri, r = (prep.rewards || [])[i]; if(!r) return;
+      const R = run(), k = kOf(r.name, i); if(cb.checked) R.handed[k] = 1; else delete R.handed[k];
+      runSave(); renderHub();
+    }));
+    // Treasure → a claimable drop on the players' sheets.
+    hub.querySelectorAll('.advh-drop').forEach(b => b.addEventListener('click', () => {
+      const i = +b.closest('.advh-loot').dataset.ri, r = (prep.rewards || [])[i]; if(!r) return;
+      if(dropLoot([r], r.name)) { run().handed[kOf(r.name, i)] = 1; runSave(); flash(b, '✓ Sent'); setTimeout(renderHub, 900); }
+    }));
+    const dropAll = hub.querySelector('.advh-drop-all');
+    if(dropAll) dropAll.addEventListener('click', () => {
+      const list = prep.rewards || []; const left = list.map((r, i) => [r, i]).filter(([r, i]) => !isHanded(r, i));
+      if(dropLoot(left.map(x => x[0]), (prep.subtitle || prep.title || lab('treasure')))) { left.forEach(([r, i]) => { run().handed[kOf(r.name, i)] = 1; }); runSave(); flash(dropAll, '✓ Sent'); setTimeout(renderHub, 900); }
+    });
+    // Trackers → Start puts them in the Trackers tool (never twice).
+    hub.querySelectorAll('.advh-trk-start').forEach(b => b.addEventListener('click', () => {
+      const row = b.closest('.advh-trk'), scope = row.dataset.scope, i = +row.dataset.i;
+      const list = scope === 'adv' ? (prep.trackers || []) : ((scenes()[+scope.slice(5)] || {}).trackers || []);
+      const t = list[i]; if(!t) return;
+      const where = scope === 'adv' ? (prep.subtitle || prep.title || 'Adventure') : ((scenes()[+scope.slice(5)] || {}).name || 'Scene');
+      if(startTracker(scope, t, i, where)) { b.innerHTML = '✓ Running'; b.disabled = true; b.classList.remove('primary'); }
+    }));
+    // Run Scene: linked cast → combat (qty each), linked map → Maps, linked tables → roll.
+    hub.querySelectorAll('.advh-run-combat').forEach(b => b.addEventListener('click', () => {
+      const s = scenes()[+b.closest('.advh-scene').dataset.i]; if(!s || typeof window.sendPrepNpcToTracker !== 'function') return;
+      let n = 0;
+      ((s.links || {}).cast || []).forEach(nm => { const sb = (prep.statblocks || []).find(x => eqName(x.name, nm)); if(!sb || sb.sbtype === 'talk') return;
+        const q = Math.max(1, Math.min(20, parseInt(sb.qty, 10) || 1)); for(let k = 0; k < q; k++) if(window.sendPrepNpcToTracker(sb, prepSys)) n++; });
+      if(n) flash(b, '✓ ' + n + ' added');
+    }));
+    hub.querySelectorAll('.advh-run-map').forEach(b => b.addEventListener('click', () => { const mp = maps().find(m => eqName(m.title, b.dataset.map)); sendMap(mp, b); }));
+    hub.querySelectorAll('.advh-run-roll').forEach(b => b.addEventListener('click', () => {
+      const t = tables()[+b.dataset.ti]; const sc = b.closest('.advh-scene'); rollInto(t, null, sc.querySelector('.advh-run-res'));
     }));
     // NPCs: mount the read-only combat card, banner toggles the full card.
     hub.querySelectorAll('.advh-npc').forEach(slot => {
@@ -8433,26 +8672,29 @@ function wireSessionPrepLoader(root) {
         }
       });
     });
+    hub.querySelectorAll('.advh-talk-social').forEach(b => b.addEventListener('click', () => {
+      const sb = (prep.statblocks || [])[+b.closest('.advh-talk').dataset.i];
+      if(sb && typeof window.sendPrepNpcToSocial === 'function' && window.sendPrepNpcToSocial(Object.assign({}, sb, { sbtype: 'npc' }), prepSys)) flash(b, '✓ Added');
+    }));
     // Roll a table row → show inline.
     hub.querySelectorAll('.advh-roll').forEach(b => b.addEventListener('click', () => {
-      const box = b.closest('.advh-table'); const i = +box.dataset.i; const t = tables()[i];
-      const rows = (t.rows || []); if(!rows.length) return;
-      const pick = Math.floor(Math.random() * rows.length); const row = rows[pick];
-      box.querySelectorAll('.advh-trow').forEach(tr => tr.classList.toggle('hit', +tr.dataset.ri === pick));
-      const res = box.querySelector('.advh-result');
-      if(res){ res.style.display = 'block'; res.innerHTML = '<span class="advh-troll">' + advEsc(String(row.roll || row.range || (pick + 1))) + '</span> ' + advText(row.result || ''); }
+      const box = b.closest('.advh-table'); const t = tables()[+box.dataset.i];
+      rollInto(t, box, box.querySelector('.advh-result'));
     }));
     // Send a map image to the Maps station (opens as a new Maps tab).
-    hub.querySelectorAll('.advh-map-send').forEach(b => b.addEventListener('click', () => {
-      const i = +b.closest('.advh-map').dataset.i; const mp = maps()[i];
-      if(mp && mp.src && mp.src !== '__has_map__'){
-        try {
-          const node = (typeof ensureToolWindow === 'function') ? ensureToolWindow('maps') : null;
-          if(node && typeof node._loadDataUrl === 'function'){ node._loadDataUrl(mp.src, (mp.title || 'Map') + '.png'); b.textContent = '✓ Sent'; setTimeout(() => b.textContent = '→ Maps', 1400); }
-        } catch(e) {}
-      }
-    }));
+    hub.querySelectorAll('.advh-map-send').forEach(b => b.addEventListener('click', () => { const mp = maps()[+b.closest('.advh-map').dataset.i]; sendMap(mp, b); }));
   }
+  // Which scenes are expanded (kept across re-renders of the same chapter).
+  let openScenes = {};
+  // A tracker this prep started just ran out: say so on the Hub.
+  document.addEventListener('gm-tracker-finished', e => {
+    const d = e.detail || {}; if(!hub || !prep || !d.srcKey || d.srcKey.indexOf('prep:' + ((prepMeta && prepMeta.docId) || '') + ':') !== 0) return;
+    let bar = hub.querySelector('.advh-alert');
+    if(!bar){ bar = document.createElement('div'); bar.className = 'advh-alert'; const body = hub.querySelector('.advh-body'); if(body) body.parentNode.insertBefore(bar, body); else hub.appendChild(bar); }
+    bar.innerHTML = '<b>⏰ ' + advEsc(d.name || 'Tracker') + '</b>' + (d.finish ? ' — ' + advEsc(d.finish) : ' ran out') + (d.roll ? '<div class="advh-desc">🎲 ' + advEsc(d.roll) + '</div>' : '') + '<button type="button" class="advh-alert-x" title="Dismiss">✕</button>';
+    bar.querySelector('.advh-alert-x').addEventListener('click', () => bar.remove());
+    hub.querySelectorAll('.advh-trk-start').forEach(() => {});   // labels refresh on next render
+  });
 
   if(emptyEl && !emptyEl.querySelector('.doc-load-prep')) {
     const b = document.createElement('button');
@@ -9914,6 +10156,9 @@ function init_trackers(root) {
     updateRoundDisplay();
     items.forEach(it => { if(it.type === 'tracker' && it.kind === 'rounds') it.rounds = Math.max(0, it.rounds - 1); });
     render();
+    // Round countdowns in the Trackers tool (incl. ones started from an Adventure
+    // Prep) advance with combat, whichever Next Round button was pressed.
+    try { const tmr = gmcPopNodes && gmcPopNodes['timers']; if(tmr && tmr._stepRounds) tmr._stepRounds(); renderTimers(); } catch(e) {}
     if(window.__ddScheduleSave) window.__ddScheduleSave();
   }
   root._nextRound = nextRound;
@@ -13162,7 +13407,8 @@ function xsMonSummary(src, m) {
 // which go on the meta line, and which become detail lines.
 const PREP_SB_FIELDS = {
   DCC:  { stats:[['str','STR'],['int','INT'],['con','CON'],['dex','DEX'],['cha','CHA']], meta:[['level','LV'],['evade','Evade'],['dr','DR'],['move','Move'],['surprise','Surprise']], hp:'pips' },
-  SD:   { stats:[['str','STR'],['int','INT'],['con','CON'],['dex','DEX'],['cha','CHA']], def:['hpval','AC'], meta:[['level','LV'],['evade','Evade'],['dr','DR'],['move','Move']], hp:'hpcount' },
+  // SD: the prep stores AC in hpval, HP in hpcount and WIS in evade (old SD builder keys).
+  SD:   { stats:[['str','STR'],['dex','DEX'],['con','CON'],['int','INT'],['evade','WIS'],['cha','CHA']], def:['hpval','AC'], meta:[['level','LV'],['move','Move']], hp:'hpcount' },
   // DND: CR belongs in the type line (header), so it's dropped from the meta line to avoid the duplicate.
   DND:  { stats:[['str','STR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','WIS'],['cha','CHA']], def:['ac','AC'], meta:[['speed','Speed']], hp:'hp' },
   ACE:  { stats:[['smarts','SMA'],['moves','MOV'],['style','STY'],['brawn','BRA'],['power','POW']], def:['defence','DEF'], lines:[['focuses','Focuses']], hp:'health' },
@@ -20920,6 +21166,53 @@ function init_timers(root) {
   function setTicks(t, i){ const n = Math.max(1, Math.min(30, t.count || 1)); t.filled = ((t.filled||0) === i ? i - 1 : i); t.filled = Math.max(0, Math.min(n, t.filled)); }
   function findT(card){ const id = +card.dataset.id; return timers.find(x => x.id === id); }
 
+  // ── Trackers started from an Adventure Prep ──
+  // They carry src (where they came from), srcKey (so Start never duplicates),
+  // finish (what happens at the end), table (rolled at the end), repeat and players.
+  function isEnded(t){
+    if(t.kind === 'ticks') return (t.filled || 0) >= Math.max(1, Math.min(30, t.count || 1));
+    if(t.kind === 'round') return t.remainingRounds <= 0;
+    return t.remainingSeconds <= 0;
+  }
+  function extraHtml(t){
+    let h = '';
+    if(t.src) h += `<div class="tmr-src" title="Started from an Adventure Prep">From <b>${esc(t.src)}</b>${t.repeat ? ' · repeats' : ''}${t.players ? ' · players see it' : ''}</div>`;
+    const rows = (t.table && t.table.rows) || [];
+    if(t.finish || rows.length) {
+      const ended = isEnded(t) || (t.cycles > 0);
+      h += `<div class="tmr-finish${ended ? '' : ' dim'}"><span class="tmr-fin-txt">${ended ? '⏰ ' : 'At the end: '}${esc(t.finish || '')}</span>`
+        + (rows.length ? `<button type="button" class="btn small tmr-roll" title="Roll ${esc(t.table.title || 'the table')}">🎲 ${esc(t.table.title || 'Roll')}</button>` : '') + `</div>`;
+      if(t.lastRoll) h += `<div class="tmr-roll-res">${esc(t.lastRoll)}</div>`;
+    }
+    return h;
+  }
+  function rollTable(t){
+    const rows = (t.table && t.table.rows) || []; if(!rows.length) return;
+    const r = rows[Math.floor(Math.random() * rows.length)];
+    t.lastRoll = (r.roll ? r.roll + ' — ' : '') + (r.result || '');
+  }
+  function tellPlayers(t, ended){
+    try {
+      if(typeof GMCamp === 'undefined' || !GMCamp.get()) return;
+      const left = t.kind === 'time' ? fmt(t.remainingSeconds) + ' on the clock'
+        : t.kind === 'round' ? t.remainingRounds + ' round' + (t.remainingRounds === 1 ? '' : 's') + ' left'
+        : (t.filled || 0) + ' of ' + t.count;
+      GMCamp.send({ type: 'system', label: '⏳ ' + (t.name || 'Tracker'), result: '', detail: ended ? (t.finish || 'Time is up.') : left });
+    } catch(e) {}
+  }
+  // A tracker just reached its end: roll its table, tell the Hub, tell the players
+  // (if asked), and restart it if it repeats.
+  function finished(t){
+    if(t.table && t.table.rows && t.table.rows.length) rollTable(t);
+    try { document.dispatchEvent(new CustomEvent('gm-tracker-finished', { detail: { id: t.id, name: t.name, src: t.src || '', srcKey: t.srcKey || '', finish: t.finish || '', roll: t.lastRoll || '' } })); } catch(e) {}
+    if(t.players) tellPlayers(t, true);
+    if(t.repeat && t.kind !== 'ticks') {
+      t.cycles = (t.cycles || 0) + 1;
+      if(t.kind === 'round') t.remainingRounds = t.totalRounds;
+      else { t.remainingSeconds = t.totalSeconds; t.running = true; }
+    }
+  }
+
   function cardHtml(t){
     if(t.kind === 'ticks'){
       const n = Math.max(1, Math.min(30, t.count || 1)), f = Math.max(0, Math.min(n, t.filled || 0));
@@ -20946,12 +21239,13 @@ function init_timers(root) {
   function render(){
     const has = timers.length > 0;
     if(emptyEl) emptyEl.style.display = has ? 'none' : '';
-    if(listEl){ listEl.style.display = has ? '' : 'none'; listEl.innerHTML = timers.map(cardHtml).join(''); listEl.querySelectorAll('.tmr-card').forEach(wireCard); }
+    if(listEl){ listEl.style.display = has ? '' : 'none'; listEl.innerHTML = timers.map(t => { const x = extraHtml(t), c = cardHtml(t).trim(); return x ? c.replace(/<\/div>$/, x + '</div>') : c; }).join(''); listEl.querySelectorAll('.tmr-card').forEach(wireCard); }
   }
   function wireCard(card){
     const t = findT(card); if(!t) return;
     card.querySelector('.tmr-name').addEventListener('input', e => { t.name = e.target.value; save(); });
     card.querySelector('.tmr-del').addEventListener('click', () => { timers = timers.filter(x => x !== t); render(); save(); });
+    const rb = card.querySelector('.tmr-roll'); if(rb) rb.addEventListener('click', () => { rollTable(t); render(); save(); });
     card.querySelector('.tmr-reset').addEventListener('click', () => {
       if(t.kind === 'round') t.remainingRounds = t.totalRounds;
       else if(t.kind === 'ticks') t.filled = 0;
@@ -20961,14 +21255,14 @@ function init_timers(root) {
     if(t.kind === 'ticks'){
       card.querySelector('.tmr-ticks').addEventListener('click', e => {
         const box = e.target.closest('.tmr-tick'); if(!box) return;
-        setTicks(t, +box.dataset.i); render(); save();
+        const was = isEnded(t); setTicks(t, +box.dataset.i); if(!was && isEnded(t)) finished(t); render(); save();
       });
       card.querySelector('.tmr-apply-ticks').addEventListener('click', () => {
         const n = Math.max(1, Math.min(30, parseInt(card.querySelector('.tmr-count').value) || 1));
         t.count = n; if(t.filled > n) t.filled = n; render(); save();
       });
     } else if(t.kind === 'round'){
-      card.querySelector('.tmr-minus').addEventListener('click', () => { t.remainingRounds = Math.max(0, t.remainingRounds - 1); render(); save(); });
+      card.querySelector('.tmr-minus').addEventListener('click', () => { const was = t.remainingRounds > 0; t.remainingRounds = Math.max(0, t.remainingRounds - 1); if(was && t.remainingRounds <= 0) finished(t); render(); save(); });
       card.querySelector('.tmr-plus').addEventListener('click', () => { t.remainingRounds += 1; if(t.remainingRounds > t.totalRounds) t.totalRounds = t.remainingRounds; render(); save(); });
     } else {
       card.querySelector('.tmr-toggle').addEventListener('click', () => { t.running = !t.running; render(); save(); });
@@ -20982,7 +21276,9 @@ function init_timers(root) {
   // focused name/set input isn't clobbered by a full re-render.
   setInterval(() => {
     let any = false;
-    timers.forEach(t => { if(t.kind === 'time' && t.running && t.remainingSeconds > 0){ t.remainingSeconds -= 1; any = true; if(t.remainingSeconds <= 0) t.running = false; } });
+    let ended = false;
+    timers.forEach(t => { if(t.kind === 'time' && t.running && t.remainingSeconds > 0){ t.remainingSeconds -= 1; any = true; if(t.remainingSeconds <= 0){ t.running = false; finished(t); ended = true; } } });
+    if(ended){ render(); save(); try { renderTimers(); } catch(e) {} return; }
     if(any && listEl) timers.forEach(t => {
       if(t.kind !== 'time') return;
       const card = listEl.querySelector('.tmr-card[data-id="'+t.id+'"]'); if(!card) return;
@@ -20999,7 +21295,7 @@ function init_timers(root) {
   // Advance every round-countdown by one (driven by the Monitor bar Next-Round).
   root._stepRounds = () => {
     let any = false;
-    timers.forEach(t => { if(t.kind === 'round' && t.remainingRounds > 0){ t.remainingRounds -= 1; any = true; } });
+    timers.forEach(t => { if(t.kind === 'round' && t.remainingRounds > 0){ t.remainingRounds -= 1; any = true; if(t.remainingRounds <= 0) finished(t); } });
     if(any){ render(); if(window.__ddScheduleSave) window.__ddScheduleSave(); }
     return any;
   };
@@ -21018,9 +21314,23 @@ function init_timers(root) {
   // Tick a box straight from the Monitor bar (fill-to-level, same as the tool card).
   root._setTick = (id, i) => {
     const t = timers.find(x => x.id === id && x.kind === 'ticks'); if(!t) return false;
-    setTicks(t, i); render(); save(); return true;
+    const was = isEnded(t); setTicks(t, i); if(!was && isEnded(t)) finished(t); render(); save(); return true;
   };
   root._getState = () => ({ timers });
+  // Adventure Prep → Trackers: create one (never twice for the same srcKey) and start it.
+  root._addTracker = (spec) => {
+    if(!spec) return null;
+    if(spec.srcKey){ const have = timers.find(x => x.srcKey === spec.srcKey); if(have) return have.id; }
+    const t = Object.assign({}, spec, { id: nextId++ });
+    if(t.kind === 'time') t.running = true;
+    timers.push(t); render(); save();
+    try { renderTimers(); } catch(e) {}
+    if(t.players) tellPlayers(t, false);
+    return t.id;
+  };
+  root._findBySrc = (srcKey) => timers.find(x => x.srcKey === srcKey) || null;
+  // Remove every tracker a prep scene started (srcKey prefix), e.g. when the scene is done.
+  root._removeBySrc = (prefix) => { const n = timers.length; timers = timers.filter(x => !(x.srcKey && x.srcKey.indexOf(prefix) === 0)); if(timers.length !== n){ render(); save(); try { renderTimers(); } catch(e) {} } return n - timers.length; };
   root._setState = (st) => {
     if(st && Array.isArray(st.timers)){
       timers = st.timers.map(t => ({ ...t, running: false }));

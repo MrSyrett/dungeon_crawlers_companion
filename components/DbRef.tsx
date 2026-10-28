@@ -36,9 +36,9 @@ export const isHb = (x: object): boolean => (x as { source?: unknown }).source =
 // Dragonbane books: the Core Rules ("core"), the Bestiary ("bestiary") and the Book of
 // Magic ("magic"), plus the user's Homebrew. `srcChips` builds the Source row only when
 // more than one source is present (so no chip filters to nothing).
-const SRC_ORDER = ["core", "bestiary", "magic", "hb"];
-export const SRC_LABEL: Record<string, string> = { core: "Core", bestiary: "Bestiary", magic: "Book of Magic", hb: "Homebrew" };
-export const srcKey = (source?: string): string => (source === "Homebrew" ? "hb" : source === "bestiary" || source === "magic" ? source : "core");
+const SRC_ORDER = ["core", "bestiary", "magic", "pathofglory", "hb"];
+export const SRC_LABEL: Record<string, string> = { core: "Core", bestiary: "Bestiary", magic: "Book of Magic", pathofglory: "Path of Glory", hb: "Homebrew" };
+export const srcKey = (source?: string): string => (source === "Homebrew" ? "hb" : source === "bestiary" || source === "magic" || source === "pathofglory" ? source : "core");
 export function srcChips(sources: (string | undefined)[]): { key: string; label: string }[] {
   const present = new Set(sources.map(srcKey));
   return present.size > 1 ? SRC_ORDER.filter((k) => present.has(k)).map((k) => ({ key: k, label: SRC_LABEL[k] })) : [];

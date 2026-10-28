@@ -1985,7 +1985,7 @@ const DB_UNITS = ["gold", "silver", "copper"] as const;
 const DB_FEATURES = ["Subtle", "Long", "Toppling", "Piercing", "Slashing", "Bludgeoning", "Can be thrown", "Requires quiver", "No damage bonus", "Cannot be used for parrying"] as const;
 const DB_SIZES = ["Small", "Normal", "Large", "Huge", "Swarm"] as const;
 const DB_DMG_TYPES = ["slashing", "piercing", "bludgeoning", "fire", "cold", "magic", "other"] as const;
-const DB_GEAR_CATS = ["Clothes", "Musical Instruments", "Trade Goods", "Studies & Magic", "Light Sources", "Tools", "Containers", "Medicine", "Services", "Hunting & Fishing", "Means of Travel", "Animals", "Alchemy Ingredients", "Alchemical Substances"] as const;
+const DB_GEAR_CATS = ["Clothes", "Musical Instruments", "Trade Goods", "Studies & Magic", "Light Sources", "Tools", "Containers", "Medicine", "Services", "Hunting & Fishing", "Means of Travel", "Animals", "Alchemy Ingredients", "Alchemical Substances", "Magic Items"] as const;
 const dbSlug = (s: string) => "hb-" + s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
 // Dragonbane dice ("D8", "2D6", "D6 per power level") — uppercase D, free text kept short.
 const dbDice = (v: unknown): string => str(v).replace(/(\d*)d(\d+)/gi, (_m, a, b) => `${a}D${b}`).slice(0, 60);

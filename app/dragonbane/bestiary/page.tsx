@@ -22,7 +22,7 @@ const SIZES = ["Small", "Normal", "Large", "Huge", "Swarm"];
 const KIND_ORDER = ["Typical", "Goblin", "Hobgoblin", "Orc", "Ogre", "Skeleton", "Cat People", "Frog People", "Karkion", "Lizard People", "Satyr"];
 const KIND_LABEL: Record<string, string> = { Typical: "Typical NPCs", Goblin: "Goblins", Hobgoblin: "Hobgoblins", Orc: "Orcs", Ogre: "Ogres", Skeleton: "Skeletons", Karkion: "Karkions", Satyr: "Satyrs" };
 // Monster families: the Bestiary's chapters (core monsters are filed under the same ones).
-const CATEGORIES = ["Rare Kin", "Insectoids", "Trolls", "Giants", "Beasts", "Undead", "Dragons", "Demons", "Monsters"];
+const CATEGORIES = ["Rare Kin", "Insectoids", "Trolls", "Giants", "Beasts", "Undead", "Dragons", "Demons", "Path of Glory", "Monsters"];
 const catOf = (m: DbMonster) => String(m.category ?? "Monsters");
 
 const armorText = (a: DbMonster["armor"]) => (a == null || a === "" ? "—" : `${a}`);
@@ -38,7 +38,7 @@ function attackTags(a: DbMonsterAttack): string[] {
   if (p?.type) t.push(`${p.type} poison ${p.potency ?? ""}`.trim());
   if (a.ignoresArmor) t.push("armor no effect");
   t.push(a.parry ? "can be parried" : "no parry");
-  if (!a.dodge) t.push("can't be dodged");
+  if (!a.dodge) t.push("can't be dodged"); else if (a.dodge === "bane") t.push("dodge with a bane");
   return t;
 }
 
@@ -214,7 +214,7 @@ async function MonstersTab({ userId, raw }: { userId: string; raw: RawQuery }) {
                 <a href={`${BASE}?m=${encodeURIComponent(m.id)}`} className="group block">
                   <div className="flex items-start justify-between gap-2">
                     <h3 className={`${nameCls} group-hover:underline`}>{m.name} {isHb(m) ? <span className={hbBadge}>HB</span> : null}</h3>
-                    <span className="flex shrink-0 gap-1.5">{srcKey(m.source) === "bestiary" ? <span className={badge}>Bestiary</span> : null}<span className={badge}>{m.size}</span></span>
+                    <span className="flex shrink-0 gap-1.5">{srcKey(m.source) === "bestiary" ? <span className={badge}>Bestiary</span> : srcKey(m.source) === "pathofglory" ? <span className={badge}>Path of Glory</span> : null}<span className={badge}>{m.size}</span></span>
                   </div>
                   <p className="mt-1 text-[12px] text-[var(--muted)]">Ferocity {perText(m, m.ferocity, "ferocityPer")} · Mov {m.movement}{m.flying ? " (flies)" : ""} · Armor {armorText(m.armor)} · HP {perText(m, m.hp, "hpPer")}</p>
                   <p className="mt-1 line-clamp-2 text-[12.5px] leading-relaxed text-[var(--muted)]">{m.text}</p>
