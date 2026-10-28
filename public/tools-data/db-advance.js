@@ -77,24 +77,35 @@
     var st = S(); var schools = SH().knownSchools(); var h = tabs('magic');
     if (!schools.length && !SH().hasAbility('Magic Talent')) { show('Advancement', h + '<p class="m-hint">You know no school of magic. Take the <b>Magic Talent</b> heroic ability (it has no requirement, but you need a GM reward or a skill at 18 to gain one) to learn a school.</p>'); return; }
     h += '<div class="m-lbl">Learn a spell</div><p class="m-hint">After a shift with a teacher (roll INT with a boon) or with a grimoire (roll Languages), spend the school\'s advancement mark instead of an advancement roll at the end of the session.</p>';
-    var sp = A(window.DB_SPELLS).filter(function (s) { return (schools.indexOf(s.school) >= 0 || (s.school === 'General' && schools.length)) && !st.spells.some(function (x) { return x.name === s.name; }); });
+    // harmonists (Harmonism is cast with Performance) can't learn general magic (Book of Magic p.46)
+    var rollsWith = function (n) { var d = A(window.DB_SKILLS).find(function (x) { return x.name === n; }); return d && d.rollsWith; };
+    var general = schools.some(function (n) { return !rollsWith(n); });
+    var sp = A(window.DB_SPELLS).filter(function (s) { return (schools.indexOf(s.school) >= 0 || (s.school === 'General' && general)) && !st.spells.some(function (x) { return x.name === s.name; }); });
     h += '<select class="m-input" id="adv-spell">' + sp.map(function (s) { return '<option value="' + esc(s.name) + '">' + esc(s.name) + ' — ' + esc(s.school) + ' rank ' + s.rank + (s.prerequisite ? ' (needs ' + esc(s.prerequisite) + ')' : '') + '</option>'; }).join('') + '</select>';
     h += '<div class="m-row" style="margin-top:6px;"><button class="m-btn" onclick="DBADV.learn(\'teacher\')"' + (sp.length ? '' : ' disabled') + '>From a teacher (INT, boon)</button><button class="m-btn ghost" onclick="DBADV.learn(\'grimoire\')"' + (sp.length ? '' : ' disabled') + '>From a grimoire (Languages)</button></div>';
-    var tr = A(window.DB_MAGIC_TRICKS).filter(function (t) { return (schools.indexOf(t.school) >= 0 || t.school === 'General') && !st.tricks.some(function (x) { return x.name === t.name; }); });
+    var tr = A(window.DB_MAGIC_TRICKS).filter(function (t) { return (schools.indexOf(t.school) >= 0 || (t.school === 'General' && (general || !schools.length))) && !st.tricks.some(function (x) { return x.name === t.name; }); });
     h += '<div class="m-lbl">Learn a magic trick</div><p class="m-hint">A stretch with a teacher or grimoire — no mark or roll needed.</p><div class="m-row">' + tr.map(function (t) { return '<button class="chip" onclick="DBADV.trick(\'' + jsq(t.name) + '\')">' + esc(t.name) + ' <small>' + esc(t.school) + '</small></button>'; }).join('') + '</div>';
     var newS = A((window.DB_MAGIC_RULES || {}).schools).filter(function (s) { return schools.indexOf(s) < 0; });
     var talents = SH().state.abilities.filter(function (a) { return a.name === 'Magic Talent'; }).length;
     h += '<div class="m-lbl">Learn a new school</div><p class="m-hint">Needs a Magic Talent heroic ability per new school (you have ' + talents + ', and know ' + schools.length + ' school' + (schools.length === 1 ? '' : 's') + '), a week with a teacher, then an INT roll: success gives your INT base chance as the school\'s level.</p><div class="m-row">' +
-      newS.map(function (s) { return '<button class="chip"' + (talents > Math.max(0, schools.length - (SH().state.profession === 'Mage' ? 1 : 0)) ? '' : ' disabled') + ' onclick="DBADV.school(\'' + s + '\')">' + s + '</button>'; }).join('') + '</div>';
+      newS.map(function (s) { var why = schoolBlock(s); return '<button class="chip"' + (talents > Math.max(0, schools.length - (SH().state.profession === 'Mage' ? 1 : 0)) && !why ? '' : ' disabled') + (why ? ' title="' + esc(why) + '"' : '') + ' onclick="DBADV.school(\'' + s + '\')">' + s + (why ? ' <small>(' + esc(why) + ')</small>' : '') + '</button>'; }).join('') + '</div>' +
+      '<p class="m-hint">Book of Magic: Harmonism uses Performance (needs Performance 12); Enchanting needs Crafting 12; Dracomancy is learned only in play, from a dracomancer, once you know a rank 5 spell.</p>';
     show('Advancement', h);
   }
+  // Book of Magic entry requirements for taking up a school in play
+  function schoolBlock(s) { var st = S();
+    if (s === 'Harmonism' && SH().skillLevel('Performance') < 12) return 'needs Performance 12';
+    if (s === 'Enchanting' && SH().skillLevel('Crafting') < 12) return 'needs Crafting 12';
+    if (s === 'Dracomancy' && !st.spells.some(function (x) { var d = SH().spellDef(x.name); return d && d.rank >= 5; })) return 'needs a rank 5 spell';
+    return ''; }
   function learn(how) { var n = ($('adv-spell') || {}).value; if (!n) return; var st = S(); var sp = SH().spellDef(n) || {};
     var skill = how === 'teacher' ? null : 'Languages';
-    if (sp.school && sp.school !== 'General') { var rec = st.skills[sp.school] || {}; if (rec.mark) { rec.mark = false; } }
+    if (sp.school && sp.school !== 'General') { var sd = A(window.DB_SKILLS).find(function (x) { return x.name === sp.school; }); var rec = st.skills[(sd && sd.rollsWith) || sp.school] || {}; if (rec.mark) { rec.mark = false; } }
     SH().testRoll({ label: 'Learn ' + n + (how === 'teacher' ? ' (INT, teacher)' : ' (Languages, grimoire)'), target: skill ? SH().skillLevel(skill) : st.attrs.INT, skill: skill || undefined, attr: skill ? undefined : 'INT', boons: how === 'teacher' ? ['Teacher'] : [], noMark: true, noTray: true,
       onDone: function (r) { if (r.ok) { st.spells.push({ name: n, prepared: false }); SH().addLog('Spell learned', n, 'Written in your grimoire — prepare it after a shift rest', 'crit'); SH().changed(); renderMagic(); } } }); }
   function trick(n) { S().tricks.push({ name: n }); SH().addLog('Trick learned', n, ''); SH().changed(); renderMagic(); }
   function school(s) { var st = S(); SH().testRoll({ label: 'Learn ' + s + ' (INT)', target: st.attrs.INT, attr: 'INT', noMark: true, noTray: true, onDone: function (r) {
+    if (r.ok && s === 'Harmonism') { st.skills[s] = { trained: true }; SH().addLog('New school', s, 'Cast with your Performance (' + SH().skillLevel('Performance') + ')', 'crit'); SH().changed(); renderMagic(); return; }
     if (r.ok) { st.skills[s] = { trained: true, lvl: SH().baseChance(st.attrs.INT) }; SH().addLog('New school', s, 'Level ' + SH().baseChance(st.attrs.INT) + ' (INT base chance)', 'crit'); SH().changed(); renderMagic(); }
     else SH().addLog('New school', 'Not yet', 'Study another week and try again'); } }); }
   var api = {

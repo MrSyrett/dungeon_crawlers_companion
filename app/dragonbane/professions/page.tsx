@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { DB_PROFESSIONS, DB_HEROIC_ABILITIES, DB_TABLES, DB_WEAKNESSES, DB_MEMENTOS, DB_APPEARANCES } from "@/lib/data/db-data";
+import { DB_PROFESSIONS, DB_HEROIC_ABILITIES, DB_TABLES, DB_WEAKNESSES, DB_MEMENTOS, DB_APPEARANCES, DB_MAGIC_RULES } from "@/lib/data/db-data";
 import type { DbProfession, DbKitItem } from "@/lib/data/db-types";
 import { DbHeader, BackLink, RuleNote, DieTable, SectionNav, cardCls, nameCls, badge, eyebrow, sectionH, th, td, one, type RawQuery } from "@/components/DbRef";
 
@@ -51,6 +51,9 @@ function ProfessionDetail({ p }: { p: DbProfession }) {
       ) : (
         <p className="text-[13px] leading-relaxed text-[var(--muted)]">{p.heroicChoice ? "Choose one: " : ""}{p.heroicAbilities.map((h, i) => <span key={h}>{i ? ", " : ""}{abilityLine(h)}</span>)}. Your starting heroic ability ignores its skill requirement.</p>
       )}
+      {(DB_MAGIC_RULES.creationSchools as Record<string, string[]>)[p.name]?.length ? (
+        <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Book of Magic:</span> instead of {p.heroicAbilities.join(", ")}, a new {p.name.toLowerCase()} may start as a {(DB_MAGIC_RULES.creationSchools as Record<string, string[]>)[p.name].join(" / ").toLowerCase()} — three rank 1 spells, three magic tricks of that school and a grimoire. See <a href="/dragonbane/magic?sc=harmonism" className="text-[var(--sys-link)] underline">Harmonism</a>.</p>
+      ) : null}
 
       <h3 className={`${sectionH} mt-5`}>Starting gear (D6)</h3>
       <div className="grid gap-3 md:grid-cols-3">

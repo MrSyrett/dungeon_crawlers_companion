@@ -12641,7 +12641,7 @@ function dbBestiary() {
   if(dbBestiary._sig === sig) return dbBestiary._c;
   const npcGroup = n => n.boss ? 'Boss' : (!n.kind || n.kind === 'Typical') ? 'NPC' : String(n.kind);
   dbBestiary._c = [].concat(
-    M.map(m => Object.assign({}, m, { _dbkind: 'monster', group: 'Monster' })),
+    M.map(m => Object.assign({}, m, { _dbkind: 'monster', group: m.category ? 'Monster · ' + m.category : 'Monster' })),
     N.map(n => Object.assign({}, n, { _dbkind: 'npc', group: npcGroup(n) })),
     A.map(a => Object.assign({}, a, { _dbkind: 'animal', group: 'Animal' })));
   dbBestiary._sig = sig;

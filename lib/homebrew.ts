@@ -1973,19 +1973,19 @@ const DB_SKILL_NAMES = [
   "Hunting & Fishing", "Languages", "Myths & Legends", "Performance", "Persuasion", "Riding", "Seamanship",
   "Sleight of Hand", "Sneaking", "Spot Hidden", "Swimming",
   "Axes", "Bows", "Brawling", "Crossbows", "Hammers", "Knives", "Slings", "Spears", "Staves", "Swords",
-  "Animism", "Elementalism", "Mentalism",
+  "Animism", "Elementalism", "Mentalism", "Demonology", "Harmonism", "Illusionism", "Necromancy", "Symbolism", "Witchcraft", "Alchemy", "Enchanting", "Dracomancy",
 ] as const;
 const DB_WEAPON_SKILLS = ["Axes", "Bows", "Brawling", "Crossbows", "Hammers", "Knives", "Slings", "Spears", "Staves", "Swords"] as const;
-const DB_SCHOOLS = ["General", "Animism", "Elementalism", "Mentalism"] as const;
+const DB_SCHOOLS = ["General", "Animism", "Elementalism", "Mentalism", "Demonology", "Harmonism", "Illusionism", "Necromancy", "Symbolism", "Witchcraft", "Alchemy", "Enchanting", "Dracomancy"] as const;
 const DB_TIMINGS = ["action", "free", "reaction", "passive", "downtime", "roundStart"] as const;
-const DB_CASTING = ["action", "reaction", "stretch", "shift"] as const;
-const DB_REQS = ["word", "gesture", "focus", "ingredient"] as const;
+const DB_CASTING = ["action", "reaction", "stretch", "shift", "round"] as const;
+const DB_REQS = ["word", "gesture", "focus", "ingredient", "melody", "symbol", "tools"] as const;
 const DB_SUPPLIES = ["Common", "Uncommon", "Rare", "Unique"] as const;
 const DB_UNITS = ["gold", "silver", "copper"] as const;
 const DB_FEATURES = ["Subtle", "Long", "Toppling", "Piercing", "Slashing", "Bludgeoning", "Can be thrown", "Requires quiver", "No damage bonus", "Cannot be used for parrying"] as const;
 const DB_SIZES = ["Small", "Normal", "Large", "Huge", "Swarm"] as const;
 const DB_DMG_TYPES = ["slashing", "piercing", "bludgeoning", "fire", "cold", "magic", "other"] as const;
-const DB_GEAR_CATS = ["Clothes", "Musical Instruments", "Trade Goods", "Studies & Magic", "Light Sources", "Tools", "Containers", "Medicine", "Services", "Hunting & Fishing", "Means of Travel", "Animals"] as const;
+const DB_GEAR_CATS = ["Clothes", "Musical Instruments", "Trade Goods", "Studies & Magic", "Light Sources", "Tools", "Containers", "Medicine", "Services", "Hunting & Fishing", "Means of Travel", "Animals", "Alchemy Ingredients", "Alchemical Substances"] as const;
 const dbSlug = (s: string) => "hb-" + s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
 // Dragonbane dice ("D8", "2D6", "D6 per power level") — uppercase D, free text kept short.
 const dbDice = (v: unknown): string => str(v).replace(/(\d*)d(\d+)/gi, (_m, a, b) => `${a}D${b}`).slice(0, 60);

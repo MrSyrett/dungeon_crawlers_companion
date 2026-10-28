@@ -11,7 +11,7 @@ import { facetMatch, facetAttr } from "@/lib/facets";
 export const dynamic = "force-dynamic";
 const BASE = "/dragonbane/gear";
 const SUPPLIES = ["Common", "Uncommon", "Rare", "Unique"];
-const CATS = ["Clothes", "Musical Instruments", "Trade Goods", "Studies & Magic", "Light Sources", "Tools", "Containers", "Medicine", "Services", "Hunting & Fishing", "Means of Travel", "Animals"];
+const CATS = ["Clothes", "Musical Instruments", "Trade Goods", "Studies & Magic", "Light Sources", "Tools", "Containers", "Medicine", "Services", "Hunting & Fishing", "Means of Travel", "Animals", "Alchemy Ingredients", "Alchemical Substances"];
 
 const rangeText = (r: number | string) => (typeof r === "number" ? `${r}` : r);
 const weightText = (w: number | null) => (w == null ? "—" : w === 0 ? "Tiny" : w === 0.25 ? "¼" : `${w}`);

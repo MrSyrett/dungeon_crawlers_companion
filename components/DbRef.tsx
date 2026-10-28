@@ -33,13 +33,20 @@ export const td = "border-b border-[var(--border)] px-2 py-1.5 align-top text-[1
 export const isHb = (x: object): boolean => (x as { source?: unknown }).source === "Homebrew";
 
 // ── Source filter ──────────────────────────────────────────────────────────
-// Dragonbane has one book ("core") plus the user's Homebrew. `srcChips` builds the
-// Source row only when homebrew is actually present (so no chip filters to nothing).
-export const srcKey = (source?: string): string => (source === "Homebrew" ? "hb" : "core");
+// Dragonbane books: the Core Rules ("core"), the Bestiary ("bestiary") and the Book of
+// Magic ("magic"), plus the user's Homebrew. `srcChips` builds the Source row only when
+// more than one source is present (so no chip filters to nothing).
+const SRC_ORDER = ["core", "bestiary", "magic", "hb"];
+export const SRC_LABEL: Record<string, string> = { core: "Core", bestiary: "Bestiary", magic: "Book of Magic", hb: "Homebrew" };
+export const srcKey = (source?: string): string => (source === "Homebrew" ? "hb" : source === "bestiary" || source === "magic" ? source : "core");
 export function srcChips(sources: (string | undefined)[]): { key: string; label: string }[] {
   const present = new Set(sources.map(srcKey));
-  return present.has("hb") ? [{ key: "core", label: "Core" }, { key: "hb", label: "Homebrew" }] : [];
+  return present.size > 1 ? SRC_ORDER.filter((k) => present.has(k)).map((k) => ({ key: k, label: SRC_LABEL[k] })) : [];
 }
+// "Bestiary p.42" / "Book of Magic p.18" / "Core p.85" — the book a record comes from.
+export const srcPage = (x: { source?: unknown; page?: unknown }): string => {
+  const k = srcKey(x.source as string | undefined); return k === "hb" ? "Homebrew" : `${k === "core" ? "Core Rules" : SRC_LABEL[k]}${x.page ? ` p.${String(x.page)}` : ""}`;
+};
 
 export function withParams(base: string, current: Query, patch: Query): string {
   const next = { ...current, ...patch }; const sp = new URLSearchParams();

@@ -7,7 +7,7 @@
 // `metal`, `flying`, `poison`…) stay typed as `unknown` rather than failing excess-property checks.
 
 export type DbAttr = "STR" | "CON" | "AGL" | "INT" | "WIL" | "CHA";
-export type DbSource = "core" | "Homebrew";
+export type DbSource = "core" | "bestiary" | "magic" | "Homebrew";
 export type DbSupply = "Common" | "Uncommon" | "Rare" | "Unique";
 export type DbCoinUnit = "gold" | "silver" | "copper";
 export interface DbCost { amount: number; unit: DbCoinUnit; per?: string; note?: string }
@@ -20,10 +20,10 @@ export interface DbSkill {
   [k: string]: unknown;
 }
 
-export interface DbKinAbility { id: string; name: string; wp: number | null; timing: string; text: string }
+export interface DbKinAbility { id: string; name: string; wp: number | null | "varies"; timing: string; text: string; [k: string]: unknown }
 export interface DbKin {
-  id: string; name: string; page: number; roll: [number, number]; movement: number; text: string;
-  abilities: DbKinAbility[]; names: string[]; [k: string]: unknown;
+  id: string; name: string; page: number; roll?: [number, number]; roll20: [number, number]; movement: number; text: string;
+  abilities: DbKinAbility[]; names: string[]; source?: DbSource; pcNotes?: string; [k: string]: unknown;
 }
 
 export interface DbKitItem { name?: string; choice?: string[]; qty?: number; note?: string }
@@ -44,8 +44,9 @@ export interface DbHeroicAbility {
   [k: string]: unknown;
 }
 
-export type DbSchool = "General" | "Animism" | "Elementalism" | "Mentalism";
-export interface DbDice { base: string; perLevel: string; chain?: string[] }
+export type DbSchool = "General" | "Animism" | "Elementalism" | "Mentalism" | "Demonology" | "Harmonism" | "Illusionism"
+  | "Necromancy" | "Symbolism" | "Witchcraft" | "Alchemy" | "Enchanting" | "Dracomancy";
+export interface DbDice { base?: string; perLevel?: string | null; chain?: string[]; [k: string]: unknown }
 export interface DbSpell {
   id: string; name: string; school: DbSchool | string; rank: number; prerequisite: string;
   requirements: string[]; requirementDetail?: string; castingTime: "action" | "reaction" | "stretch" | "shift" | string;
@@ -67,13 +68,13 @@ export interface DbWeapon {
   melee?: boolean; ranged?: boolean; [k: string]: unknown;
 }
 export interface DbGear {
-  id: string; category: string; name: string; cost: DbCost | null; supply: DbSupply; weight: number | null; effect: string;
+  id: string; category: string; name: string; cost: DbCost | null; supply: DbSupply | null; weight: number | null; effect: string;
   [k: string]: unknown;
 }
 
 export interface DbMonsterAttack {
   roll: number; name: string; damage: string | null; type: string | null; targets: string; range: number;
-  fear: boolean | "bane"; conditions: string[]; prone: boolean; parry: boolean; dodge: boolean; text: string;
+  fear: boolean | string; conditions: string[]; prone: boolean; parry: boolean; dodge: boolean; text: string;
   [k: string]: unknown;
 }
 export interface DbMonster {
@@ -101,3 +102,17 @@ export interface DbTable {
   id: string; name: string; die?: string | null; page: number; note?: string;
   rows?: DbRollEntry[]; columns?: DbTableColumn[]; [k: string]: unknown;
 }
+
+// ── Expansions (Bestiary, Book of Magic) ──
+export interface DbKinTableRow { roll: [number, number]; kin: string; ability: string }
+export interface DbNamedText { name: string; text: string; [k: string]: unknown }
+export interface DbFamiliarCreature { name: string; movement: number | string; hp: number | string; attack?: string; skills?: string; note?: string; [k: string]: unknown }
+export interface DbMagicSchool {
+  id: string; name: string; page: number; source: DbSource; skill: string | null; attribute: string; title?: string;
+  creation: boolean; professions?: string[]; existing?: boolean; summary: string; prevalence?: string;
+  types?: DbNamedText[]; familiar?: { text: string; creatures?: DbFamiliarCreature[]; [k: string]: unknown } | null;
+  study?: Record<string, string>; startingSkills?: string[]; rules?: DbNamedText[];
+  spellTree?: { rank: number; spells: string[]; also?: string[] }[]; [k: string]: unknown;
+}
+export interface DbKinLore { kin: string; page: number; category?: string; text: string; encounter?: string | null; seed?: string | null; source?: DbSource; [k: string]: unknown }
+export interface DbBestiaryChapter { category: string; page: number; text: string; rules: DbNamedText[]; [k: string]: unknown }

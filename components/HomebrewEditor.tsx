@@ -178,16 +178,16 @@ function codeFromPips(p: unknown): string {
 // ── the 16 schemas (kind → form). Keys match the lib/homebrew normalisers. ────
 // Dragonbane vocabularies — mirror lib/homebrew's DB normalisers (kept local so
 // this client bundle never pulls in lib/data/db-data).
-const DB_SKILL_LIST = ["Acrobatics", "Awareness", "Bartering", "Beast Lore", "Bluffing", "Bushcraft", "Crafting", "Evade", "Healing", "Hunting & Fishing", "Languages", "Myths & Legends", "Performance", "Persuasion", "Riding", "Seamanship", "Sleight of Hand", "Sneaking", "Spot Hidden", "Swimming", "Axes", "Bows", "Brawling", "Crossbows", "Hammers", "Knives", "Slings", "Spears", "Staves", "Swords", "Animism", "Elementalism", "Mentalism"] as const;
+const DB_SKILL_LIST = ["Acrobatics", "Awareness", "Bartering", "Beast Lore", "Bluffing", "Bushcraft", "Crafting", "Evade", "Healing", "Hunting & Fishing", "Languages", "Myths & Legends", "Performance", "Persuasion", "Riding", "Seamanship", "Sleight of Hand", "Sneaking", "Spot Hidden", "Swimming", "Axes", "Bows", "Brawling", "Crossbows", "Hammers", "Knives", "Slings", "Spears", "Staves", "Swords", "Animism", "Elementalism", "Mentalism", "Demonology", "Harmonism", "Illusionism", "Necromancy", "Symbolism", "Witchcraft", "Alchemy", "Enchanting", "Dracomancy"] as const;
 const DB_WEAPON_SKILL_OPTS: readonly Opt[] = ["Axes", "Bows", "Brawling", "Crossbows", "Hammers", "Knives", "Slings", "Spears", "Staves", "Swords"].map((x) => [x, x] as const);
 const DB_SUPPLY_OPTS: readonly Opt[] = [["Common", "Common"], ["Uncommon", "Uncommon"], ["Rare", "Rare"], ["Unique", "Unique"]];
 const DB_UNIT_OPTS: readonly Opt[] = [["gold", "gold"], ["silver", "silver"], ["copper", "copper"]];
 const DB_FEATURE_LIST = ["Subtle", "Long", "Toppling", "Piercing", "Slashing", "Bludgeoning", "Can be thrown", "Requires quiver", "No damage bonus", "Cannot be used for parrying"] as const;
-const DB_SCHOOL_OPTS: readonly Opt[] = [["General", "General Magic"], ["Animism", "Animism"], ["Elementalism", "Elementalism"], ["Mentalism", "Mentalism"]];
+const DB_SCHOOL_OPTS: readonly Opt[] = [["General", "General Magic"], ["Animism", "Animism"], ["Elementalism", "Elementalism"], ["Mentalism", "Mentalism"], ["Demonology", "Demonology"], ["Harmonism", "Harmonism"], ["Illusionism", "Illusionism"], ["Necromancy", "Necromancy"], ["Symbolism", "Symbolism"], ["Witchcraft", "Witchcraft"], ["Alchemy", "Alchemy"], ["Enchanting", "Enchanting"], ["Dracomancy", "Dracomancy"]];
 const DB_TIMING_OPTS: readonly Opt[] = [["action", "Action"], ["free", "Free / no action"], ["reaction", "Reaction"], ["passive", "Passive"], ["downtime", "Downtime (stretch/shift)"], ["roundStart", "Start of round"]];
 const DB_SIZE_OPTS: readonly Opt[] = [["Small", "Small"], ["Normal", "Normal"], ["Large", "Large"], ["Huge", "Huge"], ["Swarm", "Swarm"]];
 const DB_DMG_OPTS: readonly Opt[] = [["", "—"], ["slashing", "Slashing"], ["piercing", "Piercing"], ["bludgeoning", "Bludgeoning"], ["fire", "Fire"], ["cold", "Cold"], ["magic", "Magic"], ["other", "Other"]];
-const DB_GEAR_CAT_OPTS: readonly Opt[] = ["Clothes", "Musical Instruments", "Trade Goods", "Studies & Magic", "Light Sources", "Tools", "Containers", "Medicine", "Services", "Hunting & Fishing", "Means of Travel", "Animals"].map((x) => [x, x] as const);
+const DB_GEAR_CAT_OPTS: readonly Opt[] = ["Clothes", "Musical Instruments", "Trade Goods", "Studies & Magic", "Light Sources", "Tools", "Containers", "Medicine", "Services", "Hunting & Fishing", "Means of Travel", "Animals", "Alchemy Ingredients", "Alchemical Substances"].map((x) => [x, x] as const);
 const dbCostForm = (d: Data): Data => { const c = (d.cost ?? {}) as Data; return { costAmount: c.amount ?? "", costUnit: c.unit ?? "silver" }; };
 const dbCostTxt = (d: Data): string => { const c = (d.cost ?? null) as Data | null; return c && c.amount != null ? `${c.amount} ${c.unit}` : "—"; };
 
@@ -854,7 +854,7 @@ const SCHEMAS: Record<string, Schema> = {
       { key: "trick", label: "Magic trick (1 WP, always works)", type: "checkbox" },
       { key: "rank", label: "Rank (1–5)", type: "number", placeholder: "1" },
       { key: "prerequisite", label: "Prerequisite", type: "text", placeholder: "Animism, or another spell" },
-      { key: "requirements", label: "Requirements", type: "picker", full: true, options: ["word", "gesture", "focus", "ingredient"], addLabel: "+ Requirement", placeholder: "word, gesture…" },
+      { key: "requirements", label: "Requirements", type: "picker", full: true, options: ["word", "gesture", "focus", "ingredient", "melody", "symbol", "tools"], addLabel: "+ Requirement", placeholder: "word, gesture…" },
       { key: "requirementDetail", label: "Focus / ingredient detail", type: "text", placeholder: "holy symbol, pebbles…" },
       { key: "castingTime", label: "Casting time", type: "select", options: [["action", "Action"], ["reaction", "Reaction"], ["stretch", "Stretch"], ["shift", "Shift"]] },
       { key: "range", label: "Range", type: "text", placeholder: "10 meters, Touch, 4 meters (sphere)" },

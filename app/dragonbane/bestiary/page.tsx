@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { DB_MONSTERS, DB_MONSTER_RULES, DB_NPCS, DB_ANIMALS, DB_NPC_TRAITS, DB_NPC_ATTRIBUTES, DB_GM_TABLES } from "@/lib/data/db-data";
+import { DB_MONSTERS, DB_MONSTER_RULES, DB_NPCS, DB_ANIMALS, DB_NPC_TRAITS, DB_NPC_ATTRIBUTES, DB_GM_TABLES, DB_BESTIARY_CHAPTERS, DB_KIN_LORE, DB_NPC_GROUPS } from "@/lib/data/db-data";
 import type { DbMonster, DbMonsterAttack, DbNpc } from "@/lib/data/db-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
-import { DbHeader, ModeRow, ChipRow, SearchForm, CountLine, EmptyState, BackLink, SectionNav, Bullets, cardCls, nameCls, badge, hbBadge, eyebrow, sectionH, th, td, one, isHb, srcKey, srcChips, rollText, type RawQuery } from "@/components/DbRef";
+import { DbHeader, ModeRow, ChipRow, SearchForm, CountLine, EmptyState, BackLink, SectionNav, Bullets, cardCls, nameCls, badge, hbBadge, eyebrow, sectionH, th, td, one, isHb, srcKey, srcChips, srcPage, rollText, type RawQuery } from "@/components/DbRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 
@@ -19,8 +19,11 @@ const BASE = "/dragonbane/bestiary";
 const NPC_BASE = `${BASE}?tab=npcs`;
 const TABS = [{ key: "monsters", label: "Monsters" }, { key: "npcs", label: "NPCs" }];
 const SIZES = ["Small", "Normal", "Large", "Huge", "Swarm"];
-const KIND_ORDER = ["Typical", "Goblin", "Orc", "Skeleton"];
-const KIND_LABEL: Record<string, string> = { Typical: "Typical NPCs", Goblin: "Goblins", Orc: "Orcs", Skeleton: "Skeletons" };
+const KIND_ORDER = ["Typical", "Goblin", "Hobgoblin", "Orc", "Ogre", "Skeleton", "Cat People", "Frog People", "Karkion", "Lizard People", "Satyr"];
+const KIND_LABEL: Record<string, string> = { Typical: "Typical NPCs", Goblin: "Goblins", Hobgoblin: "Hobgoblins", Orc: "Orcs", Ogre: "Ogres", Skeleton: "Skeletons", Karkion: "Karkions", Satyr: "Satyrs" };
+// Monster families: the Bestiary's chapters (core monsters are filed under the same ones).
+const CATEGORIES = ["Rare Kin", "Insectoids", "Trolls", "Giants", "Beasts", "Undead", "Dragons", "Demons", "Monsters"];
+const catOf = (m: DbMonster) => String(m.category ?? "Monsters");
 
 const armorText = (a: DbMonster["armor"]) => (a == null || a === "" ? "—" : `${a}`);
 const perText = (m: DbMonster, v: number, key: string) => `${v}${m[key] ? `/${String(m[key])}` : ""}`;
@@ -81,7 +84,7 @@ function MonsterDetail({ m }: { m: DbMonster }) {
     <div className={`${cardCls} border-l-4`} style={{ borderLeftColor: "var(--db)" }}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <h2 className="text-3xl text-[var(--sys-link)]">{m.name} {isHb(m) ? <span className={hbBadge}>HB</span> : null}</h2>
-        {m.page ? <span className={badge}>p.{m.page}</span> : null}
+        <span className="flex flex-wrap gap-1.5"><span className={badge}>{catOf(m)}</span>{m.page ? <span className={badge}>{srcPage(m)}{m.corePage ? ` · Core p.${String(m.corePage)}` : ""}</span> : null}</span>
       </div>
       <p className="mt-2 text-[13.5px] leading-relaxed text-[var(--muted)]">{m.text}</p>
       <div className="mt-3"><StatLine m={m} /></div>
@@ -95,6 +98,13 @@ function MonsterDetail({ m }: { m: DbMonster }) {
       <h3 className={`${sectionH} mt-5`}>Monster attacks (D6)</h3>
       <p className="mb-2 text-[12px] italic text-[var(--muted)]">Roll or choose each turn. Monster attacks always hit; never the same attack twice in a row (a repeat becomes the next entry, 6 wraps to 1).</p>
       <AttackTable m={m} />
+      {m.encounter || m.seed ? (
+        <>
+          <h3 className={`${sectionH} mt-5`}>For the GM</h3>
+          {m.encounter ? <p className="text-[13px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Random encounter.</span> {String(m.encounter)}</p> : null}
+          {m.seed ? <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Adventure seed.</span> {String(m.seed)}</p> : null}
+        </>
+      ) : null}
     </div>
   );
 }
@@ -121,7 +131,9 @@ function NpcCard({ n }: { n: DbNpc }) {
         {n.armor ? <div><dt className="inline font-semibold text-[var(--text)]">Armor:</dt> <dd className="inline">{n.armor.name} ({n.armor.rating})</dd></div> : null}
         {skills ? <div><dt className="inline font-semibold text-[var(--text)]">Skills:</dt> <dd className="inline">{skills}</dd></div> : null}
         {n.abilities.length ? <div><dt className="inline font-semibold text-[var(--text)]">Heroic abilities:</dt> <dd className="inline">{n.abilities.join(", ")}</dd></div> : null}
+        {n.kinAbility ? <div><dt className="inline font-semibold text-[var(--text)]">Kin ability:</dt> <dd className="inline"><a className="underline" href={`/dragonbane/kin?k=${encodeURIComponent(n.kind)}`}>{String(n.kinAbility)}</a></dd></div> : null}
         {n.spells?.length ? <div><dt className="inline font-semibold text-[var(--text)]">Spells:</dt> <dd className="inline">{n.spells.join(", ")}</dd></div> : null}
+        {Array.isArray(n.tricks) && n.tricks.length ? <div><dt className="inline font-semibold text-[var(--text)]">Tricks:</dt> <dd className="inline">{(n.tricks as string[]).join(", ")}</dd></div> : null}
         {n.weapons?.length ? <div><dt className="inline font-semibold text-[var(--text)]">Weapons:</dt> <dd className="inline">{n.weapons.map((w) => `${w.qty && w.qty > 1 ? `${w.qty}× ` : ""}${w.name} (skill ${w.skill}, ${w.damage})`).join("; ")}</dd></div> : null}
         {n.gear?.length ? <div><dt className="inline font-semibold text-[var(--text)]">Gear:</dt> <dd className="inline">{n.gear.join(", ")}</dd></div> : null}
       </dl>
@@ -171,27 +183,30 @@ async function MonstersTab({ userId, raw }: { userId: string; raw: RawQuery }) {
   const fer = fers.includes(one(raw.fer)) ? one(raw.fer) : "";
   const srcOpts = srcChips(all.map((m) => m.source));
   const src = srcOpts.some((o) => o.key === one(raw.src)) ? one(raw.src) : "";
-  const current = { q: one(raw.q), size, fer, src };
-  const facets = (m: DbMonster) => ({ size: m.size, fer: String(m.ferocity), src: srcKey(m.source) });
+  const cats = CATEGORIES.filter((c) => all.some((m) => catOf(m) === c));
+  const cat = cats.includes(one(raw.cat)) ? one(raw.cat) : "";
+  const current = { q: one(raw.q), cat, size, fer, src };
+  const facets = (m: DbMonster) => ({ cat: catOf(m), size: m.size, fer: String(m.ferocity), src: srcKey(m.source) });
   const show = (m: DbMonster) => facetMatch(facets(m), current) && (!q || m.name.toLowerCase().includes(q) || m.text.toLowerCase().includes(q));
-  const list = all.slice().sort((a, b) => a.name.localeCompare(b.name));
+  const list = all.slice().sort((a, b) => CATEGORIES.indexOf(catOf(a)) - CATEGORIES.indexOf(catOf(b)) || Number(a.page ?? 0) - Number(b.page ?? 0) || a.name.localeCompare(b.name));
   const shown = list.filter(show).length;
   const R = DB_MONSTER_RULES;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
-      <DbHeader title="Bestiary" subtitle={`${DB_MONSTERS.length} monsters${hbMonsters.length ? ` + ${hbMonsters.length} homebrew` : ""} · dragons, demons & worse`} />
+      <DbHeader title="Bestiary" subtitle={`${DB_MONSTERS.length} monsters${hbMonsters.length ? ` + ${hbMonsters.length} homebrew` : ""} · Core Rules + Bestiary · dragons, demons & worse`} />
       <Tabs active="monsters" />
       <HomebrewEditor kind="db-monster" campaigns={campaigns} initial={hbOwn} />
-      <SectionNav items={[{ id: "monsters", label: "Stat Blocks" }, { id: "rules", label: "Fighting Monsters" }]} />
+      <SectionNav items={[{ id: "monsters", label: "Stat Blocks" }, { id: "rules", label: "Fighting Monsters" }, { id: "families", label: "Monster Families" }]} />
 
       <section id="monsters" className="scroll-mt-20">
         <InstantFilter>
-          <SearchForm base={BASE} q={one(raw.q)} placeholder="Search monsters…" hidden={{ size, fer, src }} />
+          <SearchForm base={BASE} q={one(raw.q)} placeholder="Search monsters…" hidden={{ cat, size, fer, src }} />
+          <ChipRow label="Family" base={BASE} current={current} param="cat" options={cats.map((c) => ({ key: c, label: c }))} active={cat} />
           <ChipRow label="Size" base={BASE} current={current} param="size" options={sizes.map((s) => ({ key: s, label: s }))} active={size} />
           <ChipRow label="Ferocity" base={BASE} current={current} param="fer" options={fers.map((f) => ({ key: f, label: f }))} active={fer} />
           <ChipRow label="Source" base={BASE} current={current} param="src" options={srcOpts} active={src} />
-          <CountLine count={shown} noun="monster" base={BASE} filtered={!!(q || size || fer || src)} />
+          <CountLine count={shown} noun="monster" base={BASE} filtered={!!(q || cat || size || fer || src)} />
           <EmptyState noun="monster" base={BASE} hidden={shown > 0} />
           <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2 lg:grid-cols-3">
             {list.map((m, i) => (
@@ -199,7 +214,7 @@ async function MonstersTab({ userId, raw }: { userId: string; raw: RawQuery }) {
                 <a href={`${BASE}?m=${encodeURIComponent(m.id)}`} className="group block">
                   <div className="flex items-start justify-between gap-2">
                     <h3 className={`${nameCls} group-hover:underline`}>{m.name} {isHb(m) ? <span className={hbBadge}>HB</span> : null}</h3>
-                    <span className={badge}>{m.size}</span>
+                    <span className="flex shrink-0 gap-1.5">{srcKey(m.source) === "bestiary" ? <span className={badge}>Bestiary</span> : null}<span className={badge}>{m.size}</span></span>
                   </div>
                   <p className="mt-1 text-[12px] text-[var(--muted)]">Ferocity {perText(m, m.ferocity, "ferocityPer")} · Mov {m.movement}{m.flying ? " (flies)" : ""} · Armor {armorText(m.armor)} · HP {perText(m, m.hp, "hpPer")}</p>
                   <p className="mt-1 line-clamp-2 text-[12.5px] leading-relaxed text-[var(--muted)]">{m.text}</p>
@@ -221,8 +236,22 @@ async function MonstersTab({ userId, raw }: { userId: string; raw: RawQuery }) {
           <div className={cardCls}>
             <p className={eyebrow}>Size</p>
             <dl className="mt-1 flex flex-col gap-0.5 text-[12.5px] text-[var(--muted)]">{Object.entries(R.sizes).map(([k, v]) => <div key={k}><dt className="inline font-semibold text-[var(--text)]">{k}:</dt> <dd className="inline">{v}</dd></div>)}</dl>
-            <p className="mt-2 text-[12.5px] text-[var(--muted)]">Goblins, orcs and skeletons are not monsters — they fight as ordinary NPCs. See the <a href={NPC_BASE} className="text-[var(--sys-link)] underline">NPCs</a> tab.</p>
+            <p className="mt-2 text-[12.5px] text-[var(--muted)]">Goblins, hobgoblins, orcs, ogres, skeletons and the Bestiary&apos;s playable kin are not monsters — they fight as ordinary NPCs. See the <a href={NPC_BASE} className="text-[var(--sys-link)] underline">NPCs</a> tab.</p>
           </div>
+        </div>
+      </section>
+
+      <section id="families" className="mt-10 scroll-mt-20">
+        <h2 className={sectionH}>Monster families</h2>
+        <p className="mb-3 text-[13px] text-[var(--muted)]">The Bestiary files its creatures in chapters. Rules shared across a family are noted here; each creature&apos;s own rules are in its stat block.</p>
+        <div className="grid gap-4 md:grid-cols-2">
+          {DB_BESTIARY_CHAPTERS.map((c) => (
+            <div key={c.category} className={cardCls}>
+              <div className="flex items-start justify-between gap-2"><a href={`${BASE}?cat=${encodeURIComponent(c.category)}`} className={`${nameCls} hover:underline`}>{c.category}</a><span className={badge}>Bestiary p.{c.page}</span></div>
+              <p className="mt-1 text-[12.5px] leading-relaxed text-[var(--muted)]">{c.text}</p>
+              {c.rules.length ? <dl className="mt-1.5 flex flex-col gap-0.5 text-[12.5px] text-[var(--muted)]">{c.rules.map((r) => <div key={r.name}><dt className="inline font-semibold text-[var(--text)]">{r.name}.</dt> <dd className="inline">{r.text}</dd></div>)}</dl> : null}
+            </div>
+          ))}
         </div>
       </section>
     </div>
@@ -260,7 +289,7 @@ async function NpcsTab({ userId, raw }: { userId: string; raw: RawQuery }) {
       <DbHeader title="Bestiary" subtitle={`${DB_NPCS.length} NPC stat blocks · ${DB_ANIMALS.length} animals${hbNpcs.length ? ` · +${hbNpcs.length} homebrew` : ""}`} />
       <Tabs active="npcs" />
       <HomebrewEditor kind="db-npc" campaigns={campaigns} initial={hbOwn} />
-      <SectionNav items={[{ id: "npcs", label: "Stat Blocks" }, { id: "running", label: "Running NPCs" }, { id: "animals", label: "Common Animals" }, { id: "generator", label: "Random NPCs" }]} />
+      <SectionNav items={[{ id: "npcs", label: "Stat Blocks" }, { id: "encounters", label: "Encounters & Seeds" }, { id: "running", label: "Running NPCs" }, { id: "animals", label: "Common Animals" }, { id: "generator", label: "Random NPCs" }]} />
 
       <section id="npcs" className="scroll-mt-20">
         <InstantFilter>
@@ -274,6 +303,22 @@ async function NpcsTab({ userId, raw }: { userId: string; raw: RawQuery }) {
             {list.map((n, i) => <li key={`${n.id}-${i}`} className={cardCls} hidden={!show(n)} data-f={facetAttr(facets(n))}><NpcCard n={n} /></li>)}
           </ul>
         </InstantFilter>
+      </section>
+
+      <section id="encounters" className="mt-10 scroll-mt-20">
+        <h2 className={sectionH}>Encounters &amp; adventure seeds</h2>
+        <p className="mb-3 text-[13px] text-[var(--muted)]">From the Bestiary: a random encounter and an adventure seed for each NPC people.</p>
+        <div className="grid gap-4 md:grid-cols-2">
+          {[...DB_KIN_LORE.map((l) => ({ kind: l.kin, page: l.page, text: l.text, encounter: l.encounter, seed: l.seed, kin: true })),
+            ...DB_NPC_GROUPS.map((g) => ({ kind: String(g.kind), page: Number(g.page), text: String(g.text ?? ""), encounter: g.encounter as string | null | undefined, seed: g.seed as string | null | undefined, kin: false }))].map((l) => (
+            <div key={l.kind} className={cardCls}>
+              <div className="flex items-start justify-between gap-2"><p className={nameCls}>{KIND_LABEL[l.kind] ?? l.kind}</p><span className={badge}>Bestiary p.{l.page}</span></div>
+              {l.encounter ? <p className="mt-1 text-[12.5px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Encounter.</span> {l.encounter}</p> : null}
+              {l.seed ? <p className="mt-1 text-[12.5px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Seed.</span> {l.seed}</p> : null}
+              {l.kin ? <p className="mt-1.5 text-[12px]"><a className="text-[var(--sys-link)] underline" href={`/dragonbane/kin?k=${encodeURIComponent(l.kind)}`}>Playable kin →</a></p> : null}
+            </div>
+          ))}
+        </div>
       </section>
 
       <section id="running" className="mt-10 scroll-mt-20">

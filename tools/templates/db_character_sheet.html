@@ -356,6 +356,61 @@ body.dark .prep-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 .bd-school-tx{color:#e9e7e3;}
 .bd-school-tx.dim{color:#a09d96;font-style:italic;}
 .bd-school-row i{display:block;font-style:normal;font-family:var(--f-label);font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:#a09d96;}
+.bd-picks{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;}
+.bd-pick,.bd-abil{text-align:left;background:#131316;border:1px solid #3a3a41;border-radius:8px;padding:10px 13px;color:#d6d3cc;font:inherit;cursor:pointer;display:flex;flex-direction:column;gap:3px;min-width:0;}
+.bd-pick:hover,.bd-abil:hover{border-color:var(--acc);}
+.bd-pick:focus-visible,.bd-abil:focus-visible,.bd-kit:focus-visible{outline:2px solid var(--acc);outline-offset:1px;}
+.bd-pick.sel,.bd-abil.sel{border-color:#236855;background:#12201b;box-shadow:inset 0 0 0 1px #236855;}
+.bd-pick-hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+.bd-pick-hd b{font-family:var(--f-disp);font-weight:400;font-size:21px;line-height:1.1;color:#f3dca8;}
+.bd-pick-roll{font-family:var(--f-label);font-size:11px;letter-spacing:.04em;color:#7d7a74;white-space:nowrap;}
+.bd-pick.sel .bd-pick-roll,.bd-abil.sel .bd-pick-roll{color:#cdeedd;}
+.bd-pick-meta{font-family:var(--f-label);font-size:12.5px;color:#a09d96;line-height:1.35;}
+.bd-abils{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;}
+.bd-abil-tx{font-size:13.5px;line-height:1.45;color:#e9e7e3;}
+.bd-count{font-family:var(--f-label);font-size:11px;letter-spacing:.03em;border:1px solid #3a3a41;border-radius:4px;padding:0 6px;margin-left:6px;color:#a09d96;text-transform:none;}
+.bd-count.ok{border-color:#236855;color:#7fbf7a;}
+.bd-locked{opacity:.55;}
+.chip.taken{border-style:dashed;background:transparent;color:#7fbf7a;opacity:.6;}
+.bd-kits{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;}
+.bd-kit{position:relative;text-align:left;font:inherit;cursor:pointer;display:flex;flex-direction:column;gap:8px;padding:0 0 10px;border-radius:10px;overflow:hidden;color:#e9e7e3;
+  background:linear-gradient(180deg,#2a2418 0%,#1a1712 60%,#15130f 100%);border:1px solid #6b5a2c;box-shadow:inset 0 0 0 1px rgba(217,168,74,.12),0 2px 10px rgba(0,0,0,.35);}
+.bd-kit:hover{border-color:#d9a84a;}
+.bd-kit.sel{border-color:#5cb894;box-shadow:inset 0 0 0 1px #5cb894,0 0 0 3px rgba(92,184,148,.18),0 2px 12px rgba(0,0,0,.4);}
+.bd-kit-hd{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 12px 7px;background:linear-gradient(90deg,rgba(217,168,74,.22),rgba(217,168,74,.05));border-bottom:1px solid rgba(217,168,74,.35);}
+.bd-kit-hd b{font-family:var(--f-disp);font-weight:400;font-size:22px;letter-spacing:.04em;line-height:1;color:#f0c56a;}
+.bd-kit.sel .bd-kit-hd{background:linear-gradient(90deg,rgba(92,184,148,.25),rgba(92,184,148,.05));border-bottom-color:rgba(92,184,148,.45);}
+.bd-kit-roll{font-family:var(--f-label);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#d9c08a;border:1px solid rgba(217,168,74,.45);border-radius:4px;padding:1px 6px;}
+.bd-kit-items{display:flex;flex-direction:column;gap:3px;padding:0 12px;font-size:14px;line-height:1.35;}
+.bd-kit-it{padding-left:14px;position:relative;}
+.bd-kit-it::before{content:"◆";position:absolute;left:0;top:1px;font-size:8px;color:#b89a4e;}
+.bd-kit-it.ch{color:#f3dca8;}
+.bd-kit-it i{font-style:normal;font-family:var(--f-label);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#a09d96;margin-left:4px;}
+.bd-kit-ft{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:auto 12px 0;padding-top:7px;border-top:1px dashed rgba(217,168,74,.3);font-family:var(--f-label);font-size:12px;color:#a09d96;}
+.bd-kit-ft b{color:#f3dca8;font-weight:400;}
+.bd-kit-on{margin-left:auto;color:#7fbf7a;}
+.bd-supplies{display:flex;flex-wrap:wrap;gap:14px;align-items:center;padding:6px 0;font-size:14px;}
+.bd-supplies b{color:#f3dca8;font-size:17px;}
+.bd-supplies small{color:#7d7a74;}
+.bd-detail{margin-bottom:14px;}
+.bd-select{width:100%;}
+.bd-todo{border-color:#8a6a2a;}
+.bd-todo a{color:#f0c56a;}
+.bd-dim{color:#7d7a74;}
+.bd-rev-name{font-family:var(--f-disp);font-size:28px;line-height:1.1;color:#f3dca8;margin-top:4px;}
+.bd-rev-nick{font-size:20px;color:#d9c08a;}
+.bd-rev-sub{font-family:var(--f-label);font-size:14px;color:#a09d96;margin-bottom:10px;}
+.bd-rev{border-top:1px solid #3a3a41;padding:9px 0 10px;font-size:14px;line-height:1.55;}
+.bd-rev small{color:#7d7a74;}
+.bd-rev-hd{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--f-label);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:#5cb894;margin-bottom:4px;}
+.bd-rev-edit,.bd-rev-sub .bd-rev-edit{font-family:var(--f-label);font-size:11.5px;letter-spacing:.04em;text-transform:none;color:#5cb894;}
+.bd-attrs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
+.bd-attr{background:#131316;border:1px solid #3a3a41;border-radius:8px;text-align:center;padding:5px 2px;}
+.bd-attr span{display:block;font-family:var(--f-label);font-size:11px;letter-spacing:.06em;color:#a09d96;}
+.bd-attr b{font-size:21px;color:#f3e6d4;font-weight:600;}
+.bd-derived{display:flex;flex-wrap:wrap;gap:6px 16px;padding:0 0 10px;font-size:13.5px;color:#a09d96;}
+.bd-derived b{color:#f3dca8;}
+@media (max-width:520px){ .bd-attrs{grid-template-columns:repeat(3,1fr);} .bd-picks{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));} }
 .modal-hd .x{background:transparent;border:none;color:#a09d96;font-size:20px;cursor:pointer;padding:0 4px;}
 .modal-bd{padding:14px 16px;overflow-y:auto;}
 .modal-ft{padding:10px 16px;border-top:1px solid #3a3a41;display:flex;justify-content:space-between;gap:8px;flex-shrink:0;flex-wrap:wrap;}
@@ -862,7 +917,8 @@ function isSchool(n){ var d=skillDef(n); return !!(d&&d.type==='secondary'); }
 function knowsSchool(n){ return !!(S.skills[n]&&S.skills[n].trained); }
 function knownSchools(){ return A(D('DB_SKILLS')).filter(function(s){ return s.type==='secondary'&&knowsSchool(s.name); }).map(function(s){ return s.name; }); }
 function skillLevel(n){
-  var d=skillDef(n); var r=S.skills[n]||{};
+  var d=skillDef(n); if(d&&d.rollsWith&&d.rollsWith!==n) return skillLevel(d.rollsWith);   // Harmonism is cast with Performance
+  var r=S.skills[n]||{};
   if(r.lvl!=null&&r.lvl!=='') return Math.max(0,Math.min(18,num(r.lvl)));
   var b=d?baseChance(attr(d.attribute)):0;
   if(d&&d.type==='secondary') return r.trained?2*b:0;
@@ -1219,7 +1275,7 @@ function chooseCondition(msg,cb,count){
 function trayBB(k,n){ TR[k]=Math.max(0,Math.min(5,TR[k]+n)); renderTray(); }
 function rollFree(n){ var r=d(n); addLog('D'+n, String(r), 'd'+n+'('+r+')', n===20&&r===1?'crit':n===20&&r===20?'fumble':'normal'); }
 function rollAttr(a){ testRoll({label:ATTR_FULL[a]+' ('+a+')',target:attr(a),attr:a}); }
-function rollSkill(n,extra){ var d0=skillDef(n); if(d0&&d0.type==='secondary'&&!knowsSchool(n)){ addLog(n,'—','You don\'t know this school of magic','normal'); return; }
+function rollSkill(n,extra){ var d0=skillDef(n); if(d0&&d0.type==='secondary'&&!knowsSchool(n)){ addLog(n,'—','You don\'t know this school of magic','normal'); return; } if(d0&&d0.rollsWith&&d0.rollsWith!==n) return rollSkill(d0.rollsWith,extra);
   testRoll(Object.assign({label:n,target:skillLevel(n),skill:n,attr:d0?d0.attribute:null},extra||{})); }
 function spendWp(n,why){ n=num(n); if(n<=0) return true; if(S.wp<n){ addLog(why||'Willpower','Not enough WP','Needs '+n+' WP, you have '+S.wp,'fumble'); return false; } S.wp-=n; return true; }
 
@@ -1511,6 +1567,14 @@ function activateAbility(i){ var a=S.abilities[i]; if(!a) return; var def=abilit
   if(n==='Ill-Tempered'){ TR.boon++; if(!S.cond.Angry){ S.cond.Angry=true; extra=' · you become Angry · a boon is in the tray'; } else extra=' · a boon is in the tray'; }
   if(n==='Hunting Instincts'){ S.prey=activateAbility._prey||S.prey||''; extra=S.prey?' · prey: '+S.prey:''; }
   if(n==='Unforgiving'){ TR.boon++; extra=' · a boon is in the tray for your attack'; }
+  // Bestiary kin (p.6–49)
+  if(n==='Tough'){ if(S.hp<=0&&!S.death.dead){ S.death.rallied=true; extra=' · you rally at 0 HP — no WIL roll'; } else extra=' · use it at 0 HP to rally automatically'; }
+  if(n==='Resilient'){ TR.boon++; extra=' · a boon is in the tray for the CON roll (or make camp without Bushcraft)'; }
+  if(n==='Leaping'){ TR.boon++; extra=' · jump your Movement (half up) with no roll · a boon is in the tray for a melee attack at the end'; }
+  if(n==='Camouflage'){ TR.boon++; extra=' · a boon is in the tray for Sneaking'; }
+  if(n==='Body Slam'){ TR.boon++; extra=' · Brawling attack with a boon (in the tray): 2D6 bludgeoning + damage bonus, can\'t be parried, knocks down Normal or smaller humanoids'; }
+  if(n==='Fearless') extra=' · your next WIL roll against fear succeeds — don\'t roll it';
+  if(n==='Wings') extra=' · you fly this round at your Movement';
   // Initiative is dealt on the GM screen: these just pay the WP and tell the GM.
   if(n==='Lightning Fast') extra=' · tell the GM which of your two cards you keep';
   if(n==='Veteran') extra=' · tell the GM you keep last round\'s card';
@@ -1519,13 +1583,15 @@ function preyBoon(){ if(!S.prey) return; if(!spendWp(1,'Hunting Instincts')) ret
 function endBerserk(quiet){ S.berserk=false; S.cond.Exhausted=true; if(!quiet) addLog('Berserker ends','Exhausted','The rage is over','normal'); changed(); }
 
 // ── magic ──
-function spellCost(def,pl,indoors){ var c=def.powerLevels===false?(D('DB_MAGIC_RULES')||{}).fixedCost||2:2*pl; if(indoors&&def.indoorsDoubleWp) c*=2; return c; }
-function spellSchoolSkill(def){ if(!def) return null; if(def.school==='General') return bestSkill(knownSchools()); return knowsSchool(def.school)?def.school:null; }
+function spellCost(def,pl,indoors){ var c=def.powerLevels===false?(D('DB_MAGIC_RULES')||{}).fixedCost||2:(num(def.wpPerPowerLevel,0)||2)*pl; if(indoors&&def.indoorsDoubleWp) c*=2; return c; }
+function spellSchoolSkill(def){ if(!def) return null;
+  if(def.school==='General') return bestSkill(knownSchools().filter(function(s){ return !(skillDef(s)||{}).rollsWith; }));   // harmonists can't learn general magic
+  if(!knowsSchool(def.school)) return null; var d=skillDef(def.school); return (d&&d.rollsWith)||def.school; }
 // Cast: casts straight away at the base power level (the popup's defaults — power level 1,
 // not indoors, not on yourself, no power from the body). ↑ (upcast) opens the popup with
 // the power level and those options; it only shows for spells with power levels.
 function spellCanUpcast(def){ return !def||def.powerLevels!==false; }
-function castBtns(i,def){ return (spellCanUpcast(def)?tbtn('↑','openCast(\'spell\','+i+')','up','Upcast — choose the power level'):'')+tbtn('Cast','quickCast('+i+')'); }
+function castBtns(i,def){ var rc=def&&def.recipe; return (spellCanUpcast(def)?tbtn('↑','openCast(\'spell\','+i+')','up',rc?'Brew more doses (one per power level)':'Upcast — choose the power level'):'')+tbtn(rc?'Brew':'Cast','quickCast('+i+')'); }
 function castCheck(i){ var s=S.spells[i]; if(!s) return null; var def=spellDef(s.name)||{name:s.name,school:'General',powerLevels:true,castingTime:'action'};
   var reaction=def.castingTime==='reaction'; var freeCast=/doesn't use up your action|not an action/i.test(def.text||'');
   var sk=spellSchoolSkill(def);
@@ -1577,7 +1643,10 @@ function castSpell(i,c){
   var reaction=def.castingTime==='reaction', freeCast=/doesn't use up your action|not an action/i.test(def.text||'');
   if(reaction&&!freeCast) useReaction(); else if(!freeCast&&def.castingTime==='action') useAction();
   changed();
-  testRoll({label:'Cast · '+def.name+(def.powerLevels!==false?' (PL '+c.pl+')':''),target:skillLevel(sk),skill:sk,onDone:function(r){
+  var lab=def.recipe?labMod():null;
+  testRoll({label:(def.recipe?'Brew · ':'Cast · ')+def.name+(def.powerLevels!==false?(def.recipe?' ('+c.pl+' dose'+(c.pl>1?'s':'')+')':' (PL '+c.pl+')'):''),target:skillLevel(sk),skill:sk,
+    boons:lab&&lab.boon?[lab.boon]:[],banes:lab&&lab.bane?[lab.bane]:[],onDone:function(r){
+    if(def.recipe) useIngredients(def,c.pl);
     if(r.ok) spellEffect(def,c,r,cost,fromWp);
     else if(r.demon&&S.opts.mishaps) magicalMishap(c.pl);
     if(bodyGain){ takeDamage(bodyGain,{ignoreArmor:true,label:'Power from the body ('+bodyTxt+')'}); bodyGain=0; }
@@ -1586,11 +1655,13 @@ function castSpell(i,c){
 function spellEffect(def,c,r,cost,fromWp){
   var go=function(opt){ opt=opt||{}; var pl=c.pl;
     if(opt.free&&fromWp){ S.wp=Math.min(wpMax(),S.wp+fromWp); addLog(def.name,'No WP','Dragon: the spell cost nothing (+'+fromWp+' WP back)','crit'); }
-    if(def.damage){ var e=def.damage.base+(pl>1?'+'+(pl-1)+def.damage.perLevel.replace(/^1/,''):''); if(opt.double) e=diceTimes(e,2); var x=rollExpr(e);
+    if(def.recipe){ brewDoses(def,pl,opt); changed(); return; }
+    var lvlDice=function(dd){ var per=dd&&dd.perLevel; return dd.base+(pl>1&&per&&/^\d*D\d+$/i.test(String(per))?'+'+(pl-1)+String(per).replace(/^1/,''):''); };
+    if(def.damage&&def.damage.base){ var e=lvlDice(def.damage); if(opt.double) e=diceTimes(e,2); var x=rollExpr(e);
       var chain=A(def.damage.chain).map(function(ce){ var cr=rollExpr(ce+(pl>1?'+'+(pl-1)+String(ce).replace(/^\d*/,''):'')); return cr.total+' ('+cr.text+')'; });
       addLog('Spell damage · '+def.name,String(x.total),x.text+(chain.length?' · chain: '+chain.join(', '):'')+(def.dodge?' · can be dodged':'')+(def.parry?' / parried as a ranged attack':'')+(def.metalArmorNoEffect?' · metal armor doesn\'t protect':''),opt.double?'crit':'normal'); }
-    if(def.healing){ var he=def.healing.base+(pl>1?'+'+(pl-1)+def.healing.perLevel.replace(/^1/,''):''); var hx=rollExpr(he); if(c.self) healHp(hx.total,def.name+' ('+hx.text+')'); else addLog('Healing · '+def.name,'+'+hx.total+' HP',hx.text,'normal'); }
-    if(!def.damage&&!def.healing) addLog(def.name,'Takes effect','Power level '+pl+(opt.double?' · range doubled':'')+' · '+(def.duration||''),'normal');
+    if(def.healing&&def.healing.base){ var he=lvlDice(def.healing); var hx=rollExpr(he); if(c.self) healHp(hx.total,def.name+' ('+hx.text+')'); else addLog('Healing · '+def.name,'+'+hx.total+' HP',hx.text,'normal'); }
+    if(!(def.damage&&def.damage.base)&&!(def.healing&&def.healing.base)) addLog(def.name,'Takes effect','Power level '+pl+(opt.double?' · range doubled':'')+' · '+(def.duration||''),'normal');
     if(opt.another) addLog('Dragon','Cast another spell','Cast a second spell at once, with a bane — the bane is in the tray','crit');
     if(opt.another) { TR.bane++; renderTray(); }
     changed(); };
@@ -1598,6 +1669,14 @@ function spellEffect(def,c,r,cost,fromWp){
     openDlg('Dragon! Choose one',''+['double','free','another'].map(function(k,ix){ return '<label class="m-check"><input type="radio" name="sdr" value="'+k+'"'+(ix===0?' checked':'')+'><span>'+esc(opts[ix])+'</span></label>'; }).join(''),[{t:'Apply',f:function(){ var v=(document.querySelector('input[name="sdr"]:checked')||{}).value; closeDlg(true); var o={}; o[v]=true; go(o); }}],true); return; }
   go();
 }
+// ── alchemy (Book of Magic p.106–113): recipes are spells of the Alchemy school ──
+function invFind(n){ n=String(n).toLowerCase(); return S.inventory.find(function(r){ return String(r.name).toLowerCase()===n; })||S.inventory.find(function(r){ return String(r.name).toLowerCase().indexOf(n)>=0; }); }
+function labMod(){ if(invFind('Alchemical Laboratory')) return {boon:'Alchemical laboratory'}; if(invFind('Small Field Laboratory')) return {}; return {bane:'No laboratory (a kitchen)'}; }
+function useIngredients(def,doses){ var used=[], missing=[];
+  A(def.ingredients).forEach(function(n){ var r=invFind(n); if(r&&num(r.qty,1)>=doses){ r.qty=num(r.qty,1)-doses; used.push(doses+'× '+n); if(r.qty<=0) S.inventory.splice(S.inventory.indexOf(r),1); } else missing.push(n); });
+  addLog('Ingredients · '+def.name,used.length?'Used':'—',(used.length?'Used up: '+used.join(', '):'')+(missing.length?(used.length?' · ':'')+'not in your inventory: '+missing.join(', '):''),missing.length?'fumble':'normal'); invalidate('inv-body'); }
+function brewDoses(def,pl,opt){ var n=pl; addGearByName(def.product,n);
+  addLog('Brewed · '+def.name,'+'+n+' dose'+(n>1?'s':''),(def.product!==def.name?def.product+' · ':'')+(def.text||''),opt&&(opt.double||opt.free)?'crit':'normal'); }
 function magicalMishap(pl){ var t=(D('DB_GM_TABLES')||{}).magicalMishaps; if(!t) return; var n=d(20); var row=A(t.rows).find(function(x){ return x.roll===n; })||{}; var notes=[];
   A(row.conditions).forEach(function(c){ if(!S.cond[c]){ S.cond[c]=true; notes.push(c); } });
   addLog('Magical mishap','D20: '+n,'d20('+n+') · '+(row.text||'')+(notes.length?' · '+notes.join(', '):''),'fumble');
@@ -1750,7 +1829,7 @@ function pickerChrome(){ var f=$('picker-filter'); var opts=[];
     else if(_shopTab==='weapon') opts=[['','All weapons'],['melee','Melee'],['ranged','Ranged'],['shield','Shields']];
     else opts=[['','Armor & helmets'],['armor','Armor'],['helmet','Helmets']]; }
   else if(_pk==='ability'){ opts=[['eligible','Requirement met'],['','All heroic abilities']]; }
-  else if(_pk==='spell'||_pk==='trick'){ opts=[['mine','My schools + General'],['','All schools']].concat(['General','Animism','Elementalism','Mentalism'].map(function(s){ return [s,s]; })); }
+  else if(_pk==='spell'||_pk==='trick'){ opts=[['mine','My schools + General'],['','All schools']].concat(['General'].concat(A((D('DB_MAGIC_RULES')||{}).schools)).map(function(s){ return [s,s]; })); }
   f.innerHTML=opts.map(function(o){ return '<option value="'+esc(o[0])+'">'+esc(o[1])+'</option>'; }).join(''); f.style.display=opts.length?'':'none';
   $('picker-tabs').innerHTML=isShop()?SHOP_TABS.map(function(t){ return '<button class="brow-tab'+(_shopTab===t.id?' on':'')+'" onclick="shopTab(\''+t.id+'\')">'+esc(t.label)+'</button>'; }).join(''):
     isMagicPk()?MAGIC_TABS.map(function(t){ return '<button class="brow-tab'+(_pk===t.id?' on':'')+'" onclick="magicTab(\''+t.id+'\')">'+esc(t.label)+'</button>'; }).join(''):'';

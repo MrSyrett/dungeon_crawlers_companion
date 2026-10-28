@@ -2080,7 +2080,7 @@ function dbMobPool() {
   const arr = v => Array.isArray(v) ? v : [];
   const npcGroup = n => n.boss ? 'Boss' : (!n.kind || n.kind === 'Typical') ? 'NPC' : String(n.kind);
   return []
-    .concat(arr(typeof DB_MONSTERS !== 'undefined' ? DB_MONSTERS : null).map(m => Object.assign({}, m, { _dbkind: 'monster', group: 'Monster' })))
+    .concat(arr(typeof DB_MONSTERS !== 'undefined' ? DB_MONSTERS : null).map(m => Object.assign({}, m, { _dbkind: 'monster', group: m.category ? 'Monster · ' + m.category : 'Monster' })))
     .concat(arr(typeof DB_NPCS !== 'undefined' ? DB_NPCS : null).map(n => Object.assign({}, n, { _dbkind: 'npc', group: npcGroup(n) })))
     .concat(arr(typeof DB_ANIMALS !== 'undefined' ? DB_ANIMALS : null).map(a => Object.assign({}, a, { _dbkind: 'animal', group: 'Animal' })))
     .concat(_hbMobs);
