@@ -8271,10 +8271,11 @@ function wireSessionPrepLoader(root) {
     return '<div class="advh-card advh-clue' + (on ? ' revealed' : '') + '" data-ci="' + i + '"><div class="advh-loot-hd"><div class="advh-card-h">' + advEsc(c.header || 'Clue') + '</div>'
       + '<label class="advh-chk"><input type="checkbox" class="advh-revealed"' + (on ? ' checked' : '') + '> Revealed</label></div>'
       + (c.text ? '<div class="advh-desc">' + advText(c.text) + '</div>' : '')
-      + ((c.where || c.leads) ? '<div class="advh-desc dim">' + advEsc([c.where ? 'Found at ' + c.where : '', c.leads ? 'Leads to ' + c.leads : ''].filter(Boolean).join(' · ')) + '</div>' : '')
+      + ((c.where || c.holder || c.leads) ? '<div class="advh-desc dim">' + advEsc([c.where ? 'Found in ' + c.where : '', c.holder ? 'Held by ' + c.holder : '', c.leads ? 'Leads to ' + c.leads : ''].filter(Boolean).join(' · ')) + '</div>' : '')
       + '</div>';
   }
   const eqName = (a, b) => String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
+  const whereHas = (w, n) => String(w || '').split(/\s*,\s*/).some(p => eqName(p, n));
 
   function renderHub(){
     if(!hub || !prep) return;
@@ -8344,9 +8345,10 @@ function wireSessionPrepLoader(root) {
         const nFoes = cast.filter(b => b.sbtype !== 'talk').reduce((a, b) => a + Math.max(1, parseInt(b.qty, 10) || 1), 0);
         const mp = L.map ? maps().find(m => eqName(m.title, L.map)) : null;
         const tbs = (L.tables || []).map(n => tables().findIndex(t => eqName(t.title, n))).filter(x => x >= 0);
-        const hz = HZ.filter(z => (L.hazards || []).some(n => eqName(n, z.name)) || eqName(z.where, s.name));
-        const cls = CL.map((x, ci) => [x, ci]).filter(([x]) => (L.clues || []).some(n => eqName(n, x.header)) || eqName(x.where, s.name));
-        const rws = RW.map((x, ri) => [x, ri]).filter(([x]) => eqName(x.where, s.name));
+        // The encounter's links are the source; an older prep's "where" still counts.
+        const hz = HZ.filter(z => (L.hazards || []).some(n => eqName(n, z.name)) || whereHas(z.where, s.name));
+        const cls = CL.map((x, ci) => [x, ci]).filter(([x]) => (L.clues || []).some(n => eqName(n, x.header)) || whereHas(x.where, s.name));
+        const rws = RW.map((x, ri) => [x, ri]).filter(([x]) => (L.treasure || []).some(n => eqName(n, x.name)) || whereHas(x.where, s.name));
         const done = isDone(s, i);
         let runBar = '';
         if(nFoes) runBar += '<button type="button" class="btn small advh-send-combat advh-run-combat" title="' + advEsc(cast.filter(b => b.sbtype !== 'talk').map(b => (parseInt(b.qty, 10) > 1 ? b.qty + '× ' : '') + b.name).join(', ')) + '">⚔ Add ' + nFoes + ' to combat</button>';

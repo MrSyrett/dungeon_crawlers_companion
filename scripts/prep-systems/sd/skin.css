@@ -387,3 +387,6 @@ body.flow-mode .page + .page {
   /* SD section headers are black bars, whatever colour a section asks for. */
   .page .sl { color: #f8f8f6 !important; background: #0a0a0a !important; padding: 3px 8px !important; border-bottom-color: #0a0a0a !important; }
   .page .rt-block .sl .rt-die { color: #c8c8c4; }
+  /* Dark mode: SD's cards stay light, so their text stays dark; section bars stay white-on-black. */
+  .page.dark-mode .npc-block { color: #0a0a0a; }
+  .page.dark-mode .p-section .sl[style] { color: #f8f8f6 !important; border-bottom-color: #0a0a0a !important; }

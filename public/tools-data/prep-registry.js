@@ -129,7 +129,7 @@
   // Dragonbane / Pirate Borg / LotR keys are left alone until those builders move
   // onto the template; the Hub still shows their own sections.
   var DETAIL_KEYS = ['questgiver', 'hooks', 'goal', 'prize', 'stakes', 'opposition'];
-  var LINK_KEYS = ['cast', 'clues', 'tables', 'hazards'];
+  var LINK_KEYS = ['cast', 'clues', 'treasure', 'tables', 'hazards'];
   function _arr(v) { return Array.isArray(v) ? v : []; }
   function _str(v) { return v == null ? '' : String(v).trim(); }
   function migrate(ch) {
@@ -167,6 +167,26 @@
       l.links = L; l.trackers = _arr(l.trackers);
       return l;
     });
+    // Links live in ONE place — on the encounter. Older preps also wrote a "where"
+    // on clues, treasure and hazards; fold each into the matching encounter's links
+    // (a clue's unmatched "where" was usually a person, so it becomes "held by").
+    var locs = ch.locations.filter(function (l) { return l && typeof l === 'object'; });
+    var findLoc = function (n) { n = _str(n).toLowerCase(); return n ? locs.filter(function (l) { return _str(l.name).toLowerCase() === n; })[0] : null; };
+    var fold = function (list, key, nameKey, onMiss) {
+      list.forEach(function (x) {
+        if (!x || typeof x !== 'object' || x._linked) return;
+        var nm = _str(x[nameKey]); var w = _str(x.where);
+        if (nm && w) {
+          var hit = findLoc(w);
+          if (hit) { if (hit.links[key].map(function (v) { return v.toLowerCase(); }).indexOf(nm.toLowerCase()) < 0) hit.links[key].push(nm); }
+          else if (onMiss) onMiss(x, w);
+        }
+        x._linked = 1;
+      });
+    };
+    fold(ch.clues, 'clues', 'header', function (x, w) { if (!_str(x.holder)) x.holder = w; });
+    fold(ch.rewards, 'treasure', 'name', function (x, w) { x.legacyWhere = w; });
+    fold(ch.hazards, 'hazards', 'name', function (x, w) { x.legacyWhere = w; });
     ch._v = 2;
     return ch;
   }

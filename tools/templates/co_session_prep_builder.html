@@ -688,12 +688,18 @@ body.flow-mode .page + .page {
   .det-hooks { margin: 0; padding-left: 12px; }
   .trk-line { font-size: 9px; color: var(--ink); line-height: 1.5; margin-bottom: 2px; }
   .trk-boxes { font-family: 'Share Tech Mono', monospace; letter-spacing: 1px; }
-  .loc-links { font-size: 8.5px; color: var(--muted); line-height: 1.45; margin: 2px 0 4px; }
-  .loc-links b { color: var(--ink); font-weight: 700; }
+  /* Link lines take the colour of whatever they sit on (page, card, dark or light),
+     dimmed — so they read on every system's paper in both modes. */
+  .loc-links { font-size: 8.5px; color: inherit; opacity: 0.72; line-height: 1.45; margin: 2px 0 4px; }
+  .loc-links b { color: inherit; font-weight: 700; }
   .haz-item { font-size: 9px; color: var(--ink); margin-bottom: 5px; padding: 5px 9px 5px 11px; border-left: 3px solid var(--accent-red); border-radius: 7px; background: #fbeeee; line-height: 1.5; }
   .page.dark-mode .haz-item { background: #2a1616; color: #d0ccc4; }
   .page.dark-mode .det-grid, .page.dark-mode .trk-line { color: #d0ccc4; }
-  .page.dark-mode .loc-links b { color: #e8e4dc; }
+  /* Dark mode: accent labels, roll numbers and the cast heading on a dark page. */
+  .page.dark-mode .det-grid .det-k { color: var(--section-hdr-dark, var(--highlight)); }
+  .page.dark-mode .rt-table .rt-roll { color: var(--section-hdr-dark, var(--highlight)) !important; }
+  .page.dark-mode .sl[style*="1a4a8a"] { color: #8fb4ee !important; border-bottom-color: #8fb4ee !important; }
+  .page.dark-mode .loc-links { opacity: 0.8; }
   .sb-qty { font-size: 0.8em; opacity: 0.75; letter-spacing: 0.02em; }
   .map-keys { font-size: 9px; color: var(--ink); line-height: 1.5; margin-top: 4px; }
   .page.dark-mode .map-keys { color: #d0ccc4; }
@@ -1573,7 +1579,7 @@ function switchTab(name) {
   const panel=document.getElementById('tab-'+name); if(panel) panel.classList.add('active');
   // Pickers that list other tabs' names (scene links, "found at") refresh on view.
   if(name==='scenes') refreshAllSceneLinks();
-  if(name==='clues' || name==='treasure' || name==='scenes') refreshWhereOptions();
+  if(name==='clues' || name==='treasure' || name==='scenes') refreshAllItemLinks();
 }
 // Older links (?tab=basics, saved UI state) still land somewhere sensible.
 const _TAB_ALIASES = { basics:'adventure', encounters:'scenes', monsters:'cast' };
@@ -1599,15 +1605,17 @@ function readFields() {
   state.clues=[...document.querySelectorAll('#clues-list .entity-card')].map(c=>({
     header:c.querySelector('.clue-hdr-input')?.value.trim()||'',
     text:c.querySelector('.clue-text-input')?.value.trim()||'',
-    where:c.querySelector('.clue-where-input')?.value.trim()||'',
-    leads:c.querySelector('.clue-leads-input')?.value.trim()||''
+    holder:c.querySelector('.clue-holder-input')?.value.trim()||'',
+    leads:c.querySelector('.clue-leads-input')?.value.trim()||'',
+    where:itemWhere(c,'clues',c.querySelector('.clue-hdr-input')?.value.trim()||''), _linked:1
   })).filter(c=>c.header||c.text);
   state.rewards=[...document.querySelectorAll('#rewards-list .entity-card')].map(c=>({
     name:c.querySelector('.reward-name-input')?.value.trim()||'',
     flavor:c.querySelector('.reward-flavor-input')?.value.trim()||'',
     stats:c.querySelector('.reward-stats-input')?.value.trim()||'',
     value:c.querySelector('.reward-value-input')?.value.trim()||'',
-    where:c.querySelector('.reward-where-input')?.value.trim()||'',
+    where:itemWhere(c,'treasure',c.querySelector('.reward-name-input')?.value.trim()||''), _linked:1,
+    ...(c.dataset.legacy?{legacyWhere:c.dataset.legacy}:{}),
     cat:c.dataset.cat||''
   })).filter(r=>r.name||r.flavor);
   state.rollTables=[...document.querySelectorAll('#rolltables-list .entity-card')].map(c=>({
@@ -1635,7 +1643,8 @@ function readFields() {
   })).filter(l=>l.name||l.tag||l.readaloud||l.desc);
   state.hazards=[...document.querySelectorAll('#hazards-list .entity-card')].map(c=>({
     name:c.querySelector('.hz-name-input')?.value.trim()||'',
-    where:c.querySelector('.hz-where-input')?.value.trim()||'',
+    where:itemWhere(c,'hazards',c.querySelector('.hz-name-input')?.value.trim()||''), _linked:1,
+    ...(c.dataset.legacy?{legacyWhere:c.dataset.legacy}:{}),
     trigger:c.querySelector('.hz-trigger-input')?.value.trim()||'',
     effect:c.querySelector('.hz-effect-input')?.value.trim()||'',
     spot:c.querySelector('.hz-spot-input')?.value.trim()||''
@@ -1679,7 +1688,7 @@ function buildSidebarFromState() {
   clear('statblocks-list'); (state.statblocks||[]).forEach(s=>addStatBlock(s));
   clear('hazards-list'); (state.hazards||[]).forEach(h=>addHazard(h));
   clear('locations-list'); (state.locations||[]).forEach(l=>addLocation(l));
-  refreshAllSceneLinks(); refreshWhereOptions();
+  refreshAllSceneLinks(); refreshAllItemLinks();
 }
 
 function addClue(data={}) {
@@ -1694,11 +1703,13 @@ function addClue(data={}) {
       <label class="field-label">Detail</label>
       <textarea class="clue-text-input short" placeholder="What the heroes learn..." oninput="autosave()">${escH(data.text||'')}</textarea>
     </div>
+    <div class="link-group"><label class="field-label">Found in</label><div class="item-links" data-kind="clues"></div></div>
     <div class="field-row2 field-group">
-      <div><label class="field-label">Found At</label><input type="text" class="clue-where-input where-input" list="where-options" placeholder="Scene or person" value="${escA(data.where||'')}" oninput="autosave()"></div>
+      <div><label class="field-label">Held By</label><input type="text" class="clue-holder-input" placeholder="Who knows it (optional)" value="${escA(data.holder||'')}" oninput="autosave()"></div>
       <div><label class="field-label">Points To</label><input type="text" class="clue-leads-input" placeholder="Where it leads" value="${escA(data.leads||'')}" oninput="autosave()"></div>
     </div>`;
   list.appendChild(div);
+  refreshItemLinks(div);
 }
 
 // ── Names other tabs can link to (read live from the editor) ──────────────
@@ -1708,23 +1719,72 @@ function castNames(){ return _names('#statblocks-list .sb-name-input'); }
 function clueNames(){ return _names('#clues-list .clue-hdr-input'); }
 function tableNames(){ return _names('#rolltables-list .rt-title-input'); }
 function hazardNames(){ return _names('#hazards-list .hz-name-input'); }
-function mapTitles(){ return [...document.querySelectorAll('#maps-list .entity-card')].map((c,i)=>c.querySelector('.map-title-input')?.value.trim()||('Map '+(i+1))); }
-// One shared <datalist> of scene + cast names feeds every "Found at / Where" box.
-function refreshWhereOptions(){
-  let dl=document.getElementById('where-options');
-  if(!dl){ dl=document.createElement('datalist'); dl.id='where-options'; document.body.appendChild(dl); }
-  const opts=[...new Set([...sceneNames(), ...castNames()])];
-  dl.innerHTML=opts.map(n=>'<option value="'+escA(n)+'"></option>').join('');
-  // Scene pickers (treasure "found in", hazard "where") are real selects.
-  document.querySelectorAll('select.scene-select').forEach(sel=>{
-    const cur=sel.value||sel.dataset.value||'';
-    const names=sceneNames();
-    const all=cur && !names.includes(cur) ? [cur, ...names] : names;
-    sel.innerHTML='<option value="">—</option>'+all.map(n=>'<option value="'+escA(n)+'"'+(n===cur?' selected':'')+'>'+escH(n)+(names.includes(n)?'':' (not found)')+'</option>').join('');
-    sel.dataset.value=cur;
-  });
+function rewardNames(){ return _names('#rewards-list .reward-name-input'); }
+
+// ── Two-way links ─────────────────────────────────────────────────────────
+// A link between an encounter and a clue / treasure / hazard is stored ONCE, on
+// the encounter (its links JSON). The clue, treasure and hazard cards show the
+// same link from their side as "Found in" chips; ticking either side changes the
+// one stored link, so the two can never disagree.
+const ITEM_KINDS = {
+  clues:    { list:'#clues-list',   name:'.clue-hdr-input' },
+  treasure: { list:'#rewards-list', name:'.reward-name-input' },
+  hazards:  { list:'#hazards-list', name:'.hz-name-input' },
+};
+function sceneCards(){ return [...document.querySelectorAll('#locations-list .location-card')]; }
+const _eq = (a, b) => String(a||'').trim().toLowerCase() === String(b||'').trim().toLowerCase();
+function linkedScenes(kind, itemName){
+  if(!String(itemName||'').trim()) return [];
+  return sceneCards().filter(c => (readSceneLinks(c)[kind]||[]).some(n => _eq(n, itemName)))
+    .map(c => c.querySelector('.loc-name-input')?.value.trim()).filter(Boolean);
 }
-function sceneSelect(cls, value){ return '<select class="ui-select scene-select '+cls+'" data-value="'+escA(value||'')+'" onchange="this.dataset.value=this.value;autosave()"><option value="">—</option>'+(value?'<option value="'+escA(value)+'" selected>'+escH(value)+'</option>':'')+'</select>'; }
+function _itemKind(card){ const box=card.querySelector('.item-links'); return box ? box.dataset.kind : ''; }
+function _itemName(card){ const k=ITEM_KINDS[_itemKind(card)]; return k ? (card.querySelector(k.name)?.value.trim()||'') : ''; }
+function refreshItemLinks(card){
+  const box=card && card.querySelector('.item-links'); if(!box) return;
+  const kind=box.dataset.kind, nm=_itemName(card);
+  const scenes=sceneCards().map(c=>c.querySelector('.loc-name-input')?.value.trim()).filter(Boolean);
+  const on=new Set(linkedScenes(kind, nm).map(x=>x.toLowerCase()));
+  let html=scenes.map(n=>'<label class="link-chip'+(on.has(n.toLowerCase())?' on':'')+'"><input type="checkbox" value="'+escA(n)+'"'+(on.has(n.toLowerCase())?' checked':'')+' onchange="itemLinkToggle(this)">'+escH(n)+'</label>').join('');
+  // An old "where" that matches no encounter (renamed or deleted) shows struck through until unticked.
+  if(card.dataset.legacy) html+='<label class="link-chip on missing" title="No encounter has this name any more — untick to remove"><input type="checkbox" checked data-legacy="1" onchange="itemLinkToggle(this)">'+escH(card.dataset.legacy)+'</label>';
+  box.innerHTML = html || '<span class="link-empty">'+(nm?'No encounters in this chapter yet.':'Name it first, then pick where it is.')+'</span>';
+  if(!nm) box.querySelectorAll('input').forEach(i=>i.disabled=true);
+}
+function refreshAllItemLinks(){ Object.values(ITEM_KINDS).forEach(k=>document.querySelectorAll(k.list+' > .entity-card').forEach(refreshItemLinks)); }
+function itemLinkToggle(cb){
+  const card=cb.closest('.entity-card');
+  if(cb.dataset.legacy){ delete card.dataset.legacy; refreshItemLinks(card); autosave(); return; }
+  const kind=_itemKind(card), nm=_itemName(card); if(!nm) return;
+  const sc=sceneCards().find(c=>_eq(c.querySelector('.loc-name-input')?.value, cb.value)); if(!sc) return;
+  const L=readSceneLinks(sc); const cur=(L[kind]||[]).filter(n=>!_eq(n, nm));
+  if(cb.checked) cur.push(nm);
+  L[kind]=cur; sc.dataset.links=JSON.stringify(L);
+  refreshSceneLinks(sc); refreshItemLinks(card); autosave();
+}
+// The derived "where" saved on a clue / treasure / hazard (for the print and older readers).
+function itemWhere(card, kind, nm){ return [...linkedScenes(kind, nm), ...(card.dataset.legacy?[card.dataset.legacy]:[])].join(', '); }
+// Renaming something keeps every link to it: encounters' links, and trackers'
+// table names, follow the new name.
+(function(){
+  const SEL='.clue-hdr-input,.reward-name-input,.hz-name-input,.sb-name-input,.rt-title-input';
+  const KIND={'clue-hdr-input':'clues','reward-name-input':'treasure','hz-name-input':'hazards','sb-name-input':'cast','rt-title-input':'tables'};
+  document.addEventListener('focusin', e=>{ const t=e.target; if(t.matches && t.matches(SEL)) t.dataset.prev=t.value.trim(); });
+  document.addEventListener('change', e=>{
+    const t=e.target; if(!(t.matches && t.matches(SEL))) return;
+    const from=t.dataset.prev||'', to=t.value.trim(); t.dataset.prev=to;
+    if(!from || !to || _eq(from,to)) { refreshAllItemLinks(); return; }
+    const kind=KIND[[...t.classList].find(c=>KIND[c])];
+    sceneCards().forEach(c=>{ const L=readSceneLinks(c); if((L[kind]||[]).some(n=>_eq(n,from))){ L[kind]=L[kind].map(n=>_eq(n,from)?to:n); c.dataset.links=JSON.stringify(L); refreshSceneLinks(c); } });
+    if(kind==='tables') document.querySelectorAll('.tr-table').forEach(sel=>{ if(_eq(sel.value,from)){ trRefreshTables(sel); sel.value=to; } });
+    refreshAllItemLinks(); autosave();
+  });
+  // An encounter renamed: the item cards' chips show the new name.
+  document.addEventListener('input', e=>{ if(e.target.matches && e.target.matches('.loc-name-input')) { clearTimeout(window._ilT); window._ilT=setTimeout(refreshAllItemLinks, 400); } });
+})();
+function mapTitles(){ return [...document.querySelectorAll('#maps-list .entity-card')].map((c,i)=>c.querySelector('.map-title-input')?.value.trim()||('Map '+(i+1))); }
+// Kept for system plug-ins that call it after adding a card.
+function refreshWhereOptions(){ refreshAllItemLinks(); }
 
 function handleMapUpload(input) {
   const file = input.files[0];
@@ -1771,11 +1831,11 @@ function addReward(data={}) {
       <label class="field-label">Rules</label>
       <textarea class="reward-stats-input short" placeholder="e.g. +2 STR, 1/day cast Fireball..." oninput="autosave()">${escH(data.stats||'')}</textarea>
     </div>
-    <div class="field-row2 field-group">
-      <div><label class="field-label">Value</label><input type="text" class="reward-value-input" placeholder="e.g. 200 gp" value="${escA(data.value||'')}" oninput="autosave()"></div>
-      <div><label class="field-label">Found In</label>${sceneSelect('reward-where-input', data.where)}</div>
-    </div>`;
+    <div class="field-group"><label class="field-label">Value</label><input type="text" class="reward-value-input" placeholder="e.g. 200 gp" value="${escA(data.value||'')}" oninput="autosave()"></div>
+    <div class="link-group"><label class="field-label">Found in</label><div class="item-links" data-kind="treasure"></div></div>`;
+  if(data.legacyWhere) div.dataset.legacy=data.legacyWhere;
   list.appendChild(div);
+  refreshItemLinks(div);
 }
 
 // Treasure picker: the system's item list from the registry, loaded on first use.
@@ -1797,7 +1857,7 @@ function itemSearch(){
 }
 function itemAdd(name){
   const m=PREG && PREG.itemList(PREP_CODE).find(x=>x.name===name); if(!m) return;
-  addReward({ name:m.name, stats:m.desc||'', cat:m.category||'' }); refreshWhereOptions(); autosave();
+  addReward({ name:m.name, stats:m.desc||'', cat:m.category||'' }); autosave();
   const box=document.getElementById('itempick-search'); if(box) box.value='';
   const list=document.getElementById('itempick-list'); if(list){ list.classList.remove('show'); list.innerHTML=''; }
 }
@@ -1819,13 +1879,13 @@ function addHazard(data={}) {
       <input class="entity-name-input hz-name-input" type="text" placeholder="Hazard / trap name" value="${escA(data.name||'')}" oninput="autosave()">
       <button class="btn-remove" onclick="this.closest('.entity-card').remove();autosave()">✕</button>
     </div>
-    <div class="field-row2 field-group">
-      <div><label class="field-label">Where</label>${sceneSelect('hz-where-input', data.where)}</div>
-      <div><label class="field-label">Trigger</label><input type="text" class="hz-trigger-input" placeholder="What sets it off" value="${escA(data.trigger||'')}" oninput="autosave()"></div>
-    </div>
+    <div class="link-group"><label class="field-label">Where</label><div class="item-links" data-kind="hazards"></div></div>
+    <div class="field-group"><label class="field-label">Trigger</label><input type="text" class="hz-trigger-input" placeholder="What sets it off" value="${escA(data.trigger||'')}" oninput="autosave()"></div>
     <div class="field-group"><label class="field-label">Effect / Damage</label><textarea class="hz-effect-input short" placeholder="What happens, damage, saves..." oninput="autosave()">${escH(data.effect||'')}</textarea></div>
     <div class="field-group"><label class="field-label">Spot / Disarm</label><input type="text" class="hz-spot-input" placeholder="How to notice or disable it" value="${escA(data.spot||'')}" oninput="autosave()"></div>`;
+  if(data.legacyWhere) div.dataset.legacy=data.legacyWhere;
   list.appendChild(div);
+  refreshItemLinks(div);
 }
 
 // ── Trackers (clocks, countdowns, timers) ─────────────────────────────────
@@ -2134,7 +2194,7 @@ function addLocation(data={}) {
   const div=document.createElement('div'); div.className='entity-card location-card';
   if(data.opener) div.dataset.opener='1';
   // Links to other tabs live on the card as JSON (names), rendered as pick-chips.
-  div.dataset.links=JSON.stringify(Object.assign({map:'',mapkey:'',cast:[],clues:[],tables:[],hazards:[]}, data.links||{}));
+  div.dataset.links=JSON.stringify(Object.assign({map:'',mapkey:'',cast:[],clues:[],treasure:[],tables:[],hazards:[]}, data.links||{}));
   const type=data.type||'combat';
   const typeColors={'combat':'#C0392B','exploration':'#2d6a2d','npc':'#1a4a8a'};
   div.style.borderLeftColor=typeColors[type]||typeColors.combat;
@@ -2186,6 +2246,7 @@ function addLocation(data={}) {
       </div>
       <div class="link-group"><label class="field-label">Cast here</label><div class="link-chips" data-k="cast"></div></div>
       <div class="link-group"><label class="field-label">Clues found here</label><div class="link-chips" data-k="clues"></div></div>
+      <div class="link-group"><label class="field-label">Treasure here</label><div class="link-chips" data-k="treasure"></div></div>
       <div class="link-group"><label class="field-label">Tables to roll</label><div class="link-chips" data-k="tables"></div></div>
       <div class="link-group"><label class="field-label">Hazards &amp; traps</label><div class="link-chips" data-k="hazards"></div></div>
       <div class="link-group"><label class="field-label">Scene trackers</label><div class="entity-list scene-trackers"></div>
@@ -2200,7 +2261,7 @@ function addLocation(data={}) {
 function _sceneLinks(card){ try { return JSON.parse(card.dataset.links||'{}'); } catch(e){ return {}; } }
 function readSceneLinks(card){
   const L=_sceneLinks(card);
-  return { map:L.map||'', mapkey:L.mapkey||'', cast:L.cast||[], clues:L.clues||[], tables:L.tables||[], hazards:L.hazards||[] };
+  return { map:L.map||'', mapkey:L.mapkey||'', cast:L.cast||[], clues:L.clues||[], treasure:L.treasure||[], tables:L.tables||[], hazards:L.hazards||[] };
 }
 function sceneLinkSet(el, k, val){
   const card=el.closest('.location-card'); const L=readSceneLinks(card); L[k]=val;
@@ -2211,11 +2272,11 @@ function sceneLinkToggle(cb){
   const set=new Set(L[k]||[]); if(cb.checked) set.add(cb.value); else set.delete(cb.value);
   L[k]=[...set]; card.dataset.links=JSON.stringify(L);
   cb.closest('.link-chip').classList.toggle('on', cb.checked);
-  sceneLinkCount(card); autosave();
+  sceneLinkCount(card); refreshAllItemLinks(); autosave();
 }
 function sceneLinkCount(card){
   const L=readSceneLinks(card);
-  const n=(L.map?1:0)+L.cast.length+L.clues.length+L.tables.length+L.hazards.length+card.querySelectorAll('.scene-trackers > .tracker-card').length;
+  const n=(L.map?1:0)+L.cast.length+L.clues.length+L.treasure.length+L.tables.length+L.hazards.length+card.querySelectorAll('.scene-trackers > .tracker-card').length;
   const el=card.querySelector('.scene-links .sl-count'); if(el) el.textContent=n?'('+n+')':'';
 }
 // Rebuild the chips from the names that exist right now. A linked name that no
@@ -2223,7 +2284,7 @@ function sceneLinkCount(card){
 function refreshSceneLinks(card){
   if(!card) return;
   const L=readSceneLinks(card);
-  const src={ cast:castNames(), clues:clueNames(), tables:tableNames(), hazards:hazardNames() };
+  const src={ cast:castNames(), clues:clueNames(), treasure:rewardNames(), tables:tableNames(), hazards:hazardNames() };
   card.querySelectorAll('.link-chips').forEach(box=>{
     const k=box.dataset.k, have=src[k]||[], sel=L[k]||[];
     const all=[...have, ...sel.filter(n=>!have.includes(n))];
@@ -2254,6 +2315,7 @@ function locBlockInner(l){
   const ln=[ K.map?'<b>Map:</b> '+escH(K.map)+(K.mapkey?' #'+escH(K.mapkey):''):'',
     (K.cast||[]).length?'<b>Cast:</b> '+(K.cast||[]).map(escH).join(', '):'',
     (K.clues||[]).length?'<b>Clues:</b> '+(K.clues||[]).map(escH).join(', '):'',
+    (K.treasure||[]).length?'<b>Treasure:</b> '+(K.treasure||[]).map(escH).join(', '):'',
     (K.tables||[]).length?'<b>Roll:</b> '+(K.tables||[]).map(escH).join(', '):'',
     (K.hazards||[]).length?'<b>Hazards:</b> '+(K.hazards||[]).map(escH).join(', '):'' ].filter(Boolean).join(' · ');
   return (ln?'<div class="loc-links">'+ln+'</div>':'')
@@ -2509,7 +2571,7 @@ function renderPreview() {
     if((state.clues||[]).length){
       let h='<div class="p-section"><div class="sl">Secrets &amp; Clues</div>';
       (state.clues||[]).forEach(c=>{
-        const meta=[c.where?'<b>Found:</b> '+escH(c.where):'', c.leads?'<b>Leads to:</b> '+escH(c.leads):''].filter(Boolean).join(' · ');
+        const meta=[c.where?'<b>Found:</b> '+escH(c.where):'', c.holder?'<b>Held by:</b> '+escH(c.holder):'', c.leads?'<b>Leads to:</b> '+escH(c.leads):''].filter(Boolean).join(' · ');
         h+='<div class="clue-item">'+(c.header?'<span class="clue-hdr">'+escH(c.header)+'</span>'+(c.text?' — ':''): '')+fmtText(c.text)+(meta?'<div class="loc-links">'+meta+'</div>':'')+'</div>';
       });
       sections.push(h+'</div>');
