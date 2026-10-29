@@ -2741,6 +2741,10 @@ input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-butto
 // Right-click a die to take one back out of the pool (as on the GM Screen).
 function poolSub(e,s){ if(e&&e.preventDefault) e.preventDefault(); var i=_pool.lastIndexOf(s); if(i>=0) _pool.splice(i,1); trayShow(); return false; }
 
+
+// Every roll clears the tray (pool and Adv / Dis), as on the GM Screen.
+(function(){ var _r=trayRoll; trayRoll=function(){ var out=_r.apply(this,arguments); try{ trayClear(); trayAdv('norm'); }catch(e){} return out; }; })();
+
 </script>
 </body>
 </html>

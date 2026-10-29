@@ -615,9 +615,9 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   </div>
   <div class="log-entries" id="log-entries"></div>
   <div class="dice-tray">
-    <div class="gmt-steprow"><button class="tstep" onclick="tStep('tray-qn2',-1,0,6)">−</button><input class="tnum" id="tray-qn2" type="number" min="0" max="6" value="2"><button class="tstep" onclick="tStep('tray-qn2',1,0,6)">+</button><button class="dice-btn roll gmt-roll" onclick="rollQuick()">Roll</button></div>
+    <div class="gmt-steprow" title="Dice for the tray roll, and ± dice on your next sheet roll"><button class="tstep" onclick="tStep('tray-bonus',-1,0,6)">−</button><input class="tnum" id="tray-bonus" type="number" min="0" max="6" value="0"><button class="tstep" onclick="tStep('tray-bonus',1,0,6)">+</button><button class="dice-btn roll gmt-roll" onclick="rollQuick()">Roll</button></div>
     <div class="gmt-legacy" hidden>
-    <div class="tray-row"><span class="tray-label">Assist</span><span class="tray-label" style="color:#5a6f68;">+dice</span><input class="tray-input" id="tray-bonus" type="number" value="0" min="0" max="5" title="extra dice from an ally's help"><button class="tray-toggle" id="tray-gild" onclick="this.classList.toggle('on')" title="force this roll gilded">Gild</button></div>
+    <div class="tray-row"><span class="tray-label">Assist</span><span class="tray-label" style="color:#5a6f68;">+dice</span><button class="tray-toggle" id="tray-gild" onclick="this.classList.toggle('on')" title="force this roll gilded">Gild</button></div>
     <div class="tray-row"><span class="tray-label">Free pool</span><input class="tray-input" id="tray-qn" type="number" value="1" min="0" max="6"><button class="dice-btn" onclick="rollQuick()">Roll d6 pool</button></div>
   </div>
   </div>
@@ -842,7 +842,7 @@ function animateRoll(rolls, gildIdx){
 
 function rollAction(name){
   var rating=S.actions[name]||0, drive=actionDrive(name);
-  var trayBonus=clamp(num($('tray-bonus').value),0,5), st=staged(drive), bonus=st+trayBonus;
+  var trayBonus=clamp(num($('tray-bonus').value),0,6), st=staged(drive), bonus=st+trayBonus;
   var gild=!!S.gilded[name]||$('tray-gild').classList.contains('on');
   var n=rating+bonus, zeroMode=false, rolls=[];
   if(n<=0){ zeroMode=true; rolls=[die6(),die6()]; } else { n=Math.min(6,n); for(var i=0;i<n;i++)rolls.push(die6()); }
@@ -888,7 +888,7 @@ function finalizeGild(takeGild){
     addLog(pr.label, high+'  '+t2.tier, pr.drive+' ['+pr.rolls.join(',')+']', t2.type); }
 }
 function rollQuick(){
-  var n=tVal('tray-qn2',0,6,2), zeroMode=false, rolls=[];
+  var n=Math.max(0,Math.min(6,trayTake('tray-bonus'))), zeroMode=false, rolls=[];
   if(n<=0){ zeroMode=true; rolls=[die6(),die6()]; } else { for(var i=0;i<n;i++)rolls.push(die6()); }
   var high=zeroMode?Math.min(rolls[0],rolls[1]):Math.max.apply(null,rolls), sixes=rolls.filter(function(v){return v===6;}).length;
   var t=poolTier(high,sixes,zeroMode);
@@ -1279,6 +1279,10 @@ input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-butto
 // [−] N [+] stepper, as on the GM Screen.
 function tStep(id,dir,lo,hi){ var el=document.getElementById(id); if(!el) return; var v=parseInt(el.value,10); if(isNaN(v)) v=lo; el.value=Math.max(lo,Math.min(hi,v+dir)); }
 function tVal(id,lo,hi,dflt){ var el=document.getElementById(id); var v=el?parseInt(el.value,10):NaN; if(isNaN(v)) v=dflt; v=Math.max(lo,Math.min(hi,v)); if(el) el.value=v; return v; }
+
+
+// The tray number doubles as ± dice on the next sheet roll; it resets once used.
+function trayTake(id){ var el=document.getElementById(id); var v=el?(parseInt(el.value,10)||0):0; if(el) el.value='0'; return v; }
 
 </script>
 

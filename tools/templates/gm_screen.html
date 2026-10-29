@@ -19077,8 +19077,11 @@ function init_dice(root) {
   function doRoll() {
     const dice = Object.entries(pool).filter(([, n]) => n > 0).map(([d, n]) => [parseInt(d, 10), n]);
     if(!dice.length) return;
-    if(curSys() === 'DB') return dbPoolRoll(dice);
-    rollCore(dice, 0, advMode, null);
+    if(curSys() === 'DB') dbPoolRoll(dice); else rollCore(dice, 0, advMode, null);
+    // Every roll clears the tray (pool and ADV / DIS; Dragonbane's boons / banes too).
+    pool = {}; advMode = 'none';
+    if(curSys() === 'DB' && (DBBB.boon || DBBB.bane)) { DBBB.boon = 0; DBBB.bane = 0; dbBBChanged(); }
+    renderTray(); renderPool();
   }
   // Dragonbane: the boons / banes go on the pool's first D20 (extra D20s, keep the
   // lowest / highest), then reset. A lone D20 reads 1 = Dragon, 20 = Demon.
@@ -19106,27 +19109,29 @@ function init_dice(root) {
     const inp = trayEl.querySelector('#' + id);
     const clamp = v => Math.max(min, Math.min(max, v));
     const set = v => { const c = clamp(v); inp.value = c; if(onset) onset(c); };
-    if(inp) inp.oninput = () => { const c = clamp(parseInt(inp.value, 10) || min); if(onset) onset(c); };
+    if(inp) inp.oninput = () => { const c = clamp(parseInt(inp.value, 10) || 0); if(onset) onset(c); };
     trayEl.querySelectorAll('.gmt-step[data-step="' + id + '"]').forEach(b => {
-      b.onclick = () => set((parseInt(inp.value, 10) || min) + parseInt(b.dataset.dir, 10));
+      b.onclick = () => set((parseInt(inp.value, 10) || 0) + parseInt(b.dataset.dir, 10));
     });
   }
 
   // Remembered per-tray counts so a roll doesn't reset what the GM dialed in.
-  const _tray = { yz: 5, wild: 4, swPips: 0, ghost: 4, co: 2, mvE: 0, mvT: 0 };
+  // The d6 trays' number is the free-roll pool AND ± dice on the next card roll
+  // (as on the sheets); every roll clears it back to 0.
+  const _tray = { yz: 0, wild: 0, swPips: 0, ghost: 0, co: 0, mvE: 0, mvT: 0 };
 
   // ════════ YZE — Year Zero Engine (D6 pool: each 6 a success, each 1 a bane) ════════
   function yzCount(rolls) { let s = 0, b = 0; rolls.forEach(v => { if(v === 6) s++; else if(v === 1) b++; }); return { s, b }; }
   function yzTier(s) { return s >= 2 ? { t: 'SUCCESS ×' + s, type: 'crit' } : s === 1 ? { t: 'SUCCESS', type: 'crit' } : { t: 'FAILURE', type: 'fumble' }; }
   function renderYZETray() {
-    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row">' + stepperHtml('yz-pool', _tray.yz, 1, 20)
+    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row">' + stepperHtml('yz-pool', _tray.yz, -6, 12)
       + '<button class="gmt-roll" id="yz-roll">Roll</button></div></div>';
-    wireStepper('yz-pool', 1, 20, v => { _tray.yz = v; });
+    wireStepper('yz-pool', -6, 12, v => { _tray.yz = v; });
     trayEl.querySelector('#yz-roll').onclick = yzRoll;
   }
   function yzRoll() {
-    const size = Math.max(1, Math.min(20, parseInt((trayEl.querySelector('#yz-pool') || {}).value, 10) || 1));
-    _tray.yz = size;
+    const size = Math.max(1, Math.min(12, parseInt((trayEl.querySelector('#yz-pool') || {}).value, 10) || 0));
+    _tray.yz = 0; setTimeout(renderTray, 0);
     const base = []; for(let i = 0; i < size; i++) base.push(d6());
     const c = yzCount(base), tier = yzTier(c.s);
     const detail = size + 'd6(' + base.join(',') + ') · ' + c.s + ' succ' + (c.b ? ' · ' + c.b + ' bane' + (c.b > 1 ? 's' : '') : '');
@@ -19136,17 +19141,17 @@ function init_dice(root) {
   // ════════ WEG D6 — Star Wars / ACE! / D6 2e (pool of d6, last is the Wild Die) ════════
   // The Wild Die explodes on a 6 (re-roll and add) and a 1 is a complication.
   function renderWildTray() {
-    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row">' + stepperHtml('wd-n', _tray.wild, 1, 15)
+    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row">' + stepperHtml('wd-n', _tray.wild, -6, 15)
       + '<button class="gmt-roll" id="wd-roll">Roll</button></div></div>';
-    wireStepper('wd-n', 1, 15, v => { _tray.wild = v; });
+    wireStepper('wd-n', -6, 15, v => { _tray.wild = v; });
     trayEl.querySelector('#wd-roll').onclick = wildRoll;
   }
   // D6 System 2e tray: same pool, but the D62e Wild Die rule (see d62eWild).
   function renderWildTrayD62e() {
     renderWildTray();
     trayEl.querySelector('#wd-roll').onclick = () => {
-      const n = Math.max(1, Math.min(15, parseInt((trayEl.querySelector('#wd-n') || {}).value, 10) || 1));
-      _tray.wild = n;
+      const n = Math.max(1, Math.min(15, parseInt((trayEl.querySelector('#wd-n') || {}).value, 10) || 0));
+      _tray.wild = 0; setTimeout(renderTray, 0);
       const r = d62eWild(n);
       gmLog('D6 wild pool', r.base + (r.adv ? ' ✦ Advantage' : r.comp ? ' ⚠ Complication' : ''), n + 'D: [' + r.reg.join(' ') + '] ✦[' + r.wf.join('→') + ']' + (r.adv ? ' · if it fails: ' + r.chain : ''), r.adv ? 'crit' : r.comp ? 'fumble' : '');
     };
@@ -19163,9 +19168,9 @@ function init_dice(root) {
     return { reg: reg, wf: wf, adv: wf[0] === 6, comp: wf[0] === 1, base: sumReg + wf[0], chain: sumReg + wf.reduce((a, b) => a + b, 0) };
   }
   function wildRoll(nArg, pipsArg) {
-    const n = typeof nArg === 'number' ? nArg : Math.max(1, Math.min(15, parseInt((trayEl.querySelector('#wd-n') || {}).value, 10) || 1));
+    const n = typeof nArg === 'number' ? nArg : Math.max(1, Math.min(15, parseInt((trayEl.querySelector('#wd-n') || {}).value, 10) || 0));
     const pips = typeof pipsArg === 'number' ? pipsArg : 0;
-    _tray.wild = n;
+    _tray.wild = 0; setTimeout(renderTray, 0);
     const reg = []; for(let i = 0; i < n - 1; i++) reg.push(d6());
     let w = d6(); const wildFaces = [w]; const complication = (w === 1); let guard = 0;
     while(w === 6 && guard++ < 20) { w = d6(); wildFaces.push(w); }
@@ -19184,18 +19189,18 @@ function init_dice(root) {
   // applies to this tray and to the Combat Tracker's SW card rolls.
   function renderSWTray() {
     const on = window.gmSwWildDie();
-    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row">' + stepperHtml('swd-n', _tray.wild, 1, 15)
+    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row">' + stepperHtml('swd-n', _tray.wild, -6, 15)
       + '<button class="gmt-roll" id="swd-roll">Roll</button></div>'
       + '<div class="gmt-row"><label class="gmt-wild" title="WEG Star Wars 1st edition has no Wild Die. Turn this on to use the 2nd-edition Wild Die as a house rule (GM rolls only; players set it on their own sheets).">'
       + '<input type="checkbox" id="swd-wild"' + (on ? ' checked' : '') + '> Wild Die (house rule — 2nd edition)</label></div></div>';
-    wireStepper('swd-n', 1, 15, v => { _tray.wild = v; });
+    wireStepper('swd-n', -6, 15, v => { _tray.wild = v; });
     trayEl.querySelector('#swd-wild').onchange = e => { window.gmSwWildDie(e.target.checked); };
     trayEl.querySelector('#swd-roll').onclick = swRoll;
   }
   function swRoll() {
-    const n = Math.max(1, Math.min(15, parseInt((trayEl.querySelector('#swd-n') || {}).value, 10) || 1));
+    const n = Math.max(1, Math.min(15, parseInt((trayEl.querySelector('#swd-n') || {}).value, 10) || 0));
     const p = 0;
-    _tray.wild = n;
+    _tray.wild = 0; setTimeout(renderTray, 0);
     if(window.gmSwWildDie()) { wildRoll(n, p); return; }
     const r = []; for(let i = 0; i < n; i++) r.push(d6());
     const total = r.reduce((a, b) => a + b, 0) + p;
@@ -19205,14 +19210,14 @@ function init_dice(root) {
   // ════════ Ghostbusters — like the wild pool, but one die is the Ghost Die ════════
   // A 6 on the Ghost Die counts 0 and signals trouble (it never explodes).
   function renderGhostTray() {
-    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row">' + stepperHtml('gh-n', _tray.ghost, 1, 15)
+    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row">' + stepperHtml('gh-n', _tray.ghost, -6, 15)
       + '<button class="gmt-roll" id="gh-roll">Roll</button></div></div>';
-    wireStepper('gh-n', 1, 15, v => { _tray.ghost = v; });
+    wireStepper('gh-n', -6, 15, v => { _tray.ghost = v; });
     trayEl.querySelector('#gh-roll').onclick = ghostRoll;
   }
   function ghostRoll() {
-    const n = Math.max(1, Math.min(15, parseInt((trayEl.querySelector('#gh-n') || {}).value, 10) || 1));
-    _tray.ghost = n;
+    const n = Math.max(1, Math.min(15, parseInt((trayEl.querySelector('#gh-n') || {}).value, 10) || 0));
+    _tray.ghost = 0; setTimeout(renderTray, 0);
     const normals = []; for(let i = 0; i < n - 1; i++) normals.push(d6());
     const ghost = d6(), isGhost = (ghost === 6);
     const sum = normals.reduce((a, b) => a + b, 0) + (isGhost ? 0 : ghost);
@@ -19231,7 +19236,7 @@ function init_dice(root) {
   }
   function candelaRoll() {
     const n = Math.max(0, Math.min(6, parseInt((trayEl.querySelector('#co-n') || {}).value, 10) || 0));
-    _tray.co = n;
+    _tray.co = 0; setTimeout(renderTray, 0);
     let rolls = [], zero = false;
     if(n <= 0) { zero = true; rolls = [d6(), d6()]; } else { for(let i = 0; i < n; i++) rolls.push(d6()); }
     const high = zero ? Math.min(rolls[0], rolls[1]) : Math.max.apply(null, rolls);
@@ -19279,6 +19284,7 @@ function init_dice(root) {
     // "3d6(a,b,c)" so the parser animates all three; the Marvel die is the middle one.
     const detail = '3d6(' + dice[0].v + ',' + dice[1].v + ',' + dice[2].v + ') · ✦' + (fantastic ? 'Marvel 1→6' : 'Marvel ' + dice[1].v) + etTxt;
     gmLog('d616', sum + (fantastic ? ' · ✦ FANTASTIC' : ''), detail, fantastic ? 'crit' : '');
+    _tray.mvE = 0; _tray.mvT = 0; renderTray();
   }
 
   // ════════ Kids on Bikes — tap a die to roll it once (no pool, no adv/dis) ════════
@@ -19604,10 +19610,15 @@ function init_dice(root) {
   //   d616       Marvel: 3d6 with the Marvel die in the middle (+ ability)
   //   nimble     Nimble damage: a 1 on the primary die misses, its top face crits
   //   alientable Alien: D6 on the creature's signature-attack table
+  // The d6 tray's number is ± dice on the next card roll (as on the sheets), then clears.
+  function trayKeyFor(sys) { return ({ YZE: 'yz', TWD: 'yz', VAE: 'yz', MYZ: 'yz', SW: 'wild', ACE: 'wild', D62E: 'wild', GB: 'ghost', CO: 'co' })[sys]; }
+  function takeTrayBonus() { const k = trayKeyFor(curSys()); if(!k) return 0; const v = _tray[k] || 0; if(v) { _tray[k] = 0; setTimeout(renderTray, 0); } return v; }
   root._monsterRoll = (spec) => {
-    const kind = spec && spec.kind, label = (spec && spec.label) || 'Roll';
+    const kind = spec && spec.kind; let label = (spec && spec.label) || 'Roll';
     const expr = String((spec && spec.roll) || '').replace(/\s+/g, '');
     const pool = /^(\d+)d6([+-]\d+)?$/i.exec(expr);
+    const tb = (pool && /^(yz|wild62|wild|gbghost|swplain|ace)$/.test(kind)) ? takeTrayBonus() : 0;
+    if(tb) { pool[1] = String(Math.max(1, +pool[1] + tb)); label += ' (tray ' + (tb > 0 ? '+' : '−') + Math.abs(tb) + 'D)'; }
     if(kind === 'yz' && pool) {
       const n = Math.min(40, +pool[1]); const rolls = []; for(let i = 0; i < n; i++) rolls.push(d6());
       const c = yzCount(rolls), tier = yzTier(c.s);

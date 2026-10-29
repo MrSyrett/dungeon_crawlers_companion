@@ -814,9 +814,9 @@ body.dark .act-badge.warn{color:#f0c060;}
   </div>
   <div class="log-entries" id="log-entries"></div>
   <div class="dice-tray">
-    <div class="gmt-steprow"><button class="tstep" onclick="tStep('tray-n',-1,1,20)">−</button><input class="tnum" id="tray-n" type="number" min="1" max="20" value="5"><button class="tstep" onclick="tStep('tray-n',1,1,20)">+</button><button class="dice-btn roll gmt-roll" onclick="rollQuick()">Roll</button></div>
+    <div class="gmt-steprow" title="Dice for the tray roll, and ± dice on your next sheet roll"><button class="tstep" onclick="tStep('tray-mod',-1,-6,12)">−</button><input class="tnum" id="tray-mod" type="number" min="-6" max="12" value="0"><button class="tstep" onclick="tStep('tray-mod',1,-6,12)">+</button><button class="dice-btn roll gmt-roll" onclick="rollQuick()">Roll</button></div>
     <div class="gmt-legacy" hidden>
-    <div class="tray-row"><span class="tray-label">± Dice</span><input class="tray-input" id="tray-mod" type="number" value="0" min="-6" max="12" title="Adds to / subtracts from your next sheet roll — or set the size of a free d6 pool and tap Roll"><button class="dice-btn" onclick="rollQuick()">Roll d6 pool</button></div>
+    <div class="tray-row"><span class="tray-label">± Dice</span><button class="dice-btn" onclick="rollQuick()">Roll d6 pool</button></div>
   </div>
   </div>
 </div>
@@ -1335,7 +1335,7 @@ function rollAttack(i){
   var skName=isShoot?'Shoot':'Fight', s=skillObj(skName)||{attr:(isShoot?'AGI':'STR')};
   doMyzRoll((w.name||'Attack')+' · '+skName+(isGun?' · −1 bullet':''), attrCur(s.attr), num(S.skills[skName])-critModFor(skName), weaponBonus(w.bonus), s.attr, {kind:'attack',wdmg:num(w.damage),weaponIdx:i});
 }
-function rollQuick(){ var n=tVal('tray-n',1,20,5);
+function rollQuick(){ var n=Math.max(1,Math.min(12,trayTake('tray-mod')));
   var a=rollSet(n), succ=count6(a); animDice(a,[],[],glowFor(succ)); addLog(n+'d6 free pool', succ+'  '+tierOf(succ).t, poolStr(a)+' · '+succ+' succ', tierOf(succ).type); _lastRoll=null; }
 function rollArmor(){ var r=armorRating(); if(r<1){ addLog('Armor','—','No armor equipped — equip armor on the Gear tab.','fumble'); return; }
   var a=rollSet(Math.min(12,r)), blk=count6(a), wear=count1(a); animDice(a,[],[],blk?'crit':'normal'); addLog('Armor ('+r+')', blk+' blocked', poolStr(a)+' · each 6 stops 1 Damage'+(wear?' · unless all damage was stopped, Armor Rating drops by '+wear+' (one per 1)':''), blk?'crit':'fumble'); }
@@ -2009,6 +2009,10 @@ input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-butto
 // [−] N [+] stepper, as on the GM Screen.
 function tStep(id,dir,lo,hi){ var el=document.getElementById(id); if(!el) return; var v=parseInt(el.value,10); if(isNaN(v)) v=lo; el.value=Math.max(lo,Math.min(hi,v+dir)); }
 function tVal(id,lo,hi,dflt){ var el=document.getElementById(id); var v=el?parseInt(el.value,10):NaN; if(isNaN(v)) v=dflt; v=Math.max(lo,Math.min(hi,v)); if(el) el.value=v; return v; }
+
+
+// The tray number doubles as ± dice on the next sheet roll; it resets once used.
+function trayTake(id){ var el=document.getElementById(id); var v=el?(parseInt(el.value,10)||0):0; if(el) el.value='0'; return v; }
 
 </script>
 

@@ -2122,6 +2122,10 @@ function gtRoll(){
   addLog(_gtLabel(), String(tot), parts.join(' '), type);
 }
 
+
+// Every roll clears the tray (pool and Adv / Dis), as on the GM Screen.
+(function(){ var _r=gtRoll; gtRoll=function(){ var out=_r.apply(this,arguments); try{ gtClear(); }catch(e){} return out; }; })();
+
 </script>
 <style id="nim-turn-style">
 #tab-action{padding:0;}

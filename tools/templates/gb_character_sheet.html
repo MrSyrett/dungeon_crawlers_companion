@@ -587,7 +587,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   </div>
   <div class="log-entries" id="log-entries"></div>
   <div class="dice-tray">
-    <div class="gmt-steprow"><button class="tstep" onclick="tStep('tray-n',-1,1,15)">−</button><input class="tnum" id="tray-n" type="number" min="1" max="15" value="4"><button class="tstep" onclick="tStep('tray-n',1,1,15)">+</button><button class="dice-btn roll gmt-roll" onclick="_pool=tVal('tray-n',1,15,4); poolRoll()">Roll</button></div>
+    <div class="gmt-steprow" title="Dice for the tray roll, and ± dice on your next sheet roll"><button class="tstep" onclick="tStep('tray-n',-1,-6,15)">−</button><input class="tnum" id="tray-n" type="number" min="-6" max="15" value="0"><button class="tstep" onclick="tStep('tray-n',1,-6,15)">+</button><button class="dice-btn roll gmt-roll" onclick="var _n=Math.max(1,trayTake('tray-n')); _pool=_n; poolRoll()">Roll</button></div>
     <div class="gmt-legacy" hidden>
     <div class="dice-pool-display" id="gb-pool">Empty</div>
     <div class="dice-btns">
@@ -699,13 +699,13 @@ function delGear(i){S.gear.splice(i,1);renderGear();scheduleAutosave();}
 function d6(){return Math.floor(Math.random()*6)+1;}
 function spendBP(){var s=Math.max(0,Math.min(S.bp,num($('f-spend').value)));if(s>0){S.bp-=s;renderBP();$('f-spend').value=0;}return s;}
 function rollDice(label,baseDice){
-  var extra=spendBP();
-  var n=Math.max(1,baseDice+extra);
+  var extra=spendBP(), tb=trayTake('tray-n');
+  var n=Math.max(1,baseDice+extra+tb);
   var normals=[]; for(var i=0;i<n-1;i++)normals.push(d6());
   var ghost=d6(); var isGhost=(ghost===6);
   var sum=normals.reduce(function(a,b){return a+b;},0)+(isGhost?0:ghost);
   var faces=normals.concat([ghost]);
-  var detail=n+'d6('+faces.join(',')+')'+(isGhost?' · Ghost=0':'')+(extra?' · +'+extra+' BP':'');
+  var detail=n+'d6('+faces.join(',')+')'+(isGhost?' · Ghost=0':'')+(extra?' · +'+extra+' BP':'')+(tb?' · '+(tb>0?'+':'')+tb+' tray':'');
   // Dice animation: the last die is the Ghost Die (white, no-ghost logo on its 6).
   window.__daNext={ dice: normals.map(function(v){ return {sides:6,display:String(v)}; }).concat([{sides:6,display:String(ghost),faceSet:'ghost'}]) };
   addLog((S.name||'Ghostbuster')+' · '+label, sum+(isGhost?'':''), detail, isGhost?'ghost':'normal');
@@ -1080,6 +1080,10 @@ input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-butto
 // [−] N [+] stepper, as on the GM Screen.
 function tStep(id,dir,lo,hi){ var el=document.getElementById(id); if(!el) return; var v=parseInt(el.value,10); if(isNaN(v)) v=lo; el.value=Math.max(lo,Math.min(hi,v+dir)); }
 function tVal(id,lo,hi,dflt){ var el=document.getElementById(id); var v=el?parseInt(el.value,10):NaN; if(isNaN(v)) v=dflt; v=Math.max(lo,Math.min(hi,v)); if(el) el.value=v; return v; }
+
+
+// The tray number doubles as ± dice on the next sheet roll; it resets once used.
+function trayTake(id){ var el=document.getElementById(id); var v=el?(parseInt(el.value,10)||0):0; if(el) el.value='0'; return v; }
 
 </script>
 

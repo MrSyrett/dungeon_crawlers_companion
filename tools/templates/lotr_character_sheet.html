@@ -1908,6 +1908,7 @@ function rollCtx(kind, extra){
   if(extra.dis) dis.push(extra.dis);
   if(extra.adv) adv.push(extra.adv);
   if(kind === 'saveDex' && typeof _turn !== 'undefined' && _turn.dodge) adv.push('Dodge');
+  if(_adv !== 'norm') setTimeout(function(){ setAdv('norm'); }, 0);   // the switch is spent by this roll
   const advOn = _adv === 'adv' || adv.length > 0, disOn = _adv === 'dis' || dis.length > 0;
   const mode = (advOn && disOn) ? 'norm' : advOn ? 'adv' : disOn ? 'dis' : 'norm';
   const why = [];
@@ -4068,6 +4069,10 @@ input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-butto
 
 // Right-click a die to take one back out of the pool (as on the GM Screen).
 function poolSub(e,s){ if(e&&e.preventDefault) e.preventDefault(); var i=dicePool.lastIndexOf(s); if(i>=0) dicePool.splice(i,1); updateDicePoolDisplay(); return false; }
+
+
+// Every roll clears the tray (pool and Adv / Dis), as on the GM Screen.
+(function(){ var _r=rollDicePool; rollDicePool=function(){ var out=_r.apply(this,arguments); try{ clearDicePool(); setAdv('norm'); }catch(e){} return out; }; })();
 
 </script>
 

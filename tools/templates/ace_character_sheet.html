@@ -746,7 +746,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
   <!-- DICE TRAY -->
   <div class="dice-tray">
-    <div class="gmt-steprow"><button class="tstep" onclick="tStep('tray-n2',-1,1,15)">−</button><input class="tnum" id="tray-n2" type="number" min="1" max="15" value="4"><button class="tstep" onclick="tStep('tray-n2',1,1,15)">+</button><button class="dice-roll-btn gmt-roll" onclick="doRoll('Dice pool', tVal('tray-n2',1,15,4), {})">🎲 Roll</button></div>
+    <div class="gmt-steprow" title="Dice for the tray roll, and ± dice on your next sheet roll"><button class="tstep" onclick="tStep('tray-n2',-1,-6,15)">−</button><input class="tnum" id="tray-n2" type="number" min="-6" max="15" value="0"><button class="tstep" onclick="tStep('tray-n2',1,-6,15)">+</button><button class="dice-roll-btn gmt-roll" onclick="doRoll('Dice pool', Math.max(1,trayTake('tray-n2')), {noTray:true})">🎲 Roll</button></div>
     <div class="gmt-legacy" hidden>
     <div class="tray-row">
       <span class="tray-label">Target</span>
@@ -1040,6 +1040,7 @@ function trayStep(dir) { const el = $('tray-n'); el.value = Math.max(1, Math.min
 // Calamity Die = the first die. Fail + Calamity 1 → CALAMITY.
 function doRoll(label, n, opts) {
   opts = opts || {};
+  const _tb = opts.noTray ? 0 : trayTake('tray-n2'); if(_tb) { n = Math.max(1, n + _tb); opts.note = (opts.note ? opts.note + ' · ' : '') + 'tray ' + (_tb > 0 ? '+' : '−') + Math.abs(_tb); }
   const tn = opts.tn !== undefined ? opts.tn : trayTN();
   const dice = rollPool(n);
   const total = poolTotal(dice);
@@ -1842,6 +1843,10 @@ input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-butto
 // [−] N [+] stepper, as on the GM Screen.
 function tStep(id,dir,lo,hi){ var el=document.getElementById(id); if(!el) return; var v=parseInt(el.value,10); if(isNaN(v)) v=lo; el.value=Math.max(lo,Math.min(hi,v+dir)); }
 function tVal(id,lo,hi,dflt){ var el=document.getElementById(id); var v=el?parseInt(el.value,10):NaN; if(isNaN(v)) v=dflt; v=Math.max(lo,Math.min(hi,v)); if(el) el.value=v; return v; }
+
+
+// The tray number doubles as ± dice on the next sheet roll; it resets once used.
+function trayTake(id){ var el=document.getElementById(id); var v=el?(parseInt(el.value,10)||0):0; if(el) el.value='0'; return v; }
 
 </script>
 

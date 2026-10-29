@@ -810,7 +810,7 @@ body.dark #d6-action .turn-badge.warn{color:#f0c060;}
   <div class="dice-tray">
     <div class="tray-note" id="mod-note"></div>
     <div class="tray-note" id="opt-note"></div>
-    <div class="gmt-steprow"><button class="tstep" onclick="tStep('tray-n',-1,1,15)">−</button><input class="tnum" id="tray-n" type="number" min="1" max="15" value="4"><button class="tstep" onclick="tStep('tray-n',1,1,15)">+</button><button class="dice-btn roll gmt-roll" onclick="d62ePool=tVal('tray-n',1,15,4); rollPool()">Roll</button></div>
+    <div class="gmt-steprow" title="Dice for the tray roll, and ± dice on your next sheet roll"><button class="tstep" onclick="tStep('tray-n',-1,-6,15)">−</button><input class="tnum" id="tray-n" type="number" min="-6" max="15" value="0"><button class="tstep" onclick="tStep('tray-n',1,-6,15)">+</button><button class="dice-btn roll gmt-roll" onclick="d62ePool=Math.max(1,trayTake('tray-n')); rollPool()">Roll</button></div>
     <div class="gmt-legacy" hidden>
     <div class="dice-pool-display" id="pool-display">Empty</div>
     
@@ -1257,7 +1257,7 @@ function diceStr(p, r) {
 // Rolls a die code and returns the result WITHOUT logging (so callers can
 // combine several rolls into one log entry, e.g. an attack + its damage).
 function computeRoll(basePips, opts) {
-  opts = opts || {}; const m = opts.noMods ? { total: 0 } : currentMods();
+  opts = opts || {}; const _tb = (opts.noMods || opts.noTray) ? 0 : trayTake('tray-n'); basePips += _tb * 3; const m = opts.noMods ? { total: 0 } : currentMods();
   let p = basePips + (m.total || 0); let heroInfo = ''; let extraPlain = 0, extraWild = 0, waived = 0;
   if(heroArmed && !opts.noMods) {
     const model = heroModel(), n = heroArmed;
@@ -1281,7 +1281,7 @@ function computeRoll(basePips, opts) {
   // Success needs a total GREATER than the Difficulty Number; equal fails (p.26).
   const tot = coreAdvTotal(r, dc);
   const modShown = (m.total || 0) + waived;
-  const detail = [diceStr(p, r), heroInfo, modShown ? 'mods ' + code(modShown, true) : '', ws.note, dc ? 'vs ' + dc + (tot > dc ? ' — success' : ' — failure (must beat the number)') : ''].filter(Boolean).join(' · ');
+  const detail = [_tb ? 'tray ' + (_tb > 0 ? '+' : '−') + Math.abs(_tb) + 'D' : '', diceStr(p, r), heroInfo, modShown ? 'mods ' + code(modShown, true) : '', ws.note, dc ? 'vs ' + dc + (tot > dc ? ' — success' : ' — failure (must beat the number)') : ''].filter(Boolean).join(' · ');
   const type = ws.type || (dc ? (tot > dc ? 'crit' : 'fumble') : 'normal');
   return { total: tot, mark: ws.mark, detail: detail, type: type };
 }
@@ -2396,6 +2396,10 @@ input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-butto
 // [−] N [+] stepper, as on the GM Screen.
 function tStep(id,dir,lo,hi){ var el=document.getElementById(id); if(!el) return; var v=parseInt(el.value,10); if(isNaN(v)) v=lo; el.value=Math.max(lo,Math.min(hi,v+dir)); }
 function tVal(id,lo,hi,dflt){ var el=document.getElementById(id); var v=el?parseInt(el.value,10):NaN; if(isNaN(v)) v=dflt; v=Math.max(lo,Math.min(hi,v)); if(el) el.value=v; return v; }
+
+
+// The tray number doubles as ± dice on the next sheet roll; it resets once used.
+function trayTake(id){ var el=document.getElementById(id); var v=el?(parseInt(el.value,10)||0):0; if(el) el.value='0'; return v; }
 
 </script>
 
