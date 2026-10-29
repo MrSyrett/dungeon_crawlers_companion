@@ -567,7 +567,11 @@ function audioBroadcast(campaignId: string | null): string {
 // empty rather than throw — so guard new reads the same way.
 //
 // Files every system needs, whatever is linked.
-const SHARED_DATA = new Set(["dice-anim.js", "gm-npc-tables.js"]);
+// prep-registry.js is the Adventure Prep registry (tab order and names, which
+// modules a prep has). Its "prep-" prefix looks like a system's, so without
+// this entry it was dropped on every linked campaign, and Factions, Journey and
+// Vehicles showed as empty tabs.
+const SHARED_DATA = new Set(["dice-anim.js", "gm-npc-tables.js", "prep-registry.js"]);
 
 /** Drop the /tools-data/ script tags that belong to other systems. With no
  *  campaign linked the served system is unknown (the template picks it up

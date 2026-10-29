@@ -8274,7 +8274,9 @@ function wireSessionPrepLoader(root) {
   // LotR / Dragonbane / Pirate Borg are still hand-built preps with their own
   // Phase / Quest / Voyage sections, so they keep plain labels until they move.
   const HAND_BUILT = {};
-  const modOn = m => !!(window.PREP_REGISTRY && window.PREP_REGISTRY.hasModule && window.PREP_REGISTRY.hasModule(prepSys, m));
+  // Travel, Factions and Vehicles are on for every system; if the registry ever
+  // fails to load, still count them so their tabs don't dim with content inside.
+  const modOn = m => (window.PREP_REGISTRY && window.PREP_REGISTRY.hasModule) ? !!window.PREP_REGISTRY.hasModule(prepSys, m) : ['travel', 'factions', 'vehicles'].indexOf(m) >= 0;
   const PLAIN = { adventure: 'Overview', clues: 'Clues', scenes: 'Scenes', cast: 'NPCs', treasure: 'Loot', maps: 'Maps', tables: 'Tables', notes: 'Notes' };
   function lab(k){
     const R = window.PREP_REGISTRY;
