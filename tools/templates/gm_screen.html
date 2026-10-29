@@ -2057,15 +2057,43 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 .mon-pick.inline{position:static;inset:auto;background:transparent;backdrop-filter:none;padding:0;flex:1;display:flex}
 .mon-pick.inline .mon-pick-card{width:100%;max-height:none;border:0;padding:0;background:transparent}
 .mon-pick.inline .mon-pick-head{display:none}
-/* Trackers in the Monitor bar: two rows; Ticks put the label on top, 5 boxes a row. */
-#gmc-timers{display:grid;grid-template-rows:repeat(2,auto);grid-auto-flow:column;grid-auto-columns:max-content;gap:4px 5px;align-content:center;padding:4px 0}
-#gmc-timers .timer{padding:3px 8px;border-radius:7px}
-#gmc-timers .timer>div{display:flex;align-items:baseline;gap:6px}
-#gmc-timers .timer .tv{font-size:12px}
-#gmc-timers .ticktrk{flex-direction:column;align-items:flex-start;gap:3px;padding:3px 8px 4px;border-radius:7px}
-#gmc-timers .ticktrk.tall{grid-row:span 2}
+/* Trackers in the Monitor bar: two rows of same-size tiles, every label on top
+   (Ticks: five boxes a row). A divider separates them from the scene bubbles. */
+#gmc-timers{display:grid;grid-template-rows:repeat(2,36px);grid-auto-flow:column;grid-auto-columns:96px;gap:4px 5px;align-content:center;padding:0 0 0 10px;margin-left:4px;border-left:1px solid var(--border)}
+#gmc-timers .timer,#gmc-timers .ticktrk{box-sizing:border-box;width:96px;height:36px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:3px 8px;border-radius:7px;overflow:hidden}
+#gmc-timers .timer>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+#gmc-timers .tl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px}
+#gmc-timers .timer .tv{font-size:13px;line-height:1}
+#gmc-timers .ticktrk.tall{grid-row:span 2;height:auto}
 #gmc-timers .tick-boxes{display:grid;grid-template-columns:repeat(5,11px);gap:2px}
 #gmc-timers .tick-boxes .tmr-tick{width:11px;height:11px;border-radius:2px}
+#gmc-timers .ticktrk.two .tick-boxes{grid-template-columns:repeat(5,8px);gap:2px}
+#gmc-timers .ticktrk.two .tmr-tick{width:9px;height:9px}
+#gmc-timers .ticktrk.two{gap:2px;padding:2px 8px}
+#gmc-timers .tl{line-height:1;flex-shrink:0}
+#gmc-timers .ticktrk.two .tick-boxes{row-gap:1px}
+#gmc-timers .ticktrk.two .tmr-tick{width:8px;height:8px}
+/* "+" and ✕ (clear the scene), stacked, left of the bubbles */
+.scene-ctl{display:flex;flex-direction:column;justify-content:center;gap:5px;flex-shrink:0;padding:0 0 0 6px}
+.scene-ctl .scene-ctl-btn{width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;padding:0;cursor:pointer;align-self:auto;background:transparent}
+.scene-ctl .scene-add{border:1px dashed color-mix(in srgb,var(--accent) 60%,var(--border));color:var(--accent);font:300 22px/1 'Geist',sans-serif}
+.scene-ctl .scene-add:hover{background:color-mix(in srgb,var(--accent) 12%,transparent);border-style:solid}
+.scene-ctl .scene-clear{border:1px solid var(--border);color:var(--mid);font-size:12px}
+.scene-ctl .scene-clear:hover{border-color:var(--red-light);color:#ff8a80}
+/* Round over Session, stacked; the initiative dice sit above Advance */
+.gmc-stack{display:flex;flex-direction:column;justify-content:center;gap:8px}
+.gmc-stack .gmc-round-info{flex-direction:row;align-items:baseline;justify-content:space-between;gap:8px}
+#gmc-topbar .gmc-stack .tel-clock,.gmc-stack .tel-clock{margin:0;padding:0;border:0;flex-direction:row;align-items:baseline;justify-content:space-between;gap:8px}
+.gmc-stack .gmc-round-num{font-size:16px}
+.gmc-stack .tel-time{font-size:15px}
+.gmc-round-btns .gmc-init{display:flex;flex-direction:row;gap:3px;padding:0;border:0}
+.gmc-round-btns .gmc-round-btn.gmc-init-btn{width:26px;height:17px;padding:0;border-radius:5px;border:1px solid var(--border);background:var(--panel-2);color:var(--light);font-size:11px;line-height:1;display:inline-flex;align-items:center;justify-content:center;gap:0;text-transform:none;letter-spacing:0}
+.gmc-round-btns .gmc-init-btn:hover{border-color:var(--accent)}
+/* Talk-only NPC bubbles match the others' size (two meter rows = health bar + chips) */
+.bubble.talk .bub-meter{height:14px}
+.bubble.talk .bub-meter + .bub-meter{height:14px}
+#gmc-party-bubbles.compact .bubble.talk .bub-meter{height:9px}
+#gmc-party-bubbles.compact .bubble.talk .bub-dots i{width:8px;height:8px}
 .timer{display:flex;align-items:center;gap:6px;background:linear-gradient(180deg,#191c22,#141519);border:1px solid var(--border);border-left:2px solid #5490c4;border-radius:8px;padding:4px 10px;cursor:pointer;flex:0 0 auto}
 .timer:hover{border-color:var(--accent-dim)}
 .timer.zero{border-left-color:var(--red-light)}
@@ -2543,17 +2571,24 @@ html:not([data-gm-sys="PB"]) .pb-init-banner { display: none; }
           </div>
   </div>
 
+  <div class="scene-ctl" id="scene-ctl">
+    <button type="button" class="scene-ctl-btn scene-add" title="Add a monster or NPC to the scene" aria-label="Add to the scene">+</button>
+    <button type="button" class="scene-ctl-btn scene-clear" title="Clear the scene: remove every monster and NPC bubble and reset initiative" aria-label="Clear the scene" style="display:none">&#10005;</button>
+  </div>
   <div class="mon-group" id="gmc-party-bubbles"><div class="party-empty" id="party-empty">Open this screen from a campaign to see your party</div></div>
   <div class="mon-group" id="gmc-timers"></div>
-  <div class="gmc-init" id="gmc-init" style="display:none"></div>
   <div class="gmc-round" id="gmc-round">
-    <div class="gmc-round-info"><span class="gmc-round-lbl">Round</span><span class="gmc-round-num" id="gmc-round-num">1</span></div>
+    <!-- Round and Session stacked; the initiative dice sit above Advance. -->
+    <div class="gmc-stack">
+      <div class="gmc-round-info"><span class="gmc-round-lbl">Round</span><span class="gmc-round-num" id="gmc-round-num">1</span></div>
+      <div class="tel-clock"><div class="tel-clbl">Session</div><div class="tel-time" id="tel-clock">0:00</div></div>
+    </div>
     <div class="gmc-round-btns">
+      <div class="gmc-init" id="gmc-init" style="display:none"></div>
       <button class="gmc-round-btn gmc-round-next" type="button" onclick="gmcNextRound()" title="Advance the round (steps combat + round timers)" aria-label="Next round">&rsaquo;</button>
       <button class="gmc-round-btn gmc-round-reset" type="button" onclick="gmcResetRounds()" title="Reset the round counter and round timers" aria-label="Reset rounds">&#8635;</button>
     </div>
   </div>
-  <div class="tel-clock"><div class="tel-clbl">Session</div><div class="tel-time" id="tel-clock">0:00</div></div>
 
   <div class="view-controls">
     <button class="add-window-btn" id="add-window-btn" type="button" onclick="addWindow()" title="Add a window" aria-label="Add a window"><span class="aw-plus">＋</span> Window</button>
@@ -6893,6 +6928,17 @@ document.addEventListener('gm-roster', e => renderPartyStrip(e.detail));
 let scenePop = null;   // the open bubble popup: { kind: 'npc'|'soc'|'view'|'add', id }
 // The live Combat / Social engines, without spawning a window for them.
 function sceneNode(tool) {
+  // The station's engine first — exactly where ensureToolWindow() (and so "+ Add",
+  // Run Scene, the bestiary) sends things. An old board can also carry a free-mode
+  // Combat window; looking there first showed a different, empty tracker.
+  // In the free-window view (older boards, and the phone layout) ensureToolWindow()
+  // uses the window showing the tool, so the bar must read that same one.
+  if(document.body.dataset.cview !== 'console' && typeof gmWindows !== 'undefined') {
+    const w = gmWindows.find(x => x.tool === tool);
+    if(w && gmNodes[w.id] && gmNodes[w.id].byTool && gmNodes[w.id].byTool[tool]) return gmNodes[w.id].byTool[tool];
+  }
+  const ST = { trackers: 'cbt', social: 'soc', party: null }[tool];
+  if(ST && gmNodes['cst-' + ST] && gmNodes['cst-' + ST].byTool && gmNodes['cst-' + ST].byTool[tool]) return gmNodes['cst-' + ST].byTool[tool];
   for(const k of Object.keys(gmNodes)) { const c = gmNodes[k]; if(c && c.byTool && c.byTool[tool]) return c.byTool[tool]; }
   if(typeof gmcPopNodes !== 'undefined' && gmcPopNodes[tool]) return gmcPopNodes[tool];
   if(typeof instances !== 'undefined' && instances[tool]) return instances[tool];
@@ -6954,16 +7000,16 @@ function renderSceneStripNow(el) {
       const i = pcIdx(e.name);
       if(i < 0) { if(e.n != null || (e.cards && e.cards.length)) parts.push('<div class="bubble ghost" title="' + sceneEsc(e.name) + '">' + sceneInitChip(e, editable) + '<div class="bub-id"><span class="bub-nm">' + sceneEsc(e.name) + '</span><span class="bub-sub">Player</span></div><div class="bub-hpb empty"><span class="bub-hpt bub-hpt-none">—</span></div><div class="bub-r3 bub-r3-empty">—</div></div>'); return; }
       used.add(i);
-      parts.push(gmcBubbleHTML(roster[i], i).replace(/^(<div class="bubble[^>]*>)/, '$1' + sceneInitChip(e, editable)));
+      try { parts.push(gmcBubbleHTML(roster[i], i).replace(/^(<div class="bubble[^>]*>)/, '$1' + sceneInitChip(e, editable))); } catch(x) { console.warn('[scene] party bubble', x); }
     } else {
-      let d = null; try { d = tr._bubbleData(e.id); } catch(x) {}
-      if(d) parts.push(sceneNpcBubble(e, d, editable));
+      let d = null; try { d = tr._bubbleData(e.id); } catch(x) { console.warn('[scene] bubble data', x); }
+      // Never drop a combatant: a bubble whose data failed still shows its name.
+      try { parts.push(sceneNpcBubble(e, d || { name: e.name || '?', sub: '', def: null, hp: '', pct: null, wound: '', down: false, statuses: 0 }, editable)); } catch(x) { console.warn('[scene] bubble', x); }
     }
   });
   roster.forEach((p, i) => { if(!used.has(i)) parts.push(gmcBubbleHTML(p, i)); });
   (so && so._items ? so._items() : []).forEach(it => parts.push(sceneSocBubble(it)));
-  const add = '<button type="button" class="scene-add" title="Add a monster or NPC to the scene" aria-label="Add to the scene">+</button>';
-  el.innerHTML = (parts.length ? parts.join('') : '<div class="party-empty" id="party-empty">Open this screen from a campaign to see your party</div>') + add;
+  el.innerHTML = parts.length ? parts.join('') : '<div class="party-empty" id="party-empty">Open this screen from a campaign to see your party</div>';
   // Too many to fit in one line of full bubbles → two rows of compact ones.
   el.classList.remove('compact'); el.style.gridTemplateColumns = '';
   if(el.scrollWidth > el.clientWidth + 2) {
@@ -6971,8 +7017,7 @@ function renderSceneStripNow(el) {
     // rest across the bottom, "+" at the end spanning both.
     const k = Math.max(1, Math.ceil(el.querySelectorAll('.bubble, .party-empty').length / 2));
     el.classList.add('compact');
-    el.style.gridTemplateColumns = 'repeat(' + k + ', max-content) max-content';
-    const add = el.querySelector('.scene-add'); if(add) add.style.gridColumn = (k + 1) + ' / ' + (k + 2);
+    el.style.gridTemplateColumns = 'repeat(' + k + ', max-content)';
   }
   sceneInitButton();
 }
@@ -6982,17 +7027,18 @@ function sceneInitButton() {
   const tr = sceneNode('trackers'); const b = tr && tr._initBtn ? tr._initBtn() : null;
   const so = sceneNode('social');
   const anyone = (tr && tr._npcCount ? tr._npcCount() : 0) + (so && so._items ? so._items().length : 0);
-  if(!b && !anyone) { host.innerHTML = ''; host.style.display = 'none'; return; }
-  const h = (b ? '<button type="button" class="gmc-init-btn" data-init="1" title="' + sceneEsc(b.title) + '">' + b.ico + '<span>' + sceneEsc(b.label) + '</span></button>' : '')
-    + (b && b.indiv ? '<button type="button" class="gmc-init-btn" data-init="indiv" title="Optional individual initiative: enemies d6 (ships + AGILITY), PCs roll d6 + AGILITY on their sheets">🎲<span>Individual</span></button>' : '')
-    + (anyone ? '<button type="button" class="gmc-init-btn clear" data-clear="1" title="End the scene: remove every monster and NPC bubble and reset initiative">✕<span>Clear</span></button>' : '');
+  const clr = document.querySelector('#scene-ctl .scene-clear'); if(clr) clr.style.display = anyone ? '' : 'none';
+  if(!b) { host.innerHTML = ''; host.style.display = 'none'; return; }
+  const h = '<button type="button" class="gmc-round-btn gmc-init-btn" data-init="1" title="' + sceneEsc(b.label) + ' — ' + sceneEsc(b.title) + '" aria-label="' + sceneEsc(b.label) + '">' + b.ico + '</button>'
+    + (b.indiv ? '<button type="button" class="gmc-round-btn gmc-init-btn" data-init="indiv" title="Individual initiative — enemies d6 (ships + AGILITY); PCs roll d6 + AGILITY on their sheets" aria-label="Individual initiative">🎲</button>' : '');
   if(host.innerHTML !== h) host.innerHTML = h;
   host.style.display = '';
 }
 document.addEventListener('click', e => {
-  const b = e.target.closest && e.target.closest('#gmc-init .gmc-init-btn'); if(!b) return;
+  if(e.target.closest && e.target.closest('#scene-ctl .scene-add')) { openSceneAdd(); return; }
+  const b = e.target.closest && e.target.closest('#gmc-init .gmc-init-btn, #scene-ctl .scene-clear'); if(!b) return;
   const tr = sceneNodeEnsure('trackers');
-  if(b.dataset.clear) {
+  if(b.classList.contains('scene-clear')) {
     if(!confirm('Clear the scene? Every monster and NPC bubble is removed and initiative resets.')) return;
     if(tr && tr._clearScene) tr._clearScene();
     const so = sceneNode('social'); if(so && so._items) so._items().forEach(it => so._remove(it.id));
@@ -7024,7 +7070,6 @@ window.__sceneRefresh = function() {
       return;
     }
     if(e.target.closest('.bub-init-in')) { e.stopPropagation(); return; }
-    if(e.target.closest('.scene-add')) { openSceneAdd(); return; }
     const bub = e.target.closest('.bubble[data-scene]');
     if(bub) openScenePop(bub.dataset.scene, +bub.dataset.id);
   }, true);
@@ -7131,7 +7176,7 @@ function renderTimers(){
       const n = Math.max(1, Math.min(30, t.count||1)), f = Math.max(0, Math.min(n, t.filled||0));
       let boxes = '';
       for(let i=1;i<=n;i++) boxes += '<button type="button" class="tmr-tick'+(i<=f?' on':'')+'" data-i="'+i+'" title="Set to '+i+'"></button>';
-      return '<div class="ticktrk'+(n>5?' tall':'')+'" data-id="'+t.id+'">'
+      return '<div class="ticktrk'+(n>10?' tall':n>5?' two':'')+'" data-id="'+t.id+'">'
         + '<div class="tl" data-opentrackers title="Open Trackers">'+esc2(t.name||'Ticks')+'</div>'
         + '<div class="tick-boxes">'+boxes+'</div></div>';
     }
@@ -8981,7 +9026,7 @@ function wireSessionPrepLoader(root) {
         ? '<div class="advh-card advh-talk" data-i="' + i + '"><div class="advh-card-h">' + advEsc(sb.name || 'NPC') + ' <span class="advh-tag">non-combat</span></div>'
           + (sb.flavor ? '<div class="advh-desc">' + advText(sb.flavor) + '</div>' : '')
           + ['wants', 'quirks', 'info', 'inventory'].map(k => sb[k] ? '<div class="advh-desc"><b>' + ({ wants: 'Wants', quirks: 'Quirks', info: 'Knows', inventory: 'Carries' })[k] + ':</b> ' + advText(sb[k]) + '</div>' : '').join('')
-          + '<div class="advh-actions"><button type="button" class="btn small advh-send-social advh-talk-social" title="Add to the scene (a bubble in the Monitor bar)">Combat</button><button type="button" class="btn small ghost advh-talk-view" title="Open the card without adding it">View</button></div></div>'
+          + '<div class="advh-actions"><button type="button" class="btn small advh-send-social advh-talk-social" title="Add to the scene (a bubble in the Monitor bar)">+ Add</button><button type="button" class="btn small ghost advh-talk-view" title="Open the card without adding it">View</button></div></div>'
         : '<div class="advh-npc advh-collapsed" data-i="' + i + '"></div>').join('');
     }
     if(sec === 'clues'){
@@ -9054,7 +9099,7 @@ function wireSessionPrepLoader(root) {
     const band = card.querySelector('.cc-band');
     if(band) {
       const col = document.createElement('div'); col.className = 'advh-send-col';
-      const send = document.createElement('button'); send.type = 'button'; send.className = 'btn small advh-send advh-send-combat'; send.title = 'Add to the scene (a bubble in the Monitor bar)'; send.innerHTML = 'Combat'; col.appendChild(send);
+      const send = document.createElement('button'); send.type = 'button'; send.className = 'btn small advh-send advh-send-combat'; send.title = 'Add to the scene (a bubble in the Monitor bar)'; send.innerHTML = '+ Add'; col.appendChild(send);
       const view = document.createElement('button'); view.type = 'button'; view.className = 'btn small ghost advh-view'; view.title = 'Open the card without adding it'; view.innerHTML = 'View'; col.appendChild(view);
       band.appendChild(col);
     }
@@ -9168,7 +9213,7 @@ function wireSessionPrepLoader(root) {
         const i = +slot.dataset.i; const sb = (prep.statblocks || [])[i];
         if(sb && typeof window.sendPrepNpcToTracker === 'function' && window.sendPrepNpcToTracker(sb, prepSys)) {
           send.innerHTML = '✓ Added'; send.disabled = true;
-          setTimeout(() => { send.innerHTML = 'Combat'; send.disabled = false; }, 1400);
+          setTimeout(() => { send.innerHTML = '+ Add'; send.disabled = false; }, 1400);
         }
       });
       const view = slot.querySelector('.advh-view');
