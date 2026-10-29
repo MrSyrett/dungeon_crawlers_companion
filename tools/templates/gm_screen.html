@@ -2063,6 +2063,7 @@ body[data-cview="free"] .cst-log-rail{display:none}
 .cst-head:has(.init-badges:not(:empty)){flex-wrap:wrap;row-gap:5px}
 .init-badges{display:flex;flex-wrap:wrap;align-items:center;gap:4px;min-width:0;flex:1 1 200px;order:0}
 .init-badges:empty{display:none}
+.init-badges.in-body{flex:none;padding:6px 8px}
 .cst-head:has(.init-badges:not(:empty)) .cst-toolbar{order:1}
 .ib{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px 0 2px;border-radius:999px;background:var(--panel-2);border:1px solid color-mix(in srgb,var(--red,#b82018) 55%,var(--border));font-family:'Geist',sans-serif;font-size:11px;font-weight:700;color:var(--light);white-space:nowrap;max-width:170px}
 .ib.pc{border-color:color-mix(in srgb,var(--accent) 60%,var(--border))}
@@ -3463,7 +3464,7 @@ GMScenes.renderPins();
 <template id="tpl-trackers">
   <div class="tool-instance cbt-tool trk-tool" data-tool="trackers">
     <div class="toolbar-tpl" style="display:none">
-      <button class="btn small primary cbt-add-monster" title="Add a monster or combatant from the bestiary" aria-label="Add combatant">&#43; Add Combatant</button>
+      <button class="btn small primary cbt-add-monster" title="Add a monster or combatant from the bestiary" aria-label="Add combatant">&#43;</button>
       <button class="btn small ghost trk-init" title="Roll initiative" aria-label="Initiative">🎲<span class="trk-init-lbl"> Initiative</span></button>
       <button class="btn small ghost trk-pb-indiv pb-only" title="Optional individual initiative: every enemy rolls d6 (ships d6 + AGILITY), highest first; PCs roll d6 + AGILITY on their sheets" aria-label="Roll individual initiative">🎲<span class="trk-pb-lbl"> Individual</span></button>
       <div class="toolbar-spacer"></div>
@@ -3483,7 +3484,7 @@ GMScenes.renderPins();
 <template id="tpl-social">
   <div class="tool-instance soc-tool" data-tool="social">
     <div class="toolbar-tpl" style="display:none">
-      <button class="btn small primary soc-add" type="button" title="Add a blank NPC card" aria-label="Add NPC">&#43; NPC</button>
+      <button class="btn small primary soc-add" type="button" title="Add a blank NPC card" aria-label="Add NPC">&#43;</button>
       <div class="toolbar-spacer"></div>
       <button class="btn small ghost soc-clear" type="button" title="Remove all NPCs" aria-label="Clear NPCs">Clear</button>
     </div>
@@ -10371,14 +10372,20 @@ function init_trackers(root) {
 
   // ── Badges in the Combat window's header ──
   function badgeHost() {
+    // The first render runs before the tool is mounted in its station, so the
+    // badges are re-homed into the window header as soon as there is one (they
+    // were left in the window body, where the header's flex sizing stretched them).
     const box = root.closest('.csub, .cstation, .pane');
     const head = box && box.querySelector('.cst-head, .pane-head');
-    let host = (head || root).querySelector('.init-badges');
-    if(!host) {
-      host = document.createElement('div'); host.className = 'init-badges';
-      if(head) { const t = head.querySelector('.cst-title, .pane-title'); if(t && t.nextSibling) head.insertBefore(host, t.nextSibling); else head.appendChild(host); }
-      else list.parentNode.insertBefore(host, list);
-      host.addEventListener('click', onBadgeClick);
+    let host = root._initBadges;
+    if(!host) { host = document.createElement('div'); host.className = 'init-badges'; host.addEventListener('click', onBadgeClick); root._initBadges = host; }
+    if(head) {
+      if(host.parentNode !== head) { const t = head.querySelector('.cst-title, .pane-title'); if(t && t.nextSibling) head.insertBefore(host, t.nextSibling); else head.appendChild(host); }
+      host.classList.remove('in-body');
+    } else {
+      if(host.parentNode !== list.parentNode) { list.parentNode.insertBefore(host, list); host.classList.add('in-body'); }
+      // Not mounted in a window yet (a board restoring): look again shortly.
+      if(!root._badgeRetry) root._badgeRetry = setTimeout(() => { root._badgeRetry = null; renderBadges(); }, 600);
     }
     return host;
   }
