@@ -2046,7 +2046,8 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 /* The bubble popup: the combat card, then the roleplay side */
 .scene-pop{display:flex;flex-direction:column;gap:10px;padding:2px}
 .scene-pop .npc-card{width:100%;max-width:none}
-.scene-pop .card-grip{display:none}
+.scene-pop .card-grip,.scene-pop .npc-del,.scene-pop .soc-del{display:none}
+#gmc-pop-toolbar .scene-rm:hover{border-color:var(--red-light);color:#ff8a80}
 .scene-soc{border:1px solid var(--border);border-left:3px solid var(--npc-blue,#8f85cc);border-radius:8px;padding:8px 10px;background:var(--panel)}
 .scene-soc-h{font-family:'Geist',sans-serif;font-weight:800;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--npc-blue,#8f85cc);margin-bottom:6px}
 .scene-pop-act{display:flex;justify-content:flex-end}
@@ -2059,10 +2060,10 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 .mon-pick.inline .mon-pick-head{display:none}
 /* Trackers in the Monitor bar: two rows of same-size tiles, every label on top
    (Ticks: five boxes a row). A divider separates them from the scene bubbles. */
-#gmc-timers{display:grid;grid-template-rows:repeat(2,36px);grid-auto-flow:column;grid-auto-columns:96px;gap:4px 5px;align-content:center;padding:0 0 0 10px;margin-left:4px;border-left:1px solid var(--border)}
-#gmc-timers .timer,#gmc-timers .ticktrk{box-sizing:border-box;width:96px;height:36px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:3px 8px;border-radius:7px;overflow:hidden}
+#gmc-timers{display:grid;grid-template-rows:repeat(2,36px);grid-auto-flow:column;grid-auto-columns:80px;gap:4px 5px;align-content:center;padding:0 0 0 10px;margin-left:4px;border-left:1px solid var(--border)}
+#gmc-timers .timer,#gmc-timers .ticktrk{box-sizing:border-box;width:80px;height:36px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:3px 7px;border-radius:7px;overflow:hidden}
 #gmc-timers .timer>div{display:flex;flex-direction:column;gap:2px;min-width:0}
-#gmc-timers .tl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px}
+#gmc-timers .tl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:64px}
 #gmc-timers .timer .tv{font-size:13px;line-height:1}
 #gmc-timers .ticktrk.tall{grid-row:span 2;height:auto}
 #gmc-timers .tick-boxes{display:grid;grid-template-columns:repeat(5,11px);gap:2px}
@@ -2074,7 +2075,7 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 #gmc-timers .ticktrk.two .tick-boxes{row-gap:1px}
 #gmc-timers .ticktrk.two .tmr-tick{width:8px;height:8px}
 /* "+" and ✕ (clear the scene), stacked, left of the bubbles */
-.scene-ctl{display:flex;flex-direction:column;justify-content:center;gap:5px;flex-shrink:0;padding:0 0 0 6px}
+.scene-ctl{display:flex;flex-direction:column;justify-content:center;gap:5px;flex-shrink:0;padding:0;margin-left:-10px}
 .scene-ctl .scene-ctl-btn{width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;padding:0;cursor:pointer;align-self:auto;background:transparent}
 .scene-ctl .scene-add{border:1px dashed color-mix(in srgb,var(--accent) 60%,var(--border));color:var(--accent);font:300 22px/1 'Geist',sans-serif}
 .scene-ctl .scene-add:hover{background:color-mix(in srgb,var(--accent) 12%,transparent);border-style:solid}
@@ -2086,6 +2087,7 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 #gmc-topbar .gmc-stack .tel-clock,.gmc-stack .tel-clock{margin:0;padding:0;border:0;flex-direction:row;align-items:baseline;justify-content:space-between;gap:8px}
 .gmc-stack .gmc-round-num{font-size:16px}
 .gmc-stack .tel-time{font-size:15px}
+.gmc-round .gmc-round-btns{order:-1}
 .gmc-round-btns .gmc-init{display:flex;flex-direction:row;gap:3px;padding:0;border:0}
 .gmc-round-btns .gmc-round-btn.gmc-init-btn{width:26px;height:17px;padding:0;border-radius:5px;border:1px solid var(--border);background:var(--panel-2);color:var(--light);font-size:11px;line-height:1;display:inline-flex;align-items:center;justify-content:center;gap:0;text-transform:none;letter-spacing:0}
 .gmc-round-btns .gmc-init-btn:hover{border-color:var(--accent)}
@@ -2288,7 +2290,7 @@ body[data-cview="free"] .cst-log-rail{display:none}
 .tmr-card.expired .tmr-finish{color:var(--white)}
 .tmr-roll-res{font-size:11.5px;color:var(--light);background:var(--panel-2);border-radius:6px;padding:5px 7px}
 .tmr-kind.tk{color:#5bbf9a;border-color:#5bbf9a}
-.tmr-count{width:52px;background:var(--panel);border:1px solid var(--border);border-radius:6px;color:var(--white);font-family:'Geist Mono',monospace;font-size:13px;padding:5px 6px;text-align:center}
+.tmr-count{width:60px;cursor:pointer;background:var(--panel);border:1px solid var(--border);border-radius:6px;color:var(--white);font-family:'Geist Mono',monospace;font-size:13px;padding:5px 6px;text-align:center}
 .tmr-ticks{flex-wrap:wrap;gap:6px}
 .tmr-tickcount{margin-left:auto;font-family:'Geist Mono',monospace;font-size:13px;color:var(--dim)}
 .tmr-tick{flex:0 0 auto;border:1px solid var(--border);border-radius:4px;background:var(--panel);cursor:pointer;padding:0;transition:background .1s,border-color .1s}
@@ -7109,7 +7111,22 @@ function renderScenePop(first) {
     node = document.createElement('div'); node.className = 'scene-pop';
     const card = so._cardFor(scenePop.id); if(card) node.appendChild(card);
   } else return;
-  if(first) { showGmcPop(title, '', {}); }
+  if(first) {
+    showGmcPop(title, '', {});
+    // "Remove" sits in the popup header, beside the close ✕ (the card's own × is hidden here).
+    const tb = document.getElementById('gmc-pop-toolbar');
+    if(tb) {
+      const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'btn small ghost scene-rm'; rm.textContent = 'Remove';
+      rm.title = 'Remove from the scene';
+      const kind = scenePop.kind, id = scenePop.id;
+      rm.addEventListener('click', () => {
+        closeGmcPop();
+        if(kind === 'npc') { const t = sceneNode('trackers'); if(t && t._removeItem) t._removeItem(id); }
+        else { const so = sceneNode('social'); if(so && so._remove) so._remove(id); }
+      });
+      tb.innerHTML = ''; tb.appendChild(rm);
+    }
+  }
   else { const ttl = document.getElementById('gmc-pop-ttl'); if(ttl) ttl.textContent = title; }
   body.classList.remove('tool-host', 'msg-only');
   body.innerHTML = ''; body.appendChild(node); body.scrollTop = st;
@@ -21979,7 +21996,7 @@ function init_timers(root) {
       return `<div class="tmr-card ticks" data-id="${t.id}">
         <div class="tmr-row1"><input class="tmr-name" placeholder="Alarm Level, NPC Mood…" value="${esc(t.name)}"><span class="tmr-kind tk">Ticks</span><button class="tmr-del" title="Remove">✕</button></div>
         <div class="tmr-row2 tmr-ticks">${ticksBoxes(t)}<span class="tmr-tickcount">${f}/${n}</span></div>
-        <div class="tmr-row3"><span class="tmr-setlbl">Boxes</span><input type="number" class="tmr-count" min="1" max="30" value="${n}"><button class="tmr-apply tmr-apply-ticks">Set</button><button class="tmr-reset" title="Clear all">↺</button></div>
+        <div class="tmr-row3"><span class="tmr-setlbl">Boxes</span><select class="tmr-count" title="Number of boxes">${Array.from({ length: Math.max(10, n) }, (_, k) => k + 1).map(k => `<option value="${k}"${k === n ? ' selected' : ''}>${k}</option>`).join('')}</select><button class="tmr-reset" title="Clear all">↺</button></div>
       </div>`;
     }
     if(t.kind === 'round'){
@@ -21993,7 +22010,7 @@ function init_timers(root) {
     return `<div class="tmr-card time${zero?' expired':''}" data-id="${t.id}">
       <div class="tmr-row1"><input class="tmr-name" placeholder="Timer…" value="${esc(t.name)}"><span class="tmr-kind tm">Time</span><button class="tmr-del" title="Remove">✕</button></div>
       <div class="tmr-row2"><button class="tmr-toggle" title="Start / pause">${t.running?'⏸':'▶'}</button><div class="tmr-disp time${zero?' zero':''}">${fmt(t.remainingSeconds)}</div><button class="tmr-reset" title="Reset">↺</button></div>
-      <div class="tmr-row3"><span class="tmr-setlbl">Set</span><input type="number" class="tmr-min" min="0" max="999" value="${Math.floor(t.totalSeconds/60)}"><span class="tmr-colon">:</span><input type="number" class="tmr-sec" min="0" max="59" value="${t.totalSeconds%60}"><button class="tmr-apply">Set</button></div>
+      <div class="tmr-row3"><span class="tmr-setlbl">Set</span><input type="number" class="tmr-min" min="0" max="999" value="${Math.floor(t.totalSeconds/60)}"><span class="tmr-colon">:</span><input type="number" class="tmr-sec" min="0" max="59" value="${t.totalSeconds%60}"></div>
     </div>`;
   }
   function render(){
@@ -22017,19 +22034,23 @@ function init_timers(root) {
         const box = e.target.closest('.tmr-tick'); if(!box) return;
         const was = isEnded(t); setTicks(t, +box.dataset.i); if(!was && isEnded(t)) finished(t); render(); save();
       });
-      card.querySelector('.tmr-apply-ticks').addEventListener('click', () => {
-        const n = Math.max(1, Math.min(30, parseInt(card.querySelector('.tmr-count').value) || 1));
-        t.count = n; if(t.filled > n) t.filled = n; render(); save();
+      // The box count applies the moment it's picked (no Set button).
+      card.querySelector('.tmr-count').addEventListener('change', e => {
+        const n = Math.max(1, Math.min(30, parseInt(e.target.value) || 1));
+        t.count = n; if(t.filled > n) t.filled = n; render(); save(); try { renderTimers(); } catch(x) {}
       });
     } else if(t.kind === 'round'){
       card.querySelector('.tmr-minus').addEventListener('click', () => { const was = t.remainingRounds > 0; t.remainingRounds = Math.max(0, t.remainingRounds - 1); if(was && t.remainingRounds <= 0) finished(t); render(); save(); });
       card.querySelector('.tmr-plus').addEventListener('click', () => { t.remainingRounds += 1; if(t.remainingRounds > t.totalRounds) t.totalRounds = t.remainingRounds; render(); save(); });
     } else {
       card.querySelector('.tmr-toggle').addEventListener('click', () => { t.running = !t.running; render(); save(); });
-      card.querySelector('.tmr-apply').addEventListener('click', () => {
+      // Minutes / seconds apply when you leave the box or press Enter (no Set button).
+      const applyTime = () => {
         const m = parseInt(card.querySelector('.tmr-min').value) || 0, s = parseInt(card.querySelector('.tmr-sec').value) || 0;
-        t.totalSeconds = Math.max(0, m*60 + s); t.remainingSeconds = t.totalSeconds; t.running = false; render(); save();
-      });
+        const tot = Math.max(0, m*60 + s); if(tot === t.totalSeconds) return;
+        t.totalSeconds = tot; t.remainingSeconds = tot; t.running = false; render(); save(); try { renderTimers(); } catch(x) {}
+      };
+      card.querySelectorAll('.tmr-min, .tmr-sec').forEach(inp => { inp.addEventListener('change', applyTime); inp.addEventListener('keydown', e => { if(e.key === 'Enter') inp.blur(); }); });
     }
   }
   // Live tick — decrement running time timers, updating only their display so a
