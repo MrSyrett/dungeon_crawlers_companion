@@ -741,9 +741,9 @@ ol.advh-hooks { font-size: 12px; line-height: 1.5; color: var(--light); margin: 
 :root[data-gm-theme="DCC"] { --ff-num: "Share Tech Mono", ui-monospace, monospace; }
 :root[data-gm-theme="SD"], :root[data-gm-theme="DND"], :root[data-gm-theme="MMRPG"], :root[data-gm-theme="ACE"],
 :root[data-gm-theme="D62E"], :root[data-gm-theme="CO"], :root[data-gm-theme="NIM"], :root[data-gm-theme="YZE"], :root[data-gm-theme="TWD"],
-:root[data-gm-theme="MYZ"], :root[data-gm-theme="VAE"], :root[data-gm-theme="PB"], :root[data-gm-theme="JLU"], :root[data-gm-theme="ICRPG"] { --ff-num: var(--gt-ui); }
-:root[data-gm-theme="LOTR"] { --ff-num: "Aniron", "EB Garamond", Georgia, serif; }
-:root[data-gm-theme="DB"] { --ff-num: "Minion Pro", "EB Garamond", Georgia, serif; }
+:root[data-gm-theme="MYZ"], :root[data-gm-theme="VAE"], :root[data-gm-theme="JLU"], :root[data-gm-theme="ICRPG"] { --ff-num: var(--gt-ui); }
+/* The Garamond systems read their numbers in EB Garamond, as their sheets do (--f-num). */
+:root[data-gm-theme="LOTR"], :root[data-gm-theme="DB"], :root[data-gm-theme="PB"] { --ff-num: var(--gt-body); }
 :where(:root[data-gm-theme]) :where(button, input, select, textarea) { font-family: var(--ff-ui); }
 :root[data-gm-theme] .advh-sheet { --ps-title: var(--gt-head); --ps-head: var(--gt-wh); --ps-label: var(--gt-ui); --ps-text: var(--gt-body); --ps-num: var(--ff-num); }
 /* DCC: the Adventure banner wears the GM Screen's black → magenta, not the sheet's red. */
@@ -1563,7 +1563,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 .dice-tool { overflow: hidden; }
 .dice-tray { flex-shrink: 0; padding: 8px 10px 4px; border-top: 2px solid var(--border); background: rgba(0,0,0,0.25); }
 .dice-btn-row { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 4px; }
-.dice-die { position: relative; padding: 12px 0; min-width: 0; background: var(--panel); color: var(--light); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-family: var(--ff-ui,Geist), sans-serif; font-size: 15px; font-weight: 700; letter-spacing: .04em; transition: border-color .1s, transform .05s; overflow: visible; }
+.dice-die { position: relative; padding: 12px 0; min-width: 0; background: var(--panel); color: var(--light); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-family: var(--ff-num,var(--ff-ui,Geist)), sans-serif; font-size: 15px; font-weight: 700; letter-spacing: .04em; transition: border-color .1s, transform .05s; overflow: visible; }
 .dice-die:hover { border-color: var(--gold); }
 .dice-die:active { transform: scale(0.94); }
 .dice-die.has { border-color: var(--gold); color: var(--gold); }
@@ -1617,7 +1617,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 .gmt-btn.on { background: #1a3a1a; border-color: #2d7a2d; color: #6dbf6d; }
 .dice-pool-row.sys { gap: 6px; }
 .dice-pool-label-row { padding: 0 0 6px; }
-.dice-pool-label { display: block; font-family: var(--ff-ui,Geist), sans-serif; font-size: 11px; font-weight: 700; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dice-pool-label { display: block; font-family: var(--ff-num,var(--ff-ui,Geist)), sans-serif; font-size: 11px; font-weight: 700; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dice-pool-row { display: flex; align-items: center; gap: 5px; }
 .dice-pool-row .dice-mod { flex: 0 1 auto; }
 .dice-roll-go { flex: 1; }
@@ -18994,7 +18994,7 @@ function init_dice(root) {
   // the pool row below (renderPool).
   function injectTrayEye() {
     const camp = GMCamp.get(); if(!camp) return;
-    const row = trayEl.querySelector('.gmt-row'); if(!row) return;
+    const row = trayEl.querySelector('.gmt-row.gmt-act') || trayEl.querySelector('.gmt-row'); if(!row) return;
     const hidden = GMCamp.isHidden();
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -19009,14 +19009,18 @@ function init_dice(root) {
   // out above the dice, and Roll throws the lot — the same tray the sheets have.
   function renderGenericTray() {
     const label = poolLabel();
-    let h = label ? '<div class="dice-pool-label-row"><span class="dice-pool-label">' + label + '</span></div>' : '';
+    const isDB = curSys() === 'DB';
+    let h = label ? '<div class="dice-pool-label-row"><span class="dice-pool-label">' + (isDB ? label.replace(/d(\d)/g, 'D$1') : label) + '</span></div>' : '';
+    if(isDB) h += dbBBRow();
     h += '<div class="dice-btn-row">';
     DICE.forEach(d => {
       const n = pool[d] || 0;
-      h += '<button class="dice-die' + (n ? ' has' : '') + '" data-d="' + d + '" title="Add a d' + d + ' (right-click removes one)">d' + d + (n ? '<span class="dice-count">' + n + '</span>' : '') + '</button>';
+      const L = curSys() === 'DB' ? 'D' : 'd';
+      h += '<button class="dice-die' + (n ? ' has' : '') + '" data-d="' + d + '" title="Add a ' + L + d + ' (right-click removes one)">' + L + d + (n ? '<span class="dice-count">' + n + '</span>' : '') + '</button>';
     });
     h += '</div>';
     trayEl.innerHTML = h;
+    if(curSys() === 'DB') wireDBBB();
     trayEl.querySelectorAll('.dice-die').forEach(b => {
       b.onclick = () => { const d = parseInt(b.dataset.d, 10); pool[d] = (pool[d] || 0) + 1; renderTray(); };
       b.oncontextmenu = e => { e.preventDefault(); const d = parseInt(b.dataset.d, 10); if(pool[d]) pool[d]--; renderTray(); };
@@ -19046,8 +19050,10 @@ function init_dice(root) {
     }
     let h = '<div class="dice-pool-row">';
     h += hideEyeRow();
-    h += '<button class="dice-advbtn' + (advMode === 'adv' ? ' on-adv' : '') + '" data-m="adv" title="Advantage (d20)">▲ ADV</button>';
-    h += '<button class="dice-advbtn' + (advMode === 'dis' ? ' on-dis' : '') + '" data-m="dis" title="Disadvantage (d20)">▼ DIS</button>';
+    if(curSys() !== 'DB') {
+      h += '<button class="dice-advbtn' + (advMode === 'adv' ? ' on-adv' : '') + '" data-m="adv" title="Advantage (d20)">▲ ADV</button>';
+      h += '<button class="dice-advbtn' + (advMode === 'dis' ? ' on-dis' : '') + '" data-m="dis" title="Disadvantage (d20)">▼ DIS</button>';
+    }
     h += '<button class="dice-pool-clear" title="Clear pool">✕</button>';
     h += '<button class="dice-roll-go" title="Roll the pool">🎲 Roll</button>';
     h += '</div>';
@@ -19061,7 +19067,21 @@ function init_dice(root) {
   function doRoll() {
     const dice = Object.entries(pool).filter(([, n]) => n > 0).map(([d, n]) => [parseInt(d, 10), n]);
     if(!dice.length) return;
+    if(curSys() === 'DB') return dbPoolRoll(dice);
     rollCore(dice, 0, advMode, null);
+  }
+  // Dragonbane: the boons / banes go on the pool's first D20 (extra D20s, keep the
+  // lowest / highest), then reset. A lone D20 reads 1 = Dragon, 20 = Demon.
+  function dbPoolRoll(dice) {
+    const m = dice.some(([d]) => d === 20) ? dbTakeTray() : { boon: 0, bane: 0 };
+    let total = 0, used = false, nat = null; const bits = [];
+    dice.forEach(([d, n]) => { for(let i = 0; i < n; i++) {
+      if(d === 20 && !used) { used = true; const p = dbPool(m.boon, m.bane); total += p.kept; nat = p.kept; bits.push(p.pool); }
+      else { const r = 1 + Math.floor(Math.random() * d); total += r; bits.push('d' + d + '(' + r + ')'); }
+    } });
+    const lone = dice.length === 1 && dice[0][0] === 20 && dice[0][1] === 1;
+    const mods = [m.boon ? m.boon + ' boon' + (m.boon > 1 ? 's' : '') : '', m.bane ? m.bane + ' bane' + (m.bane > 1 ? 's' : '') : ''].filter(Boolean).join(', ');
+    gmLog(poolLabel().replace(/d(\d)/g, 'D$1'), total + (lone && nat === 1 ? ' · DRAGON!' : lone && nat === 20 ? ' · DEMON!' : ''), bits.join(' + ') + (mods ? ' · ' + mods : ''), lone && nat === 1 ? 'crit' : lone && nat === 20 ? 'fumble' : '');
   }
 
   function escGm(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
@@ -19155,19 +19175,17 @@ function init_dice(root) {
   function renderSWTray() {
     const on = window.gmSwWildDie();
     trayEl.innerHTML = '<div class="gmt"><div class="gmt-row">' + stepperHtml('swd-n', _tray.wild, 1, 15)
-      + '<span class="gmt-etl">D +</span>' + stepperHtml('swd-p', _tray.swPips || 0, 0, 2)
       + '<button class="gmt-roll" id="swd-roll">Roll</button></div>'
       + '<div class="gmt-row"><label class="gmt-wild" title="WEG Star Wars 1st edition has no Wild Die. Turn this on to use the 2nd-edition Wild Die as a house rule (GM rolls only; players set it on their own sheets).">'
       + '<input type="checkbox" id="swd-wild"' + (on ? ' checked' : '') + '> Wild Die (house rule — 2nd edition)</label></div></div>';
     wireStepper('swd-n', 1, 15, v => { _tray.wild = v; });
-    wireStepper('swd-p', 0, 2, v => { _tray.swPips = v; });
     trayEl.querySelector('#swd-wild').onchange = e => { window.gmSwWildDie(e.target.checked); };
     trayEl.querySelector('#swd-roll').onclick = swRoll;
   }
   function swRoll() {
     const n = Math.max(1, Math.min(15, parseInt((trayEl.querySelector('#swd-n') || {}).value, 10) || 1));
-    const p = Math.max(0, Math.min(2, parseInt((trayEl.querySelector('#swd-p') || {}).value, 10) || 0));
-    _tray.wild = n; _tray.swPips = p;
+    const p = 0;
+    _tray.wild = n;
     if(window.gmSwWildDie()) { wildRoll(n, p); return; }
     const r = []; for(let i = 0; i < n; i++) r.push(d6());
     const total = r.reduce((a, b) => a + b, 0) + p;
@@ -19222,8 +19240,8 @@ function init_dice(root) {
   }
   function renderMarvelTray() {
     trayEl.innerHTML = '<div class="gmt"><div class="gmt-row gmt-mv">'
-      + mvStep('edge', 'Edge', 'gmt-edge') + mvStep('trouble', 'Trouble', 'gmt-trouble')
-      + '<button class="gmt-roll" id="mv-roll">Roll</button></div></div>';
+      + mvStep('edge', 'Edge', 'gmt-edge') + mvStep('trouble', 'Trouble', 'gmt-trouble') + '</div>'
+      + '<div class="gmt-row gmt-act"><button class="gmt-roll" id="mv-roll">Roll d616</button></div></div>';
     trayEl.querySelectorAll('.gmt-step[data-mv]').forEach(b => {
       b.onclick = () => {
         const kind = b.dataset.mv, dir = parseInt(b.dataset.dir, 10);
@@ -19274,7 +19292,7 @@ function init_dice(root) {
   // dialled in on the visible tray is the one the next roll takes.
   const DBBB = window.__dbBB || (window.__dbBB = { boon: 0, bane: 0 });
   function dbBBChanged() { try { document.dispatchEvent(new Event('db-bb')); } catch(e) {} }
-  document.addEventListener('db-bb', () => { if(curSys() === 'DB' && trayEl.querySelector('.gmt-dbbb')) renderDBTray(); });
+  document.addEventListener('db-bb', () => { if(curSys() === 'DB' && trayEl.querySelector('.gmt-dbbb')) renderTray(); });
   function dbTakeTray() {
     const boon = DBBB.boon || 0, bane = DBBB.bane || 0;
     DBBB.boon = 0; DBBB.bane = 0;
@@ -19305,23 +19323,18 @@ function init_dice(root) {
     if(mod) bits.push((mod > 0 ? '+' : '') + mod);
     return { total, detail: bits.join(' ') };
   }
-  function renderDBTray() {
-    const bb = (k, lbl, tip) => { const v = DBBB[k === 'dbBoon' ? 'boon' : 'bane'] || 0; return '<span class="gmt-bb ' + (k === 'dbBoon' ? 'boon' : 'bane') + '" title="' + tip + '">'
+  function dbBBRow() {
+    const bb = (k, lbl, tip) => { const v = DBBB[k] || 0; return '<span class="gmt-bb ' + k + '" title="' + tip + '">'
       + '<button type="button" data-bb="' + k + '" data-dir="-1" aria-label="One fewer ' + lbl + '">−</button>'
-      + '<span class="gmt-bbv" id="db-' + k + '">' + v + ' ' + lbl + (v === 1 ? '' : 's') + '</span>'
+      + '<span class="gmt-bbv">' + v + ' ' + lbl + (v === 1 ? '' : 's') + '</span>'
       + '<button type="button" data-bb="' + k + '" data-dir="1" aria-label="One more ' + lbl + '">＋</button></span>'; };
-    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row gmt-dbbb">'
-      + bb('dbBoon', 'boon', 'Boons on the next D20 roll: roll an extra D20 and keep the lowest')
-      + bb('dbBane', 'bane', 'Banes on the next D20 roll: roll an extra D20 and keep the highest') + '</div>'
-      + '<div class="gmt-row gmt-kob">' + diceForSystem('DB').map(d => '<button class="dice-die gmt-die" data-d="' + d + '" title="Roll a D' + d + (d === 20 ? ' (with the boons / banes above)' : '') + '">D' + d + '</button>').join('') + '</div></div>';
+    return '<div class="gmt"><div class="gmt-row gmt-dbbb">'
+      + bb('boon', 'boon', 'Boons on the next D20 roll: roll an extra D20 and keep the lowest')
+      + bb('bane', 'bane', 'Banes on the next D20 roll: roll an extra D20 and keep the highest') + '</div></div>';
+  }
+  function wireDBBB() {
     trayEl.querySelectorAll('[data-bb]').forEach(b => { b.onclick = () => {
-      const k = b.dataset.bb === 'dbBoon' ? 'boon' : 'bane'; DBBB[k] = Math.max(0, Math.min(5, (DBBB[k] || 0) + parseInt(b.dataset.dir, 10))); dbBBChanged(); }; });
-    trayEl.querySelectorAll('.gmt-die').forEach(b => { b.onclick = () => {
-      const d = parseInt(b.dataset.d, 10);
-      if(d !== 20) return rollCore([[d, 1]], 0, 'none', null);
-      const m = dbTakeTray(), p = dbPool(m.boon, m.bane), dragon = p.kept === 1, demon = p.kept === 20;
-      gmLog('D20', p.kept + (dragon ? ' · DRAGON!' : demon ? ' · DEMON!' : ''), p.pool + p.mods, dragon ? 'crit' : demon ? 'fumble' : '');
-    }; });
+      const k = b.dataset.bb; DBBB[k] = Math.max(0, Math.min(5, (DBBB[k] || 0) + parseInt(b.dataset.dir, 10))); dbBBChanged(); }; });
   }
 
   // ════════ Pirate Borg — a Test: d20 ± ability ≥ DR (roll high); 20 Crit, 1 Fumble ════════
@@ -19333,12 +19346,6 @@ function init_dice(root) {
     return { d, tot, crit, fum, ok, word: crit ? 'CRIT!' : fum ? 'FUMBLE!' : ok ? 'SUCCESS' : 'FAILURE', type: crit || (ok && !fum) ? 'crit' : 'fumble',
       detail: 'd20(' + d + ')' + (mod ? (mod > 0 ? ' +' : ' −') + Math.abs(mod) : '') + ' = ' + tot + ' vs DR' + dr };
   }
-  // The PB tray is plain dice (the sheet rolls the Tests; enemies never roll to hit).
-  function renderPBTray() {
-    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row gmt-kob">' + diceForSystem('PB').map(d => '<button class="dice-die gmt-die" data-d="' + d + '" title="Roll a d' + d + '">d' + d + '</button>').join('') + '</div></div>';
-    trayEl.querySelectorAll('.gmt-die').forEach(b => { b.onclick = () => rollCore([[parseInt(b.dataset.d, 10), 1]], 0, 'none', null); });
-  }
-
   // Registry of system-specific trays. Systems absent here (D&D, Shadowdark,
   // Nimble, ICRPG, DCC, Justice League) use the shared generic pool tray.
   const GM_TRAYS = {
@@ -19351,8 +19358,8 @@ function init_dice(root) {
     CO: renderCandelaTray,
     MMRPG: renderMarvelTray,
     KOB: renderKOBTray,
-    DB: renderDBTray,
-    PB: renderPBTray,
+    // Pirate Borg and Dragonbane use the same pool tray as the other d20 systems
+    // (Dragonbane adds its boons / banes row, which replaces ADV / DIS).
   };
 
   // The rolling mechanic itself, so the tray's Roll button and other tools

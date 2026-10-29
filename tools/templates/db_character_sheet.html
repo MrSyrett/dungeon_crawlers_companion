@@ -131,6 +131,19 @@ input,select,textarea,button{font-family:var(--f-ui);font-variant-numeric:lining
 .dice-btns{display:flex;gap:4px;}
 .dice-btn{flex:1;padding:6px 0;background:var(--acc);border:1px solid #17503b;color:#fff;font-family:var(--f-num);font-size:13px;cursor:pointer;border-radius:6px;}
 .dice-btn:hover{background:#2e8269;}
+.dice-pool-display{font-family:var(--f-num);font-size:13px;color:var(--gold-lt,#c9a14a);min-height:18px;word-break:break-word;line-height:1.4;}
+.dice-pool-display span{color:#f0e6d0;}
+.dice-pool-display .empty{color:#6b6460;}
+.adv-seg{display:flex;gap:0;border:1px solid #3a3a41;border-radius:7px;overflow:hidden;flex:1;}
+.adv-seg button{flex:1;padding:5px 4px;background:#1d1d22;color:#b8b3aa;border:none;cursor:pointer;font-family:var(--f-label);font-size:12px;letter-spacing:.04em;}
+.adv-seg button.norm.on{background:#3a3a41;color:#fff;}
+.adv-seg button.adv.on{background:#2f8f4e;color:#fff;}
+.adv-seg button.dis.on{background:#b03030;color:#fff;}
+.dice-tray-actions{display:flex;gap:6px;}
+.dice-clear-btn{flex:0 0 auto;padding:7px 12px;background:transparent;border:1px solid #3a3a41;color:#b8b3aa;border-radius:6px;font-family:var(--f-label);font-size:13px;cursor:pointer;}
+.dice-clear-btn:hover{background:#26262c;color:#fff;}
+.dice-roll-btn{flex:1;padding:7px;background:var(--acc);border:none;color:#fff;border-radius:6px;font-family:var(--f-label);font-size:14px;letter-spacing:.06em;cursor:pointer;}
+.dice-roll-btn:hover{filter:brightness(1.15);}
 
 /* ── the sheet & cards ── */
 .sheet{background:var(--paper);border:2px solid var(--border);border-radius:14px;overflow:hidden;max-width:1080px;margin:0 auto;position:relative;box-shadow:0 14px 40px rgba(0,0,0,.35);}
@@ -567,6 +580,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .log-header{padding:12px 10px 10px 12px;gap:6px;}
 .log-title{font-size:18px;letter-spacing:.03em;}
 .log-action-btn.campaign{padding:5px 6px;}
+.tray-note:empty{display:none;}
 </style>
 </head>
 <body>
@@ -827,15 +841,15 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>
-  <div class="log-entries" id="log-entries"><div class="log-hint">Click a skill or attribute to roll</div></div>
+  <div class="log-entries" id="log-entries"></div>
   <div class="dice-tray">
+    <div class="dice-pool-display" id="dice-pool-display"><span class="empty">Empty</span></div>
     <div class="tray-row">
       <span class="bb-ctl boon" title="Boons on the next roll: roll an extra D20 and keep the lowest"><button onclick="trayBB('boon',-1)">−</button><span class="bb-val" id="tray-boon">0 boons</span><button onclick="trayBB('boon',1)">＋</button></span>
       <span class="bb-ctl bane" title="Banes on the next roll: roll an extra D20 and keep the highest"><button onclick="trayBB('bane',-1)">−</button><span class="bb-val" id="tray-bane">0 banes</span><button onclick="trayBB('bane',1)">＋</button></span>
     </div>
-    <div class="dice-btns">
-      <button class="dice-btn" onclick="rollFree(4)">D4</button><button class="dice-btn" onclick="rollFree(6)">D6</button><button class="dice-btn" onclick="rollFree(8)">D8</button><button class="dice-btn" onclick="rollFree(10)">D10</button><button class="dice-btn" onclick="rollFree(12)">D12</button><button class="dice-btn" onclick="rollFree(20)">D20</button>
-    </div>
+    <div class="dice-btns"><button class="dice-btn" onclick="trayAdd(4)">D4</button><button class="dice-btn" onclick="trayAdd(6)">D6</button><button class="dice-btn" onclick="trayAdd(8)">D8</button><button class="dice-btn" onclick="trayAdd(10)">D10</button><button class="dice-btn" onclick="trayAdd(12)">D12</button><button class="dice-btn" onclick="trayAdd(20)">D20</button></div>
+    <div class="dice-tray-actions"><button class="dice-clear-btn" onclick="trayClear()">Clear</button><button class="dice-roll-btn" onclick="trayRoll()" title="Roll the dice pool (the boons / banes above go on its D20)">🎲 Roll</button></div>
   </div>
 </div>
 </div>
@@ -1273,6 +1287,31 @@ function chooseCondition(msg,cb,count){
     if(picked.length>=count||allConds()){ closeDlg(true); addLog('Condition', c, 'Bane on '+COND_ATTR[c]+' and '+COND_ATTR[c]+'-based rolls','normal'); changed(); if(cb) cb(picked); } };
 }
 function trayBB(k,n){ TR[k]=Math.max(0,Math.min(5,TR[k]+n)); renderTray(); }
+
+// === DICE TRAY: tap dice to build a pool, then roll it (the same tray as the other d20 systems) ===
+var _pool=[];
+function _dl(s){ return 'D'+s; }
+function trayAdd(s){ _pool.push(s); trayShow(); }
+function trayClear(){ _pool=[]; trayShow(); }
+function trayShow(){ var el=$('dice-pool-display'); if(!el) return;
+  if(!_pool.length){ el.innerHTML='<span class="empty">Empty</span>'; return; }
+  var c={}; _pool.forEach(function(s){ c[s]=(c[s]||0)+1; });
+  el.innerHTML=Object.keys(c).map(Number).sort(function(a,b){return a-b;}).map(function(s){ return '<span>'+c[s]+_dl(s)+'</span>'; }).join(' + '); }
+function _poolLabel(){ var c={}; _pool.forEach(function(s){ c[s]=(c[s]||0)+1; }); return Object.keys(c).map(Number).sort(function(a,b){return a-b;}).map(function(s){ return c[s]+_dl(s); }).join(' + '); }
+// The boons / banes in the tray go on the pool's D20 (extra D20s, keep the lowest /
+// highest) and are then spent. A lone D20: 1 is a Dragon, 20 a Demon.
+function trayRoll(){
+  if(!_pool.length){ addLog('Dice Pool','—','No dice in the pool — tap dice to add','normal'); return; }
+  var parts=[], total=0, nat=null, used=false, nb=TR.boon-TR.bane, mods=[];
+  if(TR.boon) mods.push(TR.boon+(TR.boon===1?' boon':' boons')); if(TR.bane) mods.push(TR.bane+(TR.bane===1?' bane':' banes'));
+  _pool.forEach(function(sz){
+    if(sz===20 && !used && nb){ used=true; var p=d20Pool(nb); total+=p.result; nat=p.result; parts.push(p.n+'d20('+p.rolls.join(',')+') '+(nb>0?'keep lowest':'keep highest')+' → '+p.result); }
+    else { var r=d(sz); total+=r; if(sz===20&&nat==null) nat=r; parts.push(_dl(sz)+'('+r+')'); }
+  });
+  if(_pool.indexOf(20)>=0 && (TR.boon||TR.bane)){ TR.boon=0; TR.bane=0; renderTray(); } else mods=[];
+  var lone=_pool.length===1&&_pool[0]===20;
+  addLog('Dice Pool: '+_poolLabel(), String(total)+(lone&&nat===1?' · DRAGON!':lone&&nat===20?' · DEMON!':''), parts.join(' + ')+' = '+total+(mods.length?' · '+mods.join(', '):''), lone&&nat===1?'crit':lone&&nat===20?'fumble':'normal');
+}
 function rollFree(n){ var r=d(n); addLog('D'+n, String(r), 'd'+n+'('+r+')', n===20&&r===1?'crit':n===20&&r===20?'fumble':'normal'); }
 function rollAttr(a){ testRoll({label:ATTR_FULL[a]+' ('+a+')',target:attr(a),attr:a}); }
 function rollSkill(n,extra){ var d0=skillDef(n); if(d0&&d0.type==='secondary'&&!knowsSchool(n)){ addLog(n,'—','You don\'t know this school of magic','normal'); return; } if(d0&&d0.rollsWith&&d0.rollsWith!==n) return rollSkill(d0.rollsWith,extra);
@@ -1917,7 +1956,7 @@ function addLog(label,result,detail,type){
   showRollToast(label,result,detail,type);
   return div;
 }
-function clearLog(){ $('log-entries').innerHTML='<div class="log-hint">Click a skill or attribute to roll</div>'; }
+function clearLog(){ $('log-entries').innerHTML=''; }
 function toggleLogCollapse(){ document.querySelector('.roll-log').classList.toggle('collapsed'); }
 document.querySelector('.log-header').addEventListener('click', function(e){ if(window.innerWidth<=768 && !e.target.closest('button,.dm-toggle-btn')) toggleLogCollapse(); });
 (function(){ if(window.innerWidth<=768) document.querySelector('.roll-log').classList.add('collapsed'); })();

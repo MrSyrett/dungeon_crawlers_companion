@@ -537,6 +537,7 @@ body.dark .act-badge.warn{color:#f0c060;}
   #tab-gear .section-bar.cbar .hdr-btn{margin-left:auto;}
   #tab-gear .section-bar.cbar .eco-wrap{flex:1 1 100%;margin-left:0!important;justify-content:flex-start!important;}
 }
+.tray-note:empty{display:none;}
 </style>
 </head>
 <body class="sheet-locked">
@@ -775,7 +776,7 @@ body.dark .act-badge.warn{color:#f0c060;}
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>
-  <div class="log-entries" id="log-entries"><div class="log-hint">Click a skill or weapon to roll its dice pool</div></div>
+  <div class="log-entries" id="log-entries"></div>
   <div class="dice-tray">
     <div class="tray-row"><span class="tray-label">± Dice</span><input class="tray-input" id="tray-mod" type="number" value="0" min="-6" max="12" title="Adds to / subtracts from your next sheet roll — or set the size of a free d6 pool and tap Roll"><button class="dice-btn" onclick="rollQuick()">Roll d6 pool</button></div>
   </div>
@@ -1415,7 +1416,7 @@ function closeCritInfo(){ var o=$('crit-overlay'); if(o)o.classList.remove('open
 var _toastTimer=null;
 function showRollToast(label,result,detail,type){ var _da=window.DiceAnim&&window.DiceAnim.get?window.DiceAnim.get():null, _twoD=!!(_da&&_da.on&&_da.mode==='2d'); if(!_twoD){ if(window.innerWidth>768)return; var log=document.querySelector('.roll-log'); if(!log||!log.classList.contains('collapsed'))return; } var t=$('roll-toast'); if(!t)return; t.className='show'+(type==='crit'?' crit':type==='fumble'?' fumble':''); t.querySelector('.t-label').textContent=label; t.querySelector('.t-result').textContent=result; t.querySelector('.t-detail').textContent=detail; if(_toastTimer)clearTimeout(_toastTimer); _toastTimer=setTimeout(function(){ t.className=''; },3500); }
 function addLog(label,result,detail,type){ type=type||'normal'; var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint)hint.remove(); var div=document.createElement('div'); div.className='log-entry'+(type==='crit'?' crit':type==='fumble'?' fumble':''); div.innerHTML='<div class="roll-label">'+esc(label)+'</div><div class="roll-result">'+esc(result)+'</div><div class="roll-detail">'+esc(detail)+'</div>'; if(typeof campaignBroadcast==='function') campaignBroadcast(label,result,detail,type); entries.insertBefore(div, entries.firstChild); while(entries.children.length>60)entries.removeChild(entries.lastChild); entries.scrollTop=0; showRollToast(label,result,detail,type); }
-function clearLog(){ $('log-entries').innerHTML='<div class="log-hint">Click a skill or weapon to roll its dice pool</div>'; _lastRoll=null; }
+function clearLog(){ $('log-entries').innerHTML=''; _lastRoll=null; }
 function toggleLogCollapse(){ document.querySelector('.roll-log').classList.toggle('collapsed'); }
 document.querySelector('.log-header').addEventListener('click',function(e){ if(window.innerWidth<=768&&!e.target.closest('button,.dm-toggle-btn'))toggleLogCollapse(); });
 (function(){ if(window.innerWidth<=768)document.querySelector('.roll-log').classList.add('collapsed'); })();

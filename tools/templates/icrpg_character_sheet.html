@@ -464,6 +464,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 /* dd-no-spin-global — hide number-input spinner arrows everywhere */
 input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none;margin:0;}
+.tray-note:empty{display:none;}
 </style>
 <style>
 /* ICRPG-specific tweaks layered on the shared skeleton */
@@ -779,7 +780,7 @@ body.dark .tabs-bar{background:#1a161a;}
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>
-  <div class="log-entries" id="log-entries"><div class="log-hint">Click a stat or effort die to roll</div></div>
+  <div class="log-entries" id="log-entries"></div>
   <div class="dice-tray">
     <div class="tray-row"><span class="tray-label">Free roll</span><span class="tray-label" style="color:#6a5a4c;">mod</span><input class="tray-input" id="free-mod" type="number" value="0"></div>
     <div class="dice-btns">
@@ -790,7 +791,6 @@ body.dark .tabs-bar{background:#1a161a;}
       <button class="dice-btn" onclick="rollFree('d12')">d12</button>
       <button class="dice-btn roll" onclick="rollFree('d20','Check')">d20</button>
     </div>
-    <div class="tray-note">A d20 check adds the stat you click; ±3 for Hard/Easy. A natural 20 is an ULTIMATE (roll d12 Effort); a natural 1 fails. EFFORT: Basic d4, Weapons &amp; Tools d6, Guns d8, Magic &amp; Energy d10, Ultimate d12.</div>
   </div>
 </div>
 </div>
@@ -1489,7 +1489,7 @@ function addLog(label,result,detail,type){
   entries.insertBefore(div, entries.firstChild); while(entries.children.length>60) entries.removeChild(entries.lastChild); entries.scrollTop=0;
   showRollToast(label,result,detail,type);
 }
-function clearLog(){ $('log-entries').innerHTML='<div class="log-hint">Click a stat or effort die to roll</div>'; }
+function clearLog(){ $('log-entries').innerHTML=''; }
 function toggleLogCollapse(){ document.querySelector('.roll-log').classList.toggle('collapsed'); }
 document.querySelector('.log-header').addEventListener('click', function(e){ if(window.innerWidth<=768 && !e.target.closest('button,.dm-toggle-btn')) toggleLogCollapse(); });
 (function(){ if(window.innerWidth<=768) document.querySelector('.roll-log').classList.add('collapsed'); })();

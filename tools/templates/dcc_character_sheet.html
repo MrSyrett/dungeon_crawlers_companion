@@ -550,6 +550,7 @@ body.dark .section-bar::after{background:#544c54;}
 /* dd-no-spin-global — hide number-input spinner arrows everywhere */
 input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none;margin:0;}
+.tray-note:empty{display:none;}
 </style>
 <style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}</style>
 </head>
@@ -1006,12 +1007,12 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON" aria-label="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>
   <div class="log-entries" id="log-entries">
-    <div class="log-hint">Click any stat or button to roll</div>
+    
   </div>
 
   <!-- DICE TRAY -->
   <div class="dice-tray">
-    <div class="dice-pool-display" id="dice-pool-display"><span>Empty — add dice below</span></div>
+    <div class="dice-pool-display" id="dice-pool-display"><span>Empty</span></div>
     <div class="adv-btns">
       <button class="adv-btn" id="adv-btn" onclick="toggleAdv('advantage')">▲ Advantage</button>
       <button class="adv-btn" id="dis-btn" onclick="toggleAdv('disadvantage')">▼ Disadvantage</button>
@@ -2260,7 +2261,7 @@ function addLog(label, result, detail, type='normal') {
 }
 
 function clearLog() {
-  document.getElementById('log-entries').innerHTML = '<div class="log-hint">Click any stat or button to roll</div>';
+  document.getElementById('log-entries').innerHTML = '';
 }
 
 // The stat modifier doubles as the roll control, so support keyboard activation
@@ -2541,7 +2542,7 @@ function addDie(sides) {
 function updateDicePoolDisplay() {
   const el = document.getElementById('dice-pool-display');
   if(!dicePool.length) {
-    el.innerHTML = '<span>Empty — add dice above</span>';
+    el.innerHTML = '<span>Empty</span>';
     return;
   }
   // Count each die type

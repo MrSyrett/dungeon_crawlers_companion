@@ -545,6 +545,7 @@ body.dark .act-badge.warn{color:#f0c060;}
   .act-row2{justify-content:flex-end;}
   .act-card .ac-do{padding:9px 12px;font-size:12px;}
 }
+.tray-note:empty{display:none;}
 </style>
 </head>
 <body class="sheet-locked">
@@ -798,7 +799,7 @@ body.dark .act-badge.warn{color:#f0c060;}
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>
-  <div class="log-entries" id="log-entries"><div class="log-hint">Click a skill or weapon to roll its dice pool</div></div>
+  <div class="log-entries" id="log-entries"></div>
   <div class="dice-tray">
     <div class="tray-row"><span class="tray-label">± Dice</span><input class="tray-input" id="tray-mod" type="number" value="0" min="-6" max="12" title="Adds to / subtracts from your next sheet roll — or set the size of a free d6 pool and tap Roll"><button class="dice-btn" onclick="rollQuick()">Roll d6 pool</button></div>
   </div>
@@ -1646,7 +1647,7 @@ function addLog(label,result,detail,type){
   entries.insertBefore(div, entries.firstChild); while(entries.children.length>60)entries.removeChild(entries.lastChild); entries.scrollTop=0;
   showRollToast(label,result,detail,type);
 }
-function clearLog(){ $('log-entries').innerHTML='<div class="log-hint">Click a skill or weapon to roll its dice pool</div>'; _lastRoll=null; }
+function clearLog(){ $('log-entries').innerHTML=''; _lastRoll=null; }
 function toggleLogCollapse(){ document.querySelector('.roll-log').classList.toggle('collapsed'); }
 document.querySelector('.log-header').addEventListener('click',function(e){ if(window.innerWidth<=768&&!e.target.closest('button,.dm-toggle-btn'))toggleLogCollapse(); });
 (function(){ if(window.innerWidth<=768)document.querySelector('.roll-log').classList.add('collapsed'); })();

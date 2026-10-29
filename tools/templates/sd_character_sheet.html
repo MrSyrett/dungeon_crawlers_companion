@@ -586,6 +586,7 @@ body.dark .sdt-badge.bad{color:#f08a84;border-color:#a8433d;}
   .sdt-badges{margin-left:0;}
   .sdt-do{padding:9px 13px;font-size:11px;}
 }
+.tray-note:empty{display:none;}
 </style>
 <style>/* icon color policy: gold on black/light backgrounds, ink on the gold buttons */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico,.dice-roll-btn .dcc-ico,.dice-btn:hover .dcc-ico,.atk-roll-btn:hover .dcc-ico,.spell-cast-btn:hover .dcc-ico,.stat-mod:hover .dcc-ico{color:var(--on-gold,#161616)}.atk-roll-btn .dcc-ico,.spell-cast-btn .dcc-ico{color:var(--gold-ink,#8a6c0c)}/* Narrow phones: keep all 4 tabs on one row. */
 @media (max-width:389px){
@@ -920,7 +921,7 @@ body.dark .sdt-badge.bad{color:#f08a84;border-color:#a8433d;}
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import a sheet JSON" aria-label="Import">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>
   <div class="log-entries" id="log-entries">
-    <div class="log-hint">Click a stat or roll button</div>
+    
   </div>
   <div class="dice-tray">
     <div class="dice-pool-display" id="dice-pool-display"><span>Empty</span></div>
@@ -3272,7 +3273,7 @@ function addLog(label, result, detail, type='normal') {
   clearAdv();
 }
 function clearLog() {
-  document.getElementById('log-entries').innerHTML = '<div class="log-hint">Click a stat or roll button</div>';
+  document.getElementById('log-entries').innerHTML = '';
 }
 
 // ── STRESS (HeroDark) ───────────────────────────────────────────────────────

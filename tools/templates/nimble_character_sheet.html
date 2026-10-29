@@ -506,6 +506,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 @media (max-width:600px){ .nturn-row2 > .nturn-stat:last-child{margin-left:auto;} }
 /* Phones: the Inventory header's coins drop to their own centred line. */
 @media (max-width:600px){ .section-bar.inv-bar{grid-template-columns:1fr auto;row-gap:6px;} .inv-bar .inv-coins{grid-column:1 / -1;grid-row:2;justify-self:center;} }
+.tray-note:empty{display:none;}
 </style>
 </head>
 <body>
@@ -774,12 +775,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>
-  <div class="log-entries" id="log-entries"><div class="log-hint">Click a stat, skill or attack to roll</div></div>
+  <div class="log-entries" id="log-entries"></div>
   <div class="dice-tray">
-    <div class="tray-row"><span class="tray-label">DC</span><input class="tray-input" id="tray-dc" type="number" min="1" placeholder="—"><span class="tray-note" style="flex:1;">for skill checks & saves</span></div>
+    <div class="tray-row"><span class="tray-label">DC</span><input class="tray-input" id="tray-dc" type="number" min="1" placeholder="—"></div>
     <div class="adv-btns"><button class="adv-btn" id="adv-btn" onclick="setAdv(1)">▲ Advantage</button><button class="adv-btn" id="dis-btn" onclick="setAdv(-1)">▼ Disadvantage</button><input class="tray-input" id="adv-n" type="number" min="1" max="5" value="1" title="instances" style="width:44px;"></div>
     <div class="dice-btns"><button class="dice-btn" onclick="rollLoose(4)">d4</button><button class="dice-btn" onclick="rollLoose(6)">d6</button><button class="dice-btn" onclick="rollLoose(8)">d8</button><button class="dice-btn" onclick="rollLoose(10)">d10</button><button class="dice-btn" onclick="rollLoose(12)">d12</button><button class="dice-btn" onclick="rollLoose(20)">d20</button></div>
-    <div class="tray-note">Advantage: roll an extra die and drop the lowest (disadvantage drops the highest). Applies to the next roll, then clears.</div>
   </div>
 </div>
 </div>
@@ -1461,7 +1461,7 @@ function addLog(label, result, detail, type) {
   entries.insertBefore(div, entries.firstChild); while(entries.children.length > 60) entries.removeChild(entries.lastChild); entries.scrollTop = 0;
   showRollToast(label, result, detail, type);
 }
-function clearLog() { $('log-entries').innerHTML = '<div class="log-hint">Click a stat, skill or attack to roll</div>'; }
+function clearLog() { $('log-entries').innerHTML = ''; }
 function toggleLogCollapse() { document.querySelector('.roll-log').classList.toggle('collapsed'); }
 document.querySelector('.log-header').addEventListener('click', function(e) { if(window.innerWidth <= 768 && !e.target.closest('button,.dm-toggle-btn')) toggleLogCollapse(); });
 (function() { if(window.innerWidth <= 768) document.querySelector('.roll-log').classList.add('collapsed'); })();

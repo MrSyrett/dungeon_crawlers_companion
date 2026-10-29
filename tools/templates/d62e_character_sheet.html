@@ -528,6 +528,7 @@ body.dark #d6-action .turn-badge.warn{color:#f0c060;}
 @media (max-width:389px){
   .tabs-bar .tab-btn{flex:1 1 30%;}
 }
+.tray-note:empty{display:none;}
 </style>
 </head>
 <body>
@@ -792,10 +793,10 @@ body.dark #d6-action .turn-badge.warn{color:#f0c060;}
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>
-  <div class="log-entries" id="log-entries"><div class="log-hint">Click an attribute, skill or weapon to roll</div></div>
+  <div class="log-entries" id="log-entries"></div>
   <div class="dice-tray">
-    <div class="dice-pool-display" id="pool-display">Empty — tap 1D / 2D / 3D to build a pool</div>
-    <div class="tray-note" id="mod-note">No modifiers.</div>
+    <div class="dice-pool-display" id="pool-display">Empty</div>
+    <div class="tray-note" id="mod-note"></div>
     <div class="tray-note" id="opt-note"></div>
     <div class="tray-row" id="succ-target-row" style="display:none;"><span class="tray-label">Success on</span><select class="tray-select" id="succ-target" onchange="optField('successTarget', num(this.value)); applyOptions();"><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6" selected>6</option></select><span class="tray-label" style="color:#6a5a4c;">or higher</span></div>
     <div class="dice-btns">
@@ -805,7 +806,6 @@ body.dark #d6-action .turn-badge.warn{color:#f0c060;}
       <button class="dice-btn clear" onclick="clearPool()">Clear</button>
       <button class="dice-btn roll" onclick="rollPool()">Roll</button>
     </div>
-    <div class="tray-note">Every code rolls with the Wild Die — the last die explodes on a 6 (Advantage) and a 1 is a Complication. A Wound penalty and an armed Hero Point apply to attribute, skill and weapon rolls.</div>
   </div>
 </div>
 </div>
@@ -1146,7 +1146,7 @@ function updateModNote() {
   if(m.run) parts.push('−1D running');
   if(heroArmed) parts.push('Hero Point: ' + heroArmDesc());
   if(assetBonusPips) parts.push('Asset: +' + code(assetBonusPips) + ' next roll');
-  const note = $('mod-note'); if(note) note.textContent = parts.length ? parts.join(' · ') : 'No modifiers.';
+  const note = $('mod-note'); if(note) note.textContent = parts.length ? parts.join(' · ') : '';
   const hb = $('hero-btn'); if(hb) hb.textContent = heroArmed ? 'Hero armed ✓' + (heroArmed > 1 ? ' ×' + heroArmed : '') : heroArmLabel();
 }
 function heroModel() { return (typeof options !== 'undefined' && options && options.heroModel) || 'heroic'; }
@@ -1302,7 +1302,7 @@ function rollSkillRow(tr) {
 }
 // ── Dice pool tray ──────────────────────────────────────────────────────────
 var d62ePool = 0;
-function renderPool() { const el = $('pool-display'); if(el) el.textContent = d62ePool > 0 ? (d62ePool + 'D  ·  last die is Wild') : 'Empty — tap 1D / 2D / 3D to build a pool'; }
+function renderPool() { const el = $('pool-display'); if(el) el.textContent = d62ePool > 0 ? (d62ePool + 'D') : 'Empty'; }
 function addPoolDice(n) { d62ePool = Math.min(30, d62ePool + n); renderPool(); }
 function clearPool() { d62ePool = 0; renderPool(); }
 function rollPool() {
@@ -2041,7 +2041,7 @@ function addLog(label, result, detail, type) {
   entries.insertBefore(div, entries.firstChild); while(entries.children.length > 60) entries.removeChild(entries.lastChild); entries.scrollTop = 0;
   showRollToast(label, result, detail, type);
 }
-function clearLog() { $('log-entries').innerHTML = '<div class="log-hint">Click an attribute, skill or weapon to roll</div>'; }
+function clearLog() { $('log-entries').innerHTML = ''; }
 function toggleLogCollapse() { document.querySelector('.roll-log').classList.toggle('collapsed'); }
 document.querySelector('.log-header').addEventListener('click', function(e) { if(window.innerWidth <= 768 && !e.target.closest('button,.dm-toggle-btn')) toggleLogCollapse(); });
 (function() { if(window.innerWidth <= 768) document.querySelector('.roll-log').classList.add('collapsed'); })();

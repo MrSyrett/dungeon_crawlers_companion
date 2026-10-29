@@ -1124,6 +1124,7 @@ body.dark{--scar-c:#3a1f48;}
   .turn-subtab{font-size:11px;letter-spacing:.02em;padding:9px 2px;}
   .atk-tbl .mini-roll{padding-left:7px;padding-right:7px;font-size:12px;}
 }
+.tray-note:empty{display:none;}
 </style>
 </head>
 <body class="dark">
@@ -1539,7 +1540,7 @@ body.dark{--scar-c:#3a1f48;}
     <button class="log-action-btn import" onclick="document.getElementById('import-file').click()" title="Import JSON">Import</button>
     <input type="file" id="import-file" accept="application/json" style="display:none;" onchange="importSheet(this)">
   </div>
-  <div class="log-entries" id="log-entries"><div class="log-hint">Click an ability, save, skill, or attack to roll</div></div>
+  <div class="log-entries" id="log-entries"></div>
 
   <!-- DICE TRAY -->
   <div class="dice-tray">
@@ -1564,7 +1565,6 @@ body.dark{--scar-c:#3a1f48;}
       <button class="dice-clear-btn" onclick="clearDicePool()">Clear</button>
       <button class="dice-roll-btn" onclick="rollDicePool()" title="Roll the dice pool">🎲 Roll Pool</button>
     </div>
-    <div class="tray-note">Tap dice to build a pool, then Roll. Adv/Normal/Dis applies to every check, save and attack you click — Shadow, exhaustion and conditions are added automatically.</div>
   </div>
 </div>
 </div><!-- app-wrap -->
@@ -2078,7 +2078,7 @@ function dieLabel(sides){ return sides === 100 ? 'd%' : 'd' + sides; }
 function addDie(sides){ dicePool.push(sides); updateDicePoolDisplay(); }
 function updateDicePoolDisplay(){
   const el = $('dice-pool-display'); if(!el) return;
-  if(!dicePool.length){ el.innerHTML = '<span class="empty">Empty — tap dice to add</span>'; return; }
+  if(!dicePool.length){ el.innerHTML = '<span class="empty">Empty</span>'; return; }
   const c = {}; dicePool.forEach(s => c[s] = (c[s] || 0) + 1);
   el.innerHTML = Object.keys(c).map(Number).sort((a,b) => a - b).map(s => '<span>' + c[s] + dieLabel(s) + '</span>').join(' + ');
 }
@@ -3690,7 +3690,7 @@ function addLog(label, result, detail, type){
   entries.scrollTop = 0;
   showRollToast(label, result, detail, type);
 }
-function clearLog(){ $('log-entries').innerHTML = '<div class="log-hint">Click an ability, save, skill, or attack to roll</div>'; }
+function clearLog(){ $('log-entries').innerHTML = ''; }
 function toggleLogCollapse(){ document.querySelector('.roll-log').classList.toggle('collapsed'); }
 document.querySelector('.log-header').addEventListener('click', function(e){ if(window.innerWidth <= 768 && !e.target.closest('button,.dm-toggle-btn')) toggleLogCollapse(); });
 (function(){ if(window.innerWidth <= 768) document.querySelector('.roll-log').classList.add('collapsed'); })();

@@ -362,6 +362,7 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
 /* dd-no-spin-global — hide number-input spinner arrows everywhere */
 input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none;margin:0;}
+.tray-note:empty{display:none;}
 </style>
 </head>
 <body>
@@ -596,7 +597,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>
-  <div class="log-entries" id="log-entries"><div class="log-hint">Click an attribute or combat stat to roll</div></div>
+  <div class="log-entries" id="log-entries"></div>
   <div class="dice-tray">
     <div class="tray-row"><span class="tray-label">Tension</span><input class="tray-input" id="tension" type="number" placeholder="TN"><span class="tray-toggle" id="adv-a" onclick="setAdv('adv')">Adv</span><span class="tray-toggle on" id="adv-n" onclick="setAdv('none')">Flat</span><span class="tray-toggle" id="adv-d" onclick="setAdv('dis')">Dis</span></div>
     <div class="tray-row"><button class="dice-btn" onclick="rollD20Test('','',0)">Roll d20 Test</button></div>
@@ -952,7 +953,7 @@ function addLog(label,result,detail,type){
   entries.insertBefore(div,entries.firstChild); while(entries.children.length>60)entries.removeChild(entries.lastChild); entries.scrollTop=0;
   showRollToast(label,result,detail,type);
 }
-function clearLog(){ $('log-entries').innerHTML='<div class="log-hint">Click an attribute or combat stat to roll</div>'; }
+function clearLog(){ $('log-entries').innerHTML=''; }
 function toggleLogCollapse(){ document.querySelector('.roll-log').classList.toggle('collapsed'); }
 document.querySelector('.log-header').addEventListener('click',function(e){ if(window.innerWidth<=768&&!e.target.closest('button,.dm-toggle-btn'))toggleLogCollapse(); });
 (function(){ if(window.innerWidth<=768)document.querySelector('.roll-log').classList.add('collapsed'); })();
