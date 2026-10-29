@@ -753,6 +753,13 @@ function renderCombat(){
     };}
     host.appendChild(d);
   });
+  var ini=document.createElement('div'); ini.className='stat click init-stat';
+  ini.style.cssText='grid-column:1/-1;display:flex;align-items:baseline;justify-content:center;gap:10px;padding:4px 7px;';
+  ini.title='Roll Initiative — d20 Test + Agility (posted to the campaign Roll Log)';
+  var ag=attrVal('agility');
+  ini.innerHTML='<div class="lbl">Initiative</div><div class="big" style="font-size:18px;">'+(ag>=0?'+':'')+ag+'</div><div class="sub">d20 + Agility</div>';
+  ini.onclick=function(){ rollInitiative(); };
+  host.appendChild(ini);
   var dbon=num(S.dmod)+originDamageBonus();
   $('dmg-str').textContent=S.ddie+' + '+S.datt+(dbon?' + '+dbon:'')+(originDamageBonus()?' (Sword)':'');
   var dre=$('f-dr'); if(dre&&document.activeElement!==dre)dre.value=num(S.dr);
@@ -903,7 +910,9 @@ function onIdent(){S.name=$('f-name').value;S.secret=$('f-secret').value;syncDoc
 /* ═══ dice ═══ */
 function d(n){return Math.floor(Math.random()*n)+1;}
 function setAdv(a){_adv=a;['a','n','d'].forEach(function(x){$('adv-'+x).classList.remove('on');});$('adv-'+(a==='adv'?'a':a==='dis'?'d':'n')).classList.add('on');}
-function rollD20Test(label,attrKey,extra){
+// opt.plain: log under the bare label with just the integer total as the result
+// (no hero-name prefix, no Tension verdict) — used by Initiative so the GM Screen can read it.
+function rollD20Test(label,attrKey,extra,opt){
   var mod=attrKey?attrVal(attrKey):0; mod+=num(extra); mod+=condPenalty();
   var adv=_adv; if(condDisadv()){adv=(adv==='adv')?'none':'dis';}
   var r1=d(20),r2=d(20),pick=r1;
@@ -912,11 +921,15 @@ function rollD20Test(label,attrKey,extra){
   var tn=num($('tension').value);
   // Splash Page: natural 20 or beating the Tension by 15+; Editorial Cut: natural 1 or missing it by 15+ (p.33-34).
   var type=(pick===20||(tn&&total>=tn+15))?'crit':(pick===1||(tn&&total<=tn-15))?'fumble':'normal';
+  if(opt&&opt.plain){tn=0;type=pick===20?'crit':pick===1?'fumble':'normal';}
   var outcome=tn?(total>=tn?' ✓ vs '+tn:' ✗ vs '+tn):'';
   var dtxt=(adv==='adv')?('d20['+r1+','+r2+'→'+pick+' adv]'):(adv==='dis')?('d20['+r1+','+r2+'→'+pick+' dis]'):('d20:'+pick);
   var detail=dtxt+(mod?(mod>0?' +'+mod:' '+mod):'')+(condPenalty()?' (cond)':'');
+  if(opt&&opt.plain){ addLog(label, String(total), detail+(attrKey?' · '+attrKey:''), type); return total; }
   addLog((S.name||'Hero')+' · '+(label||'Test')+(attrKey?' · '+attrKey:''), total+outcome, detail, type);
 }
+// Initiative: a d20 Test + Agility (Test Result = 1d20 + Attribute); highest acts first.
+function rollInitiative(){ return rollD20Test('Initiative','agility',0,{plain:true}); }
 function rollDamage(){
   var faces=num(S.ddie.replace('1d',''))||6; var r=d(faces); var attr=attrVal(S.datt.toLowerCase()); var sword=originDamageBonus(); var tot=r+attr+num(S.dmod)+sword;
   addLog((S.name||'Hero')+' · Damage', tot, S.ddie+':'+r+' + '+S.datt+'('+(attr>=0?'+':'')+attr+')'+(num(S.dmod)?' +'+num(S.dmod):'')+(sword?' +'+sword+' Sword':''), r===faces?'crit':'normal');

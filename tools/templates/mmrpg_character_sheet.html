@@ -180,6 +180,8 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .spd-lines .spd{display:flex;justify-content:space-between;align-items:baseline;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);}
 .spd-lines .spd b{font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:700;color:var(--mv-dk);}
 .spd-lines .spd.init{grid-column:1 / -1;border-bottom:1px solid var(--rule);padding-bottom:2px;margin-bottom:1px;}
+.spd-lines .spd.init{cursor:pointer;border-radius:4px;padding-left:3px;padding-right:3px;}
+.spd-lines .spd.init:hover{background:rgba(236,29,36,.12);}
 .eq-owner,.brow-owner{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mv);margin-left:5px;}
 .eq-tag{display:inline-block;font-family:'Share Tech Mono',monospace;font-size:9px;font-weight:700;color:var(--mv);border:1px solid var(--mv);border-radius:4px;padding:0 3px;margin-left:4px;vertical-align:middle;}
 /* Attacks / Damage section (above the tabs) */
@@ -982,7 +984,7 @@ function renderDerived(){
   var mv=grantedMovement();
   Object.keys(mv).forEach(function(mode){ lines.push(['',mode,hv(mv[mode])]); });
   if(halved) lines.push(['cond','Blinded','½ speed']);
-  host.innerHTML=lines.map(function(l){ return '<div class="spd '+l[0]+'"><span>'+l[1]+'</span><b>'+l[2]+'</b></div>'; }).join('');
+  host.innerHTML=lines.map(function(l){ return '<div class="spd '+l[0]+'"'+(l[0]==='init'?' onclick="rollInitiative()" title="Roll Initiative — d616 + Vigilance (edges, troubles and Karma from the tray apply)"':'')+'><span>'+l[1]+(l[0]==='init'?' 🎲':'')+'</span><b>'+l[2]+'</b></div>'; }).join('');
 }
 // ── Attacks / Damage: the four damage abilities (Melee, Agility, Ego, Logic) ──
 var DMG_ABILITIES=['melee','agility','ego','logic'];
@@ -1146,10 +1148,15 @@ function doCheck(label, abilityKey, opts){
   var bTxt=bonus?' (incl. +'+bonus+' power)':'';
   var cTxt=ct.t?' · '+ct.why.join(', '):'';
   var detail=dieStr(r)+' '+r.sum+(score?' +'+score:'')+bTxt+etTxt+kTxt+cTxt+(r.ultimate?' · Ultimate Fantastic (6 M 6) — automatic success':(r.fantastic?' · Fantastic! (Yes, and…)':''));
-  addLog(label, (r.fantastic?'FANTASTIC · ':'')+total, detail, r.fantastic?'crit':'normal');
+  // opts.plain: the result is just the integer total (Fantastic noted in the detail) — Initiative uses it.
+  addLog(label, opts.plain?String(total):(r.fantastic?'FANTASTIC · ':'')+total, detail, r.fantastic?'crit':'normal');
   edges=0; troubles=0; renderTray();
+  r.total=total;
   return r;
 }
+// Initiative check (Core): d616 + Vigilance, through the normal check machinery (edges,
+// troubles, Karma, condition trouble). Logged as "Initiative" with the bare total for the GM Screen.
+function rollInitiative(){ return doCheck('Initiative', 'vigilance', {plain:true}); }
 function rollAbility(k){ var a=ABILITIES.find(function(x){return x.key===k;}); doCheck(a.name+' check', k, {}); }
 function rollFree(){ doCheck('d616', null, {}); }
 function rollAttack(i){

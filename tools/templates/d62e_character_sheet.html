@@ -690,7 +690,7 @@ body.dark #d6-action .turn-badge.warn{color:#f0c060;}
 
     <div class="center-col">
       <div class="card">
-      <div class="section-bar accent"><span>Status</span></div>
+      <div class="section-bar accent"><span>Status</span><span class="hdr-right"><button class="hdr-btn d6-init-btn" data-nolock onclick="rollInitiative()" title="Roll Initiative — Basic Initiative is a Perception roll (Wild Die included). Not an action; wounds still apply.">Initiative</button></span></div>
       <div class="vitals" style="grid-template-columns:1fr;">
         <div class="vital wide">
           <div class="vlbl"><span>Wounds</span><small id="wound-note">healthy</small></div>
@@ -1282,6 +1282,15 @@ function actSheetSpend(run) {
   run(); _act.used++; renderAction(); scheduleAutosave();
 }
 function rollAttr(a) { actSheetSpend(() => rollCode(a, attr(a))); }
+// Basic Initiative: roll the Perception die code (with the Wild Die). Not an action, so no
+// multi-action penalty and it never spends an armed Hero Point; a wound penalty still applies.
+// Logged as "Initiative (Perception)" with the bare total so the GM Screen can read it.
+function rollInitiative() {
+  const w = WOUND_PEN[wound] || 0;
+  const c = computeRoll(Math.max(1, attr('Perception') - w), { noMods: true });
+  addLog('Initiative (Perception)', String(c.total), [c.detail, w ? '−' + code(w) + ' ' + wound : ''].filter(Boolean).join(' · '), c.type);
+  return c.total;
+}
 function onSkillAdvChange(cb) { const tr = cb.closest('tr'); tr.dataset.adv = cb.checked ? '1' : '0'; recalc(); scheduleAutosave(); }
 function rollSkillRow(tr) {
   let base = rowTotal(tr); let name = tr.querySelector('.sk-name-in').value.trim() || 'Skill';

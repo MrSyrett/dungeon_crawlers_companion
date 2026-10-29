@@ -775,7 +775,7 @@ body.dark .sdt-badge.bad{color:#f08a84;border-color:#a8433d;}
 
       <!-- VITALS: HP / AC / XP / Luck -->
       <div class="card sd-vitals-card">
-      <div class="sl">Vitals</div>
+      <div class="sl"><span>Vitals</span><button type="button" class="trk-add sd-init-btn" onclick="rollInitiative()" title="Roll Initiative — d20 + DEX modifier (posted to the campaign Roll Log)">Initiative <b id="init-mod">+0</b></button></div>
       <div class="sd-vitals">
         <div class="sd-vital">
           <span class="sv-lbl">HP</span>
@@ -2037,6 +2037,8 @@ function refreshAutoAC() {
   if(a) a.value = String(computeSoak());
   const em = document.getElementById('evade-mod');
   if(em) em.textContent = fmtMod(evadeMod());
+  const im = document.getElementById('init-mod');
+  if(im) im.textContent = fmtMod(getStatMod('dex'));
 }
 
 // Show the AC tile + hide Stress/Defense in vanilla Shadowdark; flip in HeroDark.
@@ -3337,6 +3339,19 @@ function rollEvade() {
   addLog('Evade'+(roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':''), total,
     `${base} + DEX(${fmtMod(dexMod)})${exh?' '+fmtMod(exh)+' exhausted':''}${str?' '+fmtMod(str)+' stress':''} = ${total} vs Attack DC`, type);
   heroDarkLuckOnNat(roll, 'evade');
+}
+
+// Initiative (Core): everyone rolls d20 + DEX modifier; highest goes first.
+// Logged as "Initiative" with the bare total so the GM Screen can read it.
+function rollInitiative() {
+  const dexMod = getStatMod('dex');
+  const {result:roll, detail:advDetail} = rollWithAdv(20);
+  const total = roll + dexMod;
+  const type = roll===20?'crit':roll===1?'fumble':'normal';
+  const base = advDetail || `d20(${roll})`;
+  addLog('Initiative', String(total), `${base} + DEX(${fmtMod(dexMod)}) = ${total}`+(roll===20?' · NAT 20':roll===1?' · NAT 1':''), type);
+  const im = document.getElementById('init-mod');
+  if(im) im.textContent = fmtMod(dexMod);
 }
 
 // Extra spell lists a caster opted into (beyond their class's own list). Saved

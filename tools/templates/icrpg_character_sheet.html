@@ -683,10 +683,11 @@ body.dark .tabs-bar{background:#1a161a;}
       <div class="vitals" style="grid-template-columns:1fr;">
         <div class="vital wide">
           <div class="vlbl"><span>Hearts &amp; HP</span></div>
-          <div class="vbig" style="margin-top:2px;">
+          <div class="vbig" style="margin-top:2px;flex-wrap:wrap;row-gap:4px;">
             <input type="number" id="f-hp" data-nolock value="10" oninput="onHp()"> <span style="color:var(--muted);font-size:20px;">/</span>
             <input type="number" id="f-hpmax" data-nolock value="10" oninput="onHp()">
             <button class="small-btn ghost" style="margin-left:8px;" onclick="icRecover()" title="Sacrifice your TURN: d20 + CON vs TARGET → regain CON + 1 HP (p.17)">Recover</button>
+            <button class="small-btn ghost ic-init-btn" style="margin-left:4px;" onclick="icInitiative()" title="Roll Initiative — everyone rolls a plain d20; highest goes first (posted to the campaign Roll Log)">Initiative</button>
           </div>
           <div class="hearts" id="hearts"></div>
         </div>
@@ -889,6 +890,12 @@ function rollStat(ab){
   var type = crit?'crit':fumble?'fumble':'normal';
   var verdict = crit?'★ NAT 20 — ULTIMATE':hit?'✓ HIT vs '+tgt:fumble?'✗ NAT 1':'✗ MISS vs '+tgt;
   addLog(ab+' Check', total+'  '+verdict, 'd20('+d+') '+(t>=0?'+':'')+t, type);
+}
+// Initiative: everyone rolls a plain d20 (no stat); highest goes first.
+// Logged as "Initiative" with the bare total so the GM Screen can read it.
+function icInitiative(){
+  var d=die(20);
+  addLog('Initiative', String(d), 'd20('+d+') · highest goes first', d===20?'crit':d===1?'fumble':'normal');
 }
 function rollEffort(key,dieCode,name){
   var n=dieVal(dieCode), r=die(n), bon=num(($('ef-'+key)||{}).value), total=r+bon;

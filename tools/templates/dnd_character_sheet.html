@@ -1656,7 +1656,7 @@ function d20Check(label, mod, opts){
   let type = 'normal';
   if(r.nat === 20) type = 'crit'; else if(r.nat === 1) type = 'fumble';
   _lastRoll = { label, total };
-  addLog(label, sgn(total), detail, type);
+  addLog(label, opts.plain ? String(total) : sgn(total), detail, type);   // opts.plain: bare integer (Initiative → GM Screen)
   return { total, nat: r.nat, type };
 }
 // Rolling is disabled while the sheet is unlocked (you're editing, not playing).
@@ -1680,7 +1680,7 @@ function rollSkill(name){
 }
 // Initiative = DEX mod + magic + Alert (Proficiency Bonus); a manual override wins. Remarkable Athlete → Advantage.
 function initBonus(){ return modOf('DEX') + magicSum('init') + (hasFeature('Alert') ? profBonus() : 0); }
-function rollInitiative(){ if(rollsOff()) return; const ov = ovNum('init', NaN); d20Check('Initiative', isNaN(ov) ? initBonus() : ov, { kind:'check', abil:'DEX', adv: hasFeature('Remarkable Athlete') ? 'Remarkable Athlete' : '', note: hasFeature('Alert') ? 'Alert +PB' : '' }); }
+function rollInitiative(){ if(rollsOff()) return; const ov = ovNum('init', NaN); d20Check('Initiative', isNaN(ov) ? initBonus() : ov, { kind:'check', abil:'DEX', adv: hasFeature('Remarkable Athlete') ? 'Remarkable Athlete' : '', note: hasFeature('Alert') ? 'Alert +PB' : '', plain:true }); }
 function rollSpellAttack(){ if(rollsOff()) return; if(spellsBlockedByArmor('Spell Attack')) return; d20Check('Spell Attack', spellAtkBonus(), { kind:'attack' }); }
 function rollDeathSave(){
   if(rollsOff()) return;

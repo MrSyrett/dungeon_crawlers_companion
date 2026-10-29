@@ -1935,7 +1935,7 @@ function d20Check(label, mod, opts){
   let type = 'normal';
   if(misFail || r.nat === 1) type = 'fumble'; else if(r.nat === 20) type = 'crit';
   _lastRoll = { label, total };
-  addLog(label, misFail ? 'Fail (' + total + ')' : sgn(total), detail, type);
+  addLog(label, opts.plain ? String(total) : misFail ? 'Fail (' + total + ')' : sgn(total), detail, type);   // opts.plain: bare integer (Initiative → GM Screen)
   return { total, nat: r.nat, type, autoFail: misFail, mode: r.mode };
 }
 function rollsOff(){ if(_locked) return false; addLog('Rolling off', '🔓', 'Lock the sheet to roll', 'fumble'); return true; }
@@ -1977,7 +1977,7 @@ function rollInitiative(){
   if(hasFeature('Forth to Battle')) bits.push('Forth to Battle ' + sgn(modOf('CHA')) + ' CHA');
   if(hasFeature('Ambusher')) bits.push('Ambusher ' + sgn(modOf('WIS')) + ' WIS');
   if(errandRunner()) bits.push('Errand Runner +' + errandRunner());
-  d20Check('Initiative', isNaN(ov) ? initBonus() : ov, { kind:'check', abil:'DEX', adv: hasFeature('War-Hardened') ? 'War-Hardened' : '', note: bits.join(' · ') });
+  d20Check('Initiative', isNaN(ov) ? initBonus() : ov, { kind:'check', abil:'DEX', adv: hasFeature('War-Hardened') ? 'War-Hardened' : '', note: bits.join(' · '), plain:true });
 }
 function rollDeathSave(){
   if(rollsOff()) return;

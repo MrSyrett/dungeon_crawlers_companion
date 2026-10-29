@@ -720,7 +720,7 @@ body.dark #d6-action .turn-badge.warn{color:#f0c060;}
 
     <div class="center-col">
       <div class="card">
-      <div class="section-bar gold"><span>Status</span><span class="hdr-right"><button class="hdr-btn" data-nolock onclick="rollResist()" title="Roll Strength (+ armor) against a damage roll. Not an action: no wound, running or multi-action penalty (core p.14). A Force Point still doubles it.">Resist Damage</button></span></div>
+      <div class="section-bar gold"><span>Status</span><span class="hdr-right"><button class="hdr-btn sw-init-btn" data-nolock onclick="rollInitiative()" title="Roll Initiative — your Dexterity die code (Wild Die only with the house rule). Not an action; wounds still apply.">Initiative</button><button class="hdr-btn" data-nolock onclick="rollResist()" title="Roll Strength (+ armor) against a damage roll. Not an action: no wound, running or multi-action penalty (core p.14). A Force Point still doubles it.">Resist Damage</button></span></div>
       <div class="vitals">
         <div class="vital wide">
           <div class="vlbl"><span>Wounds</span><small id="wound-note">unhurt</small></div>
@@ -1223,6 +1223,16 @@ function rollResist() {
   if(forcePointArmed) { pips = base * 2; fp = true; _act.fpRolls = (_act.fpRolls || 0) + 1; }
   const r = rollDice(Math.max(1, pips), true), ws = wildStyle(r);
   addLog('Resist damage (Strength)', r.total + ws.mark, [swDiceStr(pips, r), ap ? 'incl. armor ' + toCode(ap, true) : '', fp ? 'Force Point (doubled)' : '', 'no wound / multi-action penalty · not an action', ws.note].filter(Boolean).join(' · '), ws.type || 'normal');
+}
+// Initiative: roll the Dexterity die code (Wild Die only with the house rule).
+// Not an action (no multi-action/running penalty, never spends a Force Point); wounds apply.
+// Logged as "Initiative (Dexterity)" with the bare total so the GM Screen can read it.
+function rollInitiative() {
+  const base = attr('Dexterity'), w = WOUND_PEN[wound] || 0;
+  const pips = Math.max(1, base - w);
+  const r = rollDice(pips, true), ws = wildStyle(r);
+  addLog('Initiative (Dexterity)', String(r.total), [swDiceStr(pips, r), w ? '−' + toCode(w) + ' ' + wound : '', ws.note].filter(Boolean).join(' · '), ws.type || 'normal');
+  return r.total;
 }
 function callDarkSide() {
   $('f-ds').value = num($('f-ds').value) + 1; $('f-fp').value = num($('f-fp').value) + 1;

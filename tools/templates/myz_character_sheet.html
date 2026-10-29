@@ -1551,8 +1551,17 @@ function actSpecial(add){
     add('special',{ name:m.name||'Mutation', kind:kind, sub:spend+' MP', blocked:blocked, btn:'Use', run:function(){ useMutation(i); } });
   });
 }
+// Initiative (core p.80): D6 + current Agility; Combat Veteran rolls two D6 and keeps the higher.
+// Logged as "Initiative" with the bare total so the GM Screen can read it.
+function hasTalent(n){ return (S.talents||[]).some(function(t){ return t&&String(t.name||'').trim().toLowerCase()===n.toLowerCase(); }); }
+function myzInitiative(){
+  var agi=attrCur('AGI'), vet=hasTalent('Combat Veteran'), a=die6(), b=vet?die6():0, d=Math.max(a,b), total=d+agi;
+  addLog('Initiative', String(total), (vet?'D6×2 ['+a+','+b+'] keep '+d+' (Combat Veteran)':'D6('+d+')')+' + Agility '+agi+' = '+total, 'normal');
+  return total;
+}
 function actRow2(){
-  var b='<span class="act-res">Bullets <b>'+bulletsOnHand()+'</b></span>';
+  var b='<button class="hdr-btn myz-init-btn" onclick="myzInitiative()" title="Roll Initiative — D6 + current Agility'+(hasTalent('Combat Veteran')?' (Combat Veteran: two D6, keep the higher)':'')+'">Initiative +'+attrCur('AGI')+'</button>';
+  b+='<span class="act-res">Bullets <b>'+bulletsOnHand()+'</b></span>';
   ATTR_KEYS.forEach(function(k){ if(isBroken(k)) b+='<span class="act-badge bad">'+esc(attrName(k))+' Broken</span>'; });
   CONDS.forEach(function(c){ if(S.conditions&&S.conditions[c.name]) b+='<span class="act-badge warn">'+esc(c.name)+'</span>'; });
   return b;
