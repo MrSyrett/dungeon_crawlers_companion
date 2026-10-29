@@ -2359,6 +2359,45 @@ html:not([data-gm-sys="DB"]) .db-init-banner { display: none; }
 html:not([data-gm-sys="PB"]) .pb-init-banner { display: none; }
 @media (max-width: 768px) { .trk-pb-init .trk-pb-lbl, .trk-pb-indiv .trk-pb-lbl { display: none; } }
 </style>
+<style id="gm-sys-theme">
+/* ── Campaign theme (set from the linked campaign: <html data-gm-theme="SYS">) ──
+   A hybrid: the top monitor bar, the bottom tools bar, the window headers, the accent
+   colour and the heading fonts follow the campaign's game (the same tokens its
+   Adventure Prep uses, from public/tokens.css); window backgrounds and content stay
+   neutral. With no campaign linked the screen keeps its own blue. Shadowdark, Pirate
+   Borg and D&D use their second face (the logo faces are hard to read at this size);
+   Vaesen's bars are its deep blue so the gold only marks accents. */
+:root[data-gm-theme="ACE"]{--accent:#3aa8e0;--accent-2:color-mix(in srgb,#3aa8e0 70%,#000);--accent-dim:color-mix(in srgb,#3aa8e0 55%,#000);--glow:color-mix(in srgb,#3aa8e0 45%,transparent);--glow-2:color-mix(in srgb,#3aa8e0 34%,transparent);--gt-a:#d8b92a;--gt-b:#f4d84a;--gt-bg:#0e1620;--gt-panel:#141e2a;--gt-text:#eef4f8;--gt-head:"Lilita One","Geist",sans-serif;--gt-body:"Nunito", ui-sans-serif, system-ui, sans-serif}
+:root[data-gm-theme="CO"]{--accent:#2fa595;--accent-2:color-mix(in srgb,#2fa595 70%,#000);--accent-dim:color-mix(in srgb,#2fa595 55%,#000);--glow:color-mix(in srgb,#2fa595 45%,transparent);--glow-2:color-mix(in srgb,#2fa595 34%,transparent);--gt-a:#0c1512;--gt-b:#17564d;--gt-bg:#12201c;--gt-panel:#16241f;--gt-text:#e7efeb;--gt-head:"Cormorant Garamond","Geist",sans-serif;--gt-body:"Lora", Georgia, serif}
+:root[data-gm-theme="D62E"]{--accent:#e07b39;--accent-2:color-mix(in srgb,#e07b39 70%,#000);--accent-dim:color-mix(in srgb,#e07b39 55%,#000);--glow:color-mix(in srgb,#e07b39 45%,transparent);--glow-2:color-mix(in srgb,#e07b39 34%,transparent);--gt-a:#121214;--gt-b:#6d360f;--gt-bg:#1c1a1e;--gt-panel:#262329;--gt-text:#eae6e8;--gt-head:"Saira Condensed","Geist",sans-serif;--gt-body:"Saira", ui-sans-serif, system-ui, sans-serif}
+:root[data-gm-theme="DB"]{--accent:#5cb894;--accent-2:color-mix(in srgb,#5cb894 70%,#000);--accent-dim:color-mix(in srgb,#5cb894 55%,#000);--glow:color-mix(in srgb,#5cb894 45%,transparent);--glow-2:color-mix(in srgb,#5cb894 34%,transparent);--gt-a:#0b1f18;--gt-b:#236855;--gt-bg:#1a1918;--gt-panel:#232120;--gt-text:#eee3cc;--gt-head:"Hideout","EB Garamond","Geist",sans-serif;--gt-body:"EB Garamond", ui-serif, Georgia, serif}
+:root[data-gm-theme="DCC"]{--accent:#f2c230;--accent-2:color-mix(in srgb,#f2c230 70%,#000);--accent-dim:color-mix(in srgb,#f2c230 55%,#000);--glow:color-mix(in srgb,#f2c230 45%,transparent);--glow-2:color-mix(in srgb,#f2c230 34%,transparent);--gt-a:#0b0a0d;--gt-b:#3a0c22;--gt-bg:#121016;--gt-panel:#19161f;--gt-text:#ece9e1;--gt-head:"Anton","Geist",sans-serif;--gt-body:"Barlow", ui-sans-serif, system-ui, sans-serif}
+:root[data-gm-theme="DND"]{--accent:#ff3b30;--accent-2:color-mix(in srgb,#ff3b30 70%,#000);--accent-dim:color-mix(in srgb,#ff3b30 55%,#000);--glow:color-mix(in srgb,#ff3b30 45%,transparent);--glow-2:color-mix(in srgb,#ff3b30 34%,transparent);--gt-a:#7a1119;--gt-b:#c8102e;--gt-bg:#1a1718;--gt-panel:#221e1f;--gt-text:#f5efe3;--gt-head:"Cinzel","Geist",sans-serif;--gt-body:"EB Garamond", Georgia, serif}
+:root[data-gm-theme="GB"]{--accent:#8bc53f;--accent-2:color-mix(in srgb,#8bc53f 70%,#000);--accent-dim:color-mix(in srgb,#8bc53f 55%,#000);--glow:color-mix(in srgb,#8bc53f 45%,transparent);--glow-2:color-mix(in srgb,#8bc53f 34%,transparent);--gt-a:#5f8f24;--gt-b:#8bc53f;--gt-bg:#181e11;--gt-panel:#1e2614;--gt-text:#e9f0dc;--gt-head:"Ghostbusters","Anton","Geist",sans-serif;--gt-body:"Asap", ui-sans-serif, system-ui, sans-serif}
+:root[data-gm-theme="ICRPG"]{--accent:#e8823c;--accent-2:color-mix(in srgb,#e8823c 70%,#000);--accent-dim:color-mix(in srgb,#e8823c 55%,#000);--glow:color-mix(in srgb,#e8823c 45%,transparent);--glow-2:color-mix(in srgb,#e8823c 34%,transparent);--gt-a:#8a3712;--gt-b:#c8501e;--gt-bg:#1f1914;--gt-panel:#2a221b;--gt-text:#eae2d8;--gt-head:"Permanent Marker","Geist",sans-serif;--gt-body:"Archivo", ui-sans-serif, system-ui, sans-serif}
+:root[data-gm-theme="JLU"]{--accent:#6293f2;--accent-2:color-mix(in srgb,#6293f2 70%,#000);--accent-dim:color-mix(in srgb,#6293f2 55%,#000);--glow:color-mix(in srgb,#6293f2 45%,transparent);--glow-2:color-mix(in srgb,#6293f2 34%,transparent);--gt-a:#1c49a8;--gt-b:#2f6fed;--gt-bg:#182339;--gt-panel:#1f2c47;--gt-text:#e8eefb;--gt-head:"Russo One","Geist",sans-serif;--gt-body:"Rubik", ui-sans-serif, system-ui, sans-serif}
+:root[data-gm-theme="KOB"]{--accent:#a56ee8;--accent-2:color-mix(in srgb,#a56ee8 70%,#000);--accent-dim:color-mix(in srgb,#a56ee8 55%,#000);--glow:color-mix(in srgb,#a56ee8 45%,transparent);--glow-2:color-mix(in srgb,#a56ee8 34%,transparent);--gt-a:#5c3596;--gt-b:#7c4dbd;--gt-bg:#232128;--gt-panel:#2e2b38;--gt-text:#e8e4dc;--gt-head:"Dreadful","Geist",sans-serif;--gt-body:"Mulish", ui-sans-serif, system-ui, sans-serif}
+:root[data-gm-theme="LOTR"]{--accent:#e2c36b;--accent-2:color-mix(in srgb,#e2c36b 70%,#000);--accent-dim:color-mix(in srgb,#e2c36b 55%,#000);--glow:color-mix(in srgb,#e2c36b 45%,transparent);--glow-2:color-mix(in srgb,#e2c36b 34%,transparent);--gt-a:#0f2118;--gt-b:#1f4a30;--gt-bg:#0f2118;--gt-panel:#15291e;--gt-text:#ece4cc;--gt-head:"Ringbearer","EB Garamond","Geist",sans-serif;--gt-body:"EB Garamond", ui-serif, Georgia, serif}
+:root[data-gm-theme="MMRPG"]{--accent:#ff3b30;--accent-2:color-mix(in srgb,#ff3b30 70%,#000);--accent-dim:color-mix(in srgb,#ff3b30 55%,#000);--glow:color-mix(in srgb,#ff3b30 45%,transparent);--glow-2:color-mix(in srgb,#ff3b30 34%,transparent);--gt-a:#b3141a;--gt-b:#ec1d24;--gt-bg:#141011;--gt-panel:#1b1618;--gt-text:#f4f1f2;--gt-head:"Marvel","Oswald","Geist",sans-serif;--gt-body:"Source Sans 3", ui-sans-serif, system-ui, sans-serif}
+:root[data-gm-theme="MYZ"]{--accent:#cf6a2a;--accent-2:color-mix(in srgb,#cf6a2a 70%,#000);--accent-dim:color-mix(in srgb,#cf6a2a 55%,#000);--glow:color-mix(in srgb,#cf6a2a 45%,transparent);--glow-2:color-mix(in srgb,#cf6a2a 34%,transparent);--gt-a:#8f4517;--gt-b:#cf6a2a;--gt-bg:#1c1714;--gt-panel:#262019;--gt-text:#e6ddcf;--gt-head:"Anton","Geist",sans-serif;--gt-body:"Asap", ui-sans-serif, system-ui, sans-serif}
+:root[data-gm-theme="NIM"]{--accent:#7fd39a;--accent-2:color-mix(in srgb,#7fd39a 70%,#000);--accent-dim:color-mix(in srgb,#7fd39a 55%,#000);--glow:color-mix(in srgb,#7fd39a 45%,transparent);--glow-2:color-mix(in srgb,#7fd39a 34%,transparent);--gt-a:#141816;--gt-b:#175235;--gt-bg:#212623;--gt-panel:#2a312d;--gt-text:#e8e4dc;--gt-head:"Fraunces","Geist",sans-serif;--gt-body:"Figtree", ui-sans-serif, system-ui, sans-serif}
+:root[data-gm-theme="PB"]{--accent:#e6463a;--accent-2:color-mix(in srgb,#e6463a 70%,#000);--accent-dim:color-mix(in srgb,#e6463a 55%,#000);--glow:color-mix(in srgb,#e6463a 45%,transparent);--glow-2:color-mix(in srgb,#e6463a 34%,transparent);--gt-a:#0d0b0b;--gt-b:#3a0a0d;--gt-bg:#0d0b0b;--gt-panel:#161212;--gt-text:#ece4d4;--gt-head:"1651 Alchemy","Geist",sans-serif;--gt-body:"EB Garamond", ui-serif, Georgia, serif}
+:root[data-gm-theme="SD"]{--accent:#c8a020;--accent-2:color-mix(in srgb,#c8a020 70%,#000);--accent-dim:color-mix(in srgb,#c8a020 55%,#000);--glow:color-mix(in srgb,#c8a020 45%,transparent);--glow-2:color-mix(in srgb,#c8a020 34%,transparent);--gt-a:#0f0f11;--gt-b:#141418;--gt-bg:#0f0f11;--gt-panel:#141418;--gt-text:#f6f5f2;--gt-head:"Old Newspaper","Geist",sans-serif;--gt-body:"Montserrat", ui-sans-serif, system-ui, sans-serif}
+:root[data-gm-theme="SW"]{--accent:#f0c020;--accent-2:color-mix(in srgb,#f0c020 70%,#000);--accent-dim:color-mix(in srgb,#f0c020 55%,#000);--glow:color-mix(in srgb,#f0c020 45%,transparent);--glow-2:color-mix(in srgb,#f0c020 34%,transparent);--gt-a:#0a0a0a;--gt-b:#1f1f1f;--gt-bg:#111113;--gt-panel:#18181b;--gt-text:#f2f4f8;--gt-head:"Star Jedi","Archivo Black","Geist",sans-serif;--gt-body:"Libre Franklin", ui-sans-serif, system-ui, sans-serif}
+:root[data-gm-theme="TWD"]{--accent:#9e1b1b;--accent-2:color-mix(in srgb,#9e1b1b 70%,#000);--accent-dim:color-mix(in srgb,#9e1b1b 55%,#000);--glow:color-mix(in srgb,#9e1b1b 45%,transparent);--glow-2:color-mix(in srgb,#9e1b1b 34%,transparent);--gt-a:#7a1414;--gt-b:#9e1b1b;--gt-bg:#1a1313;--gt-panel:#241919;--gt-text:#e8e1d6;--gt-head:"Dead Kansas","Oswald","Geist",sans-serif;--gt-body:"Mulish", ui-sans-serif, system-ui, sans-serif}
+:root[data-gm-theme="VAE"]{--accent:#d4a53a;--accent-2:color-mix(in srgb,#d4a53a 70%,#000);--accent-dim:color-mix(in srgb,#d4a53a 55%,#000);--glow:color-mix(in srgb,#d4a53a 45%,transparent);--glow-2:color-mix(in srgb,#d4a53a 34%,transparent);--gt-a:#1b2a4a;--gt-b:#2f4772;--gt-bg:#17140f;--gt-panel:#211c15;--gt-text:#e8e0cf;--gt-head:"Fraunces","Geist",sans-serif;--gt-body:"EB Garamond", ui-serif, Georgia, serif}
+:root[data-gm-theme="YZE"]{--accent:#16bdd6;--accent-2:color-mix(in srgb,#16bdd6 70%,#000);--accent-dim:color-mix(in srgb,#16bdd6 55%,#000);--glow:color-mix(in srgb,#16bdd6 45%,transparent);--glow-2:color-mix(in srgb,#16bdd6 34%,transparent);--gt-a:#0d8299;--gt-b:#16bdd6;--gt-bg:#0e1c20;--gt-panel:#132225;--gt-text:#e2eef0;--gt-head:"Archivo Narrow","Geist",sans-serif;--gt-body:"IBM Plex Sans", ui-sans-serif, system-ui, sans-serif}
+:root[data-gm-theme] .topbar{background:linear-gradient(120deg,color-mix(in srgb,var(--gt-a) 70%,#000),color-mix(in srgb,var(--gt-b) 55%,var(--gt-bg)))!important;border-bottom-color:color-mix(in srgb,var(--accent) 40%,transparent)!important}
+:root[data-gm-theme] .bottom-bar{background:linear-gradient(180deg,color-mix(in srgb,var(--gt-b) 45%,var(--gt-bg)),color-mix(in srgb,var(--gt-a) 60%,#000))!important;box-shadow:0 -2px 0 color-mix(in srgb,var(--accent) 30%,transparent),0 -6px 16px rgba(0,0,0,.4)!important}
+:root[data-gm-theme] .cst-head{background:linear-gradient(180deg,color-mix(in srgb,var(--gt-panel) 92%,var(--gt-text)),var(--gt-panel))!important;box-shadow:0 1px 0 color-mix(in srgb,var(--accent) 35%,transparent)!important}
+:root[data-gm-theme] .cst-title,:root[data-gm-theme] .advh-title,:root[data-gm-theme] .advh-card-h,:root[data-gm-theme] .advh-row-name,:root[data-gm-theme] .qbtn,:root[data-gm-theme] .cm-name,:root[data-gm-theme] .bb-restore-btn{font-family:var(--gt-head)!important;letter-spacing:.06em}
+:root[data-gm-theme] .cst-title{color:color-mix(in srgb,var(--gt-text) 75%,#fff)!important}
+:root[data-gm-theme] .qbtn,:root[data-gm-theme] .bb-restore-btn{color:color-mix(in srgb,var(--gt-text) 85%,#fff)!important}
+:root[data-gm-theme] .advh-prose,:root[data-gm-theme] .advh-desc,:root[data-gm-theme] .advh-readaloud{font-family:var(--gt-body),"Geist",sans-serif}
+:root[data-gm-theme] .cmode-tab:hover,:root[data-gm-theme] .qbtn:hover{background:color-mix(in srgb,var(--accent) 9%,transparent)!important}
+:root[data-gm-theme] .cmode-tab.active{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 12%,transparent),transparent)!important}
+:root[data-gm-theme] .bb-restore-btn{background:color-mix(in srgb,var(--accent) 8%,transparent)!important}
+</style>
 </head>
 <body>
 
@@ -2699,6 +2738,7 @@ const GMCamp = (function() {
           // correct. Reloading instead would compare a snapshot that still says the
           // old system and reload again.
           if(typeof window.setGmSystem === 'function') window.setGmSystem(m.system);
+          paintCampaignTheme();
         }
       }
     }
@@ -2730,6 +2770,14 @@ const GMCamp = (function() {
     }
   }
 
+  // Theme the screen's chrome (bars, window headers, accent, heading fonts) after
+  // the linked campaign's game. No campaign → no attribute → the neutral blue.
+  function paintCampaignTheme() {
+    const el = document.documentElement;
+    if(campaign && campaign.system && window.GM_SYSTEM) el.setAttribute('data-gm-theme', window.GM_SYSTEM);
+    else el.removeAttribute('data-gm-theme');
+  }
+
   function set(c) {
     settled = true;
     campaign = (c && c.id) ? c : null;
@@ -2742,6 +2790,7 @@ const GMCamp = (function() {
     // system dropdown any more). If this campaign object doesn't carry a system
     // yet, loadList() reconciles it from the account's campaign list below.
     if(campaign && campaign.system && typeof window.setGmSystem === 'function') window.setGmSystem(campaign.system);
+    paintCampaignTheme();
     if(campaign && campList === null) loadList();   // resolve this campaign's VTT link + system
     if(window.__ddScheduleSave) setTimeout(window.__ddScheduleSave, 300);   // persist the link
   }
