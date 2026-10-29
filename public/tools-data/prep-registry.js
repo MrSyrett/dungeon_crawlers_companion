@@ -587,6 +587,9 @@
       rows: re.map(function (r, i) { return { roll: String(i + 1), result: [_str(r.header), _str(r.text)].filter(Boolean).join(': ') }; }) });
     // Shadowdark stored a row's roll as `range`; everything else uses `roll`.
     tables.forEach(function (t) { if (t && Array.isArray(t.rows)) t.rows = t.rows.map(function (r) { if (!r || typeof r !== 'object') return r; if (r.roll == null && r.range != null) { r.roll = r.range; } return r; }); });
+    // An older converter wrote every table under both names; keep one of each.
+    var _seenT = {};
+    tables = tables.filter(function (t) { if (!t) return false; var k = JSON.stringify([_str(t.title).toLowerCase(), _str(t.die), _arr(t.rows).map(function (r) { return [_str(r && r.roll), _str(r && r.result)]; })]); if (_seenT[k]) return false; _seenT[k] = 1; return true; });
     ch.rollTables = tables; delete ch.rolltables; ch.randenc = [];
     // Shadowdark's Strong Start scenes become the opening scenes.
     var so = _arr(ch.strongopen).filter(function (x) { return x && (x.name || x.readaloud || x.desc || x.tag); });

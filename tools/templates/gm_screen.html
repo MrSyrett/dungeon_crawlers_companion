@@ -603,7 +603,8 @@ input[type="number"] { -moz-appearance: textfield; }
 .advh-send-combat:hover { background: var(--red-light); border-color: var(--red-light); }
 .advh-send-social { background: var(--npc-blue); border-color: var(--npc-blue); color: #fff; }
 .advh-send-social:hover { filter: brightness(1.12); }
-.advh-readaloud { border-left: 3px solid var(--gold); background: rgba(84,144,196,.10); padding: 7px 9px; border-radius: 0 6px 6px 0; font-size: 12.5px; line-height: 1.5; color: var(--light); font-style: italic; overflow-wrap: anywhere; word-break: break-word; }
+/* Read-aloud: the same slate blue as the Adventure Prep's read-aloud box in every system. */
+.advh-readaloud { border-left: 3px solid #8db5d8; background: rgba(141,181,216,.12); padding: 7px 9px; border-radius: 0 6px 6px 0; font-size: 12.5px; line-height: 1.5; color: var(--light); font-style: italic; overflow-wrap: anywhere; word-break: break-word; }
 .advh-desc { font-size: 12px; line-height: 1.5; color: var(--light); margin-top: 6px; overflow-wrap: anywhere; }
 .advh-desc.dim { color: var(--dim); }
 .advh-abils { font-size: 12px; line-height: 1.55; color: var(--light); margin-top: 6px; white-space: pre-wrap; overflow-wrap: anywhere; }
@@ -8381,7 +8382,8 @@ function wireSessionPrepLoader(root) {
       if(!list.length) return looseHtml || '<div class="advh-empty">No scenes or encounters in this prep.</div>';
       return list.map((s, i) => {
         const typ = (s.type || '').toLowerCase();
-        const dot = typ === 'combat' ? '#d63a30' : typ === 'npc' ? '#c8a020' : 'var(--accent)';
+        // Encounter colours match the Adventure Prep: combat red, exploration green, social blue.
+        const dot = typ === 'combat' ? '#e0604f' : typ === 'npc' ? '#6f9ee8' : typ === 'exploration' ? '#5fb85f' : 'var(--accent)';
         const typName = typ === 'npc' ? 'Social' : (typ ? typ.charAt(0).toUpperCase() + typ.slice(1) : '');
         const sub = s.tag || typName;
         const L = s.links || {};

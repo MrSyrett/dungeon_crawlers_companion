@@ -15,3 +15,4 @@
     /* UI (sidebar) — deep forest green */
     --ui-bg: #0f2118; --ui-panel: #15291e; --ui-border: #2c4a37;
     --ui-text: #ece4cc; --ui-muted: #a7b59c; --ui-accent: #e2c36b; --ui-highlight: #c9a227;
+    /* Readability layer: Garamond sets small. */ --body-scale: 1.08;

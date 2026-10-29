@@ -79,6 +79,7 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
     /* UI (sidebar) — near-black */
     --ui-bg: #0d0b0b; --ui-panel: #161212; --ui-border: #3a2424;
     --ui-text: #ece4d4; --ui-muted: #a89a8a; --ui-accent: #e6463a; --ui-highlight: #a3121a;
+    /* Readability layer: Garamond sets small; labels in 1651 Alchemy (the second accent font). */ --body-scale: 1.08; --font-label-text: "1651 Alchemy", "EB Garamond", Georgia, serif;
   }
   body { font-family: 'Barlow', sans-serif; background: var(--ui-bg); color: var(--ui-text); display: flex; height: 100vh; overflow: hidden; }
 
@@ -866,6 +867,72 @@ html:root[data-themed][data-system="PB"] { --font-display: "1651 Alchemy", "EB G
   .sb-qty { font-size: 0.8em; opacity: 0.75; letter-spacing: 0.02em; }
   .map-keys { font-size: 9px; color: var(--ink); line-height: 1.5; margin-top: 4px; }
   .page.dark-mode .map-keys { color: #d0ccc4; }
+
+  /* ═══ READABILITY LAYER (every system) ═══════════════════════════════════════
+     Last in the first <style> on purpose: it comes after each system's skin, so the
+     page reads the same in all twenty systems, and exportHTML() carries it into the
+     exported file. Skins choose colours and the display fonts for titles, headers
+     and names; SIZES, line heights and the small-text faces live here only.
+     --body-scale (root-vars) evens out optical size: Garamond sets small, so the
+     serif systems use 1.08; Montserrat sets large (0.96). */
+  :root {
+    --ty-body: calc(11px * var(--body-scale, 1));
+    --ty-small: calc(10px * var(--body-scale, 1));
+    --ty-label: 9.5px;
+    --ty-meta: 9px;
+    /* Read-aloud: one look in every system, like the encounter colours — a light
+       slate-blue box with dark text and a slate-blue bar; on a dark page, a deep
+       slate box with light text. Slate (greyed blue) stays clear of the deep blue
+       used for social encounters while sitting quietly on every system's paper. */
+    --ra-bg: #e3ecf4; --ra-bar: #4a7aa6; --ra-text: #16222e; --ra-border: #c6d6e5;
+    --ra-bg-dark: #2a394a; --ra-bar-dark: #8db5d8; --ra-text-dark: #eef4f9; --ra-border-dark: #3e5368;
+  }
+  /* The page sets its own ink: anything that inherits (link lines, details) used to
+     pick up the panel's light UI text and vanish on a light page. */
+  .page { color: var(--ink); }
+  .page.dark-mode { color: #d0ccc4; }
+  .page .p-text, .page .loc-desc, .page .entry-desc, .page .clue-item, .page .haz-item,
+  .page .loc-dq, .page .det-grid, .page .trk-line, .page .map-keys, .page .sb-npc-notes, .page .sb-notes, .page .columns {
+    font-family: var(--font-body, 'Barlow', sans-serif); font-size: var(--ty-body); line-height: 1.5;
+  }
+  .page .sb-ability, .page .rt-table, .page .reward-stats, .page .mod-box .loc-desc { font-family: var(--font-body, 'Barlow', sans-serif); font-size: var(--ty-small); line-height: 1.45; }
+  .page .loc-links { font-family: var(--font-body, 'Barlow', sans-serif); font-size: var(--ty-small); opacity: .82; }
+  /* Small labels: a text face in bold capitals, never a display font. A system can
+     name its own readable label face in --font-label-text (Dragonbane, LotR, Pirate Borg). */
+  .page .loc-lbl, .page .det-grid .det-k, .page .sb-table th {
+    font-family: var(--font-label-text, var(--font-body, 'Barlow', sans-serif)); font-size: var(--ty-label);
+    font-weight: 700; text-transform: uppercase; letter-spacing: .05em; line-height: 1.4;
+  }
+  .page .sb-type, .page .entry-meta, .page .loc-tag, .page .rt-block .sl .rt-die {
+    font-family: var(--font-label-text, var(--font-body, 'Barlow', sans-serif)); font-size: var(--ty-meta);
+    font-weight: 600; letter-spacing: .05em; line-height: 1.4;
+  }
+  /* Numbers keep a fixed-width look only where they line up in a column. */
+  .page .sb-table td { font-family: var(--font-body, 'Barlow', sans-serif); font-size: var(--ty-small); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .page .rt-table .rt-roll { font-size: var(--ty-small); }
+  /* Titles and names: the system's display font, at one size for everyone. */
+  .page .sl { font-size: 14px; line-height: 1.25; }
+  .page .loc-name { font-size: 13px; line-height: 1.25; }
+  .page .entry-name { font-size: 13px; line-height: 1.25; }
+  .page .sb-name { font-size: 15px; line-height: 1.2; }
+  .page .clue-hdr { font-size: 11px; }
+  /* Read-aloud — the same box on every system's page, light or dark. */
+  .page .read-aloud { background: var(--ra-bg); border: 0; border-left: 4px solid var(--ra-bar); box-shadow: inset 0 0 0 1px var(--ra-border); border-radius: 8px; padding: 8px 11px; }
+  .page.dark-mode .read-aloud { background: var(--ra-bg-dark); border-left-color: var(--ra-bar-dark); box-shadow: inset 0 0 0 1px var(--ra-border-dark); }
+  .page.dark-mode .read-aloud p { color: var(--ra-text-dark); }
+  .page .read-aloud p { color: var(--ra-text); font-family: var(--font-body, 'Barlow', sans-serif); font-size: var(--ty-body); font-style: italic; line-height: 1.55; }
+  /* Flavour (stat-block and treasure descriptions) is a GM's note, not read-aloud:
+     a quiet tinted strip in the system's own accent, ink text. */
+  .page .sb-flavor { background: color-mix(in srgb, var(--accent) 9%, transparent); color: var(--ink); border: 0; border-left: 3px solid color-mix(in srgb, var(--accent) 70%, transparent);
+    border-radius: 6px; padding: 5px 8px; font-family: var(--font-body, 'Barlow', sans-serif); font-size: var(--ty-small); font-style: italic; line-height: 1.45; }
+  .page.dark-mode .sb-flavor { background: color-mix(in srgb, var(--accent) 16%, transparent); color: #e2ddd2; }
+  /* Editing panel: readable tabs and labels; the read-aloud field wears the read-aloud colour. */
+  .tab-btn { font-size: 9.5px; letter-spacing: .04em; padding: 8px 3px; min-width: 0; white-space: normal; line-height: 1.2; overflow-wrap: anywhere; }
+  .field-label { font-size: 10px; }
+  .loc-ra-input, .so-ra-input { border-left: 3px solid var(--ra-bar-dark) !important; }
+  .field-label.ra-label { color: var(--ra-bar-dark) !important; }
+  textarea { overflow-y: hidden; }
+  textarea.grow-cap { overflow-y: auto; }
 </style>
 <style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}
 /* The Dark Mode row lived here; the theme is an account preference now, so the
@@ -1822,6 +1889,18 @@ function buildContinuationPage(sourcePage, key, isDark, isPage2) {
   return page;
 }
 
+// Text boxes grow to fit what's in them (capped, then they scroll).
+function growTA(t){ if(!t || !t.offsetParent) return; t.style.height='auto'; const h=t.scrollHeight+2; t.style.height=Math.min(h,420)+'px'; t.classList.toggle('grow-cap', h>420); }
+function growAll(root){
+  // Batched (all writes, then all reads, then all writes) so a long book doesn't thrash layout.
+  const ts=[...(root||document).querySelectorAll('textarea')].filter(t=>t.closest('.sidebar') && t.offsetParent);
+  ts.forEach(t=>{ t.style.height='auto'; });
+  const hs=ts.map(t=>t.scrollHeight+2);
+  ts.forEach((t,i)=>{ t.style.height=Math.min(hs[i],420)+'px'; t.classList.toggle('grow-cap', hs[i]>420); });
+}
+document.addEventListener('input', e=>{ if(e.target && e.target.tagName==='TEXTAREA') growTA(e.target); });
+document.addEventListener('focusin', e=>{ if(e.target && e.target.tagName==='TEXTAREA') growTA(e.target); });
+document.addEventListener('toggle', e=>{ if(e.target && e.target.querySelectorAll) setTimeout(()=>growAll(e.target),0); }, true);
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
@@ -1830,6 +1909,7 @@ function switchTab(name) {
   if(name==='scenes') refreshAllSceneLinks();
   if(name==='clues' || name==='treasure' || name==='scenes') refreshAllItemLinks();
   if(PREG && PREG.MODULE_TABS && PREG.MODULE_TABS.indexOf(name)>=0) { try{ readFields(); }catch(e){} }
+  if(panel) requestAnimationFrame(()=>growAll(panel));
 }
 // Older links (?tab=basics, saved UI state) still land somewhere sensible.
 const _TAB_ALIASES = { basics:'adventure', encounters:'scenes', monsters:'cast' };
@@ -2365,14 +2445,14 @@ function addStrongOpen(data={}) {
     </div>
     <div class="field-group">
       <label class="field-label">Encounter Type</label>
-      <div style="display:flex;gap:6px;">
-        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:9px;color:#C0392B;letter-spacing:0.06em;">
+      <div style="display:flex;gap:12px;">
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;font-weight:600;color:#e0604f;">
           <input type="radio" class="so-type-input" name="sotype-${uid}" value="combat" ${type==='combat'?'checked':''} onchange="updateLocCardColor(this);autosave()"> Combat
         </label>
-        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:9px;color:#2d6a2d;letter-spacing:0.06em;">
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;font-weight:600;color:#5fb85f;">
           <input type="radio" class="so-type-input" name="sotype-${uid}" value="exploration" ${type==='exploration'?'checked':''} onchange="updateLocCardColor(this);autosave()"> Exploration
         </label>
-        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:9px;color:#1a4a8a;letter-spacing:0.06em;">
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;font-weight:600;color:#6f9ee8;">
           <input type="radio" class="so-type-input" name="sotype-${uid}" value="npc" ${type==='npc'?'checked':''} onchange="updateLocCardColor(this);autosave()"> Social
         </label>
       </div>
@@ -2382,7 +2462,7 @@ function addStrongOpen(data={}) {
       <input type="text" class="so-tag-input" placeholder="e.g. In medias res // High tension" value="${escA(data.tag||'')}" oninput="autosave()">
     </div>
     <div class="field-group">
-      <label class="field-label accent">Read-Aloud Text</label>
+      <label class="field-label ra-label">Read-Aloud Text</label>
       <textarea class="so-ra-input" placeholder="Opening scene read-aloud..." oninput="autosave()">${escH(data.readaloud||'')}</textarea>
     </div>
     <div class="field-group">
@@ -2528,14 +2608,14 @@ function addLocation(data={}) {
     </div>
     <div class="field-group">
       <label class="field-label">Encounter Type</label>
-      <div style="display:flex;gap:6px;">
-        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:9px;color:#C0392B;letter-spacing:0.06em;">
+      <div style="display:flex;gap:12px;">
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;font-weight:600;color:#e0604f;">
           <input type="radio" class="loc-type-input" name="loctype-${uid}" value="combat" ${type==='combat'?'checked':''} onchange="updateLocCardColor(this);autosave()"> Combat
         </label>
-        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:9px;color:#2d6a2d;letter-spacing:0.06em;">
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;font-weight:600;color:#5fb85f;">
           <input type="radio" class="loc-type-input" name="loctype-${uid}" value="exploration" ${type==='exploration'?'checked':''} onchange="updateLocCardColor(this);autosave()"> Exploration
         </label>
-        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:9px;color:#1a4a8a;letter-spacing:0.06em;">
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;font-weight:600;color:#6f9ee8;">
           <input type="radio" class="loc-type-input" name="loctype-${uid}" value="npc" ${type==='npc'?'checked':''} onchange="updateLocCardColor(this);autosave()"> Social
         </label>
       </div>
@@ -2545,7 +2625,7 @@ function addLocation(data={}) {
       <input type="text" class="loc-tag-input" placeholder="The goal &amp; tension in one line, e.g. Open the door before the room floods" value="${escA(data.tag||'')}" oninput="autosave()">
     </div>
     <div class="field-group">
-      <label class="field-label accent">Read-Aloud Text</label>
+      <label class="field-label ra-label">Read-Aloud Text</label>
       <textarea class="loc-ra-input" placeholder="Text to read aloud to players..." oninput="autosave()">${escH(data.readaloud||'')}</textarea>
     </div>
     <div class="field-group">
@@ -2829,17 +2909,17 @@ function addStatBlock(data={}) {
     </div>
     <div class="field-group">
       <label class="field-label">Type</label>
-      <div style="display:flex;gap:6px;">
-        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:9px;color:#C0392B;letter-spacing:0.06em;">
+      <div style="display:flex;gap:12px;">
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;font-weight:600;color:#e0604f;">
           <input type="radio" class="sb-type-radio" name="sbtype-${uid}" value="mob" ${sbtype==='mob'?'checked':''} onchange="updateSbCardColor(this);toggleSocial(this);autosave()"> Foe
         </label>
-        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:9px;color:#6a2d8a;letter-spacing:0.06em;">
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;font-weight:600;color:#b08ad8;">
           <input type="radio" class="sb-type-radio" name="sbtype-${uid}" value="boss" ${sbtype==='boss'?'checked':''} onchange="updateSbCardColor(this);toggleSocial(this);autosave()"> Boss
         </label>
-        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:9px;color:#1a4a8a;letter-spacing:0.06em;">
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;font-weight:600;color:#6f9ee8;">
           <input type="radio" class="sb-type-radio" name="sbtype-${uid}" value="npc" ${sbtype==='npc'?'checked':''} onchange="updateSbCardColor(this);toggleSocial(this);autosave()"> NPC / Ally
         </label>
-        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:9px;color:#3f7f8f;letter-spacing:0.06em;" title="Someone to talk to — no stat block">
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;font-weight:600;color:#5fb3c4;" title="Someone to talk to — no stat block">
           <input type="radio" class="sb-type-radio" name="sbtype-${uid}" value="talk" ${sbtype==='talk'?'checked':''} onchange="updateSbCardColor(this);toggleSocial(this);autosave()"> Talk-only
         </label>
       </div>
@@ -2994,7 +3074,7 @@ function renderPreview() {
       let h='<div class="p-section"><div class="sl gold">'+escH(L('treasure'))+'</div>';
       (state.rewards||[]).forEach(r=>{
         const meta=[r.value?'<b>Value:</b> '+escH(r.value):'', r.where?'<b>Found in:</b> '+escH(r.where):'', (r.heldBy||[]).length?'<b>Held by:</b> '+r.heldBy.map(escH).join(', '):''].filter(Boolean).join(' · ');
-        h+='<div class="npc-block" style="border-left-color:var(--accent-dark);"><div class="entry-name">'+escH(r.name)+'</div>'+(r.flavor?'<div class="sb-flavor" style="margin-bottom:5px;padding:5px 7px;">'+fmtText(r.flavor)+'</div>':'')+(r.stats?'<p class="entry-desc reward-stats" style="font-family:Share Tech Mono,monospace;font-size:8px;margin-top:3px;">'+fmtText(r.stats)+'</p>':'')+(meta?'<div class="loc-links">'+meta+'</div>':'')+xLines('rewards', r)+'</div>';
+        h+='<div class="npc-block" style="border-left-color:var(--accent-dark);"><div class="entry-name">'+escH(r.name)+'</div>'+(r.flavor?'<div class="sb-flavor" style="margin-bottom:5px;padding:5px 7px;">'+fmtText(r.flavor)+'</div>':'')+(r.stats?'<p class="entry-desc reward-stats" style="margin-top:3px;">'+fmtText(r.stats)+'</p>':'')+(meta?'<div class="loc-links">'+meta+'</div>':'')+xLines('rewards', r)+'</div>';
       });
       sections.push(h+'</div>');
     }
@@ -3243,7 +3323,10 @@ function exportHTML() {
   const advTitle = (chapters[0] && chapters[0].title) || state.title || 'Adventure';
   const allDark = chapters.length > 0 && chapters.every(c => !!c.darkMode);
   // Collect every chapter's pages in order (including continuations).
-  const allPages=_collectAllChapterPageHTML().join('\n');
+  // Each map image is stored once, in the saved data; the pages point at it and a
+  // small script fills them in when the file opens (this halves a map-heavy export).
+  const _srcIdx={}; chapters.forEach((c,ci)=>(c.maps||[]).forEach((m,mi)=>{ if(m&&m.src&&m.src.indexOf('data:')===0&&!(m.src in _srcIdx)) _srcIdx[m.src]=ci+'.'+mi; }));
+  const allPages=_collectAllChapterPageHTML().join('\n').replace(/src="(data:[^"]+)"/g,(all,u)=>_srcIdx[u]!==undefined?'src="" data-spb-map="'+_srcIdx[u]+'"':all);
   const css=document.querySelector('style').innerHTML;
   const stateJson=JSON.stringify({ chapters: chapters, active: activeChapter });
   const stateB64=btoa(unescape(encodeURIComponent(stateJson)));
@@ -3265,6 +3348,7 @@ ${darkOverride}
 </style></head><body>${allPages}
 <script>document.querySelectorAll('.sb-hp-row').forEach(row=>{const pips=row.querySelectorAll('.hp-pip');const total=pips.length;pips.forEach((pip,i)=>{const t=total===1?1:i/(total-1);let r,g,b=10;if(t<0.33){const s=t/0.33;r=170;g=Math.round(50*s);}else if(t<0.66){const s=(t-0.33)/0.33;r=170;g=Math.round(50+100*s);}else{const s=(t-0.66)/0.34;r=Math.round(170*(1-s));g=160;}pip.style.background=\`rgb(\${r},\${g},\${b})\`;pip.style.borderColor='rgba(0,0,0,0.3)';});});<\/script>
 <script id="spb-state" type="application/json" data-spb="${stateB64}"><\/script>
+<script>(function(){try{var e=document.getElementById('spb-state');var st=JSON.parse(decodeURIComponent(escape(atob(e.getAttribute('data-spb')))));document.querySelectorAll('img[data-spb-map]').forEach(function(i){var k=i.getAttribute('data-spb-map').split('.');var m=((st.chapters[+k[0]]||{}).maps||[])[+k[1]];if(m&&m.src)i.src=m.src;});}catch(x){}})();<\/script>
 </body></html>`;
   const blob=new Blob([html],{type:'text/html'});
   const url=URL.createObjectURL(blob);

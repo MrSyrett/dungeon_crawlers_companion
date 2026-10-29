@@ -18,3 +18,4 @@
     /* UI (sidebar) — near-black */
     --ui-bg: #0d0b0b; --ui-panel: #161212; --ui-border: #3a2424;
     --ui-text: #ece4d4; --ui-muted: #a89a8a; --ui-accent: #e6463a; --ui-highlight: #a3121a;
+    /* Readability layer: Garamond sets small; labels in 1651 Alchemy (the second accent font). */ --body-scale: 1.08; --font-label-text: "1651 Alchemy", "EB Garamond", Georgia, serif;

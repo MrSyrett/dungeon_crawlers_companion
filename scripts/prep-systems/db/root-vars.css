@@ -18,3 +18,4 @@
     /* UI (sidebar) — neutral near-black (only the preview ground is green parchment) */
     --ui-bg: #1a1918; --ui-panel: #232120; --ui-border: #3f3a35;
     --ui-text: #eee3cc; --ui-muted: #b5a68c; --ui-accent: #5cb894; --ui-highlight: #236855;
+    /* Readability layer: Garamond sets small; labels in the book's Minion Pro. */ --body-scale: 1.08; --font-label-text: "Minion Pro", "EB Garamond", Georgia, serif;

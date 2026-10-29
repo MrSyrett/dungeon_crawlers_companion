@@ -7,3 +7,4 @@
     /* UI sidebar — dark stone */
     --ui-bg: #111112; --ui-panel: #1a1a1c; --ui-border: #2e2e32;
     --ui-text: #e8e8e4; --ui-muted: #7a7a7a; --ui-accent: #e8c84a; --ui-highlight: #e8c84a;
+    /* Readability layer: Montserrat (Shadowdark's text face) sets large. */ --body-scale: 0.96; --font-body: 'Montserrat', sans-serif;

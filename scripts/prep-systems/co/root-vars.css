@@ -1,7 +1,7 @@
     /* DCW GM Toolkit + Rules for Survival combined palette */
     --ink: #1a1a1a; --paper: #ffffff; --accent: #2fa595; --accent-dark: #1c6b60;
     --accent-red: #b82018; --accent-red-dark: #7a1510;
-    --muted: #555; --rule: #d8d0c0; --box-bg: #0f221f; --read-bg: #2a1a08;
+    --muted: #555; --rule: #d8d0c0; --box-bg: #d9ece8; --read-bg: #2a1a08;
     --read-text: #ffffff; --highlight: #6fe0d2; --green: #2d6a2d; --blue-npc: #1a4a8a;
     --section-hdr: var(--accent-dark); --table-hdr: #4a4a4a; --preview-bg: #26262a;
     --font-display: 'Cinzel', serif;
