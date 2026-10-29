@@ -46,7 +46,7 @@
 .mod-box { background: rgba(255,250,235,.55); border: 1px solid #d6c08f; border-left: 4px solid var(--db);border-right: 4px solid var(--db); border-radius: 8px; padding: 6px 9px 7px 10px; margin-bottom: 6px; }
 .mod-box .loc-desc { margin-top: 2px; }
 .mod-travel-box { border-left-color: #6b5a2c;border-right-color: #6b5a2c; }
-.mod-site-box { border-left-color: var(--accent-dark); }
+.mod-site-box { border-left-color: var(--accent-dark);border-right-color: var(--accent-dark); }
 .mod-badges { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 4px; }
 .mod-badge { display: inline-flex; align-items: baseline; gap: 4px; border: 1px solid #c8ae78; border-radius: 999px; padding: 1px 7px; font-family: var(--font-body); font-size: 9.5px; color: var(--ink); background: #fbf3df; }
 .mod-badge > span { font-family: var(--font-label); font-size: 8.5px; color: var(--accent-dark); letter-spacing: .04em; }

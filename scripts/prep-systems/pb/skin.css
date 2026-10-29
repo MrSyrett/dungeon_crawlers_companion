@@ -45,7 +45,7 @@ html:root[data-themed][data-system="PB"] { --font-display: "1651 Alchemy", "EB G
 /* Pirate Borg preview boxes */
 .pb-box, .mod-box { background: rgba(255,250,240,.5); border: 1px solid #cdb995; border-left: 4px solid var(--pb);border-right: 4px solid var(--pb); border-radius: 8px; padding: 6px 9px 7px 10px; margin-bottom: 6px; }
 .pb-box .loc-desc, .mod-box .loc-desc { margin-top: 2px; }
-.pb-voyage-box, .mod-travel-box { border-left-color: #3a3a52; }
+.pb-voyage-box, .mod-travel-box { border-left-color: #3a3a52;border-right-color: #3a3a52; }
 .pb-ship-box { border-left-color: #2a0c0e; }
 .pb-ship-box.foe { border-left-color: var(--pb);border-right-color: var(--pb); }
 .pb-badges, .mod-badges { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 4px; }

@@ -260,11 +260,11 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
   .p-text { font-size: 9.5px; color: var(--ink); line-height: 1.6; font-family: 'Barlow', sans-serif; }
 
   /* Read-aloud: cyan background */
-  .read-aloud { background: #00AEEF; border-left: 4px solid #0082B3; border-radius: 8px; padding: 8px 10px 8px 11px; margin-bottom: 6px; }
+  .read-aloud { background: #00AEEF; border-left: 4px solid #0082B3;border-right: 4px solid #0082B3; border-radius: 8px; padding: 8px 10px 8px 11px; margin-bottom: 6px; }
   .read-aloud p { color: white; font-size: 9px; font-style: italic; line-height: 1.65; }
 
   /* Flavor text on stat blocks also cyan */
-  .sb-flavor { font-size: 8.5px; font-style: italic; color: white; background: #00AEEF; line-height: 1.5; margin-bottom: 7px; padding: 6px 8px 6px 10px; border: none; border-left: 4px solid #0082B3; border-radius: 7px; }
+  .sb-flavor { font-size: 8.5px; font-style: italic; color: white; background: #00AEEF; line-height: 1.5; margin-bottom: 7px; padding: 6px 8px 6px 10px; border: none; border-left: 4px solid #0082B3;border-right: 4px solid #0082B3; border-radius: 7px; }
   .sb-npc-notes { font-size: 8.5px; color: var(--ink); line-height: 1.6; }
   .page.dark-mode .sb-npc-notes { color: #b0aca4; }
 
@@ -647,7 +647,7 @@ body.flow-mode .page + .page {
   /* ── Shared modules (before the skin, so a skin can restyle) ── */
   .mod-box { background: rgba(255,255,255,.45); border: 1px solid var(--rule, #d6c08f); border-left: 4px solid var(--accent);border-right: 4px solid var(--accent); border-radius: 8px; padding: 6px 9px 7px 10px; margin-bottom: 6px; }
   .mod-box .loc-desc { margin-top: 2px; }
-  .mod-travel-box { border-left-color: var(--muted, #6b5a2c); }
+  .mod-travel-box { border-left-color: var(--muted, #6b5a2c);border-right-color: var(--muted, #6b5a2c); }
   .mod-badges { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 4px; }
   .mod-badge { display: inline-flex; align-items: baseline; gap: 4px; border: 1px solid var(--rule, #c8ae78); border-radius: 999px; padding: 1px 7px; font-size: 9px; color: var(--ink); background: rgba(255,255,255,.6); }
   .mod-badge > span { font-family: var(--font-display); font-size: 8px; color: var(--accent-dark); letter-spacing: .04em; text-transform: uppercase; }
@@ -796,7 +796,7 @@ body.flow-mode .page + .page {
      are !important on purpose: they are a cross-system convention (like the
      encounter colours), so no skin or app theme (public/tokens.css) may re-colour them. */
   .page .read-aloud { background: var(--ra-bg) !important; border: 0 !important; border-left: 4px solid var(--ra-bar) !important;border-right: 4px solid var(--ra-bar) !important; box-shadow: inset 0 0 0 1px var(--ra-border) !important; border-radius: 8px; padding: 8px 11px; }
-  .page.dark-mode .read-aloud { background: var(--ra-bg-dark) !important; border-left-color: var(--ra-bar-dark) !important; box-shadow: inset 0 0 0 1px var(--ra-border-dark) !important; }
+  .page.dark-mode .read-aloud { background: var(--ra-bg-dark) !important; border-left-color: var(--ra-bar-dark) !important;border-right-color: var(--ra-bar-dark) !important; box-shadow: inset 0 0 0 1px var(--ra-border-dark) !important; }
   .page.dark-mode .read-aloud p { color: var(--ra-text-dark) !important; }
   .page .read-aloud p { color: var(--ra-text) !important; font-family: var(--font-body, 'Barlow', sans-serif); font-size: var(--ty-body); font-style: italic; line-height: 1.55; }
   /* Flavour (stat-block and treasure descriptions) is a GM's note, not read-aloud:
@@ -830,9 +830,9 @@ body.flow-mode .page + .page {
   .page.dark-mode .clue-item, .page.dark-mode .hook-item, .page.dark-mode .haz-item, .page.dark-mode .npc-block, .page.dark-mode .mob-block, .page.dark-mode .stat-block,
   .page.dark-mode .mod-box, .page.dark-mode .lotr-box, .page.dark-mode .pb-box, .page.dark-mode .lotr-oc {
     background: var(--box-dark) !important; color: var(--ink-dark) !important; box-shadow: inset 0 0 0 1px var(--box-dark-line) !important;
-    border-left-color: var(--section-hdr-dark, var(--highlight)) !important;
+    border-left-color: var(--section-hdr-dark, var(--highlight)) !important;border-right-color: var(--section-hdr-dark, var(--highlight)) !important;
   }
-  .page.dark-mode .stat-block, .page.dark-mode .stat-block.full-width { border-top-color: var(--section-hdr-dark, var(--highlight)) !important; border-left-color: transparent !important; }
+  .page.dark-mode .stat-block, .page.dark-mode .stat-block.full-width { border-top-color: var(--section-hdr-dark, var(--highlight)) !important;border-bottom-color: var(--section-hdr-dark, var(--highlight)) !important; border-left-color: transparent !important; }
   .page .sb-table td { background: rgba(255,255,255,.45) !important; }
   .page.dark-mode .sb-table td { background: #222226 !important; color: var(--ink-dark) !important; }
   /* One system colour per mode, everywhere: the header colour also draws every box
@@ -851,10 +851,10 @@ body.flow-mode .page + .page {
   .page .stat-block.sbt-boss { border-top-color: var(--sbt-boss) !important;border-bottom-color: var(--sbt-boss) !important; }
   .page .stat-block.sbt-npc { border-top-color: var(--sbt-npc) !important;border-bottom-color: var(--sbt-npc) !important; }
   .page .stat-block.sbt-talk { border-top-color: var(--sbt-talk) !important;border-bottom-color: var(--sbt-talk) !important; }
-  .page.dark-mode .stat-block, .page.dark-mode .stat-block.sbt-mob { border-top-color: var(--sbt-mob-dark) !important; }
-  .page.dark-mode .stat-block.sbt-boss { border-top-color: var(--sbt-boss-dark) !important; }
-  .page.dark-mode .stat-block.sbt-npc { border-top-color: var(--sbt-npc-dark) !important; }
-  .page.dark-mode .stat-block.sbt-talk { border-top-color: var(--sbt-talk-dark) !important; }
+  .page.dark-mode .stat-block, .page.dark-mode .stat-block.sbt-mob { border-top-color: var(--sbt-mob-dark) !important;border-bottom-color: var(--sbt-mob-dark) !important; }
+  .page.dark-mode .stat-block.sbt-boss { border-top-color: var(--sbt-boss-dark) !important;border-bottom-color: var(--sbt-boss-dark) !important; }
+  .page.dark-mode .stat-block.sbt-npc { border-top-color: var(--sbt-npc-dark) !important;border-bottom-color: var(--sbt-npc-dark) !important; }
+  .page.dark-mode .stat-block.sbt-talk { border-top-color: var(--sbt-talk-dark) !important;border-bottom-color: var(--sbt-talk-dark) !important; }
   .page .sl { border-bottom-color: var(--sys-hdr) !important; }
   .page .sb-type { color: var(--sys-type) !important; }
   .page .sb-table th, .page.dark-mode .sb-table th { background: var(--sys-hdr) !important; color: var(--sys-hdr-ink) !important; }
@@ -880,7 +880,7 @@ body.flow-mode .page + .page {
   /* Flavour text IS read-aloud text: the same D2 slate-blue box everywhere. */
   .page .sb-flavor { background: var(--ra-bg) !important; color: var(--ra-text) !important; border: 0 !important; border-left: 4px solid var(--ra-bar) !important;border-right: 4px solid var(--ra-bar) !important;
     box-shadow: inset 0 0 0 1px var(--ra-border) !important; border-radius: 8px !important; padding: 6px 10px !important; font-style: italic; }
-  .page.dark-mode .sb-flavor { background: var(--ra-bg-dark) !important; color: var(--ra-text-dark) !important; border-left-color: var(--ra-bar-dark) !important; box-shadow: inset 0 0 0 1px var(--ra-border-dark) !important; }
+  .page.dark-mode .sb-flavor { background: var(--ra-bg-dark) !important; color: var(--ra-text-dark) !important; border-left-color: var(--ra-bar-dark) !important;border-right-color: var(--ra-bar-dark) !important; box-shadow: inset 0 0 0 1px var(--ra-border-dark) !important; }
   .page .sb-flavor *, .page.dark-mode .sb-flavor * { color: inherit !important; }
   /* Headers: ONE colour per system — the page no longer uses the gold / blue / green variants. */
   /* Encounter names take the encounter-type colour (lighter on the dark page). */
@@ -918,7 +918,7 @@ body.flow-mode .page + .page {
   .tab-btn { font-size: 9.5px; letter-spacing: .02em; padding: 8px 1px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: clip; line-height: 1.2; flex: none !important; }
   .tab-btn.mod-off { display: none; }
   .field-label { font-size: 10px; }
-  .loc-ra-input, .so-ra-input, .sb-flavor-input, .reward-flavor-input { border-left: 3px solid var(--ra-bar-dark) !important; }
+  .loc-ra-input, .so-ra-input, .sb-flavor-input, .reward-flavor-input { border-left: 3px solid var(--ra-bar-dark) !important;border-right: 3px solid var(--ra-bar-dark) !important; }
   .field-label.ra-label { color: var(--ra-bar-dark) !important; }
   textarea { overflow-y: hidden; }
   textarea.grow-cap { overflow-y: auto; }
@@ -2875,6 +2875,113 @@ function fmtText(str) {
   }).join('<br>');
 }
 
+// The printed page's sections, per tab, as HTML strings. Pure (reads state only),
+// so the GM Screen's Adventure tool can draw the very same blocks (prep-sheet bundle).
+function _hasQuestName(){ return !!document.getElementById('f-d-name'); }
+function previewParts(){
+    const P = { adventure:[], tables:[], clues:[], treasure:[], factions:[], travel:[], scenes:[], cast:[], vehicles:[] };
+
+    const L = t => (PREG ? PREG.label(PREP_CODE, t) : t);
+    const D = state.details || {};
+    let sections = P.adventure;
+    // ADVENTURE — details, overview, trackers, GM notes (the GM Screen's order)
+    {
+      const rows=[], row=(k,v)=>{ if(v&&String(v).trim()) rows.push('<div class="det-k">'+escH(k)+'</div><div>'+v+'</div>'); };
+      // The adventure's name is already the chapter heading; only a system's own
+      // quest / job name (Dragonbane, Pirate Borg) prints, as a row.
+      if(_hasQuestName()) row(PREP_CODE==='PB'?'Job':'Quest', escH(D.name||''));
+      row('Quest giver', escH(D.questgiver||''));
+      const hooks=String(D.hooks||'').split('\n').map(x=>x.trim()).filter(Boolean);
+      if(hooks.length) row(hooks.length>1?'Hooks':'Hook', hooks.length>1?'<ul class="det-hooks">'+hooks.map(h=>'<li>'+escH(h)+'</li>').join('')+'</ul>':escH(hooks[0]));
+      row('Goal', escH(D.goal||'')); row('Prize', escH(D.prize||'')); row('Stakes', fmtText(D.stakes||'')); row('Opposition', escH(D.opposition||''));
+      if(typeof PLUG.detailRows==='function') (PLUG.detailRows(D)||[]).forEach(x=>row(x[0], escH(x[1]||'')));
+      const detT=(L('adventure')==='Adventure'?'Adventure Details':escH(L('adventure')));
+      if(rows.length) sections.push('<div class="p-section"><div class="sl">'+detT+'</div><div class="det-grid">'+rows.join('')+'</div></div>');
+    }
+    sections.push('<div class="p-section"><div class="sl">Overview</div><p class="p-text">'+fmtText(state.overview)+'</p></div>');
+    // The system's own Adventure-tab sections sit under Overview, as in the panel.
+    previewSections('adventure').forEach(h=>sections.push(h));
+    if((state.trackers||[]).length){
+      sections.push('<div class="p-section"><div class="sl">Trackers</div>'+state.trackers.map(trackerLine).join('')+'</div>');
+    }
+    if(state.notes && state.notes.trim()){
+      sections.push('<div class="p-section"><div class="sl">GM Notes</div><p class="p-text">'+fmtText(state.notes)+'</p></div>');
+    }
+    plugPreview('adventure', sections);
+
+    sections = P.tables;
+    // TABLES
+    (state.rollTables||[]).forEach(t=>{
+      if(!(t.title||(t.rows||[]).length)) return;
+      let h='<div class="p-section rt-block"><div class="sl">'+escH(t.title||'Roll Table')+(t.die?' <span class="rt-die">'+escH(t.die)+'</span>':'')+'</div><table class="rt-table"><tbody>';
+      (t.rows||[]).forEach(r=>{ h+='<tr><td class="rt-roll">'+escH(r.roll||'')+'</td><td class="rt-result">'+fmtText(r.result||'')+'</td></tr>'; });
+      sections.push(h+'</tbody></table></div>');
+    });
+
+    sections = P.clues;
+    // CLUES
+    if((state.clues||[]).length){
+      let h='<div class="p-section"><div class="sl">Secrets &amp; Clues</div>';
+      (state.clues||[]).forEach(c=>{
+        const meta=[c.where?'<b>Found:</b> '+escH(c.where):'', (c.heldBy||[]).length?'<b>Held by:</b> '+c.heldBy.map(escH).join(', '):''].filter(Boolean).join(' · ');
+        h+='<div class="clue-item">'+(c.header?'<span class="clue-hdr">'+escH(c.header)+'</span>'+(c.text?' — ':''): '')+fmtText(c.text)+(meta?'<div class="loc-links">'+meta+'</div>':'')+'</div>';
+      });
+      sections.push(h+'</div>');
+    }
+
+    plugPreview('clues', sections);
+    sections = P.treasure;
+    // TREASURE
+    if((state.rewards||[]).length){
+      let h='<div class="p-section"><div class="sl">'+escH(L('treasure'))+'</div>';
+      (state.rewards||[]).forEach(r=>{
+        const meta=[r.value?'<b>Value:</b> '+escH(r.value):'', r.where?'<b>Found in:</b> '+escH(r.where):'', (r.heldBy||[]).length?'<b>Held by:</b> '+r.heldBy.map(escH).join(', '):''].filter(Boolean).join(' · ');
+        h+='<div class="npc-block"><div class="entry-name">'+escH(r.name)+'</div>'+(r.flavor?'<div class="sb-flavor" style="margin-bottom:5px;">'+fmtText(r.flavor)+'</div>':'')+(r.stats?'<p class="entry-desc reward-stats" style="margin-top:3px;">'+fmtText(r.stats)+'</p>':'')+(meta?'<div class="loc-links">'+meta+'</div>':'')+xLines('rewards', r)+'</div>';
+      });
+      sections.push(h+'</div>');
+    }
+
+    plugPreview('treasure', sections);
+    // MODULES (print order = tab order): factions, then travel legs. Vehicles print after the cast.
+    sections = P.factions;
+    previewFactions().forEach(h=>sections.push(h));
+    sections = P.travel;
+    previewTravel().forEach(h=>sections.push(h));
+    plugPreview('travel', sections);
+
+    sections = P.scenes;
+    // HAZARDS & TRAPS, then the SCENES (which spill onto page 2 when they don't fit)
+    if((state.hazards||[]).length){
+      let h='<div class="p-section"><div class="sl">Hazards &amp; Traps</div>';
+      state.hazards.forEach(z=>{
+        const bits=[z.where?'<b>Where:</b> '+escH(z.where):'', z.trigger?'<b>Trigger:</b> '+escH(z.trigger):'', z.spot?'<b>Spot / disarm:</b> '+escH(z.spot):''].filter(Boolean).map(x=>'<div class="loc-links">'+x+'</div>').join('');
+        h+='<div class="haz-item"><span class="clue-hdr">'+escH(z.name||'Hazard')+'</span>'+(z.effect?' — '+fmtText(z.effect):'')+bits+xLines('hazards', z)+'</div>';
+      });
+      sections.push(h+'</div>');
+    }
+    if((state.locations||[]).length) sections.push('<div class="p-section" style="margin-bottom:6px;"><div class="sl">'+escH(L('scenes'))+'</div></div>');
+    (state.locations||[]).forEach(l=>{ sections.push(locBlock(l)); });
+    plugPreview('scenes', sections);
+    sections = P.cast;
+    // CAST — full stat blocks
+    if((state.statblocks||[]).length){
+      sections.push('<div class="p-section" style="margin-top:4px;"><div class="sl">Imperials, Aliens &amp; NPCs</div></div>');
+      state.statblocks.forEach(sb=>{
+        const sbDiv = buildSB(sb);
+        sbDiv.classList.add('full-width');
+        sbDiv.style.width='100%';
+        sbDiv.style.flex='0 0 100%';
+        sbDiv.style.marginBottom='8px';
+        sections.push(sbDiv.outerHTML);
+      });
+    }
+
+    plugPreview('end', sections);
+    sections = P.vehicles;
+    previewVehicles().forEach(h=>sections.push(h));
+    return P;
+}
+
 function renderPreview() {
   // Rebuilding the pages shrinks the preview for a moment (continuation pages are
   // torn down and rebuilt), and the browser clamps the scroll to the shorter
@@ -2896,98 +3003,9 @@ function renderPreview() {
     const rightEl = document.getElementById('p1-right');
     if(!leftEl || !rightEl) return;
 
-    // Build HTML strings for each section
-    const sections = [];
-
-    const L = t => (PREG ? PREG.label(PREP_CODE, t) : t);
-    const D = state.details || {};
-    // ADVENTURE — details, overview, trackers, GM notes (the GM Screen's order)
-    {
-      const rows=[], row=(k,v)=>{ if(v&&String(v).trim()) rows.push('<div class="det-k">'+escH(k)+'</div><div>'+v+'</div>'); };
-      // The adventure's name is already the chapter heading; only a system's own
-      // quest / job name (Dragonbane, Pirate Borg) prints, as a row.
-      if(document.getElementById('f-d-name')) row(PREP_CODE==='PB'?'Job':'Quest', escH(D.name||''));
-      row('Quest giver', escH(D.questgiver||''));
-      const hooks=String(D.hooks||'').split('\n').map(x=>x.trim()).filter(Boolean);
-      if(hooks.length) row(hooks.length>1?'Hooks':'Hook', hooks.length>1?'<ul class="det-hooks">'+hooks.map(h=>'<li>'+escH(h)+'</li>').join('')+'</ul>':escH(hooks[0]));
-      row('Goal', escH(D.goal||'')); row('Prize', escH(D.prize||'')); row('Stakes', fmtText(D.stakes||'')); row('Opposition', escH(D.opposition||''));
-      if(typeof PLUG.detailRows==='function') (PLUG.detailRows(D)||[]).forEach(x=>row(x[0], escH(x[1]||'')));
-      const detT=(L('adventure')==='Adventure'?'Adventure Details':escH(L('adventure')));
-      if(rows.length) sections.push('<div class="p-section"><div class="sl">'+detT+'</div><div class="det-grid">'+rows.join('')+'</div></div>');
-    }
-    sections.push('<div class="p-section"><div class="sl">Overview</div><p class="p-text">'+fmtText(state.overview)+'</p></div>');
-    // The system's own Adventure-tab sections sit under Overview, as in the panel.
-    previewSections('adventure').forEach(h=>sections.push(h));
-    if((state.trackers||[]).length){
-      sections.push('<div class="p-section"><div class="sl">Trackers</div>'+state.trackers.map(trackerLine).join('')+'</div>');
-    }
-    if(state.notes && state.notes.trim()){
-      sections.push('<div class="p-section"><div class="sl">GM Notes</div><p class="p-text">'+fmtText(state.notes)+'</p></div>');
-    }
-    plugPreview('adventure', sections);
-
-    // TABLES
-    (state.rollTables||[]).forEach(t=>{
-      if(!(t.title||(t.rows||[]).length)) return;
-      let h='<div class="p-section rt-block"><div class="sl">'+escH(t.title||'Roll Table')+(t.die?' <span class="rt-die">'+escH(t.die)+'</span>':'')+'</div><table class="rt-table"><tbody>';
-      (t.rows||[]).forEach(r=>{ h+='<tr><td class="rt-roll">'+escH(r.roll||'')+'</td><td class="rt-result">'+fmtText(r.result||'')+'</td></tr>'; });
-      sections.push(h+'</tbody></table></div>');
-    });
-
-    // CLUES
-    if((state.clues||[]).length){
-      let h='<div class="p-section"><div class="sl">Secrets &amp; Clues</div>';
-      (state.clues||[]).forEach(c=>{
-        const meta=[c.where?'<b>Found:</b> '+escH(c.where):'', (c.heldBy||[]).length?'<b>Held by:</b> '+c.heldBy.map(escH).join(', '):''].filter(Boolean).join(' · ');
-        h+='<div class="clue-item">'+(c.header?'<span class="clue-hdr">'+escH(c.header)+'</span>'+(c.text?' — ':''): '')+fmtText(c.text)+(meta?'<div class="loc-links">'+meta+'</div>':'')+'</div>';
-      });
-      sections.push(h+'</div>');
-    }
-
-    plugPreview('clues', sections);
-    // TREASURE
-    if((state.rewards||[]).length){
-      let h='<div class="p-section"><div class="sl">'+escH(L('treasure'))+'</div>';
-      (state.rewards||[]).forEach(r=>{
-        const meta=[r.value?'<b>Value:</b> '+escH(r.value):'', r.where?'<b>Found in:</b> '+escH(r.where):'', (r.heldBy||[]).length?'<b>Held by:</b> '+r.heldBy.map(escH).join(', '):''].filter(Boolean).join(' · ');
-        h+='<div class="npc-block"><div class="entry-name">'+escH(r.name)+'</div>'+(r.flavor?'<div class="sb-flavor" style="margin-bottom:5px;">'+fmtText(r.flavor)+'</div>':'')+(r.stats?'<p class="entry-desc reward-stats" style="margin-top:3px;">'+fmtText(r.stats)+'</p>':'')+(meta?'<div class="loc-links">'+meta+'</div>':'')+xLines('rewards', r)+'</div>';
-      });
-      sections.push(h+'</div>');
-    }
-
-    plugPreview('treasure', sections);
-    // MODULES (print order = tab order): factions, then travel legs. Vehicles print after the cast.
-    previewFactions().forEach(h=>sections.push(h));
-    previewTravel().forEach(h=>sections.push(h));
-    plugPreview('travel', sections);
-
-    // HAZARDS & TRAPS, then the SCENES (which spill onto page 2 when they don't fit)
-    if((state.hazards||[]).length){
-      let h='<div class="p-section"><div class="sl">Hazards &amp; Traps</div>';
-      state.hazards.forEach(z=>{
-        const bits=[z.where?'<b>Where:</b> '+escH(z.where):'', z.trigger?'<b>Trigger:</b> '+escH(z.trigger):'', z.spot?'<b>Spot / disarm:</b> '+escH(z.spot):''].filter(Boolean).map(x=>'<div class="loc-links">'+x+'</div>').join('');
-        h+='<div class="haz-item"><span class="clue-hdr">'+escH(z.name||'Hazard')+'</span>'+(z.effect?' — '+fmtText(z.effect):'')+bits+xLines('hazards', z)+'</div>';
-      });
-      sections.push(h+'</div>');
-    }
-    if((state.locations||[]).length) sections.push('<div class="p-section" style="margin-bottom:6px;"><div class="sl">'+escH(L('scenes'))+'</div></div>');
-    (state.locations||[]).forEach(l=>{ sections.push(locBlock(l)); });
-    plugPreview('scenes', sections);
-    // CAST — full stat blocks
-    if((state.statblocks||[]).length){
-      sections.push('<div class="p-section" style="margin-top:4px;"><div class="sl">Imperials, Aliens &amp; NPCs</div></div>');
-      state.statblocks.forEach(sb=>{
-        const sbDiv = buildSB(sb);
-        sbDiv.classList.add('full-width');
-        sbDiv.style.width='100%';
-        sbDiv.style.flex='0 0 100%';
-        sbDiv.style.marginBottom='8px';
-        sections.push(sbDiv.outerHTML);
-      });
-    }
-
-    plugPreview('end', sections);
-    previewVehicles().forEach(h=>sections.push(h));
+    // Build HTML strings for each section (previewParts, in print order)
+    const P = previewParts();
+    const sections = [].concat(P.adventure, P.tables, P.clues, P.treasure, P.factions, P.travel, P.scenes, P.cast, P.vehicles);
     // Put all items in left first to measure real heights
     // A header never ends a column on its own: a heading-only section is glued to
     // the block after it, so pagination moves them together.
