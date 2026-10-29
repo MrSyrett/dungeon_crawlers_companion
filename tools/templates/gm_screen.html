@@ -8184,7 +8184,7 @@ function wireSessionPrepLoader(root) {
              // The Lord of the Rings prep: journeys, councils, landmarks, hoards, schemes, rumours.
              lotr: ['councils','landmarks','hoards','schemes','rumours','tindex'].reduce((n, k) => n + (Array.isArray(prep[k]) ? prep[k].length : 0), 0) + (prep.phase && ['what','where','why','who','place'].some(k => String(prep.phase[k] || '').trim()) ? 1 : 0),
              // Shared modules (on per system in the registry): Sites and Travel legs.
-             site: modOn('site') ? (prep.sites || []).length : 0, travel: modOn('travel') ? (prep.travel || []).length : 0,
+             travel: modOn('travel') ? (prep.travel || []).length : 0, factions: modOn('factions') ? (prep.factions || []).length : 0, vehicles: modOn('vehicles') ? (prep.vehicles || []).length : 0,
              // Pirate Borg prep: the job, voyage legs, ships, traps.
              pb: (prep.pbShips || []).length };
   }
@@ -8290,7 +8290,7 @@ function wireSessionPrepLoader(root) {
     // The eight baseline tabs (with each system's flavour names), plus the
     // hand-built LotR / Dragonbane / Pirate Borg sections after Scenes. Only tabs
     // with something in them show; the first tab is always there.
-    const ALL = ['adventure', 'tables', 'clues', 'treasure', 'scenes', 'site', 'travel', 'lotr', 'pb', 'cast', 'maps'];
+    const ALL = ['adventure', 'tables', 'clues', 'treasure', 'scenes', 'travel', 'factions', 'vehicles', 'lotr', 'pb', 'cast', 'maps'];
     const TABS = ALL.filter(k => k === 'adventure' || c[k]).map(k => [k, lab(k)]);
     if(!TABS.some(([k]) => k === activeSec)) activeSec = 'adventure';
     const advTitle = (prepChapters[0] && prepChapters[0].title) || prep.title || prep._docTitle || 'Adventure';
@@ -8348,7 +8348,7 @@ function wireSessionPrepLoader(root) {
         const typ = (s.type || '').toLowerCase();
         const dot = typ === 'combat' ? '#d63a30' : typ === 'npc' ? '#c8a020' : 'var(--accent)';
         const typName = typ === 'npc' ? 'Social' : (typ ? typ.charAt(0).toUpperCase() + typ.slice(1) : '');
-        const sub = [(s.links || {}).site && modOn('site') ? (s.links || {}).site : '', s.tag || typName].filter(Boolean).join(' · ');
+        const sub = s.tag || typName;
         const L = s.links || {};
         const scnSec = (label, val) => (val && String(val).trim()) ? '<div class="advh-scene-sec"><div class="advh-scene-lbl">' + label + '</div><div class="advh-desc">' + advFmt(val) + '</div></div>' : '';
         // What this scene links to (and what the other tabs say is found here).
@@ -8414,16 +8414,33 @@ function wireSessionPrepLoader(root) {
       if(F.haven || F.patron || F.notes || F.recovery) h += card('Fellowship Phase', ln('Haven', F.haven) + ln('Patron', F.patron) + ln('Recovery', F.recovery ? '−' + F.recovery + ' Shadow' : '') + ln('Yule', F.yule ? 'yes' : '') + ln('Undertakings', (F.undertakings || []).join(', ')) + ln('Notes', F.notes));
       return h || '<div class="advh-empty">No Adventuring Phase notes in this prep.</div>';
     }
-    if(sec === 'site'){
-      // Sites module: one card per dungeon / location, with the encounters that belong to it.
+    if(sec === 'factions'){
+      // Factions module: each faction's next move, and its clock → the Trackers tool.
+      const R = window.PREP_REGISTRY;
       const card = (h, body) => '<div class="advh-card"><div class="advh-card-h">' + advEsc(h) + '</div>' + body + '</div>';
       const ln = (l, v) => (v != null && String(v).trim()) ? '<div class="advh-desc"><b>' + advEsc(l) + ':</b> ' + advText(String(v)) + '</div>' : '';
-      const one = lab('site').replace(/s$/, '');
-      return (prep.sites || []).map(x => {
-        const here = scenes().map((sc, si) => [sc, si]).filter(([sc]) => x.name && eqName((sc.links || {}).site, x.name));
-        return card(one + (x.name ? ' — ' + x.name : ''), ln('The way in', x.wayin) + ln('Inside', x.inside) + ln('Who is there', x.guests) + ln('The challenge', x.challenge) + ln('The boss', x.boss) + ln('The way out', x.wayout) + ln('Notes', x.notes)
-          + (here.length ? '<div class="advh-actions">' + here.map(([sc, si]) => '<button type="button" class="btn small advh-goto-scene" data-si="' + si + '">' + advEsc(sc.name || 'Scene') + '</button>').join('') + '</div>' : ''));
-      }).join('') || '<div class="advh-empty">No sites in this prep.</div>';
+      return (prep.factions || []).map((f, i) => {
+        const moves = String(f.moves || '').split('\n').map(x => x.trim()).filter(Boolean);
+        const t = R && R.factionTracker ? R.factionTracker(f) : null;
+        return card((f.name || 'Faction') + (f.attitude ? ' · ' + f.attitude : ''),
+          ln('Goal', f.goal) + (moves.length ? '<div class="advh-desc"><b>Next move:</b> ' + advEsc(moves[0]) + '</div>' + (moves.length > 1 ? '<div class="advh-desc dim">Then: ' + advEsc(moves.slice(1).join(' → ')) + '</div>' : '') : '')
+          + ln('Assets', f.assets) + (t ? ln('A box fills when', f.ticks) : '') + ln('Notes', f.notes)
+          + (t ? trackersHtml([t], 'faction' + i) : ''));
+      }).join('') || '<div class="advh-empty">No factions in this prep.</div>';
+    }
+    if(sec === 'vehicles'){
+      // Vehicles module: stats and weapons; → Combat sends one to the combat tracker.
+      const R = window.PREP_REGISTRY, C = (R && R.vehicleCfg) ? R.vehicleCfg(prepSys) : { fields: [] };
+      const ln = (l, v) => (v != null && String(v).trim()) ? '<div class="advh-desc"><b>' + advEsc(l) + ':</b> ' + advText(String(v)) + '</div>' : '';
+      return (prep.vehicles || []).map((x, i) => {
+        const st = x.stats || {};
+        const role = x.role === 'party' ? 'the heroes\'' : x.role === 'foe' ? 'encountered' : '';
+        return '<div class="advh-card advh-vehicle" data-vi="' + i + '"><div class="advh-loot-hd"><div class="advh-card-h">' + advEsc(x.name || 'Vehicle') + (role ? ' <span class="advh-tag">' + advEsc(role) + '</span>' : '') + '</div>'
+          + '<button type="button" class="btn small advh-veh-combat" title="Add to the combat tracker">&rarr; Combat</button></div>'
+          + (x.type ? '<div class="advh-desc dim">' + advEsc(x.type) + '</div>' : '')
+          + '<div class="advh-desc">' + C.fields.filter(f => String(st[f[0]] || '').trim()).map(f => '<b>' + advEsc(f[1]) + '</b> ' + advEsc(st[f[0]])).join(' · ') + '</div>'
+          + ln('Crew', x.crew) + ln('Cargo', x.cargo) + ln('Weapons', x.weapons) + ln('Notes', x.notes) + '</div>';
+      }).join('') || '<div class="advh-empty">No vehicles in this prep.</div>';
     }
     if(sec === 'travel'){
       // Travel module: each leg with the system's calculator; its travel time can start as a Ticks tracker.
@@ -8627,19 +8644,20 @@ function wireSessionPrepLoader(root) {
       const list = prep.rewards || []; const left = list.map((r, i) => [r, i]).filter(([r, i]) => !isHanded(r, i));
       if(dropLoot(left.map(x => x[0]), (prep.subtitle || prep.title || lab('treasure')))) { left.forEach(([r, i]) => { run().handed[kOf(r.name, i)] = 1; }); runSave(); flash(dropAll, '✓ Sent'); setTimeout(renderHub, 900); }
     });
-    // A site's encounter button → open that encounter on the Encounters tab.
-    hub.querySelectorAll('.advh-goto-scene').forEach(b => b.addEventListener('click', () => {
-      const si = +b.dataset.si; activeSec = 'scenes'; renderHub();
-      const el = hub.querySelector('.advh-scene[data-i="' + si + '"]'); if(!el) return;
-      const hd = el.querySelector('.advh-scene-hd'); if(hd) hd.click(); el.scrollIntoView({ block: 'start' });
+    // A vehicle → the combat tracker, as a stat block with its hull as the damage track.
+    hub.querySelectorAll('.advh-veh-combat').forEach(b => b.addEventListener('click', () => {
+      const R = window.PREP_REGISTRY, x = (prep.vehicles || [])[+b.closest('.advh-vehicle').dataset.vi];
+      if(!x || !R || !R.vehicleToStatblock || typeof window.sendPrepNpcToTracker !== 'function') return;
+      if(window.sendPrepNpcToTracker(R.vehicleToStatblock(x, prepSys), prepSys)) flash(b, '✓ Added');
     }));
     // Trackers → Start puts them in the Trackers tool (never twice).
     hub.querySelectorAll('.advh-trk-start').forEach(b => b.addEventListener('click', () => {
       const row = b.closest('.advh-trk'), scope = row.dataset.scope, i = +row.dataset.i;
-      const isLeg = scope.indexOf('travel') === 0;
-      const list = scope === 'adv' ? (prep.trackers || []) : isLeg ? [legTracker(+scope.slice(6))] : ((scenes()[+scope.slice(5)] || {}).trackers || []);
+      const isLeg = scope.indexOf('travel') === 0, isFac = scope.indexOf('faction') === 0;
+      const facT = () => { const R = window.PREP_REGISTRY, f = (prep.factions || [])[+scope.slice(7)]; return R && R.factionTracker && f ? R.factionTracker(f) : null; };
+      const list = scope === 'adv' ? (prep.trackers || []) : isLeg ? [legTracker(+scope.slice(6))] : isFac ? [facT()] : ((scenes()[+scope.slice(5)] || {}).trackers || []);
       const t = list[i]; if(!t) return;
-      const where = scope === 'adv' ? (prep.subtitle || prep.title || 'Adventure') : isLeg ? lab('travel') : ((scenes()[+scope.slice(5)] || {}).name || 'Scene');
+      const where = scope === 'adv' ? (prep.subtitle || prep.title || 'Adventure') : isLeg ? lab('travel') : isFac ? lab('factions') : ((scenes()[+scope.slice(5)] || {}).name || 'Scene');
       if(startTracker(scope, t, i, where)) { b.innerHTML = '✓ Running'; b.disabled = true; b.classList.remove('primary'); }
     }));
     // Run Scene: linked cast → combat (qty each), linked map → Maps, linked tables → roll.

@@ -10,19 +10,19 @@
   // GM Screen's Hub tabs and the printed prep all follow it.
   var TABS = ['adventure', 'tables', 'clues', 'treasure', 'scenes', 'cast', 'maps'];
   var LABELS = { adventure: 'Adventure', tables: 'Tables', clues: 'Clues', treasure: 'Treasure', scenes: 'Encounters', cast: 'Monsters/NPCs', maps: 'Maps',
-    site: 'Sites', travel: 'Travel' };
-  // Shared modules that are built so far, in tab order (they sit after Encounters).
-  // A system turns one on in SYSTEMS[code].modules; Factions & clocks and Vehicles
-  // are listed there already and get their tabs when they are built.
-  var MODULE_TABS = ['site', 'travel'];
+    travel: 'Travel', factions: 'Factions', vehicles: 'Vehicles' };
+  // Shared modules, in tab order (they sit after Encounters). A system turns one on
+  // in SYSTEMS[code].modules. (A Sites module was tried and dropped: a chapter is one
+  // site, and the Adventure tab holds it — see siteText.)
+  var MODULE_TABS = ['travel', 'factions', 'vehicles'];
   // Flavour names (kept per system), loot drops, and the shared modules each system
   // turns on. Modules are set per system, never per adventure: an empty one simply
   // shows nothing on the GM Screen.
   var SYSTEMS = {
-    SD:    { labels: { scenes: 'Encounters', cast: 'Monsters', treasure: 'Treasure' }, loot: true, modules: ['site'] },
-    DCC:   { labels: { scenes: 'Encounters', cast: 'NPCs/Mobs', treasure: 'Loot' }, loot: true, modules: ['site'] },
+    SD:    { labels: { scenes: 'Encounters', cast: 'Monsters', treasure: 'Treasure' }, loot: true, modules: [] },
+    DCC:   { labels: { scenes: 'Encounters', cast: 'NPCs/Mobs', treasure: 'Loot' }, loot: true, modules: [] },
     DND:   { labels: { scenes: 'Encounters', cast: 'Monsters/NPCs', treasure: 'Treasure' }, loot: true, modules: ['travel'] },
-    DB:    { labels: { adventure: 'Quest', cast: 'Monsters', treasure: 'Treasure', site: 'Site', travel: 'Journey' }, loot: true, modules: ['travel', 'site'] },
+    DB:    { labels: { adventure: 'Quest', cast: 'Monsters', treasure: 'Treasure', travel: 'Journey' }, loot: true, modules: ['travel'] },
     MMRPG: { labels: { cast: 'Villains/NPCs', treasure: 'Gear' }, loot: true, modules: ['factions'] },
     KOB:   { labels: { cast: 'NPCs/Threats', treasure: 'Items' }, loot: false, modules: [] },
     SW:    { labels: { cast: 'Imperials/NPCs', treasure: 'Gear' }, loot: true, modules: ['travel', 'vehicles'] },
@@ -31,7 +31,7 @@
     TWD:   { labels: { cast: 'Adversaries/NPCs', treasure: 'Gear' }, loot: true, modules: ['factions', 'vehicles'] },
     VAE:   { labels: { cast: 'Vaesen/NPCs', treasure: 'Treasure' }, loot: true, modules: [] },
     MYZ:   { labels: { cast: 'Zone Threats/NPCs', treasure: 'Artifacts' }, loot: true, modules: ['travel'] },
-    PB:    { labels: { adventure: 'The Job', cast: 'Foes', treasure: 'Plunder', scenes: 'Places', travel: 'Voyage', ships: 'Ships' }, loot: true, modules: ['travel', 'site', 'vehicles', 'factions'] },
+    PB:    { labels: { adventure: 'The Job', cast: 'Foes', treasure: 'Plunder', scenes: 'Places', travel: 'Voyage', ships: 'Ships' }, loot: true, modules: ['travel', 'factions'] },
     CO:    { labels: { cast: 'Threats/NPCs', treasure: 'Items' }, loot: true, modules: ['factions'] },
     GB:    { labels: { cast: 'Ghosts/Extras', treasure: 'Gear' }, loot: true, modules: [] },
     ACE:   { labels: { cast: 'Extras', treasure: 'Treasure' }, loot: true, modules: [] },
@@ -186,6 +186,77 @@
   function travel(code) { return TRAVEL[String(code || '').toUpperCase()] || null; }
   function travelCalc(code, leg, ch) { var t = travel(code); try { return t && t.calc ? t.calc(leg || {}, ch || null) : null; } catch (e) { return null; } }
 
+  // ── Factions & clocks (the Factions module) ───────────────────────────────
+  // A faction is { name, attitude, goal, assets, moves (one per line, next first),
+  // clock (boxes), ticks (what fills a box), full (what happens when it fills), notes }.
+  // The clock is a Ticks tracker the GM Screen can start. A system can offer its
+  // book's factions to pick from.
+  var ATTITUDES = ['Allied', 'Friendly', 'Neutral', 'Wary', 'Hostile'];
+  var FACTION_LISTS = {
+    PB: { scripts: ['/tools-data/pb-data.js'], list: function () { return _arr(typeof PB_FACTIONS !== 'undefined' ? PB_FACTIONS : null).map(function (f) { return { name: f.name, notes: [f.seat ? 'Seat: ' + f.seat : '', f.text, f.page ? (f.source || 'Core Rules') + ' p. ' + f.page : ''].filter(Boolean).join('\n') }; }); } }
+  };
+  function factionList(code) { var f = FACTION_LISTS[String(code || '').toUpperCase()]; try { return f ? f.list() : []; } catch (e) { return []; } }
+  function factionTracker(f) {
+    var n = Math.max(1, Math.min(30, parseInt(f && f.clock, 10) || 0)); if (!f || !(parseInt(f.clock, 10) > 0)) return null;
+    return { name: _str(f.name) + ' — clock', kind: 'ticks', size: n, finish: _str(f.full) || (_str(f.name) + ' achieves its goal') };
+  }
+
+  // ── Vehicles (the Vehicles module) ──────────────────────────────────────────
+  // A vehicle is { name, role (party | foe | other), type, stats{}, crew, cargo,
+  // weapons (one per line), notes }. Each system names its stat boxes and may offer
+  // its book's vehicles (loaded on first use). hp = the stat that becomes the combat
+  // tracker's damage track when a vehicle is sent to combat.
+  var VEHICLE_DEFAULT = { fields: [['speed', 'Speed'], ['armor', 'Armor'], ['hull', 'Hull']], hp: 'hull' };
+  var VEHICLES = {
+    // Star Wars d6: scale, speed code, maneuverability, hull and shields (dice codes).
+    SW: { fields: [['scale', 'Scale'], ['speed', 'Speed'], ['maneuver', 'Maneuver'], ['hull', 'Hull'], ['shields', 'Shields']], hp: 'hull',
+      scripts: ['/tools-data/sw-vehicles.js'],
+      list: function () { return _arr(typeof SW_VEHICLES !== 'undefined' ? SW_VEHICLES : null).map(function (v) { return { name: v.name, sub: [v.kind, v.scale].filter(Boolean).join(' · '),
+        make: function () { return { name: v.name, type: [v.kind, v.craft].filter(Boolean).join(' — '), stats: { scale: _str(v.scale), speed: _str(v.speed), maneuver: _str(v.maneuverability), hull: _str(v.hull), shields: _str(v.shields) },
+          crew: [_str(v.crew), v.passengers && v.passengers !== 'None' ? 'passengers: ' + v.passengers : ''].filter(Boolean).join('; '), cargo: _str(v.cargo),
+          weapons: _arr(v.weapons).map(function (w) { return w.name + (w.count ? ' (' + w.count + ')' : '') + ': ' + [w.fireControl ? 'fire control ' + w.fireControl : '', w.damage ? 'damage ' + w.damage : '', w.range ? 'range ' + w.range : ''].filter(Boolean).join(', ') + (w.notes ? '. ' + w.notes : ''); }).join('\n'),
+          notes: [v.hyperdrive ? 'Hyperdrive ' + v.hyperdrive : '', v.nav ? 'Nav: ' + v.nav : '', v.consumables ? 'Consumables: ' + v.consumables : '', v.description].filter(Boolean).join('\n') }; } }; }); } },
+    // Alien: maneuverability, speed, hull and armor; weapons from the vehicle weapons list.
+    YZE: { fields: [['maneuver', 'Maneuver'], ['speed', 'Speed'], ['hull', 'Hull'], ['armor', 'Armor']], hp: 'hull',
+      scripts: ['/tools-data/yze-alien-data.js'],
+      list: function () {
+        var W = _arr(typeof ALIEN_VEHICLE_WEAPONS !== 'undefined' ? ALIEN_VEHICLE_WEAPONS : null);
+        return _arr(typeof ALIEN_VEHICLES !== 'undefined' ? ALIEN_VEHICLES : null).map(function (v) { return { name: v.name, sub: 'Hull ' + v.hull + ' · Armor ' + v.armor,
+          make: function () { return { name: v.name, type: 'Vehicle' + (v.cost ? ' — ' + v.cost : ''), stats: { maneuver: _str(v.maneuver), speed: _str(v.speed), hull: _str(v.hull), armor: _str(v.armor) },
+            crew: v.passengers ? v.passengers + ' passengers' : '', cargo: '',
+            weapons: String(v.weapons || '').split(/\s*;\s*/).filter(Boolean).map(function (n) {
+              var m = /^(\d+)×\s*(.*)$/.exec(n), nm = (m ? m[2] : n).toLowerCase();
+              // Match on the distinctive words ("Hellhound II Missiles" → "AGM-220C Hellhound II Tactical Missile").
+              var key = nm.split(/[^a-z0-9.]+/).filter(function (t) { return t.length >= 2 && !/^(mm|missiles?|turret|launcher|cannon|guns?|tactical)$/.test(t); });
+              var w = W.filter(function (x) { var xn = x.name.toLowerCase(); return xn === nm || nm.indexOf(xn) === 0 || (key.length && key.every(function (t) { return xn.indexOf(t) >= 0; })); })[0];
+              return n + (w ? ': Bonus ' + w.bonus + ', Damage ' + w.damage + ', ' + w.range + (w.ammo ? ', ammo ' + w.ammo : '') + (w.special ? ' — ' + w.special : '') : '');
+            }).join('\n'), notes: '' }; } }; });
+      } }
+  };
+  function vehicleCfg(code) { return VEHICLES[String(code || '').toUpperCase()] || VEHICLE_DEFAULT; }
+  function loadList(cfg, cb) {
+    if (!cfg || !cfg.scripts) { if (cb) cb(); return; }
+    var left = cfg.scripts.length; if (!left) { if (cb) cb(); return; }
+    if (cfg._ready) { if (cb) cb(); return; }
+    var done = function () { if (--left > 0) return; cfg._ready = true; if (cb) cb(); };
+    cfg.scripts.forEach(function (src) {
+      var have = [].slice.call(document.scripts).some(function (x) { return x.src && x.src.indexOf(src) >= 0; });
+      if (have) { done(); return; }
+      var el = document.createElement('script'); el.src = src; el.async = false; el.onload = done; el.onerror = done; document.head.appendChild(el);
+    });
+  }
+  function vehicleList(code, cb) { var c = VEHICLES[String(code || '').toUpperCase()]; if (!c || !c.list) { cb([]); return; } loadList(c, function () { var l = []; try { l = c.list(); } catch (e) {} cb(l); }); }
+  function factionListLoad(code, cb) { var c = FACTION_LISTS[String(code || '').toUpperCase()]; if (!c) { cb([]); return; } loadList(c, function () { cb(factionList(code)); }); }
+  // A vehicle as a prep stat block, so the combat tracker can take it like any foe.
+  function vehicleToStatblock(v, code) {
+    var C = vehicleCfg(code), st = v.stats || {};
+    var dmg = _str(st[C.hp]);
+    return { name: _str(v.name) || 'Vehicle', sbtype: v.role === 'party' ? 'npc' : 'mob', type: ['VEHICLE', _str(v.type).toUpperCase()].filter(Boolean).join(' // '),
+      flavor: _str(v.notes), hp: dmg, health: dmg,
+      abilities: C.fields.filter(function (f) { return _str(st[f[0]]); }).map(function (f) { return f[1] + ': ' + _str(st[f[0]]); })
+        .concat(_str(v.crew) ? ['Crew: ' + _str(v.crew)] : [], _str(v.cargo) ? ['Cargo: ' + _str(v.cargo)] : [], String(v.weapons || '').split('\n').map(_str).filter(Boolean)).join('\n') };
+  }
+
   // Tracker kinds — the GM Screen's Trackers tool (Time / Rounds / Ticks).
   var TRACKER_KINDS = [
     { key: 'time', label: 'Time', unit: 'min', hint: 'Real-time countdown' },
@@ -227,7 +298,7 @@
   //   strongopen[] (Shadowdark)    → the first scenes, marked opener
   //   rolltables / randenc (SD)    → rollTables
   //   Dragonbane's dbQuest / dbSite / dbLeaving / dbJourneys / dbTraps → details,
-  //   sites, travel and hazards (see _dragonbane). Pirate Borg / LotR keys are left
+  //   overview + notes, travel and hazards (see _dragonbane, _foldSites). Pirate Borg / LotR keys are left
   //   alone until those builders move onto the template.
   var DETAIL_KEYS = ['questgiver', 'hooks', 'goal', 'prize', 'stakes', 'opposition'];
   var LINK_KEYS = ['cast', 'clues', 'treasure', 'tables', 'hazards'];
@@ -250,9 +321,7 @@
     var S = ch.dbSite, leave = _str(ch.dbLeaving);
     if ((S && typeof S === 'object' && ['name', 'wayin', 'feature', 'guests', 'challenge', 'boss', 'notes'].some(function (k) { return _str(S[k]); })) || leave) {
       S = S || {};
-      var nm = _str(S.name) || 'The Adventure Site';
-      ch.sites.push({ name: nm, wayin: _str(S.wayin), inside: _str(S.feature), guests: _str(S.guests), challenge: _str(S.challenge), boss: _str(S.boss), wayout: leave, notes: _str(S.notes) });
-      ch._dbSite = nm;   // the old builder's rooms were the site's rooms
+      ch.sites.push({ name: _str(S.name) || 'The Adventure Site', wayin: _str(S.wayin), inside: _str(S.feature), guests: _str(S.guests), challenge: _str(S.challenge), boss: _str(S.boss), wayout: leave, notes: _str(S.notes) });
     }
     delete ch.dbSite; delete ch.dbLeaving;
     _arr(ch.dbJourneys).forEach(function (j) {
@@ -315,6 +384,25 @@
     });
     delete ch.pbTraps;
   }
+  // A site (Dragonbane's Adventure Site, or a card from the short-lived Sites tab)
+  // → the Adventure tab: its description into the Overview, its boss into the
+  // Opposition, what happens on leaving and its notes into the GM Notes.
+  function siteText(x) {
+    var L = [['The way in', x.wayin], ['Inside', x.inside], ['Who is there', x.guests], ['The challenge', x.challenge], ['The boss', x.boss]]
+      .filter(function (r) { return _str(r[1]); }).map(function (r) { return r[0] + ': ' + _str(r[1]); });
+    return [_str(x.name)].concat(L).filter(Boolean).join('\n');
+  }
+  function _foldSites(ch, d) {
+    _arr(ch.sites).forEach(function (x) {
+      if (!x || typeof x !== 'object') return;
+      var t = siteText(x);
+      if (t) ch.overview = (_str(ch.overview) ? String(ch.overview).replace(/\s+$/, '') + '\n\n' : '') + t;
+      if (_str(x.boss) && !d.opposition) d.opposition = _str(x.boss);
+      var n = [_str(x.wayout) ? 'If they leave' + (x.name ? ' ' + _str(x.name) : '') + ' and come back:\n' + _str(x.wayout) : '', _str(x.notes) ? (x.name ? _str(x.name) + ' — ' : '') + _str(x.notes) : ''].filter(Boolean).join('\n\n');
+      if (n) ch.notes = (_str(ch.notes) ? String(ch.notes).replace(/\s+$/, '') + '\n\n' : '') + n;
+    });
+    delete ch.sites;
+  }
   function migrate(ch) {
     if (!ch || typeof ch !== 'object') return ch;
     var d = (ch.details && typeof ch.details === 'object') ? ch.details : {};
@@ -345,21 +433,21 @@
     if (_log) ch.notes = ch.notes.trim() ? ch.notes.replace(/\s+$/, '') + '\n\n' + _log : _log;
     ch.log = '';
     ch.clues = _arr(ch.clues); ch.rewards = _arr(ch.rewards); ch.statblocks = _arr(ch.statblocks); ch.maps = _arr(ch.maps);
-    ch.sites = _arr(ch.sites); ch.travel = _arr(ch.travel);
+    ch.sites = _arr(ch.sites); ch.travel = _arr(ch.travel); ch.factions = _arr(ch.factions); ch.vehicles = _arr(ch.vehicles);
     _dragonbane(ch, d);
     _lotr(ch);
     _pirateborg(ch, d);
+    _foldSites(ch, d);
     ch.locations = _arr(ch.locations).map(function (l) {
       if (!l || typeof l !== 'object') return l;
       var L = (l.links && typeof l.links === 'object') ? l.links : {};
       if (typeof L.map !== 'string') L.map = _str(L.map);
       if (typeof L.mapkey !== 'string') L.mapkey = _str(L.mapkey);
       LINK_KEYS.forEach(function (k) { L[k] = _arr(L[k]).map(_str).filter(Boolean); });
-      if (typeof L.site !== 'string') L.site = _str(L.site);
+      delete L.site;
       l.links = L; l.trackers = _arr(l.trackers);
       return l;
     });
-    if (ch._dbSite) { ch.locations.forEach(function (l) { if (l && typeof l === 'object' && !l.links.site) l.links.site = ch._dbSite; }); delete ch._dbSite; }
     // Links live in ONE place — on the encounter. Older preps also wrote a "where"
     // on clues, treasure and hazards; fold each into the matching encounter's links
     // (a clue's unmatched "where" was usually a person, so it becomes "held by").
@@ -398,6 +486,8 @@
 
   window.PREP_REGISTRY = { TABS: TABS, LABELS: LABELS, SYSTEMS: SYSTEMS, ITEMS: ITEMS, TRACKER_KINDS: TRACKER_KINDS, DETAIL_KEYS: DETAIL_KEYS, MODULE_TABS: MODULE_TABS, TRAVEL: TRAVEL,
     sys: sys, label: label, loot: loot, modules: modules, itemList: itemList, loadItems: loadItems, migrate: migrate, trackerToTool: trackerToTool,
-    travel: travel, travelCalc: travelCalc, hasModule: function (code, m) { return modules(code).indexOf(m) >= 0 && MODULE_TABS.indexOf(m) >= 0; },
+    travel: travel, travelCalc: travelCalc, siteText: siteText,
+    ATTITUDES: ATTITUDES, factionList: factionList, factionListLoad: factionListLoad, factionTracker: factionTracker,
+    vehicleCfg: vehicleCfg, vehicleList: vehicleList, vehicleToStatblock: vehicleToStatblock, hasModule: function (code, m) { return modules(code).indexOf(m) >= 0 && MODULE_TABS.indexOf(m) >= 0; },
     hasItems: function (code) { return !!ITEMS[String(code || '').toUpperCase()]; } };
 })();

@@ -1,8 +1,9 @@
 // ══ Dragonbane plug-in ══════════════════════════════════════════════════════
 // The book's six-die generators (Quest, Journey, Adventure Site, NPC) wired to the
 // shared template: the Quest fills Adventure Details, a Journey adds a Travel leg,
-// an Adventure Site fills a Site card, an NPC adds a stat block. Plus typical traps
-// (→ Hazards), Leaving the Site (→ the site's way out), the journey leg's mishap and
+// an Adventure Site is written into the Overview (its boss as the Opposition), an
+// NPC adds a stat block. Plus typical traps (→ Hazards), Leaving the Site (→ GM
+// Notes; a chapter is one site), the journey leg's mishap and
 // encounter rolls, and random finds / coins for Treasure. Tables and numbers come
 // from /tools-data/db-data.js (window.DB_*) and its GM suite /tools-data/db-gm-tables.js
 // (window.DB_GM); all text here is our own.
@@ -32,30 +33,24 @@ function dbRollJourney(silent){
   if(!silent) { autosave(); switchTab('travel'); }
   return card;
 }
-// ── An Adventure Site → a new Site card (or an empty one already there) ──
-function dbSiteCard(){
-  const empty = [...document.querySelectorAll('#sites-list > .site-card')].find(c => ![...c.querySelectorAll('input, textarea')].some(x => x.value.trim()));
-  return empty || addSite({});
-}
-function dbRollSite(silent){
+// ── An Adventure Site → the Overview (one chapter is one site), boss → Opposition ──
+function dbRollSite(silent, name){
   const G = DG(); const a = G && G.adventure('site'); if(!a) return;
-  const v = a.cols.map(c => c.value), card = dbSiteCard();
-  const set = (k, val) => { const el = card.querySelector('.st-' + k); if(el) el.value = val || ''; };
-  set('wayin', v[0]); set('inside', v[1]); set('guests', G.rollInline(v[2] + ' ' + v[3])); set('challenge', v[4]); set('boss', v[5]);
-  const nm = card.querySelector('.site-name-input');
-  if(nm && !nm.value) { const J = G.rollCols('journey'); if(J) nm.value = dcap(J[5].value); }
-  if(!silent) { refreshAllSceneLinks(); autosave(); switchTab('site'); }
-  return card;
+  const v = a.cols.map(c => c.value);
+  if(!name) { const J = G.rollCols('journey'); name = J ? dcap(J[5].value) : 'The Adventure Site'; }
+  const block = PREG.siteText({ name: name, wayin: v[0], inside: v[1], guests: G.rollInline(v[2] + ' ' + v[3]), challenge: v[4], boss: v[5] });
+  const ov = document.getElementById('f-overview');
+  if(ov) ov.value = (ov.value.trim() ? ov.value.replace(/\s+$/, '') + '\n\n' : '') + block;
+  const op = document.getElementById('f-d-opposition'); if(op && !op.value.trim()) op.value = dcap(v[5]);
+  if(!silent) { autosave(); switchTab('adventure'); }
 }
 function dbRollWholeAdventure(){
   dbRollQuest(true);
   const leg = dbRollJourney(true);
-  const site = dbRollSite(true);
-  // The journey's destination names the site.
-  const to = leg && leg.querySelector('.tv-to') ? leg.querySelector('.tv-to').value : '';
-  const nm = site && site.querySelector('.site-name-input'); if(nm && to) nm.value = to;
   if(!v('f-overview')) setVal('f-overview', [v('f-d-hooks'), leg ? (leg.querySelector('.tv-notes')?.value || '').replace(/ Plan a mishap or two\.$/, '') : ''].filter(Boolean).join(' '));
-  refreshAllSceneLinks(); autosave();
+  // The journey's destination names the site.
+  dbRollSite(true, leg && leg.querySelector('.tv-to') ? leg.querySelector('.tv-to').value : '');
+  autosave(); switchTab('adventure');
 }
 // ── NPC table → a stat block (closest typical NPC's numbers) + social notes ──
 function dbRollNpc(){
@@ -84,17 +79,14 @@ PLUG.travel.encounter = function(card){
   _appendLine(card.querySelector('.tv-encounters'), m.name + n + ' (' + (m.group || '') + ')');
 };
 
-// ── Sites: Leaving the Site (what happens if they leave for a shift and come back) ──
-PLUG.site.wayoutTools = '<div style="display:flex;gap:6px;"><button class="btn-add btn-mini" style="flex:1" onclick="dbLeavingTable(this)">Use the book\'s D6 table</button><button class="btn-add btn-mini btn-roll" style="flex:1" onclick="dbLeavingRoll(this)">🎲 Roll it now</button></div>';
-function dbLeavingTable(btn) {
+// ── Leaving the Site: what happens if they leave for a shift and come back (→ GM Notes) ──
+function dbLeavingTable() {
   const t = DT('leavingSite'); if(!t) return;
-  const ta = btn.closest('.site-card').querySelector('.st-wayout'); if(!ta) return;
-  ta.value = t.rows.map(r => 'D6 ' + (Array.isArray(r.roll) ? r.roll[0] + '–' + r.roll[1] : r.roll) + ': ' + r.text).join('\n');
-  autosave();
+  _appendLine(document.getElementById('f-notes'), 'If they leave the site and come back:\n' + t.rows.map(r => 'D6 ' + (Array.isArray(r.roll) ? r.roll[0] + '–' + r.roll[1] : r.roll) + ': ' + r.text).join('\n'));
 }
-function dbLeavingRoll(btn) {
+function dbLeavingRoll() {
   const G = DG(); const x = G && G.rollRows('leavingSite'); if(!x) return;
-  _appendLine(btn.closest('.site-card').querySelector('.st-wayout'), 'Rolled D6 ' + x.roll + ': ' + x.row.text);
+  _appendLine(document.getElementById('f-notes'), 'Leaving the site — rolled D6 ' + x.roll + ': ' + x.row.text);
 }
 
 // ── Traps → Hazards ──
@@ -116,5 +108,5 @@ function dbTreasureCoins() {
   autosave();
 }
 
-// The book's own hints replace the generic ones on the Site and Journey tabs.
-['site-hint', 'travel-hint'].forEach(id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; });
+// The book's own hint replaces the generic one on the Journey tab.
+['travel-hint'].forEach(id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; });

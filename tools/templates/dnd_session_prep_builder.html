@@ -656,17 +656,20 @@ body.flow-mode .page + .page {
   .mob-pick-item:hover { background: var(--ui-bg); color: var(--ui-accent); }
   .mob-pick-empty { padding: 10px; text-align: center; color: var(--ui-muted); font-family: 'Barlow', sans-serif; font-size: 11px; }
 
-  /* ── Shared modules: Sites and Travel (before the skin, so a skin can restyle) ── */
+  /* ── Shared modules (before the skin, so a skin can restyle) ── */
   .mod-box { background: rgba(255,255,255,.45); border: 1px solid var(--rule, #d6c08f); border-left: 4px solid var(--accent); border-radius: 8px; padding: 6px 9px 7px 10px; margin-bottom: 6px; }
   .mod-box .loc-desc { margin-top: 2px; }
   .mod-travel-box { border-left-color: var(--muted, #6b5a2c); }
-  .mod-site-box { border-left-color: var(--accent-dark); }
   .mod-badges { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 4px; }
   .mod-badge { display: inline-flex; align-items: baseline; gap: 4px; border: 1px solid var(--rule, #c8ae78); border-radius: 999px; padding: 1px 7px; font-size: 9px; color: var(--ink); background: rgba(255,255,255,.6); }
   .mod-badge > span { font-family: var(--font-display); font-size: 8px; color: var(--accent-dark); letter-spacing: .04em; text-transform: uppercase; }
   .mod-note { font-size: 9px; color: var(--muted, #6e5b45); font-style: italic; margin: 1px 0 3px; line-height: 1.45; }
   .mod-route { font-family: var(--font-display); font-size: 10px; color: var(--accent-dark); margin-bottom: 2px; }
   .mod-list { margin: 2px 0 3px; }
+  .mod-ol { margin: 2px 0 3px 16px; font-size: 9.5px; line-height: 1.45; color: var(--ink); }
+  .page.dark-mode .mod-ol { color: #d0ccc4; }
+  .mod-faction-box { border-left-color: var(--accent-red, #a02020); }
+  .mod-vehicle-box .sb-table { margin: 3px 0 4px; }
   .mod-danger .loc-lbl, .mod-boss .loc-lbl { color: var(--accent-red, #a02020) !important; }
   .page.dark-mode .mod-box { background: rgba(10,10,9,.5); border-color: #3f3a35; }
   .page.dark-mode .mod-badge { background: #262422; color: #eee3cc; border-color: #5a5248; }
@@ -773,8 +776,9 @@ body.flow-mode .page + .page {
     <button class="tab-btn" data-tab="clues" onclick="switchTab('clues')">Clues</button>
     <button class="tab-btn" data-tab="treasure" onclick="switchTab('treasure')">Treasure</button>
     <button class="tab-btn" data-tab="scenes" onclick="switchTab('scenes')">Scenes</button>
-    <button class="tab-btn mod-off" data-tab="site" data-module="site" onclick="switchTab('site')">Sites</button>
     <button class="tab-btn mod-off" data-tab="travel" data-module="travel" onclick="switchTab('travel')">Travel</button>
+    <button class="tab-btn mod-off" data-tab="factions" data-module="factions" onclick="switchTab('factions')">Factions</button>
+    <button class="tab-btn mod-off" data-tab="vehicles" data-module="vehicles" onclick="switchTab('vehicles')">Vehicles</button>
 
     <button class="tab-btn" data-tab="cast" onclick="switchTab('cast')">Monsters/NPCs</button>
     <button class="tab-btn" data-tab="maps" onclick="switchTab('maps')">Maps</button>
@@ -840,15 +844,6 @@ body.flow-mode .page + .page {
 
     </div>
 
-    <!-- SITES (module): one card per dungeon / location; encounters link to their site -->
-    <div class="tab-panel" id="tab-site">
-      <div class="section-divider" id="site-heading">Sites</div>
-      <p class="tab-hint" id="site-hint">One card per dungeon or location: the way in, what is inside, who is there, the challenge, the boss and the way out. Each encounter picks its site in its Links.</p>
-
-      <div id="sites-list" class="entity-list"></div>
-      <button class="btn-add" onclick="addSite();autosave()">+ Add Site</button>
-    </div>
-
     <!-- TRAVEL (module): journey legs, with the system's own calculator -->
     <div class="tab-panel" id="tab-travel">
       <div class="section-divider" id="travel-heading">Travel</div>
@@ -857,6 +852,29 @@ body.flow-mode .page + .page {
       <div id="travel-list" class="entity-list"></div>
       <button class="btn-add" onclick="addTravelLeg();autosave()">+ Add Leg</button>
 
+    </div>
+
+    <!-- FACTIONS & CLOCKS (module): who else wants something, and how close they are to getting it -->
+    <div class="tab-panel" id="tab-factions">
+      <div class="section-divider" id="factions-heading">Factions</div>
+      <p class="tab-hint" id="factions-hint">Groups with their own goals. Each faction's clock is a row of boxes: say what fills a box and what happens when the last one fills. On the GM Screen the clock gets a Start button that adds it to the Trackers tool.</p>
+
+      <div id="factionpick-row" style="display:none;gap:6px;margin-bottom:6px;"><select id="factionpick" class="ui-select" style="flex:1"></select><button class="btn-add" style="flex:0 0 auto;width:auto;margin:0;padding:5px 10px" onclick="factionFromBook()">+ Add</button></div>
+      <div id="factions-list" class="entity-list"></div>
+      <button class="btn-add" onclick="addFaction();autosave()">+ Add Faction</button>
+    </div>
+
+    <!-- VEHICLES (module): ships, starships, cars — the crew's and the ones they meet -->
+    <div class="tab-panel" id="tab-vehicles">
+      <div class="section-divider" id="vehicles-heading">Vehicles</div>
+      <p class="tab-hint" id="vehicles-hint">The crew's vehicles and the ones they meet. On the GM Screen a vehicle goes to the combat tracker like any foe, its hull as the damage track.</p>
+
+      <div style="display:none;gap:6px;margin-bottom:4px;" id="vehpick-row">
+        <input type="text" id="vehpick-search" style="flex:1;min-width:0;" placeholder="Search the book's vehicles…" autocomplete="off" oninput="vehSearch()" onfocus="vehSearch()">
+      </div>
+      <div id="vehpick-list" class="mob-pick-list"></div>
+      <div id="vehicles-list" class="entity-list"></div>
+      <button class="btn-add" onclick="addVehicle();autosave()">+ Add Vehicle</button>
     </div>
 
 
@@ -1049,8 +1067,9 @@ const DEFAULT_STATE = {
   trackers:[],          // clocks / countdowns / timers → the GM Screen's Trackers tool
   clues:[], rewards:[], rollTables:[], hooks:[], notes:'', strongopen:[], locations:[], statblocks:[],
   hazards:[],           // hazards & traps (scenes link to them by name)
-  sites:[],             // Sites module: {name, wayin, inside, guests, challenge, boss, wayout, notes}
   travel:[],            // Travel module: {name, from, to, distance, terrain, navigator, opts{}, mishaps, encounters, notes}
+  factions:[],          // Factions module: {name, attitude, goal, assets, moves, clock, ticks, full, notes}
+  vehicles:[],          // Vehicles module: {name, role, type, stats{}, crew, cargo, weapons, notes}
   _v:2
 };
 // A fresh chapter object with its own nested objects (DEFAULT_STATE is never mutated).
@@ -1625,7 +1644,7 @@ function switchTab(name) {
   // Pickers that list other tabs' names (scene links, "found at") refresh on view.
   if(name==='scenes') refreshAllSceneLinks();
   if(name==='clues' || name==='treasure' || name==='scenes') refreshAllItemLinks();
-  if(name==='site' || name==='travel') { try{ readFields(); }catch(e){} }
+  if(PREG && PREG.MODULE_TABS && PREG.MODULE_TABS.indexOf(name)>=0) { try{ readFields(); }catch(e){} }
 }
 // Older links (?tab=basics, saved UI state) still land somewhere sensible.
 const _TAB_ALIASES = { basics:'adventure', encounters:'scenes', monsters:'cast' };
@@ -1635,7 +1654,7 @@ function applyTabLabels(){
   document.querySelectorAll('.tab-btn[data-tab]').forEach(b=>{ b.textContent = PREG.label(PREP_CODE, b.dataset.tab); });
   const sh=document.getElementById('scenes-heading'); if(sh) sh.textContent = PREG.label(PREP_CODE,'scenes');
   const th=document.getElementById('treasure-heading'); if(th) th.textContent = PREG.label(PREP_CODE,'treasure');
-  ['site','travel'].forEach(m=>{ const h=document.getElementById(m+'-heading'); if(h) h.textContent=PREG.label(PREP_CODE,m); });
+  ((PREG && PREG.MODULE_TABS) || []).forEach(m=>{ const h=document.getElementById(m+'-heading'); if(h) h.textContent=PREG.label(PREP_CODE,m); });
   // Shared modules this system turns on (registry): show their tabs.
   document.querySelectorAll('.tab-btn[data-module]').forEach(b=>b.classList.toggle('mod-off', !modOn(b.dataset.module)));
   // Lay the tab buttons out in two even rows (four a row for the baseline seven).
@@ -1656,7 +1675,7 @@ function readFields() {
   state.details={ questgiver:v('f-d-questgiver'), hooks:v('f-d-hooks'), goal:v('f-d-goal'), prize:v('f-d-prize'), stakes:v('f-d-stakes'), opposition:v('f-d-opposition') };
   // A system plug-in can add a name for the quest / job (an #f-d-name field in its slot).
   state.details.name=document.getElementById('f-d-name') ? v('f-d-name') : _dn;
-  state.sites=readSites(); state.travel=readTravel();
+  state.travel=readTravel(); state.factions=readFactions(); state.vehicles=readVehicles();
   state.trackers=readTrackers(document.getElementById('trackers-list'));
   state.maps = collectMaps();
   state.clues=[...document.querySelectorAll('#clues-list .entity-card')].map(c=>({
@@ -1745,8 +1764,9 @@ function buildSidebarFromState() {
   clear('rolltables-list'); (state.rollTables||[]).forEach(t=>addRollTable(t));
   clear('statblocks-list'); (state.statblocks||[]).forEach(s=>addStatBlock(s));
   clear('hazards-list'); (state.hazards||[]).forEach(h=>addHazard(h));
-  clear('sites-list'); (state.sites||[]).forEach(x=>addSite(x));
   clear('travel-list'); (state.travel||[]).forEach(x=>addTravelLeg(x));
+  clear('factions-list'); (state.factions||[]).forEach(x=>addFaction(x));
+  clear('vehicles-list'); (state.vehicles||[]).forEach(x=>addVehicle(x));
   clear('locations-list'); (state.locations||[]).forEach(l=>addLocation(l));
   refreshAllSceneLinks(); refreshAllItemLinks();
   if(typeof PLUG.build==='function') try{ PLUG.build(); }catch(e){}
@@ -2306,7 +2326,7 @@ function addLocation(data={}) {
   const div=document.createElement('div'); div.className='entity-card location-card';
   if(data.opener) div.dataset.opener='1';
   // Links to other tabs live on the card as JSON (names), rendered as pick-chips.
-  div.dataset.links=JSON.stringify(Object.assign({map:'',mapkey:'',site:'',cast:[],clues:[],treasure:[],tables:[],hazards:[]}, data.links||{}));
+  div.dataset.links=JSON.stringify(Object.assign({map:'',mapkey:'',cast:[],clues:[],treasure:[],tables:[],hazards:[]}, data.links||{}));
   const type=data.type||'combat';
   const typeColors={'combat':'#C0392B','exploration':'#2d6a2d','npc':'#1a4a8a'};
   div.style.borderLeftColor=typeColors[type]||typeColors.combat;
@@ -2356,7 +2376,6 @@ function addLocation(data={}) {
         <div><label class="field-label">Map</label><select class="ui-select sl-map" onchange="sceneLinkSet(this,'map',this.value)"></select></div>
         <div style="flex:0 0 74px"><label class="field-label">Key</label><input type="text" class="sl-mapkey" placeholder="e.g. 4" oninput="sceneLinkSet(this,'mapkey',this.value.trim())"></div>
       </div>
-      <div class="field-group sl-site-row" style="display:none"><label class="field-label">Site</label><select class="ui-select sl-site" onchange="sceneLinkSet(this,'site',this.value)"></select></div>
       <div class="link-group"><label class="field-label">Cast here</label><div class="link-chips" data-k="cast"></div></div>
       <div class="link-group"><label class="field-label">Clues found here</label><div class="link-chips" data-k="clues"></div></div>
       <div class="link-group"><label class="field-label">Treasure here</label><div class="link-chips" data-k="treasure"></div></div>
@@ -2374,7 +2393,7 @@ function addLocation(data={}) {
 function _sceneLinks(card){ try { return JSON.parse(card.dataset.links||'{}'); } catch(e){ return {}; } }
 function readSceneLinks(card){
   const L=_sceneLinks(card);
-  return { map:L.map||'', mapkey:L.mapkey||'', site:L.site||'', cast:L.cast||[], clues:L.clues||[], treasure:L.treasure||[], tables:L.tables||[], hazards:L.hazards||[] };
+  return { map:L.map||'', mapkey:L.mapkey||'', cast:L.cast||[], clues:L.clues||[], treasure:L.treasure||[], tables:L.tables||[], hazards:L.hazards||[] };
 }
 function sceneLinkSet(el, k, val){
   const card=el.closest('.location-card'); const L=readSceneLinks(card); L[k]=val;
@@ -2382,7 +2401,7 @@ function sceneLinkSet(el, k, val){
 }
 function sceneLinkCount(card){
   const L=readSceneLinks(card);
-  const n=(L.map?1:0)+(L.site?1:0)+L.cast.length+L.clues.length+L.treasure.length+L.tables.length+L.hazards.length+card.querySelectorAll('.scene-trackers > .tracker-card').length;
+  const n=(L.map?1:0)+L.cast.length+L.clues.length+L.treasure.length+L.tables.length+L.hazards.length+card.querySelectorAll('.scene-trackers > .tracker-card').length;
   const el=card.querySelector('.scene-links .sl-count'); if(el) el.textContent=n?'('+n+')':'';
 }
 // Rebuild the chips from the names that exist right now. A linked name that no
@@ -2395,10 +2414,6 @@ function refreshSceneLinks(card){
   if(ms){ const t=mapTitles(); const cur=L.map; const all=cur&&!t.includes(cur)?[cur,...t]:t;
     ms.innerHTML='<option value="">—</option>'+all.map(n=>'<option value="'+escA(n)+'"'+(n===cur?' selected':'')+'>'+escH(n)+'</option>').join(''); }
   const mk=card.querySelector('.sl-mapkey'); if(mk && document.activeElement!==mk) mk.value=L.mapkey||'';
-  const ss=card.querySelector('.sl-site'), sr=card.querySelector('.sl-site-row');
-  if(ss){ const on=modOn('site'); if(sr) sr.style.display=on?'':'none';
-    if(on){ const t=siteNames(); const cur=L.site; const all=cur&&!t.some(x=>_eq(x,cur))?[cur,...t]:t;
-      ss.innerHTML='<option value="">—</option>'+all.map(n=>'<option value="'+escA(n)+'"'+(_eq(n,cur)?' selected':'')+'>'+escH(n)+'</option>').join(''); } }
   sceneLinkCount(card);
 }
 function refreshAllSceneLinks(){ document.querySelectorAll('#locations-list .location-card').forEach(refreshSceneLinks); }
@@ -2415,7 +2430,7 @@ function updateLocCardColor(radio) {
 function locBlockInner(l){
   const sec=(label,val)=>(val&&String(val).trim())?'<p class="loc-desc"><strong class="loc-lbl">'+escH(label)+':</strong> '+fmtText(val)+'</p>':'';
   const K=l.links||{};
-  const ln=[ K.site?'<b>'+escH(PREG?PREG.label(PREP_CODE,'site').replace(/s$/,''):'Site')+':</b> '+escH(K.site):'',
+  const ln=[
     K.map?'<b>Map:</b> '+escH(K.map)+(K.mapkey?' #'+escH(K.mapkey):''):'',
     (K.cast||[]).length?'<b>Cast:</b> '+(K.cast||[]).map(escH).join(', '):'',
     (K.clues||[]).length?'<b>Clues:</b> '+(K.clues||[]).map(escH).join(', '):'',
@@ -2737,10 +2752,11 @@ function renderPreview() {
     }
 
     plugPreview('treasure', sections);
-    // MODULES: travel legs, then the sites (each heads its encounters)
+    // MODULES: travel legs
     previewTravel().forEach(h=>sections.push(h));
     plugPreview('travel', sections);
-    previewSites().forEach(h=>sections.push(h));
+    previewFactions().forEach(h=>sections.push(h));
+    previewVehicles().forEach(h=>sections.push(h));
 
     // SCENES (spill onto page 2 when they don't fit), then hazards & traps
     const _typeC={'combat':'#C0392B','exploration':'#2d6a2d','npc':'#1a4a8a'};
@@ -3270,40 +3286,19 @@ function clearAll() {
   startObserving();
 })();
 
-// ── Shared modules: Sites and Travel ─────────────────────────────────────
+// ── Shared modules: Travel, Factions & clocks, Vehicles ─────────────────────────────────────
 // On per system (PREP_REGISTRY.SYSTEMS[code].modules), never per adventure. A
 // system plug-in can hook in through PLUG (set in its ext.js):
 //   PLUG.travel.mishap(card) / .encounter(card)  roll buttons on a leg
 //   PLUG.travel.fields(data) / .after(card,data) / .read(card) / .preview(leg)
 //                                                a system's own leg fields
-//   PLUG.site.wayoutTools                        extra buttons under "Way out"
 //   PLUG.init()                                  once, before the prep loads
 //   PLUG.read()                                  at the end of readFields (DOM → state)
 //   PLUG.build()                                 after the editor is rebuilt (state → DOM)
 //   PLUG.preview(where) → [html]                 print sections at adventure · clues ·
 //                                                treasure · travel · scenes · end
-var PLUG = window.PLUG || (window.PLUG = { travel:{}, site:{} });
-function siteNames(){ return _names('#sites-list .site-name-input'); }
+var PLUG = window.PLUG || (window.PLUG = { travel:{} });
 function _mf(cls, label, val, ph, ta){ return '<div class="field-group"><label class="field-label">'+escH(label)+'</label>'+(ta?'<textarea class="'+cls+' short" placeholder="'+escA(ph||'')+'" oninput="autosave()">'+escH(val||'')+'</textarea>':'<input type="text" class="'+cls+'" placeholder="'+escA(ph||'')+'" value="'+escA(val||'')+'" oninput="autosave()">')+'</div>'; }
-const SITE_FIELDS=[['wayin','The way in','e.g. hidden and hard to find'],['inside','Inside','What is there — features, rooms, atmosphere',1],['guests','Who is there','Inhabitants and unexpected guests'],['challenge','The challenge','A deadly trap, a puzzle, a cave-in…'],['boss','The boss','Who waits at the end (appearance, motive, tactics)'],['wayout','The way out','How they leave — and what happens if they leave and come back',1],['notes','Notes','History, rumours, anything else',1]];
-function addSite(data={}){
-  const list=document.getElementById('sites-list'); if(!list) return null;
-  const div=document.createElement('div'); div.className='entity-card site-card'; div.style.borderLeft='2px solid var(--ui-accent)';
-  div.innerHTML='<div class="entity-card-header"><input class="entity-name-input site-name-input" type="text" placeholder="Site name (e.g. Nightpit)" value="'+escA(data.name||'')+'" oninput="autosave()"><button class="btn-remove" onclick="this.closest(\'.entity-card\').remove();refreshAllSceneLinks();autosave()">✕</button></div>'
-    + SITE_FIELDS.map(f=>_mf('st-'+f[0], f[1], data[f[0]], f[2], f[3]) + (f[0]==='wayout' && PLUG.site && PLUG.site.wayoutTools ? PLUG.site.wayoutTools : '')).join('')
-    + '<div class="mod-calc st-scenes"></div>';
-  list.appendChild(div); return div;
-}
-function readSites(){
-  return [...document.querySelectorAll('#sites-list > .site-card')].map(c=>{
-    const o={ name:c.querySelector('.site-name-input')?.value.trim()||'' };
-    SITE_FIELDS.forEach(f=>{ o[f[0]]=c.querySelector('.st-'+f[0])?.value.trim()||''; });
-    // Which encounters belong here (from their Links), shown on the card.
-    const here=sceneCards().filter(sc=>o.name && _eq(readSceneLinks(sc).site,o.name)).map(sc=>sc.querySelector('.loc-name-input')?.value.trim()).filter(Boolean);
-    const el=c.querySelector('.st-scenes'); if(el) el.innerHTML=here.length?'<b>'+escH(PREG?PREG.label(PREP_CODE,'scenes'):'Encounters')+' here:</b> '+here.map(escH).join(', '):'';
-    return o;
-  }).filter(o=>o.name||SITE_FIELDS.some(f=>o[f[0]]));
-}
 function travelCfg(){ return (PREG && PREG.travel && PREG.travel(PREP_CODE)) || null; }
 function addTravelLeg(data={}){
   const list=document.getElementById('travel-list'); if(!list) return null;
@@ -3339,6 +3334,108 @@ function readTravel(){
   }).filter(o=>Object.keys(o).some(k=>k!=='opts' && (Array.isArray(o[k])?o[k].length:String(o[k]||'').trim())));
 }
 function _appendLine(ta, line){ if(!ta) return; ta.value=(ta.value?ta.value.replace(/\s+$/,'')+'\n':'')+line; autosave(); }
+// ── Factions & clocks ──
+function addFaction(data={}){
+  const list=document.getElementById('factions-list'); if(!list) return null;
+  const A=(PREG&&PREG.ATTITUDES)||['Allied','Friendly','Neutral','Wary','Hostile'], cur=data.attitude||'Neutral';
+  const tone={Allied:'#2d6a2d',Friendly:'#4f8a4f',Neutral:'var(--ui-muted)',Wary:'#b08a2a',Hostile:'#C0392B'};
+  const div=document.createElement('div'); div.className='entity-card faction-card'; div.style.borderLeft='2px solid '+(tone[cur]||tone.Neutral);
+  div.innerHTML='<div class="entity-card-header"><input class="entity-name-input fc-name" type="text" placeholder="Faction (e.g. The Iron Syndicate)" value="'+escA(data.name||'')+'" oninput="autosave()"><button class="btn-remove" onclick="this.closest(\'.entity-card\').remove();autosave()">✕</button></div>'
+    + '<div class="field-row2 field-group"><div><label class="field-label">Attitude to the heroes</label><select class="ui-select fc-attitude" onchange="this.closest(\'.faction-card\').style.borderLeftColor=({Allied:\'#2d6a2d\',Friendly:\'#4f8a4f\',Wary:\'#b08a2a\',Hostile:\'#C0392B\'})[this.value]||\'var(--ui-muted)\';autosave()">'+A.map(a=>'<option'+(a===cur?' selected':'')+'>'+escH(a)+'</option>').join('')+'</select></div>'
+    + '<div style="flex:0 0 84px"><label class="field-label" title="How many boxes on its clock (blank = no clock)">Clock boxes</label><input type="number" min="1" max="30" class="fc-clock" placeholder="—" value="'+escA(String(data.clock||''))+'" oninput="autosave()"></div></div>'
+    + _mf('fc-goal','Goal',data.goal,'What they want')
+    + _mf('fc-assets','Assets & leverage',data.assets,'People, places, money, secrets they can use',1)
+    + _mf('fc-moves','Moves (one per line, next one first)',data.moves,'What they do if nobody stops them…',1)
+    + '<div class="field-row2 field-group"><div><label class="field-label">A box fills when</label><input type="text" class="fc-ticks" placeholder="e.g. a session passes, they win a fight" value="'+escA(data.ticks||'')+'" oninput="autosave()"></div>'
+    + '<div><label class="field-label">When it\'s full</label><input type="text" class="fc-full" placeholder="What happens" value="'+escA(data.full||'')+'" oninput="autosave()"></div></div>'
+    + _mf('fc-notes','Notes',data.notes,'Leaders, history, how to reach them…',1);
+  list.appendChild(div); return div;
+}
+function readFactions(){
+  return [...document.querySelectorAll('#factions-list > .faction-card')].map(c=>{
+    const g=k=>c.querySelector('.fc-'+k)?.value.trim()||'';
+    return { name:g('name'), attitude:g('attitude')||'Neutral', goal:g('goal'), assets:g('assets'), moves:g('moves'), clock:parseInt(g('clock'),10)||'', ticks:g('ticks'), full:g('full'), notes:g('notes') };
+  }).filter(f=>f.name||f.goal||f.moves||f.notes);
+}
+// The system's book factions to pick from (Pirate Borg's six, …).
+function factionPickerInit(){
+  const row=document.getElementById('factionpick-row'), sel=document.getElementById('factionpick'); if(!row||!sel||!PREG||!PREG.factionListLoad) return;
+  PREG.factionListLoad(PREP_CODE, l=>{ if(!l.length) return; sel.innerHTML='<option value="">The book\'s factions…</option>'+l.map(f=>'<option>'+escH(f.name)+'</option>').join(''); row.style.display='flex'; });
+}
+function factionFromBook(){
+  const n=v('factionpick'); const f=PREG && PREG.factionList(PREP_CODE).find(x=>x.name===n); if(!f) return;
+  addFaction({ name:f.name, notes:f.notes }); autosave();
+}
+function previewFactions(){
+  if(!modOn('factions')) return [];
+  const lab=(PREG?PREG.label(PREP_CODE,'factions'):'Factions');
+  const F=state.factions||[]; if(!F.length) return [];
+  return ['<div class="p-section"><div class="sl">'+escH(lab)+'</div>'+F.map(f=>{
+    const n=parseInt(f.clock,10)||0;
+    return '<div class="mod-box mod-faction-box"><div class="entry-name">'+escH(f.name||'Faction')+'</div><div class="mod-badges">'+_mbadge('Attitude', f.attitude)+(n?_mbadge('Clock', '☐'.repeat(Math.min(30,n))):'')+'</div>'
+      +_mline('Goal', f.goal)+_mline('Assets', f.assets)
+      +(f.moves?'<p class="loc-desc"><strong class="loc-lbl">Moves:</strong></p><ol class="mod-ol">'+f.moves.split('\n').filter(Boolean).map(x=>'<li>'+escH(x)+'</li>').join('')+'</ol>':'')
+      +(n?_mline('A box fills when', f.ticks)+_mline('When full', f.full):'')+_mline('Notes', f.notes)+'</div>';
+  }).join('')+'</div>'];
+}
+
+// ── Vehicles ──
+function vehCfg(){ return (PREG && PREG.vehicleCfg) ? PREG.vehicleCfg(PREP_CODE) : { fields:[['speed','Speed'],['armor','Armor'],['hull','Hull']], hp:'hull' }; }
+function addVehicle(data={}){
+  const list=document.getElementById('vehicles-list'); if(!list) return null;
+  const C=vehCfg(), st=data.stats||{}, role=data.role||'party';
+  const tone={party:'#1a4a8a',foe:'#C0392B',other:'var(--ui-muted)'};
+  const uid='vh'+Date.now()+Math.random().toString(36).slice(2);
+  const div=document.createElement('div'); div.className='entity-card vehicle-card'; div.style.borderLeft='2px solid '+(tone[role]||tone.party);
+  div.innerHTML='<div class="entity-card-header"><input class="entity-name-input vh-name" type="text" placeholder="Vehicle name" value="'+escA(data.name||'')+'" oninput="autosave()"><button class="btn-remove" onclick="this.closest(\'.entity-card\').remove();autosave()">✕</button></div>'
+    + '<div class="field-group mod-checks">'+[['party','The heroes\''],['foe','Encountered'],['other','Other']].map(([k,l])=>'<label><input type="radio" class="vh-role" name="vhrole-'+uid+'" value="'+k+'"'+(role===k?' checked':'')+' onchange="this.closest(\'.vehicle-card\').style.borderLeftColor=({party:\'#1a4a8a\',foe:\'#C0392B\'})[this.value]||\'var(--ui-muted)\';autosave()"> '+l+'</label>').join('')+'</div>'
+    + _mf('vh-type','Type',data.type,'e.g. Light freighter, APC, pickup truck')
+    + '<div style="display:grid;grid-template-columns:repeat('+C.fields.length+',1fr);gap:4px;" class="field-group">'+C.fields.map(f=>'<div><label class="field-label" style="font-size:8px">'+escH(f[1])+'</label><input type="text" class="vh-st" data-k="'+escA(f[0])+'" value="'+escA(st[f[0]]||'')+'" oninput="autosave()"></div>').join('')+'</div>'
+    + _mf('vh-crew','Crew & passengers',data.crew,'Who is aboard')
+    + _mf('vh-cargo','Cargo',data.cargo,'What it carries')
+    + _mf('vh-weapons','Weapons (one per line)',data.weapons,'Name: bonus / damage / range…',1)
+    + _mf('vh-notes','Notes',data.notes,'Quirks, damage, who owns it…',1);
+  list.appendChild(div); return div;
+}
+function readVehicles(){
+  return [...document.querySelectorAll('#vehicles-list > .vehicle-card')].map(c=>{
+    const g=k=>c.querySelector('.vh-'+k)?.value.trim()||'';
+    const stats={}; c.querySelectorAll('.vh-st').forEach(x=>{ if(x.value.trim()) stats[x.dataset.k]=x.value.trim(); });
+    return { name:g('name'), role:(c.querySelector('.vh-role:checked')||{}).value||'party', type:g('type'), stats, crew:g('crew'), cargo:g('cargo'), weapons:g('weapons'), notes:g('notes') };
+  }).filter(x=>x.name||x.type||Object.keys(x.stats).length);
+}
+// The book's vehicles (Star Wars, Alien), loaded on first use.
+let _vehList=null;
+function vehSearch(){
+  const box=document.getElementById('vehpick-search'), list=document.getElementById('vehpick-list'); if(!box||!list||!PREG) return;
+  if(!_vehList){ list.innerHTML='<div class="mob-pick-empty">Loading the vehicle list…</div>'; list.classList.add('show'); PREG.vehicleList(PREP_CODE, l=>{ _vehList=l; vehSearch(); }); return; }
+  const q=box.value.trim().toLowerCase(); const hits=_vehList.filter(x=>!q||x.name.toLowerCase().includes(q)).slice(0,80);
+  list.innerHTML=hits.length?hits.map((x,i)=>'<button type="button" class="mob-pick-item" data-veh="'+escA(x.name)+'" onclick="vehAdd(this.dataset.veh)">'+escH(x.name)+' <span style="opacity:.55">— '+escH(x.sub||'')+'</span></button>').join(''):'<div class="mob-pick-empty">No match.</div>';
+  list.classList.add('show');
+}
+function vehAdd(name){
+  const x=(_vehList||[]).find(v=>v.name===name); if(!x) return;
+  addVehicle(Object.assign({ role:'foe' }, x.make())); autosave();
+  const box=document.getElementById('vehpick-search'); if(box) box.value='';
+  const list=document.getElementById('vehpick-list'); if(list){ list.classList.remove('show'); list.innerHTML=''; }
+}
+document.addEventListener('click', e=>{ const list=document.getElementById('vehpick-list'); if(!list||!list.classList.contains('show')) return; if(e.target.closest && (e.target.closest('#vehpick-list')||e.target.closest('#vehpick-search'))) return; list.classList.remove('show'); });
+(function(){ const c=PREG&&PREG.vehicleCfg?PREG.vehicleCfg(PREP_CODE):null; const row=document.getElementById('vehpick-row'); if(row && c && c.list) row.style.display='flex'; })();
+function previewVehicles(){
+  if(!modOn('vehicles')) return [];
+  const C=vehCfg(), lab=(PREG?PREG.label(PREP_CODE,'vehicles'):'Vehicles');
+  const V=state.vehicles||[]; if(!V.length) return [];
+  return V.map(x=>{
+    const role=x.role==='party'?'The heroes\'':x.role==='foe'?'Encountered':'';
+    return '<div class="p-section"><div class="sl">'+escH(lab.replace(/([^s])s$/,'$1'))+(x.name?' — '+escH(x.name):'')+'</div><div class="mod-box mod-vehicle-box">'
+      +'<div class="mod-badges">'+_mbadge('', role)+_mbadge('Type', x.type)+'</div>'
+      +'<table class="sb-table"><tr>'+C.fields.map(f=>'<th>'+escH(f[1])+'</th>').join('')+'</tr><tr>'+C.fields.map(f=>'<td>'+escH((x.stats||{})[f[0]]||'—')+'</td>').join('')+'</tr></table>'
+      +_mline('Crew', x.crew)+_mline('Cargo', x.cargo)
+      +(x.weapons?'<div class="mod-list">'+x.weapons.split('\n').filter(Boolean).map(w=>'<div class="sb-ability">'+fmtText(w)+'</div>').join('')+'</div>':'')
+      +_mline('Notes', x.notes)+'</div></div>';
+  });
+}
+
 // A system plug-in's print sections, at fixed points of the page order:
 // adventure · clues · treasure · travel · scenes · end.
 function plugPreview(where, sections){
@@ -3365,32 +3462,12 @@ function previewTravel(){
     return '<div class="p-section"><div class="sl">'+escH(lab)+(j.name?' — '+escH(j.name):(route?' — '+escH(route):''))+'</div>'+h+'</div>';
   });
 }
-function previewSites(){
-  if(!modOn('site')) return [];
-  const lab=PREG?PREG.label(PREP_CODE,'site').replace(/s$/,''):'Site';
-  return (state.sites||[]).map(x=>{
-    const here=(state.locations||[]).filter(l=>x.name&&_eq((l.links||{}).site,x.name)).map(l=>l.name).filter(Boolean);
-    return '<div class="p-section"><div class="sl">'+escH(lab)+(x.name?' — '+escH(x.name):'')+'</div><div class="mod-box mod-site-box">'
-      +_mline('The way in',x.wayin)+_mline('Inside',x.inside)+_mline('Who is there',x.guests)
-      +(x.challenge?'<p class="loc-desc mod-danger"><strong class="loc-lbl">The challenge:</strong> '+fmtText(x.challenge)+'</p>':'')
-      +(x.boss?'<p class="loc-desc mod-boss"><strong class="loc-lbl">The boss:</strong> '+fmtText(x.boss)+'</p>':'')
-      +_mline('The way out',x.wayout)+_mline('Notes',x.notes)
-      +(here.length?'<div class="loc-links"><b>'+escH(PREG?PREG.label(PREP_CODE,'scenes'):'Encounters')+':</b> '+here.map(escH).join(', ')+'</div>':'')+'</div></div>';
-  });
-}
-// A site renamed: the encounters that point at it follow.
-(function(){
-  document.addEventListener('focusin', e=>{ const t=e.target; if(t.matches && t.matches('.site-name-input')) t.dataset.prev=t.value.trim(); });
-  document.addEventListener('change', e=>{ const t=e.target; if(!(t.matches && t.matches('.site-name-input'))) return;
-    const from=t.dataset.prev||'', to=t.value.trim(); t.dataset.prev=to;
-    if(from && to && !_eq(from,to)) sceneCards().forEach(c=>{ const L=readSceneLinks(c); if(_eq(L.site,from)){ L.site=to; c.dataset.links=JSON.stringify(L); } });
-    refreshAllSceneLinks(); autosave(); });
-})();
 
 // ── System plug-in (scripts/prep-systems/<sys>/ext.js) ──
 
 
 if(typeof PLUG.init==='function') try{ PLUG.init(); }catch(e){ console.error(e); }
+try{ factionPickerInit(); }catch(e){}
 applyTabLabels();
 loadState();buildSidebarFromState();renderChapterTabs();applyFlowMode();renderPreview();applyDarkModeInit();
 try{ mobTypesRefresh(); }catch(e){}
