@@ -86,10 +86,12 @@ function pbRollZombie(){
 
 // ── Voyage legs ──
 const PB_HEADINGS = [['', '—'], 'N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-function pbShipNames() { return (state.pbShips || []).map(s => s.name).filter(Boolean); }
+// The prep's ships are the Vehicles module's list (state.vehicles), in the ship shape.
+function pbShipsState() { return (state.vehicles || []).map(x => PREG.pbVehicleToShip(x)); }
+function pbShipNames() { return pbShipsState().map(s => s.name).filter(Boolean); }
 // A leg's own fields on the Travel card: heading, ship and speed, weather, winds, events.
 PLUG.travel.fields = function(data){
-  const ships = pbShipNames(); const cur = data.ship || (state.pbShips || []).filter(s => s.role === 'party').map(s => s.name)[0] || '';
+  const ships = pbShipNames(); const cur = data.ship || pbShipsState().filter(s => s.role === 'party').map(s => s.name)[0] || '';
   return dgrid([['Heading', dsel('vy-heading', PB_HEADINGS, data.heading)], ['Ship', dsel('vy-ship', [['', '—']].concat(ships.map(s => [s, s])).concat(cur && ships.indexOf(cur) < 0 ? [[cur, cur]] : []), cur)], ['Speed', din('vy-speed', data.speed, 'ship')]])
     + dfg('Weather', din('vy-weather', data.weather, 'Foul Weather 2d6, or your own'))
     + `<div style="display:flex;gap:6px;"><button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbVoyRoll(this,'weather')">🎲 Foul weather 2d6</button><button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbVoyRoll(this,'winds')">🎲 Winds 2d6 + d6</button></div>`
@@ -103,7 +105,7 @@ PLUG.travel.preview = function(j){
   return _mline('Weather', j.weather) + _mline('Winds', j.winds)
     + (j.events ? '<p class="loc-desc"><strong class="loc-lbl">Events:</strong></p><div class="pb-list pb-events">' + String(j.events).split('\n').filter(Boolean).map(x => '<div class="sb-ability">☠ ' + fmtText(x) + '</div>').join('') + '</div>' : '');
 };
-function pbShipByName(n) { return (state.pbShips || []).find(s => s.name === n) || pbShipPool().find(s => s.name === n) || null; }
+function pbShipByName(n) { return pbShipsState().find(s => s.name === n) || pbShipPool().find(s => s.name === n) || null; }
 function pbVoyRoll(btn, kind) {
   const G = PG(); const c = btn.closest('.entity-card'); if(!G || !c) return;
   if(kind === 'weather') { const x = G.rollTable(PT('foulWeather')); if(x) { c.querySelector('.vy-weather').value = x.row.text.replace(/\.$/, '') + ' (2d6 ' + x.roll + ')'; autosave(); } }
@@ -168,7 +170,7 @@ function addPbShip(data={}) {
   const mods = data.mods || {}, spec = data.specialty || [], known = data.shanties || [];
   const uid = 'sh' + Date.now() + Math.random().toString(36).slice(2);
   const role = data.role || 'party';
-  const card = dcard('ships-list', 'pb-ship', dtitle('sh-name', data.name, 'Ship name (e.g. The Salted Widow)'),
+  const card = dcard('vehicles-list', 'pb-ship vehicle-card', dtitle('sh-name', data.name, 'Ship name (e.g. The Salted Widow)'),
     `<div class="field-group pb-checks pb-checks-row">${[['party', 'Party ship'], ['foe', 'Encountered'], ['other', 'Other']].map(([k, l]) => `<label><input type="radio" class="sh-role" name="shrole-${uid}" value="${k}" ${role === k ? 'checked' : ''} onchange="autosave()"> ${l}</label>`).join('')}</div>`
     + drow([['Type', din('sh-base', data.base || data.type, 'e.g. Sloop')], ['HP now', din('sh-hp', data.hp, 'HP'), 0.6], ['Max HP', din('sh-hpmax', data.hpMax, 'max'), 0.6]])
     + dgrid([['Hull', dsel('sh-hull', PB_HULLS, data.hull)], ['Agility', din('sh-agility', data.agility, '+0')], ['Speed', din('sh-speed', data.speed, 'hexes')], ['Crew skill', din('sh-skill', data.skill, '+0')]])
@@ -395,22 +397,11 @@ function pbAddCaptain(){
 PLUG.init = function(){ pbFillPickers(); };
 PLUG.read = function(){
   state.details.faction = v('f-d-faction'); state.details.port = v('f-d-port');
-  const cards = id => [...document.querySelectorAll('#' + id + ' > .entity-card')];
-  state.pbShips = cards('ships-list').map(c => {
-    const s = pbShipRead(c), k = pbShipCalc(s), el = c.querySelector('.sh-calc');
-    if(el) el.innerHTML = (k.hasSkill ? 'Crew skill <b>' + psgn(k.now) + '</b>' + (k.modSum ? ' <span style="opacity:.75">(' + psgn(k.base) + ' base, ' + escH(k.lines.join(', ')) + ')</span>' : '') : 'No crew skill — use the passengers\' stats.')
-      + (k.hasSkill ? '<br>Morale: 2d6 ' + psgn(k.now) + (k.qm ? ' +3' : '') + ' — under 4, surrender or mutiny.' : '')
-      + '<br>Shanties a day: <b>' + k.perDay + '</b> (1 ± the Captain\'s SPIRIT)' + (s.shanties.length ? ' · ' + s.shanties.length + ' known' : '')
-      + (k.under ? '<br><b>Under-crewed</b>: one crew action a turn, and tick "Under manned".' : '');
-    return s;
-  }).filter(s => s.name || s.base || s.hp);
 };
 PLUG.build = function(){
   const D = state.details || {};
   ['faction','port'].forEach(k => { const el = document.getElementById('f-d-' + k); if(!el) return; if(D[k] && ![...el.options].some(o => o.value === D[k])) el.insertAdjacentHTML('beforeend', '<option>' + escH(D[k]) + '</option>'); el.value = D[k] || ''; });
-  const list = document.getElementById('ships-list'); if(list) list.innerHTML = '';
-  (state.pbShips || []).forEach(s => addPbShip(s));
-  try { PLUG.read(); } catch(e) {}
+  try { readVehicles(); } catch(e) {}   // fill the ships' crew-skill boxes
 };
 PLUG.detailRows = D => [['Faction', D.faction], ['Port', D.port]];
 
@@ -434,9 +425,18 @@ function pbShipBlock(s) {
   if(k.hasSkill) h += '<div class="pb-note dim">Morale 2d6 ' + psgn(k.now) + (k.qm ? ' +3' : '') + ', under 4 surrenders or mutinies. Crew actions DR12' + ((s.specialty || []).indexOf('drunk-crew') >= 0 ? ' (+2 drunk)' : '') + '.</div>';
   return h + '</div>';
 }
-PLUG.preview = function(where){
-  if(where !== 'travel') return [];
-  return (state.pbShips || []).map(s => dsec((s.role === 'party' ? 'Our Ship' : 'Ship') + (s.name ? ' — ' + escH(s.name) : ''), pbShipBlock(s)));
+// ── Ships are the Vehicles module (labelled Ships): the PB plug-in draws the full ship card ──
+function pbShipCalcBox(c, s) {
+  const k = pbShipCalc(s), el = c.querySelector('.sh-calc');
+  if(el) el.innerHTML = (k.hasSkill ? 'Crew skill <b>' + psgn(k.now) + '</b>' + (k.modSum ? ' <span style="opacity:.75">(' + psgn(k.base) + ' base, ' + escH(k.lines.join(', ')) + ')</span>' : '') : 'No crew skill — use the passengers\' stats.')
+    + (k.hasSkill ? '<br>Morale: 2d6 ' + psgn(k.now) + (k.qm ? ' +3' : '') + ' — under 4, surrender or mutiny.' : '')
+    + '<br>Shanties a day: <b>' + k.perDay + '</b> (1 ± the Captain\'s SPIRIT)' + (s.shanties.length ? ' · ' + s.shanties.length + ' known' : '')
+    + (k.under ? '<br><b>Under-crewed</b>: one crew action a turn, and tick "Under manned".' : '');
+}
+PLUG.vehicles = {
+  add: data => addPbShip(data && data.stats ? PREG.pbVehicleToShip(data) : (data || {})),
+  read: c => { const s = pbShipRead(c); pbShipCalcBox(c, s); return PREG.pbShipToVehicle(s); },
+  preview: x => { const s = PREG.pbVehicleToShip(x); return dsec((s.role === 'party' ? 'Our Ship' : 'Ship') + (s.name ? ' — ' + escH(s.name) : ''), pbShipBlock(s)); }
 };
-// The book's own hint replaces the generic one on the Voyage tab.
-(function(){ const el = document.getElementById('travel-hint'); if(el) el.style.display = 'none'; })();
+// The book's own hints replace the generic ones on the Voyage and Ships tabs.
+['travel-hint', 'vehicles-hint'].forEach(id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; });

@@ -8186,7 +8186,7 @@ function wireSessionPrepLoader(root) {
              // Shared modules (on per system in the registry): Sites and Travel legs.
              travel: modOn('travel') ? (prep.travel || []).length : 0, factions: modOn('factions') ? (prep.factions || []).length : 0, vehicles: modOn('vehicles') ? (prep.vehicles || []).length : 0,
              // Pirate Borg prep: the job, voyage legs, ships, traps.
-             pb: (prep.pbShips || []).length };
+             };
   }
 
   // ── Tab labels: the same registry the builders use, so the names match ──
@@ -8197,7 +8197,7 @@ function wireSessionPrepLoader(root) {
   const PLAIN = { adventure: 'Overview', clues: 'Clues', scenes: 'Scenes', cast: 'NPCs', treasure: 'Loot', maps: 'Maps', tables: 'Tables', notes: 'Notes' };
   function lab(k){
     const R = window.PREP_REGISTRY;
-    if(k === 'lotr') return 'Phase'; if(k === 'pb') return 'Ships';
+    if(k === 'lotr') return 'Phase';
     if(!R || HAND_BUILT[prepSys]) return PLAIN[k] || k;
     return R.label(prepSys, k);
   }
@@ -8290,7 +8290,7 @@ function wireSessionPrepLoader(root) {
     // The eight baseline tabs (with each system's flavour names), plus the
     // hand-built LotR / Dragonbane / Pirate Borg sections after Scenes. Only tabs
     // with something in them show; the first tab is always there.
-    const ALL = ['adventure', 'tables', 'clues', 'treasure', 'scenes', 'travel', 'factions', 'vehicles', 'lotr', 'pb', 'cast', 'maps'];
+    const ALL = ['adventure', 'tables', 'clues', 'treasure', 'scenes', 'travel', 'factions', 'vehicles', 'lotr', 'cast', 'maps'];
     const TABS = ALL.filter(k => k === 'adventure' || c[k]).map(k => [k, lab(k)]);
     if(!TABS.some(([k]) => k === activeSec)) activeSec = 'adventure';
     const advTitle = (prepChapters[0] && prepChapters[0].title) || prep.title || prep._docTitle || 'Adventure';
@@ -8429,6 +8429,18 @@ function wireSessionPrepLoader(root) {
       }).join('') || '<div class="advh-empty">No factions in this prep.</div>';
     }
     if(sec === 'vehicles'){
+      // Pirate Borg ships: crew skill with its modifiers, morale, specialty crew, shanties.
+      const pbShipLines = (x, ln) => {
+        const R = window.PREP_REGISTRY, s = R && R.pbVehicleToShip ? R.pbVehicleToShip(x) : null; if(!s) return '';
+        const A = n => (typeof window[n] !== 'undefined' && Array.isArray(window[n])) ? window[n] : [];
+        const SP = A('PB_SPECIALTY_CREW'), SH = A('PB_SHANTIES'), CM = A('PB_CREW_MODS');
+        const sg = n => (n >= 0 ? '+' : '−') + Math.abs(n);
+        let mod = 0; Object.keys(s.mods || {}).forEach(k => { const m = CM.find(z => z.condition === k); if(m && typeof m.mod === 'number') mod += m.per ? m.mod * (parseInt(s.mods[k], 10) || 0) : m.mod; });
+        const sk = String(s.skill || '').trim() !== '' ? (parseInt(String(s.skill).replace(/[−–]/g, '-'), 10) || 0) + mod : null;
+        return (sk == null ? '' : ln('Crew skill', sg(sk) + (mod ? ' (' + sg(mod) + ' from modifiers)' : '') + ' · Morale 2d6 ' + sg(sk) + ((s.specialty || []).indexOf('veteran-quartermaster') >= 0 ? ' +3' : '') + ' — under 4 surrenders or mutinies'))
+          + ln('Specialty crew', (s.specialty || []).map(id => (SP.find(z => z.id === id) || { name: id }).name).join(', '))
+          + ln('Shanties', (s.shanties || []).map(id => (SH.find(z => z.id === id) || { name: id }).name).join(', ')) + ln('Special', s.special);
+      };
       // Vehicles module: stats and weapons; → Combat sends one to the combat tracker.
       const R = window.PREP_REGISTRY, C = (R && R.vehicleCfg) ? R.vehicleCfg(prepSys) : { fields: [] };
       const ln = (l, v) => (v != null && String(v).trim()) ? '<div class="advh-desc"><b>' + advEsc(l) + ':</b> ' + advText(String(v)) + '</div>' : '';
@@ -8439,7 +8451,7 @@ function wireSessionPrepLoader(root) {
           + '<button type="button" class="btn small advh-veh-combat" title="Add to the combat tracker">&rarr; Combat</button></div>'
           + (x.type ? '<div class="advh-desc dim">' + advEsc(x.type) + '</div>' : '')
           + '<div class="advh-desc">' + C.fields.filter(f => String(st[f[0]] || '').trim()).map(f => '<b>' + advEsc(f[1]) + '</b> ' + advEsc(st[f[0]])).join(' · ') + '</div>'
-          + ln('Crew', x.crew) + ln('Cargo', x.cargo) + ln('Weapons', x.weapons) + ln('Notes', x.notes) + '</div>';
+          + ln('Crew', x.crew) + ln('Cargo', x.cargo) + ln('Weapons', x.weapons) + (prepSys === 'PB' ? pbShipLines(x, ln) : '') + ln('Notes', x.notes) + '</div>';
       }).join('') || '<div class="advh-empty">No vehicles in this prep.</div>';
     }
     if(sec === 'travel'){
@@ -8461,32 +8473,6 @@ function wireSessionPrepLoader(root) {
           + ln('Notes', j.notes)
           + (t ? trackersHtml([t], 'travel' + i) : ''));
       }).join('') || '<div class="advh-empty">No travel legs in this prep.</div>';
-    }
-    if(sec === 'pb'){
-      // Pirate Borg: the crew's ship and the ones they meet (the PB plug-in's Ships tab). The job,
-      // voyage legs and traps moved to Adventure, the Voyage module and Hazards.
-      const card = (h, body) => '<div class="advh-card"><div class="advh-card-h">' + advEsc(h) + '</div>' + body + '</div>';
-      const ln = (l, v) => (v != null && String(v).trim()) ? '<div class="advh-desc"><b>' + advEsc(l) + ':</b> ' + advText(String(v)) + '</div>' : '';
-      const sg = v => { const n = parseInt(String(v).replace(/[−–]/g, '-'), 10); return isNaN(n) ? String(v || '') : (n >= 0 ? '+' : '−') + Math.abs(n); };
-      const TR = (typeof PB_TRAVEL !== 'undefined' && PB_TRAVEL) ? PB_TRAVEL : { hexMiles: 50, againstTrades: { directions: ['NE','E','SE'], hexesPerDay: -1, min: 1 } };
-      const SP = (typeof PB_SPECIALTY_CREW !== 'undefined' && Array.isArray(PB_SPECIALTY_CREW)) ? PB_SPECIALTY_CREW : [];
-      const SH = (typeof PB_SHANTIES !== 'undefined' && Array.isArray(PB_SHANTIES)) ? PB_SHANTIES : [];
-      const CM = (typeof PB_CREW_MODS !== 'undefined' && Array.isArray(PB_CREW_MODS)) ? PB_CREW_MODS : [];
-      let h = '';
-      const ships = prep.pbShips || [];
-      ships.forEach(s => {
-        let mod = 0; Object.keys(s.mods || {}).forEach(k => { const m = CM.find(x => x.condition === k); if(m && typeof m.mod === 'number') mod += m.per ? m.mod * (parseInt(s.mods[k], 10) || 0) : m.mod; });
-        const sk = String(s.skill || '').trim() !== '' ? (parseInt(String(s.skill).replace(/[−–]/g, '-'), 10) || 0) + mod : null;
-        h += card((s.role === 'party' ? 'Our ship — ' : 'Ship — ') + (s.name || s.base || ''),
-          ln('Type', s.base) + ln('Stats', ['HP ' + (s.hp || '—') + (s.hpMax && s.hpMax !== s.hp ? '/' + s.hpMax : ''), 'Hull ' + (s.hull ? '−' + s.hull : '—'), 'AGL ' + (s.agility !== '' && s.agility != null ? sg(s.agility) : '—'), 'Speed ' + (s.speed || '—'), 'Skill ' + (sk == null ? '—' : sg(sk))].join(' · '))
-          + ln('Weapons', ['Broadsides ' + (s.broadsides || '—'), 'Small arms ' + (s.smallArms || '—'), 'Ram ' + (s.ram || '—')].join(' · '))
-          + ln('Crew', [s.crewMin || s.crewMax ? s.crewMin + '–' + s.crewMax : '', s.crew ? s.crew + ' aboard' : ''].filter(Boolean).join(' · ')) + ln('Cargo', s.cargo)
-          + ln('Specialty crew', (s.specialty || []).map(id => (SP.find(x => x.id === id) || { name: id }).name).join(', '))
-          + ln('Shanties', (s.shanties || []).map(id => (SH.find(x => x.id === id) || { name: id }).name).join(', '))
-          + ln('Morale', sk == null ? '' : '2d6 ' + sg(sk) + ((s.specialty || []).indexOf('veteran-quartermaster') >= 0 ? ' +3' : '') + ' — under 4 surrenders or mutinies')
-          + ln('Special', s.special) + ln('Notes', s.notes));
-      });
-      return h || '<div class="advh-empty">No ships in this prep.</div>';
     }
     if(sec === 'cast'){
       const list = prep.statblocks || [];

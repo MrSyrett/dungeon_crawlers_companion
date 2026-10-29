@@ -23,7 +23,7 @@
     DCC:   { labels: { scenes: 'Encounters', cast: 'NPCs/Mobs', treasure: 'Loot' }, loot: true, modules: [] },
     DND:   { labels: { scenes: 'Encounters', cast: 'Monsters/NPCs', treasure: 'Treasure' }, loot: true, modules: ['travel'] },
     DB:    { labels: { adventure: 'Quest', cast: 'Monsters', treasure: 'Treasure', travel: 'Journey' }, loot: true, modules: ['travel'] },
-    MMRPG: { labels: { cast: 'Villains/NPCs', treasure: 'Gear' }, loot: true, modules: ['factions'] },
+    MMRPG: { labels: { cast: 'Villains/NPCs', treasure: 'Gear' }, loot: true, modules: ['factions', 'vehicles'] },
     KOB:   { labels: { cast: 'NPCs/Threats', treasure: 'Items' }, loot: false, modules: [] },
     SW:    { labels: { cast: 'Imperials/NPCs', treasure: 'Gear' }, loot: true, modules: ['travel', 'vehicles'] },
     LOTR:  { labels: { cast: 'Adversaries', treasure: 'Treasure', travel: 'Journeys', phase: 'Phase' }, loot: true, modules: ['travel'] },
@@ -31,11 +31,11 @@
     TWD:   { labels: { cast: 'Adversaries/NPCs', treasure: 'Gear' }, loot: true, modules: ['factions', 'vehicles'] },
     VAE:   { labels: { cast: 'Vaesen/NPCs', treasure: 'Treasure' }, loot: true, modules: [] },
     MYZ:   { labels: { cast: 'Zone Threats/NPCs', treasure: 'Artifacts' }, loot: true, modules: ['travel'] },
-    PB:    { labels: { adventure: 'The Job', cast: 'Foes', treasure: 'Plunder', scenes: 'Places', travel: 'Voyage', ships: 'Ships' }, loot: true, modules: ['travel', 'factions'] },
+    PB:    { labels: { adventure: 'The Job', cast: 'Foes', treasure: 'Plunder', scenes: 'Places', travel: 'Voyage', vehicles: 'Ships' }, loot: true, modules: ['travel', 'factions', 'vehicles'] },
     CO:    { labels: { cast: 'Threats/NPCs', treasure: 'Items' }, loot: true, modules: ['factions'] },
     GB:    { labels: { cast: 'Ghosts/Extras', treasure: 'Gear' }, loot: true, modules: [] },
     ACE:   { labels: { cast: 'Extras', treasure: 'Treasure' }, loot: true, modules: [] },
-    D62E:  { labels: { cast: 'Foes/NPCs', treasure: 'Gear' }, loot: true, modules: [] },
+    D62E:  { labels: { cast: 'Foes/NPCs', treasure: 'Gear' }, loot: true, modules: ['vehicles'] },
     NIM:   { labels: { cast: 'Monsters/NPCs', treasure: 'Treasure' }, loot: true, modules: [] },
     ICRPG: { labels: { cast: 'Monsters', treasure: 'Loot' }, loot: true, modules: [] },
     JLU:   { labels: { cast: 'Villains/NPCs', treasure: 'Gear' }, loot: true, modules: ['factions'] }
@@ -163,7 +163,7 @@
         var TR = (typeof PB_TRAVEL !== 'undefined' && PB_TRAVEL) ? PB_TRAVEL : { hexMiles: 50, againstTrades: { directions: ['NE', 'E', 'SE'], hexesPerDay: -1, min: 1 } };
         var n = function (x) { var v = parseInt(String(x == null ? '' : x).replace(/[−–]/g, '-').replace(/[^\d-]/g, ''), 10); return isNaN(v) ? 0 : v; };
         var hexes = n(j.distance);
-        var ships = _arr(ch && ch.pbShips).concat(_arr(typeof PB_SHIPS !== 'undefined' ? PB_SHIPS : null));
+        var ships = _arr(ch && ch.vehicles).map(function (v) { return { name: v.name, speed: (v.stats || {}).speed }; }).concat(_arr(ch && ch.pbShips), _arr(typeof PB_SHIPS !== 'undefined' ? PB_SHIPS : null));
         var sh = j.ship ? ships.filter(function (s) { return s && s.name === j.ship; })[0] : null;
         var base = String(j.speed || '').trim() !== '' ? n(j.speed) : (sh ? n(sh.speed) : 0);
         var against = TR.againstTrades.directions.indexOf(j.heading) >= 0;
@@ -208,6 +208,29 @@
   // tracker's damage track when a vehicle is sent to combat.
   var VEHICLE_DEFAULT = { fields: [['speed', 'Speed'], ['armor', 'Armor'], ['hull', 'Hull']], hp: 'hull' };
   var VEHICLES = {
+    // The Walking Dead (Core Rules p. 75–76): Maneuverability (gear bonus to Mobility when
+    // driving), Damage (when ramming), Hull (its Health) and Armor (dice vs damage), plus Issues.
+    TWD: { fields: [['maneuver', 'Maneuver'], ['damage', 'Damage'], ['hull', 'Hull'], ['armor', 'Armor']], hp: 'hull',
+      list: function () { return [['Car', '+2', '2', '4', '4', 'Will run out of gas'], ['Bicycle', '+2', '0', '2', '0', 'Easily gets a flat tire'], ['Horse', '+2', '1', '4', '0', 'Needs to be fed, easily scared'],
+        ['Motorcycle', '+3', '2', '3', '2', 'Will run out of gas'], ['Battle Tank', '+1', '4', '10', '8', 'Will run out of gas, loud']].map(function (r) { return { name: r[0], sub: 'Hull ' + r[3] + ' · Armor ' + r[4],
+          make: function () { return { name: r[0], type: r[0], stats: { maneuver: r[1], damage: r[2] + (r[0] === 'Battle Tank' ? ' (not including weapons)' : ''), hull: r[3], armor: r[4] }, crew: '', cargo: '', weapons: '', notes: 'Issue: ' + r[5] }; } }; }); } },
+    // Marvel Multiverse: size, speed, Health and damage reduction (the book's and expansions' vehicles).
+    MMRPG: { fields: [['size', 'Size'], ['speed', 'Speed'], ['health', 'Health'], ['dr', 'Damage Red.']], hp: 'health',
+      scripts: ['/tools-data/mmrpg-vehicles.js'],
+      list: function () { return _arr(typeof MMRPG_VEHICLES !== 'undefined' ? MMRPG_VEHICLES : null).map(function (v) { return { name: v.name, sub: [v.tier, v.size, v.source].filter(Boolean).join(' · '),
+        make: function () { return { name: v.name, type: [v.tier, v.size].filter(Boolean).join(' · '), stats: { size: _str(v.size), speed: _str(v.speed), health: _str(v.health), dr: _str(v.damageReduction) },
+          crew: v.passengers ? v.passengers + (String(v.passengers) === '1' ? ' passenger' : ' passengers') : '', cargo: '', weapons: String(v.weapons || '').split(/\s*;\s*/).filter(Boolean).join('\n'),
+          notes: [v.powers ? 'Powers: ' + v.powers : '', v.notes, v.description, v.source].filter(Boolean).join('\n') }; } }; }); } },
+    // D6 System 2e: scale, speed, maneuverability, body and shields (dice codes).
+    D62E: { fields: [['scale', 'Scale'], ['speed', 'Speed'], ['maneuver', 'Maneuver'], ['body', 'Body'], ['shields', 'Shields']], hp: 'body',
+      scripts: ['/tools-data/d62e-vehicles.js'],
+      list: function () { return _arr(typeof D62E_VEHICLES !== 'undefined' ? D62E_VEHICLES : null).map(function (v) { return { name: v.name, sub: [v.kind, v.genre].filter(Boolean).join(' · '),
+        make: function () { return { name: v.name, type: _str(v.kind), stats: { scale: _str(v.scale), speed: _str(v.speed), maneuver: _str(v.maneuver), body: _str(v.body), shields: _str(v.shields) },
+          crew: v.crew ? 'Crew ' + v.crew : '', cargo: '', weapons: _arr(v.weapons).map(function (w) { return w.name + ': damage ' + w.damage + (w.range ? ', range ' + w.range : ''); }).join('\n'),
+          notes: [v.description, v.page ? 'Core p. ' + v.page : ''].filter(Boolean).join('\n') }; } }; }); } },
+    // Pirate Borg: ships (the PB plug-in draws the full ship card — crew skill, modifiers,
+    // specialty crew, shanties). Speed is what the Voyage calculator reads.
+    PB: { fields: [['hp', 'HP'], ['hpMax', 'Max HP'], ['hull', 'Hull'], ['agility', 'AGL'], ['speed', 'Speed'], ['skill', 'Skill'], ['broadsides', 'Broadsides'], ['smallArms', 'Small arms'], ['ram', 'Ram'], ['cargoSlots', 'Cargo slots'], ['crewMin', 'Crew min'], ['crewMax', 'Crew max'], ['aboard', 'Aboard'], ['capSpirit', 'Captain SPI']], hp: 'hp' },
     // Star Wars d6: scale, speed code, maneuverability, hull and shields (dice codes).
     SW: { fields: [['scale', 'Scale'], ['speed', 'Speed'], ['maneuver', 'Maneuver'], ['hull', 'Hull'], ['shields', 'Shields']], hp: 'hull',
       scripts: ['/tools-data/sw-vehicles.js'],
@@ -352,6 +375,19 @@
     });
     delete ch.journeys;
   }
+  // A Pirate Borg ship (the old builder's flat shape) ↔ a vehicle.
+  var PB_SHIP_STATS = ['hp', 'hpMax', 'hull', 'agility', 'speed', 'skill', 'broadsides', 'smallArms', 'ram', 'cargoSlots', 'crewMin', 'crewMax', 'capSpirit'];
+  function pbShipToVehicle(sh) {
+    var st = {}; PB_SHIP_STATS.forEach(function (k) { if (_str(sh[k])) st[k] = _str(sh[k]); }); if (_str(sh.crew)) st.aboard = _str(sh.crew);
+    return { name: _str(sh.name), role: sh.role || 'party', type: _str(sh.base || sh.type), stats: st, crew: '', cargo: _str(sh.cargo), weapons: '', notes: _str(sh.notes),
+      special: _str(sh.special), specialty: _arr(sh.specialty), mods: (sh.mods && typeof sh.mods === 'object') ? sh.mods : {}, shanties: _arr(sh.shanties) };
+  }
+  function pbVehicleToShip(v) {
+    var st = v.stats || {}, o = { role: v.role || 'party', name: _str(v.name), base: _str(v.type), crew: _str(st.aboard), cargo: _str(v.cargo), notes: _str(v.notes),
+      special: _str(v.special), specialty: _arr(v.specialty), mods: v.mods || {}, shanties: _arr(v.shanties) };
+    PB_SHIP_STATS.forEach(function (k) { o[k] = _str(st[k]); });
+    return o;
+  }
   // Pirate Borg: the Job → Adventure Details (+ faction and port), voyage legs →
   // Travel, traps → Hazards. Ships stay as the PB plug-in's own list (pbShips).
   function _pirateborg(ch, d) {
@@ -383,6 +419,9 @@
         spot: _str(t.test), where: hit ? w : '' });
     });
     delete ch.pbTraps;
+    // Ships → the Vehicles module (labelled Ships for Pirate Borg).
+    _arr(ch.pbShips).forEach(function (sh) { if (sh && typeof sh === 'object') ch.vehicles.push(pbShipToVehicle(sh)); });
+    delete ch.pbShips;
   }
   // A site (Dragonbane's Adventure Site, or a card from the short-lived Sites tab)
   // → the Adventure tab: its description into the Overview, its boss into the
@@ -488,6 +527,6 @@
     sys: sys, label: label, loot: loot, modules: modules, itemList: itemList, loadItems: loadItems, migrate: migrate, trackerToTool: trackerToTool,
     travel: travel, travelCalc: travelCalc, siteText: siteText,
     ATTITUDES: ATTITUDES, factionList: factionList, factionListLoad: factionListLoad, factionTracker: factionTracker,
-    vehicleCfg: vehicleCfg, vehicleList: vehicleList, vehicleToStatblock: vehicleToStatblock, hasModule: function (code, m) { return modules(code).indexOf(m) >= 0 && MODULE_TABS.indexOf(m) >= 0; },
+    vehicleCfg: vehicleCfg, vehicleList: vehicleList, vehicleToStatblock: vehicleToStatblock, pbShipToVehicle: pbShipToVehicle, pbVehicleToShip: pbVehicleToShip, hasModule: function (code, m) { return modules(code).indexOf(m) >= 0 && MODULE_TABS.indexOf(m) >= 0; },
     hasItems: function (code) { return !!ITEMS[String(code || '').toUpperCase()]; } };
 })();

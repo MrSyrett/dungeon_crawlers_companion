@@ -862,7 +862,7 @@ body.flow-mode .page + .page {
       </div>
       <div id="vehpick-list" class="mob-pick-list"></div>
       <div id="vehicles-list" class="entity-list"></div>
-      <button class="btn-add" onclick="addVehicle();autosave()">+ Add Vehicle</button>
+      <button class="btn-add" id="vehicles-add" onclick="addVehicle();autosave()">+ Add Vehicle</button>
     </div>
 
 
@@ -1644,6 +1644,7 @@ function applyTabLabels(){
   document.querySelectorAll('.tab-btn[data-tab]').forEach(b=>{ b.textContent = PREG.label(PREP_CODE, b.dataset.tab); });
   const sh=document.getElementById('scenes-heading'); if(sh) sh.textContent = PREG.label(PREP_CODE,'scenes');
   const th=document.getElementById('treasure-heading'); if(th) th.textContent = PREG.label(PREP_CODE,'treasure');
+  { const va=document.getElementById('vehicles-add'); if(va) va.textContent='+ Add '+PREG.label(PREP_CODE,'vehicles').replace(/([^s])s$/,'$1'); }
   ((PREG && PREG.MODULE_TABS) || []).forEach(m=>{ const h=document.getElementById(m+'-heading'); if(h) h.textContent=PREG.label(PREP_CODE,m); });
   // Shared modules this system turns on (registry): show their tabs.
   document.querySelectorAll('.tab-btn[data-module]').forEach(b=>b.classList.toggle('mod-off', !modOn(b.dataset.module)));
@@ -3267,6 +3268,8 @@ function clearAll() {
 //   PLUG.init()                                  once, before the prep loads
 //   PLUG.read()                                  at the end of readFields (DOM → state)
 //   PLUG.build()                                 after the editor is rebuilt (state → DOM)
+//   PLUG.vehicles.add(data) / .read(card) / .preview(v)  a system's own vehicle card
+//                                                (must use #vehicles-list and .vehicle-card)
 //   PLUG.preview(where) → [html]                 print sections at adventure · clues ·
 //                                                treasure · travel · scenes · end
 var PLUG = window.PLUG || (window.PLUG = { travel:{} });
@@ -3355,6 +3358,8 @@ function previewFactions(){
 function vehCfg(){ return (PREG && PREG.vehicleCfg) ? PREG.vehicleCfg(PREP_CODE) : { fields:[['speed','Speed'],['armor','Armor'],['hull','Hull']], hp:'hull' }; }
 function addVehicle(data={}){
   const list=document.getElementById('vehicles-list'); if(!list) return null;
+  // A system can draw its own vehicle card (Pirate Borg's ships).
+  if(PLUG.vehicles && PLUG.vehicles.add) return PLUG.vehicles.add(data);
   const C=vehCfg(), st=data.stats||{}, role=data.role||'party';
   const tone={party:'#1a4a8a',foe:'#C0392B',other:'var(--ui-muted)'};
   const uid='vh'+Date.now()+Math.random().toString(36).slice(2);
@@ -3371,6 +3376,7 @@ function addVehicle(data={}){
 }
 function readVehicles(){
   return [...document.querySelectorAll('#vehicles-list > .vehicle-card')].map(c=>{
+    if(PLUG.vehicles && PLUG.vehicles.read) return PLUG.vehicles.read(c);
     const g=k=>c.querySelector('.vh-'+k)?.value.trim()||'';
     const stats={}; c.querySelectorAll('.vh-st').forEach(x=>{ if(x.value.trim()) stats[x.dataset.k]=x.value.trim(); });
     return { name:g('name'), role:(c.querySelector('.vh-role:checked')||{}).value||'party', type:g('type'), stats, crew:g('crew'), cargo:g('cargo'), weapons:g('weapons'), notes:g('notes') };
@@ -3398,6 +3404,7 @@ function previewVehicles(){
   const C=vehCfg(), lab=(PREG?PREG.label(PREP_CODE,'vehicles'):'Vehicles');
   const V=state.vehicles||[]; if(!V.length) return [];
   return V.map(x=>{
+    if(PLUG.vehicles && PLUG.vehicles.preview) return PLUG.vehicles.preview(x);
     const role=x.role==='party'?'The heroes\'':x.role==='foe'?'Encountered':'';
     return '<div class="p-section"><div class="sl">'+escH(lab.replace(/([^s])s$/,'$1'))+(x.name?' — '+escH(x.name):'')+'</div><div class="mod-box mod-vehicle-box">'
       +'<div class="mod-badges">'+_mbadge('', role)+_mbadge('Type', x.type)+'</div>'
