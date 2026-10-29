@@ -533,13 +533,22 @@ input[type="number"] { -moz-appearance: textfield; }
 .adv-hub { flex: 1; min-width: 0; min-height: 0; flex-direction: column; background: var(--panel); color: var(--text); overflow: hidden; }
 .advh-msg, .advh-empty { padding: 18px 14px; font-size: 12.5px; color: var(--dim); }
 .advh-empty { font-style: italic; }
-.advh-head { padding: 12px 14px 10px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg,#20242c,#171a20); flex-shrink: 0; }
-.advh-titlerow { display: flex; align-items: flex-start; gap: 10px; }
+.advh-head { padding: 6px 8px 6px 12px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg,#20242c,#171a20); flex-shrink: 0; }
+.advh-titlerow { display: flex; align-items: center; gap: 8px; }
 .advh-titlerow > div { flex: 1; min-width: 0; }
-.advh-title { font-family: 'Geist', sans-serif; font-weight: 900; font-size: 17px; letter-spacing: .04em; color: var(--white); line-height: 1.1; }
-.advh-sub { font-family: 'Geist', sans-serif; font-size: 12px; color: var(--gold); letter-spacing: .04em; margin-top: 1px; }
+.advh-tline { display: flex; align-items: baseline; gap: 0; min-width: 0; }
+.advh-title { font-family: 'Geist', sans-serif; font-weight: 900; font-size: 15px; letter-spacing: .04em; color: var(--white); line-height: 1.25; flex: 0 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.advh-sub { font-family: 'Geist', sans-serif; font-size: 12px; color: var(--gold); letter-spacing: .04em; flex: 1 1 0; min-width: 3em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.advh-sub::before { content: '·'; color: var(--dim); margin: 0 7px; }
+/* In the Adventure station the window header carries the title, so the hub's
+   head keeps only [chapter count] · chapter name and Full prep. */
+.advh-in-station .advh-title { display: none; }
+.advh-in-station .advh-chcount { margin-left: 0; }
+.advh-in-station .advh-title + .advh-sub::before { content: none; }
+#cst-adv-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; }
+#cst-adv-toolbar { flex-shrink: 0; }
 .advh-meta { font-family: 'Geist Mono', monospace; font-size: 10.5px; color: var(--dim); margin-top: 5px; }
-.advh-full { flex-shrink: 0; }
+.advh-full { flex-shrink: 0; padding: 3px 8px !important; font-size: 9.5px !important; }
 .advh-backbtn { position: absolute; top: 8px; left: 8px; z-index: 6; box-shadow: 0 2px 8px rgba(0,0,0,.5); }
 /* ── ADVENTURE ← LIBRARY (the system's Adventures shelf + reader, laid over the
    pane so whatever was loaded underneath comes back when it closes) ── */
@@ -559,7 +568,7 @@ input[type="number"] { -moz-appearance: textfield; }
 .advh-co-head .cnt { color: var(--dim); font-size: 11px; }
 .advh-title-tog { cursor: pointer; user-select: none; }
 .advh-title-tog:hover .advh-title { color: var(--accent); }
-.advh-chcount { display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; padding: 1px 7px; border: 1px solid var(--border); border-radius: 999px; font-size: 11px; font-weight: 800; color: var(--dim); vertical-align: 2px; letter-spacing: 0; }
+.advh-chcount { flex: 0 0 auto; align-self: center; display: inline-flex; align-items: center; gap: 3px; margin-left: 7px; padding: 0 6px; border: 1px solid var(--border); border-radius: 999px; font-size: 11px; font-weight: 800; color: var(--dim); letter-spacing: 0; line-height: 16px; }
 .advh-chcount .caret { font-size: 9px; display: inline-block; transition: transform .15s; transform: rotate(-90deg); }
 .advh-title-tog.open .advh-chcount .caret { transform: none; }
 .advh-outline.collapsed { display: none; }
@@ -571,8 +580,8 @@ input[type="number"] { -moz-appearance: textfield; }
 .advh-co-row .n { font-family: 'Geist', sans-serif; font-weight: 800; font-size: 10px; color: var(--dim); width: 14px; text-align: center; flex: 0 0 auto; }
 .advh-co-row .nm { font-family: 'Geist', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: .02em; color: var(--light); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; }
 .advh-co-row.on .nm { color: var(--white); }
-.advh-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0 1px; padding: 5px 6px 0; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.advh-tab { min-width: 0; overflow: hidden; text-overflow: ellipsis; background: transparent; border: 0; border-bottom: 2px solid transparent; color: var(--dim); font-family: 'Geist', sans-serif; font-weight: 800; font-size: 10px; letter-spacing: .03em; text-transform: uppercase; padding: 6px 4px; cursor: pointer; white-space: nowrap; text-align: center; }
+.advh-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0 1px; padding: 1px 6px 0; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.advh-tab { min-width: 0; overflow: hidden; text-overflow: ellipsis; background: transparent; border: 0; border-bottom: 2px solid transparent; color: var(--dim); font-family: 'Geist', sans-serif; font-weight: 800; font-size: 10px; letter-spacing: .03em; text-transform: uppercase; padding: 4px 3px 3px; line-height: 1.2; cursor: pointer; white-space: nowrap; text-align: center; }
 .advh-tab:hover { color: var(--light); }
 .advh-tab.on { color: var(--white); border-bottom-color: var(--accent); }
 .advh-tab[data-empty="1"] { opacity: .45; }
@@ -1962,6 +1971,8 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 .gmc-round-reset:hover{color:var(--accent);border-color:var(--accent-dim)}
 .gmc-round-next:hover{filter:brightness(1.08)}
 .gmc-round-btn:active{transform:translateY(1px)}
+.gmc-round-btn.tmr-ico{width:28px;height:24px;border-radius:6px;font-size:16px;flex-shrink:0}
+@media (max-width: 768px){ .gmc-round-btn.tmr-ico{width:42px;height:42px;border-radius:8px;font-size:20px} }
 .party-empty{font-family:'Geist',sans-serif;font-weight:700;font-size:11px;letter-spacing:.03em;color:var(--dim);text-transform:uppercase;opacity:.7;white-space:nowrap}
 /* Rounded-square party bubbles that mirror the Party Card header. */
 /* Party bubble — a consistent vertical 3-row stack: identity · health · stat chips. */
@@ -2088,7 +2099,8 @@ body[data-cview="free"] .cst-log-rail{display:none}
 .pop-body.msg-only .ai-party-msg{border-bottom:none}
 .pop-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 7%,transparent),transparent);flex-shrink:0}
 .pop-ttl{font-family:'Geist',sans-serif;font-weight:900;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--white);flex-shrink:0}
-.pop-toolbar{margin-left:auto;display:flex;align-items:center;gap:6px;flex-wrap:nowrap;min-width:0;overflow-x:auto}
+/* Wraps onto a second line when it can't fit (a phone) rather than scrolling sideways. */
+.pop-toolbar{margin-left:auto;display:flex;align-items:center;justify-content:flex-end;gap:6px;row-gap:5px;flex-wrap:wrap;min-width:0}
 .pop-toolbar:empty{display:none}
 .pop-head .pop-toolbar:not(:empty) + .pop-x{margin-left:8px}
 .pop-x{margin-left:auto;width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--mid);font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
@@ -6013,8 +6025,9 @@ GMScenes.renderPins();
       <button class="btn small ghost tmr-add-round" type="button" title="Add a round countdown">＋ Rounds</button>
       <button class="btn small ghost tmr-add-ticks" type="button" title="Add a tick-box tracker (e.g. Alarm Level, NPC Mood)">＋ Ticks</button>
       <div class="toolbar-spacer"></div>
-      <button class="btn small ghost tmr-next-round" type="button" title="Advance all round countdowns by one">Next Round ›</button>
-      <button class="btn small ghost tmr-reset-rounds" type="button" title="Reset all round countdowns">Reset Rounds</button>
+      <!-- Same icon pair as the Monitor bar's Round control, so the toolbar fits without scrolling. -->
+      <button class="gmc-round-btn gmc-round-next tmr-ico tmr-next-round" type="button" title="Next round: advance all round countdowns by one" aria-label="Next round">&rsaquo;</button>
+      <button class="gmc-round-btn gmc-round-reset tmr-ico tmr-reset-rounds" type="button" title="Reset all round countdowns" aria-label="Reset rounds">&#8635;</button>
     </div>
     <div class="tmr-body">
       <div class="tmr-empty">
@@ -8180,8 +8193,26 @@ function wireSessionPrepLoader(root) {
     body.appendChild(backBtn);
   }
 
-  function showHub(){ if(emptyEl) emptyEl.style.display = 'none'; if(frameWrap) frameWrap.style.display = 'none'; if(backBtn) backBtn.style.display = 'none'; if(hub) hub.style.display = 'flex'; }
-  function showPreview(){ if(hub) hub.style.display = 'none'; if(backBtn && prep) backBtn.style.display = 'block'; }
+  function showHub(){ if(emptyEl) emptyEl.style.display = 'none'; if(frameWrap) frameWrap.style.display = 'none'; if(backBtn) backBtn.style.display = 'none'; if(hub) hub.style.display = 'flex'; syncAdvTitle(); }
+  function showPreview(){ if(hub) hub.style.display = 'none'; if(backBtn && prep) backBtn.style.display = 'block'; syncAdvTitle(); }
+  // In the Adventure station, the window header says the loaded adventure's name
+  // instead of "Adventure" (the hub's own head then shows just the chapter line).
+  // Anything else in the pane — a PDF, an image, nothing — puts "Adventure" back.
+  function syncAdvTitle(){
+    const t = document.getElementById('cst-adv-title');
+    const inStation = !!(t && root.closest && root.closest('#cst-adv-content'));
+    if(hub) hub.classList.toggle('advh-in-station', inStation);
+    if(!inStation) return;
+    const on = !!(prep && hub && (hub.style.display !== 'none' || (backBtn && backBtn.style.display === 'block')));
+    const name = on ? ((prepChapters[0] && prepChapters[0].title) || prep.title || prep._docTitle || 'Adventure') : 'Adventure';
+    if(t.textContent !== name) t.textContent = name;
+    t.title = on ? name : '';
+  }
+  if(hub && window.MutationObserver) {
+    let q = 0;
+    const mo = new MutationObserver(() => { if(!q) q = requestAnimationFrame(() => { q = 0; syncAdvTitle(); }); });
+    [hub, frameWrap, emptyEl].forEach(el => { if(el) mo.observe(el, { attributes: true, attributeFilter: ['style'] }); });
+  }
 
   function open() {
     openPrepPicker(function(doc) {
@@ -8418,12 +8449,16 @@ function wireSessionPrepLoader(root) {
     const advTitle = (prepChapters[0] && prepChapters[0].title) || prep.title || prep._docTitle || 'Adventure';
     const D = DET();
     // (Goal and Prize live in Adventure Details — no pinned strip under the title.)
+    const subName = multi ? chapterName(prepChapters[prepActiveChapter] || {}, prepActiveChapter) : (prep.subtitle || '');
     let h = '<div class="advh-head">'
       // A multi-chapter prep: the chapter count sits by the title, and clicking the
       // title opens the chapter list (no separate "Chapters" bar).
-      + '<div class="advh-titlerow"><div' + (multi ? ' class="advh-title-tog' + (prepChaptersCollapsed ? '' : ' open') + '" data-cotoggle title="' + (prepChaptersCollapsed ? 'Show' : 'Hide') + ' chapters"' : '') + '>'
-      + '<div class="advh-title">' + advEsc(advTitle) + (multi ? ' <span class="advh-chcount"><span class="caret">▾</span>' + prepChapters.length + '</span>' : '') + '</div>'
-      + (multi ? '<div class="advh-sub">' + advEsc(chapterName(prepChapters[prepActiveChapter] || {}, prepActiveChapter)) + '</div>' : (prep.subtitle ? '<div class="advh-sub">' + advEsc(prep.subtitle) + '</div>' : '')) + '</div>'
+      // One line: Title [chapter count] · chapter name, then Full prep. Both names
+      // truncate with an ellipsis (the title keeps priority); hover shows them whole.
+      + '<div class="advh-titlerow"><div class="advh-tline' + (multi ? ' advh-title-tog' + (prepChaptersCollapsed ? '' : ' open') : '') + '"' + (multi ? ' data-cotoggle' : '') + ' title="' + advEsc(advTitle + (subName ? ' — ' + subName : '') + (multi ? ' · click to ' + (prepChaptersCollapsed ? 'show' : 'hide') + ' chapters' : '')) + '">'
+      + '<div class="advh-title">' + advEsc(advTitle) + '</div>'
+      + (multi ? '<span class="advh-chcount"><span class="caret">▾</span>' + prepChapters.length + '</span>' : '')
+      + (subName ? '<div class="advh-sub">' + advEsc(subName) + '</div>' : '') + '</div>'
       + '<button class="btn small advh-full" title="Open the full printable prep in this pane">Full prep</button></div>'
       + '</div>';
     if(multi) {
@@ -8438,6 +8473,7 @@ function wireSessionPrepLoader(root) {
     h += '<div class="advh-body">' + sectionHtml(activeSec) + '</div>';
     hub.innerHTML = h;
     wireHub();
+    syncAdvTitle();
   }
 
   // The Lord of the Rings Adventuring Phase pieces, shown in the tab that matches
@@ -8478,8 +8514,8 @@ function wireSessionPrepLoader(root) {
       const D = DET(), R = run();
       const sc = scenes(), cl = prep.clues || [], tr = prep.rewards || [];
       const nDone = sc.filter((s, i) => isDone(s, i)).length, nRev = cl.filter((x, i) => isRevealed(x, i)).length, nHand = tr.filter((x, i) => isHanded(x, i)).length;
-      const prog = [sc.length ? nDone + ' of ' + sc.length + ' ' + lab('scenes').toLowerCase() + ' done' : '', cl.length ? nRev + ' of ' + cl.length + ' clues revealed' : '', tr.length ? nHand + ' of ' + tr.length + ' ' + lab('treasure').toLowerCase() + ' handed out' : ''].filter(Boolean);
-      let h = prog.length ? '<div class="advh-progress">' + prog.map(advEsc).join(' · ') + '</div>' : '';
+      // (No "0 of 8 scenes done · …" line: each scene, clue and loot row shows its own state.)
+      let h = '';
       const row = (k, v) => (v && String(v).trim()) ? '<div class="advh-det-k">' + k + '</div><div class="advh-det-v">' + v + '</div>' : '';
       const hooks = String(D.hooks || '').split('\n').map(x => x.trim()).filter(Boolean);
       // The adventure's name is already the title / chapter; only Dragonbane's quest
