@@ -737,7 +737,7 @@ body.flow-mode .page + .page {
   .page.dark-mode .det-grid, .page.dark-mode .trk-line { color: #d0ccc4; }
   /* Dark mode: accent labels, roll numbers and the cast heading on a dark page. */
   .page.dark-mode .det-grid .det-k { color: var(--section-hdr-dark, var(--highlight)); }
-  .page.dark-mode .rt-table .rt-roll { color: var(--section-hdr-dark, var(--highlight)) !important; }
+  .page.dark-mode .rt-table .rt-roll { color: var(--sys-type) !important; }
   .page.dark-mode .sl[style*="1a4a8a"] { color: #8fb4ee !important; border-bottom-color: #8fb4ee !important; }
   .page.dark-mode .loc-links { opacity: 0.8; }
   .sb-qty { font-size: 0.8em; opacity: 0.75; letter-spacing: 0.02em; }
@@ -792,20 +792,119 @@ body.flow-mode .page + .page {
   .page .entry-name { font-size: 13px; line-height: 1.25; }
   .page .sb-name { font-size: 15px; line-height: 1.2; }
   .page .clue-hdr { font-size: 11px; }
-  /* Read-aloud — the same box on every system's page, light or dark. */
-  .page .read-aloud { background: var(--ra-bg); border: 0; border-left: 4px solid var(--ra-bar); box-shadow: inset 0 0 0 1px var(--ra-border); border-radius: 8px; padding: 8px 11px; }
-  .page.dark-mode .read-aloud { background: var(--ra-bg-dark); border-left-color: var(--ra-bar-dark); box-shadow: inset 0 0 0 1px var(--ra-border-dark); }
-  .page.dark-mode .read-aloud p { color: var(--ra-text-dark); }
-  .page .read-aloud p { color: var(--ra-text); font-family: var(--font-body, 'Barlow', sans-serif); font-size: var(--ty-body); font-style: italic; line-height: 1.55; }
+  /* Read-aloud — the same box on every system's page, light or dark. The colours
+     are !important on purpose: they are a cross-system convention (like the
+     encounter colours), so no skin or app theme (public/tokens.css) may re-colour them. */
+  .page .read-aloud { background: var(--ra-bg) !important; border: 0 !important; border-left: 4px solid var(--ra-bar) !important; box-shadow: inset 0 0 0 1px var(--ra-border) !important; border-radius: 8px; padding: 8px 11px; }
+  .page.dark-mode .read-aloud { background: var(--ra-bg-dark) !important; border-left-color: var(--ra-bar-dark) !important; box-shadow: inset 0 0 0 1px var(--ra-border-dark) !important; }
+  .page.dark-mode .read-aloud p { color: var(--ra-text-dark) !important; }
+  .page .read-aloud p { color: var(--ra-text) !important; font-family: var(--font-body, 'Barlow', sans-serif); font-size: var(--ty-body); font-style: italic; line-height: 1.55; }
   /* Flavour (stat-block and treasure descriptions) is a GM's note, not read-aloud:
      a quiet tinted strip in the system's own accent, ink text. */
-  .page .sb-flavor { background: color-mix(in srgb, var(--accent) 9%, transparent); color: var(--ink); border: 0; border-left: 3px solid color-mix(in srgb, var(--accent) 70%, transparent);
+  .page .sb-flavor { background: color-mix(in srgb, var(--accent) 9%, transparent) !important; color: var(--ink) !important; border: 0 !important; border-left: 3px solid color-mix(in srgb, var(--accent) 70%, transparent) !important;
     border-radius: 6px; padding: 5px 8px; font-family: var(--font-body, 'Barlow', sans-serif); font-size: var(--ty-small); font-style: italic; line-height: 1.45; }
-  .page.dark-mode .sb-flavor { background: color-mix(in srgb, var(--accent) 16%, transparent); color: #e2ddd2; }
+  .page.dark-mode .sb-flavor { background: color-mix(in srgb, var(--accent) 16%, transparent) !important; color: #e2ddd2 !important; }
+  /* ── One page, one box, in every system ────────────────────────────────────
+     Light: a shared parchment page and a slightly deeper parchment for every box
+     (clues, hazards, treasure, cast, module boxes). Dark: the neutral greys.
+     Box rules all wear the system's accent. !important because skins and the app
+     theme used to paint these per system — this is a cross-system convention. */
+  :root {
+    --pg-light: radial-gradient(120% 90% at 50% 40%, #fcf8ee 0%, #f8f1e1 70%, #f2e8d2 100%);
+    --box-light: #eadfc3; --box-light-line: rgba(110,80,30,.20);
+    --pg-dark: #1c1c1f; --box-dark: #2a2a2e; --box-dark-line: rgba(255,255,255,.08);
+    --ink-dark: #dcd8d0;
+    /* Encounter types — the one exception to "one header colour". */
+    --enc-combat: #b0332a; --enc-exploration: #2d6a2d; --enc-social: #1a4a8a;
+    --enc-combat-dark: #ec6b5c; --enc-exploration-dark: #6cc46c; --enc-social-dark: #8fb7f2;
+  }
+  .page, .page-cont { background: var(--pg-light) !important; }
+  .page.dark-mode { background: var(--pg-dark) !important; color: var(--ink-dark); }
+  .page .clue-item, .page .hook-item, .page .haz-item, .page .npc-block, .page .mob-block, .page .stat-block,
+  .page .mod-box, .page .lotr-box, .page .pb-box, .page .lotr-oc {
+    background: var(--box-light) !important; color: var(--ink);
+    box-shadow: inset 0 0 0 1px var(--box-light-line) !important;
+  }
+  .page .clue-item, .page .hook-item, .page .haz-item, .page .npc-block, .page .mob-block, .page .mod-box, .page .lotr-box, .page .pb-box, .page .lotr-oc { border-left: 4px solid var(--accent) !important; }
+  .page .stat-block, .page .stat-block.full-width { border-top: 4px solid var(--accent) !important; }
+  .page.dark-mode .clue-item, .page.dark-mode .hook-item, .page.dark-mode .haz-item, .page.dark-mode .npc-block, .page.dark-mode .mob-block, .page.dark-mode .stat-block,
+  .page.dark-mode .mod-box, .page.dark-mode .lotr-box, .page.dark-mode .pb-box, .page.dark-mode .lotr-oc {
+    background: var(--box-dark) !important; color: var(--ink-dark) !important; box-shadow: inset 0 0 0 1px var(--box-dark-line) !important;
+    border-left-color: var(--section-hdr-dark, var(--highlight)) !important;
+  }
+  .page.dark-mode .stat-block, .page.dark-mode .stat-block.full-width { border-top-color: var(--section-hdr-dark, var(--highlight)) !important; border-left-color: transparent !important; }
+  .page .sb-table td { background: rgba(255,255,255,.45) !important; }
+  .page.dark-mode .sb-table td { background: #222226 !important; color: var(--ink-dark) !important; }
+  /* One system colour per mode, everywhere: the header colour also draws every box
+     rule, the cast card's top bar, its type line and its stat-table bands — so a
+     card never mixes the accent with a different header colour (TWD red vs teal,
+     LotR gold vs green, Star Wars yellow type line on parchment…). */
+  .page { --sys-hdr: var(--section-hdr, var(--accent)); --sys-hdr-ink: #fbf6ea; --sys-type: color-mix(in srgb, var(--sys-hdr) 78%, #000); }
+  .page.dark-mode { --sys-hdr: var(--section-hdr-dark, var(--highlight)); --sys-hdr-ink: #1c1c1f; --sys-type: color-mix(in srgb, var(--sys-hdr) 72%, #fff); }
+  .page .clue-item, .page .hook-item, .page .haz-item, .page .npc-block, .page .mob-block, .page .mod-box, .page .lotr-box, .page .pb-box, .page .lotr-oc,
+  .page.dark-mode .clue-item, .page.dark-mode .hook-item, .page.dark-mode .haz-item, .page.dark-mode .npc-block, .page.dark-mode .mob-block, .page.dark-mode .mod-box, .page.dark-mode .lotr-box, .page.dark-mode .pb-box, .page.dark-mode .lotr-oc { border-left-color: var(--sys-hdr) !important; }
+  .page .stat-block, .page .stat-block.full-width, .page.dark-mode .stat-block, .page.dark-mode .stat-block.full-width { border-top-color: var(--sys-hdr) !important; }
+  .page .sl { border-bottom-color: var(--sys-hdr) !important; }
+  .page .sb-type { color: var(--sys-type) !important; }
+  .page .sb-table th, .page.dark-mode .sb-table th { background: var(--sys-hdr) !important; color: var(--sys-hdr-ink) !important; }
+  .page:not(.dark-mode) .sb-table th { background: color-mix(in srgb, var(--sys-hdr) 86%, #000) !important; }
+  /* Small coloured text (roll ranges, ×N counts, badge labels) uses the deeper
+     type-line shade of the header colour so it stays readable at its size. */
+  .page .rt-table .rt-roll, .page .mod-badge > span, .page .lotr-badge > span, .page .pb-badge > span { color: var(--sys-type) !important; }
+  .page .sb-qty { opacity: 1 !important; color: var(--sys-type) !important; }
+  .page .mod-badge { background: rgba(255,255,255,.5) !important; border-color: var(--box-light-line) !important; color: var(--ink) !important; }
+  .page.dark-mode .mod-badge { background: rgba(255,255,255,.05) !important; border-color: rgba(255,255,255,.2) !important; color: var(--ink-dark) !important; }
+  .page .hp-pip { text-shadow: 0 0 2px rgba(0,0,0,.85), 0 1px 1px rgba(0,0,0,.6); }
+  /* Stat tables always fit their card: columns share the width and long
+     attribute names wrap instead of running off the right edge. */
+  .page .sb-table { width: 100%; table-layout: fixed; }
+  .page .sb-table th, .page .sb-table td { overflow-wrap: anywhere; hyphens: auto; padding-left: 2px; padding-right: 2px; }
+  .page .stat-block, .page .npc-block, .page .mob-block, .page .clue-item, .page .haz-item, .page .hook-item { min-width: 0; overflow-wrap: anywhere; }
+  /* Cast cards on the dark page: every line of the card is light text (some skins
+     drew a white paper card in dark mode and kept black text inside it). */
+  .page.dark-mode .stat-block .sb-name { color: var(--sb-name-dark, #efebe3) !important; }
+  .page.dark-mode .stat-block .sb-stat-line, .page.dark-mode .stat-block .sb-score-table th, .page.dark-mode .stat-block .sb-score-table td,
+  .page.dark-mode .stat-block .sb-ability, .page.dark-mode .stat-block .sb-notes, .page.dark-mode .stat-block .sb-npc-notes, .page.dark-mode .stat-block .sb-section-label { color: var(--ink-dark) !important; }
+  .page.dark-mode .stat-block .sb-name, .page.dark-mode .stat-block .sb-section-label { border-bottom-color: rgba(255,255,255,.25) !important; }
+  /* Flavour text IS read-aloud text: the same D2 slate-blue box everywhere. */
+  .page .sb-flavor { background: var(--ra-bg) !important; color: var(--ra-text) !important; border: 0 !important; border-left: 4px solid var(--ra-bar) !important;
+    box-shadow: inset 0 0 0 1px var(--ra-border) !important; border-radius: 8px !important; padding: 6px 10px !important; font-style: italic; }
+  .page.dark-mode .sb-flavor { background: var(--ra-bg-dark) !important; color: var(--ra-text-dark) !important; border-left-color: var(--ra-bar-dark) !important; box-shadow: inset 0 0 0 1px var(--ra-border-dark) !important; }
+  .page .sb-flavor *, .page.dark-mode .sb-flavor * { color: inherit !important; }
+  /* Headers: ONE colour per system — the page no longer uses the gold / blue / green variants. */
+  /* Encounter names take the encounter-type colour (lighter on the dark page). */
+  .page .loc-name.enc-combat, .page .loc-name.enc-exploration, .page .loc-name.enc-social {
+    display: block; font-family: var(--font-display); font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+    padding-bottom: 1px; margin-bottom: 4px; border-bottom: 1.5px solid currentColor !important;
+  }
+  .page .loc-name.enc-combat { color: var(--enc-combat) !important; }
+  .page .loc-name.enc-exploration { color: var(--enc-exploration) !important; }
+  .page .loc-name.enc-social { color: var(--enc-social) !important; }
+  .page.dark-mode .loc-name.enc-combat { color: var(--enc-combat-dark) !important; }
+  .page.dark-mode .loc-name.enc-exploration { color: var(--enc-exploration-dark) !important; }
+  .page.dark-mode .loc-name.enc-social { color: var(--enc-social-dark) !important; }
+  /* Labels and sub-sections are ink, the same in every system: headers carry the
+     system colour, everything under them reads as text. Interactions /
+     Consequences / Notes / Trackers are true sub-sections: a label over a rule. */
+  .page .loc-lbl, .page .det-grid .det-k { color: var(--ink) !important; }
+  .page.dark-mode .loc-lbl, .page.dark-mode .det-grid .det-k { color: var(--ink-dark) !important; }
+  .page .loc-sub {
+    font-family: var(--font-label-text, var(--font-body, 'Barlow', sans-serif)); font-size: var(--ty-label); font-weight: 700;
+    text-transform: uppercase; letter-spacing: .06em; color: var(--ink); line-height: 1.3;
+    border-bottom: 1px solid var(--box-light-line); padding-bottom: 1px; margin: 7px 0 3px;
+  }
+  .page.dark-mode .loc-sub { color: var(--ink-dark); border-bottom-color: rgba(255,255,255,.2); }
+  .page .loc-sub + .loc-desc { margin-top: 0; }
+  /* Readable greys on the dark page (the template's were too dim). */
+  .page.dark-mode .p-text, .page.dark-mode .loc-desc, .page.dark-mode .entry-desc, .page.dark-mode .sb-ability, .page.dark-mode .sb-notes,
+  .page.dark-mode .sb-npc-notes, .page.dark-mode .loc-dq, .page.dark-mode .det-grid, .page.dark-mode .trk-line, .page.dark-mode .rt-table td, .page.dark-mode .map-keys { color: var(--ink-dark) !important; }
+  .page.dark-mode .loc-tag, .page.dark-mode .p2-footer p { color: #a8a39a !important; }
+  .page.dark-mode .entry-name, .page.dark-mode .clue-hdr { color: #efebe3 !important; }
+  .page .entry-name, .page .clue-hdr { color: var(--ink); }
   /* Editing panel: readable tabs and labels; the read-aloud field wears the read-aloud colour. */
   .tab-btn { font-size: 9.5px; letter-spacing: .04em; padding: 8px 3px; min-width: 0; white-space: normal; line-height: 1.2; overflow-wrap: anywhere; }
   .field-label { font-size: 10px; }
-  .loc-ra-input, .so-ra-input { border-left: 3px solid var(--ra-bar-dark) !important; }
+  .loc-ra-input, .so-ra-input, .sb-flavor-input, .reward-flavor-input { border-left: 3px solid var(--ra-bar-dark) !important; }
   .field-label.ra-label { color: var(--ra-bar-dark) !important; }
   textarea { overflow-y: hidden; }
   textarea.grow-cap { overflow-y: auto; }
@@ -892,14 +991,14 @@ body.flow-mode .page + .page {
 
     <!-- SCENES: encounters, rooms and locations, plus hazards & traps -->
     <div class="tab-panel" id="tab-scenes">
-      <div class="section-divider" id="scenes-heading">Scenes</div>
-
-      <div id="locations-list" class="entity-list"></div>
-      <button class="btn-add" onclick="addLocation();autosave()">+ Add Scene</button>
       <div class="section-divider">Hazards &amp; Traps</div>
 
       <div id="hazards-list" class="entity-list"></div>
       <button class="btn-add" onclick="addHazard();autosave()">+ Add Hazard / Trap</button>
+      <div class="section-divider" id="scenes-heading">Scenes</div>
+
+      <div id="locations-list" class="entity-list"></div>
+      <button class="btn-add" onclick="addLocation();autosave()">+ Add Scene</button>
 
       <div class="sys-sections" data-tab="scenes"></div>
     </div>
@@ -1387,6 +1486,15 @@ window.addEventListener('message', (e) => {
 });
 
 function paginatePages() {
+  const pa0=document.querySelector('.preview-area');
+  if(pa0 && window._keepScroll==null) window._keepScroll=pa0.scrollTop;
+  try { _paginatePages(); } finally {
+    const pa=document.querySelector('.preview-area');
+    if(pa && window._keepScroll!=null){ pa.scrollTop=window._keepScroll; }
+    window._keepScroll=null;
+  }
+}
+function _paginatePages() {
   // Always clear prior pagination artefacts first so switching modes is clean.
   document.querySelectorAll('.page-cont').forEach(p=>p.remove());
   document.querySelectorAll('[data-paginated-hidden]').forEach(el=>{
@@ -2511,24 +2619,33 @@ function updateLocCardColor(radio) {
 // the labeled Interactions / Consequences / Notes sections (Dramatic Question is
 // rendered above this, next to the name).
 function locBlockInner(l){
-  const sec=(label,val)=>(val&&String(val).trim())?'<p class="loc-desc"><strong class="loc-lbl">'+escH(label)+':</strong> '+fmtText(val)+'</p>':'';
+  // Interactions / Consequences / Notes: true sub-sections, a label over a rule.
+  const sec=(label,val)=>(val&&String(val).trim())?'<div class="loc-sub">'+escH(label)+'</div><p class="loc-desc">'+fmtText(val)+'</p>':'';
   const K=l.links||{};
+  // What's linked here, one kind per line. The map link stays on the GM Screen
+  // (it opens the map); on the page it's noise, so it isn't printed.
   const ln=[
-    K.map?'<b>Map:</b> '+escH(K.map)+(K.mapkey?' #'+escH(K.mapkey):''):'',
     (K.cast||[]).length?'<b>Cast:</b> '+(K.cast||[]).map(escH).join(', '):'',
     (K.clues||[]).length?'<b>Clues:</b> '+(K.clues||[]).map(escH).join(', '):'',
     (K.treasure||[]).length?'<b>Treasure:</b> '+(K.treasure||[]).map(escH).join(', '):'',
-    (K.tables||[]).length?'<b>Roll:</b> '+(K.tables||[]).map(escH).join(', '):'',
-    (K.hazards||[]).length?'<b>Hazards:</b> '+(K.hazards||[]).map(escH).join(', '):'' ].filter(Boolean).join(' · ');
+    (K.hazards||[]).length?'<b>Hazards:</b> '+(K.hazards||[]).map(escH).join(', '):'',
+    (K.tables||[]).length?'<b>Roll:</b> '+(K.tables||[]).map(escH).join(', '):'' ].filter(Boolean).map(x=>'<div class="loc-links">'+x+'</div>').join('');
   const enc=PREG&&PREG.encounterInfo?PREG.encounterInfo(PREP_CODE,l,state):null;
-  return (ln?'<div class="loc-links">'+ln+'</div>':'')
+  return ln
     + (enc?'<div class="loc-links"><b>Difficulty:</b> '+escH(enc.text)+'</div>':'')
     + xLines('scenes', l)
     + (l.readaloud?'<div class="read-aloud"><p>'+fmtText(l.readaloud)+'</p></div>':'')
     + sec('Interactions', l.desc)
     + sec('Consequences', l.consequences)
     + sec('Notes', l.notes)
-    + ((l.trackers||[]).length?'<div class="loc-links"><b>Trackers:</b></div>'+l.trackers.map(trackerLine).join(''):'');
+    + ((l.trackers||[]).length?'<div class="loc-sub">Trackers</div>'+l.trackers.map(trackerLine).join(''):'');
+}
+// One encounter on the page: its name in the encounter-type colour (the one place
+// a header isn't the system's header colour), the dramatic question, then the body.
+function locBlock(l){
+  const t=({combat:'combat',exploration:'exploration',npc:'social'})[l.type]||'combat';
+  const showTag=l.tag&&l.name;
+  return '<div class="location-block"><div class="loc-name enc-'+t+'">'+escH(l.name||l.tag||'')+'</div>'+(showTag?'<div class="loc-dq">'+escH(l.tag)+'</div>':'')+locBlockInner(l)+'</div>';
 }
 // One printed tracker line: name, kind + size (boxes drawn for Ticks), what happens.
 function trackerLine(t){
@@ -2766,6 +2883,12 @@ function fmtText(str) {
 }
 
 function renderPreview() {
+  // Rebuilding the pages shrinks the preview for a moment (continuation pages are
+  // torn down and rebuilt), and the browser clamps the scroll to the shorter
+  // content — the view jumped to the last page on every edit. Remember where the
+  // reader was; paginatePages() puts them back once the pages are rebuilt.
+  const _pa=document.querySelector('.preview-area');
+  if(_pa && window._keepScroll==null) window._keepScroll=_pa.scrollTop;
   setText('p-title',state.title||'Adventure Title');
   setText('p-subtitle',state.subtitle);
   // Page 2
@@ -2826,10 +2949,10 @@ function renderPreview() {
     plugPreview('clues', sections);
     // TREASURE
     if((state.rewards||[]).length){
-      let h='<div class="p-section"><div class="sl gold">'+escH(L('treasure'))+'</div>';
+      let h='<div class="p-section"><div class="sl">'+escH(L('treasure'))+'</div>';
       (state.rewards||[]).forEach(r=>{
         const meta=[r.value?'<b>Value:</b> '+escH(r.value):'', r.where?'<b>Found in:</b> '+escH(r.where):'', (r.heldBy||[]).length?'<b>Held by:</b> '+r.heldBy.map(escH).join(', '):''].filter(Boolean).join(' · ');
-        h+='<div class="npc-block" style="border-left-color:var(--accent-dark);"><div class="entry-name">'+escH(r.name)+'</div>'+(r.flavor?'<div class="sb-flavor" style="margin-bottom:5px;padding:5px 7px;">'+fmtText(r.flavor)+'</div>':'')+(r.stats?'<p class="entry-desc reward-stats" style="margin-top:3px;">'+fmtText(r.stats)+'</p>':'')+(meta?'<div class="loc-links">'+meta+'</div>':'')+xLines('rewards', r)+'</div>';
+        h+='<div class="npc-block"><div class="entry-name">'+escH(r.name)+'</div>'+(r.flavor?'<div class="sb-flavor" style="margin-bottom:5px;">'+fmtText(r.flavor)+'</div>':'')+(r.stats?'<p class="entry-desc reward-stats" style="margin-top:3px;">'+fmtText(r.stats)+'</p>':'')+(meta?'<div class="loc-links">'+meta+'</div>':'')+xLines('rewards', r)+'</div>';
       });
       sections.push(h+'</div>');
     }
@@ -2841,28 +2964,21 @@ function renderPreview() {
     previewFactions().forEach(h=>sections.push(h));
     previewVehicles().forEach(h=>sections.push(h));
 
-    // SCENES (spill onto page 2 when they don't fit), then hazards & traps
-    const _typeC={'combat':'#C0392B','exploration':'#2d6a2d','npc':'#1a4a8a'};
-    if((state.locations||[]).length) sections.push('<div class="p-section" style="margin-bottom:6px;"><div class="sl">'+escH(L('scenes'))+'</div></div>');
-    (state.locations||[]).forEach(l=>{
-      const c=_typeC[l.type]||_typeC.combat;
-      const displayName = l.name || l.tag || '';
-      const showTag = l.tag && l.name;
-      sections.push('<div class="location-block"><div class="loc-name" style="color:'+c+';border-bottom:1.5px solid '+c+';padding-bottom:1px;font-family:var(--font-display);font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;display:block;margin-bottom:4px;">'+escH(displayName)+'</div>'+(showTag?'<div class="loc-dq">'+escH(l.tag)+'</div>':'')+locBlockInner(l)+'</div>');
-    });
+    // HAZARDS & TRAPS, then the SCENES (which spill onto page 2 when they don't fit)
     if((state.hazards||[]).length){
       let h='<div class="p-section"><div class="sl">Hazards &amp; Traps</div>';
       state.hazards.forEach(z=>{
-        const bits=[z.where?'<b>Where:</b> '+escH(z.where):'', z.trigger?'<b>Trigger:</b> '+escH(z.trigger):'', z.spot?'<b>Spot / disarm:</b> '+escH(z.spot):''].filter(Boolean).join(' · ');
-        h+='<div class="haz-item"><span class="clue-hdr">'+escH(z.name||'Hazard')+'</span>'+(z.effect?' — '+fmtText(z.effect):'')+(bits?'<div class="loc-links">'+bits+'</div>':'')+xLines('hazards', z)+'</div>';
+        const bits=[z.where?'<b>Where:</b> '+escH(z.where):'', z.trigger?'<b>Trigger:</b> '+escH(z.trigger):'', z.spot?'<b>Spot / disarm:</b> '+escH(z.spot):''].filter(Boolean).map(x=>'<div class="loc-links">'+x+'</div>').join('');
+        h+='<div class="haz-item"><span class="clue-hdr">'+escH(z.name||'Hazard')+'</span>'+(z.effect?' — '+fmtText(z.effect):'')+bits+xLines('hazards', z)+'</div>';
       });
       sections.push(h+'</div>');
     }
-
+    if((state.locations||[]).length) sections.push('<div class="p-section" style="margin-bottom:6px;"><div class="sl">'+escH(L('scenes'))+'</div></div>');
+    (state.locations||[]).forEach(l=>{ sections.push(locBlock(l)); });
     plugPreview('scenes', sections);
     // CAST — full stat blocks
     if((state.statblocks||[]).length){
-      sections.push('<div class="p-section" style="margin-top:4px;"><div class="sl" style="color:#1a4a8a;border-bottom-color:#1a4a8a;">Monsters &amp; NPCs</div></div>');
+      sections.push('<div class="p-section" style="margin-top:4px;"><div class="sl">Monsters &amp; NPCs</div></div>');
       state.statblocks.forEach(sb=>{
         const sbDiv = buildSB(sb);
         sbDiv.classList.add('full-width');
@@ -2875,6 +2991,10 @@ function renderPreview() {
 
     plugPreview('end', sections);
     // Put all items in left first to measure real heights
+    // A header never ends a column on its own: a heading-only section is glued to
+    // the block after it, so pagination moves them together.
+    const _isHead=h=>/^<div class="p-section"[^>]*><div class="sl">[^<]*<\/div><\/div>$/.test(String(h).trim());
+    for(let i=sections.length-2;i>=0;i--) if(_isHead(sections[i])) sections.splice(i,2,'<div class="p-keep">'+sections[i]+sections[i+1]+'</div>');
     leftEl.innerHTML = sections.join('');
     rightEl.innerHTML = '';
 
@@ -2908,12 +3028,7 @@ function renderPreview() {
   if(locsEl2) {
     const p1LocCount = document.querySelectorAll('#p1-left .location-block, #p1-right .location-block').length;
     const overflowLocs = (state.locations||[]).slice(p1LocCount);
-    locsEl2.innerHTML = overflowLocs.map(l=>`
-      <div class="location-block">
-        <div class="loc-name" style="color:${typeColors[l.type]||typeColors.combat};border-bottom:1.5px solid ${typeColors[l.type]||typeColors.combat};padding-bottom:1px;font-family:var(--font-display);font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;display:block;margin-bottom:4px;">${escH(l.name||l.tag||'')}</div>
-        ${l.tag&&l.name?`<div class="loc-dq">${escH(l.tag)}</div>`:''}
-        ${locBlockInner(l)}
-      </div>`).join('');
+    locsEl2.innerHTML = overflowLocs.map(locBlock).join('');
     // Hide page 2 entirely when nothing overflowed
     if(pageTwo) pageTwo.style.display = overflowLocs.length ? '' : 'none';
   }

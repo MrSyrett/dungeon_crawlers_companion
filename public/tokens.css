@@ -1539,8 +1539,7 @@ body {
    ========================================================================== */
 
 /* --- DCC · adventure prep -------------------------------------------------
-   Orange → the cover magenta, sage → gold, cyan read-aloud → a near-black
-   block with a magenta rule, and the masthead band goes black with a gold
+   Orange → the cover magenta, sage → gold, and the masthead band goes black with a gold
    wordmark the way the covers do it. */
 :root[data-themed][data-system="DCC"][data-tool="session"] {
   --section-hdr-dark: var(--dcc-gold);
@@ -1575,12 +1574,8 @@ body {
   color: var(--dcc-gold);
   border-bottom-color: var(--dcc-gold);
 }
-/* The one place the template wrote the cyan straight into the rule. */
-:root[data-themed][data-system="DCC"][data-tool="session"] .read-aloud,
-:root[data-themed][data-system="DCC"][data-tool="session"] .sb-flavor {
-  background: #141016;
-  border-left-color: #e8275f;
-}
+/* Read-aloud and flavour boxes are no longer skinned here: they share one look
+   in every system, set by the prep template's readability layer. */
 
 /* --- DCC · character sheet ------------------------------------------------
    The sheet is essentially one colour used sixty times, and that colour was
@@ -1636,7 +1631,7 @@ body {
 
 /* --- D&D · adventure prep -------------------------------------------------
    Black, white, red and the light brown — so the gold highlight, the green and
-   the blue NPC rule all go, and the read-aloud stops being cyan. */
+   the blue NPC rule all go. */
 :root[data-themed][data-system="DND"][data-tool="session"] {
   --section-hdr-dark: var(--crimson-ink);
   /* Two reds, not four: the theme red and its dark. The template shipped
@@ -1660,11 +1655,6 @@ body {
   --sub-color: #ffffff;       /* was #fbe7dc, a pale pink in no D&D palette; white is 8.16:1 on the red band */
   --preview-bg: #0d0b0c;
   --gold: #8a4a22;            /* icons on the cream page */
-}
-:root[data-themed][data-system="DND"][data-tool="session"] .read-aloud,
-:root[data-themed][data-system="DND"][data-tool="session"] .sb-flavor {
-  background: #7a1119;
-  border-left-color: #c8102e;
 }
 :root[data-themed][data-system="DND"][data-tool="session"] .sl.gold {
   color: #8a4a22;

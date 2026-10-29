@@ -8,6 +8,7 @@
     --read-text: #f3e7cc; --highlight: #c9a14a; --green: #4f6a2f; --blue-npc: #2f4f6f;
     --section-hdr: #1e5842; --table-hdr: #1e5842; --preview-bg: #0f0e0d;
     --gold: #c9a14a; --gold-lift: #e3c27a; --db: #236855; --db-ink: #5cb894;
+    --sb-name-dark: #5cb894;
     /* The logo red: every Hideout title is lettered in it inside a --gold stroke. */
     --db-logo: #e42a32;
     --font-display: "Hideout", "EB Garamond", Georgia, serif;

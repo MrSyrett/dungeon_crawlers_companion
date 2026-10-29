@@ -106,3 +106,7 @@ html:root[data-themed][data-system="PB"] { --font-display: "1651 Alchemy", "EB G
 @media (max-width: 768px) { .section-divider { font-size: 16px !important; padding: 8px 2px 6px !important; } .pb-checks label { font-size: 13px; } .pb-grid { grid-template-columns: repeat(2, 1fr); } }
 
 .mod-calc b { color: var(--ui-accent); }
+/* Box rules, card bars and stat bands follow the header colour: black ink on the
+   bone page, white on the dark page. */
+.page { --sys-hdr: var(--ink) !important; }
+.page.dark-mode { --sys-hdr: #ffffff !important; }

@@ -3,7 +3,7 @@ const SB_CONFIG = {
   typePlaceholder: 'IMPERIAL // STORMTROOPER',
   hp: null,
   rows: [
-    [{ key:'dex', label:'DEX', th:'Dexterity', ph:'2D' }, { key:'kno', label:'KNOW', th:'Knowledge', ph:'2D' }, { key:'mec', label:'MECH', th:'Mechanical', ph:'2D' }, { key:'per', label:'PERC', th:'Perception', ph:'2D' }, { key:'str', label:'STR', th:'Strength', ph:'2D' }, { key:'tec', label:'TECH', th:'Technical', ph:'2D' }],
+    [{ key:'dex', label:'DEX', th:'DEX', ph:'2D' }, { key:'kno', label:'KNOW', th:'KNO', ph:'2D' }, { key:'mec', label:'MECH', th:'MEC', ph:'2D' }, { key:'per', label:'PERC', th:'PER', ph:'2D' }, { key:'str', label:'STR', th:'STR', ph:'2D' }, { key:'tec', label:'TECH', th:'TEC', ph:'2D' }],
     // 1st edition prints no Move stat; Sourcebook creatures carry a Speed Code (key stays 'move' for saved prep).
     [{ key:'move', label:'SPEED', th:'Speed Code (creatures)' }, { key:'force', label:'FORCE PTS', th:'Force Points' }, { key:'armor', label:'ARMOR' }],
   ],

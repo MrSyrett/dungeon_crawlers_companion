@@ -68,11 +68,11 @@
 .page.dark-mode .sb-table td { background: #14281c; color: #e3dabf; }
 .page.dark-mode .clue-item { background: #1d3527; color: #e3dabf; }
 .page.dark-mode .lotr-box, .mod-box { background: rgba(10,25,16,.55); border-color: #2f5040; }
-.page.dark-mode .lotr-badge, .mod-badge { background: #1d3527; color: #ece4cc; border-color: #4a6a4a; }
+.page.dark-mode .lotr-badge, .page.dark-mode .mod-badge { background: #1d3527; color: #ece4cc; border-color: #4a6a4a; }
 .page.dark-mode .lotr-badge > span, .page.dark-mode .mod-badge > span, .page.dark-mode .lotr-route, .page.dark-mode .mod-route, .page.dark-mode .lotr-oc b { color: var(--gold-lift); }
 .page.dark-mode .lotr-badge.gold { background: #3a3215; border-color: var(--gold); }
 .page.dark-mode .lotr-oc { background: #1d3527; color: #e3dabf; }
-.page.dark-mode .lotr-note, .mod-note { color: #e2b27a; } .page.dark-mode .lotr-note.dim, .page.dark-mode .lotr-src { color: #a7b59c; }
+.page.dark-mode .lotr-note, .page.dark-mode .mod-note { color: #e2b27a; } .page.dark-mode .lotr-note.dim, .page.dark-mode .lotr-src { color: #a7b59c; }
 .page.dark-mode .lotr-peril { background: #3a2015; color: #f0c8a8; }
 .page.dark-mode .sb-ability.sb-shadow { background: rgba(160,120,200,.12); }
 .page.dark-mode .sb-ability.sb-shadow strong { color: #c9a8e8; }
@@ -98,3 +98,8 @@
 
 .mod-travel-box { border-left-color: var(--lotr-green); }
 .mod-calc b { color: var(--ui-accent); }
+
+/* Dark-page text that kept its light-page ink. */
+.page.dark-mode .lotr-fat { color: #e2b27a; }
+.page.dark-mode .lotr-truth { color: #c2baa8; border-color: #5a6a5a; }
+.page.dark-mode .lotr-truth.t-true { color: #8fd0a2; border-color: #8fd0a2; } .page.dark-mode .lotr-truth.t-false { color: #f08a7a; border-color: #f08a7a; } .page.dark-mode .lotr-truth.t-partly-true { color: #e2c36b; border-color: #e2c36b; }

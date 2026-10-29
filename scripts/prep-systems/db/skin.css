@@ -94,3 +94,7 @@
 @media (max-width: 768px) { .db-checks label, .mod-checks label { font-size: 13px; } }
 
 .mod-calc b { color: var(--ui-accent); }
+/* The one system colour that box rules, card bars and stat bands follow is the
+   header's own green (lifted on the dark page) — not the app theme's gold. */
+.page { --sys-hdr: var(--db) !important; }
+.page.dark-mode { --sys-hdr: var(--db-ink) !important; }

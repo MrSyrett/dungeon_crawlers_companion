@@ -333,7 +333,6 @@
     DCC: [{ key: 'floor', title: 'The floor', tab: 'adventure', single: true, hint: 'Difficulties come from the floor number: Stat Check 10 + Floor · Opposed 10 + the antagonist\'s Stat Mod + Floor · Unopposed 10 + (Floor × 2). A dungeon day is 30 hours.',
       fields: [['number', 'Floor', '1', 'num'], ['theme', 'Theme', 'What this floor is'], ['days', 'Days until the stairwells close', 'e.g. 5', 'num'], ['notes', 'Notes', 'Bosses, safe rooms, the Show…', 'area']],
       tracker: function (o) { var n = parseInt(o.days, 10); return n > 0 ? { name: 'Floor ' + (o.number || '') + ' — days left', kind: 'ticks', size: Math.min(30, n), finish: 'The floor collapses: anyone not down a stairwell is gone' } : null; } }],
-    DND: [PARTY],
     NIM: [PARTY],
     // Marvel: the villain's plan, its steps a Ticks tracker; the story's acts.
     MMRPG: [{ key: 'plan', title: 'The villain\'s plan', tab: 'adventure', single: true, hint: 'Each step the heroes don\'t stop fills a box; when the last fills, the villain wins.',
@@ -374,9 +373,6 @@
 
   // Encounter difficulty from an encounter's linked cast (D&D 2024 XP budget, Nimble levels).
   var CR_XP = { '0': 10, '1/8': 25, '1/4': 50, '1/2': 100, '1': 200, '2': 450, '3': 700, '4': 1100, '5': 1800, '6': 2300, '7': 2900, '8': 3900, '9': 5000, '10': 5900, '11': 7200, '12': 8400, '13': 10000, '14': 11500, '15': 13000, '16': 15000, '17': 18000, '18': 20000, '19': 22000, '20': 25000, '21': 33000, '22': 41000, '23': 50000, '24': 62000, '25': 75000, '26': 90000, '27': 105000, '28': 120000, '29': 135000, '30': 155000 };
-  // XP budget per character (Low, Moderate, High) by level — DMG 2024.
-  var DND_BUDGET = [[50, 75, 100], [100, 150, 200], [150, 225, 400], [250, 375, 500], [500, 750, 1100], [600, 1000, 1400], [750, 1300, 1700], [1000, 1700, 2100], [1300, 2000, 2600], [1600, 2300, 3100],
-    [1900, 2900, 4100], [2200, 3700, 4700], [2600, 4200, 5400], [2900, 4900, 6200], [3300, 5400, 7800], [3800, 6100, 9800], [4500, 7200, 11700], [5000, 8700, 14200], [5500, 10700, 17200], [6400, 13200, 22000]];
   function _castOf(scene, ch) {
     var sb = _arr(ch && ch.statblocks), L = (scene && scene.links) || {};
     return _arr(L.cast).map(function (n) { return sb.filter(function (b) { return b && _str(b.name).toLowerCase() === _str(n).toLowerCase(); })[0]; }).filter(function (b) { return b && b.sbtype !== 'talk'; });
@@ -384,17 +380,11 @@
   function encounterInfo(code, scene, ch) {
     var C = String(code || '').toUpperCase(), P = ((ch && ch.sys) || {}).party || {};
     var size = parseInt(P.size, 10) || 0, lvl = parseInt(P.level, 10) || 0, cast = _castOf(scene, ch);
-    if (!cast.length || (C !== 'DND' && C !== 'NIM')) return null;
+    // Nimble only: D&D's XP-budget rating was removed at the user's request (2026-10-28).
+    if (!cast.length || C !== 'NIM') return null;
     // Only fights are rated: a social or exploration scene's cast is who you meet.
     if (scene && scene.type && scene.type !== 'combat') return null;
     var qty = function (b) { return Math.max(1, parseInt(b.qty, 10) || 1); };
-    if (C === 'DND') {
-      var xp = cast.reduce(function (s, b) { var m = /CR\s*([\d/]+)/i.exec(String(b.type || '') + ' ' + String(b.cr || '')); return s + (m && CR_XP[m[1]] != null ? CR_XP[m[1]] : 0) * qty(b); }, 0);
-      if (!size || !lvl) return { text: xp + ' XP — set the party on the Adventure tab to rate it', level: '' };
-      var B = DND_BUDGET[Math.min(20, Math.max(1, lvl)) - 1].map(function (x) { return x * size; });
-      var lv = xp > B[2] ? 'Beyond High' : xp > B[1] ? 'High' : xp > B[0] ? 'Moderate' : 'Low';
-      return { text: xp + ' XP — ' + lv + ' (budget for ' + size + ' level-' + lvl + ': Low ' + B[0] + ' · Moderate ' + B[1] + ' · High ' + B[2] + ')', level: lv };
-    }
     var ml = cast.filter(function (b) { return !/MINION/i.test(String(b.type || '')); }).reduce(function (s, b) { return s + (parseInt(b.level, 10) || 0) * qty(b); }, 0);
     if (!size || !lvl) return { text: 'Monster levels ' + ml + ' — set the party on the Adventure tab to rate it', level: '' };
     var hl = size * lvl, r = ml / hl;
