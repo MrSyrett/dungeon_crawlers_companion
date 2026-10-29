@@ -538,6 +538,19 @@ body.dark .act-badge.warn{color:#f0c060;}
   #tab-gear .section-bar.cbar .eco-wrap{flex:1 1 100%;margin-left:0!important;justify-content:flex-start!important;}
 }
 .tray-note:empty{display:none;}
+/* Dice tray = the GM Screen's tray for this system (same controls, same behaviour). */
+.gmt-label{font-size:12px;font-weight:700;color:#e8c84a;min-height:16px;letter-spacing:.03em;}
+.dice-btn.gmt-die{position:relative;}
+.gmt-cnt{position:absolute;top:-6px;right:-5px;background:#e8c84a;color:#111;border-radius:8px;font-size:10px;font-weight:700;padding:0 4px;line-height:14px;font-family:inherit;}
+.gmt-acts,.gmt-steprow{display:flex;gap:6px;align-items:stretch;}
+.gmt-adv,.gmt-x,.tstep{background:#1d1d22;border:1px solid #3a3a41;color:#cfcac2;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:.06em;padding:6px 9px;font-family:inherit;}
+.gmt-adv:hover,.gmt-x:hover,.tstep:hover{background:#2a2a31;color:#fff;}
+.gmt-adv.on-adv{background:#2f8f4e;border-color:#2f8f4e;color:#fff;}
+.gmt-adv.on-dis{background:#b03030;border-color:#b03030;color:#fff;}
+.gmt-roll{flex:1;}
+.tstep{width:34px;padding:0;font-size:17px;}
+.tnum{width:56px;text-align:center;background:#141418;border:1px solid #3a3a41;border-radius:6px;color:#fff;font-size:15px;padding:5px 0;-moz-appearance:textfield;font-family:inherit;}
+.tnum::-webkit-inner-spin-button,.tnum::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 </style>
 </head>
 <body class="sheet-locked">
@@ -778,7 +791,10 @@ body.dark .act-badge.warn{color:#f0c060;}
   </div>
   <div class="log-entries" id="log-entries"></div>
   <div class="dice-tray">
+    <div class="gmt-steprow"><button class="tstep" onclick="tStep('tray-n',-1,1,20)">−</button><input class="tnum" id="tray-n" type="number" min="1" max="20" value="5"><button class="tstep" onclick="tStep('tray-n',1,1,20)">+</button><button class="dice-btn roll gmt-roll" onclick="rollQuick()">Roll</button></div>
+    <div class="gmt-legacy" hidden>
     <div class="tray-row"><span class="tray-label">± Dice</span><input class="tray-input" id="tray-mod" type="number" value="0" min="-6" max="12" title="Adds to / subtracts from your next sheet roll — or set the size of a free d6 pool and tap Roll"><button class="dice-btn" onclick="rollQuick()">Roll d6 pool</button></div>
+  </div>
   </div>
 </div>
 </div>
@@ -1140,7 +1156,7 @@ function rollAttack(i){
   var pen=skillObj(skName)?skillPen(skName):condPenaltyFor(s.attr)+critModFor(null);
   doRoll((w.name||'Attack')+' · '+skName, attrBase(s.attr)-pen, num(S.skills[skName]), weaponBonus(w.bonus), s.attr, {kind:'attack',wdmg:num(w.damage),ctype:attrType(s.attr)});
 }
-function rollQuick(){ var n=clamp(num($('tray-mod').value),1,12); $('tray-mod').value='0'; var a=rollSet(n), succ=count6(a); animDice(a,[],[],glowFor(succ)); addLog(n+'d6 free pool', succ+'  '+tierOf(succ).t, poolStr(a)+' · '+succ+' succ', tierOf(succ).type); _lastRoll=null; }
+function rollQuick(){ var n=tVal('tray-n',1,20,5); var a=rollSet(n), succ=count6(a); animDice(a,[],[],glowFor(succ)); addLog(n+'d6 free pool', succ+'  '+tierOf(succ).t, poolStr(a)+' · '+succ+' succ', tierOf(succ).type); _lastRoll=null; }
 function rollArmor(){ var r=armorRating(); if(r<1){ addLog('Armor','—','No armor equipped — equip armor on the Gear tab.','fumble'); return; } var a=rollSet(Math.min(12,r)), blk=count6(a); animDice(a,[],[],blk?'crit':'normal'); addLog('Armor ('+r+')', blk+' blocked', poolStr(a)+' · each 6 cancels 1 damage', blk?'crit':'fumble'); }
 
 // ── Push (Vaesen): keep 6s, reroll blanks; cost = one Condition of the roll's type ──
@@ -1705,6 +1721,11 @@ input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-butto
   if(document.readyState==='complete') setTimeout(init,350);
   else window.addEventListener('load',function(){ setTimeout(init,350); });
 })();
+
+// [−] N [+] stepper, as on the GM Screen.
+function tStep(id,dir,lo,hi){ var el=document.getElementById(id); if(!el) return; var v=parseInt(el.value,10); if(isNaN(v)) v=lo; el.value=Math.max(lo,Math.min(hi,v+dir)); }
+function tVal(id,lo,hi,dflt){ var el=document.getElementById(id); var v=el?parseInt(el.value,10):NaN; if(isNaN(v)) v=dflt; v=Math.max(lo,Math.min(hi,v)); if(el) el.value=v; return v; }
+
 </script>
 
 </body>

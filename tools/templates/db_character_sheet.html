@@ -848,7 +848,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <span class="bb-ctl boon" title="Boons on the next roll: roll an extra D20 and keep the lowest"><button onclick="trayBB('boon',-1)">−</button><span class="bb-val" id="tray-boon">0 boons</span><button onclick="trayBB('boon',1)">＋</button></span>
       <span class="bb-ctl bane" title="Banes on the next roll: roll an extra D20 and keep the highest"><button onclick="trayBB('bane',-1)">−</button><span class="bb-val" id="tray-bane">0 banes</span><button onclick="trayBB('bane',1)">＋</button></span>
     </div>
-    <div class="dice-btns"><button class="dice-btn" onclick="trayAdd(4)">D4</button><button class="dice-btn" onclick="trayAdd(6)">D6</button><button class="dice-btn" onclick="trayAdd(8)">D8</button><button class="dice-btn" onclick="trayAdd(10)">D10</button><button class="dice-btn" onclick="trayAdd(12)">D12</button><button class="dice-btn" onclick="trayAdd(20)">D20</button></div>
+    <div class="dice-btns"><button class="dice-btn" onclick="trayAdd(4)" oncontextmenu="return poolSub(event,4)">D4</button><button class="dice-btn" onclick="trayAdd(6)" oncontextmenu="return poolSub(event,6)">D6</button><button class="dice-btn" onclick="trayAdd(8)" oncontextmenu="return poolSub(event,8)">D8</button><button class="dice-btn" onclick="trayAdd(10)" oncontextmenu="return poolSub(event,10)">D10</button><button class="dice-btn" onclick="trayAdd(12)" oncontextmenu="return poolSub(event,12)">D12</button><button class="dice-btn" onclick="trayAdd(20)" oncontextmenu="return poolSub(event,20)">D20</button></div>
     <div class="dice-tray-actions"><button class="dice-clear-btn" onclick="trayClear()">Clear</button><button class="dice-roll-btn" onclick="trayRoll()" title="Roll the dice pool (the boons / banes above go on its D20)">🎲 Roll</button></div>
   </div>
 </div>
@@ -2386,6 +2386,10 @@ input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-butto
   function tip(root){ (root.querySelectorAll?root.querySelectorAll(SEL):[]).forEach(function(el){ if(!el.title) el.title=el.textContent.trim(); }); }
   tip(box); new MutationObserver(function(ms){ ms.forEach(function(m){ m.addedNodes.forEach(function(n){ if(n.nodeType===1) tip(n); }); }); }).observe(box,{childList:true,subtree:true});
 })();
+
+// Right-click a die to take one back out of the pool (as on the GM Screen).
+function poolSub(e,s){ if(e&&e.preventDefault) e.preventDefault(); var i=_pool.lastIndexOf(s); if(i>=0) _pool.splice(i,1); trayShow(); return false; }
+
 </script>
 </body>
 </html>

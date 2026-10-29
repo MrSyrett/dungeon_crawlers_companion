@@ -363,6 +363,20 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
 input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none;margin:0;}
 .tray-note:empty{display:none;}
+/* Dice tray = the GM Screen's tray for this system (same controls, same behaviour). */
+.dice-btns{display:flex;gap:4px;}
+.gmt-label{font-size:12px;font-weight:700;color:#e8c84a;min-height:16px;letter-spacing:.03em;}
+.dice-btn.gmt-die{position:relative;}
+.gmt-cnt{position:absolute;top:-6px;right:-5px;background:#e8c84a;color:#111;border-radius:8px;font-size:10px;font-weight:700;padding:0 4px;line-height:14px;font-family:inherit;}
+.gmt-acts,.gmt-steprow{display:flex;gap:6px;align-items:stretch;}
+.gmt-adv,.gmt-x,.tstep{background:#1d1d22;border:1px solid #3a3a41;color:#cfcac2;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:.06em;padding:6px 9px;font-family:inherit;}
+.gmt-adv:hover,.gmt-x:hover,.tstep:hover{background:#2a2a31;color:#fff;}
+.gmt-adv.on-adv{background:#2f8f4e;border-color:#2f8f4e;color:#fff;}
+.gmt-adv.on-dis{background:#b03030;border-color:#b03030;color:#fff;}
+.gmt-roll{flex:1;}
+.tstep{width:34px;padding:0;font-size:17px;}
+.tnum{width:56px;text-align:center;background:#141418;border:1px solid #3a3a41;border-radius:6px;color:#fff;font-size:15px;padding:5px 0;-moz-appearance:textfield;font-family:inherit;}
+.tnum::-webkit-inner-spin-button,.tnum::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 </style>
 </head>
 <body>
@@ -599,9 +613,14 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   </div>
   <div class="log-entries" id="log-entries"></div>
   <div class="dice-tray">
+    <div class="gmt-label" id="gmt-pool"></div>
+    <div class="dice-btns"><button class="dice-btn gmt-die" data-d="6" onclick="gtAdd(6)" oncontextmenu="return gtSub(event,6)" title="Add a d6 (right-click removes one)">d6</button><button class="dice-btn gmt-die" data-d="8" onclick="gtAdd(8)" oncontextmenu="return gtSub(event,8)" title="Add a d8 (right-click removes one)">d8</button><button class="dice-btn gmt-die" data-d="12" onclick="gtAdd(12)" oncontextmenu="return gtSub(event,12)" title="Add a d12 (right-click removes one)">d12</button></div>
+    <div class="gmt-acts"><button class="gmt-adv" id="gmt-adv" onclick="gtAdv('adv')" title="Advantage (d20)">▲ ADV</button><button class="gmt-adv" id="gmt-dis" onclick="gtAdv('dis')" title="Disadvantage (d20)">▼ DIS</button><button class="gmt-x" onclick="gtClear()" title="Clear the pool">✕</button><button class="dice-btn roll gmt-roll" onclick="gtRoll()">🎲 Roll</button></div>
+    <div class="gmt-legacy" hidden>
     <div class="tray-row"><span class="tray-label">Tension</span><input class="tray-input" id="tension" type="number" placeholder="TN"><span class="tray-toggle" id="adv-a" onclick="setAdv('adv')">Adv</span><span class="tray-toggle on" id="adv-n" onclick="setAdv('none')">Flat</span><span class="tray-toggle" id="adv-d" onclick="setAdv('dis')">Dis</span></div>
     <div class="tray-row"><button class="dice-btn" onclick="rollD20Test('','',0)">Roll d20 Test</button></div>
     <div class="tray-row"><span class="tray-label">Quick</span><button class="dice-btn mini" onclick="quickRoll(6)">d6</button><button class="dice-btn mini" onclick="quickRoll(8)">d8</button><button class="dice-btn mini" onclick="quickRoll(12)">d12</button></div>
+  </div>
   </div>
 </div>
 </div>
@@ -1329,6 +1348,32 @@ input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-butto
   if(document.readyState==='complete') setTimeout(init,350);
   else window.addEventListener('load',function(){ setTimeout(init,350); });
 })();
+
+// [−] N [+] stepper, as on the GM Screen.
+function tStep(id,dir,lo,hi){ var el=document.getElementById(id); if(!el) return; var v=parseInt(el.value,10); if(isNaN(v)) v=lo; el.value=Math.max(lo,Math.min(hi,v+dir)); }
+function tVal(id,lo,hi,dflt){ var el=document.getElementById(id); var v=el?parseInt(el.value,10):NaN; if(isNaN(v)) v=dflt; v=Math.max(lo,Math.min(hi,v)); if(el) el.value=v; return v; }
+
+// Dice tray = the GM Screen's pool tray: tap a die to add it (right-click removes
+// one), ADV / DIS apply to a lone d20, ✕ clears, Roll throws the pool.
+var _gtPool={}, _gtAdv='none';
+function _gtLabel(){ return Object.keys(_gtPool).map(Number).sort(function(a,b){return a-b;}).filter(function(d){return _gtPool[d]>0;}).map(function(d){return _gtPool[d]+'d'+d;}).join(' + '); }
+function gtRender(){ var el=document.getElementById('gmt-pool'); if(el) el.textContent=_gtLabel();
+  [].forEach.call(document.querySelectorAll('.gmt-die'),function(b){ var n=_gtPool[b.dataset.d]||0, c=b.querySelector('.gmt-cnt');
+    if(n){ if(!c){ c=document.createElement('span'); c.className='gmt-cnt'; b.appendChild(c); } c.textContent=n; } else if(c) c.remove(); });
+  var a=document.getElementById('gmt-adv'), d=document.getElementById('gmt-dis'); if(a) a.classList.toggle('on-adv',_gtAdv==='adv'); if(d) d.classList.toggle('on-dis',_gtAdv==='dis'); }
+function gtAdd(d){ _gtPool[d]=(_gtPool[d]||0)+1; gtRender(); }
+function gtSub(e,d){ if(e&&e.preventDefault) e.preventDefault(); if(_gtPool[d]) _gtPool[d]--; gtRender(); return false; }
+function gtSync(){ if(typeof setAdv==='function') setAdv(_gtAdv==='adv'?'adv':_gtAdv==='dis'?'dis':'none'); }
+function gtAdv(m){ _gtAdv=_gtAdv===m?'none':m; try{ gtSync(); }catch(e){} gtRender(); }
+function gtClear(){ _gtPool={}; _gtAdv='none'; try{ gtSync(); }catch(e){} gtRender(); }
+function gtRoll(){
+  var dice=Object.keys(_gtPool).map(Number).filter(function(d){return _gtPool[d]>0;}).sort(function(a,b){return a-b;}); if(!dice.length) return;
+  var R=function(n){return 1+Math.floor(Math.random()*n);}, lone=dice.length===1&&dice[0]===20&&_gtPool[20]===1, tot=0, parts=[], type='normal';
+  if(lone&&_gtAdv!=='none'){ var a=R(20), b=R(20), k=_gtAdv==='adv'?Math.max(a,b):Math.min(a,b); tot=k; parts.push('d20('+a+','+b+' '+(_gtAdv==='adv'?'▲':'▼')+' '+k+')'); type=k===20?'crit':k===1?'fumble':'normal'; }
+  else dice.forEach(function(d){ var r=[]; for(var i=0;i<_gtPool[d];i++) r.push(R(d)); r.forEach(function(v){tot+=v;}); parts.push(_gtPool[d]+'d'+d+'('+r.join(',')+')'); if(lone) type=r[0]===20?'crit':r[0]===1?'fumble':'normal'; });
+  addLog(_gtLabel(), String(tot), parts.join(' '), type);
+}
+
 </script>
 
 </body>

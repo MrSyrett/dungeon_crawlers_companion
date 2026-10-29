@@ -1293,13 +1293,13 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       </div>
     </div>
     <div class="dice-btns">
-      <button class="dice-btn" onclick="addDie(4)">d4</button>
-      <button class="dice-btn" onclick="addDie(6)">d6</button>
-      <button class="dice-btn" onclick="addDie(8)">d8</button>
-      <button class="dice-btn" onclick="addDie(10)">d10</button>
-      <button class="dice-btn" onclick="addDie(12)">d12</button>
-      <button class="dice-btn" onclick="addDie(20)">d20</button>
-      <button class="dice-btn" onclick="addDie(100)">d%</button>
+      <button class="dice-btn" onclick="addDie(4)" oncontextmenu="return poolSub(event,4)">d4</button>
+      <button class="dice-btn" onclick="addDie(6)" oncontextmenu="return poolSub(event,6)">d6</button>
+      <button class="dice-btn" onclick="addDie(8)" oncontextmenu="return poolSub(event,8)">d8</button>
+      <button class="dice-btn" onclick="addDie(10)" oncontextmenu="return poolSub(event,10)">d10</button>
+      <button class="dice-btn" onclick="addDie(12)" oncontextmenu="return poolSub(event,12)">d12</button>
+      <button class="dice-btn" onclick="addDie(20)" oncontextmenu="return poolSub(event,20)">d20</button>
+      <button class="dice-btn" onclick="addDie(100)" oncontextmenu="return poolSub(event,100)">d%</button>
     </div>
     <div style="display:flex;gap:6px;">
       <button class="dice-clear-btn" onclick="clearDicePool()">Clear</button>
@@ -5103,6 +5103,10 @@ if(window.DNDHB) DNDHB.load(function(){
 });
 </script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js (injects CSS + audio + 2D/3D engine). Extracted from the per-sheet inline copy. -->
+<script>
+// Right-click a die to take one back out of the pool (as on the GM Screen).
+function poolSub(e,s){ if(e&&e.preventDefault) e.preventDefault(); var i=dicePool.lastIndexOf(s); if(i>=0) dicePool.splice(i,1); updateDicePoolDisplay(); return false; }
+</script>
 <script src="/tools-data/dice-anim.js"></script>
 </body>
 </html>

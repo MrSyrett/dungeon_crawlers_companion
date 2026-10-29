@@ -791,7 +791,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   <div class="dice-tray">
     <div class="dice-pool-display" id="dice-pool-display"><span class="empty">Empty</span></div>
     <div class="tray-row"><div class="adv-seg" id="adv-seg"><button class="adv dis" data-mode="dis" onclick="trayAdv('dis')" title="Disadvantage: roll two d20, keep the lower">Dis</button><button class="norm on" data-mode="norm" onclick="trayAdv('norm')" title="Normal">Normal</button><button class="adv" data-mode="adv" onclick="trayAdv('adv')" title="Advantage: roll two d20, keep the higher">Adv</button></div></div>
-    <div class="dice-btns"><button class="dice-btn" onclick="trayAdd(2)">d2</button><button class="dice-btn" onclick="trayAdd(4)">d4</button><button class="dice-btn" onclick="trayAdd(6)">d6</button><button class="dice-btn" onclick="trayAdd(8)">d8</button><button class="dice-btn" onclick="trayAdd(10)">d10</button><button class="dice-btn" onclick="trayAdd(12)">d12</button><button class="dice-btn" onclick="trayAdd(20)">d20</button><button class="dice-btn" onclick="trayAdd(100)">d%</button></div>
+    <div class="dice-btns"><button class="dice-btn" onclick="trayAdd(2)" oncontextmenu="return poolSub(event,2)">d2</button><button class="dice-btn" onclick="trayAdd(4)" oncontextmenu="return poolSub(event,4)">d4</button><button class="dice-btn" onclick="trayAdd(6)" oncontextmenu="return poolSub(event,6)">d6</button><button class="dice-btn" onclick="trayAdd(8)" oncontextmenu="return poolSub(event,8)">d8</button><button class="dice-btn" onclick="trayAdd(10)" oncontextmenu="return poolSub(event,10)">d10</button><button class="dice-btn" onclick="trayAdd(12)" oncontextmenu="return poolSub(event,12)">d12</button><button class="dice-btn" onclick="trayAdd(20)" oncontextmenu="return poolSub(event,20)">d20</button><button class="dice-btn" onclick="trayAdd(100)" oncontextmenu="return poolSub(event,100)">d%</button></div>
     <div class="dice-tray-actions"><button class="dice-clear-btn" onclick="trayClear()">Clear</button><button class="dice-roll-btn" onclick="trayRoll()" title="Roll the dice pool">🎲 Roll</button></div>
   </div>
 </div>
@@ -2737,6 +2737,10 @@ input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-butto
   function tip(root){ (root.querySelectorAll?root.querySelectorAll(SEL):[]).forEach(function(el){ if(!el.title) el.title=el.textContent.trim(); }); }
   tip(box); new MutationObserver(function(ms){ ms.forEach(function(m){ m.addedNodes.forEach(function(n){ if(n.nodeType===1) tip(n); }); }); }).observe(box,{childList:true,subtree:true});
 })();
+
+// Right-click a die to take one back out of the pool (as on the GM Screen).
+function poolSub(e,s){ if(e&&e.preventDefault) e.preventDefault(); var i=_pool.lastIndexOf(s); if(i>=0) _pool.splice(i,1); trayShow(); return false; }
+
 </script>
 </body>
 </html>

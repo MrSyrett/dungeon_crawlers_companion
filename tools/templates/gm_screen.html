@@ -2168,15 +2168,20 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 .scene-ctl .scene-clear:hover{border-color:var(--red-light);color:#ff8a80}
 /* Round over Session, stacked; the initiative dice sit above Advance */
 .gmc-stack{display:flex;flex-direction:column;justify-content:center;gap:8px}
-.gmc-stack .gmc-round-info{flex-direction:row;align-items:baseline;justify-content:space-between;gap:8px}
-#gmc-topbar .gmc-stack .tel-clock,.gmc-stack .tel-clock{margin:0;padding:0;border:0;flex-direction:row;align-items:baseline;justify-content:space-between;gap:8px}
+.gmc-stack .gmc-round-info{flex-direction:row;align-items:baseline;justify-content:space-between;gap:4px}
+#gmc-topbar .gmc-stack .tel-clock,.gmc-stack .tel-clock{margin:0;padding:0;border:0;flex-direction:row;align-items:baseline;justify-content:space-between;gap:4px}
 .gmc-stack .gmc-round-num{font-size:16px}
 .gmc-stack .tel-time{font-size:15px}
 /* The ticking timer and the round number never change the bar's width: fixed
    tabular digits in a right-aligned box sized for H:MM:SS / three digits. */
-.tel-time{font-variant-numeric:tabular-nums lining-nums;display:inline-block;min-width:4.7em;text-align:right;white-space:nowrap}
-.gmc-round-num{font-variant-numeric:tabular-nums lining-nums;display:inline-block;min-width:1.9em;text-align:right}
+.tel-time{font-variant-numeric:tabular-nums lining-nums;display:inline-block;min-width:5ch;text-align:right;white-space:nowrap}
+.gmc-round-num{font-variant-numeric:tabular-nums lining-nums;display:inline-block;min-width:2.1ch;text-align:right}
 .gmc-stack{flex-shrink:0}
+/* Labels in one column, values right beside them (no gap across the box);
+   the values stay left-aligned in a fixed-width cell so ticking never moves anything. */
+.gmc-stack{display:grid;grid-template-columns:auto auto;column-gap:6px;row-gap:8px;align-items:baseline}
+.gmc-stack .gmc-round-info,#gmc-topbar .gmc-stack .tel-clock,.gmc-stack .tel-clock{display:contents}
+.gmc-stack .gmc-round-num,.gmc-stack .tel-time{text-align:left}
 .gmc-round .gmc-round-btns{order:-1}
 .gmc-round-btns .gmc-init{display:flex;flex-direction:row;gap:3px;padding:0;border:0}
 .gmc-round-btns .gmc-round-btn.gmc-init-btn{width:26px;height:17px;padding:0;border-radius:5px;border:1px solid var(--border);background:var(--panel-2);color:var(--light);font-size:11px;line-height:1;display:inline-flex;align-items:center;justify-content:center;gap:0;text-transform:none;letter-spacing:0}
