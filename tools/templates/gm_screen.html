@@ -8250,6 +8250,39 @@ function wireSessionPrepLoader(root) {
     return { name: nm + ' — ' + k.tickName + 's', kind: 'ticks', size: k.ticks, finish: j.to ? 'Arrive at ' + j.to : 'Arrived' };
   }
 
+  // Per-system extras on cards (registry EXTRA) and blocks (SECTIONS), each with its tracker.
+  function xHub(kind, item){
+    const R = window.PREP_REGISTRY, F = R && R.extra ? R.extra(prepSys, kind) : [], X = (item && item.x) || {};
+    const bits = F.filter(f => X[f[0]] != null && String(X[f[0]]).trim() !== '').map(f => '<b>' + advEsc(f[1]) + ':</b> ' + advEsc(String(X[f[0]])));
+    return bits.length ? '<div class="advh-desc dim">' + bits.join(' · ') + '</div>' : '';
+  }
+  function sceneTrk(i){
+    const s = scenes()[i] || {}, R = window.PREP_REGISTRY;
+    return (R && R.sceneTrackers ? R.sceneTrackers(prepSys, s) : []).concat(s.trackers || []);
+  }
+  function sysSecs(){ const R = window.PREP_REGISTRY; return R && R.sections ? R.sections(prepSys) : []; }
+  function sysTracker(scope){
+    const m = /^sys:([^:]+):(\d+)$/.exec(scope); if(!m) return null;
+    const sec = sysSecs().find(x => x.key === m[1]); if(!sec || !sec.tracker) return null;
+    const v = (prep.sys || {})[sec.key]; const o = sec.single ? v : (Array.isArray(v) ? v[+m[2]] : null);
+    return o ? sec.tracker(o) : null;
+  }
+  function sysSectionsHtml(){
+    const S = prep.sys || {};
+    return sysSecs().map(sec => {
+      const v = S[sec.key], L = sec.single ? (v && Object.values(v).some(x => x !== '' && x !== false && x != null) ? [v] : []) : (Array.isArray(v) ? v : []);
+      if(!L.length) return '';
+      return '<div class="advh-notes"><div class="advh-scene-lbl">' + advEsc(sec.title) + '</div>' + L.map((o, i) => {
+        const rows = sec.fields.map(f => { const val = o[f[0]]; if(val == null || val === '' || val === false) return '';
+          const lb = f[1].replace(/\s*\(.*\)$/, '');
+          if(f[3] === 'lines') return '<div class="advh-desc"><b>' + advEsc(lb) + ':</b></div><ol class="advh-hooks">' + String(val).split('\n').filter(x => x.trim()).map(x => '<li>' + advEsc(x) + '</li>').join('') + '</ol>';
+          return '<div class="advh-desc"><b>' + advEsc(lb) + ':</b> ' + advText(val === true ? 'yes' : String(val)) + '</div>'; }).join('');
+        const t = sec.tracker ? sec.tracker(o) : null;
+        return '<div class="advh-card">' + rows + (t ? trackersHtml([t], 'sys:' + sec.key + ':' + i) : '') + '</div>';
+      }).join('') + '</div>';
+    }).join('');
+  }
+
   // ── Treasure → character sheets: the same claimable drop as the Treasure panels ──
   function canDrop(){ return lootOn() && typeof GMCamp !== 'undefined' && GMCamp.get(); }
   function dropLoot(items, title){
@@ -8267,6 +8300,7 @@ function wireSessionPrepLoader(root) {
       + '<label class="advh-chk" title="Ticked once it has been handed out"><input type="checkbox" class="advh-handed"' + (handed ? ' checked' : '') + '> Handed out</label></div>'
       + (r.flavor ? '<div class="advh-desc">' + advText(r.flavor) + '</div>' : '')
       + (r.stats ? '<div class="advh-desc dim">' + advText(r.stats) + '</div>' : '')
+      + xHub('rewards', r)
       + ((r.value || r.where || held(r).length) ? '<div class="advh-desc dim">' + advEsc([r.value ? 'Value ' + r.value : '', r.where ? 'Found in ' + r.where : '', held(r).length ? 'Held by ' + held(r).join(', ') : ''].filter(Boolean).join(' · ')) + '</div>' : '')
       + (lootOn() ? '<div class="advh-actions"><button type="button" class="btn small advh-drop" title="' + (canDrop() ? 'Send to the players as a claimable drop' : 'Link a campaign first (top bar)') + '"' + (canDrop() ? '' : ' disabled') + '>🎁 Drop to players</button></div>' : '')
       + '</div>';
@@ -8333,6 +8367,7 @@ function wireSessionPrepLoader(root) {
       const detT = (lab('adventure') === 'Adventure' || lab('adventure') === 'Overview' ? 'Adventure Details' : lab('adventure')) + (D.name ? ' — ' + D.name : '');
       if(det || D.name) h += '<div class="advh-card"><div class="advh-card-h">' + advEsc(detT) + '</div><div class="advh-det">' + det + '</div></div>';
       if(prep.overview) h += '<div class="advh-prose">' + advText(prep.overview) + '</div>';
+      h += sysSectionsHtml();
       if((prep.trackers || []).length) h += '<div class="advh-notes"><div class="advh-scene-lbl">Trackers</div>' + trackersHtml(prep.trackers, 'adv') + '</div>';
       if(prep.notes && prep.notes.trim()) h += '<div class="advh-notes"><div class="advh-scene-lbl">GM notes</div><div class="advh-prose">' + advText(prep.notes) + '</div></div>';
       return h || '<div class="advh-empty">No overview written for this adventure.</div>';
@@ -8342,7 +8377,7 @@ function wireSessionPrepLoader(root) {
       const SB = prep.statblocks || [], CL = prep.clues || [], RW = prep.rewards || [], HZ = prep.hazards || [];
       // Hazards & traps no encounter links to still need a home at the table.
       const loose = HZ.filter(z => !list.some(s => ((s.links || {}).hazards || []).some(n => eqName(n, z.name)) || whereHas(z.where, s.name)));
-      const looseHtml = loose.length ? '<div class="advh-notes"><div class="advh-scene-lbl">Hazards &amp; traps</div>' + loose.map(z => '<div class="advh-haz"><b>' + advEsc(z.name || 'Hazard') + '</b>' + (z.trigger ? ' — ' + advEsc(z.trigger) : '') + (z.effect ? '<div>' + advText(z.effect) + '</div>' : '') + (z.spot ? '<div class="dim">Spot / disarm: ' + advEsc(z.spot) + '</div>' : '') + '</div>').join('') + '</div>' : '';
+      const looseHtml = loose.length ? '<div class="advh-notes"><div class="advh-scene-lbl">Hazards &amp; traps</div>' + loose.map(z => '<div class="advh-haz"><b>' + advEsc(z.name || 'Hazard') + '</b>' + (z.trigger ? ' — ' + advEsc(z.trigger) : '') + (z.effect ? '<div>' + advText(z.effect) + '</div>' : '') + (z.spot ? '<div class="dim">Spot / disarm: ' + advEsc(z.spot) + '</div>' : '') + xHub('hazards', z) + '</div>').join('') + '</div>' : '';
       if(!list.length) return looseHtml || '<div class="advh-empty">No scenes or encounters in this prep.</div>';
       return list.map((s, i) => {
         const typ = (s.type || '').toLowerCase();
@@ -8367,10 +8402,13 @@ function wireSessionPrepLoader(root) {
         tbs.forEach(ti => { runBar += '<button type="button" class="btn small advh-run-roll" data-ti="' + ti + '">🎲 ' + advEsc(tables()[ti].title || 'Roll') + '</button>'; });
         let extra = '';
         if(cast.length) extra += '<div class="advh-scene-sec"><div class="advh-scene-lbl">Cast here</div><div class="advh-desc">' + cast.map(b => advEsc((parseInt(b.qty, 10) > 1 ? b.qty + '× ' : '') + b.name) + (b.sbtype === 'talk' ? ' <span class="advh-tag">talk</span>' : '')).join(', ') + '</div></div>';
-        if(hz.length) extra += '<div class="advh-scene-sec"><div class="advh-scene-lbl">Hazards &amp; traps</div>' + hz.map(z => '<div class="advh-haz"><b>' + advEsc(z.name || 'Hazard') + '</b>' + (z.trigger ? ' — ' + advEsc(z.trigger) : '') + (z.effect ? '<div>' + advText(z.effect) + '</div>' : '') + (z.spot ? '<div class="dim">Spot / disarm: ' + advEsc(z.spot) + '</div>' : '') + '</div>').join('') + '</div>';
+        if(hz.length) extra += '<div class="advh-scene-sec"><div class="advh-scene-lbl">Hazards &amp; traps</div>' + hz.map(z => '<div class="advh-haz"><b>' + advEsc(z.name || 'Hazard') + '</b>' + (z.trigger ? ' — ' + advEsc(z.trigger) : '') + (z.effect ? '<div>' + advText(z.effect) + '</div>' : '') + (z.spot ? '<div class="dim">Spot / disarm: ' + advEsc(z.spot) + '</div>' : '') + xHub('hazards', z) + '</div>').join('') + '</div>';
         if(cls.length) extra += '<div class="advh-scene-sec"><div class="advh-scene-lbl">Clues here</div>' + cls.map(([x, ci]) => clueRow(x, ci)).join('') + '</div>';
         if(rws.length) extra += '<div class="advh-scene-sec"><div class="advh-scene-lbl">' + advEsc(lab('treasure')) + ' here</div>' + rws.map(([x, ri]) => treasureRow(x, ri)).join('') + '</div>';
-        if((s.trackers || []).length) extra += '<div class="advh-scene-sec"><div class="advh-scene-lbl">Scene trackers</div>' + trackersHtml(s.trackers, 'scene' + i) + '</div>';
+        const sT = sceneTrk(i);
+        if(sT.length) extra += '<div class="advh-scene-sec"><div class="advh-scene-lbl">Scene trackers</div>' + trackersHtml(sT, 'scene' + i) + '</div>';
+        const R_ = window.PREP_REGISTRY, enc = R_ && R_.encounterInfo ? R_.encounterInfo(prepSys, s, prep) : null;
+        const xh = xHub('scenes', s);
         const hasBody = s.readaloud || s.desc || s.consequences || s.notes;
         return '<div class="advh-scene' + (done ? ' done' : '') + '" data-i="' + i + '">'
           + '<div class="advh-scene-top"><button class="advh-row advh-scene-hd"><span class="advh-dot" style="background:' + dot + '"></span>'
@@ -8380,13 +8418,14 @@ function wireSessionPrepLoader(root) {
           + '<label class="advh-chk advh-done-chk" title="Mark this scene done"><input type="checkbox" class="advh-done"' + (done ? ' checked' : '') + '> Done</label></div>'
           + '<div class="advh-scene-body" style="display:none;">'
           + (runBar ? '<div class="advh-run">' + runBar + '</div><div class="advh-result advh-run-res" style="display:none;"></div>' : '')
+          + (enc ? '<div class="advh-desc"><b>Difficulty</b> · ' + advEsc(enc.text) + '</div>' : '') + xh
           + (s.tag ? '<div class="advh-scene-dq">' + advEsc(s.tag) + '</div>' : '')
           + (s.readaloud ? '<div class="advh-readaloud">' + advFmt(s.readaloud) + '</div>' : '')
           + scnSec('Interactions', s.desc)
           + scnSec('Consequences', s.consequences)
           + scnSec('Notes', s.notes)
           + extra
-          + (!hasBody && !extra && !runBar ? '<div class="advh-desc dim">No details recorded.</div>' : '')
+          + (!hasBody && !extra && !runBar && !xh && !enc ? '<div class="advh-desc dim">No details recorded.</div>' : '')
           + '</div></div>';
       }).join('') + looseHtml;
     }
@@ -8606,7 +8645,7 @@ function wireSessionPrepLoader(root) {
         R.done[k] = 1;
         // Offer to clear this scene's running trackers.
         const n = timersNode();
-        if((s.trackers || []).some((t, ti) => trkStarted('scene' + i, t, ti)) && n && n._removeBySrc && confirm('Scene done. Remove its trackers from the Trackers tool?')) n._removeBySrc('prep:' + ((prepMeta && prepMeta.docId) || '') + ':' + prepActiveChapter + ':scene' + i + ':');
+        if(sceneTrk(i).some((t, ti) => trkStarted('scene' + i, t, ti)) && n && n._removeBySrc && confirm('Scene done. Remove its trackers from the Trackers tool?')) n._removeBySrc('prep:' + ((prepMeta && prepMeta.docId) || '') + ':' + prepActiveChapter + ':scene' + i + ':');
       } else delete R.done[k];
       runSave(); renderHub();
     }));
@@ -8639,11 +8678,11 @@ function wireSessionPrepLoader(root) {
     // Trackers → Start puts them in the Trackers tool (never twice).
     hub.querySelectorAll('.advh-trk-start').forEach(b => b.addEventListener('click', () => {
       const row = b.closest('.advh-trk'), scope = row.dataset.scope, i = +row.dataset.i;
-      const isLeg = scope.indexOf('travel') === 0, isFac = scope.indexOf('faction') === 0;
+      const isLeg = scope.indexOf('travel') === 0, isFac = scope.indexOf('faction') === 0, isSys = scope.indexOf('sys:') === 0;
       const facT = () => { const R = window.PREP_REGISTRY, f = (prep.factions || [])[+scope.slice(7)]; return R && R.factionTracker && f ? R.factionTracker(f) : null; };
-      const list = scope === 'adv' ? (prep.trackers || []) : isLeg ? [legTracker(+scope.slice(6))] : isFac ? [facT()] : ((scenes()[+scope.slice(5)] || {}).trackers || []);
+      const list = scope === 'adv' ? (prep.trackers || []) : isSys ? [sysTracker(scope)] : isLeg ? [legTracker(+scope.slice(6))] : isFac ? [facT()] : sceneTrk(+scope.slice(5));
       const t = list[i]; if(!t) return;
-      const where = scope === 'adv' ? (prep.subtitle || prep.title || 'Adventure') : isLeg ? lab('travel') : isFac ? lab('factions') : ((scenes()[+scope.slice(5)] || {}).name || 'Scene');
+      const where = scope === 'adv' || isSys ? (prep.subtitle || prep.title || 'Adventure') : isLeg ? lab('travel') : isFac ? lab('factions') : ((scenes()[+scope.slice(5)] || {}).name || 'Scene');
       if(startTracker(scope, t, i, where)) { b.innerHTML = '✓ Running'; b.disabled = true; b.classList.remove('primary'); }
     }));
     // Run Scene: linked cast → combat (qty each), linked map → Maps, linked tables → roll.

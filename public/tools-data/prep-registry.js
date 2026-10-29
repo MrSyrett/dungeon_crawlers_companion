@@ -172,6 +172,32 @@
         if (!hexes || !speed) return { lines: ['Set the hexes and a ship (or a speed) to work out the days at sea.'], ticks: 0, tickName: 'day' };
         return { ticks: days, tickName: 'day', lines: [hexes + ' hex' + (hexes === 1 ? '' : 'es') + ' (' + hexes * TR.hexMiles + ' miles) at ' + speed + ' a day' + (against ? ' (' + base + ' −1 against the trade winds)' : '') + ' → ~' + days + ' day' + (days === 1 ? '' : 's') + ' at sea.'] };
       } },
+    // Star Wars d6: a hyperspace jump. Its standard duration × the hyperdrive multiplier;
+    // Astrogation difficulty 15 (30 with no nav computer), +1 per day cut / −1 per day
+    // added, ×2 for a hasty jump, +5 / +10 for light / heavy damage. The leg carries
+    // mult (x1/2 … x4) and cut (days cut, negative = days added).
+    SW: { unit: 'days, standard', navigator: 'Astrogator', navigatorPh: 'Who plots the jump (Astrogation)',
+      opts: [['nonav', 'No nav computer or astromech', false], ['hasty', 'Hasty jump', false], ['light', 'Light damage', false], ['heavy', 'Heavy damage', false]],
+      calc: function (j) {
+        var o = j.opts || {}, base = parseFloat(String(j.distance || '').replace(',', '.')) || 0;
+        var m = String(j.mult || 'x1').replace(/^x/i, ''), mult = m === '1/2' ? 0.5 : (parseFloat(m) || 1);
+        var cut = parseInt(j.cut, 10) || 0;
+        if (!base) return { lines: ['Set the standard duration to work out the jump.'], ticks: 0, tickName: 'day' };
+        var days = Math.max(0, base * mult - cut);
+        var dc = (o.nonav ? 30 : 15) + cut; if (o.hasty) dc *= 2; if (o.heavy) dc += 10; else if (o.light) dc += 5;
+        return { ticks: Math.ceil(days), tickName: 'day', lines: [base + ' × hyperdrive x' + m + (cut ? (cut > 0 ? ' − ' + cut + ' cut' : ' + ' + (-cut) + ' added') : '') + ' → ' + (Math.round(days * 10) / 10) + ' days in hyperspace',
+          'Astrogation difficulty ' + dc + (o.nonav ? ' (no nav computer)' : '') + (o.hasty ? ' (hasty ×2)' : '') + (o.heavy ? ' (+10 heavy damage)' : o.light ? ' (+5 light damage)' : '') + '. Failure: roll 2D on the mishap table.'] };
+      } },
+    // Mutant: Year Zero: sectors of the Zone and their Rot level (0 oasis · 1 weak, a Rot
+    // Point a day · 2 strong, one an hour · 3 hotspot, one a minute).
+    MYZ: { unit: 'sectors', navigator: 'Pathfinder', navigatorPh: 'Who finds the path (Stalker)', hide: ['mishaps'], opts: [],
+      calc: function (j) {
+        var R = _arr(typeof MYZ_ROT !== 'undefined' ? MYZ_ROT : null), n = parseInt(j.distance, 10) || 0, lv = parseInt(j.rot, 10);
+        var r = R.filter(function (x) { return x.level === lv; })[0];
+        var lines = [n ? n + ' sector' + (n === 1 ? '' : 's') + ' to cross' : 'Set the number of sectors.'];
+        if (!isNaN(lv)) lines.push('Rot level ' + lv + (r ? ' (' + r.name + '): ' + r.effect : ''));
+        return { lines: lines, ticks: 0, tickName: 'sector' };
+      } },
     // D&D: overland pace (miles a day) — Fast 30, Normal 24, Slow 18.
     DND: { unit: 'miles', navigator: 'Navigator',
       opts: [['fast', 'Fast pace', false], ['slow', 'Slow pace', false], ['difficult', 'Difficult terrain', false]],
@@ -278,6 +304,106 @@
       flavor: _str(v.notes), hp: dmg, health: dmg,
       abilities: C.fields.filter(function (f) { return _str(st[f[0]]); }).map(function (f) { return f[1] + ': ' + _str(st[f[0]]); })
         .concat(_str(v.crew) ? ['Crew: ' + _str(v.crew)] : [], _str(v.cargo) ? ['Cargo: ' + _str(v.cargo)] : [], String(v.weapons || '').split('\n').map(_str).filter(Boolean)).join('\n') };
+  }
+
+  // ── Per-system extras ─────────────────────────────────────────────────────
+  // EXTRA[code].scenes / .hazards / .rewards: extra boxes on those cards, stored in
+  // the item's `x` object and shown in the print and on the GM Screen.
+  //   [key, label, placeholder, kind]   kind: 'text' (default) | 'area' | 'select:a|b|c'
+  var EXTRA = {
+    SD:   { rewards: [['xp', 'XP', 'Poor 0 · Normal 1 · Fabulous 3 · Legendary 10']] },
+    SW:   { scenes: [['difficulty', 'Difficulty', 'e.g. Moderate 11–15 (Search), Difficult 16–20 (Climbing)']], hazards: [['difficulty', 'Difficulty', 'e.g. 15 (Dexterity to dodge)']] },
+    D62E: { scenes: [['difficulty', 'Difficulty', 'e.g. Moderate 15 (Search), Difficult 20']], hazards: [['difficulty', 'Difficulty', 'e.g. 15 (Reflexes to dodge)']] },
+    TWD:  { scenes: [['threat', 'Threat Level', '', 'select:|0|1|2|3|4|5|6'], ['swarm', 'Swarm Size', '', 'select:|1 (5–10)|2 (11–20)|3 (21–50)|4 (51–100)|5 (100+)|6 (1000+)']] },
+    CO:   { scenes: [['bleed', 'Bleed / risk', 'How the phenomenon bleeds through here, and what it costs']] },
+    GB:   { scenes: [['bust', 'The bust', 'Is this the bust? How the ghost is trapped and contained here']] },
+    ICRPG:{ scenes: [['target', 'Target', 'e.g. 12 (the room\'s Target number)']] }
+  };
+  function extra(code, kind) { var e = EXTRA[String(code || '').toUpperCase()]; return (e && e[kind]) || []; }
+
+  // SECTIONS[code]: small system blocks stored in chapter.sys[key] — single (one
+  // object) or a list. tab = where the builder shows it (adventure, clues, scenes,
+  // treasure, cast, travel). tracker(obj) → a Trackers entry the GM Screen can start.
+  //   fields: [key, label, placeholder, kind]   kind: text | area | lines | num | select:a|b | check
+  var linesOf = function (v) { return String(v || '').split('\n').map(_str).filter(Boolean); };
+  var PARTY = { key: 'party', title: 'The party', tab: 'adventure', single: true, hint: 'Used to work out how hard each encounter is.',
+    fields: [['size', 'Heroes', '4', 'num'], ['level', 'Level', '1', 'num']] };
+  var SECTIONS = {
+    // Dungeon Crawler Carl: the floor — its number sets the Difficulties; the floor timer is a tracker.
+    DCC: [{ key: 'floor', title: 'The floor', tab: 'adventure', single: true, hint: 'Difficulties come from the floor number: Stat Check 10 + Floor · Opposed 10 + the antagonist\'s Stat Mod + Floor · Unopposed 10 + (Floor × 2). A dungeon day is 30 hours.',
+      fields: [['number', 'Floor', '1', 'num'], ['theme', 'Theme', 'What this floor is'], ['days', 'Days until the stairwells close', 'e.g. 5', 'num'], ['notes', 'Notes', 'Bosses, safe rooms, the Show…', 'area']],
+      tracker: function (o) { var n = parseInt(o.days, 10); return n > 0 ? { name: 'Floor ' + (o.number || '') + ' — days left', kind: 'ticks', size: Math.min(30, n), finish: 'The floor collapses: anyone not down a stairwell is gone' } : null; } }],
+    DND: [PARTY],
+    NIM: [PARTY],
+    // Marvel: the villain's plan, its steps a Ticks tracker; the story's acts.
+    MMRPG: [{ key: 'plan', title: 'The villain\'s plan', tab: 'adventure', single: true, hint: 'Each step the heroes don\'t stop fills a box; when the last fills, the villain wins.',
+      fields: [['villain', 'Villain', 'Who'], ['goal', 'Goal', 'What they want'], ['steps', 'Steps (one per line, in order)', 'What they do next…', 'lines'], ['acts', 'Acts (one per line)', 'Act 1: the hook · Act 2: … · Act 3: the showdown', 'lines']],
+      tracker: function (o) { var n = linesOf(o.steps).length; return n ? { name: (o.villain ? o.villain + '\'s plan' : 'The villain\'s plan'), kind: 'ticks', size: n, finish: o.goal ? 'The villain wins: ' + o.goal : 'The villain wins' } : null; } }],
+    KOB: [{ key: 'town', title: 'The town', tab: 'adventure', single: true,
+      fields: [['name', 'Town', 'Name'], ['places', 'Places (one per line)', 'The arcade, the quarry…', 'lines'], ['people', 'People (one per line)', 'Who the kids know', 'lines'], ['rumors', 'Rumors & secrets', 'What everyone whispers', 'area']] }],
+    // Alien: each PC's secret agenda per act; timed events as trackers.
+    YZE: [{ key: 'agendas', title: 'Personal agendas', tab: 'adventure', item: 'Agenda', hint: 'Secret — hand each player theirs. One per act.',
+      fields: [['pc', 'Character', 'Who'], ['act1', 'Act I', 'Agenda', 'area'], ['act2', 'Act II', 'Agenda', 'area'], ['act3', 'Act III', 'Agenda', 'area']] },
+      { key: 'events', title: 'Event countdown', tab: 'adventure', item: 'Event', hint: 'Things that happen at a set time unless the crew stops them. Each is a tracker on the GM Screen.',
+      fields: [['name', 'Event', 'e.g. The reactor overloads'], ['kind', 'Counts', '', 'select:Time (minutes)|Rounds'], ['size', 'How long', '30', 'num'], ['what', 'What happens', 'When it runs out', 'area']],
+      tracker: function (o) { var n = parseInt(o.size, 10); return n > 0 ? { name: o.name || 'Event', kind: /round/i.test(o.kind) ? 'round' : 'time', size: n, finish: o.what || '' } : null; } }],
+    // The Walking Dead: havens.
+    TWD: [{ key: 'havens', title: 'Havens', tab: 'adventure', item: 'Haven',
+      fields: [['name', 'Haven', 'Name'], ['where', 'Where', 'The old prison, a farm…'], ['defense', 'Defenses', 'Walls, guards, traps'], ['needs', 'Needs & issues', 'Food, water, a leaky roof', 'area'], ['people', 'Who lives there', '', 'area']] }],
+    // Vaesen: the vaesen and the mystery's countdown (one box a day).
+    VAE: [{ key: 'dossier', title: 'The vaesen', tab: 'adventure', single: true,
+      fields: [['name', 'Vaesen', 'What it is'], ['signs', 'Signs', 'How its presence shows', 'area'], ['weakness', 'Weaknesses', 'What harms or binds it', 'area'], ['banish', 'How to end it', 'Banish, destroy, appease…', 'area']] },
+      { key: 'countdown', title: 'Countdown', tab: 'adventure', single: true, hint: 'What happens each day the investigators don\'t stop it — one line per step. On the GM Screen it is a tracker, one box per step.',
+      fields: [['steps', 'Steps (one per line)', 'Day 1: a cow dies…', 'lines']],
+      tracker: function (o) { var l = linesOf(o.steps); return l.length ? { name: 'Countdown', kind: 'ticks', size: l.length, finish: l[l.length - 1] } : null; } }],
+    // Mutant: Year Zero: the Ark's projects.
+    MYZ: [{ key: 'projects', title: 'Ark projects', tab: 'adventure', item: 'Project',
+      fields: [['name', 'Project', 'e.g. Windmill'], ['dev', 'Development', '', 'select:Food Supply|Culture|Technology|Warfare'], ['req', 'Requirement', 'e.g. Technology 10'], ['work', 'Work points', 'e.g. 3 of 10'], ['bonus', 'Bonus when done', 'e.g. Food Supply +D6'], ['notes', 'Notes', '', 'area']] }],
+    // Candela Obscura: the case file.
+    CO: [{ key: 'casefile', title: 'Case file', tab: 'adventure', single: true,
+      fields: [['phenomenon', 'The phenomenon', 'What it is'], ['signs', 'Signs', 'How it shows itself', 'area'], ['wants', 'What it wants', '', 'area'], ['end', 'How to end it', '', 'area']] }],
+    // Ghostbusters: the ghosts on the job.
+    GB: [{ key: 'ghosts', title: 'Ghost dossier', tab: 'cast', item: 'Ghost',
+      fields: [['name', 'Ghost', 'Name'], ['class', 'Class', 'e.g. Class 5 Full-Roaming Vapor'], ['signs', 'Signs', 'Slime, cold spots…', 'area'], ['trap', 'How it\'s trapped', '', 'area']] }],
+    // JLU: the crisis track — escalating stakes, one per box.
+    JLU: [{ key: 'crisis', title: 'Crisis track', tab: 'adventure', single: true, hint: 'One line per box: what gets worse each time the heroes fall behind.',
+      fields: [['stakes', 'Stakes (one per line)', 'The bridge falls…', 'lines']],
+      tracker: function (o) { var l = linesOf(o.stakes); return l.length ? { name: 'Crisis track', kind: 'ticks', size: l.length, finish: l[l.length - 1] } : null; } }]
+  };
+  function sections(code) { return SECTIONS[String(code || '').toUpperCase()] || []; }
+
+  // Encounter difficulty from an encounter's linked cast (D&D 2024 XP budget, Nimble levels).
+  var CR_XP = { '0': 10, '1/8': 25, '1/4': 50, '1/2': 100, '1': 200, '2': 450, '3': 700, '4': 1100, '5': 1800, '6': 2300, '7': 2900, '8': 3900, '9': 5000, '10': 5900, '11': 7200, '12': 8400, '13': 10000, '14': 11500, '15': 13000, '16': 15000, '17': 18000, '18': 20000, '19': 22000, '20': 25000, '21': 33000, '22': 41000, '23': 50000, '24': 62000, '25': 75000, '26': 90000, '27': 105000, '28': 120000, '29': 135000, '30': 155000 };
+  // XP budget per character (Low, Moderate, High) by level — DMG 2024.
+  var DND_BUDGET = [[50, 75, 100], [100, 150, 200], [150, 225, 400], [250, 375, 500], [500, 750, 1100], [600, 1000, 1400], [750, 1300, 1700], [1000, 1700, 2100], [1300, 2000, 2600], [1600, 2300, 3100],
+    [1900, 2900, 4100], [2200, 3700, 4700], [2600, 4200, 5400], [2900, 4900, 6200], [3300, 5400, 7800], [3800, 6100, 9800], [4500, 7200, 11700], [5000, 8700, 14200], [5500, 10700, 17200], [6400, 13200, 22000]];
+  function _castOf(scene, ch) {
+    var sb = _arr(ch && ch.statblocks), L = (scene && scene.links) || {};
+    return _arr(L.cast).map(function (n) { return sb.filter(function (b) { return b && _str(b.name).toLowerCase() === _str(n).toLowerCase(); })[0]; }).filter(function (b) { return b && b.sbtype !== 'talk'; });
+  }
+  function encounterInfo(code, scene, ch) {
+    var C = String(code || '').toUpperCase(), P = ((ch && ch.sys) || {}).party || {};
+    var size = parseInt(P.size, 10) || 0, lvl = parseInt(P.level, 10) || 0, cast = _castOf(scene, ch);
+    if (!cast.length || (C !== 'DND' && C !== 'NIM')) return null;
+    var qty = function (b) { return Math.max(1, parseInt(b.qty, 10) || 1); };
+    if (C === 'DND') {
+      var xp = cast.reduce(function (s, b) { var m = /CR\s*([\d/]+)/i.exec(String(b.type || '') + ' ' + String(b.cr || '')); return s + (m && CR_XP[m[1]] != null ? CR_XP[m[1]] : 0) * qty(b); }, 0);
+      if (!size || !lvl) return { text: xp + ' XP — set the party on the Adventure tab to rate it', level: '' };
+      var B = DND_BUDGET[Math.min(20, Math.max(1, lvl)) - 1].map(function (x) { return x * size; });
+      var lv = xp > B[2] ? 'Beyond High' : xp > B[1] ? 'High' : xp > B[0] ? 'Moderate' : 'Low';
+      return { text: xp + ' XP — ' + lv + ' (budget for ' + size + ' level-' + lvl + ': Low ' + B[0] + ' · Moderate ' + B[1] + ' · High ' + B[2] + ')', level: lv };
+    }
+    var ml = cast.filter(function (b) { return !/MINION/i.test(String(b.type || '')); }).reduce(function (s, b) { return s + (parseInt(b.level, 10) || 0) * qty(b); }, 0);
+    if (!size || !lvl) return { text: 'Monster levels ' + ml + ' — set the party on the Adventure tab to rate it', level: '' };
+    var hl = size * lvl, r = ml / hl;
+    var nl = r < 0.5 ? 'Easy' : r < 0.85 ? 'Medium' : r <= 1.05 ? 'Hard' : r < 1.5 ? 'Deadly' : 'Very deadly';
+    return { text: 'Monster levels ' + ml + ' vs heroes\' ' + hl + ' (' + Math.round(r * 100) + '%) — ' + nl + ' (minions not counted)', level: nl };
+  }
+  // A scene's own tracker from its extras (The Walking Dead: the Threat Level).
+  function sceneTrackers(code, scene) {
+    var C = String(code || '').toUpperCase(), x = (scene && scene.x) || {};
+    if (C === 'TWD' && _str(x.threat) !== '') return [{ name: 'Threat Level (starts at ' + x.threat + ')', kind: 'ticks', size: Math.max(1, 6 - (parseInt(x.threat, 10) || 0)), finish: 'Threat Level 6: the dead are in your face, surrounding you' }];
+    return [];
   }
 
   // Tracker kinds — the GM Screen's Trackers tool (Time / Rounds / Ticks).
@@ -472,6 +598,7 @@
     if (_log) ch.notes = ch.notes.trim() ? ch.notes.replace(/\s+$/, '') + '\n\n' + _log : _log;
     ch.log = '';
     ch.clues = _arr(ch.clues); ch.rewards = _arr(ch.rewards); ch.statblocks = _arr(ch.statblocks); ch.maps = _arr(ch.maps);
+    if (!ch.sys || typeof ch.sys !== 'object') ch.sys = {};
     ch.sites = _arr(ch.sites); ch.travel = _arr(ch.travel); ch.factions = _arr(ch.factions); ch.vehicles = _arr(ch.vehicles);
     _dragonbane(ch, d);
     _lotr(ch);
@@ -527,6 +654,8 @@
     sys: sys, label: label, loot: loot, modules: modules, itemList: itemList, loadItems: loadItems, migrate: migrate, trackerToTool: trackerToTool,
     travel: travel, travelCalc: travelCalc, siteText: siteText,
     ATTITUDES: ATTITUDES, factionList: factionList, factionListLoad: factionListLoad, factionTracker: factionTracker,
+    EXTRA: EXTRA, SECTIONS: SECTIONS, extra: extra, sections: sections, encounterInfo: encounterInfo, sceneTrackers: sceneTrackers, CR_XP: CR_XP,
+    loadScripts: function (srcs, cb) { loadList({ scripts: srcs }, cb); },
     vehicleCfg: vehicleCfg, vehicleList: vehicleList, vehicleToStatblock: vehicleToStatblock, pbShipToVehicle: pbShipToVehicle, pbVehicleToShip: pbVehicleToShip, hasModule: function (code, m) { return modules(code).indexOf(m) >= 0 && MODULE_TABS.indexOf(m) >= 0; },
     hasItems: function (code) { return !!ITEMS[String(code || '').toUpperCase()]; } };
 })();

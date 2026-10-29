@@ -644,6 +644,9 @@ body.flow-mode .page + .page {
   .mod-list { margin: 2px 0 3px; }
   .mod-ol { margin: 2px 0 3px 16px; font-size: 9.5px; line-height: 1.45; color: var(--ink); }
   .page.dark-mode .mod-ol { color: #d0ccc4; }
+  .x-fields { margin-bottom: 4px; }
+  .sys-sec { margin-top: 4px; }
+  .enc-info { margin: 0 0 8px; }
   .mod-faction-box { border-left-color: var(--accent-red, #a02020); }
   .mod-vehicle-box .sb-table { margin: 3px 0 4px; }
   .mod-danger .loc-lbl, .mod-boss .loc-lbl { color: var(--accent-red, #a02020) !important; }
@@ -788,6 +791,7 @@ body.flow-mode .page + .page {
       <div class="field-group"><label class="field-label">Stakes</label><textarea id="f-d-stakes" class="short" placeholder="What happens if they fail, or do nothing" oninput="autosave()"></textarea></div>
       <div class="field-group"><label class="field-label">Opposition</label><input type="text" id="f-d-opposition" placeholder="The main villain or force against them" oninput="autosave()"></div>
 <!-- SLOT:adventure-details -->
+      <div class="sys-sections" data-tab="adventure"></div>
       <div class="section-divider">Trackers</div>
       <p class="tab-hint">Clocks, countdowns and timers for the whole adventure. On the GM Screen each one gets a Start button that adds it to the Trackers tool.</p>
       <div id="trackers-list" class="entity-list"></div>
@@ -805,6 +809,7 @@ body.flow-mode .page + .page {
       <div id="clues-list" class="entity-list"></div>
       <button class="btn-add" onclick="addClue();autosave()">+ Add Clue</button>
 <!-- SLOT:clues-extra -->
+      <div class="sys-sections" data-tab="clues"></div>
     </div>
 
     <!-- SCENES: encounters, rooms and locations, plus hazards & traps -->
@@ -818,6 +823,7 @@ body.flow-mode .page + .page {
       <div id="hazards-list" class="entity-list"></div>
       <button class="btn-add" onclick="addHazard();autosave()">+ Add Hazard / Trap</button>
 <!-- SLOT:scenes-extra -->
+      <div class="sys-sections" data-tab="scenes"></div>
     </div>
 
     <!-- TRAVEL (module): journey legs, with the system's own calculator -->
@@ -828,6 +834,7 @@ body.flow-mode .page + .page {
       <div id="travel-list" class="entity-list"></div>
       <button class="btn-add" onclick="addTravelLeg();autosave()">+ Add Leg</button>
 <!-- SLOT:travel-extra -->
+      <div class="sys-sections" data-tab="travel"></div>
     </div>
 
     <!-- FACTIONS & CLOCKS (module): who else wants something, and how close they are to getting it -->
@@ -874,6 +881,7 @@ body.flow-mode .page + .page {
       </div>
       <div id="statblocks-list" class="entity-list" data-filter="all"></div>
       <div style="display:flex;gap:6px;"><button class="btn-add" style="flex:1" onclick="addStatBlock();autosave()">+ Add Stat Block</button><button class="btn-add" style="flex:1" onclick="addStatBlock({sbtype:'talk'});autosave()">+ Talk-only NPC</button></div>
+      <div class="sys-sections" data-tab="cast"></div>
     </div>
 
     <!-- TREASURE -->
@@ -887,6 +895,7 @@ body.flow-mode .page + .page {
       <div id="rewards-list" class="entity-list"></div>
       <button class="btn-add" onclick="addReward();autosave()">+ Add Treasure</button>
 <!-- SLOT:treasure-extra -->
+      <div class="sys-sections" data-tab="treasure"></div>
     </div>
 
     <!-- MAPS -->
@@ -1046,6 +1055,7 @@ const DEFAULT_STATE = {
   travel:[],            // Travel module: {name, from, to, distance, terrain, navigator, opts{}, mishaps, encounters, notes}
   factions:[],          // Factions module: {name, attitude, goal, assets, moves, clock, ticks, full, notes}
   vehicles:[],          // Vehicles module: {name, role, type, stats{}, crew, cargo, weapons, notes}
+  sys:{},               // per-system sections (registry SECTIONS): party, plan, havens, dossier, …
   _v:2
 };
 // A fresh chapter object with its own nested objects (DEFAULT_STATE is never mutated).
@@ -1670,7 +1680,7 @@ function readFields() {
     heldBy:_held(c),
     where:itemWhere(c,'treasure',c.querySelector('.reward-name-input')?.value.trim()||''), _linked:1,
     ...(c.dataset.legacy?{legacyWhere:c.dataset.legacy}:{}),
-    cat:c.dataset.cat||''
+    cat:c.dataset.cat||'', ...xRead(c)
   })).filter(r=>r.name||r.flavor);
   state.rollTables=[...document.querySelectorAll('#rolltables-list .entity-card')].map(c=>({
     title:c.querySelector('.rt-title-input')?.value.trim()||'',
@@ -1691,7 +1701,7 @@ function readFields() {
     notes:c.querySelector('.loc-notes-input')?.value.trim()||'',
     type:c.querySelector('.loc-type-input:checked')?.value||'combat',
     ...(c.dataset.opener==='1'?{opener:true}:{}),
-    links:readSceneLinks(c),
+    links:readSceneLinks(c), ...xRead(c),
     trackers:readTrackers(c.querySelector('.scene-trackers'))
   })).filter(l=>l.name||l.tag||l.readaloud||l.desc);
   state.hazards=[...document.querySelectorAll('#hazards-list .entity-card')].map(c=>({
@@ -1700,7 +1710,7 @@ function readFields() {
     ...(c.dataset.legacy?{legacyWhere:c.dataset.legacy}:{}),
     trigger:c.querySelector('.hz-trigger-input')?.value.trim()||'',
     effect:c.querySelector('.hz-effect-input')?.value.trim()||'',
-    spot:c.querySelector('.hz-spot-input')?.value.trim()||''
+    spot:c.querySelector('.hz-spot-input')?.value.trim()||'', ...xRead(c)
   })).filter(h=>h.name||h.effect);
   state.statblocks=[...document.querySelectorAll('#statblocks-list .entity-card')].map(c=>({
     name:c.querySelector('.sb-name-input')?.value.trim()||'',
@@ -1720,6 +1730,8 @@ function readFields() {
     info:c.querySelector('.sb-info-input')?.value.trim()||'',
     inventory:c.querySelector('.sb-inventory-input')?.value.trim()||''
   })).filter(s=>s.name);
+  state.sys=readSections();
+  refreshEncounterInfo();
   if(typeof PLUG.read==='function') try{ PLUG.read(); }catch(e){ console.error(e); }
 }
 
@@ -1746,6 +1758,7 @@ function buildSidebarFromState() {
   clear('vehicles-list'); (state.vehicles||[]).forEach(x=>addVehicle(x));
   clear('locations-list'); (state.locations||[]).forEach(l=>addLocation(l));
   refreshAllSceneLinks(); refreshAllItemLinks();
+  buildSections();
   if(typeof PLUG.build==='function') try{ PLUG.build(); }catch(e){}
 }
 
@@ -1939,6 +1952,7 @@ function addReward(data={}) {
       <textarea class="reward-stats-input short" placeholder="e.g. +2 STR, 1/day cast Fireball..." oninput="autosave()">${escH(data.stats||'')}</textarea>
     </div>
     <div class="field-group"><label class="field-label">Value</label><input type="text" class="reward-value-input" placeholder="e.g. 200 gp" value="${escA(data.value||'')}" oninput="autosave()"></div>
+    ${xFields('rewards', data)}
     <div class="link-group"><label class="field-label">Found in</label><div class="item-links" data-kind="treasure"></div></div>
     <div class="link-group"><label class="field-label">Held by</label><div class="held-links"></div></div>`;
   div.dataset.held=JSON.stringify(heldList(data));
@@ -1991,7 +2005,7 @@ function addHazard(data={}) {
     <div class="link-group"><label class="field-label">Where</label><div class="item-links" data-kind="hazards"></div></div>
     <div class="field-group"><label class="field-label">Trigger</label><input type="text" class="hz-trigger-input" placeholder="What sets it off" value="${escA(data.trigger||'')}" oninput="autosave()"></div>
     <div class="field-group"><label class="field-label">Effect / Damage</label><textarea class="hz-effect-input short" placeholder="What happens, damage, saves..." oninput="autosave()">${escH(data.effect||'')}</textarea></div>
-    <div class="field-group"><label class="field-label">Spot / Disarm</label><input type="text" class="hz-spot-input" placeholder="How to notice or disable it" value="${escA(data.spot||'')}" oninput="autosave()"></div>`;
+    <div class="field-group"><label class="field-label">Spot / Disarm</label><input type="text" class="hz-spot-input" placeholder="How to notice or disable it" value="${escA(data.spot||'')}" oninput="autosave()"></div>${xFields('hazards', data)}`;
   if(data.legacyWhere) div.dataset.legacy=data.legacyWhere;
   list.appendChild(div);
   refreshItemLinks(div);
@@ -2347,6 +2361,7 @@ function addLocation(data={}) {
       <label class="field-label">Notes</label>
       <textarea class="loc-notes-input short" placeholder="Anything else the GM should keep handy..." oninput="autosave()">${escH(data.notes||'')}</textarea>
     </div>
+    ${xFields('scenes', data)}<div class="mod-calc enc-info"></div>
     <details class="scene-links" ontoggle="if(this.open) refreshSceneLinks(this.closest('.location-card'))">
       <summary>Links <span class="sl-count"></span></summary>
       <div class="field-row2 field-group">
@@ -2414,7 +2429,10 @@ function locBlockInner(l){
     (K.treasure||[]).length?'<b>Treasure:</b> '+(K.treasure||[]).map(escH).join(', '):'',
     (K.tables||[]).length?'<b>Roll:</b> '+(K.tables||[]).map(escH).join(', '):'',
     (K.hazards||[]).length?'<b>Hazards:</b> '+(K.hazards||[]).map(escH).join(', '):'' ].filter(Boolean).join(' · ');
+  const enc=PREG&&PREG.encounterInfo?PREG.encounterInfo(PREP_CODE,l,state):null;
   return (ln?'<div class="loc-links">'+ln+'</div>':'')
+    + (enc?'<div class="loc-links"><b>Difficulty:</b> '+escH(enc.text)+'</div>':'')
+    + xLines('scenes', l)
     + (l.readaloud?'<div class="read-aloud"><p>'+fmtText(l.readaloud)+'</p></div>':'')
     + sec('Interactions', l.desc)
     + sec('Consequences', l.consequences)
@@ -2682,7 +2700,7 @@ function renderPreview() {
       let h='<div class="p-section"><div class="sl gold">'+escH(L('treasure'))+'</div>';
       (state.rewards||[]).forEach(r=>{
         const meta=[r.value?'<b>Value:</b> '+escH(r.value):'', r.where?'<b>Found in:</b> '+escH(r.where):'', (r.heldBy||[]).length?'<b>Held by:</b> '+r.heldBy.map(escH).join(', '):''].filter(Boolean).join(' · ');
-        h+='<div class="npc-block" style="border-left-color:var(--accent-dark);"><div class="entry-name">'+escH(r.name)+'</div>'+(r.flavor?'<div class="sb-flavor" style="margin-bottom:5px;padding:5px 7px;">'+fmtText(r.flavor)+'</div>':'')+(r.stats?'<p class="entry-desc reward-stats" style="font-family:Share Tech Mono,monospace;font-size:8px;margin-top:3px;">'+fmtText(r.stats)+'</p>':'')+(meta?'<div class="loc-links">'+meta+'</div>':'')+'</div>';
+        h+='<div class="npc-block" style="border-left-color:var(--accent-dark);"><div class="entry-name">'+escH(r.name)+'</div>'+(r.flavor?'<div class="sb-flavor" style="margin-bottom:5px;padding:5px 7px;">'+fmtText(r.flavor)+'</div>':'')+(r.stats?'<p class="entry-desc reward-stats" style="font-family:Share Tech Mono,monospace;font-size:8px;margin-top:3px;">'+fmtText(r.stats)+'</p>':'')+(meta?'<div class="loc-links">'+meta+'</div>':'')+xLines('rewards', r)+'</div>';
       });
       sections.push(h+'</div>');
     }
@@ -2707,7 +2725,7 @@ function renderPreview() {
       let h='<div class="p-section"><div class="sl">Hazards &amp; Traps</div>';
       state.hazards.forEach(z=>{
         const bits=[z.where?'<b>Where:</b> '+escH(z.where):'', z.trigger?'<b>Trigger:</b> '+escH(z.trigger):'', z.spot?'<b>Spot / disarm:</b> '+escH(z.spot):''].filter(Boolean).join(' · ');
-        h+='<div class="haz-item"><span class="clue-hdr">'+escH(z.name||'Hazard')+'</span>'+(z.effect?' — '+fmtText(z.effect):'')+(bits?'<div class="loc-links">'+bits+'</div>':'')+'</div>';
+        h+='<div class="haz-item"><span class="clue-hdr">'+escH(z.name||'Hazard')+'</span>'+(z.effect?' — '+fmtText(z.effect):'')+(bits?'<div class="loc-links">'+bits+'</div>':'')+xLines('hazards', z)+'</div>';
       });
       sections.push(h+'</div>');
     }
@@ -3378,9 +3396,98 @@ function previewVehicles(){
   });
 }
 
+// ── Per-system extras: boxes on encounter / hazard / treasure cards (registry EXTRA) ──
+function _xin(cls, f, val){
+  const kind=f[3]||'text', k=escA(f[0]);
+  if(kind.indexOf('select:')===0) return '<select class="ui-select '+cls+'" data-k="'+k+'" onchange="autosave()">'+kind.slice(7).split('|').map(o=>'<option value="'+escA(o)+'"'+(String(val||'')===o?' selected':'')+'>'+escH(o||'—')+'</option>').join('')+'</select>';
+  if(kind==='area'||kind==='lines') return '<textarea class="short '+cls+'" data-k="'+k+'" placeholder="'+escA(f[2]||'')+'" oninput="autosave()">'+escH(val||'')+'</textarea>';
+  if(kind==='check') return '<input type="checkbox" class="'+cls+'" data-k="'+k+'"'+(val?' checked':'')+' onchange="autosave()">';
+  return '<input type="'+(kind==='num'?'number':'text')+'" class="'+cls+'" data-k="'+k+'" placeholder="'+escA(f[2]||'')+'" value="'+escA(val==null?'':String(val))+'" oninput="autosave()">';
+}
+function xFields(kind, data){
+  const F=PREG&&PREG.extra?PREG.extra(PREP_CODE,kind):[]; if(!F.length) return '';
+  const X=(data&&data.x)||{};
+  return '<div class="x-fields">'+F.map(f=>'<div class="field-group"><label class="field-label">'+escH(f[1])+'</label>'+_xin('x-in',f,X[f[0]])+'</div>').join('')+'</div>';
+}
+function xRead(card){
+  const els=[...card.querySelectorAll(':scope .x-fields .x-in')].filter(e=>e.closest('.entity-card')===card); if(!els.length) return {};
+  const x={}; els.forEach(e=>{ const v=e.type==='checkbox'?e.checked:e.value.trim(); if(v!==''&&v!==false) x[e.dataset.k]=v; });
+  return Object.keys(x).length?{x}:{};
+}
+function xLines(kind, item){
+  const F=PREG&&PREG.extra?PREG.extra(PREP_CODE,kind):[], X=(item&&item.x)||{};
+  const bits=F.filter(f=>X[f[0]]!=null&&String(X[f[0]]).trim()!=='').map(f=>'<b>'+escH(f[1])+':</b> '+escH(String(X[f[0]])));
+  return bits.length?'<div class="loc-links">'+bits.join(' · ')+'</div>':'';
+}
+// Encounter difficulty on each encounter card (D&D XP budget, Nimble levels).
+function refreshEncounterInfo(){
+  if(!PREG||!PREG.encounterInfo) return;
+  sceneCards().forEach(c=>{ const el=c.querySelector('.enc-info'); if(!el) return;
+    const k=PREG.encounterInfo(PREP_CODE,{ links:readSceneLinks(c) },state); el.innerHTML=k?'<b>Difficulty</b> · '+escH(k.text):''; });
+}
+
+// ── Per-system sections (registry SECTIONS): single blocks or lists, stored in state.sys ──
+function sysSections(){ return (PREG&&PREG.sections)?PREG.sections(PREP_CODE):[]; }
+function _secItem(sec, data){
+  const d=data||{};
+  return sec.fields.map(f=>{ const w=f[3]==='num'?'flex:0 0 90px':'flex:1';
+    return '<div class="field-group"><label class="field-label">'+escH(f[1])+'</label>'+_xin('sx-in',f,d[f[0]])+'</div>'; }).join('');
+}
+function addSecItem(key, data){
+  const sec=sysSections().find(x=>x.key===key); const list=document.querySelector('.sys-sec[data-key="'+key+'"] .sec-list'); if(!sec||!list) return;
+  const div=document.createElement('div'); div.className='entity-card sec-item';
+  div.innerHTML='<div class="entity-card-header"><span class="field-label" style="margin:0">'+escH(sec.item||sec.title)+'</span><button class="btn-remove" onclick="this.closest(\'.entity-card\').remove();autosave()">✕</button></div>'+_secItem(sec,data);
+  list.appendChild(div);
+}
+function buildSections(){
+  const S=state.sys||{};
+  document.querySelectorAll('.sys-sections').forEach(box=>{
+    const mine=sysSections().filter(x=>(x.tab||'adventure')===box.dataset.tab);
+    box.innerHTML=mine.map(sec=>'<div class="sys-sec" data-key="'+escA(sec.key)+'"><div class="section-divider">'+escH(sec.title)+'</div>'+(sec.hint?'<p class="tab-hint">'+escH(sec.hint)+'</p>':'')
+      +'<div class="sys-sec-tools" data-key="'+escA(sec.key)+'"></div>'
+      +(sec.single?'<div class="sec-single">'+_secItem(sec,S[sec.key])+'</div>':'<div class="entity-list sec-list"></div><button class="btn-add" onclick="addSecItem(\''+escA(sec.key)+'\');autosave()">+ Add '+escH(sec.item||'Item')+'</button>')
+      +'</div>').join('');
+    mine.filter(sec=>!sec.single).forEach(sec=>(Array.isArray(S[sec.key])?S[sec.key]:[]).forEach(d=>addSecItem(sec.key,d)));
+  });
+  if(typeof PLUG.sectionTools==='function') try{ PLUG.sectionTools(); }catch(e){}
+}
+function _secRead(sec, el){
+  const o={}; el.querySelectorAll('.sx-in').forEach(e=>{ if(e.closest('.sec-item, .sec-single')!==el) return; const v=e.type==='checkbox'?e.checked:e.value.trim(); o[e.dataset.k]=v; });
+  return o;
+}
+function readSections(){
+  const out={};
+  sysSections().forEach(sec=>{
+    const box=document.querySelector('.sys-sec[data-key="'+sec.key+'"]'); if(!box) { if(state.sys && state.sys[sec.key]!=null) out[sec.key]=state.sys[sec.key]; return; }
+    if(sec.single){ const el=box.querySelector('.sec-single'); out[sec.key]=el?_secRead(sec,el):{}; }
+    else out[sec.key]=[...box.querySelectorAll('.sec-list > .sec-item')].map(el=>_secRead(sec,el)).filter(o=>Object.values(o).some(v=>v!==''&&v!==false));
+  });
+  // Keep anything the registry no longer lists rather than dropping it.
+  Object.keys(state.sys||{}).forEach(k=>{ if(!(k in out)) out[k]=state.sys[k]; });
+  return out;
+}
+function _secBlock(sec, o){
+  return '<div class="mod-box">'+sec.fields.map(f=>{ const v=o[f[0]]; if(v==null||v===''||v===false) return '';
+    if(f[3]==='lines') return '<p class="loc-desc"><strong class="loc-lbl">'+escH(f[1].replace(/\s*\(.*\)$/,''))+':</strong></p><ol class="mod-ol">'+String(v).split('\n').filter(Boolean).map(x=>'<li>'+escH(x)+'</li>').join('')+'</ol>';
+    return _mline(f[1], v===true?'yes':String(v)); }).join('')+'</div>';
+}
+function previewSections(tab){
+  const S=state.sys||{};
+  return sysSections().filter(sec=>(sec.tab||'adventure')===tab).map(sec=>{
+    const v=S[sec.key]; if(sec.single){ if(!v||!Object.values(v).some(x=>x!==''&&x!==false&&x!=null)) return '';
+      const t=sec.tracker?sec.tracker(v):null;
+      return '<div class="p-section"><div class="sl">'+escH(sec.title)+'</div>'+_secBlock(sec,v)+(t?'<div class="trk-line">'+trackerLine(t).replace(/^<div class="trk-line">|<\/div>$/g,'')+'</div>':'')+'</div>'; }
+    const L=Array.isArray(v)?v:[]; if(!L.length) return '';
+    return '<div class="p-section"><div class="sl">'+escH(sec.title)+'</div>'+L.map(o=>_secBlock(sec,o)).join('')+'</div>';
+  }).filter(Boolean);
+}
+
 // A system plug-in's print sections, at fixed points of the page order:
 // adventure · clues · treasure · travel · scenes · end.
 function plugPreview(where, sections){
+  // The system's own sections (registry SECTIONS) print where their tab sits.
+  const tabOf={ adventure:'adventure', clues:'clues', treasure:'treasure', travel:'travel', scenes:'scenes', end:'cast' }[where];
+  if(tabOf) previewSections(tabOf).forEach(h=>sections.push(h));
   if(typeof PLUG.preview!=='function') return;
   try{ (PLUG.preview(where)||[]).forEach(h=>sections.push(h)); }catch(e){ console.error(e); }
 }
