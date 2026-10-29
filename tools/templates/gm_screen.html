@@ -2000,6 +2000,72 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 .bub-r3-empty{color:var(--dim);font-family:'Geist Mono',monospace;font-size:9px;align-items:center}
 .bub-chip{display:inline-flex;align-items:baseline;gap:2px;font-family:'Geist Mono',monospace;font-size:8.5px;font-weight:700;color:var(--white);background:var(--panel-2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;line-height:1.3;white-space:nowrap}
 .bub-chip em{font-family:'Geist',sans-serif;font-style:normal;font-weight:800;font-size:7.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--dim)}
+/* ── The scene bar: monsters / NPCs beside the party, in turn order ── */
+#gmc-party-bubbles{align-content:center}
+.bubble.foe::before{background:#d63a30}
+.bubble.foe.boss::before{background:var(--boss,#7b5cff)}
+.bubble.ally::before{background:var(--npc-blue,#8f85cc)}
+.bubble.ally .bub-init{background:color-mix(in srgb,var(--npc-blue,#8f85cc) 75%,#000);color:#fff}
+.bubble.talk::before{background:var(--npc-blue,#8f85cc)}
+.bubble.ghost{opacity:.75;cursor:default}
+.bubble:has(.bub-init) .bub-id{padding-right:24px}
+.bub-init{position:absolute;top:5px;right:6px;z-index:1;display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#eef0f3;color:#111318;font:800 11px/1 'Geist Mono',monospace;box-shadow:0 1px 3px rgba(0,0,0,.5)}
+.bubble.foe .bub-init{background:color-mix(in srgb,#d63a30 80%,#000);color:#fff}
+.bub-init.ed{cursor:text}
+.bub-init.ed:hover{outline:1px solid var(--white)}
+.bub-init.none{opacity:.55}
+.bub-init.keep{background:transparent;box-shadow:none;gap:3px;padding:0}
+.bub-keep{min-width:18px;height:18px;border-radius:999px;border:1px dashed var(--accent);background:var(--panel);color:var(--white);font:800 10.5px/1 'Geist Mono',monospace;cursor:pointer;padding:0 3px}
+.bub-keep:hover{background:color-mix(in srgb,var(--accent) 30%,var(--panel))}
+.bub-init-in{position:absolute;top:4px;right:5px;z-index:2;width:42px;height:20px;border-radius:10px;border:1px solid var(--accent);background:var(--dark);color:var(--white);font:700 11px 'Geist Mono',monospace;text-align:center}
+.bub-chip.soc{color:var(--npc-blue,#8f85cc)}
+.bub-meter{display:flex;align-items:center;gap:5px;font-family:'Geist',sans-serif;font-size:7.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+.bub-meter em{font-style:normal;width:44px}
+.bub-dots{display:inline-flex;gap:2px}
+.bub-dots i{width:9px;height:9px;border-radius:2px;border:1px solid var(--border);background:var(--panel)}
+.bub-dots.pat i.on{background:var(--gold);border-color:var(--gold)}
+.bub-dots.int i.on{background:#5490c4;border-color:#5490c4}
+.scene-add{flex:0 0 auto;align-self:center;width:36px;height:36px;border-radius:10px;border:1px dashed color-mix(in srgb,var(--accent) 60%,var(--border));background:transparent;color:var(--accent);font:300 24px/1 'Geist',sans-serif;cursor:pointer}
+.scene-add:hover{background:color-mix(in srgb,var(--accent) 12%,transparent);border-style:solid}
+/* Too many for one line: two rows of compact bubbles (name, health and number). */
+#gmc-party-bubbles.compact{display:grid;grid-template-rows:repeat(2,auto);grid-auto-flow:row;gap:4px 5px;align-content:center;padding:2px 8px}
+#gmc-party-bubbles.compact .bubble{width:150px;padding:4px 8px 5px;gap:3px;border-radius:8px}
+#gmc-party-bubbles.compact .bub-sub,#gmc-party-bubbles.compact .bub-r3,#gmc-party-bubbles.compact .bub-meter:last-child{display:none}
+#gmc-party-bubbles.compact .bub-nm{font-size:11.5px}
+#gmc-party-bubbles.compact .bub-hpb{height:9px}
+#gmc-party-bubbles.compact .bub-hpt{font-size:7px}
+#gmc-party-bubbles.compact .bub-init{top:3px;right:4px;min-width:17px;height:17px;font-size:10px}
+#gmc-party-bubbles.compact .scene-add{grid-row:1 / span 2;height:100%;min-height:36px}
+#gmc-party-bubbles.compact .party-empty{grid-row:span 2}
+/* Initiative control beside the round counter */
+.gmc-init{display:flex;flex-direction:column;justify-content:center;gap:3px;padding:0 6px 0 10px;border-left:1px solid var(--border);flex-shrink:0}
+.gmc-init-btn{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;border-radius:6px;border:1px solid var(--border);background:var(--panel-2);color:var(--light);font:800 9px 'Geist',sans-serif;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap}
+.gmc-init-btn:hover{border-color:var(--accent);color:var(--white)}
+.gmc-init-btn.clear{color:var(--mid)}
+.gmc-init-btn.clear:hover{border-color:var(--red-light);color:#ff8a80}
+/* The bubble popup: the combat card, then the roleplay side */
+.scene-pop{display:flex;flex-direction:column;gap:10px;padding:2px}
+.scene-pop .npc-card{width:100%;max-width:none}
+.scene-pop .card-grip{display:none}
+.scene-soc{border:1px solid var(--border);border-left:3px solid var(--npc-blue,#8f85cc);border-radius:8px;padding:8px 10px;background:var(--panel)}
+.scene-soc-h{font-family:'Geist',sans-serif;font-weight:800;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--npc-blue,#8f85cc);margin-bottom:6px}
+.scene-pop-act{display:flex;justify-content:flex-end}
+.scene-add-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 8px}
+.scene-add-hint{font-size:11.5px;color:var(--dim)}
+.scene-add-hint.ok{color:var(--green-light,#4caf50)}
+.scene-pick-host{position:relative;flex:1;min-height:0;display:flex}
+.mon-pick.inline{position:static;inset:auto;background:transparent;backdrop-filter:none;padding:0;flex:1;display:flex}
+.mon-pick.inline .mon-pick-card{width:100%;max-height:none;border:0;padding:0;background:transparent}
+.mon-pick.inline .mon-pick-head{display:none}
+/* Trackers in the Monitor bar: two rows; Ticks put the label on top, 5 boxes a row. */
+#gmc-timers{display:grid;grid-template-rows:repeat(2,auto);grid-auto-flow:column;grid-auto-columns:max-content;gap:4px 5px;align-content:center;padding:4px 0}
+#gmc-timers .timer{padding:3px 8px;border-radius:7px}
+#gmc-timers .timer>div{display:flex;align-items:baseline;gap:6px}
+#gmc-timers .timer .tv{font-size:12px}
+#gmc-timers .ticktrk{flex-direction:column;align-items:flex-start;gap:3px;padding:3px 8px 4px;border-radius:7px}
+#gmc-timers .ticktrk.tall{grid-row:span 2}
+#gmc-timers .tick-boxes{display:grid;grid-template-columns:repeat(5,11px);gap:2px}
+#gmc-timers .tick-boxes .tmr-tick{width:11px;height:11px;border-radius:2px}
 .timer{display:flex;align-items:center;gap:6px;background:linear-gradient(180deg,#191c22,#141519);border:1px solid var(--border);border-left:2px solid #5490c4;border-radius:8px;padding:4px 10px;cursor:pointer;flex:0 0 auto}
 .timer:hover{border-color:var(--accent-dim)}
 .timer.zero{border-left-color:var(--red-light)}
@@ -2479,6 +2545,7 @@ html:not([data-gm-sys="PB"]) .pb-init-banner { display: none; }
 
   <div class="mon-group" id="gmc-party-bubbles"><div class="party-empty" id="party-empty">Open this screen from a campaign to see your party</div></div>
   <div class="mon-group" id="gmc-timers"></div>
+  <div class="gmc-init" id="gmc-init" style="display:none"></div>
   <div class="gmc-round" id="gmc-round">
     <div class="gmc-round-info"><span class="gmc-round-lbl">Round</span><span class="gmc-round-num" id="gmc-round-num">1</span></div>
     <div class="gmc-round-btns">
@@ -3224,12 +3291,6 @@ GMScenes.renderPins();
 
     <!-- ZONE 3 — COMMAND BAR: modes + quick tools (spans the left column only) -->
     <footer class="bottom-bar" id="bottom-bar">
-      <div class="bb-modes">
-        <button class="cmode-tab" data-mode="explore"   type="button" onclick="setConsoleMode('explore')"><span class="cm-ico">🧭</span><span class="cm-name">Explore</span></button>
-        <button class="cmode-tab" data-mode="social"    type="button" onclick="setConsoleMode('social')"><span class="cm-ico">🗣</span><span class="cm-name">Social</span></button>
-        <button class="cmode-tab" data-mode="combat"    type="button" onclick="setConsoleMode('combat')"><span class="cm-ico">⚔</span><span class="cm-name">Combat</span></button>
-        <button class="cmode-tab" data-mode="master"   type="button" onclick="setConsoleMode('master')"><span class="cm-ico">▦</span><span class="cm-name">Master</span></button>
-      </div>
       <!-- Restore chips for hidden Adventure / Roll Log panes — populated only while hidden. -->
       <div class="bb-restore" id="bb-restore"></div>
       <div class="bb-quick" id="bb-quick">
@@ -6530,12 +6591,12 @@ const STATION_TITLES = { adv:'Adventure', map:'Maps', soc:'Social', cbt:'Combat'
 // Each mode is a visibility map over the four stations. `tools` overrides which
 // tool a station hosts in that mode, `titles` its header text. The center wrapper
 // (#cst-center) is shown whenever either of its subs (map / cbt) is visible.
-const CONSOLE_MODES = {
-  explore:  { adv:1, map:1, soc:0, cbt:0, log:1 },   // adventure + MAP fills the canvas + roll log
-  social:   { adv:1, map:0, soc:1, cbt:0, log:1 },   // adventure + SOCIAL fills the canvas + roll log
-  combat:   { adv:1, map:1, soc:0, cbt:1, log:1 },   // adventure + MAP on top, COMBAT below + roll log
-  master:   { adv:1, map:1, soc:1, cbt:1, log:1 },   // everything — Maps|Social on top, Combat below
-};
+// One layout: Adventure | Maps | Roll Log. Combat and Social live in the Monitor
+// bar (bubbles) and the bubble popup now; their stations stay mounted but hidden,
+// because those tools are the engines behind the bubbles. The old view names
+// (from saved boards) all land on this layout.
+const ONE_LAYOUT = { adv:1, map:1, soc:0, cbt:0, log:1 };
+const CONSOLE_MODES = { explore: ONE_LAYOUT, social: ONE_LAYOUT, combat: ONE_LAYOUT, master: ONE_LAYOUT };
 let consoleMode = 'master';
 // When set ('map'|'soc'|'cbt'), that station is expanded to fill the whole canvas
 // and the others (plus Adventure / Roll Log) collapse. Cleared on a mode change.
@@ -6646,6 +6707,7 @@ function renderConsole(mode) {
     const manuallyHidden = (st === 'adv' || st === 'log') && hiddenStations.has(st);
     const visible = modeWants && !manuallyHidden;
     if(el) el.classList.toggle('collapsed', !visible);
+    if(st === 'soc' || st === 'cbt') { mountStation(st, stationToolFor(eff, st)); return; }   // hidden engines
     if(modeWants) {
       // Keep the tool mounted even while hidden so its state is preserved and
       // un-hiding is instant.
@@ -6813,14 +6875,244 @@ function gmcBubbleHTML(pc, i){
 function gmcBubblesHTML(roster){ return (roster||[]).map((pc,i)=> gmcBubbleHTML(pc,i)).join(''); }
 
 function renderPartyStrip(roster){
-  const el = document.getElementById('gmc-party-bubbles');
-  if(!el) return;
   roster = roster || window.GM_ROSTER || [];
   gmcRoster = roster;
-  if(!roster.length){ el.innerHTML = '<div class="party-empty" id="party-empty">Open this screen from a campaign to see your party</div>'; return; }
-  el.innerHTML = gmcBubblesHTML(roster);
+  renderSceneStrip();   // the party, plus whoever else is in the scene
 }
 document.addEventListener('gm-roster', e => renderPartyStrip(e.detail));
+
+// ═══════════════════════════════════════════════════════════════════════════
+// THE SCENE BAR — the Monitor bar is the combat (and social) view.
+// Party bubbles are always there; monsters and NPCs added with "+" (or from the
+// Adventure window's NPC tab) get bubbles beside them. Once initiative is
+// rolled, every bubble sorts into turn order and shows its number. A bubble
+// opens that creature's card in a popup: its combat card (HP, conditions,
+// rollable attacks) plus its roleplay side (Patience / Interest, wants, info).
+// The Combat and Social engines still run underneath, in hidden stations.
+// ═══════════════════════════════════════════════════════════════════════════
+let scenePop = null;   // the open bubble popup: { kind: 'npc'|'soc'|'view'|'add', id }
+// The live Combat / Social engines, without spawning a window for them.
+function sceneNode(tool) {
+  for(const k of Object.keys(gmNodes)) { const c = gmNodes[k]; if(c && c.byTool && c.byTool[tool]) return c.byTool[tool]; }
+  if(typeof gmcPopNodes !== 'undefined' && gmcPopNodes[tool]) return gmcPopNodes[tool];
+  if(typeof instances !== 'undefined' && instances[tool]) return instances[tool];
+  return null;
+}
+function sceneNodeEnsure(tool) { return sceneNode(tool) || (typeof ensureToolWindow === 'function' ? ensureToolWindow(tool) : null); }
+const sceneEsc = s => esc2(s);
+function sceneInitChip(e, editable) {
+  if(!e) return '';
+  // A hero dealt two cards (Lightning Fast / Fast Reflexes / Battle-hardened): pick one.
+  if(e.kind === 'pc' && e.cards && e.cards.length > 1)
+    return '<span class="bub-init keep">' + e.cards.map(c => '<button type="button" class="bub-keep" data-name="' + sceneEsc(e.name) + '" data-keep="' + c + '" title="Keep this card">' + c + '</button>').join('') + '</span>';
+  const n = e.kind === 'npc' && e.ns && e.ns.length > 1 ? e.ns.join('·') : (e.n == null ? '' : String(e.n));
+  if(n === '' && !(editable && e.kind === 'pc')) return '';
+  return '<span class="bub-init' + (editable ? ' ed' : '') + (n === '' ? ' none' : '') + '" data-key="' + sceneEsc(e.key) + '" title="' + (editable ? 'Initiative — click to change' : 'Turn order') + '">' + (n === '' ? '?' : sceneEsc(n)) + '</span>';
+}
+function sceneHpRow(d) {
+  if(d.hp) { const w = d.pct == null ? 100 : Math.max(4, d.pct); return '<div class="bub-hpb"><i style="width:' + w + '%;background:' + gmcHpColor(d.pct) + '"></i><span class="bub-hpt">' + sceneEsc(d.hp) + '</span></div>'; }
+  if(d.wound) return '<div class="bub-hpb bub-wound"><span class="bub-hpt">' + sceneEsc(d.wound) + '</span></div>';
+  return '<div class="bub-hpb empty"><span class="bub-hpt bub-hpt-none">—</span></div>';
+}
+function sceneNpcBubble(e, d, editable) {
+  const chips = [];
+  if(d.def) chips.push('<span class="bub-chip"><em>' + sceneEsc(d.def.l) + '</em>' + sceneEsc(d.def.v) + '</span>');
+  if(d.statuses) chips.push('<span class="bub-chip"><em>Cond</em>' + d.statuses + '</span>');
+  if(d.social) chips.push('<span class="bub-chip soc">Talk</span>');
+  return '<div class="bubble ' + (d.ally ? 'ally' : 'foe') + (d.boss ? ' boss' : '') + (d.down ? ' down' : '') + '" data-scene="npc" data-id="' + e.id + '" title="' + sceneEsc(d.name) + '">'
+    + sceneInitChip(e, editable)
+    + '<div class="bub-id"><span class="bub-nm">' + sceneEsc(d.name) + '</span>' + (d.sub ? '<span class="bub-sub">' + sceneEsc(d.sub) + '</span>' : '') + '</div>'
+    + sceneHpRow(d)
+    + (chips.length ? '<div class="bub-r3">' + chips.join('') + '</div>' : '<div class="bub-r3 bub-r3-empty">—</div>')
+    + '</div>';
+}
+function sceneDots(v) { let h = ''; for(let i = 1; i <= 5; i++) h += '<i class="' + (i <= v ? 'on' : '') + '"></i>'; return h; }
+function sceneSocBubble(it) {
+  const p = it.patience == null ? 5 : it.patience, n = it.interest == null ? 1 : it.interest;
+  return '<div class="bubble talk" data-scene="soc" data-id="' + it.id + '" title="' + sceneEsc(it.name || 'NPC') + '">'
+    + '<div class="bub-id"><span class="bub-nm">' + sceneEsc(it.name || 'NPC') + '</span><span class="bub-sub">' + sceneEsc(it.tag || 'Non-Combat') + '</span></div>'
+    + '<div class="bub-meter"><em>Patience</em><span class="bub-dots pat">' + sceneDots(p) + '</span></div>'
+    + '<div class="bub-meter"><em>Interest</em><span class="bub-dots int">' + sceneDots(n) + '</span></div>'
+    + '</div>';
+}
+let _sceneRendering = false;
+function renderSceneStrip() {
+  const el = document.getElementById('gmc-party-bubbles');
+  if(!el || _sceneRendering) return;
+  _sceneRendering = true;
+  try { renderSceneStripNow(el); } finally { _sceneRendering = false; }
+}
+function renderSceneStripNow(el) {
+  const roster = gmcRoster || [];
+  const tr = sceneNode('trackers'), so = sceneNode('social');
+  let order = []; try { order = tr && tr._sceneOrder ? tr._sceneOrder() : []; } catch(e) { order = []; }
+  const editable = !!(tr && tr._initEditable && tr._initEditable());
+  const used = new Set(), parts = [];
+  const pcIdx = name => roster.findIndex((p, i) => !used.has(i) && String(p.name || '').trim().toLowerCase() === String(name || '').trim().toLowerCase());
+  order.forEach(e => {
+    if(e.kind === 'pc') {
+      const i = pcIdx(e.name);
+      if(i < 0) { if(e.n != null || (e.cards && e.cards.length)) parts.push('<div class="bubble ghost" title="' + sceneEsc(e.name) + '">' + sceneInitChip(e, editable) + '<div class="bub-id"><span class="bub-nm">' + sceneEsc(e.name) + '</span><span class="bub-sub">Player</span></div><div class="bub-hpb empty"><span class="bub-hpt bub-hpt-none">—</span></div><div class="bub-r3 bub-r3-empty">—</div></div>'); return; }
+      used.add(i);
+      parts.push(gmcBubbleHTML(roster[i], i).replace(/^(<div class="bubble[^>]*>)/, '$1' + sceneInitChip(e, editable)));
+    } else {
+      let d = null; try { d = tr._bubbleData(e.id); } catch(x) {}
+      if(d) parts.push(sceneNpcBubble(e, d, editable));
+    }
+  });
+  roster.forEach((p, i) => { if(!used.has(i)) parts.push(gmcBubbleHTML(p, i)); });
+  (so && so._items ? so._items() : []).forEach(it => parts.push(sceneSocBubble(it)));
+  const add = '<button type="button" class="scene-add" title="Add a monster or NPC to the scene" aria-label="Add to the scene">+</button>';
+  el.innerHTML = (parts.length ? parts.join('') : '<div class="party-empty" id="party-empty">Open this screen from a campaign to see your party</div>') + add;
+  // Too many to fit in one line of full bubbles → two rows of compact ones.
+  el.classList.remove('compact'); el.style.gridTemplateColumns = '';
+  if(el.scrollWidth > el.clientWidth + 2) {
+    // Two rows that read like a line of text: the first half across the top, the
+    // rest across the bottom, "+" at the end spanning both.
+    const k = Math.max(1, Math.ceil(el.querySelectorAll('.bubble, .party-empty').length / 2));
+    el.classList.add('compact');
+    el.style.gridTemplateColumns = 'repeat(' + k + ', max-content) max-content';
+    const add = el.querySelector('.scene-add'); if(add) add.style.gridColumn = (k + 1) + ' / ' + (k + 2);
+  }
+  sceneInitButton();
+}
+// The Initiative control beside the round counter follows the system's rules.
+function sceneInitButton() {
+  const host = document.getElementById('gmc-init'); if(!host) return;
+  const tr = sceneNode('trackers'); const b = tr && tr._initBtn ? tr._initBtn() : null;
+  const so = sceneNode('social');
+  const anyone = (tr && tr._npcCount ? tr._npcCount() : 0) + (so && so._items ? so._items().length : 0);
+  if(!b && !anyone) { host.innerHTML = ''; host.style.display = 'none'; return; }
+  const h = (b ? '<button type="button" class="gmc-init-btn" data-init="1" title="' + sceneEsc(b.title) + '">' + b.ico + '<span>' + sceneEsc(b.label) + '</span></button>' : '')
+    + (b && b.indiv ? '<button type="button" class="gmc-init-btn" data-init="indiv" title="Optional individual initiative: enemies d6 (ships + AGILITY), PCs roll d6 + AGILITY on their sheets">🎲<span>Individual</span></button>' : '')
+    + (anyone ? '<button type="button" class="gmc-init-btn clear" data-clear="1" title="End the scene: remove every monster and NPC bubble and reset initiative">✕<span>Clear</span></button>' : '');
+  if(host.innerHTML !== h) host.innerHTML = h;
+  host.style.display = '';
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('#gmc-init .gmc-init-btn'); if(!b) return;
+  const tr = sceneNodeEnsure('trackers');
+  if(b.dataset.clear) {
+    if(!confirm('Clear the scene? Every monster and NPC bubble is removed and initiative resets.')) return;
+    if(tr && tr._clearScene) tr._clearScene();
+    const so = sceneNode('social'); if(so && so._items) so._items().forEach(it => so._remove(it.id));
+    return;
+  }
+  if(tr && tr._rollInit) tr._rollInit(b.dataset.init === 'indiv');
+});
+let _sceneQ = 0;
+window.__sceneRefresh = function() {
+  if(_sceneQ) return;
+  _sceneQ = requestAnimationFrame(() => { _sceneQ = 0; renderSceneStrip(); if(scenePop && (scenePop.kind === 'npc' || scenePop.kind === 'soc')) renderScenePop(); });
+};
+// Clicks in the bar: an initiative number (edit / keep a card), a bubble (popup), "+" (add).
+(function wireScene() {
+  const el = document.getElementById('gmc-party-bubbles'); if(!el) return;
+  el.addEventListener('click', e => {
+    const keep = e.target.closest('.bub-keep');
+    if(keep) { e.stopPropagation(); e.preventDefault(); const tr = sceneNode('trackers'); if(tr && tr._keepCard) tr._keepCard(keep.dataset.name, +keep.dataset.keep); return; }
+    const chip = e.target.closest('.bub-init.ed');
+    if(chip) {
+      e.stopPropagation(); e.preventDefault();
+      const inp = document.createElement('input'); inp.type = 'number'; inp.className = 'bub-init-in'; inp.value = chip.classList.contains('none') ? '' : chip.textContent;
+      chip.replaceWith(inp); inp.focus(); inp.select();
+      let done = false;
+      const commit = ok => { if(done) return; done = true; const v = parseInt(inp.value, 10); const tr = sceneNode('trackers'); if(ok && !isNaN(v) && tr && tr._setInit) tr._setInit(chip.dataset.key, v); else renderSceneStrip(); };
+      inp.addEventListener('click', ev => ev.stopPropagation());
+      inp.addEventListener('keydown', ev => { if(ev.key === 'Enter') commit(true); else if(ev.key === 'Escape') commit(false); });
+      inp.addEventListener('blur', () => commit(true));
+      return;
+    }
+    if(e.target.closest('.bub-init-in')) { e.stopPropagation(); return; }
+    if(e.target.closest('.scene-add')) { openSceneAdd(); return; }
+    const bub = e.target.closest('.bubble[data-scene]');
+    if(bub) openScenePop(bub.dataset.scene, +bub.dataset.id);
+  }, true);
+})();
+
+// ── The bubble popup: combat card + roleplay ──
+function sceneSocialHtml(s, live) {
+  if(!s) return '';
+  const sec = (l, v) => v && String(v).trim() ? '<div class="cc-traits soc-sec"><div class="cc-sec">' + l + '</div><div class="cc-trait">' + sceneEsc(v).replace(/\r?\n/g, '<br>') + '</div></div>' : '';
+  const meter = (label, key, lv) => { let b = ''; for(let i = 1; i <= 5; i++) b += '<button type="button" class="soc-tick' + (i <= lv ? ' on' : '') + '" data-key="' + key + '" data-i="' + i + '"' + (live ? '' : ' disabled') + '></button>'; return '<div class="soc-meter ' + key + '"><span class="soc-meter-lbl">' + label + '</span><span class="soc-meter-boxes">' + b + '</span><span class="soc-meter-val">' + lv + '/5</span></div>'; };
+  return '<div class="scene-soc"><div class="scene-soc-h">Roleplay</div>'
+    + (s.readaloud ? '<div class="cc-readaloud">' + sceneEsc(s.readaloud).replace(/\r?\n/g, '<br>') + '</div>' : '')
+    + (live ? '<div class="soc-meters">' + meter('Patience', 'patience', s.patience == null ? 5 : s.patience) + meter('Interest', 'interest', s.interest == null ? 1 : s.interest) + '</div>' : '')
+    + sec('Wants', s.wants) + sec('Quirks', s.quirks) + sec('Info / Secrets', s.info) + sec('Inventory', s.inventory) + '</div>';
+}
+function openScenePop(kind, id) { scenePop = { kind, id }; renderScenePop(true); }
+function renderScenePop(first) {
+  const body = document.getElementById('gmc-pop-body'); if(!body || !scenePop) return;
+  // Don't rebuild under the GM's cursor (typing a name or damage); the next change will.
+  if(!first && body.contains(document.activeElement) && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+  const st = body.scrollTop;
+  let title = '', node = null;
+  if(scenePop.kind === 'npc') {
+    const tr = sceneNode('trackers'); const it = tr && tr._item(scenePop.id);
+    if(!it) { closeGmcPop(); return; }
+    title = it.name || 'Combatant';
+    node = document.createElement('div'); node.className = 'scene-pop';
+    const card = tr._cardFor(scenePop.id); if(card) node.appendChild(card);
+    if(it.social) {
+      const w = document.createElement('div'); w.innerHTML = sceneSocialHtml(Object.assign({}, it.social, { readaloud: '' }), true); node.appendChild(w.firstChild);   // the card already shows the flavour text
+      node.querySelectorAll('.scene-soc .soc-tick').forEach(b => b.addEventListener('click', () => { const k = b.dataset.key, i = +b.dataset.i, cur = it.social[k] || 0; it.social[k] = Math.max(0, Math.min(5, cur === i ? i - 1 : i)); tr._touch(); }));
+    }
+  } else if(scenePop.kind === 'soc') {
+    const so = sceneNode('social'); const it = so && so._item(scenePop.id);
+    if(!it) { closeGmcPop(); return; }
+    title = it.name || 'NPC';
+    node = document.createElement('div'); node.className = 'scene-pop';
+    const card = so._cardFor(scenePop.id); if(card) node.appendChild(card);
+  } else return;
+  if(first) { showGmcPop(title, '', {}); }
+  else { const ttl = document.getElementById('gmc-pop-ttl'); if(ttl) ttl.textContent = title; }
+  body.classList.remove('tool-host', 'msg-only');
+  body.innerHTML = ''; body.appendChild(node); body.scrollTop = st;
+}
+// "View" from the Adventure window: the prepped card in a popup, not added yet.
+window.openSceneView = function(sb, sys) {
+  if(!sb) return;
+  const body = document.getElementById('gmc-pop-body'); if(!body) return;
+  const talk = sb.sbtype === 'talk';
+  const node = document.createElement('div'); node.className = 'scene-pop';
+  if(!talk && typeof window.prepStatblockToItem === 'function' && typeof window.buildNpcCard === 'function') {
+    try { const item = window.prepStatblockToItem(sb, sys, -1); const card = window.buildNpcCard(item, 0); card.classList.add('advh-ro'); card.querySelectorAll('.cc-hp-dmg, .npc-del').forEach(x => x.remove()); node.appendChild(card); } catch(e) {}
+  }
+  const soc = { readaloud: sb.flavor || '', wants: sb.wants || '', quirks: sb.quirks || '', info: sb.info || '', inventory: sb.inventory || '' };
+  if(soc.wants || soc.quirks || soc.info || soc.inventory || (talk && soc.readaloud)) { const w = document.createElement('div'); w.innerHTML = sceneSocialHtml(soc, false); node.appendChild(w.firstChild); }
+  const act = document.createElement('div'); act.className = 'scene-pop-act';
+  act.innerHTML = '<button type="button" class="btn small primary">Add to the scene</button>';
+  act.firstChild.addEventListener('click', () => { closeGmcPop(); if(talk) window.sendPrepNpcToSocial(Object.assign({}, sb, { sbtype: 'npc' }), sys); else window.sendPrepNpcToTracker(sb, sys); });
+  node.appendChild(act);
+  scenePop = { kind: 'view' };
+  showGmcPop(sb.name || 'NPC', '', {});
+  body.classList.remove('tool-host', 'msg-only'); body.innerHTML = ''; body.appendChild(node);
+};
+// "+" — the bestiary picker (the system's monsters, homebrew included) or a
+// blank talk-only NPC.
+function openSceneAdd() {
+  const tr = sceneNodeEnsure('trackers'); if(!tr || !tr._openPickerIn) return;
+  const body = document.getElementById('gmc-pop-body'); if(!body) return;
+  showGmcPop('Add to the scene', '', { tall: true });
+  body.classList.remove('tool-host', 'msg-only'); body.innerHTML = '';
+  const extra = document.createElement('div'); extra.className = 'scene-add-row';
+  extra.innerHTML = '<button type="button" class="btn small ghost" data-talk>+ Talk-only NPC</button><span class="scene-add-hint">Pick a monster to add it (add several to get Goblin 1, Goblin 2…). Close when done.</span>';
+  extra.querySelector('[data-talk]').addEventListener('click', () => {
+    const so = sceneNodeEnsure('social'); if(!so || !so._addNpc) return;
+    const it = so._addNpc({ name: 'New NPC' }); closeGmcPop(); if(it) openScenePop('soc', it.id);
+  });
+  body.appendChild(extra);
+  const host = document.createElement('div'); host.className = 'scene-pick-host'; body.appendChild(host);
+  scenePop = { kind: 'add' };
+  tr._openPickerIn(host);
+}
+// A monster added from the picker flashes "✓ Name added" in the popup.
+window.__sceneAdded = function(name) {
+  const hint = document.querySelector('#gmc-pop-body .scene-add-hint'); if(!hint) return;
+  hint.textContent = '✓ ' + name + ' added'; hint.classList.add('ok');
+  clearTimeout(hint._t); hint._t = setTimeout(() => { hint.textContent = 'Pick another, or close when done.'; hint.classList.remove('ok'); }, 1400);
+};
+
 
 // ── Timers — mirror the standalone Timers tool into the monitor bar. ──
 function gmcTimersState(){
@@ -6839,7 +7131,7 @@ function renderTimers(){
       const n = Math.max(1, Math.min(30, t.count||1)), f = Math.max(0, Math.min(n, t.filled||0));
       let boxes = '';
       for(let i=1;i<=n;i++) boxes += '<button type="button" class="tmr-tick'+(i<=f?' on':'')+'" data-i="'+i+'" title="Set to '+i+'"></button>';
-      return '<div class="ticktrk" data-id="'+t.id+'">'
+      return '<div class="ticktrk'+(n>5?' tall':'')+'" data-id="'+t.id+'">'
         + '<div class="tl" data-opentrackers title="Open Trackers">'+esc2(t.name||'Ticks')+'</div>'
         + '<div class="tick-boxes">'+boxes+'</div></div>';
     }
@@ -6965,6 +7257,9 @@ function showGmcPop(title, html, opts){
 function closeGmcPop(){
   const scrim = document.getElementById('gmc-scrim');
   if(scrim) scrim.classList.remove('show');
+  // A scene popup closing: put the bestiary picker back, forget the open bubble.
+  if(scenePop && scenePop.kind === 'add') { const tr = sceneNode('trackers'); if(tr && tr._closePicker) tr._closePicker(); }
+  scenePop = null;
   gmcCharPopIdx = null;   // popup closed — stop live-refreshing any character card
   gmcCharPopId = null;
   gmcCharPopName = null;
@@ -8686,7 +8981,7 @@ function wireSessionPrepLoader(root) {
         ? '<div class="advh-card advh-talk" data-i="' + i + '"><div class="advh-card-h">' + advEsc(sb.name || 'NPC') + ' <span class="advh-tag">non-combat</span></div>'
           + (sb.flavor ? '<div class="advh-desc">' + advText(sb.flavor) + '</div>' : '')
           + ['wants', 'quirks', 'info', 'inventory'].map(k => sb[k] ? '<div class="advh-desc"><b>' + ({ wants: 'Wants', quirks: 'Quirks', info: 'Knows', inventory: 'Carries' })[k] + ':</b> ' + advText(sb[k]) + '</div>' : '').join('')
-          + '<div class="advh-actions"><button type="button" class="btn small advh-send-social advh-talk-social">&rarr; Social</button></div></div>'
+          + '<div class="advh-actions"><button type="button" class="btn small advh-send-social advh-talk-social" title="Add to the scene (a bubble in the Monitor bar)">Combat</button><button type="button" class="btn small ghost advh-talk-view" title="Open the card without adding it">View</button></div></div>'
         : '<div class="advh-npc advh-collapsed" data-i="' + i + '"></div>').join('');
     }
     if(sec === 'clues'){
@@ -8755,12 +9050,12 @@ function wireSessionPrepLoader(root) {
     // Strip the adjustable / removable bits — read-only in the hub.
     card.querySelectorAll('.cc-hp-dmg, .npc-del').forEach(e => e.remove());
     card.querySelectorAll('.cc-hp-cur').forEach(inp => { inp.readOnly = true; inp.disabled = true; inp.tabIndex = -1; });
-    // → Combat and → Social send actions live stacked on the banner (on-demand send).
+    // Combat (add a bubble to the Monitor bar) and View (open the card in a popup).
     const band = card.querySelector('.cc-band');
     if(band) {
       const col = document.createElement('div'); col.className = 'advh-send-col';
-      const send = document.createElement('button'); send.type = 'button'; send.className = 'btn small advh-send advh-send-combat'; send.title = 'Add to the combat tracker'; send.innerHTML = '&rarr; Combat'; col.appendChild(send);
-      const soc = document.createElement('button'); soc.type = 'button'; soc.className = 'btn small advh-send-social'; soc.title = 'Add to the Social station'; soc.innerHTML = '&rarr; Social'; col.appendChild(soc);
+      const send = document.createElement('button'); send.type = 'button'; send.className = 'btn small advh-send advh-send-combat'; send.title = 'Add to the scene (a bubble in the Monitor bar)'; send.innerHTML = 'Combat'; col.appendChild(send);
+      const view = document.createElement('button'); view.type = 'button'; view.className = 'btn small ghost advh-view'; view.title = 'Open the card without adding it'; view.innerHTML = 'View'; col.appendChild(view);
       band.appendChild(col);
     }
     slot.innerHTML = '';
@@ -8856,7 +9151,7 @@ function wireSessionPrepLoader(root) {
       let n = 0;
       ((s.links || {}).cast || []).forEach(nm => { const sb = (prep.statblocks || []).find(x => eqName(x.name, nm)); if(!sb || sb.sbtype === 'talk') return;
         const q = Math.max(1, Math.min(20, parseInt(sb.qty, 10) || 1)); for(let k = 0; k < q; k++) if(window.sendPrepNpcToTracker(sb, prepSys)) n++; });
-      if(n) flash(b, '✓ ' + n + ' added');
+      if(n) flash(b, '✓ ' + n + ' in the scene');
     }));
     hub.querySelectorAll('.advh-run-map').forEach(b => b.addEventListener('click', () => { const mp = maps().find(m => eqName(m.title, b.dataset.map)); sendMap(mp, b); }));
     hub.querySelectorAll('.advh-run-roll').forEach(b => b.addEventListener('click', () => {
@@ -8866,16 +9161,18 @@ function wireSessionPrepLoader(root) {
     hub.querySelectorAll('.advh-npc').forEach(slot => {
       mountNpcCard(slot);
       const band = slot.querySelector('.cc-band');
-      if(band) band.addEventListener('click', e => { if(e.target.closest('.advh-send, .advh-send-social')) return; slot.classList.toggle('advh-collapsed'); });
+      if(band) band.addEventListener('click', e => { if(e.target.closest('.advh-send, .advh-send-social, .advh-view')) return; slot.classList.toggle('advh-collapsed'); });
       const send = slot.querySelector('.advh-send');
       if(send) send.addEventListener('click', e => {
         e.stopPropagation();
         const i = +slot.dataset.i; const sb = (prep.statblocks || [])[i];
         if(sb && typeof window.sendPrepNpcToTracker === 'function' && window.sendPrepNpcToTracker(sb, prepSys)) {
           send.innerHTML = '✓ Added'; send.disabled = true;
-          setTimeout(() => { send.innerHTML = '&rarr; Combat'; send.disabled = false; }, 1400);
+          setTimeout(() => { send.innerHTML = 'Combat'; send.disabled = false; }, 1400);
         }
       });
+      const view = slot.querySelector('.advh-view');
+      if(view) view.addEventListener('click', e => { e.stopPropagation(); const sb = (prep.statblocks || [])[+slot.dataset.i]; if(sb && window.openSceneView) window.openSceneView(sb, prepSys); });
       const soc = slot.querySelector('.advh-send-social');
       if(soc) soc.addEventListener('click', e => {
         e.stopPropagation();
@@ -8886,6 +9183,10 @@ function wireSessionPrepLoader(root) {
         }
       });
     });
+    hub.querySelectorAll('.advh-talk-view').forEach(b => b.addEventListener('click', () => {
+      const sb = (prep.statblocks || [])[+b.closest('.advh-talk').dataset.i];
+      if(sb && window.openSceneView) window.openSceneView(Object.assign({}, sb, { sbtype: 'talk' }), prepSys);
+    }));
     hub.querySelectorAll('.advh-talk-social').forEach(b => b.addEventListener('click', () => {
       const sb = (prep.statblocks || [])[+b.closest('.advh-talk').dataset.i];
       if(sb && typeof window.sendPrepNpcToSocial === 'function' && window.sendPrepNpcToSocial(Object.assign({}, sb, { sbtype: 'npc' }), prepSys)) flash(b, '✓ Added');
@@ -10022,13 +10323,13 @@ function init_trackers(root) {
       btn.addEventListener('click', () => {
         if(XS_SOURCES.indexOf(pickerSource) >= 0) {
           const m = xsBestiary(pickerSource).find(x => x.name === btn.dataset.mon);
-          if(m) { items.push(xsMonsterItem(pickerSource, m)); render(); }
+          if(m) { const it = xsMonsterItem(pickerSource, m); items.push(it); autoNumber(it); render(); if(window.__sceneAdded) window.__sceneAdded(it.name); }
         } else if(pickerSource === 'dcc') {
           const m = dccBestiary().find(x => x.name === btn.dataset.mon);
-          if(m) { items.push(dccMonsterItem(m)); render(); }
+          if(m) { const it = dccMonsterItem(m); items.push(it); autoNumber(it); render(); if(window.__sceneAdded) window.__sceneAdded(it.name); }
         } else {
           const m = allMonsters().find(x => x.name === btn.dataset.mon);
-          if(m) { items.push(monsterItem(m)); render(); }
+          if(m) { const it = monsterItem(m); items.push(it); autoNumber(it); render(); if(window.__sceneAdded) window.__sceneAdded(it.name); }
         }
       });
     });
@@ -10073,8 +10374,9 @@ function init_trackers(root) {
         </div>
         <div class="mon-pick-list">${pickerRowsHtml()}</div>
       </div>`;
-    // Overlay within the Combat window so it never pushes the cards around.
-    root.appendChild(pickerEl);
+    // Overlay within the Combat window so it never pushes the cards around —
+    // or inside the Monitor bar's "+" popup when that opened it.
+    if(root._pickerHost) { pickerEl.classList.add('inline'); root._pickerHost.appendChild(pickerEl); } else root.appendChild(pickerEl);
     pickerEl.addEventListener('mousedown', e => { if(e.target === pickerEl) closePicker(); });
     pickerEl.querySelector('.mon-pick-search').addEventListener('input', e => {
       pickerQuery = e.target.value;
@@ -10093,6 +10395,7 @@ function init_trackers(root) {
     pickerEl?.remove();
     pickerEl = null;
     pickerOpen = false;
+    if(root._pickerHost) { root._pickerHost = null; if(typeof closeGmcPop === 'function') closeGmcPop(); }
     render();
   }
 
@@ -10114,6 +10417,7 @@ function init_trackers(root) {
       list.appendChild(card);
     });
     renderBadges();
+    if(typeof window.__sceneRefresh === 'function') window.__sceneRefresh();
   }
 
   // Running timers tick once a second. A tick only touches the ticking card's
@@ -10240,7 +10544,10 @@ function init_trackers(root) {
   // campaign's linked sheets. A PC who is also a tracker card is that card.
   function partyRoster() {
     let out = [];
-    try { const node = getOrCreateInstance('party'); if(node && typeof node._initParty === 'function') out = node._initParty(); } catch(e) {}
+    // Find the Party tool WITHOUT creating one: building it publishes the roster,
+    // which redraws the scene bar, which asks for the party again.
+    try { const node = (typeof sceneNode === 'function' ? sceneNode('party') : null) || (typeof instances !== 'undefined' ? instances.party : null); if(node && typeof node._initParty === 'function') out = node._initParty(); } catch(e) {}
+    if(!out.length && Array.isArray(window.GM_ROSTER)) out = window.GM_ROSTER.filter(p => p && p.name).map(p => ({ name: String(p.name).trim(), sheet: p.sheet || null }));
     const inTracker = new Set(npcsOf().map(n => String(n.name || '').trim().toLowerCase()));
     return out.filter(p => p && p.name && !inTracker.has(String(p.name).trim().toLowerCase()));
   }
@@ -10456,12 +10763,88 @@ function init_trackers(root) {
       const p = addPc(r.source); p.v = v; p.src = 'log';
       if(!ini.rolled && R.kind !== 'order' && R.kind !== 'stat') ini.rolled = true;
       renderBadges(); save();
+      if(typeof window.__sceneRefresh === 'function') window.__sceneRefresh();
   }
   root._initLogRoll = onLogRoll;   // (also lets a test feed a player's roll in)
   try { if(typeof GMCamp !== 'undefined' && GMCamp.watchRolls) GMCamp.watchRolls(onLogRoll); } catch(e) {}
   // Keep the badge labels in step when the screen's system changes.
   document.addEventListener('gm-system-change', () => renderBadges());
   root._initRoll = initRoll;
+
+  // ══ THE SCENE BAR hooks ═══════════════════════════════════════════════════
+  // The Combat window is hidden: the Monitor bar shows every combatant as a
+  // bubble (in turn order) and a bubble opens its card in a popup. These are the
+  // calls the bar and the popup make into this tracker.
+  //
+  // Several of the same monster are numbered (Goblin 1, Goblin 2 …) as they arrive.
+  function autoNumber(it) {
+    if(!it || it.type !== 'npc') return;
+    const base = String(it.name || '').replace(/\s+\d+$/, '').trim(); if(!base) return;
+    const same = items.filter(x => x.type === 'npc' && String(x.name || '').replace(/\s+\d+$/, '').trim().toLowerCase() === base.toLowerCase());
+    if(same.length < 2) return;
+    same.forEach((x, i) => { x.name = base + ' ' + (i + 1); });
+  }
+  root._autoNumber = autoNumber;
+  // The bar's order: the initiative order once there is one, else the party first
+  // and then the combatants in the order they were added. Each entry carries the
+  // number to show (initiative / card / turn position) or null.
+  root._sceneOrder = () => {
+    syncParty();
+    const out = [], seenNpc = {};
+    const add = (x, n) => {
+      if(x.pc) { out.push({ kind: 'pc', name: x.name, n, key: x.key, cards: (x.ref.cards || []).slice(), veteran: x.ref.veteran, prev: x.ref.prev }); return; }
+      const id = x.ref.id;
+      if(seenNpc[id]) { if(n != null) seenNpc[id].ns.push(n); return; }
+      const e = { kind: 'npc', id, name: x.ref.name || '?', n, ns: n != null ? [n] : [], key: x.key };
+      seenNpc[id] = e; out.push(e);
+    };
+    if(showBadges()) turnOrder().forEach(x => add(x, x.n == null ? null : x.n));
+    else { ini.pcs.forEach(p => add({ pc: true, name: p.name, ref: p, key: 'p' + p.name }, null)); npcsOf().forEach(it => add({ ref: it, key: 'n' + it.id }, null)); }
+    // Anything the order missed (e.g. a combatant added after the deal) goes last.
+    npcsOf().forEach(it => { if(!seenNpc[it.id]) add({ ref: it, key: 'n' + it.id }, null); });
+    return out;
+  };
+  root._initEditable = () => editable();
+  root._setInit = (key, v) => {
+    const x = turnOrder().find(t => t.key === key);
+    if(!x) { const p = key.charAt(0) === 'p' ? addPc(key.slice(1)) : null; if(p) { p.v = v; ini.rolled = true; render(); save(); } return; }
+    const R = rule();
+    if(R.kind === 'cards') { const c = Math.max(1, Math.min(10, v)); if(x.pc) { x.ref.cards = [c]; x.ref.d2 = []; } else { x.ref.cards[x.ci || 0] = c; x.ref.cards.sort((a, b) => a - b); } sortNpcs(); }
+    else if(x.pc) { x.ref.v = v; x.ref.src = 'gm'; }
+    else { x.ref.iv = v; sortNpcs(); }
+    ini.rolled = true; render(); save();
+  };
+  root._keepCard = (name, c) => { const p = pcBy(name); if(!p) return; p.cards = [c]; p.d2 = []; if(rule().post) postDeal(); render(); save(); };
+  root._initBtn = () => {
+    const k = rule().kind;
+    if(k === 'fixed' || k === 'stat' || k === 'order') return null;
+    return k === 'cards' ? { ico: '🃏', label: 'Deal', title: 'Deal initiative cards 1–10 to everyone (lowest acts first) and post the deal to the players\' Roll Log' }
+         : k === 'side' ? { ico: '⚔', label: 'Sides', title: 'Initiative d6: 1-3 the enemies act first, 4-6 the PCs do', indiv: true }
+         : { ico: '🎲', label: 'Initiative', title: 'Roll initiative for the monsters (highest first). Players roll Initiative on their sheets; their results appear on their bubbles.' };
+  };
+  root._rollInit = (indiv) => { if(indiv) { ini.sinceId = lastRollId; ini.pcs.forEach(p => { p.v = null; }); pbIndividual(); } else { if(rule().kind === 'side') ini.indiv = false; initRoll(); } };
+  // A bubble's face: health (HP / segments / wounds), its defense and type line.
+  root._bubbleData = id => {
+    const it = items.find(x => x.id === id); if(!it) return null;
+    let v = null; try { v = monView(it); } catch(e) {}
+    let hp = '', pct = null, wound = '', down = false;
+    if(Array.isArray(it.segments)) { const a = it.segments.filter(Boolean).length; hp = a + '/' + it.segments.length; pct = Math.round(100 * a / Math.max(1, it.segments.length)); down = a === 0; }
+    else if(it.hpMode === 'sw') { wound = it.wound && it.wound !== 'none' ? it.wound : 'Unhurt'; down = it.wound === 'incapacitated' || it.wound === 'mortal'; }
+    else if(it.hpMax != null) { const c = +it.hpCurrent || 0, m = Math.max(1, +it.hpMax || 1); hp = c + '/' + m; pct = Math.round(100 * Math.max(0, c) / m); down = c <= 0; }
+    return { name: it.name || '?', sub: (v && (v.sub || v.badge)) || it.tag || '', def: v && v.def ? v.def : null, hp, pct, wound, down,
+             statuses: (it.statuses || []).length, social: !!it.social, ally: it.tone === 'var(--gold)' || /\bnpc\b/i.test(String(it.role || '')), boss: /boss/i.test(String(it.role || it.tag || '')) || it.tone === 'var(--boss, #7b5cff)' };
+  };
+  // The live card for the popup — the same card the Combat window used to show.
+  root._cardFor = id => { const idx = items.findIndex(x => x.id === id); if(idx < 0) return null; return buildNpcCard(items[idx], idx); };
+  root._item = id => items.find(x => x.id === id) || null;
+  root._removeItem = id => { items = items.filter(x => x.id !== id); render(); save(); };
+  root._touch = () => { render(); save(); };
+  root._npcCount = () => npcsOf().length;
+  // End of a fight: every monster/NPC bubble goes and initiative starts over.
+  root._clearScene = () => { items = items.filter(x => x.type !== 'npc'); ini = { rolled: false, round: null, sinceId: lastRollId, pcs: [], side: null, sideRoll: null, indiv: false }; render(); save(); };
+  // The bestiary picker, opened in another container (the "+" popup).
+  root._openPickerIn = host => { root._pickerHost = host || null; if(pickerEl) { pickerEl.remove(); pickerEl = null; } pickerOpen = true; openPicker(); };
+  root._closePicker = () => { if(pickerEl) { pickerEl.remove(); pickerEl = null; } pickerOpen = false; root._pickerHost = null; };
   function nextRound() {
     round += 1;
     // Dragonbane / Alien: once a deal is on the table, the cards are dealt anew every round.
@@ -10488,7 +10871,7 @@ function init_trackers(root) {
     // combatant for those, an ACE/Nimble/SW combatant when the source says so,
     // and a standard SD combatant otherwise.
     const item = (m && Array.isArray(m.hbSlots)) ? dccMonsterItem(m) : (XS_SOURCES.indexOf(src) >= 0 ? xsMonsterItem(src, m) : monsterItem(m));
-    items.push(item);
+    items.push(item); autoNumber(item);
     render();
     return item;
   };
@@ -10498,7 +10881,10 @@ function init_trackers(root) {
   root._addPrepNpc = (sb, sys) => {
     if(!sb || typeof window.prepStatblockToItem !== 'function') return null;
     const item = window.prepStatblockToItem(sb, sys, nextId++);
-    items.push(item);
+    // A prepped NPC's roleplay details ride along, so its popup shows both sides.
+    const soc = { readaloud: sb.flavor || '', wants: sb.wants || '', quirks: sb.quirks || '', info: sb.info || '', inventory: sb.inventory || '' };
+    if(soc.wants || soc.quirks || soc.info || (sb.sbtype === 'npc' && soc.readaloud)) item.social = Object.assign(soc, { patience: 5, interest: 1 });
+    items.push(item); autoNumber(item);
     render();
     return item;
   };
@@ -10622,6 +11008,7 @@ function init_social(root) {
     if(empty) empty.classList.toggle('show', items.length === 0);
     list.innerHTML = '';
     items.forEach(it => list.appendChild(buildSocialCard(it)));
+    if(typeof window.__sceneRefresh === 'function') window.__sceneRefresh();
   }
   function fromPrep(sb){
     return { id: nextId++, type:'npc', name: sb.name || 'NPC', tag: sb.type || '',
@@ -10639,6 +11026,11 @@ function init_social(root) {
 
   root._addPrepNpc = (sb, sys) => { if(!sb) return null; const it = fromPrep(sb); items.push(it); render(); save(); return it; };
   root._addNpc     = (o)       => { const it = fromNpc(o); items.push(it); render(); save(); return it; };
+  // Scene-bar hooks: talk-only NPCs show as bubbles; a bubble opens this card.
+  root._items      = () => items.slice();
+  root._item       = id => items.find(x => x.id === id) || null;
+  root._cardFor    = id => { const it = items.find(x => x.id === id); return it ? buildSocialCard(it) : null; };
+  root._remove     = id => { items = items.filter(x => x.id !== id); render(); save(); };
   root._getState   = () => ({ items });
   root._setState   = (st) => {
     if(st && Array.isArray(st.items)){
