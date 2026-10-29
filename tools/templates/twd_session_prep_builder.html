@@ -680,6 +680,15 @@ body.flow-mode .page + .page {
   .link-chip.on { color: var(--ui-text); border-color: var(--ui-accent); background: color-mix(in srgb, var(--ui-accent) 12%, transparent); }
   .link-chip.missing { border-style: dashed; text-decoration: line-through; }
   .link-empty { font-size: 10.5px; color: var(--ui-muted); font-style: italic; }
+  .link-chips, .item-links, .held-links { position: relative; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; min-height: 22px; }
+  .link-chip .lc-x { background: none; border: 0; color: var(--ui-muted); cursor: pointer; font-size: 9px; padding: 0 0 0 2px; line-height: 1; }
+  .link-chip .lc-x:hover { color: var(--ui-text); }
+  .link-chip.ext { border-style: dashed; }
+  .lc-add { width: 22px; height: 22px; border-radius: 999px; border: 1px dashed var(--ui-border); background: none; color: var(--ui-accent); font-size: 14px; line-height: 1; cursor: pointer; padding: 0; }
+  .lc-add:hover { border-color: var(--ui-accent); border-style: solid; }
+  .link-pop { position: absolute; z-index: 30; top: 100%; left: 0; margin-top: 4px; min-width: 180px; max-width: 100%; max-height: 220px; overflow-y: auto; background: var(--ui-panel); border: 1px solid var(--ui-border); border-radius: 6px; box-shadow: 0 6px 18px rgba(0,0,0,.45); padding: 3px; display: flex; flex-direction: column; }
+  .lc-opt { text-align: left; background: none; border: 0; border-radius: 4px; color: var(--ui-text); font-size: 12px; padding: 5px 8px; cursor: pointer; }
+  .lc-opt:hover { background: var(--ui-bg); color: var(--ui-accent); }
   /* Tracker cards (adventure-level and per scene). */
   .tracker-card { padding: 6px 8px; }
   .tracker-card .tr-row { display: flex; gap: 6px; align-items: center; margin-bottom: 5px; }
@@ -735,7 +744,6 @@ body.flow-mode .page + .page {
     <button class="tab-btn" data-tab="scenes" onclick="switchTab('scenes')">Scenes</button>
     <button class="tab-btn" data-tab="cast" onclick="switchTab('cast')">Adversaries/NPCs</button>
     <button class="tab-btn" data-tab="maps" onclick="switchTab('maps')">Maps</button>
-    <button class="tab-btn" data-tab="notes" onclick="switchTab('notes')">Notes</button>
   </div>
   <div class="sidebar-content">
 
@@ -771,7 +779,7 @@ body.flow-mode .page + .page {
       <button class="btn-add" onclick="addTracker({}, document.getElementById('trackers-list'));autosave()">+ Add Tracker</button>
       <div class="section-divider">GM Notes</div>
       <div class="field-group">
-        <textarea id="f-notes" rows="4" style="width:100%;background:var(--ui-panel);border:1px solid var(--ui-border);border-radius:3px;color:var(--ui-text);font-size:12px;padding:6px 8px;resize:vertical;outline:none;font-family:'Barlow',sans-serif;" placeholder="Reminders and GM-only notes for this chapter..." oninput="autosave()"></textarea>
+        <textarea id="f-notes" rows="8" style="width:100%;background:var(--ui-panel);border:1px solid var(--ui-border);border-radius:3px;color:var(--ui-text);font-size:12px;padding:6px 8px;resize:vertical;outline:none;font-family:'Barlow',sans-serif;" placeholder="Reminders, GM-only notes, what happened at the table, player threads..." oninput="autosave()"></textarea>
       </div>
     </div>
 
@@ -885,15 +893,6 @@ body.flow-mode .page + .page {
       </div>
     </div>
 
-    <!-- NOTES: free scratch space — session log, threads, reminders -->
-    <div class="tab-panel" id="tab-notes">
-      <div class="section-divider">Session Log &amp; Notes</div>
-      <div class="field-group">
-        <textarea id="f-log" rows="14" style="width:100%;background:var(--ui-panel);border:1px solid var(--ui-border);border-radius:3px;color:var(--ui-text);font-size:12px;padding:6px 8px;resize:vertical;outline:none;font-family:'Barlow',sans-serif;" placeholder="What happened at the table, things to remember next time, player threads..." oninput="autosave()"></textarea>
-      </div>
-
-    </div>
-
   </div>
   <div class="save-indicator" id="save-indicator">All changes saved</div>
   <div class="sidebar-footer" style="display:flex; flex-wrap:nowrap; gap:6px;">
@@ -967,24 +966,6 @@ body.flow-mode .page + .page {
     <div class="page-bottom-band"></div>
   </div>
 
-  <!-- PAGE 4: Notes (the session log) — printed last, after the maps -->
-  <div class="page" id="page-four">
-    <div class="page-banner">
-      <div>
-        <div class="adventure-title" id="p4-title">Adventure Title</div>
-        <div class="adventure-subtitle" id="p4-subtitle">Notes</div>
-      </div>
-      <div class="header-meta">
-        <span id="p4-floor"></span><span id="p4-session"></span>
-        <span id="p4-players"></span><span id="p4-duration"></span>
-      </div>
-    </div>
-    <div class="page-inner">
-      <div id="p-statblocks"></div>
-    </div>
-    <div class="page-bottom-band"></div>
-  </div>
-
 </div>
 
 <!-- Shared dungeon-map engine (Map generator) + the TWD bestiary (NPC/animal/walker picker). -->
@@ -1008,7 +989,6 @@ const DEFAULT_STATE = {
   trackers:[],          // clocks / countdowns / timers → the GM Screen's Trackers tool
   clues:[], rewards:[], rollTables:[], hooks:[], notes:'', strongopen:[], locations:[], statblocks:[],
   hazards:[],           // hazards & traps (scenes link to them by name)
-  log:'',               // Notes tab: session log, threads, reminders
   _v:2
 };
 // A fresh chapter object with its own nested objects (DEFAULT_STATE is never mutated).
@@ -1326,9 +1306,6 @@ function paginatePages() {
   const locsEl=document.getElementById('p-locations');
   if(locsEl) runPagination(locsEl,COL_H*2,'p2',isDark,null,document.getElementById('page-two'),false);
 
-  // PAGE 4: Notes (session log)
-  const notesEl=document.getElementById('p-statblocks');
-  if(notesEl && notesEl.innerHTML) runPagination(notesEl,USABLE_H,'p4N',isDark,null,document.getElementById('page-four'),false);
 
   // PAGE 3: Maps
   const mapsEl=document.getElementById('p-maps-container');
@@ -1611,8 +1588,8 @@ function readFields() {
   state.clues=[...document.querySelectorAll('#clues-list .entity-card')].map(c=>({
     header:c.querySelector('.clue-hdr-input')?.value.trim()||'',
     text:c.querySelector('.clue-text-input')?.value.trim()||'',
-    holder:c.querySelector('.clue-holder-input')?.value.trim()||'',
-    leads:c.querySelector('.clue-leads-input')?.value.trim()||'',
+    heldBy:_held(c),
+    ...(c.dataset.leads?{leads:c.dataset.leads}:{}),
     where:itemWhere(c,'clues',c.querySelector('.clue-hdr-input')?.value.trim()||''), _linked:1
   })).filter(c=>c.header||c.text);
   state.rewards=[...document.querySelectorAll('#rewards-list .entity-card')].map(c=>({
@@ -1620,6 +1597,7 @@ function readFields() {
     flavor:c.querySelector('.reward-flavor-input')?.value.trim()||'',
     stats:c.querySelector('.reward-stats-input')?.value.trim()||'',
     value:c.querySelector('.reward-value-input')?.value.trim()||'',
+    heldBy:_held(c),
     where:itemWhere(c,'treasure',c.querySelector('.reward-name-input')?.value.trim()||''), _linked:1,
     ...(c.dataset.legacy?{legacyWhere:c.dataset.legacy}:{}),
     cat:c.dataset.cat||''
@@ -1633,7 +1611,6 @@ function readFields() {
     })).filter(x=>x.roll||x.result)
   })).filter(t=>t.title||t.rows.length);
   state.notes=document.getElementById('f-notes')?.value||'';
-  state.log=document.getElementById('f-log')?.value||'';
   state.hooks=[]; state.strongopen=[];   // folded into details / scenes (see migrateChapter)
   state.locations=[...document.querySelectorAll('#locations-list .location-card')].map(c=>({
     name:c.querySelector('.loc-name-input')?.value.trim()||'',
@@ -1684,7 +1661,6 @@ function buildSidebarFromState() {
   setVal('f-d-questgiver',D.questgiver); setVal('f-d-hooks',D.hooks); setVal('f-d-goal',D.goal);
   setVal('f-d-prize',D.prize); setVal('f-d-stakes',D.stakes); setVal('f-d-opposition',D.opposition);
   setVal('f-notes',state.notes||'');
-  setVal('f-log',state.log||'');
   const clear=id=>{ const el=document.getElementById(id); if(el) el.innerHTML=''; return el; };
   const trl=clear('trackers-list'); (state.trackers||[]).forEach(t=>addTracker(t,trl));
   clear('maps-list'); (state.maps||[]).forEach(m=>addMap(m));
@@ -1710,10 +1686,9 @@ function addClue(data={}) {
       <textarea class="clue-text-input short" placeholder="What the heroes learn..." oninput="autosave()">${escH(data.text||'')}</textarea>
     </div>
     <div class="link-group"><label class="field-label">Found in</label><div class="item-links" data-kind="clues"></div></div>
-    <div class="field-row2 field-group">
-      <div><label class="field-label">Held By</label><input type="text" class="clue-holder-input" placeholder="Who knows it (optional)" value="${escA(data.holder||'')}" oninput="autosave()"></div>
-      <div><label class="field-label">Points To</label><input type="text" class="clue-leads-input" placeholder="Where it leads" value="${escA(data.leads||'')}" oninput="autosave()"></div>
-    </div>`;
+    <div class="link-group"><label class="field-label">Held by</label><div class="held-links"></div></div>`;
+  div.dataset.held=JSON.stringify(heldList(data));
+  if(data.leads) div.dataset.leads=data.leads;     // the old "Points to" text rides along unseen
   list.appendChild(div);
   refreshItemLinks(div);
 }
@@ -1746,28 +1721,77 @@ function linkedScenes(kind, itemName){
 }
 function _itemKind(card){ const box=card.querySelector('.item-links'); return box ? box.dataset.kind : ''; }
 function _itemName(card){ const k=ITEM_KINDS[_itemKind(card)]; return k ? (card.querySelector(k.name)?.value.trim()||'') : ''; }
-function refreshItemLinks(card){
-  const box=card && card.querySelector('.item-links'); if(!box) return;
+// ── Link pickers ──────────────────────────────────────────────────────────
+// Every link box shows only what is linked (a chip with ✕) and a "+" button that
+// opens a short list of what can still be added. Three kinds of box:
+//   .link-chips[data-k]   on an encounter: its cast / clues / treasure / tables / hazards
+//   .item-links[data-kind] on a clue / treasure / hazard: the encounters it is in
+//                          (stored on those encounters — the same one link)
+//   .held-links           on a clue / treasure: who holds it (Monsters/NPCs)
+function _held(card){ try { return JSON.parse(card.dataset.held||'[]'); } catch(e){ return []; } }
+function heldList(d){ const h=d&&d.heldBy; if(Array.isArray(h)) return h.filter(Boolean); const one=String((d&&d.holder)||'').trim(); return one?[one]:[]; }
+function _boxModel(box){
+  if(box.matches('.link-chips')){
+    const card=box.closest('.location-card'), k=box.dataset.k;
+    const src={ cast:castNames, clues:clueNames, treasure:rewardNames, tables:tableNames, hazards:hazardNames }[k];
+    return { card, all:src?src():[], sel:readSceneLinks(card)[k]||[], what:{cast:'cast',clues:'clues',treasure:'treasure',tables:'tables',hazards:'hazards & traps'}[k],
+      add:n=>{ const L=readSceneLinks(card); if(!(L[k]||[]).some(x=>_eq(x,n))) L[k]=[...(L[k]||[]),n]; card.dataset.links=JSON.stringify(L); },
+      remove:n=>{ const L=readSceneLinks(card); L[k]=(L[k]||[]).filter(x=>!_eq(x,n)); card.dataset.links=JSON.stringify(L); } };
+  }
+  const card=box.closest('.entity-card');
+  if(box.matches('.held-links')){
+    // Everyone in Monsters/NPCs; NPCs and talk-only folk first.
+    const order=r=>(r==='npc'||r==='talk')?0:1;
+    const cast=[...document.querySelectorAll('#statblocks-list > .entity-card')].map(c=>({n:c.querySelector('.sb-name-input')?.value.trim(), r:c.dataset.role})).filter(x=>x.n).sort((a,b)=>order(a.r)-order(b.r)).map(x=>x.n);
+    return { card, all:cast, sel:_held(card), what:'Monsters/NPCs', ext:true,
+      add:n=>{ const h=_held(card); if(!h.some(x=>_eq(x,n))) h.push(n); card.dataset.held=JSON.stringify(h); },
+      remove:n=>{ card.dataset.held=JSON.stringify(_held(card).filter(x=>!_eq(x,n))); } };
+  }
   const kind=box.dataset.kind, nm=_itemName(card);
-  const scenes=sceneCards().map(c=>c.querySelector('.loc-name-input')?.value.trim()).filter(Boolean);
-  const on=new Set(linkedScenes(kind, nm).map(x=>x.toLowerCase()));
-  let html=scenes.map(n=>'<label class="link-chip'+(on.has(n.toLowerCase())?' on':'')+'"><input type="checkbox" value="'+escA(n)+'"'+(on.has(n.toLowerCase())?' checked':'')+' onchange="itemLinkToggle(this)">'+escH(n)+'</label>').join('');
-  // An old "where" that matches no encounter (renamed or deleted) shows struck through until unticked.
-  if(card.dataset.legacy) html+='<label class="link-chip on missing" title="No encounter has this name any more — untick to remove"><input type="checkbox" checked data-legacy="1" onchange="itemLinkToggle(this)">'+escH(card.dataset.legacy)+'</label>';
-  box.innerHTML = html || '<span class="link-empty">'+(nm?'No encounters in this chapter yet.':'Name it first, then pick where it is.')+'</span>';
-  if(!nm) box.querySelectorAll('input').forEach(i=>i.disabled=true);
+  return { card, nameless:!nm, all:sceneCards().map(c=>c.querySelector('.loc-name-input')?.value.trim()).filter(Boolean),
+    sel:[...linkedScenes(kind,nm), ...(card.dataset.legacy?[card.dataset.legacy]:[])], what:'encounters',
+    add:n=>{ const sc=sceneCards().find(c=>_eq(c.querySelector('.loc-name-input')?.value,n)); if(!sc) return; const L=readSceneLinks(sc); if(!(L[kind]||[]).some(x=>_eq(x,nm))) L[kind]=[...(L[kind]||[]),nm]; sc.dataset.links=JSON.stringify(L); refreshSceneLinks(sc); },
+    remove:n=>{ if(card.dataset.legacy && _eq(card.dataset.legacy,n)){ delete card.dataset.legacy; return; } const sc=sceneCards().find(c=>_eq(c.querySelector('.loc-name-input')?.value,n)); if(!sc) return; const L=readSceneLinks(sc); L[kind]=(L[kind]||[]).filter(x=>!_eq(x,nm)); sc.dataset.links=JSON.stringify(L); refreshSceneLinks(sc); } };
 }
+function renderLinkBox(box){
+  const m=_boxModel(box);
+  const chips=m.sel.map(n=>{ const known=m.all.some(x=>_eq(x,n));
+    // A link to a name that isn't in the prep any more: struck through (encounter
+    // links), or dashed for a holder typed before Held by was a list.
+    const cls=known?'':(m.ext?' ext':' missing');
+    const tip=known?n:(m.ext?'Not in Monsters/NPCs':'Not in this chapter any more');
+    return '<span class="link-chip on'+cls+'" title="'+escA(tip)+'">'+escH(n)+'<button type="button" class="lc-x" data-n="'+escA(n)+'" title="Remove" aria-label="Remove '+escA(n)+'">✕</button></span>'; }).join('');
+  const left=m.all.filter(n=>!m.sel.some(x=>_eq(x,n)));
+  const add=m.nameless ? '<span class="link-empty">Name it first.</span>'
+    : (left.length ? '<button type="button" class="lc-add" title="Add from '+escA(m.what)+'">+</button>' : (m.sel.length?'':'<span class="link-empty">No '+escH(m.what)+' in this chapter yet.</span>'));
+  box.innerHTML=chips+add;
+}
+function refreshItemLinks(card){ if(!card) return; card.querySelectorAll('.item-links, .held-links').forEach(renderLinkBox); }
 function refreshAllItemLinks(){ Object.values(ITEM_KINDS).forEach(k=>document.querySelectorAll(k.list+' > .entity-card').forEach(refreshItemLinks)); }
-function itemLinkToggle(cb){
-  const card=cb.closest('.entity-card');
-  if(cb.dataset.legacy){ delete card.dataset.legacy; refreshItemLinks(card); autosave(); return; }
-  const kind=_itemKind(card), nm=_itemName(card); if(!nm) return;
-  const sc=sceneCards().find(c=>_eq(c.querySelector('.loc-name-input')?.value, cb.value)); if(!sc) return;
-  const L=readSceneLinks(sc); const cur=(L[kind]||[]).filter(n=>!_eq(n, nm));
-  if(cb.checked) cur.push(nm);
-  L[kind]=cur; sc.dataset.links=JSON.stringify(L);
-  refreshSceneLinks(sc); refreshItemLinks(card); autosave();
+function _afterLinkChange(box){
+  const card=box.closest('.location-card');
+  if(card && box.matches('.link-chips')) { sceneLinkCount(card); refreshAllItemLinks(); }
+  renderLinkBox(box); autosave();
 }
+function _closeLinkPop(){ document.querySelectorAll('.link-pop').forEach(p=>p.remove()); }
+document.addEventListener('click', e=>{
+  const t=e.target; if(!t.closest) return;
+  const x=t.closest('.lc-x');
+  if(x){ e.preventDefault(); const box=x.closest('.link-chips, .item-links, .held-links'); _boxModel(box).remove(x.dataset.n); _afterLinkChange(box); return; }
+  const opt=t.closest('.lc-opt');
+  if(opt){ e.preventDefault(); const box=opt.closest('.link-pop')._box; _closeLinkPop(); _boxModel(box).add(opt.dataset.n); _afterLinkChange(box); return; }
+  const add=t.closest('.lc-add');
+  if(add){
+    e.preventDefault(); const box=add.closest('.link-chips, .item-links, .held-links');
+    const was=box.querySelector('.link-pop'); _closeLinkPop(); if(was) return;
+    const m=_boxModel(box); const left=m.all.filter(n=>!m.sel.some(x=>_eq(x,n)));
+    const pop=document.createElement('div'); pop.className='link-pop'; pop._box=box;
+    pop.innerHTML=left.map(n=>'<button type="button" class="lc-opt" data-n="'+escA(n)+'">'+escH(n)+'</button>').join('');
+    box.appendChild(pop); return;
+  }
+  if(!t.closest('.link-pop')) _closeLinkPop();
+});
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') _closeLinkPop(); });
 // The derived "where" saved on a clue / treasure / hazard (for the print and older readers).
 function itemWhere(card, kind, nm){ return [...linkedScenes(kind, nm), ...(card.dataset.legacy?[card.dataset.legacy]:[])].join(', '); }
 // Renaming something keeps every link to it: encounters' links, and trackers'
@@ -1783,6 +1807,7 @@ function itemWhere(card, kind, nm){ return [...linkedScenes(kind, nm), ...(card.
     const kind=KIND[[...t.classList].find(c=>KIND[c])];
     sceneCards().forEach(c=>{ const L=readSceneLinks(c); if((L[kind]||[]).some(n=>_eq(n,from))){ L[kind]=L[kind].map(n=>_eq(n,from)?to:n); c.dataset.links=JSON.stringify(L); refreshSceneLinks(c); } });
     if(kind==='tables') document.querySelectorAll('.tr-table').forEach(sel=>{ if(_eq(sel.value,from)){ trRefreshTables(sel); sel.value=to; } });
+    if(kind==='cast') document.querySelectorAll('#clues-list > .entity-card, #rewards-list > .entity-card').forEach(c=>{ const h=_held(c); if(h.some(n=>_eq(n,from))) c.dataset.held=JSON.stringify(h.map(n=>_eq(n,from)?to:n)); });
     refreshAllItemLinks(); autosave();
   });
   // An encounter renamed: the item cards' chips show the new name.
@@ -1838,7 +1863,9 @@ function addReward(data={}) {
       <textarea class="reward-stats-input short" placeholder="e.g. +2 STR, 1/day cast Fireball..." oninput="autosave()">${escH(data.stats||'')}</textarea>
     </div>
     <div class="field-group"><label class="field-label">Value</label><input type="text" class="reward-value-input" placeholder="e.g. 200 gp" value="${escA(data.value||'')}" oninput="autosave()"></div>
-    <div class="link-group"><label class="field-label">Found in</label><div class="item-links" data-kind="treasure"></div></div>`;
+    <div class="link-group"><label class="field-label">Found in</label><div class="item-links" data-kind="treasure"></div></div>
+    <div class="link-group"><label class="field-label">Held by</label><div class="held-links"></div></div>`;
+  div.dataset.held=JSON.stringify(heldList(data));
   if(data.legacyWhere) div.dataset.legacy=data.legacyWhere;
   list.appendChild(div);
   refreshItemLinks(div);
@@ -2273,13 +2300,6 @@ function sceneLinkSet(el, k, val){
   const card=el.closest('.location-card'); const L=readSceneLinks(card); L[k]=val;
   card.dataset.links=JSON.stringify(L); sceneLinkCount(card); autosave();
 }
-function sceneLinkToggle(cb){
-  const card=cb.closest('.location-card'); const k=cb.closest('.link-chips').dataset.k; const L=readSceneLinks(card);
-  const set=new Set(L[k]||[]); if(cb.checked) set.add(cb.value); else set.delete(cb.value);
-  L[k]=[...set]; card.dataset.links=JSON.stringify(L);
-  cb.closest('.link-chip').classList.toggle('on', cb.checked);
-  sceneLinkCount(card); refreshAllItemLinks(); autosave();
-}
 function sceneLinkCount(card){
   const L=readSceneLinks(card);
   const n=(L.map?1:0)+L.cast.length+L.clues.length+L.treasure.length+L.tables.length+L.hazards.length+card.querySelectorAll('.scene-trackers > .tracker-card').length;
@@ -2290,14 +2310,7 @@ function sceneLinkCount(card){
 function refreshSceneLinks(card){
   if(!card) return;
   const L=readSceneLinks(card);
-  const src={ cast:castNames(), clues:clueNames(), treasure:rewardNames(), tables:tableNames(), hazards:hazardNames() };
-  card.querySelectorAll('.link-chips').forEach(box=>{
-    const k=box.dataset.k, have=src[k]||[], sel=L[k]||[];
-    const all=[...have, ...sel.filter(n=>!have.includes(n))];
-    box.innerHTML=all.length ? all.map(n=>{ const on=sel.includes(n), miss=!have.includes(n);
-      return '<label class="link-chip'+(on?' on':'')+(miss?' missing':'')+'" title="'+escA(miss?'No longer in this prep — untick to remove':n)+'"><input type="checkbox" value="'+escA(n)+'"'+(on?' checked':'')+' onchange="sceneLinkToggle(this)">'+escH(n)+'</label>'; }).join('')
-      : '<span class="link-empty">None in this chapter yet.</span>';
-  });
+  card.querySelectorAll('.link-chips').forEach(renderLinkBox);
   const ms=card.querySelector('.sl-map');
   if(ms){ const t=mapTitles(); const cur=L.map; const all=cur&&!t.includes(cur)?[cur,...t]:t;
     ms.innerHTML='<option value="">—</option>'+all.map(n=>'<option value="'+escA(n)+'"'+(n===cur?' selected':'')+'>'+escH(n)+'</option>').join(''); }
@@ -2556,7 +2569,6 @@ function renderPreview() {
   // Page 3
   setText('p3-title',state.title||'Adventure Title');
   // Page 4
-  setText('p4-title',state.title||'Adventure Title');
   // Overview with formatting
   // Build all p1 items, measure, fill left then right
   (function() {
@@ -2598,7 +2610,7 @@ function renderPreview() {
     if((state.clues||[]).length){
       let h='<div class="p-section"><div class="sl">Secrets &amp; Clues</div>';
       (state.clues||[]).forEach(c=>{
-        const meta=[c.where?'<b>Found:</b> '+escH(c.where):'', c.holder?'<b>Held by:</b> '+escH(c.holder):'', c.leads?'<b>Leads to:</b> '+escH(c.leads):''].filter(Boolean).join(' · ');
+        const meta=[c.where?'<b>Found:</b> '+escH(c.where):'', (c.heldBy||[]).length?'<b>Held by:</b> '+c.heldBy.map(escH).join(', '):''].filter(Boolean).join(' · ');
         h+='<div class="clue-item">'+(c.header?'<span class="clue-hdr">'+escH(c.header)+'</span>'+(c.text?' — ':''): '')+fmtText(c.text)+(meta?'<div class="loc-links">'+meta+'</div>':'')+'</div>';
       });
       sections.push(h+'</div>');
@@ -2608,7 +2620,7 @@ function renderPreview() {
     if((state.rewards||[]).length){
       let h='<div class="p-section"><div class="sl gold">'+escH(L('treasure'))+'</div>';
       (state.rewards||[]).forEach(r=>{
-        const meta=[r.value?'<b>Value:</b> '+escH(r.value):'', r.where?'<b>Found in:</b> '+escH(r.where):''].filter(Boolean).join(' · ');
+        const meta=[r.value?'<b>Value:</b> '+escH(r.value):'', r.where?'<b>Found in:</b> '+escH(r.where):'', (r.heldBy||[]).length?'<b>Held by:</b> '+r.heldBy.map(escH).join(', '):''].filter(Boolean).join(' · ');
         h+='<div class="npc-block" style="border-left-color:var(--accent-dark);"><div class="entry-name">'+escH(r.name)+'</div>'+(r.flavor?'<div class="sb-flavor" style="margin-bottom:5px;padding:5px 7px;">'+fmtText(r.flavor)+'</div>':'')+(r.stats?'<p class="entry-desc reward-stats" style="font-family:Share Tech Mono,monospace;font-size:8px;margin-top:3px;">'+fmtText(r.stats)+'</p>':'')+(meta?'<div class="loc-links">'+meta+'</div>':'')+'</div>';
       });
       sections.push(h+'</div>');
@@ -2713,13 +2725,7 @@ function renderPreview() {
 
   // Pages 3 & 4: maps only on 3; stat blocks now render inline on the main pages
   const _p3 = document.getElementById('page-three');
-  const _p4 = document.getElementById('page-four');
   if(_p3) _p3.style.display = (state.maps||[]).length ? '' : 'none';
-  // Page 4: the Notes tab's session log, after the maps.
-  const hasLog = !!(state.log && state.log.trim());
-  if(_p4) _p4.style.display = hasLog ? '' : 'none';
-  const sbEl=document.getElementById('p-statblocks');
-  if(sbEl) sbEl.innerHTML = hasLog ? '<div class="p-section"><div class="sl">Session Log</div><p class="p-text">'+fmtText(state.log)+'</p></div>' : '';
   applyGradients();
   // Run pagination after DOM has painted
   requestAnimationFrame(()=>requestAnimationFrame(paginatePages));

@@ -8262,7 +8262,7 @@ function wireSessionPrepLoader(root) {
       + '<label class="advh-chk" title="Ticked once it has been handed out"><input type="checkbox" class="advh-handed"' + (handed ? ' checked' : '') + '> Handed out</label></div>'
       + (r.flavor ? '<div class="advh-desc">' + advText(r.flavor) + '</div>' : '')
       + (r.stats ? '<div class="advh-desc dim">' + advText(r.stats) + '</div>' : '')
-      + ((r.value || r.where) ? '<div class="advh-desc dim">' + advEsc([r.value ? 'Value ' + r.value : '', r.where ? 'Found in ' + r.where : ''].filter(Boolean).join(' · ')) + '</div>' : '')
+      + ((r.value || r.where || held(r).length) ? '<div class="advh-desc dim">' + advEsc([r.value ? 'Value ' + r.value : '', r.where ? 'Found in ' + r.where : '', held(r).length ? 'Held by ' + held(r).join(', ') : ''].filter(Boolean).join(' · ')) + '</div>' : '')
       + (lootOn() ? '<div class="advh-actions"><button type="button" class="btn small advh-drop" title="' + (canDrop() ? 'Send to the players as a claimable drop' : 'Link a campaign first (top bar)') + '"' + (canDrop() ? '' : ' disabled') + '>🎁 Drop to players</button></div>' : '')
       + '</div>';
   }
@@ -8271,11 +8271,12 @@ function wireSessionPrepLoader(root) {
     return '<div class="advh-card advh-clue' + (on ? ' revealed' : '') + '" data-ci="' + i + '"><div class="advh-loot-hd"><div class="advh-card-h">' + advEsc(c.header || 'Clue') + '</div>'
       + '<label class="advh-chk"><input type="checkbox" class="advh-revealed"' + (on ? ' checked' : '') + '> Revealed</label></div>'
       + (c.text ? '<div class="advh-desc">' + advText(c.text) + '</div>' : '')
-      + ((c.where || c.holder || c.leads) ? '<div class="advh-desc dim">' + advEsc([c.where ? 'Found in ' + c.where : '', c.holder ? 'Held by ' + c.holder : '', c.leads ? 'Leads to ' + c.leads : ''].filter(Boolean).join(' · ')) + '</div>' : '')
+      + ((c.where || held(c).length) ? '<div class="advh-desc dim">' + advEsc([c.where ? 'Found in ' + c.where : '', held(c).length ? 'Held by ' + held(c).join(', ') : ''].filter(Boolean).join(' · ')) + '</div>' : '')
       + '</div>';
   }
   const eqName = (a, b) => String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
   const whereHas = (w, n) => String(w || '').split(/\s*,\s*/).some(p => eqName(p, n));
+  const held = x => Array.isArray(x.heldBy) ? x.heldBy.filter(Boolean) : (x.holder ? [x.holder] : []);
 
   function renderHub(){
     if(!hub || !prep) return;
@@ -8284,7 +8285,7 @@ function wireSessionPrepLoader(root) {
     // The eight baseline tabs (with each system's flavour names), plus the
     // hand-built LotR / Dragonbane / Pirate Borg sections after Scenes. Only tabs
     // with something in them show; the first tab is always there.
-    const ALL = ['adventure', 'tables', 'clues', 'treasure', 'scenes', 'lotr', 'db', 'pb', 'cast', 'maps', 'notes'];
+    const ALL = ['adventure', 'tables', 'clues', 'treasure', 'scenes', 'lotr', 'db', 'pb', 'cast', 'maps'];
     const TABS = ALL.filter(k => k === 'adventure' || c[k]).map(k => [k, lab(k)]);
     if(!TABS.some(([k]) => k === activeSec)) activeSec = 'adventure';
     const advTitle = (prepChapters[0] && prepChapters[0].title) || prep.title || prep._docTitle || 'Adventure';

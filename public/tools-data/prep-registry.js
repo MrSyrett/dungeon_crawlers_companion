@@ -8,8 +8,8 @@
   'use strict';
   // The baseline: eight tabs, same order in every system — the builder's tabs, the
   // GM Screen's Hub tabs and the printed prep all follow it.
-  var TABS = ['adventure', 'tables', 'clues', 'treasure', 'scenes', 'cast', 'maps', 'notes'];
-  var LABELS = { adventure: 'Adventure', tables: 'Tables', clues: 'Clues', treasure: 'Treasure', scenes: 'Encounters', cast: 'Monsters/NPCs', maps: 'Maps', notes: 'Notes' };
+  var TABS = ['adventure', 'tables', 'clues', 'treasure', 'scenes', 'cast', 'maps'];
+  var LABELS = { adventure: 'Adventure', tables: 'Tables', clues: 'Clues', treasure: 'Treasure', scenes: 'Encounters', cast: 'Monsters/NPCs', maps: 'Maps' };
   // Flavour names (kept per system), loot drops, and the shared modules each system
   // turns on. Modules are set per system, never per adventure: an empty one simply
   // shows nothing on the GM Screen.
@@ -156,7 +156,11 @@
     ch.strongopen = [];
     ch.trackers = _arr(ch.trackers);
     ch.hazards = _arr(ch.hazards);
-    if (typeof ch.log !== 'string') ch.log = _str(ch.log);
+    // The separate Notes tab (session log) was folded into the Adventure tab's GM Notes.
+    if (typeof ch.notes !== 'string') ch.notes = _str(ch.notes);
+    var _log = _str(ch.log).trim();
+    if (_log) ch.notes = ch.notes.trim() ? ch.notes.replace(/\s+$/, '') + '\n\n' + _log : _log;
+    ch.log = '';
     ch.clues = _arr(ch.clues); ch.rewards = _arr(ch.rewards); ch.statblocks = _arr(ch.statblocks); ch.maps = _arr(ch.maps);
     ch.locations = _arr(ch.locations).map(function (l) {
       if (!l || typeof l !== 'object') return l;
@@ -184,7 +188,11 @@
         x._linked = 1;
       });
     };
-    fold(ch.clues, 'clues', 'header', function (x, w) { if (!_str(x.holder)) x.holder = w; });
+    // Who holds a clue or a treasure is a list of Monsters/NPCs names (heldBy).
+    var held = function (x) { if (!Array.isArray(x.heldBy)) { var h = _str(x.holder); x.heldBy = h ? [h] : []; } delete x.holder; };
+    ch.clues.forEach(function (x) { if (x && typeof x === 'object') held(x); });
+    ch.rewards.forEach(function (x) { if (x && typeof x === 'object') held(x); });
+    fold(ch.clues, 'clues', 'header', function (x, w) { if (!x.heldBy.some(function (v) { return v.toLowerCase() === w.toLowerCase(); })) x.heldBy.push(w); });
     fold(ch.rewards, 'treasure', 'name', function (x, w) { x.legacyWhere = w; });
     fold(ch.hazards, 'hazards', 'name', function (x, w) { x.legacyWhere = w; });
     ch._v = 2;
