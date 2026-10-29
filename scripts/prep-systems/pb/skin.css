@@ -1,0 +1,105 @@
+/* ═══ PIRATE BORG skin ═════════════════════════════════════════════════════
+   Lives in this (first) style block on purpose: exportHTML() copies only the
+   first <style>, so the printed/exported pages keep the look. The sidebar and
+   the ground behind the pages are themed by public/tokens.css
+   (:root[data-themed][data-system="PB"]); everything below is page-side or
+   Pirate Borg-only sidebar furniture. JSL Blackletter titles, 1651 Alchemy
+   labels, EB Garamond body and every number (Alchemy has old-style numerals
+   and lacks < > ^ ~ { } \), blood red on bone — or bone on black. */
+.page { font-family: var(--font-body); background: radial-gradient(120% 90% at 50% 40%, #f1e9d6 0%, #e9dfc7 70%, #dccfb1 100%); color: var(--ink); }
+.page .p-text, .page .entry-desc, .page .loc-desc, .page .clue-item, .page .sb-notes, .page .sb-npc-notes, .page .rt-table, .page .loc-dq, .page .sb-flavor, .page .read-aloud p { font-family: var(--font-body); }
+.page .p-text, .page .entry-desc, .page .loc-desc, .page .clue-item { font-size: 10.5px; line-height: 1.5; }
+.page .sb-ability { font-family: var(--font-body); font-size: 9.6px; line-height: 1.42; }
+.page-banner { border-bottom: 2px solid var(--pb); box-shadow: inset 0 -1px 0 rgba(163,18,26,.45); background: linear-gradient(120deg, rgba(13,11,11,.92), rgba(58,10,13,.88)), url("/themes/pb-splatter.webp") center / cover; }
+.page-bottom-band { border-top: 2px solid var(--pb); }
+.adventure-title { font-family: var(--font-display) !important; font-size: 34px; letter-spacing: 0.01em; line-height: 1.05; font-weight: 400; text-transform: none !important; text-shadow: 0 2px 0 rgba(0,0,0,.55); }
+.adventure-subtitle { font-family: var(--font-label); text-transform: none; font-weight: 400; letter-spacing: 0.04em; font-size: 13px; margin-top: 4px; }
+.header-meta { font-family: var(--font-body); letter-spacing: 0.04em; font-size: 9.5px; opacity: .92; }
+.page .loc-lbl { font-family: var(--font-label); text-transform: none; font-weight: 400; letter-spacing: .03em; font-size: 10px; color: var(--accent-dark); }
+.page.dark-mode .loc-lbl { color: var(--pb-ink); }
+.sl { font-family: var(--font-display); font-weight: 400; font-size: 17px; letter-spacing: 0.01em; text-transform: none; color: var(--section-hdr); border-bottom: 1.5px solid var(--pb); padding-bottom: 1px; }
+.entry-name, .loc-name { font-family: var(--font-label) !important; text-transform: none !important; letter-spacing: 0.03em !important; font-weight: 400 !important; }
+.loc-name { font-size: 13px !important; }
+.sb-name { font-family: var(--font-display); text-transform: none; font-weight: 400; letter-spacing: .01em; font-size: 18px; color: var(--ink); }
+/* The blackletter is never red: white on every dark ground (masthead, sidebar,
+   dark page), and the page's black ink on the bone page, where white can't read. */
+.sl { color: var(--ink); }
+.sidebar-title, .section-divider, .page.dark-mode .sl, .page.dark-mode .sb-name { color: #ffffff; }
+.sb-type, .entry-meta, .loc-tag { color: var(--accent-dark); font-family: var(--font-label); letter-spacing: .04em; }
+.read-aloud, .sb-flavor { background: linear-gradient(180deg, #1b1010, #120a0a); border-left: 4px solid var(--pb); }
+.read-aloud p, .sb-flavor { color: #ece4d4; font-size: 10px; }
+.stat-block { background: #e4d8be; border-top-color: var(--pb); }
+.sb-table th { background: var(--table-hdr); color: #ece4d4; font-family: var(--font-label); font-weight: 400; letter-spacing: .04em; }
+.sb-table td { font-family: var(--font-body); font-size: 10px; text-align: center; }
+/* A d6 attack-table row (e.g. a boss that rolls for its attack): the die as a blood tab. */
+.sb-ability.sb-matk { display: flex; gap: 5px; align-items: baseline; }
+.sb-ability.sb-matk .sb-d6 { flex: 0 0 auto; font-family: var(--font-body); font-weight: 600; font-size: 9px; letter-spacing: .02em; color: #fff; background: var(--pb); border-radius: 3px; padding: 0 4px; line-height: 1.5; }
+.sb-ability.sb-matk strong { color: var(--accent-dark); }
+.clue-item { background: #f3ebd8; border-left-color: var(--pb); }
+.npc-block, .mob-block { background: #e4d8be; }
+.map-container img, .map-placeholder { border-color: var(--pb); }
+.p-footer, .p2-footer { border-top-color: var(--pb); }
+/* Pirate Borg preview boxes */
+.pb-box, .mod-box { background: rgba(255,250,240,.5); border: 1px solid #cdb995; border-left: 4px solid var(--pb); border-radius: 8px; padding: 6px 9px 7px 10px; margin-bottom: 6px; }
+.pb-box .loc-desc, .mod-box .loc-desc { margin-top: 2px; }
+.pb-voyage-box, .mod-travel-box { border-left-color: #3a3a52; }
+.pb-ship-box { border-left-color: #2a0c0e; }
+.pb-ship-box.foe { border-left-color: var(--pb); }
+.pb-badges, .mod-badges { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 4px; }
+.pb-badge, .mod-badge { display: inline-flex; align-items: baseline; gap: 4px; border: 1px solid #c4ad86; border-radius: 999px; padding: 1px 7px; font-family: var(--font-body); font-size: 9.5px; color: var(--ink); background: #f7f0e1; }
+.pb-badge > span, .mod-badge > span { font-family: var(--font-label); font-size: 8.5px; color: var(--accent-dark); letter-spacing: .04em; }
+.pb-badge.red { border-color: var(--pb); background: #f4dcd8; }
+.pb-badge.warn { border-color: #8a2a1c; }
+.pb-badge.warn > span { color: #8a1a14; }
+.pb-note, .mod-note { font-family: var(--font-body); font-size: 9.5px; color: #7a1a14; font-style: italic; margin: 1px 0 3px; }
+.pb-note.dim { color: var(--muted); }
+.pb-route, .mod-route { font-family: var(--font-label); font-size: 11px; color: var(--accent-dark); margin-bottom: 2px; }
+.pb-list, .mod-list { margin: 2px 0 3px; }
+.pb-events .sb-ability { color: #6a1410; }
+.pb-tbl td { font-size: 9.6px !important; }
+.pb-dmg { font-family: var(--font-body); font-weight: 600; font-size: 9px; color: #fff; background: var(--pb); border-radius: 3px; padding: 0 4px; }
+.pb-src { color: var(--muted); font-size: 9px; }
+.pb-shipstats { width: 100%; border-collapse: collapse; margin: 3px 0 4px; }
+.pb-shipstats th { background: var(--table-hdr); color: #ece4d4; font-family: var(--font-label); font-weight: 400; font-size: 8.5px; letter-spacing: .04em; padding: 2px 3px; }
+.pb-shipstats td { font-family: var(--font-body); font-size: 10px; text-align: center; border: 1px solid var(--rule); padding: 1px 3px; background: rgba(255,250,240,.45); }
+/* Dark page: black, bone text, blood accents */
+.page.dark-mode { background: radial-gradient(120% 90% at 50% 40%, #1a1313 0%, #130e0e 70%, #0b0808 100%); }
+.page.dark-mode .p-text, .page.dark-mode .loc-desc, .page.dark-mode .entry-desc, .page.dark-mode .sb-ability, .page.dark-mode .columns { color: #e3dac8; }
+.page.dark-mode .entry-name { color: #f0e6d0; }
+.page.dark-mode .sl { border-bottom-color: var(--pb); }
+.page.dark-mode .stat-block, .page.dark-mode .npc-block, .page.dark-mode .mob-block { background: #1f1717; }
+.page.dark-mode .sb-table td, .page.dark-mode .pb-shipstats td { background: #170f0f; color: #e3dac8; border-color: #3a2424; }
+.page.dark-mode .clue-item { background: #1f1717; color: #e3dac8; }
+.page.dark-mode .pb-box, .page.dark-mode .mod-box { background: rgba(10,6,6,.6); border-color: #3a2424; }
+.page.dark-mode .pb-badge, .page.dark-mode .mod-badge { background: #1f1717; color: #ece4d4; border-color: #5a3232; }
+.page.dark-mode .pb-badge > span, .page.dark-mode .mod-badge > span, .page.dark-mode .pb-route, .page.dark-mode .mod-route, .page.dark-mode .sb-ability.sb-matk strong, .page.dark-mode .sb-type, .page.dark-mode .loc-tag, .page.dark-mode .entry-meta { color: var(--pb-ink); }
+.page.dark-mode .pb-badge.red { background: #3a1214; border-color: var(--pb); }
+.page.dark-mode .pb-note, .page.dark-mode .mod-note { color: #f08a7a; } .page.dark-mode .pb-note.dim, .page.dark-mode .pb-src { color: #a89a8a; }
+.page.dark-mode .pb-events .sb-ability { color: #f0b0a0; }
+/* Sidebar furniture (Pirate Borg-only controls) */
+.section-divider { font-family: var(--font-display); font-weight: 400; font-size: 16px; text-transform: none; letter-spacing: .01em; }
+.entity-name-input { font-family: var(--font-label); font-weight: 400; text-transform: none; font-size: 13px; letter-spacing: .02em; }
+.co-name, .co-name-input { font-family: var(--font-label); font-weight: 400; }
+.co-head .ttl, .co-add { font-family: var(--font-label); font-weight: 400; text-transform: none; letter-spacing: .04em; font-size: 12px; }
+/* Blackletter capitals don't read at button size: the footer and the mobile grab bar use the accent face. */
+.btn-primary, .btn-secondary, .sidebar-footer .btn-secondary, .sidebar-tab { font-family: var(--font-label) !important; text-transform: none !important; font-weight: 400 !important; letter-spacing: .04em !important; font-size: 13px !important; }
+.sidebar-content select { width: 100%; background: var(--ui-bg); border: 1px solid var(--ui-border); border-radius: 6px; color: var(--ui-text); font-size: 11px; padding: 5px 6px; outline: none; }
+.sidebar-content select:focus { border-color: var(--ui-accent); }
+.pb-hint { font-size: 10.5px; color: var(--ui-muted); line-height: 1.4; margin: -4px 0 8px; font-style: italic; }
+.pb-calc { font-size: 11px; line-height: 1.5; color: var(--ui-text); background: color-mix(in srgb, var(--ui-accent) 9%, var(--ui-bg)); border: 1px solid color-mix(in srgb, var(--ui-accent) 35%, var(--ui-border)); border-radius: 6px; padding: 6px 8px; margin-top: 6px; }
+.pb-calc:empty { display: none; }
+.pb-calc b { color: var(--ui-accent); }
+.pb-row { display: flex; gap: 6px; }
+.pb-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.pb-grid .field-label { font-size: 8px; }
+.pb-checks { display: flex; flex-direction: column; gap: 3px; }
+.pb-checks.pb-checks-row { flex-direction: row; flex-wrap: wrap; gap: 4px 12px; }
+.pb-checks label { font-size: 11px; color: var(--ui-text); display: flex; gap: 6px; align-items: center; cursor: pointer; line-height: 1.35; }
+.pb-checks label .pb-mod { color: var(--ui-muted); font-size: 10px; }
+.pb-fold > summary { cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--ui-muted); margin: 4px 0; }
+.pb-fold[open] > summary { color: var(--ui-accent); }
+.btn-add.btn-mini { padding: 5px; margin-bottom: 6px; }
+.btn-add.btn-roll { border-color: var(--ui-highlight); color: var(--ui-accent); }
+@media (max-width: 768px) { .section-divider { font-size: 16px !important; padding: 8px 2px 6px !important; } .pb-checks label { font-size: 13px; } .pb-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.mod-calc b { color: var(--ui-accent); }

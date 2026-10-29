@@ -1,0 +1,20 @@
+    /* Dragonbane: the core book's green and gold on green-black, parchment pages.
+       Red is the Hideout wordmark's alone (red letters in a gold outline).
+       Sidebar --ui-* values match :root[data-themed][data-system="DB"] in
+       public/tokens.css (which wins when injected); these are the fallback. */
+    --ink: #2a1d14; --paper: #efe2c4; --accent: #236855; --accent-dark: #1e5842;
+    --accent-red: #236855; --accent-red-dark: #1e5842;
+    --muted: #6e5b45; --rule: #d3bf96; --box-bg: #e9dab7; --read-bg: #2a1d14;
+    --read-text: #f3e7cc; --highlight: #c9a14a; --green: #4f6a2f; --blue-npc: #2f4f6f;
+    --section-hdr: #1e5842; --table-hdr: #1e5842; --preview-bg: #0f0e0d;
+    --gold: #c9a14a; --gold-lift: #e3c27a; --db: #236855; --db-ink: #5cb894;
+    /* The logo red: every Hideout title is lettered in it inside a --gold stroke. */
+    --db-logo: #e42a32;
+    --font-display: "Hideout", "EB Garamond", Georgia, serif;
+    --font-label: "Minion Pro", "EB Garamond", Georgia, serif;
+    --font-body: "EB Garamond", Georgia, serif;
+    /* Masthead banner — green-black into the book's green, with the title as the logo (red, gold outline) */
+    --banner-a: #0b1f18; --banner-b: #236855; --title-color: #e42a32; --title-weight: 400; --sub-color: #e3d2ad;
+    /* UI (sidebar) — neutral near-black (only the preview ground is green parchment) */
+    --ui-bg: #1a1918; --ui-panel: #232120; --ui-border: #3f3a35;
+    --ui-text: #eee3cc; --ui-muted: #b5a68c; --ui-accent: #5cb894; --ui-highlight: #236855;

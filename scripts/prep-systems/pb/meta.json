@@ -1,0 +1,21 @@
+{
+  "cfg": "pb",
+  "file": "pb_session_prep_builder.html",
+  "code": "PB",
+  "name": "Pirate Borg",
+  "title": "Pirate Borg — Adventure",
+  "sessionKey": "pb_session",
+  "lsKey": "pb_builder_v1",
+  "chapterLabel": "Chapter",
+  "chapterPh": "Chapter 1",
+  "chapterUpper": "CHAPTER",
+  "sessionLabel": "Session",
+  "titlePh": "e.g. The Drowned Bell of Port Maw",
+  "subtitlePh": "e.g. A Pirate Borg adventure",
+  "castTab": "Foes",
+  "castHeading": "Foes, Folk &amp; Bosses",
+  "mobLabel": "Foe",
+  "bossLabel": "Boss",
+  "randomLabel": "Random Foe",
+  "pickerComment": "<!-- Shared dungeon-map engine + the Pirate Borg data layer. -->"
+}

@@ -19,9 +19,11 @@
 // The tab layout and flavour labels live in public/tools-data/prep-registry.js, which
 // both the builders and the GM Screen's Adventure Hub read, so they always agree.
 //
-// Not generated (yet): The Lord of the Rings 5e (lotr), Dragonbane (db) and Pirate
-// Borg (pb) builders are still hand-built and are moved onto the template in the
-// rollout order; until then this script never writes them.
+// Every builder is generated. Dragonbane (db), The Lord of the Rings 5e (lotr) and
+// Pirate Borg (pb) were hand-built until 28 Oct 2026; they now run on the template
+// with plug-ins (Quest / Job → Adventure Details, journeys and voyages → the Travel
+// module, the Adventure Site → Sites, traps → Hazards; LotR's Phase and PB's Ships
+// are plug-in tabs). HAND_BUILT is kept for any future builder that needs it.
 import { readFileSync, writeFileSync, readdirSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -29,7 +31,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const TPL = readFileSync(join(ROOT, "tools", "templates", "_prep_template.html"), "utf8");
 const CFG_DIR = join(ROOT, "scripts", "prep-systems");
-const HAND_BUILT = new Set(["lotr", "db", "pb"]);
+const HAND_BUILT = new Set([]);
 
 const only = process.argv.slice(2);
 const read = (d, f, dflt = "") => (existsSync(join(d, f)) ? readFileSync(join(d, f), "utf8") : dflt);

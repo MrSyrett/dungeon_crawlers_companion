@@ -1,0 +1,17 @@
+    /* The Lord of the Rings: Elven gold on deep forest green, parchment pages.
+       Sidebar --ui-* values match :root[data-themed][data-system="LOTR"] in
+       public/tokens.css (which wins when injected); these are the fallback. */
+    --ink: #2a2116; --paper: #f2e6c9; --accent: #a8841c; --accent-dark: #7a5f12;
+    --accent-red: #2c4a37; --accent-red-dark: #1f3a29;
+    --muted: #6b5f48; --rule: #d6c7a0; --box-bg: #ece0bf; --read-bg: #1f3a29;
+    --read-text: #f4ead2; --highlight: #c9a227; --green: #2c5a3a; --blue-npc: #2f4f6f;
+    --section-hdr: #1f4a30; --table-hdr: #2c4a37; --preview-bg: #07120c;
+    --gold: #c9a227; --gold-lift: #e2c36b; --lotr-green: #1f4a30; --shadow-ink: #4b2d5c;
+    --font-display: "Ringbearer", "EB Garamond", Georgia, serif;
+    --font-label: "Aniron", "EB Garamond", Georgia, serif;
+    --font-body: "EB Garamond", Georgia, serif;
+    /* Masthead banner — deep green with the Elven-gold title, like the sheet header */
+    --banner-a: #0f2118; --banner-b: #1f4a30; --title-color: #e2c36b; --title-weight: 400; --sub-color: #d9e4cc;
+    /* UI (sidebar) — deep forest green */
+    --ui-bg: #0f2118; --ui-panel: #15291e; --ui-border: #2c4a37;
+    --ui-text: #ece4cc; --ui-muted: #a7b59c; --ui-accent: #e2c36b; --ui-highlight: #c9a227;

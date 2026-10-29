@@ -1,0 +1,17 @@
+    /* Pirate Borg: blood red on black, bone pages. Sidebar --ui-* values match
+       :root[data-themed][data-system="PB"] in public/tokens.css (which wins
+       when injected); these are the fallback. */
+    --ink: #1d1414; --paper: #ece3cf; --accent: #a3121a; --accent-dark: #7a0d13;
+    --accent-red: #a3121a; --accent-red-dark: #7a0d13;
+    --muted: #6e5a4f; --rule: #cdbfa3; --box-bg: #e3d7bd; --read-bg: #160d0d;
+    --read-text: #ece4d4; --highlight: #e6463a; --green: #3f5a34; --blue-npc: #3a3a52;
+    --section-hdr: #8a0f16; --table-hdr: #2a0c0e; --preview-bg: #0a0808;
+    --gold: #a3121a; --gold-lift: #e6463a; --pb: #a3121a; --pb-ink: #e6463a; --pb-bone: #e8e0cc;
+    --font-display: "JSL Blackletter", "EB Garamond", Georgia, serif;
+    --font-label: "1651 Alchemy", "EB Garamond", Georgia, serif;
+    --font-body: "EB Garamond", Georgia, serif;
+    /* Masthead banner — black into a dried-blood red, with the blackletter title in white */
+    --banner-a: #0d0b0b; --banner-b: #3a0a0d; --title-color: #ffffff; --title-weight: 400; --sub-color: #e6463a;
+    /* UI (sidebar) — near-black */
+    --ui-bg: #0d0b0b; --ui-panel: #161212; --ui-border: #3a2424;
+    --ui-text: #ece4d4; --ui-muted: #a89a8a; --ui-accent: #e6463a; --ui-highlight: #a3121a;

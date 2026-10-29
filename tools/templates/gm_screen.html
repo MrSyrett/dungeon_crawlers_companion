@@ -8176,31 +8176,28 @@ function wireSessionPrepLoader(root) {
     return m.filter(x => x && x.src);
   }
   const DET = () => prep.details || {};
-  const hasDetails = () => ['questgiver','hooks','goal','prize','stakes','opposition'].some(k => String(DET()[k] || '').trim());
+  const hasDetails = () => ['questgiver','hooks','goal','prize','stakes','opposition','name'].some(k => String(DET()[k] || '').trim());
   function counts(){
     return { adventure: (prep.overview || hasDetails() || (prep.trackers || []).length || (prep.notes && prep.notes.trim())) ? 1 : 0,
-             scenes: scenes().length, clues: (prep.clues || []).length, treasure: (prep.rewards || []).length, tables: tables().length,
+             scenes: scenes().length || (prep.hazards || []).length, clues: (prep.clues || []).length, treasure: (prep.rewards || []).length, tables: tables().length,
              cast: (prep.statblocks || []).length, maps: maps().length, notes: (prep.log && String(prep.log).trim()) ? 1 : 0,
              // The Lord of the Rings prep: journeys, councils, landmarks, hoards, schemes, rumours.
-             lotr: ['journeys','councils','landmarks','hoards','schemes','rumours'].reduce((n, k) => n + (Array.isArray(prep[k]) ? prep[k].length : 0), 0),
-             // Dragonbane prep: the quest, the adventure site, journey legs, traps, leaving the site.
-             db: (prep.dbQuest && Object.keys(prep.dbQuest).some(k => String(prep.dbQuest[k] || '').trim()) ? 1 : 0)
-               + (prep.dbSite && Object.keys(prep.dbSite).some(k => String(prep.dbSite[k] || '').trim()) ? 1 : 0)
-               + ['dbJourneys','dbTraps'].reduce((n, k) => n + (Array.isArray(prep[k]) ? prep[k].length : 0), 0)
-               + ((prep.dbLeaving && String(prep.dbLeaving).trim()) ? 1 : 0),
+             lotr: ['councils','landmarks','hoards','schemes','rumours','tindex'].reduce((n, k) => n + (Array.isArray(prep[k]) ? prep[k].length : 0), 0) + (prep.phase && ['what','where','why','who','place'].some(k => String(prep.phase[k] || '').trim()) ? 1 : 0),
+             // Shared modules (on per system in the registry): Sites and Travel legs.
+             site: modOn('site') ? (prep.sites || []).length : 0, travel: modOn('travel') ? (prep.travel || []).length : 0,
              // Pirate Borg prep: the job, voyage legs, ships, traps.
-             pb: (prep.pbJob && Object.keys(prep.pbJob).some(k => String(prep.pbJob[k] || '').trim()) ? 1 : 0)
-               + ['pbVoyages','pbShips','pbTraps'].reduce((n, k) => n + (Array.isArray(prep[k]) ? prep[k].length : 0), 0) };
+             pb: (prep.pbShips || []).length };
   }
 
   // ── Tab labels: the same registry the builders use, so the names match ──
   // LotR / Dragonbane / Pirate Borg are still hand-built preps with their own
   // Phase / Quest / Voyage sections, so they keep plain labels until they move.
-  const HAND_BUILT = { LOTR: 1, DB: 1, PB: 1 };
+  const HAND_BUILT = {};
+  const modOn = m => !!(window.PREP_REGISTRY && window.PREP_REGISTRY.hasModule && window.PREP_REGISTRY.hasModule(prepSys, m));
   const PLAIN = { adventure: 'Overview', clues: 'Clues', scenes: 'Scenes', cast: 'NPCs', treasure: 'Loot', maps: 'Maps', tables: 'Tables', notes: 'Notes' };
   function lab(k){
     const R = window.PREP_REGISTRY;
-    if(k === 'lotr') return 'Phase'; if(k === 'db') return 'Quest'; if(k === 'pb') return 'Voyage';
+    if(k === 'lotr') return 'Phase'; if(k === 'pb') return 'Ships';
     if(!R || HAND_BUILT[prepSys]) return PLAIN[k] || k;
     return R.label(prepSys, k);
   }
@@ -8245,6 +8242,14 @@ function wireSessionPrepLoader(root) {
     }).join('');
   }
 
+  // A travel leg's time on the road (Dragonbane shifts, D&D days) as a Ticks tracker.
+  function legTracker(i){
+    const j = (prep.travel || [])[i], R = window.PREP_REGISTRY; if(!j || !R || !R.travelCalc) return null;
+    const k = R.travelCalc(prepSys, j, prep); if(!k || !k.ticks) return null;
+    const nm = j.name || [j.from, j.to].filter(Boolean).join(' → ') || 'Leg ' + (i + 1);
+    return { name: nm + ' — ' + k.tickName + 's', kind: 'ticks', size: k.ticks, finish: j.to ? 'Arrive at ' + j.to : 'Arrived' };
+  }
+
   // ── Treasure → character sheets: the same claimable drop as the Treasure panels ──
   function canDrop(){ return lootOn() && typeof GMCamp !== 'undefined' && GMCamp.get(); }
   function dropLoot(items, title){
@@ -8285,7 +8290,7 @@ function wireSessionPrepLoader(root) {
     // The eight baseline tabs (with each system's flavour names), plus the
     // hand-built LotR / Dragonbane / Pirate Borg sections after Scenes. Only tabs
     // with something in them show; the first tab is always there.
-    const ALL = ['adventure', 'tables', 'clues', 'treasure', 'scenes', 'lotr', 'db', 'pb', 'cast', 'maps'];
+    const ALL = ['adventure', 'tables', 'clues', 'treasure', 'scenes', 'site', 'travel', 'lotr', 'pb', 'cast', 'maps'];
     const TABS = ALL.filter(k => k === 'adventure' || c[k]).map(k => [k, lab(k)]);
     if(!TABS.some(([k]) => k === activeSec)) activeSec = 'adventure';
     const advTitle = (prepChapters[0] && prepChapters[0].title) || prep.title || prep._docTitle || 'Adventure';
@@ -8323,8 +8328,10 @@ function wireSessionPrepLoader(root) {
       const row = (k, v) => (v && String(v).trim()) ? '<div class="advh-det-k">' + k + '</div><div class="advh-det-v">' + v + '</div>' : '';
       const hooks = String(D.hooks || '').split('\n').map(x => x.trim()).filter(Boolean);
       const det = row('Quest giver', advEsc(D.questgiver)) + row(hooks.length > 1 ? 'Hooks' : 'Hook', hooks.length > 1 ? '<ul class="advh-hooks">' + hooks.map(x => '<li>' + advEsc(x) + '</li>').join('') + '</ul>' : advEsc(hooks[0] || ''))
-        + row('Goal', advEsc(D.goal)) + row('Prize', advEsc(D.prize)) + row('Stakes', advText(D.stakes || '')) + row('Opposition', advEsc(D.opposition));
-      if(det) h += '<div class="advh-card"><div class="advh-card-h">Adventure Details</div><div class="advh-det">' + det + '</div></div>';
+        + row('Goal', advEsc(D.goal)) + row('Prize', advEsc(D.prize)) + row('Stakes', advText(D.stakes || '')) + row('Opposition', advEsc(D.opposition))
+        + row('Faction', advEsc(D.faction)) + row('Port', advEsc(D.port));
+      const detT = (lab('adventure') === 'Adventure' || lab('adventure') === 'Overview' ? 'Adventure Details' : lab('adventure')) + (D.name ? ' — ' + D.name : '');
+      if(det || D.name) h += '<div class="advh-card"><div class="advh-card-h">' + advEsc(detT) + '</div><div class="advh-det">' + det + '</div></div>';
       if(prep.overview) h += '<div class="advh-prose">' + advText(prep.overview) + '</div>';
       if((prep.trackers || []).length) h += '<div class="advh-notes"><div class="advh-scene-lbl">Trackers</div>' + trackersHtml(prep.trackers, 'adv') + '</div>';
       if(prep.notes && prep.notes.trim()) h += '<div class="advh-notes"><div class="advh-scene-lbl">GM notes</div><div class="advh-prose">' + advText(prep.notes) + '</div></div>';
@@ -8332,13 +8339,16 @@ function wireSessionPrepLoader(root) {
     }
     if(sec === 'scenes'){
       const list = scenes();
-      if(!list.length) return '<div class="advh-empty">No scenes or encounters in this prep.</div>';
       const SB = prep.statblocks || [], CL = prep.clues || [], RW = prep.rewards || [], HZ = prep.hazards || [];
+      // Hazards & traps no encounter links to still need a home at the table.
+      const loose = HZ.filter(z => !list.some(s => ((s.links || {}).hazards || []).some(n => eqName(n, z.name)) || whereHas(z.where, s.name)));
+      const looseHtml = loose.length ? '<div class="advh-notes"><div class="advh-scene-lbl">Hazards &amp; traps</div>' + loose.map(z => '<div class="advh-haz"><b>' + advEsc(z.name || 'Hazard') + '</b>' + (z.trigger ? ' — ' + advEsc(z.trigger) : '') + (z.effect ? '<div>' + advText(z.effect) + '</div>' : '') + (z.spot ? '<div class="dim">Spot / disarm: ' + advEsc(z.spot) + '</div>' : '') + '</div>').join('') + '</div>' : '';
+      if(!list.length) return looseHtml || '<div class="advh-empty">No scenes or encounters in this prep.</div>';
       return list.map((s, i) => {
         const typ = (s.type || '').toLowerCase();
         const dot = typ === 'combat' ? '#d63a30' : typ === 'npc' ? '#c8a020' : 'var(--accent)';
         const typName = typ === 'npc' ? 'Social' : (typ ? typ.charAt(0).toUpperCase() + typ.slice(1) : '');
-        const sub = s.tag || typName;
+        const sub = [(s.links || {}).site && modOn('site') ? (s.links || {}).site : '', s.tag || typName].filter(Boolean).join(' · ');
         const L = s.links || {};
         const scnSec = (label, val) => (val && String(val).trim()) ? '<div class="advh-scene-sec"><div class="advh-scene-lbl">' + label + '</div><div class="advh-desc">' + advFmt(val) + '</div></div>' : '';
         // What this scene links to (and what the other tabs say is found here).
@@ -8378,7 +8388,7 @@ function wireSessionPrepLoader(root) {
           + extra
           + (!hasBody && !extra && !runBar ? '<div class="advh-desc dim">No details recorded.</div>' : '')
           + '</div></div>';
-      }).join('');
+      }).join('') + looseHtml;
     }
     if(sec === 'lotr'){
       // The Lord of the Rings Adventuring Phase: schemes, rumours, journeys,
@@ -8391,18 +8401,7 @@ function wireSessionPrepLoader(root) {
       if(P.what || P.where || P.season || P.region) h += card('Adventuring Phase', ln('When', [P.year, P.season].filter(Boolean).join(' · ')) + ln('Where', [P.place, P.region].filter(Boolean).join(' · ')) + ln('What', P.what) + ln('Why', P.why) + ln('Who', P.who));
       (prep.schemes || []).forEach(x => { h += card('Scheme — ' + (x.name || ''), ln('Schemer', x.villain) + ln('Aim', x.aim) + ln('Moves', x.steps) + ln('If unchecked', x.unchecked)); });
       (prep.rumours || []).forEach(x => { h += card('Rumour' + (x.truth ? ' (' + x.truth + ')' : ''), '<div class="advh-desc">' + advText(x.text || '') + '</div>' + ln('Source', x.source)); });
-      (prep.journeys || []).forEach(j => {
-        const k = /border/i.test(j.region || '') ? 'border' : /dark/i.test(j.region || '') ? 'dark' : 'wild';
-        const xpr = i => (J && J.xp && J.xp[i]) ? (J.xp[i][k] || 0) : 0;
-        const nn = v => parseInt(v, 10) || 0;
-        const T = { road: 0, open: 1, hard: 2 };
-        const xp = nn(j.road) * xpr(0) + nn(j.open) * xpr(1) + nn(j.hard) * xpr(2) + (j.perils || []).reduce((a, p) => a + nn(p.rating) * xpr(T[p.terrain] != null ? T[p.terrain] : 2), 0);
-        const fat = (j.events || []).reduce((a, e) => { const ev = J && J.events.find(x => x.name === e.name); return a + (ev ? ev.fatigue : 0); }, 0);
-        h += card('Journey — ' + (j.name || [j.from, j.to].filter(Boolean).join(' → ')),
-          ln('Route', [j.from, j.to].filter(Boolean).join(' → ') + (j.region ? ' · ' + j.region : '')) + ln('Hexes', 'road ' + nn(j.road) + ' · open ' + nn(j.open) + ' · hard ' + nn(j.hard))
-          + ln('Perilous Areas', (j.perils || []).map(p => (p.name || 'Area') + ' (Peril ' + (p.rating || '?') + ')').join(', ')) + ln('XP', String(xp)) + ln('Fatigue save', 'DC ' + (10 + fat) + ' CON')
-          + ln('Events', (j.events || []).map(e => (e.roll ? e.roll + ' ' : '') + (e.name || '') + (e.target ? ' — ' + e.target : '') + (e.idea ? ': ' + e.idea : '')).join('\n')) + ln('Notes', j.notes));
-      });
+      // Journeys moved into the Travel module (see the Journeys tab).
       (prep.councils || []).forEach(c => {
         const at = C && C.attitudes.find(a => a.name === c.attitude), rq = C && C.requests.find(r => r.name === c.request);
         h += card('Council — ' + (c.name || ''), ln('Audience', (c.attitude || '') + (at ? ' (DC ' + at.dc + ')' : '') + (c.audience ? ' · ' + c.audience : '')) + ln('Request', (c.request || '') + (rq ? ' — ' + rq.successes + ' success' + (rq.successes === 1 ? '' : 'es') : '') + (c.ask ? ': ' + c.ask : ''))
@@ -8410,32 +8409,45 @@ function wireSessionPrepLoader(root) {
       });
       (prep.landmarks || []).forEach(l => { h += card('Landmark — ' + (l.name || ''), ln('Rumour', l.rumour) + ln('Old Lore', l.oldlore) + ln('Background', l.background) + ln('Locations', l.locations) + ln('Trouble', l.trouble)); });
       (prep.hoards || []).forEach(x => { h += card('Hoard — ' + (x.name || x.rating || ''), ln('Rating', x.rating) + ln('Value', x.value) + ln('Greed DC', x.greed) + ln('Magic', x.magic) + ln('Contents', x.notes) + ln('Curse', x.curse)); });
+      (prep.tindex || []).forEach(t => { h += card('Treasure Index — ' + (t.item || ''), ln('For', t.hero) + ln('Kind', [t.kind, t.object].filter(Boolean).join(' · ')) + ln('Blessings', t.blessings) + ln('Curse', t.curse && !/^none$/i.test(t.curse) ? t.curse : '') + ln('Notes', t.notes)); });
+      const F = prep.fellowship || {};
+      if(F.haven || F.patron || F.notes || F.recovery) h += card('Fellowship Phase', ln('Haven', F.haven) + ln('Patron', F.patron) + ln('Recovery', F.recovery ? '−' + F.recovery + ' Shadow' : '') + ln('Yule', F.yule ? 'yes' : '') + ln('Undertakings', (F.undertakings || []).join(', ')) + ln('Notes', F.notes));
       return h || '<div class="advh-empty">No Adventuring Phase notes in this prep.</div>';
     }
-    if(sec === 'db'){
-      // Dragonbane: the quest, the adventure site, journey legs, traps and what
-      // happens if the party leaves — from the Dragonbane prep builder.
+    if(sec === 'site'){
+      // Sites module: one card per dungeon / location, with the encounters that belong to it.
       const card = (h, body) => '<div class="advh-card"><div class="advh-card-h">' + advEsc(h) + '</div>' + body + '</div>';
       const ln = (l, v) => (v != null && String(v).trim()) ? '<div class="advh-desc"><b>' + advEsc(l) + ':</b> ' + advText(String(v)) + '</div>' : '';
-      const J = (typeof DB_JOURNEY !== 'undefined' && DB_JOURNEY) ? DB_JOURNEY : { pace: { foot: 15, mounted: 30 } };
-      let h = '';
-      const Q = prep.dbQuest || {};
-      if(Object.keys(Q).some(k => String(Q[k] || '').trim())) h += card('The Quest' + (Q.name ? ' — ' + Q.name : ''), ln('Hook', Q.hook) + ln('Patron', Q.patron) + ln('Goal', Q.goal) + ln('Reward', Q.reward) + ln('Notes', Q.notes));
-      const S = prep.dbSite || {};
-      if(Object.keys(S).some(k => String(S[k] || '').trim())) h += card('Adventure Site' + (S.name ? ' — ' + S.name : ''), ln('Way in', S.wayin) + ln('Features', S.feature) + ln('Unexpected guests', S.guests) + ln('Deadly challenge', S.challenge) + ln('Boss', S.boss) + ln('Notes', S.notes));
-      (prep.dbJourneys || []).forEach(j => {
-        const km = parseInt(j.km, 10) || 0, pace = j.mounted ? J.pace.mounted : J.pace.foot, shifts = km ? Math.ceil(km / pace) : 0;
-        h += card('Journey — ' + (j.name || [j.from, j.to].filter(Boolean).join(' → ') || 'Leg'),
-          ln('Route', [j.from, j.to].filter(Boolean).join(' → ')) + ln('Distance', km ? km + ' km · ' + shifts + ' shift' + (shifts === 1 ? '' : 's') + ' (' + pace + ' km/shift' + (j.mounted ? ', mounted' : '') + ') · ~' + Math.ceil(shifts / 2) + ' day' + (Math.ceil(shifts / 2) === 1 ? '' : 's') : '')
-          + ln('Terrain', [j.offroad ? 'Off the road — pathfinder BUSHCRAFT each shift' : 'Road or path', j.map ? 'map' : (j.offroad ? 'no map (bane)' : ''), j.hard ? 'very difficult terrain (bane)' : ''].filter(Boolean).join(' · '))
-          + ln('Pathfinder', j.pathfinder) + ln('Mishaps', j.mishaps) + ln('Encounters', j.encounters) + ln('Notes', j.notes));
-      });
-      (prep.dbTraps || []).forEach(t => { h += card('Trap — ' + (t.name || ''), ln('Where', t.where) + ln('Effect', t.text) + ln('Damage', t.damage) + ln('Spot / disarm', t.spot)); });
-      if(prep.dbLeaving && String(prep.dbLeaving).trim()) h += card('Leaving the Site', '<div class="advh-desc">' + advText(String(prep.dbLeaving)) + '</div>');
-      return h || '<div class="advh-empty">No quest, journey or site notes in this prep.</div>';
+      const one = lab('site').replace(/s$/, '');
+      return (prep.sites || []).map(x => {
+        const here = scenes().map((sc, si) => [sc, si]).filter(([sc]) => x.name && eqName((sc.links || {}).site, x.name));
+        return card(one + (x.name ? ' — ' + x.name : ''), ln('The way in', x.wayin) + ln('Inside', x.inside) + ln('Who is there', x.guests) + ln('The challenge', x.challenge) + ln('The boss', x.boss) + ln('The way out', x.wayout) + ln('Notes', x.notes)
+          + (here.length ? '<div class="advh-actions">' + here.map(([sc, si]) => '<button type="button" class="btn small advh-goto-scene" data-si="' + si + '">' + advEsc(sc.name || 'Scene') + '</button>').join('') + '</div>' : ''));
+      }).join('') || '<div class="advh-empty">No sites in this prep.</div>';
+    }
+    if(sec === 'travel'){
+      // Travel module: each leg with the system's calculator; its travel time can start as a Ticks tracker.
+      const card = (h, body) => '<div class="advh-card"><div class="advh-card-h">' + advEsc(h) + '</div>' + body + '</div>';
+      const ln = (l, v) => (v != null && String(v).trim()) ? '<div class="advh-desc"><b>' + advEsc(l) + ':</b> ' + advText(String(v)) + '</div>' : '';
+      const R = window.PREP_REGISTRY, T = (R && R.travel && R.travel(prepSys)) || {};
+      return (prep.travel || []).map((j, i) => {
+        const k = R && R.travelCalc ? R.travelCalc(prepSys, j, prep) : null;
+        const on = (T.opts || []).filter(o => (j.opts || {})[o[0]]).map(o => o[1]);
+        const t = legTracker(i);
+        return card(lab('travel').replace(/([^s])s$/, '$1') + ' — ' + (j.name || [j.from, j.to].filter(Boolean).join(' → ') || 'Leg ' + (i + 1)),
+          ln('Route', [j.from, j.to].filter(Boolean).join(' → ')) + ln('Distance', j.distance ? j.distance + (T.unit ? ' ' + T.unit : '') : '') + (on.length ? ln('Conditions', on.join(' · ')) : '')
+          + (k && (j.distance || k.ticks) ? '<div class="advh-desc dim">' + k.lines.map(advEsc).join('<br>') + '</div>' : '')
+          + ln(T.navigator || 'Navigator', j.navigator) + ln('Terrain', j.terrain) + ln('Heading', j.heading) + ln('Ship', j.ship) + ln('Weather', j.weather) + ln('Winds', j.winds) + ln('Mishaps', j.mishaps) + ln('Encounters', j.encounters)
+          + (typeof j.events === 'string' ? ln('Events', j.events) : '')
+          + ((j.perils || []).length ? ln('Perilous Areas', j.perils.map(p => (p.name || 'Area') + ' (Peril ' + (p.rating || '?') + ')').join(', ')) : '')
+          + (Array.isArray(j.events) && j.events.length ? ln('Events', j.events.map(e => (e.roll ? e.roll + ' ' : '') + (e.name || '') + (e.target ? ' — ' + e.target : '') + (e.idea ? ': ' + e.idea : '')).join('\n')) : '')
+          + ln('Notes', j.notes)
+          + (t ? trackersHtml([t], 'travel' + i) : ''));
+      }).join('') || '<div class="advh-empty">No travel legs in this prep.</div>';
     }
     if(sec === 'pb'){
-      // Pirate Borg: the job, voyage legs, ships and traps — from the Pirate Borg prep builder.
+      // Pirate Borg: the crew's ship and the ones they meet (the PB plug-in's Ships tab). The job,
+      // voyage legs and traps moved to Adventure, the Voyage module and Hazards.
       const card = (h, body) => '<div class="advh-card"><div class="advh-card-h">' + advEsc(h) + '</div>' + body + '</div>';
       const ln = (l, v) => (v != null && String(v).trim()) ? '<div class="advh-desc"><b>' + advEsc(l) + ':</b> ' + advText(String(v)) + '</div>' : '';
       const sg = v => { const n = parseInt(String(v).replace(/[−–]/g, '-'), 10); return isNaN(n) ? String(v || '') : (n >= 0 ? '+' : '−') + Math.abs(n); };
@@ -8444,18 +8456,7 @@ function wireSessionPrepLoader(root) {
       const SH = (typeof PB_SHANTIES !== 'undefined' && Array.isArray(PB_SHANTIES)) ? PB_SHANTIES : [];
       const CM = (typeof PB_CREW_MODS !== 'undefined' && Array.isArray(PB_CREW_MODS)) ? PB_CREW_MODS : [];
       let h = '';
-      const J = prep.pbJob || {};
-      if(Object.keys(J).some(k => String(J[k] || '').trim())) h += card('The Job' + (J.name ? ' — ' + J.name : ''), ln('Hook', J.hook) + ln('Patron', J.patron) + ln('Faction', J.faction) + ln('Port', J.port) + ln('Prize', J.prize) + ln('Goal', J.goal) + ln('Rivals', J.rivals) + ln('Notes', J.notes));
       const ships = prep.pbShips || [];
-      (prep.pbVoyages || []).forEach(j => {
-        const hx = parseInt(j.hexes, 10) || 0, sh = ships.find(s => s.name === j.ship);
-        const base = String(j.speed || '').trim() !== '' ? (parseInt(j.speed, 10) || 0) : (sh ? parseInt(sh.speed, 10) || 0 : 0);
-        const ag = TR.againstTrades.directions.indexOf(j.heading) >= 0, sp = base ? (ag ? Math.max(TR.againstTrades.min, base + TR.againstTrades.hexesPerDay) : base) : 0;
-        h += card('Voyage — ' + (j.name || [j.from, j.to].filter(Boolean).join(' → ') || 'Leg'),
-          ln('Route', [j.from, j.to].filter(Boolean).join(' → ') + (j.heading ? ' · heading ' + j.heading : ''))
-          + ln('Distance', hx ? hx + ' hexes (' + hx * TR.hexMiles + ' miles)' + (sp ? ' at ' + sp + ' a day' + (ag ? ' (−1 against the trade winds)' : '') + ' · ~' + Math.ceil(hx / sp) + ' day' + (Math.ceil(hx / sp) === 1 ? '' : 's') : '') : '')
-          + ln('Ship', j.ship) + ln('Weather', j.weather) + ln('Winds', j.winds) + ln('Events', j.events) + ln('Notes', j.notes));
-      });
       ships.forEach(s => {
         let mod = 0; Object.keys(s.mods || {}).forEach(k => { const m = CM.find(x => x.condition === k); if(m && typeof m.mod === 'number') mod += m.per ? m.mod * (parseInt(s.mods[k], 10) || 0) : m.mod; });
         const sk = String(s.skill || '').trim() !== '' ? (parseInt(String(s.skill).replace(/[−–]/g, '-'), 10) || 0) + mod : null;
@@ -8468,8 +8469,7 @@ function wireSessionPrepLoader(root) {
           + ln('Morale', sk == null ? '' : '2d6 ' + sg(sk) + ((s.specialty || []).indexOf('veteran-quartermaster') >= 0 ? ' +3' : '') + ' — under 4 surrenders or mutinies')
           + ln('Special', s.special) + ln('Notes', s.notes));
       });
-      (prep.pbTraps || []).forEach(t => { h += card('Trap — ' + (t.name || ''), ln('Where', t.where) + ln('Effect', t.text) + ln('Damage', t.damage) + ln('Test', t.test) + ln('Bait', t.bait) + ln('Trigger', t.trigger) + ln('State', t.state) + ln('Complication', t.complication)); });
-      return h || '<div class="advh-empty">No job, voyage, ship or trap notes in this prep.</div>';
+      return h || '<div class="advh-empty">No ships in this prep.</div>';
     }
     if(sec === 'cast'){
       const list = prep.statblocks || [];
@@ -8627,12 +8627,19 @@ function wireSessionPrepLoader(root) {
       const list = prep.rewards || []; const left = list.map((r, i) => [r, i]).filter(([r, i]) => !isHanded(r, i));
       if(dropLoot(left.map(x => x[0]), (prep.subtitle || prep.title || lab('treasure')))) { left.forEach(([r, i]) => { run().handed[kOf(r.name, i)] = 1; }); runSave(); flash(dropAll, '✓ Sent'); setTimeout(renderHub, 900); }
     });
+    // A site's encounter button → open that encounter on the Encounters tab.
+    hub.querySelectorAll('.advh-goto-scene').forEach(b => b.addEventListener('click', () => {
+      const si = +b.dataset.si; activeSec = 'scenes'; renderHub();
+      const el = hub.querySelector('.advh-scene[data-i="' + si + '"]'); if(!el) return;
+      const hd = el.querySelector('.advh-scene-hd'); if(hd) hd.click(); el.scrollIntoView({ block: 'start' });
+    }));
     // Trackers → Start puts them in the Trackers tool (never twice).
     hub.querySelectorAll('.advh-trk-start').forEach(b => b.addEventListener('click', () => {
       const row = b.closest('.advh-trk'), scope = row.dataset.scope, i = +row.dataset.i;
-      const list = scope === 'adv' ? (prep.trackers || []) : ((scenes()[+scope.slice(5)] || {}).trackers || []);
+      const isLeg = scope.indexOf('travel') === 0;
+      const list = scope === 'adv' ? (prep.trackers || []) : isLeg ? [legTracker(+scope.slice(6))] : ((scenes()[+scope.slice(5)] || {}).trackers || []);
       const t = list[i]; if(!t) return;
-      const where = scope === 'adv' ? (prep.subtitle || prep.title || 'Adventure') : ((scenes()[+scope.slice(5)] || {}).name || 'Scene');
+      const where = scope === 'adv' ? (prep.subtitle || prep.title || 'Adventure') : isLeg ? lab('travel') : ((scenes()[+scope.slice(5)] || {}).name || 'Scene');
       if(startTracker(scope, t, i, where)) { b.innerHTML = '✓ Running'; b.disabled = true; b.classList.remove('primary'); }
     }));
     // Run Scene: linked cast → combat (qty each), linked map → Maps, linked tables → roll.

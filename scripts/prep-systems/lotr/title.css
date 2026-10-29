@@ -1,0 +1,9 @@
+  /* The LotR faces. Declared in this file on purpose: lib/inject.ts does NOT
+     inject public/tokens.css when previewOnly is set (the GM Screen's Adventure
+     pane), so titles relying on the injected copy would quietly fall back there.
+     Same woff2 files as tokens.css, same origin — no extra request in practice. */
+  @font-face { font-family: "Ringbearer"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("/fonts/ringbearer.woff2") format("woff2"); }
+  @font-face { font-family: "Aniron"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("/fonts/aniron.woff2") format("woff2"); }
+  @font-face { font-family: "EB Garamond"; font-style: normal; font-weight: 400 600; font-display: swap; src: url("/fonts/google/eb-garamond-400.woff2") format("woff2"); }
+  @font-face { font-family: "EB Garamond"; font-style: italic; font-weight: 400 600; font-display: swap; src: url("/fonts/google/eb-garamond-400-italic.woff2") format("woff2"); }
+  .adventure-title { font-family: "Ringbearer", "EB Garamond", Georgia, serif; font-size: 28px; font-weight: var(--title-weight); color: var(--title-color); line-height: 0.95; text-transform: uppercase; letter-spacing: 0.02em; }

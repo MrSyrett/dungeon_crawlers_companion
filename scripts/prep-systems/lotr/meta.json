@@ -1,0 +1,21 @@
+{
+  "cfg": "lotr",
+  "file": "lotr_session_prep_builder.html",
+  "code": "LOTR",
+  "name": "The Lord of the Rings 5e",
+  "title": "The Lord of the Rings — Adventure",
+  "sessionKey": "lotr_session",
+  "lsKey": "lotr_builder_v1",
+  "chapterLabel": "Chapter",
+  "chapterPh": "Chapter 1",
+  "chapterUpper": "CHAPTER",
+  "sessionLabel": "Session",
+  "titlePh": "e.g. The Star of the Mist",
+  "subtitlePh": "e.g. An Adventuring Phase in Eriador",
+  "castTab": "Adversaries",
+  "castHeading": "Adversaries &amp; Folk",
+  "mobLabel": "Adversary",
+  "bossLabel": "Chief",
+  "randomLabel": "Random Foe",
+  "pickerComment": "<!-- Shared dungeon-map engine (Map generator) + the LotR data layer (adversaries, journeys, councils, treasure, Eye). -->"
+}
