@@ -42,7 +42,7 @@ function ActionList({ title, items, color }: { title: string; items?: DndMonster
 function StatBlock({ m }: { m: DndMonster }) {
   const line = (label: string, val?: string) => (val ? <div><span className="font-semibold text-[var(--text)]">{label}:</span> <span className="text-[var(--muted)]">{val}</span></div> : null);
   return (
-    <div className={`${cardCls} border-l-4`} style={{ borderLeftColor: "var(--dnd)" }}>
+    <div className={`${cardCls} border-l-4 border-r-4`} style={{ borderLeftColor: "var(--dnd)", borderRightColor: "var(--dnd)" }}>
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold uppercase tracking-[0.1em]">{m.name}</h2>

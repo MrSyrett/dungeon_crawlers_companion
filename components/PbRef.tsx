@@ -487,7 +487,7 @@ export function MonsterBlock({ m, captainName }: { m: PbMonster; captainName?: s
   const naval = m.naval && typeof m.naval === "object" ? (m.naval as { hp: number; morale: number | null; armor: { name: string; die: string } | null; speed: number; agility: number; attacks: { name: string; damage: string | null; notes?: string }[] }) : null;
   const notes = [typeof m.drNote === "string" ? m.drNote : "", typeof m.armorNote === "string" ? m.armorNote : ""].filter(Boolean);
   return (
-    <div className={`${cardCls} border-l-4`} style={{ borderLeftColor: "var(--pb)" }}>
+    <div className={`${cardCls} border-l-4 border-r-4`} style={{ borderLeftColor: "var(--pb)", borderRightColor: "var(--pb)" }}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <h2 className="text-4xl text-[var(--sys-head)]">{m.name} <HbBadge x={m} /></h2>
         <span className="flex flex-wrap gap-1.5">{tags.map((t) => <span key={t} className={badge}>{t}</span>)}{pageText(m) ? <span className={dBadge}>{pageText(m)}</span> : null}</span>
@@ -648,5 +648,5 @@ export function ShipBlock({ s, compact, href }: { s: PbShip; compact?: boolean; 
     </>
   );
   if (compact) return <div className={cardCls}>{href ? <a href={href} className="group block">{body}</a> : body}</div>;
-  return <div className={`${cardCls} border-l-4`} style={{ borderLeftColor: "var(--pb)" }}>{body}{!isHb(s) ? <p className="mt-2 text-[11.5px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Source:</span> {sourcesLine(s)}</p> : null}</div>;
+  return <div className={`${cardCls} border-l-4 border-r-4`} style={{ borderLeftColor: "var(--pb)", borderRightColor: "var(--pb)" }}>{body}{!isHb(s) ? <p className="mt-2 text-[11.5px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Source:</span> {sourcesLine(s)}</p> : null}</div>;
 }

@@ -39,7 +39,7 @@
 body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;}
 .app-wrap{display:flex;flex:1;min-height:0;align-items:flex-start;}
 .sheet-wrap{flex:1;overflow-y:auto;padding:44px 16px 16px;container-type:inline-size;}
-.roll-log{width:280px;flex-shrink:0;background:var(--log-bg);display:flex;flex-direction:column;border-left:3px solid var(--dnd);position:sticky;top:0;height:100vh;overflow:hidden;}
+.roll-log{width:280px;flex-shrink:0;background:var(--log-bg);display:flex;flex-direction:column;border-left:3px solid var(--dnd);border-right:3px solid var(--dnd);position:sticky;top:0;height:100vh;overflow:hidden;}
 #log-collapse-btn{position:fixed;right:280px;top:50%;transform:translateY(-50%);z-index:201;background:var(--dnd);color:white;border:none;cursor:pointer;width:20px;height:56px;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;border-radius:4px 0 0 4px;box-shadow:-2px 0 6px rgba(0,0,0,.3);transition:right .2s ease;}
 #log-collapse-btn::after{content:"\25C0";}
 .roll-log.collapsed #log-collapse-btn{right:0;}
@@ -55,7 +55,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .log-entry .roll-detail{font-family:'Share Tech Mono',monospace;font-size:10px;color:#8a7f7f;margin-top:3px;line-height:1.4;word-break:break-word;}
 .log-entry.crit .roll-result{color:#6dd36d;}.log-entry.fumble .roll-result{color:#ff5a5a;}
 .log-entry.crit{border-color:#3a7a3a;}.log-entry.fumble{border-color:#7a3030;}
-.log-entry.remote{border-left:3px solid #b6683f;background:#241c18;}
+.log-entry.remote{border-left:3px solid #b6683f;border-right:3px solid #b6683f;background:#241c18;}
 .log-hint{color:#4a4040;font-size:11px;font-family:'Barlow Condensed',sans-serif;text-align:center;padding:20px 10px;letter-spacing:.06em;text-transform:uppercase;}
 .log-actions{display:flex;gap:4px;padding:8px 10px;border-bottom:1px solid #241c1c;flex-wrap:wrap;}
 .log-action-btn{flex:1;padding:5px 4px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;transition:background .1s;border-radius:2px;}
@@ -778,7 +778,7 @@ body.dark .abil-mod{color:#fff;} /* solid red roll button keeps white text in da
      2147483000 against 201). As the log's own first row it cannot go up there. */
   #log-collapse-btn{position:static!important;transform:none!important;flex:0 0 auto!important;
     width:100%!important;height:var(--dd-log-tab)!important;min-height:var(--dd-log-tab)!important;
-    box-sizing:border-box!important;border-top:3px solid var(--dnd)!important;
+    box-sizing:border-box!important;border-top:3px solid var(--dnd)!important;border-bottom:3px solid var(--dnd)!important;
     border-radius:14px 14px 0 0!important;box-shadow:none!important;font-size:12px!important;letter-spacing:.06em;padding:0!important;}
   #log-collapse-btn::after{content:"\25BC Hide Log";}
   .roll-log.collapsed #log-collapse-btn::after{content:"\25B2 Roll Log";}
@@ -872,7 +872,7 @@ textarea::-webkit-scrollbar,select::-webkit-scrollbar,.log-entries::-webkit-scro
 .tab-panel.on::-webkit-scrollbar-thumb:hover,.tab-split .tab-scroll::-webkit-scrollbar-thumb:hover,#spells-by-level::-webkit-scrollbar-thumb:hover,#tab-equipment .tbl-scroll::-webkit-scrollbar-thumb:hover{background:var(--dnd-dk);}
 select option{background:var(--input-bg);color:var(--ink);}
 /* Found-loot + loot boxes (shared with the other sheets / GM screen) */
-.log-foundloot,.log-system{border-left:3px solid #c8a020 !important;background:#221f16 !important;}
+.log-foundloot,.log-system{border-left:3px solid #c8a020 !important;border-right:3px solid #c8a020 !important;background:#221f16 !important;}
 .fl-head,.sys-head{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#e0c060;}
 .fl-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:#f0e2b0;margin-top:2px;}
 .fl-desc,.sys-body{font-size:11px;color:#b7a98a;margin-top:2px;line-height:1.4;}
@@ -884,7 +884,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 .fl-btn{flex:0 0 auto;background:#c8a020;color:#161616;border:none;border-radius:3px;padding:4px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
 .fl-btn:hover:not(:disabled){background:#e0b83a;}
 .fl-btn:disabled{background:transparent;color:#8a8570;border:1px solid #4a463a;cursor:default;}
-.log-lootbox{border-left:3px solid #c8a020 !important;background:#20211a !important;}
+.log-lootbox{border-left:3px solid #c8a020 !important;border-right:3px solid #c8a020 !important;background:#20211a !important;}
 .lb-head{font-family:'Barlow Condensed',sans-serif;color:#e0c060;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.1em;}
 .lb-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:#f0e2b0;margin-top:2px;}
 .lb-for{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#9a9a78;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}

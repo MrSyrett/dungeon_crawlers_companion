@@ -105,9 +105,9 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
   .co-add:hover { border-color: var(--ui-accent); }
   .co-list { max-height: 34vh; overflow-y: auto; scrollbar-width: thin; padding-bottom: 4px; }
   .chapter-outline.collapsed .co-list { display: none; }
-  .co-row { display: flex; align-items: center; gap: 7px; padding: 6px 12px; cursor: pointer; border-left: 2px solid transparent; }
+  .co-row { display: flex; align-items: center; gap: 7px; padding: 6px 12px; cursor: pointer; border-left: 2px solid transparent; border-right: 2px solid transparent; }
   .co-row:hover { background: var(--ui-panel); }
-  .co-row.active { background: color-mix(in srgb, var(--ui-accent) 12%, var(--ui-bg)); border-left-color: var(--ui-accent); }
+  .co-row.active { background: color-mix(in srgb, var(--ui-accent) 12%, var(--ui-bg)); border-left-color: var(--ui-accent);border-right-color: var(--ui-accent); }
   .co-grip { color: var(--ui-muted); cursor: grab; font-size: 12px; flex: 0 0 auto; touch-action: none; }
   .co-grip:active { cursor: grabbing; }
   .co-row.dragging { opacity: 0.4; }
@@ -158,7 +158,7 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
   .btn-remove:hover { color: var(--ui-accent); }
   .btn-add { width: 100%; background: none; border: 1px dashed var(--ui-border); border-radius: 6px; color: var(--ui-muted); font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; padding: 6px; cursor: pointer; transition: all 0.15s; margin-top: 2px; }
   .btn-add:hover { border-color: var(--ui-accent); color: var(--ui-accent); }
-  .location-card { background: var(--ui-bg); border: 1px solid var(--ui-border); border-left: 3px solid var(--accent-red); border-radius: 8px; padding: 8px; }
+  .location-card { background: var(--ui-bg); border: 1px solid var(--ui-border); border-left: 3px solid var(--accent-red);border-right: 3px solid var(--accent-red); border-radius: 8px; padding: 8px; }
   .sidebar-footer { padding: 10px 12px; border-top: 1px solid var(--ui-border); display: flex; gap: 8px; }
   .btn-primary { flex: 1; background: var(--ui-accent); border: none; color: white; font-family: var(--font-display); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 8px; border-radius: 6px; cursor: pointer; }
   .btn-primary:hover { background: var(--accent-dark); }
@@ -220,8 +220,8 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
      embedded read-only in the GM Screen (previewOnly in lib/inject.ts). */
   .page.dark-mode .sl { color: var(--section-hdr-dark, var(--highlight)); border-bottom-color: var(--section-hdr-dark, var(--highlight)); }
   .page.dark-mode .location-block { border-bottom-color: #3a3a3e; }
-  .page.dark-mode .p-footer { border-top-color: var(--accent); }
-  .page.dark-mode .p2-footer { border-top-color: var(--accent); }
+  .page.dark-mode .p-footer { border-top-color: var(--accent);border-bottom-color: var(--accent); }
+  .page.dark-mode .p2-footer { border-top-color: var(--accent);border-bottom-color: var(--accent); }
   .page.dark-mode .p2-footer p { color: #888; }
   .page.dark-mode .map-placeholder { background: #2a2a2e; color: var(--accent); border-color: var(--accent); }
   .page.dark-mode .columns { color: #d0ccc4; }
@@ -272,8 +272,8 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
   .page.dark-mode .sb-npc-notes { color: #b0aca4; }
 
   /* NPC/mob blocks - grey-green GMT boxes */
-  .npc-block { background: var(--box-bg); border: none; border-left: 4px solid var(--blue-npc); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 7px 9px 7px 10px; margin-bottom: 6px; }
-  .mob-block { background: var(--box-bg); border: none; border-left: 4px solid var(--accent-red); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 7px 9px 7px 10px; margin-bottom: 6px; }
+  .npc-block { background: var(--box-bg); border: none; border-left: 4px solid var(--blue-npc);border-right: 4px solid var(--blue-npc); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 7px 9px 7px 10px; margin-bottom: 6px; }
+  .mob-block { background: var(--box-bg); border: none; border-left: 4px solid var(--accent-red);border-right: 4px solid var(--accent-red); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 7px 9px 7px 10px; margin-bottom: 6px; }
   .entry-name { font-family: var(--font-display); font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--ink); margin-bottom: 1px; }
   .entry-meta { font-family: 'Share Tech Mono', monospace; font-size: 8px; color: var(--accent-dark); letter-spacing: 0.06em; margin-bottom: 4px; }
   .entry-desc { font-size: 9px; color: var(--ink); line-height: 1.55; }
@@ -290,7 +290,7 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
   .loc-lbl { font-family: var(--font-display); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; font-size: 8px; }
   .page.dark-mode .loc-dq { color: #b0aca4; }
 
-  .clue-item { font-size: 9px; color: var(--ink); margin-bottom: 5px; padding: 5px 9px 5px 11px; border-left: 3px solid var(--accent); border-radius: 7px; background: #fdf5e8; line-height: 1.5; }
+  .clue-item { font-size: 9px; color: var(--ink); margin-bottom: 5px; padding: 5px 9px 5px 11px; border-left: 3px solid var(--accent);border-right: 3px solid var(--accent); border-radius: 7px; background: #fdf5e8; line-height: 1.5; }
   .hook-item { background: #fdf8ec; }
   .reward-stats { color: var(--ink); }
   .clue-hdr { font-family: var(--font-display); font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--ink); }
@@ -301,7 +301,7 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
   .page.dark-mode .rt-table td { border-color: rgba(255,255,255,0.12); color: #d0ccc4; }
   .page.dark-mode .rt-table .rt-roll { color: var(--accent); }
 
-  .p-footer { border-top: 2px solid var(--accent); margin-top: 14px; padding-top: 10px; }
+  .p-footer { border-top: 2px solid var(--accent);border-bottom: 2px solid var(--accent); margin-top: 14px; padding-top: 10px; }
 
   .map-container { margin-bottom: 14px; }
   .map-container img { width: 100%; height: auto; display: block; border: 2px solid var(--accent); }
@@ -310,8 +310,8 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
 
   /* Stat blocks - GMT grey-green boxes with dark header rows */
   .statblocks { display: flex; gap: 12px; flex-wrap: wrap; }
-  .stat-block { background: var(--box-bg); border: none; border-top: 4px solid var(--accent-red); border-radius: 8px; box-shadow: 0 1px 5px rgba(0,0,0,0.09); overflow: hidden; padding: 8px 10px; width: calc(50% - 6px); flex: 0 0 calc(50% - 6px); }
-  .stat-block.full-width { width: 100%; flex: 0 0 100%; border-top-color: var(--blue-npc); }
+  .stat-block { background: var(--box-bg); border: none; border-top: 4px solid var(--accent-red);border-bottom: 4px solid var(--accent-red); border-radius: 8px; box-shadow: 0 1px 5px rgba(0,0,0,0.09); overflow: hidden; padding: 8px 10px; width: calc(50% - 6px); flex: 0 0 calc(50% - 6px); }
+  .stat-block.full-width { width: 100%; flex: 0 0 100%; border-top-color: var(--blue-npc);border-bottom-color: var(--blue-npc); }
   .sb-name { font-family: var(--font-display); font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink); margin-bottom: 1px; }
   .sb-type { font-family: 'Share Tech Mono', monospace; font-size: 8px; color: var(--accent-dark); letter-spacing: 0.06em; margin-bottom: 6px; }
   .sb-hp-row { display: flex; gap: 4px; margin-bottom: 6px; flex-wrap: wrap; }
@@ -325,9 +325,9 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
   .sb-ability { font-size: 8.5px; color: var(--ink); margin-bottom: 4px; line-height: 1.5; }
   .sb-ability.sb-secret strong { color: #a11; }
   .page.dark-mode .sb-ability.sb-secret strong { color: #e07a7a; }
-  .sb-warning { background: rgba(255,255,255,0.5); border: 1px solid var(--blue-npc); border-left: 3px solid var(--blue-npc); padding: 4px 8px; font-family: 'Share Tech Mono', monospace; font-size: 8px; color: var(--blue-npc); letter-spacing: 0.05em; margin-bottom: 7px; }
+  .sb-warning { background: rgba(255,255,255,0.5); border: 1px solid var(--blue-npc); border-left: 3px solid var(--blue-npc);border-right: 3px solid var(--blue-npc); padding: 4px 8px; font-family: 'Share Tech Mono', monospace; font-size: 8px; color: var(--blue-npc); letter-spacing: 0.05em; margin-bottom: 7px; }
   .sb-notes { font-size: 8.5px; color: var(--ink); line-height: 1.6; column-count: 2; column-gap: 16px; }
-  .p2-footer { border-top: 2px solid var(--accent); margin-top: 14px; padding-top: 6px; display: flex; justify-content: space-between; }
+  .p2-footer { border-top: 2px solid var(--accent);border-bottom: 2px solid var(--accent); margin-top: 14px; padding-top: 6px; display: flex; justify-content: space-between; }
   .p2-footer p { font-family: 'Share Tech Mono', monospace; font-size: 7.5px; color: var(--muted); letter-spacing: 0.08em; }
 
   /* Fixed letter-size pages */
@@ -637,7 +637,7 @@ body.flow-mode #p-locations {
 body.flow-mode .sb-notes { column-count: 1 !important; }
 body.flow-mode [data-paginated-hidden] { display: revert !important; }
 body.flow-mode .page + .page {
-  border-top: 3px solid var(--accent);
+  border-top: 3px solid var(--accent);border-bottom: 3px solid var(--accent);
 }
   /* Bestiary mob picker (NPCs/Mobs tab) */
   .mob-pick-list { display: none; max-height: 260px; overflow-y: auto; margin-bottom: 6px; border: 1px solid var(--ui-border); border-radius: 3px; background: var(--ui-panel); }
@@ -648,7 +648,7 @@ body.flow-mode .page + .page {
   .mob-pick-empty { padding: 10px; text-align: center; color: var(--ui-muted); font-family: 'Barlow', sans-serif; font-size: 11px; }
 
   /* ── Shared modules (before the skin, so a skin can restyle) ── */
-  .mod-box { background: rgba(255,255,255,.45); border: 1px solid var(--rule, #d6c08f); border-left: 4px solid var(--accent); border-radius: 8px; padding: 6px 9px 7px 10px; margin-bottom: 6px; }
+  .mod-box { background: rgba(255,255,255,.45); border: 1px solid var(--rule, #d6c08f); border-left: 4px solid var(--accent);border-right: 4px solid var(--accent); border-radius: 8px; padding: 6px 9px 7px 10px; margin-bottom: 6px; }
   .mod-box .loc-desc { margin-top: 2px; }
   .mod-travel-box { border-left-color: var(--muted, #6b5a2c); }
   .mod-badges { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 4px; }
@@ -662,7 +662,7 @@ body.flow-mode .page + .page {
   .x-fields { margin-bottom: 4px; }
   .sys-sec { margin-top: 4px; }
   .enc-info { margin: 0 0 8px; }
-  .mod-faction-box { border-left-color: var(--accent-red, #a02020); }
+  .mod-faction-box { border-left-color: var(--accent-red, #a02020);border-right-color: var(--accent-red, #a02020); }
   .mod-vehicle-box .sb-table { margin: 3px 0 4px; }
   .mod-danger .loc-lbl, .mod-boss .loc-lbl { color: var(--accent-red, #a02020) !important; }
   .page.dark-mode .mod-box { background: rgba(10,10,9,.5); border-color: #3f3a35; }
@@ -735,7 +735,7 @@ body.flow-mode .page + .page {
      dimmed — so they read on every system's paper in both modes. */
   .loc-links { font-size: 8.5px; color: inherit; opacity: 0.72; line-height: 1.45; margin: 2px 0 4px; }
   .loc-links b { color: inherit; font-weight: 700; }
-  .haz-item { font-size: 9px; color: var(--ink); margin-bottom: 5px; padding: 5px 9px 5px 11px; border-left: 3px solid var(--accent-red); border-radius: 7px; background: #fbeeee; line-height: 1.5; }
+  .haz-item { font-size: 9px; color: var(--ink); margin-bottom: 5px; padding: 5px 9px 5px 11px; border-left: 3px solid var(--accent-red);border-right: 3px solid var(--accent-red); border-radius: 7px; background: #fbeeee; line-height: 1.5; }
   .page.dark-mode .haz-item { background: #2a1616; color: #d0ccc4; }
   .page.dark-mode .det-grid, .page.dark-mode .trk-line { color: #d0ccc4; }
   /* Dark mode: accent labels, roll numbers and the cast heading on a dark page. */
@@ -798,7 +798,7 @@ body.flow-mode .page + .page {
   /* Read-aloud — the same box on every system's page, light or dark. The colours
      are !important on purpose: they are a cross-system convention (like the
      encounter colours), so no skin or app theme (public/tokens.css) may re-colour them. */
-  .page .read-aloud { background: var(--ra-bg) !important; border: 0 !important; border-left: 4px solid var(--ra-bar) !important; box-shadow: inset 0 0 0 1px var(--ra-border) !important; border-radius: 8px; padding: 8px 11px; }
+  .page .read-aloud { background: var(--ra-bg) !important; border: 0 !important; border-left: 4px solid var(--ra-bar) !important;border-right: 4px solid var(--ra-bar) !important; box-shadow: inset 0 0 0 1px var(--ra-border) !important; border-radius: 8px; padding: 8px 11px; }
   .page.dark-mode .read-aloud { background: var(--ra-bg-dark) !important; border-left-color: var(--ra-bar-dark) !important; box-shadow: inset 0 0 0 1px var(--ra-border-dark) !important; }
   .page.dark-mode .read-aloud p { color: var(--ra-text-dark) !important; }
   .page .read-aloud p { color: var(--ra-text) !important; font-family: var(--font-body, 'Barlow', sans-serif); font-size: var(--ty-body); font-style: italic; line-height: 1.55; }
@@ -828,8 +828,8 @@ body.flow-mode .page + .page {
     background: var(--box-light) !important; color: var(--ink);
     box-shadow: inset 0 0 0 1px var(--box-light-line) !important;
   }
-  .page .clue-item, .page .hook-item, .page .haz-item, .page .npc-block, .page .mob-block, .page .mod-box, .page .lotr-box, .page .pb-box, .page .lotr-oc { border-left: 4px solid var(--accent) !important; }
-  .page .stat-block, .page .stat-block.full-width { border-top: 4px solid var(--accent) !important; }
+  .page .clue-item, .page .hook-item, .page .haz-item, .page .npc-block, .page .mob-block, .page .mod-box, .page .lotr-box, .page .pb-box, .page .lotr-oc { border-left: 4px solid var(--accent) !important;border-right: 4px solid var(--accent) !important; }
+  .page .stat-block, .page .stat-block.full-width { border-top: 4px solid var(--accent) !important;border-bottom: 4px solid var(--accent) !important; }
   .page.dark-mode .clue-item, .page.dark-mode .hook-item, .page.dark-mode .haz-item, .page.dark-mode .npc-block, .page.dark-mode .mob-block, .page.dark-mode .stat-block,
   .page.dark-mode .mod-box, .page.dark-mode .lotr-box, .page.dark-mode .pb-box, .page.dark-mode .lotr-oc {
     background: var(--box-dark) !important; color: var(--ink-dark) !important; box-shadow: inset 0 0 0 1px var(--box-dark-line) !important;
@@ -845,15 +845,15 @@ body.flow-mode .page + .page {
   .page { --sys-hdr: var(--section-hdr, var(--accent)); --sys-hdr-ink: #fbf6ea; --sys-type: color-mix(in srgb, var(--sys-hdr) 78%, #000); }
   .page.dark-mode { --sys-hdr: var(--section-hdr-dark, var(--highlight)); --sys-hdr-ink: #1c1c1f; --sys-type: color-mix(in srgb, var(--sys-hdr) 72%, #fff); }
   .page .clue-item, .page .hook-item, .page .haz-item, .page .npc-block, .page .mob-block, .page .mod-box, .page .lotr-box, .page .pb-box, .page .lotr-oc,
-  .page.dark-mode .clue-item, .page.dark-mode .hook-item, .page.dark-mode .haz-item, .page.dark-mode .npc-block, .page.dark-mode .mob-block, .page.dark-mode .mod-box, .page.dark-mode .lotr-box, .page.dark-mode .pb-box, .page.dark-mode .lotr-oc { border-left-color: var(--sys-hdr) !important; }
+  .page.dark-mode .clue-item, .page.dark-mode .hook-item, .page.dark-mode .haz-item, .page.dark-mode .npc-block, .page.dark-mode .mob-block, .page.dark-mode .mod-box, .page.dark-mode .lotr-box, .page.dark-mode .pb-box, .page.dark-mode .lotr-oc { border-left-color: var(--sys-hdr) !important;border-right-color: var(--sys-hdr) !important; }
   /* A cast card's top bar wears its type colour (the same hues as the panel's type
      radios): foe red, boss purple, NPC / ally blue, non-combat teal. */
   :root { --sbt-mob: #b0332a; --sbt-boss: #6a2d8a; --sbt-npc: #1a4a8a; --sbt-talk: #1f7a8c;
           --sbt-mob-dark: #ec6b5c; --sbt-boss-dark: #b08ad8; --sbt-npc-dark: #8fb7f2; --sbt-talk-dark: #5fb3c4; }
-  .page .stat-block, .page .stat-block.full-width, .page .stat-block.sbt-mob { border-top-color: var(--sbt-mob) !important; }
-  .page .stat-block.sbt-boss { border-top-color: var(--sbt-boss) !important; }
-  .page .stat-block.sbt-npc { border-top-color: var(--sbt-npc) !important; }
-  .page .stat-block.sbt-talk { border-top-color: var(--sbt-talk) !important; }
+  .page .stat-block, .page .stat-block.full-width, .page .stat-block.sbt-mob { border-top-color: var(--sbt-mob) !important;border-bottom-color: var(--sbt-mob) !important; }
+  .page .stat-block.sbt-boss { border-top-color: var(--sbt-boss) !important;border-bottom-color: var(--sbt-boss) !important; }
+  .page .stat-block.sbt-npc { border-top-color: var(--sbt-npc) !important;border-bottom-color: var(--sbt-npc) !important; }
+  .page .stat-block.sbt-talk { border-top-color: var(--sbt-talk) !important;border-bottom-color: var(--sbt-talk) !important; }
   .page.dark-mode .stat-block, .page.dark-mode .stat-block.sbt-mob { border-top-color: var(--sbt-mob-dark) !important; }
   .page.dark-mode .stat-block.sbt-boss { border-top-color: var(--sbt-boss-dark) !important; }
   .page.dark-mode .stat-block.sbt-npc { border-top-color: var(--sbt-npc-dark) !important; }
@@ -881,7 +881,7 @@ body.flow-mode .page + .page {
   .page.dark-mode .stat-block .sb-ability, .page.dark-mode .stat-block .sb-notes, .page.dark-mode .stat-block .sb-npc-notes, .page.dark-mode .stat-block .sb-section-label { color: var(--ink-dark) !important; }
   .page.dark-mode .stat-block .sb-name, .page.dark-mode .stat-block .sb-section-label { border-bottom-color: rgba(255,255,255,.25) !important; }
   /* Flavour text IS read-aloud text: the same D2 slate-blue box everywhere. */
-  .page .sb-flavor { background: var(--ra-bg) !important; color: var(--ra-text) !important; border: 0 !important; border-left: 4px solid var(--ra-bar) !important;
+  .page .sb-flavor { background: var(--ra-bg) !important; color: var(--ra-text) !important; border: 0 !important; border-left: 4px solid var(--ra-bar) !important;border-right: 4px solid var(--ra-bar) !important;
     box-shadow: inset 0 0 0 1px var(--ra-border) !important; border-radius: 8px !important; padding: 6px 10px !important; font-style: italic; }
   .page.dark-mode .sb-flavor { background: var(--ra-bg-dark) !important; color: var(--ra-text-dark) !important; border-left-color: var(--ra-bar-dark) !important; box-shadow: inset 0 0 0 1px var(--ra-border-dark) !important; }
   .page .sb-flavor *, .page.dark-mode .sb-flavor * { color: inherit !important; }

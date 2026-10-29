@@ -153,7 +153,7 @@ body.dark .chip{background:#1b2a4a;border-color:#3a5aa0;color:#cfe0ff;}
 textarea{width:100%;border:1px solid var(--input-border);border-radius:6px;padding:7px;font-family:inherit;font-size:13px;resize:vertical;min-height:70px;background:#fff;}
 
 /* ═══ Canonical Roll Log (shared shell; only the dice tray is JLU-specific) ═══ */
-.roll-log{width:290px;flex-shrink:0;background:var(--log-bg);display:flex;flex-direction:column;border-left:3px solid var(--jlu);position:sticky;top:0;height:100vh;overflow:hidden;}
+.roll-log{width:290px;flex-shrink:0;background:var(--log-bg);display:flex;flex-direction:column;border-left:3px solid var(--jlu);border-right:3px solid var(--jlu);position:sticky;top:0;height:100vh;overflow:hidden;}
 #log-collapse-btn{position:fixed;right:290px;top:50%;transform:translateY(-50%);z-index:201;background:var(--jlu);color:#fff;border:none;cursor:pointer;width:20px;height:56px;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;border-radius:6px 0 0 6px;box-shadow:-2px 0 6px rgba(0,0,0,.3);transition:right .2s ease;}
 #log-collapse-btn::after{content:"\25C0";}
 .roll-log.collapsed #log-collapse-btn{right:0;}
@@ -180,7 +180,7 @@ textarea{width:100%;border:1px solid var(--input-border);border-radius:6px;paddi
 .log-entry .roll-result{font-family:'Share Tech Mono',monospace;font-size:20px;font-weight:700;color:var(--log-text);line-height:1.05;}
 .log-entry .roll-detail{font-family:'Share Tech Mono',monospace;font-size:10px;color:#8794b8;margin-top:3px;line-height:1.4;word-break:break-word;}
 /* Campaign log cards the GM Screen can post: found loot (claim per item), loot boxes (open/claim), system messages. */
-.log-foundloot,.log-system,.log-lootbox{border-left:3px solid var(--jlu) !important;}
+.log-foundloot,.log-system,.log-lootbox{border-left:3px solid var(--jlu) !important;border-right:3px solid var(--jlu) !important;}
 .fl-head,.sys-head,.lb-head{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--jlu);}
 .fl-name,.lb-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--log-text);margin-top:2px;}
 .fl-desc,.sys-body,.lb-desc{font-size:11px;color:#b8b2a4;margin-top:2px;line-height:1.4;}
@@ -198,7 +198,7 @@ textarea{width:100%;border:1px solid var(--input-border);border-radius:6px;paddi
 .lb-actions{margin-top:6px;}
 .log-entry.crit .roll-result{color:var(--gold);}.log-entry.fumble .roll-result{color:#e2796f;}
 .log-entry.crit{border-color:#b58a20;}.log-entry.fumble{border-color:#8a3a34;}
-.log-entry.remote{border-left:3px solid #c88a5a;background:#1a1c22;}
+.log-entry.remote{border-left:3px solid #c88a5a;border-right:3px solid #c88a5a;background:#1a1c22;}
 .log-hint{color:#565f78;font-size:11px;font-family:'Barlow Condensed',sans-serif;text-align:center;padding:20px 10px;letter-spacing:.06em;text-transform:uppercase;}
 .dice-tray{border-top:1px solid #1a2338;padding:10px;display:flex;flex-direction:column;gap:7px;background:#080d17;}
 .tray-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
@@ -343,7 +343,7 @@ body.dark .stat.click:hover{background:#1a2a4d;}
      2147483000 against 201). As the log's own first row it cannot go up there. */
   #log-collapse-btn{position:static!important;transform:none!important;flex:0 0 auto!important;
     width:100%!important;height:var(--dd-log-tab)!important;min-height:var(--dd-log-tab)!important;
-    box-sizing:border-box!important;border-top:3px solid var(--jlu)!important;
+    box-sizing:border-box!important;border-top:3px solid var(--jlu)!important;border-bottom:3px solid var(--jlu)!important;
     border-radius:14px 14px 0 0!important;box-shadow:none!important;font-size:12px!important;letter-spacing:.06em;padding:0!important;}
   #log-collapse-btn::after{content:"\25BC Hide Log";}
   .roll-log.collapsed #log-collapse-btn::after{content:"\25B2 Roll Log";}
@@ -801,7 +801,7 @@ function renderArchFeatures(){
       (a.abilities||[]).forEach(function(ab){ if(chosen.indexOf(ab.name)<0)return;
         html+='<div class="abil"><b>'+esc(ab.name)+'</b><br>'+esc(ab.text)+'</div>'; });
     } else { html+='<div class="abil" style="color:var(--muted);">No abilities chosen — pick '+archAbilityCap()+' in Create or Level.</div>'; }
-    if(a.drawback){ html+='<div class="abil" style="border-left:2px solid var(--jlu);"><b style="color:var(--jlu-dk);">Drawback · '+esc(a.drawback.name)+'</b><br>'+esc(a.drawback.text)+'</div>'; }
+    if(a.drawback){ html+='<div class="abil" style="border-left:2px solid var(--jlu);border-right:2px solid var(--jlu);"><b style="color:var(--jlu-dk);">Drawback · '+esc(a.drawback.name)+'</b><br>'+esc(a.drawback.text)+'</div>'; }
     html+='</div></div>';
   }
   // Origin: features + limitation
@@ -809,7 +809,7 @@ function renderArchFeatures(){
   if(o){
     html+='<div class="pw"><div class="pw-head"><div><span class="pn">'+esc(o.name)+'</span> <span class="gr">Origin</span><div class="cat">'+esc(o.summary||'')+'</div></div></div><div class="pw-body">';
     (o.features||[]).forEach(function(f){ html+='<div class="abil"><b>'+esc(f.name)+'</b><br>'+esc(f.text)+'</div>'; });
-    if(o.limitation){ html+='<div class="abil" style="border-left:2px solid var(--jlu);"><b style="color:var(--jlu-dk);">Limitation</b><br>'+esc(o.limitation)+'</div>'; }
+    if(o.limitation){ html+='<div class="abil" style="border-left:2px solid var(--jlu);border-right:2px solid var(--jlu);"><b style="color:var(--jlu-dk);">Limitation</b><br>'+esc(o.limitation)+'</div>'; }
     html+='</div></div>';
   }
   host.innerHTML=html;

@@ -43,7 +43,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .sheet-wrap{flex:1;overflow-y:auto;padding:44px 16px 16px;container-type:inline-size;}
 
 /* Roll log */
-.roll-log{width:290px;flex-shrink:0;background:var(--log-bg);display:flex;flex-direction:column;border-left:3px solid var(--mv);position:sticky;top:0;height:100vh;overflow:hidden;}
+.roll-log{width:290px;flex-shrink:0;background:var(--log-bg);display:flex;flex-direction:column;border-left:3px solid var(--mv);border-right:3px solid var(--mv);position:sticky;top:0;height:100vh;overflow:hidden;}
 #log-collapse-btn{position:fixed;right:290px;top:50%;transform:translateY(-50%);z-index:201;background:var(--mv);color:#fff;border:none;cursor:pointer;width:20px;height:56px;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;border-radius:6px 0 0 6px;box-shadow:-2px 0 6px rgba(0,0,0,.3);transition:right .2s ease;}
 #log-collapse-btn::after{content:"\25C0";}
 .roll-log.collapsed #log-collapse-btn{right:0;}
@@ -57,7 +57,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .log-entry .roll-result{font-family:'Share Tech Mono',monospace;font-size:20px;font-weight:700;color:var(--log-text);line-height:1.05;}
 .log-entry .roll-detail{font-family:'Share Tech Mono',monospace;font-size:10px;color:#9aa0ac;margin-top:3px;line-height:1.4;word-break:break-word;}
 /* Campaign log cards the GM Screen can post: found loot (claim per item), loot boxes (open/claim), system messages. */
-.log-foundloot,.log-system,.log-lootbox{border-left:3px solid var(--mv) !important;}
+.log-foundloot,.log-system,.log-lootbox{border-left:3px solid var(--mv) !important;border-right:3px solid var(--mv) !important;}
 .fl-head,.sys-head,.lb-head{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--mv);}
 .fl-name,.lb-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--log-text);margin-top:2px;}
 .fl-desc,.sys-body,.lb-desc{font-size:11px;color:#b8b2a4;margin-top:2px;line-height:1.4;}
@@ -75,7 +75,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .lb-actions{margin-top:6px;}
 .log-entry.crit .roll-result{color:#ffd23f;}.log-entry.fumble .roll-result{color:#e0776f;}
 .log-entry.crit{border-color:#c8a020;}.log-entry.fumble{border-color:#8a3a34;}
-.log-entry.remote{border-left:3px solid #c88a5a;background:#221a1a;}
+.log-entry.remote{border-left:3px solid #c88a5a;border-right:3px solid #c88a5a;background:#221a1a;}
 .log-hint{color:#565a66;font-size:11px;font-family:'Barlow Condensed',sans-serif;text-align:center;padding:20px 10px;letter-spacing:.06em;text-transform:uppercase;}
 .log-actions{display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;border-bottom:1px solid #24262e;}
 .log-action-btn{flex:1;padding:6px 4px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;transition:background .1s;border-radius:6px;}
@@ -450,7 +450,7 @@ body.dark .a-tile .atv{color:#f0888e;}
      2147483000 against 201). As the log's own first row it cannot go up there. */
   #log-collapse-btn{position:static!important;transform:none!important;flex:0 0 auto!important;
     width:100%!important;height:var(--dd-log-tab)!important;min-height:var(--dd-log-tab)!important;
-    box-sizing:border-box!important;border-top:3px solid var(--mv)!important;
+    box-sizing:border-box!important;border-top:3px solid var(--mv)!important;border-bottom:3px solid var(--mv)!important;
     border-radius:14px 14px 0 0!important;box-shadow:none!important;font-size:12px!important;letter-spacing:.06em;padding:0!important;}
   #log-collapse-btn::after{content:"\25BC Hide Log";}
   .roll-log.collapsed #log-collapse-btn::after{content:"\25B2 Roll Log";}

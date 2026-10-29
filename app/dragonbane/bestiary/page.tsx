@@ -81,7 +81,7 @@ function MonsterDetail({ m }: { m: DbMonster }) {
     ...((m.immunities as string[] | undefined) ?? []).map((r) => `Immunity: ${r}`),
   ];
   return (
-    <div className={`${cardCls} border-l-4`} style={{ borderLeftColor: "var(--db)" }}>
+    <div className={`${cardCls} border-l-4 border-r-4`} style={{ borderLeftColor: "var(--db)", borderRightColor: "var(--db)" }}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <h2 className="text-3xl text-[var(--sys-link)]">{m.name} {isHb(m) ? <span className={hbBadge}>HB</span> : null}</h2>
         <span className="flex flex-wrap gap-1.5"><span className={badge}>{catOf(m)}</span>{m.page ? <span className={badge}>{srcPage(m)}{m.corePage ? ` · Core p.${String(m.corePage)}` : ""}</span> : null}</span>

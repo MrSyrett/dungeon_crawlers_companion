@@ -106,7 +106,7 @@ function SchoolDetail({ sc, spells, tricks }: { sc: DbMagicSchool; spells: DbSpe
   const study = (sc.study ?? {}) as Record<string, string>;
   const STUDY_LABEL: Record<string, string> = { ranks12: "Ranks 1–2", ranks34: "Ranks 3–4", rank5: "Rank 5", other: "Also" };
   return (
-    <div className={`${cardCls} border-l-4`} style={{ borderLeftColor: "var(--db)" }}>
+    <div className={`${cardCls} border-l-4 border-r-4`} style={{ borderLeftColor: "var(--db)", borderRightColor: "var(--db)" }}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <h2 className="text-3xl text-[var(--sys-link)]">{sc.name}</h2>
         <span className="flex flex-wrap gap-1.5">
@@ -221,7 +221,7 @@ export default async function DbMagicPage({ searchParams }: { searchParams: Prom
       <div className="mx-auto w-full max-w-3xl px-5 py-10">
         <DbHeader title="Magic" subtitle={`${SCHOOL_LABEL[selected.school] ?? selected.school} · ${selected.recipe ? "recipe" : "rank"} ${selected.rank}`} />
         <BackLink href={BASE} label="All spells" />
-        <div className={`${cardCls} border-l-4`} style={{ borderLeftColor: "var(--db)" }}>
+        <div className={`${cardCls} border-l-4 border-r-4`} style={{ borderLeftColor: "var(--db)", borderRightColor: "var(--db)" }}>
           <SpellCard s={selected} full />
           {leadsTo.length ? <p className="mt-3 text-[12.5px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Prerequisite for:</span> {leadsTo.join(", ")}</p> : null}
           {schoolRec(selected.school) ? <p className="mt-2 text-[12.5px]"><a className="text-[var(--sys-link)] underline" href={`${BASE}?sc=${schoolRec(selected.school)!.id}`}>About {SCHOOL_LABEL[selected.school]} →</a></p> : null}

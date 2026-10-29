@@ -125,7 +125,7 @@ textarea{width:100%;border:1px solid var(--input-border);border-radius:6px;paddi
 .empty{font-size:12px;color:var(--muted);font-style:italic;padding:4px 0;}
 
 /* ═══ Canonical Roll Log (shared shell; only the dice tray is GB-specific) ═══ */
-.roll-log{width:290px;flex-shrink:0;background:var(--log-bg);display:flex;flex-direction:column;border-left:3px solid var(--gb);position:sticky;top:0;height:100vh;overflow:hidden;}
+.roll-log{width:290px;flex-shrink:0;background:var(--log-bg);display:flex;flex-direction:column;border-left:3px solid var(--gb);border-right:3px solid var(--gb);position:sticky;top:0;height:100vh;overflow:hidden;}
 #log-collapse-btn{position:fixed;right:290px;top:50%;transform:translateY(-50%);z-index:201;background:var(--gb);color:#12180a;border:none;cursor:pointer;width:20px;height:56px;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;border-radius:6px 0 0 6px;box-shadow:-2px 0 6px rgba(0,0,0,.3);transition:right .2s ease;}
 #log-collapse-btn::after{content:"\25C0";}
 .roll-log.collapsed #log-collapse-btn{right:0;}
@@ -152,7 +152,7 @@ textarea{width:100%;border:1px solid var(--input-border);border-radius:6px;paddi
 .log-entry .roll-result{font-family:'Share Tech Mono',monospace;font-size:20px;font-weight:700;color:var(--log-text);line-height:1.05;}
 .log-entry .roll-detail{font-family:'Share Tech Mono',monospace;font-size:10px;color:#8f9c78;margin-top:3px;line-height:1.4;word-break:break-word;}
 /* Campaign log cards the GM Screen can post: found loot (claim per item), loot boxes (open/claim), system messages. */
-.log-foundloot,.log-system,.log-lootbox{border-left:3px solid var(--gb) !important;}
+.log-foundloot,.log-system,.log-lootbox{border-left:3px solid var(--gb) !important;border-right:3px solid var(--gb) !important;}
 .fl-head,.sys-head,.lb-head{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--gb);}
 .fl-name,.lb-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--log-text);margin-top:2px;}
 .fl-desc,.sys-body,.lb-desc{font-size:11px;color:#b8b2a4;margin-top:2px;line-height:1.4;}
@@ -171,7 +171,7 @@ textarea{width:100%;border:1px solid var(--input-border);border-radius:6px;paddi
 .log-entry.crit .roll-result{color:var(--ecto);}.log-entry.fumble .roll-result{color:#e2796f;}
 .log-entry.crit{border-color:#5f8f24;}.log-entry.fumble{border-color:#8a3a34;}
 .log-entry.ghost .roll-result{color:#c78be6;}.log-entry.ghost{border-color:#5a3e7a;}
-.log-entry.remote{border-left:3px solid #c88a5a;background:#1f1c18;}
+.log-entry.remote{border-left:3px solid #c88a5a;border-right:3px solid #c88a5a;background:#1f1c18;}
 .log-hint{color:#59614a;font-size:11px;font-family:'Barlow Condensed',sans-serif;text-align:center;padding:20px 10px;letter-spacing:.06em;text-transform:uppercase;}
 .dice-tray{border-top:1px solid #232b18;padding:10px;display:flex;flex-direction:column;gap:7px;background:#0c0f08;}
 .tray-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
@@ -346,7 +346,7 @@ body.dark .carry.over,body.dark .pk-carry.over{color:#e88;}
      2147483000 against 201). As the log's own first row it cannot go up there. */
   #log-collapse-btn{position:static!important;transform:none!important;flex:0 0 auto!important;
     width:100%!important;height:var(--dd-log-tab)!important;min-height:var(--dd-log-tab)!important;
-    box-sizing:border-box!important;border-top:3px solid var(--gb)!important;
+    box-sizing:border-box!important;border-top:3px solid var(--gb)!important;border-bottom:3px solid var(--gb)!important;
     border-radius:14px 14px 0 0!important;box-shadow:none!important;font-size:12px!important;letter-spacing:.06em;padding:0!important;}
   #log-collapse-btn::after{content:"\25BC Hide Log";}
   .roll-log.collapsed #log-collapse-btn::after{content:"\25B2 Roll Log";}

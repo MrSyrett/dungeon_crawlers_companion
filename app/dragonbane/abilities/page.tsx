@@ -44,7 +44,7 @@ export default async function DbAbilitiesPage({ searchParams }: { searchParams: 
       <div className="mx-auto w-full max-w-3xl px-5 py-10">
         <DbHeader title="Heroic Abilities" subtitle={selected.name} />
         <BackLink href={BASE} label="All heroic abilities" />
-        <div className={`${cardCls} border-l-4`} style={{ borderLeftColor: "var(--db)" }}>
+        <div className={`${cardCls} border-l-4 border-r-4`} style={{ borderLeftColor: "var(--db)", borderRightColor: "var(--db)" }}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <h2 className="text-3xl text-[var(--sys-link)]">{selected.name} {isHb(selected) ? <span className={hbBadge}>HB</span> : null}</h2>
             <span className="flex gap-1.5"><span className={badge}>{wpText(selected.wp)}</span><span className={badge}>{TIMING_LABEL[selected.timing] ?? selected.timing}</span></span>

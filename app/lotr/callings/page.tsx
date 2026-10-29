@@ -181,7 +181,7 @@ export default async function LotrCallingsPage({ searchParams }: { searchParams:
       </section>
 
       {path ? (
-        <section className={`${cardCls} mt-4 border-l-4`} style={{ borderLeftColor: "var(--lotr)" }}>
+        <section className={`${cardCls} mt-4 border-l-4 border-r-4`} style={{ borderLeftColor: "var(--lotr)", borderRightColor: "var(--lotr)" }}>
           <p className={eyebrow}>Shadow Path</p>
           <h2 className="text-xl text-[var(--sys-link)]">{path.name}</h2>
           <p className="mt-1 text-[13px] italic leading-relaxed text-[var(--muted)]">{path.description}</p>

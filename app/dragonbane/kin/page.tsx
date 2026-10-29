@@ -19,7 +19,7 @@ function KinDetail({ k }: { k: DbKin }) {
   const lore = DB_KIN_LORE.find((l) => l.kin === k.name);
   const traits = (k.traits as string[] | undefined) ?? [];
   return (
-    <div className={`${cardCls} border-l-4`} style={{ borderLeftColor: "var(--db)" }}>
+    <div className={`${cardCls} border-l-4 border-r-4`} style={{ borderLeftColor: "var(--db)", borderRightColor: "var(--db)" }}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <h2 className="text-3xl text-[var(--sys-link)]">{k.name}</h2>
         <span className="flex flex-wrap gap-1.5">

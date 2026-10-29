@@ -17,7 +17,7 @@ function abilityLine(name: string) {
 
 function ProfessionDetail({ p }: { p: DbProfession }) {
   return (
-    <div className={`${cardCls} border-l-4`} style={{ borderLeftColor: "var(--db)" }}>
+    <div className={`${cardCls} border-l-4 border-r-4`} style={{ borderLeftColor: "var(--db)", borderRightColor: "var(--db)" }}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <h2 className="text-3xl text-[var(--sys-link)]">{p.name}</h2>
         <span className={badge}>D10 {p.roll} · Key attribute {p.keyAttribute}</span>

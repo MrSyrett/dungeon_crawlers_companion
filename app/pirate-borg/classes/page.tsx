@@ -56,7 +56,7 @@ function StatStrip({ c }: { c: PbClass }) {
 function ClassDetail({ c }: { c: PbClass }) {
   const deck = c.usesCards;
   return (
-    <div className={`${cardCls} border-l-4`} style={{ borderLeftColor: "var(--pb)" }}>
+    <div className={`${cardCls} border-l-4 border-r-4`} style={{ borderLeftColor: "var(--pb)", borderRightColor: "var(--pb)" }}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <h2 className="text-4xl text-[var(--sys-head)]">{c.name}</h2>
         <span className="flex flex-wrap gap-1.5">{c.roll ? <span className={dBadge}>{c.optional ? "d8" : "d6"} {c.roll}</span> : null}{c.optional ? <span className={badge}>Optional</span> : null}<span className={dBadge}>pg. {c.page}</span></span>

@@ -176,7 +176,7 @@ export default async function PbBestiaryPage({ searchParams }: { searchParams: P
             const faction = PB_FACTIONS.find((f) => f.id === c.faction);
             const boss = byId.get(c.captain);
             return (
-              <article key={c.id} id={`captain-${c.id}`} className={`${cardCls} scroll-mt-20 border-l-4`} style={{ borderLeftColor: "var(--pb)" }}>
+              <article key={c.id} id={`captain-${c.id}`} className={`${cardCls} scroll-mt-20 border-l-4 border-r-4`} style={{ borderLeftColor: "var(--pb)", borderRightColor: "var(--pb)" }}>
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <h3 className="text-[22px] leading-tight text-[var(--sys-link)]">{c.name}</h3>
                   <span className="flex gap-1.5">{faction ? <span className={badge}>{faction.name}</span> : null}<span className={dBadge}>pg. {c.page}</span></span>
