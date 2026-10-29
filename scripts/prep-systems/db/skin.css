@@ -18,13 +18,16 @@
 .page.dark-mode .loc-lbl { color: var(--gold-lift); }
 .sl { font-family: var(--font-display); font-weight: 400; font-size: 14px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--section-hdr); border-bottom: 1.5px solid var(--gold); padding-bottom: 1px; }
 .entry-name, .loc-name { font-family: var(--font-label) !important; text-transform: none !important; letter-spacing: 0.03em !important; font-weight: 400 !important; }
-.sb-name { font-family: var(--font-display); text-transform: uppercase; font-weight: 400; letter-spacing: .05em; font-size: 15px; color: var(--accent-dark); }
-/* Hideout is the logo wherever it titles something: red letters inside a gold
-   outline. The stroke is painted first (paint-order), so only its outer half
-   shows and the letter keeps its weight; em-sized so it grows with the type. */
-.adventure-title, .sl, .sb-name, .sidebar-title, .section-divider,
-.page.dark-mode .sl, .page.dark-mode .sb-name { color: var(--db-logo); -webkit-text-stroke: var(--db-stroke, .11em) var(--gold); paint-order: stroke fill; }
-.adventure-title { --db-stroke: .09em; }
+.sb-name { font-family: var(--font-display); text-transform: uppercase; font-weight: 400; letter-spacing: .05em; font-size: 15px; }
+/* The adventure title is the logo: red Hideout inside a gold outline. The stroke
+   is painted first (paint-order), so only its outer half shows. Every other
+   header is plain Hideout in the book's green — no stroke. */
+.adventure-title { color: var(--db-logo); -webkit-text-stroke: .09em var(--gold); paint-order: stroke fill; }
+.sl, .sb-name { color: var(--db); -webkit-text-stroke: 0; }
+/* The deep green is too dim as text on the dark page and the dark panel; the
+   lifted green (--db-ink / --ui-accent) is the same hue at 6.6:1. */
+.page.dark-mode .sl, .page.dark-mode .sb-name { color: var(--db-ink); }
+.sidebar-title, .section-divider { color: var(--ui-accent); -webkit-text-stroke: 0; }
 .sb-type, .entry-meta, .loc-tag { color: var(--accent-dark); }
 .read-aloud, .sb-flavor { background: linear-gradient(180deg, #262422, #1b1a19); border-left: 4px solid var(--db); }
 .read-aloud p, .sb-flavor { color: #f3e7cc; font-size: 10px; }

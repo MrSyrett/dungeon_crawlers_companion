@@ -7,7 +7,10 @@
     --read-text: #ece4d4; --highlight: #e6463a; --green: #3f5a34; --blue-npc: #3a3a52;
     --section-hdr: #8a0f16; --table-hdr: #2a0c0e; --preview-bg: #0a0808;
     --gold: #a3121a; --gold-lift: #e6463a; --pb: #a3121a; --pb-ink: #e6463a; --pb-bone: #e8e0cc;
-    --font-display: "JSL Blackletter", "EB Garamond", Georgia, serif;
+    /* JSL Blackletter is hard to read small: it letters the adventure title only
+       (title.css / skin.css). Every other display use takes the second font. */
+    --font-display: "1651 Alchemy", "EB Garamond", Georgia, serif;
+    --font-blackletter: "JSL Blackletter", "EB Garamond", Georgia, serif;
     --font-label: "1651 Alchemy", "EB Garamond", Georgia, serif;
     --font-body: "EB Garamond", Georgia, serif;
     /* Masthead banner — black into a dried-blood red, with the blackletter title in white */

@@ -12,7 +12,10 @@
 .page .sb-ability { font-family: var(--font-body); font-size: 9.6px; line-height: 1.42; }
 .page-banner { border-bottom: 2px solid var(--pb); box-shadow: inset 0 -1px 0 rgba(163,18,26,.45); background: linear-gradient(120deg, rgba(13,11,11,.92), rgba(58,10,13,.88)), url("/themes/pb-splatter.webp") center / cover; }
 .page-bottom-band { border-top: 2px solid var(--pb); }
-.adventure-title { font-family: var(--font-display) !important; font-size: 34px; letter-spacing: 0.01em; line-height: 1.05; font-weight: 400; text-transform: none !important; text-shadow: 0 2px 0 rgba(0,0,0,.55); }
+/* The app theme (public/tokens.css) sets --font-display to the blackletter for all of
+   Pirate Borg; in the Adventure Prep it letters the adventure title only. */
+html:root[data-themed][data-system="PB"] { --font-display: "1651 Alchemy", "EB Garamond", ui-serif, Georgia, serif; }
+.adventure-title { font-family: var(--font-blackletter) !important; font-size: 34px; letter-spacing: 0.01em; line-height: 1.05; font-weight: 400; text-transform: none !important; text-shadow: 0 2px 0 rgba(0,0,0,.55); }
 .adventure-subtitle { font-family: var(--font-label); text-transform: none; font-weight: 400; letter-spacing: 0.04em; font-size: 13px; margin-top: 4px; }
 .header-meta { font-family: var(--font-body); letter-spacing: 0.04em; font-size: 9.5px; opacity: .92; }
 .page .loc-lbl { font-family: var(--font-label); text-transform: none; font-weight: 400; letter-spacing: .03em; font-size: 10px; color: var(--accent-dark); }
