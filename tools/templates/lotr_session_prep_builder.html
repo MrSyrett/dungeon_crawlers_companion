@@ -1031,7 +1031,10 @@ body.flow-mode .page + .page {
   .page.dark-mode .entry-name, .page.dark-mode .clue-hdr { color: #efebe3 !important; }
   .page .entry-name, .page .clue-hdr { color: var(--ink); }
   /* Editing panel: readable tabs and labels; the read-aloud field wears the read-aloud colour. */
-  .tab-btn { font-size: 9.5px; letter-spacing: .04em; padding: 8px 6px; flex: 1 1 auto !important; min-width: auto; white-space: normal; line-height: 1.2; overflow-wrap: normal; word-break: keep-all; hyphens: none; }
+  /* Ten tabs, five to a row: Adventure · Tables · Clues · Treasure · Factions / Journey · Encounters · NPCs · Vehicles · Maps. */
+  .sidebar-tabs { display: grid !important; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .tab-btn { font-size: 9.5px; letter-spacing: .02em; padding: 8px 1px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: clip; line-height: 1.2; flex: none !important; }
+  .tab-btn.mod-off { display: none; }
   .field-label { font-size: 10px; }
   .loc-ra-input, .so-ra-input, .sb-flavor-input, .reward-flavor-input { border-left: 3px solid var(--ra-bar-dark) !important; }
   .field-label.ra-label { color: var(--ra-bar-dark) !important; }
@@ -1058,7 +1061,6 @@ body.flow-mode .page + .page {
   <div class="sidebar-tabs" id="sidebar-tabs">
     <!-- Tab order = the order things print on the page. -->
     <button class="tab-btn active" data-tab="adventure" onclick="switchTab('adventure')">Adventure</button>
-    <button class="tab-btn" data-tab="phase" onclick="switchTab('phase')">Phase</button>
 
     <button class="tab-btn" data-tab="tables" onclick="switchTab('tables')">Tables</button>
     <button class="tab-btn" data-tab="clues" onclick="switchTab('clues')">Clues</button>
@@ -1099,6 +1101,61 @@ body.flow-mode .page + .page {
         <textarea id="f-overview" placeholder="Brief summary of the adventure..." oninput="autosave()"></textarea>
       </div>
 
+      <div class="section-divider">Adventuring Phase</div>
+      <div class="lotr-hint">Five questions to set the Phase in Middle-earth: when, where, what is afoot, why the Player-heroes care, and who they will meet.</div>
+      <div style="display:flex; gap:8px;" class="field-group">
+        <div style="flex:1"><label class="field-label">When — Year</label><input type="text" id="f-ph-year" placeholder="e.g. 2965 (Third Age)" oninput="autosave()"></div>
+        <div style="flex:1"><label class="field-label">Season</label>
+          <select id="f-ph-season" onchange="autosave()"><option value="">—</option><option>Spring</option><option>Summer</option><option>Autumn</option><option>Winter</option></select></div>
+      </div>
+      <div style="display:flex; gap:8px;" class="field-group">
+        <div style="flex:1"><label class="field-label">Where — Region type</label>
+          <select id="f-ph-region" onchange="autosave()"><option value="">—</option><option>Border Land</option><option>Wild Land</option><option>Dark Land</option></select></div>
+        <div style="flex:1.4"><label class="field-label">Place</label><input type="text" id="f-ph-place" placeholder="e.g. The North Downs" oninput="autosave()"></div>
+      </div>
+      <div class="field-group"><label class="field-label">Where — Setting notes</label><textarea id="f-ph-where" class="short" placeholder="A famous place to bring to life, or any ruin, glade or river? How far from the Company's haven?" oninput="autosave()"></textarea></div>
+      <div class="field-group"><label class="field-label accent">What? — What is going on</label><textarea id="f-ph-what" class="short" placeholder="The situation presented at the first session — a rumour from the last Fellowship Phase, or a direct challenge..." oninput="autosave()"></textarea></div>
+      <div class="field-group"><label class="field-label">Why? — Personal stakes</label><textarea id="f-ph-why" class="short" placeholder="Callings, distinctive features and Tale of Years entries that pull each Player-hero in..." oninput="autosave()"></textarea></div>
+      <div class="field-group"><label class="field-label">Who? — Personalities</label><textarea id="f-ph-who" class="short" placeholder="Familiar figures, the patron, a new recurring character — remember the heroes are the protagonists." oninput="autosave()"></textarea></div>
+      <div class="lotr-calc" id="ph-season-note"></div>
+
+      <div class="section-divider">Schemes</div>
+      <div class="lotr-hint">The objectives of the Company's enemies — what they will do if nobody stops them.</div>
+      <div id="schemes-list" class="entity-list"></div>
+      <button class="btn-add" onclick="addScheme();autosave()">+ Add Scheme</button>
+
+      <div class="section-divider">Fellowship Phase</div>
+      <div style="display:flex; gap:8px;" class="field-group">
+        <div style="flex:1"><label class="field-label">Spiritual recovery</label>
+          <select id="f-fp-recovery" onchange="autosave()"><option value="">—</option><option value="1">1 — hindered the Shadow</option><option value="2">2 — damaged the Enemy</option><option value="3">3 — drew the Eye</option></select></div>
+        <div style="flex:1"><label class="field-label">Safe haven</label><input type="text" id="f-fp-haven" list="lotr-havens" placeholder="e.g. Bree" oninput="autosave()"></div>
+      </div>
+      <datalist id="lotr-havens"></datalist>
+      <div class="checkbox-row"><input type="checkbox" id="f-fp-yule" onchange="autosave()"><label for="f-fp-yule">Yule — the winter Fellowship Phase</label></div>
+      <div class="field-group"><label class="field-label">Patron</label><input type="text" id="f-fp-patron" list="lotr-patrons" placeholder="e.g. Bilbo Baggins" oninput="autosave()"><datalist id="lotr-patrons"></datalist></div>
+      <div class="field-group"><label class="field-label">Suggested undertakings</label>
+        <div id="fp-undertakings" class="lotr-checks"></div></div>
+      <div class="field-group"><label class="field-label">Fellowship notes</label><textarea id="f-fp-notes" class="short" placeholder="News of the wider world, songs to write, heirs to raise..." oninput="autosave()"></textarea></div>
+
+      <div class="section-divider">Eye Awareness (optional)</div>
+      <div class="lotr-hint">Starting score from the Company's make-up; the Hunt threshold from the region. Reaching it means a Revelation episode.</div>
+      <div class="field-group lotr-checks">
+        <label><input type="checkbox" id="f-eye-dwarf" onchange="autosave()"> One or more Dwarves</label>
+        <label><input type="checkbox" id="f-eye-elf" onchange="autosave()"> Dúnedain or Elves</label>
+        <label><input type="checkbox" id="f-eye-highelf" onchange="autosave()"> A High Elf</label>
+      </div>
+      <div style="display:flex; gap:8px;" class="field-group">
+        <div style="flex:1"><label class="field-label">Heroes with PB +4</label><input type="text" id="f-eye-pb4" placeholder="0" oninput="autosave()"></div>
+        <div style="flex:1"><label class="field-label">Famous weapons/armour</label><input type="text" id="f-eye-famous" placeholder="0" oninput="autosave()"></div>
+      </div>
+      <div class="field-group"><label class="field-label">Hunt region</label>
+        <select id="f-eye-region" onchange="autosave()"><option>Border Land</option><option selected>Wild Land</option><option>Dark Land</option></select></div>
+      <div class="field-group lotr-checks" id="eye-mods"></div>
+      <div class="field-group"><label class="field-label">Revelation episodes to use</label>
+        <div id="eye-revs" class="lotr-checks"></div></div>
+      <div class="lotr-calc" id="eye-calc"></div>
+      <button class="btn-add btn-mini" style="margin-top:6px" onclick="lotrEyeTracker()" title="Add the Eye as a Ticks tracker on the Adventure tab, so the GM Screen can start it">+ Add the Eye as a tracker</button>
+    
       <div class="sys-sections" data-tab="adventure"></div>
       <div class="section-divider">Trackers</div>
       <p class="tab-hint">Clocks, countdowns and timers for the whole adventure. On the GM Screen each one gets a Start button that adds it to the Trackers tool.</p>
@@ -1181,63 +1238,6 @@ body.flow-mode .page + .page {
       <button class="btn-add" id="vehicles-add" onclick="addVehicle();autosave()">+ Add Vehicle</button>
     </div>
 
-    <!-- LOTR: the Adventuring Phase (When? Where? What? Why? Who?), Schemes, Fellowship Phase, Eye Awareness -->
-    <div class="tab-panel" id="tab-phase">
-      <div class="section-divider">Adventuring Phase</div>
-      <div class="lotr-hint">Five questions to set the Phase in Middle-earth: when, where, what is afoot, why the Player-heroes care, and who they will meet.</div>
-      <div style="display:flex; gap:8px;" class="field-group">
-        <div style="flex:1"><label class="field-label">When — Year</label><input type="text" id="f-ph-year" placeholder="e.g. 2965 (Third Age)" oninput="autosave()"></div>
-        <div style="flex:1"><label class="field-label">Season</label>
-          <select id="f-ph-season" onchange="autosave()"><option value="">—</option><option>Spring</option><option>Summer</option><option>Autumn</option><option>Winter</option></select></div>
-      </div>
-      <div style="display:flex; gap:8px;" class="field-group">
-        <div style="flex:1"><label class="field-label">Where — Region type</label>
-          <select id="f-ph-region" onchange="autosave()"><option value="">—</option><option>Border Land</option><option>Wild Land</option><option>Dark Land</option></select></div>
-        <div style="flex:1.4"><label class="field-label">Place</label><input type="text" id="f-ph-place" placeholder="e.g. The North Downs" oninput="autosave()"></div>
-      </div>
-      <div class="field-group"><label class="field-label">Where — Setting notes</label><textarea id="f-ph-where" class="short" placeholder="A famous place to bring to life, or any ruin, glade or river? How far from the Company's haven?" oninput="autosave()"></textarea></div>
-      <div class="field-group"><label class="field-label accent">What? — What is going on</label><textarea id="f-ph-what" class="short" placeholder="The situation presented at the first session — a rumour from the last Fellowship Phase, or a direct challenge..." oninput="autosave()"></textarea></div>
-      <div class="field-group"><label class="field-label">Why? — Personal stakes</label><textarea id="f-ph-why" class="short" placeholder="Callings, distinctive features and Tale of Years entries that pull each Player-hero in..." oninput="autosave()"></textarea></div>
-      <div class="field-group"><label class="field-label">Who? — Personalities</label><textarea id="f-ph-who" class="short" placeholder="Familiar figures, the patron, a new recurring character — remember the heroes are the protagonists." oninput="autosave()"></textarea></div>
-      <div class="lotr-calc" id="ph-season-note"></div>
-
-      <div class="section-divider">Schemes</div>
-      <div class="lotr-hint">The objectives of the Company's enemies — what they will do if nobody stops them.</div>
-      <div id="schemes-list" class="entity-list"></div>
-      <button class="btn-add" onclick="addScheme();autosave()">+ Add Scheme</button>
-
-      <div class="section-divider">Fellowship Phase</div>
-      <div style="display:flex; gap:8px;" class="field-group">
-        <div style="flex:1"><label class="field-label">Spiritual recovery</label>
-          <select id="f-fp-recovery" onchange="autosave()"><option value="">—</option><option value="1">1 — hindered the Shadow</option><option value="2">2 — damaged the Enemy</option><option value="3">3 — drew the Eye</option></select></div>
-        <div style="flex:1"><label class="field-label">Safe haven</label><input type="text" id="f-fp-haven" list="lotr-havens" placeholder="e.g. Bree" oninput="autosave()"></div>
-      </div>
-      <datalist id="lotr-havens"></datalist>
-      <div class="checkbox-row"><input type="checkbox" id="f-fp-yule" onchange="autosave()"><label for="f-fp-yule">Yule — the winter Fellowship Phase</label></div>
-      <div class="field-group"><label class="field-label">Patron</label><input type="text" id="f-fp-patron" list="lotr-patrons" placeholder="e.g. Bilbo Baggins" oninput="autosave()"><datalist id="lotr-patrons"></datalist></div>
-      <div class="field-group"><label class="field-label">Suggested undertakings</label>
-        <div id="fp-undertakings" class="lotr-checks"></div></div>
-      <div class="field-group"><label class="field-label">Fellowship notes</label><textarea id="f-fp-notes" class="short" placeholder="News of the wider world, songs to write, heirs to raise..." oninput="autosave()"></textarea></div>
-
-      <div class="section-divider">Eye Awareness (optional)</div>
-      <div class="lotr-hint">Starting score from the Company's make-up; the Hunt threshold from the region. Reaching it means a Revelation episode.</div>
-      <div class="field-group lotr-checks">
-        <label><input type="checkbox" id="f-eye-dwarf" onchange="autosave()"> One or more Dwarves</label>
-        <label><input type="checkbox" id="f-eye-elf" onchange="autosave()"> Dúnedain or Elves</label>
-        <label><input type="checkbox" id="f-eye-highelf" onchange="autosave()"> A High Elf</label>
-      </div>
-      <div style="display:flex; gap:8px;" class="field-group">
-        <div style="flex:1"><label class="field-label">Heroes with PB +4</label><input type="text" id="f-eye-pb4" placeholder="0" oninput="autosave()"></div>
-        <div style="flex:1"><label class="field-label">Famous weapons/armour</label><input type="text" id="f-eye-famous" placeholder="0" oninput="autosave()"></div>
-      </div>
-      <div class="field-group"><label class="field-label">Hunt region</label>
-        <select id="f-eye-region" onchange="autosave()"><option>Border Land</option><option selected>Wild Land</option><option>Dark Land</option></select></div>
-      <div class="field-group lotr-checks" id="eye-mods"></div>
-      <div class="field-group"><label class="field-label">Revelation episodes to use</label>
-        <div id="eye-revs" class="lotr-checks"></div></div>
-      <div class="lotr-calc" id="eye-calc"></div>
-      <button class="btn-add btn-mini" style="margin-top:6px" onclick="lotrEyeTracker()" title="Add the Eye as a Ticks tracker on the Adventure tab, so the GM Screen can start it">+ Add the Eye as a tracker</button>
-    </div>
 
 
     <!-- CAST: everyone in the adventure, one list with role chips -->
@@ -2047,7 +2047,8 @@ const _TAB_ALIASES = { basics:'adventure', encounters:'scenes', monsters:'cast' 
 function applyTabLabels(){
   if(!PREG) return;
   // A long label ("Imperials/NPCs") may wrap only after its slash, never mid-word.
-  document.querySelectorAll('.tab-btn[data-tab]').forEach(b=>{ b.innerHTML = escH(PREG.label(PREP_CODE, b.dataset.tab)).replace(/\//g,'/<wbr>'); });
+  // Tabs have fixed names on every system (registry TAB_NAMES); headings inside keep the system's words.
+  document.querySelectorAll('.tab-btn[data-tab]').forEach(b=>{ b.textContent = PREG.tabName ? PREG.tabName(b.dataset.tab) : PREG.label(PREP_CODE, b.dataset.tab); });
   const sh=document.getElementById('scenes-heading'); if(sh) sh.textContent = PREG.label(PREP_CODE,'scenes');
   const th=document.getElementById('treasure-heading'); if(th) th.textContent = PREG.label(PREP_CODE,'treasure');
   { const va=document.getElementById('vehicles-add'); if(va) va.textContent='+ Add '+PREG.label(PREP_CODE,'vehicles').replace(/([^s])s$/,'$1'); }

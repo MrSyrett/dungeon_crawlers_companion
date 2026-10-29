@@ -17,6 +17,11 @@
   // Factions, Travel, Encounters, Cast, Vehicles. (A Sites module was tried and dropped: a chapter is one
   // site, and the Adventure tab holds it — see siteText.)
   var MODULE_TABS = ['travel', 'factions', 'vehicles'];
+  // Tab names — the same ten tabs, in the same order, on every Adventure Prep and on
+  // the GM Screen (user, 2026-10-29). Section headings inside keep each system's own words.
+  var TAB_ORDER = ['adventure', 'tables', 'clues', 'treasure', 'factions', 'travel', 'scenes', 'cast', 'vehicles', 'maps'];
+  var TAB_NAMES = { adventure: 'Adventure', tables: 'Tables', clues: 'Clues', treasure: 'Treasure', factions: 'Factions', travel: 'Journey', scenes: 'Encounters', cast: 'NPCs', vehicles: 'Vehicles', maps: 'Maps' };
+  function tabName(k) { return TAB_NAMES[k] || k; }
   // Flavour names (kept per system), loot drops, and the shared modules each system
   // turns on. Modules are set per system, never per adventure: an empty one simply
   // shows nothing on the GM Screen.
@@ -633,6 +638,7 @@
     sys: sys, label: label, loot: loot, modules: modules, itemList: itemList, loadItems: loadItems, migrate: migrate, trackerToTool: trackerToTool,
     travel: travel, travelCalc: travelCalc, siteText: siteText,
     ATTITUDES: ATTITUDES, factionList: factionList, factionListLoad: factionListLoad, factionTracker: factionTracker,
+    TAB_ORDER: TAB_ORDER, TAB_NAMES: TAB_NAMES, tabName: tabName,
     EXTRA: EXTRA, SECTIONS: SECTIONS, extra: extra, sections: sections, encounterInfo: encounterInfo, sceneTrackers: sceneTrackers, CR_XP: CR_XP,
     loadScripts: function (srcs, cb) { loadList({ scripts: srcs }, cb); },
     vehicleCfg: vehicleCfg, vehicleList: vehicleList, vehicleToStatblock: vehicleToStatblock, pbShipToVehicle: pbShipToVehicle, pbVehicleToShip: pbVehicleToShip, hasModule: function (code, m) { return modules(code).indexOf(m) >= 0 && MODULE_TABS.indexOf(m) >= 0; },

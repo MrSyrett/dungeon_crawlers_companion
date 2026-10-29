@@ -557,6 +557,12 @@ input[type="number"] { -moz-appearance: textfield; }
 .advh-outline.collapsed .advh-co-head .caret { transform: rotate(-90deg); }
 .advh-co-head .ttl { font-family: 'Geist', sans-serif; font-weight: 800; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--light); }
 .advh-co-head .cnt { color: var(--dim); font-size: 11px; }
+.advh-title-tog { cursor: pointer; user-select: none; }
+.advh-title-tog:hover .advh-title { color: var(--accent); }
+.advh-chcount { display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; padding: 1px 7px; border: 1px solid var(--border); border-radius: 999px; font-size: 11px; font-weight: 800; color: var(--dim); vertical-align: 2px; letter-spacing: 0; }
+.advh-chcount .caret { font-size: 9px; display: inline-block; transition: transform .15s; transform: rotate(-90deg); }
+.advh-title-tog.open .advh-chcount .caret { transform: none; }
+.advh-outline.collapsed { display: none; }
 .advh-co-list { max-height: 30vh; overflow-y: auto; scrollbar-width: thin; padding-bottom: 3px; }
 .advh-outline.collapsed .advh-co-list { display: none; }
 .advh-co-row { display: flex; align-items: center; gap: 8px; padding: 6px 10px; cursor: pointer; border-left: 2px solid transparent; }
@@ -565,8 +571,8 @@ input[type="number"] { -moz-appearance: textfield; }
 .advh-co-row .n { font-family: 'Geist', sans-serif; font-weight: 800; font-size: 10px; color: var(--dim); width: 14px; text-align: center; flex: 0 0 auto; }
 .advh-co-row .nm { font-family: 'Geist', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: .02em; color: var(--light); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; }
 .advh-co-row.on .nm { color: var(--white); }
-.advh-tabs { display: flex; flex-wrap: wrap; gap: 0 1px; padding: 5px 6px 0; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.advh-tab { flex: 1 1 auto; background: transparent; border: 0; border-bottom: 2px solid transparent; color: var(--dim); font-family: 'Geist', sans-serif; font-weight: 800; font-size: 10px; letter-spacing: .03em; text-transform: uppercase; padding: 6px 4px; cursor: pointer; white-space: nowrap; text-align: center; }
+.advh-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0 1px; padding: 5px 6px 0; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.advh-tab { min-width: 0; overflow: hidden; text-overflow: ellipsis; background: transparent; border: 0; border-bottom: 2px solid transparent; color: var(--dim); font-family: 'Geist', sans-serif; font-weight: 800; font-size: 10px; letter-spacing: .03em; text-transform: uppercase; padding: 6px 4px; cursor: pointer; white-space: nowrap; text-align: center; }
 .advh-tab:hover { color: var(--light); }
 .advh-tab.on { color: var(--white); border-bottom-color: var(--accent); }
 .advh-tab[data-empty="1"] { opacity: .45; }
@@ -8327,20 +8333,26 @@ function wireSessionPrepLoader(root) {
     // hand-built LotR / Dragonbane / Pirate Borg sections after Scenes. Only tabs
     // with something in them show; the first tab is always there.
     // Same order as the Adventure Prep's tabs and printed page.
-    const ALL = ['adventure', 'lotr', 'tables', 'clues', 'treasure', 'factions', 'travel', 'scenes', 'cast', 'vehicles', 'maps'];
-    const TABS = ALL.filter(k => k === 'adventure' || c[k]).map(k => [k, lab(k)]);
+    // The same ten tabs, names and order as the Adventure Prep (registry TAB_ORDER / TAB_NAMES),
+    // five to a row; an empty one is dimmed, never hidden.
+    const R0 = window.PREP_REGISTRY;
+    const ALL = (R0 && R0.TAB_ORDER) || ['adventure', 'tables', 'clues', 'treasure', 'factions', 'travel', 'scenes', 'cast', 'vehicles', 'maps'];
+    const TABS = ALL.map(k => [k, (R0 && R0.tabName) ? R0.tabName(k) : lab(k)]);
+    ALL.forEach(k => { if(!c[k] && lotrPart(k)) c[k] = 1; });
     if(!TABS.some(([k]) => k === activeSec)) activeSec = 'adventure';
     const advTitle = (prepChapters[0] && prepChapters[0].title) || prep.title || prep._docTitle || 'Adventure';
     const D = DET();
     // (Goal and Prize live in Adventure Details — no pinned strip under the title.)
     let h = '<div class="advh-head">'
-      + '<div class="advh-titlerow"><div><div class="advh-title">' + advEsc(advTitle) + '</div>'
-      + (!multi && prep.subtitle ? '<div class="advh-sub">' + advEsc(prep.subtitle) + '</div>' : '') + '</div>'
+      // A multi-chapter prep: the chapter count sits by the title, and clicking the
+      // title opens the chapter list (no separate "Chapters" bar).
+      + '<div class="advh-titlerow"><div' + (multi ? ' class="advh-title-tog' + (prepChaptersCollapsed ? '' : ' open') + '" data-cotoggle title="' + (prepChaptersCollapsed ? 'Show' : 'Hide') + ' chapters"' : '') + '>'
+      + '<div class="advh-title">' + advEsc(advTitle) + (multi ? ' <span class="advh-chcount"><span class="caret">▾</span>' + prepChapters.length + '</span>' : '') + '</div>'
+      + (multi ? '<div class="advh-sub">' + advEsc(chapterName(prepChapters[prepActiveChapter] || {}, prepActiveChapter)) + '</div>' : (prep.subtitle ? '<div class="advh-sub">' + advEsc(prep.subtitle) + '</div>' : '')) + '</div>'
       + '<button class="btn small advh-full" title="Open the full printable prep in this pane">Full prep</button></div>'
       + '</div>';
     if(multi) {
       h += '<div class="advh-outline' + (prepChaptersCollapsed ? ' collapsed' : '') + '">'
-        + '<div class="advh-co-head" data-cotoggle><span class="caret">▾</span><span class="ttl">Chapters</span><span class="cnt">(' + prepChapters.length + ')</span></div>'
         + '<div class="advh-co-list">'
         + prepChapters.map((ch, i) =>
             '<div class="advh-co-row' + (i === prepActiveChapter ? ' on' : '') + '" data-chap="' + i + '" title="' + advEsc(chapterName(ch, i)) + '"><span class="n">' + (i + 1) + '</span><span class="nm">' + advEsc(chapterName(ch, i)) + '</span></div>').join('')
@@ -8353,7 +8365,40 @@ function wireSessionPrepLoader(root) {
     wireHub();
   }
 
+  // The Lord of the Rings Adventuring Phase pieces, shown in the tab that matches
+  // the builder: Phase, Schemes and Fellowship → Adventure · Rumours → Clues ·
+  // Hoards and Treasure Index → Treasure · Councils → Encounters · Landmarks → Journey.
+  function lotrPart(where){
+      const card = (h, body) => '<div class="advh-card"><div class="advh-card-h">' + advEsc(h) + '</div>' + body + '</div>';
+      const ln = (l, v) => (v && String(v).trim()) ? '<div class="advh-desc"><b>' + advEsc(l) + ':</b> ' + advText(String(v)) + '</div>' : '';
+      const C = (typeof LOTR_COUNCIL !== 'undefined') ? LOTR_COUNCIL : null;
+      let h = '';
+      if(where === 'adventure'){
+        const P = prep.phase || {};
+        if(P.what || P.where || P.season || P.region) h += card('Adventuring Phase', ln('When', [P.year, P.season].filter(Boolean).join(' · ')) + ln('Where', [P.place, P.region].filter(Boolean).join(' · ')) + ln('What', P.what) + ln('Why', P.why) + ln('Who', P.who));
+        (prep.schemes || []).forEach(x => { h += card('Scheme — ' + (x.name || ''), ln('Schemer', x.villain) + ln('Aim', x.aim) + ln('Moves', x.steps) + ln('If unchecked', x.unchecked)); });
+        const F = prep.fellowship || {};
+        if(F.haven || F.patron || F.notes || F.recovery) h += card('Fellowship Phase', ln('Haven', F.haven) + ln('Patron', F.patron) + ln('Recovery', F.recovery ? '−' + F.recovery + ' Shadow' : '') + ln('Yule', F.yule ? 'yes' : '') + ln('Undertakings', (F.undertakings || []).join(', ')) + ln('Notes', F.notes));
+      }
+      if(where === 'clues') (prep.rumours || []).forEach(x => { h += card('Rumour' + (x.truth ? ' (' + x.truth + ')' : ''), '<div class="advh-desc">' + advText(x.text || '') + '</div>' + ln('Source', x.source)); });
+      if(where === 'scenes') (prep.councils || []).forEach(c => {
+        const at = C && C.attitudes.find(a => a.name === c.attitude), rq = C && C.requests.find(r => r.name === c.request);
+        h += card('Council — ' + (c.name || ''), ln('Audience', (c.attitude || '') + (at ? ' (DC ' + at.dc + ')' : '') + (c.audience ? ' · ' + c.audience : '')) + ln('Request', (c.request || '') + (rq ? ' — ' + rq.successes + ' success' + (rq.successes === 1 ? '' : 'es') : '') + (c.ask ? ': ' + c.ask : ''))
+          + ln('Introduction', c.intro) + ln('Sways them', c.sway) + ln('Success', c.success) + ln('With woe', c.woe) + ln('Disaster', c.disaster));
+      });
+      if(where === 'travel') (prep.landmarks || []).forEach(l => { h += card('Landmark — ' + (l.name || ''), ln('Rumour', l.rumour) + ln('Old Lore', l.oldlore) + ln('Background', l.background) + ln('Locations', l.locations) + ln('Trouble', l.trouble)); });
+      if(where === 'treasure'){
+        (prep.hoards || []).forEach(x => { h += card('Hoard — ' + (x.name || x.rating || ''), ln('Rating', x.rating) + ln('Value', x.value) + ln('Greed DC', x.greed) + ln('Magic', x.magic) + ln('Contents', x.notes) + ln('Curse', x.curse)); });
+        (prep.tindex || []).forEach(t => { h += card('Treasure Index — ' + (t.item || ''), ln('For', t.hero) + ln('Kind', [t.kind, t.object].filter(Boolean).join(' · ')) + ln('Blessings', t.blessings) + ln('Curse', t.curse && !/^none$/i.test(t.curse) ? t.curse : '') + ln('Notes', t.notes)); });
+      }
+      return h;
+  }
   function sectionHtml(sec){
+    const core = sectionCore(sec), extra = lotrPart(sec);
+    if(!extra) return core;
+    return (/^<div class="advh-empty">/.test(core) ? '' : core) + '<div class="advh-lotr">' + extra + '</div>';
+  }
+  function sectionCore(sec){
     if(sec === 'adventure'){
       const D = DET(), R = run();
       const sc = scenes(), cl = prep.clues || [], tr = prep.rewards || [];
@@ -8436,30 +8481,6 @@ function wireSessionPrepLoader(root) {
           + (!hasBody && !extra && !detailsHtml && !runBar && !xh ? '<div class="advh-desc dim">No details recorded.</div>' : '')
           + '</div></div>';
       }).join('') + looseHtml;
-    }
-    if(sec === 'lotr'){
-      // The Lord of the Rings Adventuring Phase: schemes, rumours, journeys,
-      // councils, landmarks and hoards from the LotR prep builder.
-      const card = (h, body) => '<div class="advh-card"><div class="advh-card-h">' + advEsc(h) + '</div>' + body + '</div>';
-      const ln = (l, v) => (v && String(v).trim()) ? '<div class="advh-desc"><b>' + advEsc(l) + ':</b> ' + advText(String(v)) + '</div>' : '';
-      const J = (typeof LOTR_JOURNEY !== 'undefined') ? LOTR_JOURNEY : null, C = (typeof LOTR_COUNCIL !== 'undefined') ? LOTR_COUNCIL : null;
-      let h = '';
-      const P = prep.phase || {};
-      if(P.what || P.where || P.season || P.region) h += card('Adventuring Phase', ln('When', [P.year, P.season].filter(Boolean).join(' · ')) + ln('Where', [P.place, P.region].filter(Boolean).join(' · ')) + ln('What', P.what) + ln('Why', P.why) + ln('Who', P.who));
-      (prep.schemes || []).forEach(x => { h += card('Scheme — ' + (x.name || ''), ln('Schemer', x.villain) + ln('Aim', x.aim) + ln('Moves', x.steps) + ln('If unchecked', x.unchecked)); });
-      (prep.rumours || []).forEach(x => { h += card('Rumour' + (x.truth ? ' (' + x.truth + ')' : ''), '<div class="advh-desc">' + advText(x.text || '') + '</div>' + ln('Source', x.source)); });
-      // Journeys moved into the Travel module (see the Journeys tab).
-      (prep.councils || []).forEach(c => {
-        const at = C && C.attitudes.find(a => a.name === c.attitude), rq = C && C.requests.find(r => r.name === c.request);
-        h += card('Council — ' + (c.name || ''), ln('Audience', (c.attitude || '') + (at ? ' (DC ' + at.dc + ')' : '') + (c.audience ? ' · ' + c.audience : '')) + ln('Request', (c.request || '') + (rq ? ' — ' + rq.successes + ' success' + (rq.successes === 1 ? '' : 'es') : '') + (c.ask ? ': ' + c.ask : ''))
-          + ln('Introduction', c.intro) + ln('Sways them', c.sway) + ln('Success', c.success) + ln('With woe', c.woe) + ln('Disaster', c.disaster));
-      });
-      (prep.landmarks || []).forEach(l => { h += card('Landmark — ' + (l.name || ''), ln('Rumour', l.rumour) + ln('Old Lore', l.oldlore) + ln('Background', l.background) + ln('Locations', l.locations) + ln('Trouble', l.trouble)); });
-      (prep.hoards || []).forEach(x => { h += card('Hoard — ' + (x.name || x.rating || ''), ln('Rating', x.rating) + ln('Value', x.value) + ln('Greed DC', x.greed) + ln('Magic', x.magic) + ln('Contents', x.notes) + ln('Curse', x.curse)); });
-      (prep.tindex || []).forEach(t => { h += card('Treasure Index — ' + (t.item || ''), ln('For', t.hero) + ln('Kind', [t.kind, t.object].filter(Boolean).join(' · ')) + ln('Blessings', t.blessings) + ln('Curse', t.curse && !/^none$/i.test(t.curse) ? t.curse : '') + ln('Notes', t.notes)); });
-      const F = prep.fellowship || {};
-      if(F.haven || F.patron || F.notes || F.recovery) h += card('Fellowship Phase', ln('Haven', F.haven) + ln('Patron', F.patron) + ln('Recovery', F.recovery ? '−' + F.recovery + ' Shadow' : '') + ln('Yule', F.yule ? 'yes' : '') + ln('Undertakings', (F.undertakings || []).join(', ')) + ln('Notes', F.notes));
-      return h || '<div class="advh-empty">No Adventuring Phase notes in this prep.</div>';
     }
     if(sec === 'factions'){
       // Factions module: each faction's next move, and its clock → the Trackers tool.
@@ -8627,7 +8648,7 @@ function wireSessionPrepLoader(root) {
 
   function wireHub(){
     hub.querySelectorAll('.advh-tab').forEach(b => b.addEventListener('click', () => { activeSec = b.dataset.sec; renderHub(); }));
-    hub.querySelectorAll('.advh-co-row').forEach(b => b.addEventListener('click', () => { setPrepChapter(+b.dataset.chap); }));
+    hub.querySelectorAll('.advh-co-row').forEach(b => b.addEventListener('click', () => { prepChaptersCollapsed = true; setPrepChapter(+b.dataset.chap); }));
     const coToggle = hub.querySelector('[data-cotoggle]');
     if(coToggle) coToggle.addEventListener('click', () => { prepChaptersCollapsed = !prepChaptersCollapsed; renderHub(); });
     const onChap = hub.querySelector('.advh-co-row.on');

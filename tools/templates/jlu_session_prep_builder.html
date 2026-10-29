@@ -913,7 +913,10 @@ body.flow-mode .page + .page {
   .page.dark-mode .entry-name, .page.dark-mode .clue-hdr { color: #efebe3 !important; }
   .page .entry-name, .page .clue-hdr { color: var(--ink); }
   /* Editing panel: readable tabs and labels; the read-aloud field wears the read-aloud colour. */
-  .tab-btn { font-size: 9.5px; letter-spacing: .04em; padding: 8px 6px; flex: 1 1 auto !important; min-width: auto; white-space: normal; line-height: 1.2; overflow-wrap: normal; word-break: keep-all; hyphens: none; }
+  /* Ten tabs, five to a row: Adventure · Tables · Clues · Treasure · Factions / Journey · Encounters · NPCs · Vehicles · Maps. */
+  .sidebar-tabs { display: grid !important; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .tab-btn { font-size: 9.5px; letter-spacing: .02em; padding: 8px 1px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: clip; line-height: 1.2; flex: none !important; }
+  .tab-btn.mod-off { display: none; }
   .field-label { font-size: 10px; }
   .loc-ra-input, .so-ra-input, .sb-flavor-input, .reward-flavor-input { border-left: 3px solid var(--ra-bar-dark) !important; }
   .field-label.ra-label { color: var(--ra-bar-dark) !important; }
@@ -1850,7 +1853,8 @@ const _TAB_ALIASES = { basics:'adventure', encounters:'scenes', monsters:'cast' 
 function applyTabLabels(){
   if(!PREG) return;
   // A long label ("Imperials/NPCs") may wrap only after its slash, never mid-word.
-  document.querySelectorAll('.tab-btn[data-tab]').forEach(b=>{ b.innerHTML = escH(PREG.label(PREP_CODE, b.dataset.tab)).replace(/\//g,'/<wbr>'); });
+  // Tabs have fixed names on every system (registry TAB_NAMES); headings inside keep the system's words.
+  document.querySelectorAll('.tab-btn[data-tab]').forEach(b=>{ b.textContent = PREG.tabName ? PREG.tabName(b.dataset.tab) : PREG.label(PREP_CODE, b.dataset.tab); });
   const sh=document.getElementById('scenes-heading'); if(sh) sh.textContent = PREG.label(PREP_CODE,'scenes');
   const th=document.getElementById('treasure-heading'); if(th) th.textContent = PREG.label(PREP_CODE,'treasure');
   { const va=document.getElementById('vehicles-add'); if(va) va.textContent='+ Add '+PREG.label(PREP_CODE,'vehicles').replace(/([^s])s$/,'$1'); }

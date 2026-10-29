@@ -390,3 +390,6 @@ body.flow-mode .page + .page {
   /* Dark mode: SD's cards stay light, so their text stays dark; section bars stay white-on-black. */
   .page.dark-mode .npc-block { color: #0a0a0a; }
   .page.dark-mode .p-section .sl[style] { color: #f8f8f6 !important; border-bottom-color: #0a0a0a !important; }
+
+  /* Ten tabs, five a row: Montserrat runs wide, so a touch smaller here. */
+  .tab-btn { font-size: 8.5px !important; letter-spacing: 0 !important; }
