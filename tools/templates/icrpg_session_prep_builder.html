@@ -3475,7 +3475,7 @@ function xLines(kind, item){
 function refreshEncounterInfo(){
   if(!PREG||!PREG.encounterInfo) return;
   sceneCards().forEach(c=>{ const el=c.querySelector('.enc-info'); if(!el) return;
-    const k=PREG.encounterInfo(PREP_CODE,{ links:readSceneLinks(c) },state); el.innerHTML=k?'<b>Difficulty</b> · '+escH(k.text):''; });
+    const k=PREG.encounterInfo(PREP_CODE,{ links:readSceneLinks(c), type:c.querySelector('.loc-type-input:checked')?.value||'combat' },state); el.innerHTML=k?'<b>Difficulty</b> · '+escH(k.text):''; });
 }
 
 // ── Per-system sections (registry SECTIONS): single blocks or lists, stored in state.sys ──

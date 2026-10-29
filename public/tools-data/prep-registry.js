@@ -385,6 +385,8 @@
     var C = String(code || '').toUpperCase(), P = ((ch && ch.sys) || {}).party || {};
     var size = parseInt(P.size, 10) || 0, lvl = parseInt(P.level, 10) || 0, cast = _castOf(scene, ch);
     if (!cast.length || (C !== 'DND' && C !== 'NIM')) return null;
+    // Only fights are rated: a social or exploration scene's cast is who you meet.
+    if (scene && scene.type && scene.type !== 'combat') return null;
     var qty = function (b) { return Math.max(1, parseInt(b.qty, 10) || 1); };
     if (C === 'DND') {
       var xp = cast.reduce(function (s, b) { var m = /CR\s*([\d/]+)/i.exec(String(b.type || '') + ' ' + String(b.cr || '')); return s + (m && CR_XP[m[1]] != null ? CR_XP[m[1]] : 0) * qty(b); }, 0);
