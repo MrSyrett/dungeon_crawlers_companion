@@ -1,6 +1,5 @@
 // ══ D&D 2024 plug-in ════════════════════════════════════════════════════════
-// Encounter difficulty (registry encounterInfo: the linked cast's XP vs the party's XP
-// budget) shows on each encounter. Treasure: magic items for a hoard, picked at random
+// Treasure: magic items for a hoard, picked at random
 // from the app's magic item list by the rarities that suit the hoard's CR band.
 function xRoll(expr){ const m=/(\d*)d(\d+)\s*(?:[×x*]\s*([\d,]+))?/i.exec(String(expr||'')); if(!m) return null; const n=parseInt(m[1]||'1',10), d=parseInt(m[2],10), mul=m[3]?parseInt(m[3].replace(/,/g,''),10):1; const r=[]; for(let i=0;i<n;i++) r.push(1+Math.floor(Math.random()*d)); return { total: r.reduce((a,b)=>a+b,0)*mul, dice:r, mul }; }
 function xPick(a){ return a && a.length ? a[Math.floor(Math.random()*a.length)] : null; }

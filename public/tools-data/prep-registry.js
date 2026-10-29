@@ -326,14 +326,11 @@
   // treasure, cast, travel). tracker(obj) → a Trackers entry the GM Screen can start.
   //   fields: [key, label, placeholder, kind]   kind: text | area | lines | num | select:a|b | check
   var linesOf = function (v) { return String(v || '').split('\n').map(_str).filter(Boolean); };
-  var PARTY = { key: 'party', title: 'The party', tab: 'adventure', single: true, hint: 'Used to work out how hard each encounter is.',
-    fields: [['size', 'Heroes', '4', 'num'], ['level', 'Level', '1', 'num']] };
   var SECTIONS = {
     // Dungeon Crawler Carl: the floor — its number sets the Difficulties; the floor timer is a tracker.
     DCC: [{ key: 'floor', title: 'The floor', tab: 'adventure', single: true, hint: 'Difficulties come from the floor number: Stat Check 10 + Floor · Opposed 10 + the antagonist\'s Stat Mod + Floor · Unopposed 10 + (Floor × 2). A dungeon day is 30 hours.',
       fields: [['number', 'Floor', '1', 'num'], ['theme', 'Theme', 'What this floor is'], ['days', 'Days until the stairwells close', 'e.g. 5', 'num'], ['notes', 'Notes', 'Bosses, safe rooms, the Show…', 'area']],
       tracker: function (o) { var n = parseInt(o.days, 10); return n > 0 ? { name: 'Floor ' + (o.number || '') + ' — days left', kind: 'ticks', size: Math.min(30, n), finish: 'The floor collapses: anyone not down a stairwell is gone' } : null; } }],
-    NIM: [PARTY],
     // Marvel: the villain's plan, its steps a Ticks tracker; the story's acts.
     MMRPG: [{ key: 'plan', title: 'The villain\'s plan', tab: 'adventure', single: true, hint: 'Each step the heroes don\'t stop fills a box; when the last fills, the villain wins.',
       fields: [['villain', 'Villain', 'Who'], ['goal', 'Goal', 'What they want'], ['steps', 'Steps (one per line, in order)', 'What they do next…', 'lines'], ['acts', 'Acts (one per line)', 'Act 1: the hook · Act 2: … · Act 3: the showdown', 'lines']],
@@ -371,26 +368,11 @@
   };
   function sections(code) { return SECTIONS[String(code || '').toUpperCase()] || []; }
 
-  // Encounter difficulty from an encounter's linked cast (D&D 2024 XP budget, Nimble levels).
+  // No encounter difficulty ratings on any system (user, 2026-10-28). encounterInfo
+  // stays as a no-op so older builders and the GM Screen keep working; CR_XP is
+  // still exported for the GM Screen's own tools.
   var CR_XP = { '0': 10, '1/8': 25, '1/4': 50, '1/2': 100, '1': 200, '2': 450, '3': 700, '4': 1100, '5': 1800, '6': 2300, '7': 2900, '8': 3900, '9': 5000, '10': 5900, '11': 7200, '12': 8400, '13': 10000, '14': 11500, '15': 13000, '16': 15000, '17': 18000, '18': 20000, '19': 22000, '20': 25000, '21': 33000, '22': 41000, '23': 50000, '24': 62000, '25': 75000, '26': 90000, '27': 105000, '28': 120000, '29': 135000, '30': 155000 };
-  function _castOf(scene, ch) {
-    var sb = _arr(ch && ch.statblocks), L = (scene && scene.links) || {};
-    return _arr(L.cast).map(function (n) { return sb.filter(function (b) { return b && _str(b.name).toLowerCase() === _str(n).toLowerCase(); })[0]; }).filter(function (b) { return b && b.sbtype !== 'talk'; });
-  }
-  function encounterInfo(code, scene, ch) {
-    var C = String(code || '').toUpperCase(), P = ((ch && ch.sys) || {}).party || {};
-    var size = parseInt(P.size, 10) || 0, lvl = parseInt(P.level, 10) || 0, cast = _castOf(scene, ch);
-    // Nimble only: D&D's XP-budget rating was removed at the user's request (2026-10-28).
-    if (!cast.length || C !== 'NIM') return null;
-    // Only fights are rated: a social or exploration scene's cast is who you meet.
-    if (scene && scene.type && scene.type !== 'combat') return null;
-    var qty = function (b) { return Math.max(1, parseInt(b.qty, 10) || 1); };
-    var ml = cast.filter(function (b) { return !/MINION/i.test(String(b.type || '')); }).reduce(function (s, b) { return s + (parseInt(b.level, 10) || 0) * qty(b); }, 0);
-    if (!size || !lvl) return { text: 'Monster levels ' + ml + ' — set the party on the Adventure tab to rate it', level: '' };
-    var hl = size * lvl, r = ml / hl;
-    var nl = r < 0.5 ? 'Easy' : r < 0.85 ? 'Medium' : r <= 1.05 ? 'Hard' : r < 1.5 ? 'Deadly' : 'Very deadly';
-    return { text: 'Monster levels ' + ml + ' vs heroes\' ' + hl + ' (' + Math.round(r * 100) + '%) — ' + nl + ' (minions not counted)', level: nl };
-  }
+  function encounterInfo() { return null; }
   // A scene's own tracker from its extras (The Walking Dead: the Threat Level).
   function sceneTrackers(code, scene) {
     var C = String(code || '').toUpperCase(), x = (scene && scene.x) || {};

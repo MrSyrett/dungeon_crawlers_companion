@@ -2560,7 +2560,7 @@ function addLocation(data={}) {
       <label class="field-label">Notes</label>
       <textarea class="loc-notes-input short" placeholder="Anything else the GM should keep handy..." oninput="autosave()">${escH(data.notes||'')}</textarea>
     </div>
-    ${xFields('scenes', data)}<div class="mod-calc enc-info"></div>
+    ${xFields('scenes', data)}
     <details class="scene-links" ontoggle="if(this.open) refreshSceneLinks(this.closest('.location-card'))">
       <summary>Links <span class="sl-count"></span></summary>
       <div class="field-row2 field-group">
@@ -2630,9 +2630,7 @@ function locBlockInner(l){
     (K.treasure||[]).length?'<b>Treasure:</b> '+(K.treasure||[]).map(escH).join(', '):'',
     (K.hazards||[]).length?'<b>Hazards:</b> '+(K.hazards||[]).map(escH).join(', '):'',
     (K.tables||[]).length?'<b>Roll:</b> '+(K.tables||[]).map(escH).join(', '):'' ].filter(Boolean).map(x=>'<div class="loc-links">'+x+'</div>').join('');
-  const enc=PREG&&PREG.encounterInfo?PREG.encounterInfo(PREP_CODE,l,state):null;
   return ln
-    + (enc?'<div class="loc-links"><b>Difficulty:</b> '+escH(enc.text)+'</div>':'')
     + xLines('scenes', l)
     + (l.readaloud?'<div class="read-aloud"><p>'+fmtText(l.readaloud)+'</p></div>':'')
     + sec('Interactions', l.desc)
@@ -3637,12 +3635,7 @@ function xLines(kind, item){
   const bits=F.filter(f=>X[f[0]]!=null&&String(X[f[0]]).trim()!=='').map(f=>'<b>'+escH(f[1])+':</b> '+escH(String(X[f[0]])));
   return bits.length?'<div class="loc-links">'+bits.join(' · ')+'</div>':'';
 }
-// Encounter difficulty on each encounter card (D&D XP budget, Nimble levels).
-function refreshEncounterInfo(){
-  if(!PREG||!PREG.encounterInfo) return;
-  sceneCards().forEach(c=>{ const el=c.querySelector('.enc-info'); if(!el) return;
-    const k=PREG.encounterInfo(PREP_CODE,{ links:readSceneLinks(c), type:c.querySelector('.loc-type-input:checked')?.value||'combat' },state); el.innerHTML=k?'<b>Difficulty</b> · '+escH(k.text):''; });
-}
+function refreshEncounterInfo(){} // difficulty ratings removed (user, 2026-10-28)
 
 // ── Per-system sections (registry SECTIONS): single blocks or lists, stored in state.sys ──
 function sysSections(){ return (PREG&&PREG.sections)?PREG.sections(PREP_CODE):[]; }
