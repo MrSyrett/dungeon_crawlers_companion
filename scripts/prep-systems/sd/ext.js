@@ -6,9 +6,8 @@
 // Stat block in the Shadowdark style: AC | HP | MV line, six-score table.
 function buildSB(s) {
   const div = document.createElement('div');
-  const sbtypeColors = {mob:'#0a0a0a', boss:'#333', npc:'#555'};
-  div.className = 'stat-block' + (s.fullwidth ? ' full-width' : '');
-  div.style.borderTopColor = sbtypeColors[s.sbtype] || sbtypeColors.mob;
+  // The card's top and bottom bars take the cast-type colour (template .sbt-* rules).
+  div.className = 'stat-block sbt-' + (['mob','boss','npc','talk'].indexOf(s.sbtype) >= 0 ? s.sbtype : 'mob') + (s.fullwidth ? ' full-width' : '');
 
   let html = '';
 
@@ -20,7 +19,6 @@ function buildSB(s) {
     if(s.flavor) html += '<div class="sb-flavor">' + fmtText(s.flavor) + '</div>';
     const ts=(label,val)=>(val&&String(val).trim())?'<div class="sb-ability"><strong>'+escH(label)+':</strong> '+fmtText(val)+'</div>':'';
     html += ts('Wants',s.wants)+ts('Quirks',s.quirks)+ts('Info / Secrets',s.info)+ts('Inventory',s.inventory)+(s.notes?'<hr class="sb-divider"><div class="sb-notes">'+fmtText(s.notes)+'</div>':'');
-    div.style.borderTopColor = '#555';
     div.innerHTML = html;
     return div;
   }

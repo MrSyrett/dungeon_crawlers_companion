@@ -622,6 +622,25 @@
     fold(ch.clues, 'clues', 'header', function (x, w) { if (!x.heldBy.some(function (v) { return v.toLowerCase() === w.toLowerCase(); })) x.heldBy.push(w); });
     fold(ch.rewards, 'treasure', 'name', function (x, w) { x.legacyWhere = w; });
     fold(ch.hazards, 'hazards', 'name', function (x, w) { x.legacyWhere = w; });
+    // Hazards & traps are an encounter type now (yellow): each old hazard becomes a
+    // "hazard" encounter right after the first encounter that linked it (else at
+    // the end). Trigger → Interactions, Effect / Damage → Consequences, Spot /
+    // Disarm → Notes. The encounters' hazard links are dropped with them.
+    _arr(ch.hazards).forEach(function (z) {
+      if (!z || typeof z !== 'object') return;
+      var nm = _str(z.name);
+      var enc = { name: nm || 'Hazard', type: 'hazard', tag: '', readaloud: '',
+        desc: _str(z.trigger) ? 'Trigger: ' + _str(z.trigger) : '',
+        consequences: _str(z.effect),
+        notes: [_str(z.spot) ? 'Spot / disarm: ' + _str(z.spot) : '', _str(z.legacyWhere) ? 'Where: ' + _str(z.legacyWhere) : ''].filter(Boolean).join('\n'),
+        links: { map: '', mapkey: '', cast: [], clues: [], treasure: [], tables: [], hazards: [] }, trackers: [] };
+      if (z.x && typeof z.x === 'object') enc.x = z.x;
+      var at = -1;
+      if (nm) ch.locations.forEach(function (l, i) { if (at < 0 && l && l.links && l.links.hazards.some(function (v) { return v.toLowerCase() === nm.toLowerCase(); })) at = i; });
+      if (at < 0) ch.locations.push(enc); else ch.locations.splice(at + 1, 0, enc);
+    });
+    ch.hazards = [];
+    ch.locations.forEach(function (l) { if (l && l.links) l.links.hazards = []; });
     ch._v = 2;
     return ch;
   }

@@ -8,7 +8,7 @@
 // The builder's own editor UI (sidebar, inputs, buttons) is dropped; anything
 // that is not page-scoped but styles a page block (e.g. a skin's `.read-aloud`)
 // is prefixed with .advh-sheet so it can never reach the rest of the GM Screen.
-const PAGE_CLASS = /^(page-banner|page-inner|page-bottom-band|adventure-title|adventure-subtitle|header-meta|sl|gold|sl-green|p-section|p-text|p-keep|det-grid|det-k|det-hooks|rt-[\w-]+|clue-item|clue-hdr|loc-name|loc-dq|loc-sub|loc-desc|loc-links|loc-lbl|loc-tag|location-block|enc-[\w-]+|npc-block|mob-block|entry-name|entry-desc|entry-meta|sb-(?!.*-input)[\w-]+|stat-block|sbt-[\w-]+|hp-pip|full-width|reward-stats|haz-item|read-aloud|trk-[\w-]+|map-keys|mod-[\w-]+|columns|dcc-ico|hook-item|hp-row)$/;
+const PAGE_CLASS = /^(page-banner|page-inner|page-bottom-band|adventure-title|adventure-subtitle|header-meta|sl|gold|sl-green|p-section|p-text|p-keep|det-grid|det-k|det-hooks|rt-[\w-]+|clue-item|clue-hdr|loc-name|loc-dq|loc-sub|loc-desc|loc-links|loc-lbl|loc-tag|location-block|enc-[\w-]+|npc-block|mob-block|entry-name|entry-desc|entry-meta|sb-(?!.*-input)[\w-]+|stat-block|sbt-[\w-]+|hp-pip|full-width|reward-stats|haz-item|read-aloud|trk-[\w-]+|map-keys|mod-[\w-]+|columns|dcc-ico|hook-item|hp-row|pb-[\w-]+|lotr-[\w-]+|db-[\w-]+|sd-[\w-]+|sh-[\w-]+|je-[\w-]+|jp-[\w-]+|jr-[\w-]+|tv-[\w-]+|fp-[\w-]+|eye-[\w-]+|woe|ok|bad)$/;
 const DROP = /(^|[\s>+~(,])(html|body)\b|\.preview-area|\.sidebar|::?-webkit-scrollbar|::selection|\.ui-|#[\w-]/;
 
 function splitTop(str, sep) {
@@ -114,7 +114,7 @@ function skipTemplate(src, i) {
 }
 const FNS = ['escH', 'escA', 'fmtText', 'modOn', 'travelCfg', 'vehCfg', 'sysSections', '_secBlock', '_mline', '_mbadge',
   'xLines', 'trackerLine', 'locBlockInner', 'locBlock', 'buildSB', 'previewFactions', 'previewTravel', 'previewVehicles',
-  'previewSections', 'plugPreview', 'previewParts'];
+  'previewSections', 'plugPreview', 'previewParts', 'applyGradients'];
 
 export function sheetJs(builderHtml, { code, sbConfig, extJs }) {
   const fns = FNS.map(n => fnSource(builderHtml, n)).join('\n');
@@ -138,6 +138,7 @@ window.PREP_SHEET[PREP_CODE] = {
   statBlock: function (sb) { return buildSB(sb || {}).outerHTML; },
   sceneBody: function (l) { return locBlockInner(l || {}); },
   fmt: fmtText,
+  gradients: applyGradients,
   trackerLine: trackerLine,
   factions: function (st) { state = st || {}; return previewFactions(); },
   travel: function (st) { state = st || {}; return previewTravel(); },

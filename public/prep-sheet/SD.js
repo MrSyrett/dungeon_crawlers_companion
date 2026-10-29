@@ -94,7 +94,7 @@ function locBlockInner(l){
     + ((l.trackers||[]).length?'<div class="loc-sub">Trackers</div>'+l.trackers.map(trackerLine).join(''):'');
 }
 function locBlock(l){
-  const t=({combat:'combat',exploration:'exploration',npc:'social'})[l.type]||'combat';
+  const t=({combat:'combat',exploration:'exploration',npc:'social',hazard:'hazard'})[l.type]||'combat';
   const showTag=l.tag&&l.name;
   return '<div class="location-block"><div class="loc-name enc-'+t+'">'+escH(l.name||l.tag||'')+'</div>'+(showTag?'<div class="loc-dq">'+escH(l.tag)+'</div>':'')+locBlockInner(l)+'</div>';
 }
@@ -313,6 +313,18 @@ function previewParts(){
     previewVehicles().forEach(h=>sections.push(h));
     return P;
 }
+function applyGradients() {
+  document.querySelectorAll('.sb-hp-row').forEach(row=>{
+    const pips=row.querySelectorAll('.hp-pip');const total=pips.length;
+    pips.forEach((pip,i)=>{
+      const t=total===1?1:i/(total-1);let r,g,b=10;
+      if(t<0.33){const s=t/0.33;r=170;g=Math.round(50*s);}
+      else if(t<0.66){const s=(t-0.33)/0.33;r=170;g=Math.round(50+100*s);}
+      else{const s=(t-0.66)/0.34;r=Math.round(170*(1-s));g=160;}
+      pip.style.background=`rgb(${r},${g},${b})`;pip.style.borderColor='rgba(0,0,0,0.3)';
+    });
+  });
+}
 try {
 // ══ Shadowdark plug-in ══════════════════════════════════════════════════════
 // The SD prep's own look for stat blocks, the book generators (sd-prep-tables.js,
@@ -322,9 +334,8 @@ try {
 // Stat block in the Shadowdark style: AC | HP | MV line, six-score table.
 function buildSB(s) {
   const div = document.createElement('div');
-  const sbtypeColors = {mob:'#0a0a0a', boss:'#333', npc:'#555'};
-  div.className = 'stat-block' + (s.fullwidth ? ' full-width' : '');
-  div.style.borderTopColor = sbtypeColors[s.sbtype] || sbtypeColors.mob;
+  // The card's top and bottom bars take the cast-type colour (template .sbt-* rules).
+  div.className = 'stat-block sbt-' + (['mob','boss','npc','talk'].indexOf(s.sbtype) >= 0 ? s.sbtype : 'mob') + (s.fullwidth ? ' full-width' : '');
 
   let html = '';
 
@@ -336,7 +347,6 @@ function buildSB(s) {
     if(s.flavor) html += '<div class="sb-flavor">' + fmtText(s.flavor) + '</div>';
     const ts=(label,val)=>(val&&String(val).trim())?'<div class="sb-ability"><strong>'+escH(label)+':</strong> '+fmtText(val)+'</div>':'';
     html += ts('Wants',s.wants)+ts('Quirks',s.quirks)+ts('Info / Secrets',s.info)+ts('Inventory',s.inventory)+(s.notes?'<hr class="sb-divider"><div class="sb-notes">'+fmtText(s.notes)+'</div>':'');
-    div.style.borderTopColor = '#555';
     div.innerHTML = html;
     return div;
   }
@@ -605,6 +615,7 @@ window.PREP_SHEET[PREP_CODE] = {
   statBlock: function (sb) { return buildSB(sb || {}).outerHTML; },
   sceneBody: function (l) { return locBlockInner(l || {}); },
   fmt: fmtText,
+  gradients: applyGradients,
   trackerLine: trackerLine,
   factions: function (st) { state = st || {}; return previewFactions(); },
   travel: function (st) { state = st || {}; return previewTravel(); },

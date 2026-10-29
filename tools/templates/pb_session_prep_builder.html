@@ -943,8 +943,8 @@ html:root[data-themed][data-system="PB"] { --font-display: "1651 Alchemy", "EB G
     --pg-dark: #1c1c1f; --box-dark: #2a2a2e; --box-dark-line: rgba(255,255,255,.08);
     --ink-dark: #dcd8d0;
     /* Encounter types — the one exception to "one header colour". */
-    --enc-combat: #b0332a; --enc-exploration: #2d6a2d; --enc-social: #1a4a8a;
-    --enc-combat-dark: #ec6b5c; --enc-exploration-dark: #6cc46c; --enc-social-dark: #8fb7f2;
+    --enc-combat: #b0332a; --enc-exploration: #2d6a2d; --enc-social: #1a4a8a; --enc-hazard: #a67c00;
+    --enc-combat-dark: #ec6b5c; --enc-exploration-dark: #6cc46c; --enc-social-dark: #8fb7f2; --enc-hazard-dark: #f2c94c;
   }
   .page, .page-cont { background: var(--pg-light) !important; }
   .page.dark-mode { background: var(--pg-dark) !important; color: var(--ink-dark); }
@@ -1012,16 +1012,18 @@ html:root[data-themed][data-system="PB"] { --font-display: "1651 Alchemy", "EB G
   .page .sb-flavor *, .page.dark-mode .sb-flavor * { color: inherit !important; }
   /* Headers: ONE colour per system — the page no longer uses the gold / blue / green variants. */
   /* Encounter names take the encounter-type colour (lighter on the dark page). */
-  .page .loc-name.enc-combat, .page .loc-name.enc-exploration, .page .loc-name.enc-social {
+  .page .loc-name.enc-combat, .page .loc-name.enc-exploration, .page .loc-name.enc-social, .page .loc-name.enc-hazard {
     display: block; font-family: var(--font-display); font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
     padding-bottom: 1px; margin-bottom: 4px; border-bottom: 1.5px solid currentColor !important;
   }
   .page .loc-name.enc-combat { color: var(--enc-combat) !important; }
   .page .loc-name.enc-exploration { color: var(--enc-exploration) !important; }
   .page .loc-name.enc-social { color: var(--enc-social) !important; }
+  .page .loc-name.enc-hazard { color: var(--enc-hazard) !important; }
   .page.dark-mode .loc-name.enc-combat { color: var(--enc-combat-dark) !important; }
   .page.dark-mode .loc-name.enc-exploration { color: var(--enc-exploration-dark) !important; }
   .page.dark-mode .loc-name.enc-social { color: var(--enc-social-dark) !important; }
+  .page.dark-mode .loc-name.enc-hazard { color: var(--enc-hazard-dark) !important; }
   /* Labels and sub-sections are ink, the same in every system: headers carry the
      system colour, everything under them reads as text. Interactions /
      Consequences / Notes / Trackers are true sub-sections: a label over a rule. */
@@ -1142,17 +1144,14 @@ html:root[data-themed][data-system="PB"] { --font-display: "1651 Alchemy", "EB G
 
     <!-- SCENES: encounters, rooms and locations, plus hazards & traps -->
     <div class="tab-panel" id="tab-scenes">
-      <div class="section-divider">Hazards &amp; Traps</div>
-      <div class="pb-hint">It's a Trap! (Trapped in the Tropics): roll the d12 trap alone for speed, or across trap, bait, trigger, state and complication (5d12). Adapt what doesn't fit.</div>
-      <div style="display:flex;gap:6px;"><button class="btn-add btn-roll" style="flex:1" onclick="addHazard(pbTrapHazard(false));autosave()">🎲 Trap d12</button><button class="btn-add btn-roll" style="flex:1" onclick="addHazard(pbTrapHazard(true));autosave()">🎲 Trap 5d12</button></div>
-
-      <div id="hazards-list" class="entity-list"></div>
-      <button class="btn-add" onclick="addHazard();autosave()">+ Add Hazard / Trap</button>
       <div class="section-divider" id="scenes-heading">Scenes</div>
       <div style="display:flex;gap:6px;"><button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbAddIsland()" title="Uncharted Islands (Core Rules pg. 122)">🎲 Uncharted island</button><button class="btn-add btn-mini btn-roll" style="flex:1" onclick="pbAddWreck()" title="Derelict Ship generator (pg. 116)">🎲 Derelict ship</button></div>
 
+      <div class="pb-hint">It's a Trap! (Trapped in the Tropics): roll the d12 trap alone for speed, or across trap, bait, trigger, state and complication (5d12). Adapt what doesn't fit.</div>
+      <div style="display:flex;gap:6px;"><button class="btn-add btn-roll" style="flex:1" onclick="addHazard(pbTrapHazard(false));autosave()">🎲 Trap d12</button><button class="btn-add btn-roll" style="flex:1" onclick="addHazard(pbTrapHazard(true));autosave()">🎲 Trap 5d12</button></div>
+
       <div id="locations-list" class="entity-list"></div>
-      <button class="btn-add" onclick="addLocation();autosave()">+ Add Scene</button>
+      <div style="display:flex;gap:6px;"><button class="btn-add" style="flex:1" onclick="addLocation();autosave()">+ Add Scene</button><button class="btn-add" style="flex:1" onclick="addHazard();autosave()">+ Add Hazard</button></div>
 
       <div class="sys-sections" data-tab="scenes"></div>
     </div>
@@ -2111,14 +2110,7 @@ function readFields() {
     links:readSceneLinks(c), ...xRead(c),
     trackers:readTrackers(c.querySelector('.scene-trackers'))
   })).filter(l=>l.name||l.tag||l.readaloud||l.desc);
-  state.hazards=[...document.querySelectorAll('#hazards-list .entity-card')].map(c=>({
-    name:c.querySelector('.hz-name-input')?.value.trim()||'',
-    where:itemWhere(c,'hazards',c.querySelector('.hz-name-input')?.value.trim()||''), _linked:1,
-    ...(c.dataset.legacy?{legacyWhere:c.dataset.legacy}:{}),
-    trigger:c.querySelector('.hz-trigger-input')?.value.trim()||'',
-    effect:c.querySelector('.hz-effect-input')?.value.trim()||'',
-    spot:c.querySelector('.hz-spot-input')?.value.trim()||'', ...xRead(c)
-  })).filter(h=>h.name||h.effect);
+  state.hazards=[];   // hazards & traps are encounters of type 'hazard' now
   state.statblocks=[...document.querySelectorAll('#statblocks-list .entity-card')].map(c=>({
     name:c.querySelector('.sb-name-input')?.value.trim()||'',
     sbtype:c.querySelector('.sb-type-radio:checked')?.value||'mob',
@@ -2159,7 +2151,6 @@ function buildSidebarFromState() {
   clear('rewards-list'); (state.rewards||[]).forEach(r=>addReward(r));
   clear('rolltables-list'); (state.rollTables||[]).forEach(t=>addRollTable(t));
   clear('statblocks-list'); (state.statblocks||[]).forEach(s=>addStatBlock(s));
-  clear('hazards-list'); (state.hazards||[]).forEach(h=>addHazard(h));
   clear('travel-list'); (state.travel||[]).forEach(x=>addTravelLeg(x));
   clear('factions-list'); (state.factions||[]).forEach(x=>addFaction(x));
   clear('vehicles-list'); (state.vehicles||[]).forEach(x=>addVehicle(x));
@@ -2401,21 +2392,14 @@ document.addEventListener('click', e=>{
 (function(){ const row=document.getElementById('itempick-row'); if(row && !(PREG && PREG.hasItems(PREP_CODE))) row.style.display='none'; })();
 
 // ── Hazards & traps ───────────────────────────────────────────────────────
+// A hazard or trap is an encounter of type "hazard" (yellow). Generators (Dragonbane,
+// Pirate Borg) still hand over the old hazard shape: trigger → Interactions,
+// effect / damage → Consequences, spot / disarm → Notes.
 function addHazard(data={}) {
-  const list=document.getElementById('hazards-list'); if(!list) return;
-  const div=document.createElement('div'); div.className='entity-card'; div.style.borderLeft='2px solid #C0392B';
-  div.innerHTML=`
-    <div class="entity-card-header">
-      <input class="entity-name-input hz-name-input" type="text" placeholder="Hazard / trap name" value="${escA(data.name||'')}" oninput="autosave()">
-      <button class="btn-remove" onclick="this.closest('.entity-card').remove();autosave()">✕</button>
-    </div>
-    <div class="link-group"><label class="field-label">Where</label><div class="item-links" data-kind="hazards"></div></div>
-    <div class="field-group"><label class="field-label">Trigger</label><input type="text" class="hz-trigger-input" placeholder="What sets it off" value="${escA(data.trigger||'')}" oninput="autosave()"></div>
-    <div class="field-group"><label class="field-label">Effect / Damage</label><textarea class="hz-effect-input short" placeholder="What happens, damage, saves..." oninput="autosave()">${escH(data.effect||'')}</textarea></div>
-    <div class="field-group"><label class="field-label">Spot / Disarm</label><input type="text" class="hz-spot-input" placeholder="How to notice or disable it" value="${escA(data.spot||'')}" oninput="autosave()"></div>${xFields('hazards', data)}`;
-  if(data.legacyWhere) div.dataset.legacy=data.legacyWhere;
-  list.appendChild(div);
-  refreshItemLinks(div);
+  if(data.type==='hazard' || data.desc || data.consequences) return addLocation(Object.assign({}, data, { type:'hazard' }));
+  return addLocation({ name:data.name||'', type:'hazard', x:data.x,
+    desc:data.trigger?'Trigger: '+data.trigger:'', consequences:data.effect||'',
+    notes:[data.spot?'Spot / disarm: '+data.spot:'', data.where?'Where: '+data.where:''].filter(Boolean).join('\n') });
 }
 
 // ── Trackers (clocks, countdowns, timers) ─────────────────────────────────
@@ -2563,7 +2547,7 @@ function addStrongOpen(data={}) {
   if(!list) return;   // Strong Open section removed from the builder
   const div=document.createElement('div'); div.className='location-card';
   const type=data.type||'combat';
-  const typeColors={'combat':'#C0392B','exploration':'#2d6a2d','npc':'#1a4a8a'};
+  const typeColors={'combat':'#C0392B','exploration':'#2d6a2d','npc':'#1a4a8a','hazard':'#c9a227'};
   div.style.borderLeftColor=typeColors[type]||typeColors.combat;
   const uid='so'+Date.now()+Math.random().toString(36).slice(2);
   div.innerHTML=`
@@ -2573,7 +2557,7 @@ function addStrongOpen(data={}) {
     </div>
     <div class="field-group">
       <label class="field-label">Encounter Type</label>
-      <div style="display:flex;gap:12px;">
+      <div style="display:flex;flex-wrap:wrap;gap:4px 12px;">
         <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;font-weight:600;color:#e0604f;">
           <input type="radio" class="so-type-input" name="sotype-${uid}" value="combat" ${type==='combat'?'checked':''} onchange="updateLocCardColor(this);autosave()"> Combat
         </label>
@@ -2726,7 +2710,7 @@ function addLocation(data={}) {
   // Links to other tabs live on the card as JSON (names), rendered as pick-chips.
   div.dataset.links=JSON.stringify(Object.assign({map:'',mapkey:'',cast:[],clues:[],treasure:[],tables:[],hazards:[]}, data.links||{}));
   const type=data.type||'combat';
-  const typeColors={'combat':'#C0392B','exploration':'#2d6a2d','npc':'#1a4a8a'};
+  const typeColors={'combat':'#C0392B','exploration':'#2d6a2d','npc':'#1a4a8a','hazard':'#c9a227'};
   div.style.borderLeftColor=typeColors[type]||typeColors.combat;
   const uid='loc'+Date.now()+Math.random().toString(36).slice(2);
   div.innerHTML=`
@@ -2745,6 +2729,9 @@ function addLocation(data={}) {
         </label>
         <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;font-weight:600;color:#6f9ee8;">
           <input type="radio" class="loc-type-input" name="loctype-${uid}" value="npc" ${type==='npc'?'checked':''} onchange="updateLocCardColor(this);autosave()"> Social
+        </label>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;font-weight:600;color:#e2b93b;white-space:nowrap;">
+          <input type="radio" class="loc-type-input" name="loctype-${uid}" value="hazard" ${type==='hazard'?'checked':''} onchange="updateLocCardColor(this);autosave()"> Hazard
         </label>
       </div>
     </div>
@@ -2779,7 +2766,6 @@ function addLocation(data={}) {
       <div class="link-group"><label class="field-label">Clues found here</label><div class="link-chips" data-k="clues"></div></div>
       <div class="link-group"><label class="field-label">Treasure here</label><div class="link-chips" data-k="treasure"></div></div>
       <div class="link-group"><label class="field-label">Tables to roll</label><div class="link-chips" data-k="tables"></div></div>
-      <div class="link-group"><label class="field-label">Hazards &amp; traps</label><div class="link-chips" data-k="hazards"></div></div>
       <div class="link-group"><label class="field-label">Scene trackers</label><div class="entity-list scene-trackers"></div>
         <button class="btn-add" style="margin-top:4px" onclick="addTracker({}, this.previousElementSibling);autosave()">+ Scene Tracker</button></div>
     </details>`;
@@ -2819,7 +2805,7 @@ function refreshAllSceneLinks(){ document.querySelectorAll('#locations-list .loc
 
 
 function updateLocCardColor(radio) {
-  const colors={combat:'#C0392B',exploration:'#2d6a2d',npc:'#1a4a8a'};
+  const colors={combat:'#C0392B',exploration:'#2d6a2d',npc:'#1a4a8a',hazard:'#c9a227'};
   radio.closest('.location-card').style.borderLeftColor=colors[radio.value]||colors.combat;
 }
 
@@ -2849,7 +2835,7 @@ function locBlockInner(l){
 // One encounter on the page: its name in the encounter-type colour (the one place
 // a header isn't the system's header colour), the dramatic question, then the body.
 function locBlock(l){
-  const t=({combat:'combat',exploration:'exploration',npc:'social'})[l.type]||'combat';
+  const t=({combat:'combat',exploration:'exploration',npc:'social',hazard:'hazard'})[l.type]||'combat';
   const showTag=l.tag&&l.name;
   return '<div class="location-block"><div class="loc-name enc-'+t+'">'+escH(l.name||l.tag||'')+'</div>'+(showTag?'<div class="loc-dq">'+escH(l.tag)+'</div>':'')+locBlockInner(l)+'</div>';
 }
@@ -3308,7 +3294,7 @@ function renderPreview() {
   })();
 
   // Page 2: only the encounters that didn't fit on page 1
-  const typeColors={'combat':'#C0392B','exploration':'#2d6a2d','npc':'#1a4a8a'};
+  const typeColors={'combat':'#C0392B','exploration':'#2d6a2d','npc':'#1a4a8a','hazard':'#c9a227'};
   const locsEl2 = document.getElementById('p-locations');
   const pageTwo = document.getElementById('page-two');
   if(locsEl2) {

@@ -101,7 +101,7 @@ function locBlockInner(l){
     + ((l.trackers||[]).length?'<div class="loc-sub">Trackers</div>'+l.trackers.map(trackerLine).join(''):'');
 }
 function locBlock(l){
-  const t=({combat:'combat',exploration:'exploration',npc:'social'})[l.type]||'combat';
+  const t=({combat:'combat',exploration:'exploration',npc:'social',hazard:'hazard'})[l.type]||'combat';
   const showTag=l.tag&&l.name;
   return '<div class="location-block"><div class="loc-name enc-'+t+'">'+escH(l.name||l.tag||'')+'</div>'+(showTag?'<div class="loc-dq">'+escH(l.tag)+'</div>':'')+locBlockInner(l)+'</div>';
 }
@@ -320,6 +320,18 @@ function previewParts(){
     previewVehicles().forEach(h=>sections.push(h));
     return P;
 }
+function applyGradients() {
+  document.querySelectorAll('.sb-hp-row').forEach(row=>{
+    const pips=row.querySelectorAll('.hp-pip');const total=pips.length;
+    pips.forEach((pip,i)=>{
+      const t=total===1?1:i/(total-1);let r,g,b=10;
+      if(t<0.33){const s=t/0.33;r=170;g=Math.round(50*s);}
+      else if(t<0.66){const s=(t-0.33)/0.33;r=170;g=Math.round(50+100*s);}
+      else{const s=(t-0.66)/0.34;r=Math.round(170*(1-s));g=160;}
+      pip.style.background=`rgb(${r},${g},${b})`;pip.style.borderColor='rgba(0,0,0,0.3)';
+    });
+  });
+}
 try {
 // ══ JLU plug-in ═════════════════════════════════════════════════════════════
 // The crisis track (registry SECTIONS.JLU) gets a roll on the Crisis table
@@ -340,6 +352,7 @@ window.PREP_SHEET[PREP_CODE] = {
   statBlock: function (sb) { return buildSB(sb || {}).outerHTML; },
   sceneBody: function (l) { return locBlockInner(l || {}); },
   fmt: fmtText,
+  gradients: applyGradients,
   trackerLine: trackerLine,
   factions: function (st) { state = st || {}; return previewFactions(); },
   travel: function (st) { state = st || {}; return previewTravel(); },

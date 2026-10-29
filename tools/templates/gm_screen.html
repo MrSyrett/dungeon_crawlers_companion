@@ -701,7 +701,16 @@ ol.advh-hooks { font-size: 12px; line-height: 1.5; color: var(--light); margin: 
 .advh-sheet .advh-schk { float: right; margin: 0 0 4px 10px; color: inherit; opacity: .8; position: relative; z-index: 1; }
 .advh-sheet .advh-schk input { accent-color: var(--sys-hdr, var(--accent)); }
 .advh-sheet .advh-clue.revealed, .advh-sheet .advh-loot.handed { opacity: .62; }
-.advh-sheet .advh-sb-acts { float: right; display: flex; gap: 5px; margin: 0 0 4px 10px; position: relative; z-index: 1; }
+.advh-sheet .advh-sb-hd { display: flex; align-items: flex-start; gap: 8px; cursor: pointer; }
+.advh-sheet .advh-sb-t { flex: 1; min-width: 0; }
+.advh-sheet .advh-sb-t > .sb-name { overflow-wrap: anywhere; }
+.advh-sheet .advh-sb-acts { display: flex; gap: 5px; flex-shrink: 0; align-items: center; }
+.advh-sheet .advh-sb-hd > .advh-chev { align-self: center; }
+.advh-sheet .advh-sb.advh-sb-collapsed > :not(.advh-sb-hd) { display: none !important; }
+.advh-sheet .advh-sb.advh-sb-collapsed .advh-sb-t > .sb-name { border-bottom: 0 !important; margin-bottom: 0 !important; }
+.advh-sheet .advh-smap-hd { cursor: pointer; }
+.advh-sheet .advh-smap-r { display: inline-flex; align-items: center; gap: 8px; }
+.advh-sheet .advh-smap.collapsed > :not(.sl) { display: none !important; }
 .advh-sheet .advh-sb-acts .btn, .advh-sheet .advh-sl-act .btn, .advh-sheet .advh-strk .btn { margin: 0; padding: 3px 9px !important; font-size: 10px !important; min-height: 0 !important; line-height: 1.4 !important; }
 .advh-sheet .advh-strk { border: 0; border-radius: 0; background: none; padding: 2px 0; margin-top: 3px; align-items: center; }
 .advh-sheet .advh-strk .trk-line { margin: 0; }
@@ -724,6 +733,7 @@ ol.advh-hooks { font-size: 12px; line-height: 1.5; color: var(--light); margin: 
 .advh-sheet .advh-alert { color: inherit; }
 /* Controls keep the GM Screen's accent (the page's own --accent can be near-black, e.g. Shadowdark). */
 .advh-sheet .btn { --accent: var(--gt-hl, #d0d5dc); }
+.advh-sheet:not(.dark-mode) .btn.ghost { color: var(--ink, #1a1a1a); border-color: color-mix(in srgb, var(--ink, #1a1a1a) 35%, transparent); background: transparent; }
 .advh-sheet .advh-scene, .advh-sheet .advh-table, .advh-sheet .advh-smap { background: none; border: 0; border-radius: 0; padding: 0; max-width: none; }
 .advh-sheet .advh-scene { padding-bottom: 8px; }
 
@@ -8692,7 +8702,7 @@ function wireSessionPrepLoader(root) {
         // Remember which prep is loaded so a page refresh can restore the hub
         // (not just the printable preview).
         root._advPrepDoc = { id: doc.id, tool: doc.tool, title: doc.title, system: prepSys };
-        activeSec = 'adventure'; openScenes = {};
+        activeSec = 'adventure'; openScenes = {}; openCast = {}; openMaps = {};
         setPrepChapter(prepActiveChapter);
         // The auto-save that fired on the picker click snapshotted state BEFORE
         // this async load finished (so it missed _advPrepDoc). Persist again now
@@ -8709,7 +8719,7 @@ function wireSessionPrepLoader(root) {
     prepActiveChapter = Math.min(Math.max(0, i), prepChapters.length - 1);
     prep = prepChapters[prepActiveChapter] || {};
     if(prepMeta) { prep._docTool = prepMeta.docTool; prep._docId = prepMeta.docId; prep._docTitle = prepMeta.docTitle; }
-    activeSec = 'adventure'; openScenes = {};
+    activeSec = 'adventure'; openScenes = {}; openCast = {}; openMaps = {};
     renderHub();
     try { if(window.__ddScheduleSave) window.__ddScheduleSave(); } catch(e) {}
   }
@@ -8917,6 +8927,19 @@ function wireSessionPrepLoader(root) {
   const chk = (cls, on, label, title) => '<label class="advh-chk advh-schk"' + (title ? ' title="' + advEsc(title) + '"' : '') + '><input type="checkbox" class="' + cls + '"' + (on ? ' checked' : '') + '> ' + label + '</label>';
   // Parse a list of block HTML strings into nodes we can add controls to.
   function frag(html){ const d = document.createElement('div'); d.innerHTML = html; return d; }
+  // The tab is the header: drop the page's own section heading inside it
+  // ("Secrets & Clues", "Monsters & NPCs"…). Heading-only blocks go; a list's
+  // first block loses its heading; per-item headings ("Ship — Rowboat") keep
+  // just the item's name.
+  function dropHeads(d, opts){
+    const secs = [...d.children].filter(el => el.classList.contains('p-section'));
+    secs.forEach((el, i) => {
+      const sl = el.querySelector(':scope > .sl'); if(!sl) return;
+      if(el.children.length === 1) { el.remove(); return; }
+      if(opts.first && i === 0) { sl.remove(); return; }
+      if(opts.items) { const t = sl.textContent; const k = t.indexOf(' — '); if(k > 0) sl.textContent = t.slice(k + 3); else if(!opts.keepBare) sl.remove(); }
+    });
+  }
   function sheetSection(sec, K){
     const P = K.parts(prep);
     const R = window.PREP_REGISTRY;
@@ -8943,6 +8966,7 @@ function wireSessionPrepLoader(root) {
     if(sec === 'clues'){
       const d = frag(P.clues.join(''));
       const first = (prep.clues || []).length ? d.querySelector('.p-section') : null;
+      if(first) { const sl = first.querySelector(':scope > .sl'); if(sl) sl.remove(); }
       if(first) [...first.querySelectorAll(':scope > .clue-item')].forEach((el, i) => {
         const c = (prep.clues || [])[i]; if(!c) return; const on = isRevealed(c, i);
         el.classList.add('advh-clue'); if(on) el.classList.add('revealed'); el.dataset.ci = i;
@@ -8955,6 +8979,7 @@ function wireSessionPrepLoader(root) {
       const d = frag(P.treasure.join(''));
       const list = prep.rewards || [];
       const first = list.length ? d.querySelector('.p-section') : null;
+      if(first) { const sl = first.querySelector(':scope > .sl'); if(sl) sl.remove(); }
       if(first) [...first.querySelectorAll(':scope > .npc-block')].forEach((el, i) => {
         const r = list[i]; if(!r) return; const on = isHanded(r, i);
         el.classList.add('advh-loot'); if(on) el.classList.add('handed'); el.dataset.ri = i;
@@ -8968,6 +8993,7 @@ function wireSessionPrepLoader(root) {
     }
     if(sec === 'factions'){
       const d = frag(P.factions.join(''));
+      dropHeads(d, { first: (prep.factions || []).length > 0 });
       [...d.querySelectorAll('.mod-faction-box')].forEach((el, i) => {
         const f = (prep.factions || [])[i]; const t = f && R && R.factionTracker ? R.factionTracker(f) : null;
         if(t) el.insertAdjacentHTML('beforeend', trkWrap('<div class="trk-line"><span class="clue-hdr">' + advEsc(t.name || 'Clock') + '</span></div>', 'faction' + i, 0, t));
@@ -8976,6 +9002,7 @@ function wireSessionPrepLoader(root) {
     }
     if(sec === 'travel'){
       const d = frag(P.travel.join(''));
+      dropHeads(d, { items: true });
       [...d.querySelectorAll('.mod-travel-box')].forEach((el, i) => {
         const t = legTracker(i);
         if(t) el.insertAdjacentHTML('beforeend', trkWrap('<div class="trk-line"><span class="clue-hdr">' + advEsc(t.name) + '</span></div>', 'travel' + i, 0, t));
@@ -8985,6 +9012,7 @@ function wireSessionPrepLoader(root) {
     }
     if(sec === 'vehicles'){
       const d = frag(P.vehicles.join(''));
+      dropHeads(d, { items: true, keepBare: true });
       [...d.querySelectorAll(':scope > .p-section')].forEach((el, i) => {
         if(!(prep.vehicles || [])[i]) return;
         el.classList.add('advh-vehicle'); el.dataset.vi = i;
@@ -8995,12 +9023,21 @@ function wireSessionPrepLoader(root) {
     if(sec === 'cast'){
       const list = prep.statblocks || [];
       const d = frag(P.cast.join(''));
+      dropHeads(d, {});
       [...d.querySelectorAll('.stat-block')].slice(0, list.length).forEach((el, i) => {
         const sb = list[i]; const talk = sb.sbtype === 'talk';
         el.classList.add('advh-sb'); el.dataset.i = i; if(talk) el.classList.add('advh-talk');
-        el.insertAdjacentHTML('afterbegin', '<div class="advh-sb-acts">' + (talk
+        if(!openCast[i]) el.classList.add('advh-sb-collapsed');
+        // Header row: name + type on the left, + Add / View on the right; a click
+        // on the header opens or closes the card.
+        const hd = document.createElement('div'); hd.className = 'advh-sb-hd';
+        const t = document.createElement('div'); t.className = 'advh-sb-t';
+        [el.querySelector(':scope > .sb-name'), el.querySelector(':scope > .sb-type')].forEach(x => { if(x) t.appendChild(x); });
+        hd.appendChild(t);
+        hd.insertAdjacentHTML('beforeend', '<div class="advh-sb-acts">' + (talk
           ? '<button type="button" class="btn small advh-send-social advh-talk-social" title="Add to the scene (a bubble in the Monitor bar)">+ Add</button><button type="button" class="btn small ghost advh-talk-view" title="Open the card without adding it">View</button>'
-          : '<button type="button" class="btn small advh-send-combat advh-sb-add" title="Add to the scene (a bubble in the Monitor bar)">+ Add</button><button type="button" class="btn small ghost advh-sb-view" title="Open the card without adding it">View</button>') + '</div>');
+          : '<button type="button" class="btn small advh-send-combat advh-sb-add" title="Add to the scene (a bubble in the Monitor bar)">+ Add</button><button type="button" class="btn small ghost advh-sb-view" title="Open the card without adding it">View</button>') + '</div><span class="advh-chev">' + (openCast[i] ? '▴' : '▾') + '</span>');
+        el.insertBefore(hd, el.firstChild);
       });
       sysTrackersInto(d, 'cast');
       return list.length || d.textContent.trim() ? d.innerHTML : '<div class="advh-empty">No NPCs, mobs, or bosses in this prep.</div>';
@@ -9008,11 +9045,12 @@ function wireSessionPrepLoader(root) {
     if(sec === 'scenes'){
       const list = scenes(), locs = prep.locations || [];
       // P.scenes = [hazards?] [Scenes heading?] [one block per location] [the system's own blocks]
+      // (hazards are encounters now; the "Encounters" heading is the tab itself)
       const nHead = ((prep.hazards || []).length ? 1 : 0) + (locs.length ? 1 : 0);
-      const head = P.scenes.slice(0, nHead).join(''), rest = P.scenes.slice(nHead + locs.length).join('');
+      const head = (prep.hazards || []).length ? P.scenes[0] : '', rest = P.scenes.slice(nHead + locs.length).join('');
       const SB = prep.statblocks || [];
       const blocks = list.map((s, i) => {
-        const typ = String(s.type || '').toLowerCase(), enc = ({ combat: 'combat', exploration: 'exploration', npc: 'social' })[typ] || 'combat';
+        const typ = String(s.type || '').toLowerCase(), enc = ({ combat: 'combat', exploration: 'exploration', npc: 'social', hazard: 'hazard' })[typ] || 'combat';
         const L = s.links || {};
         const cast = (L.cast || []).map(n => SB.find(b => eqName(b.name, n))).filter(Boolean);
         const nFoes = cast.filter(b => b.sbtype !== 'talk').reduce((a, b) => a + Math.max(1, parseInt(b.qty, 10) || 1), 0);
@@ -9042,9 +9080,9 @@ function wireSessionPrepLoader(root) {
     if(sec === 'maps'){
       const list = maps();
       if(!list.length) return '<div class="advh-empty">No maps in this prep.</div>';
-      return list.map((mp, i) => '<div class="p-section advh-map advh-smap" data-i="' + i + '">'
-        + '<div class="sl advh-sl-act"><span>' + advEsc(mp.title || 'Map ' + (i + 1)) + '</span>'
-        + (mp.src && mp.src !== '__has_map__' ? '<button type="button" class="btn small primary advh-map-send">&rarr; Maps</button>' : '') + '</div>'
+      return list.map((mp, i) => '<div class="p-section advh-map advh-smap' + (openMaps[i] ? '' : ' collapsed') + '" data-i="' + i + '">'
+        + '<div class="sl advh-sl-act advh-smap-hd"><span>' + advEsc(mp.title || 'Map ' + (i + 1)) + '</span><span class="advh-smap-r">'
+        + (mp.src && mp.src !== '__has_map__' ? '<button type="button" class="btn small primary advh-map-send">&rarr; Maps</button>' : '') + '<span class="advh-chev">' + (openMaps[i] ? '▴' : '▾') + '</span></span></div>'
         + (mp.src && mp.src !== '__has_map__' ? '<img class="advh-smap-img" src="' + advEsc(mp.src) + '" alt="">' : '<div class="loc-links">Stored without image data.</div>')
         + (mp.keys ? '<div class="map-keys">' + K.fmt(mp.keys) + '</div>' : '') + '</div>').join('');
     }
@@ -9112,6 +9150,7 @@ function wireSessionPrepLoader(root) {
     let body = ''; try { body = K ? sheetSection(activeSec, K) : sectionHtml(activeSec); } catch(e) { console.error('Adventure sheet', e); body = sectionHtml(activeSec); }
     h += '<div class="advh-body' + (K ? ' page-inner' : '') + '">' + body + '</div>';
     hub.innerHTML = h;
+    if(K && K.gradients) try { K.gradients(); } catch(e) {}
     wireHub();
     syncAdvTitle();
   }
@@ -9181,7 +9220,7 @@ function wireSessionPrepLoader(root) {
       return list.map((s, i) => {
         const typ = (s.type || '').toLowerCase();
         // Encounter colours match the Adventure Prep: combat red, exploration green, social blue.
-        const dot = typ === 'combat' ? '#e0604f' : typ === 'npc' ? '#6f9ee8' : typ === 'exploration' ? '#5fb85f' : 'var(--accent)';
+        const dot = typ === 'combat' ? '#e0604f' : typ === 'npc' ? '#6f9ee8' : typ === 'exploration' ? '#5fb85f' : typ === 'hazard' ? '#e2b93b' : 'var(--accent)';
         const typName = typ === 'npc' ? 'Social' : (typ ? typ.charAt(0).toUpperCase() + typ.slice(1) : '');
         const sub = s.tag || typName;
         const L = s.links || {};
@@ -9404,6 +9443,17 @@ function wireSessionPrepLoader(root) {
     if(coToggle) coToggle.addEventListener('click', () => { prepChaptersCollapsed = !prepChaptersCollapsed; renderHub(); });
     const onChap = hub.querySelector('.advh-co-row.on');
     if(onChap) onChap.scrollIntoView({ block: 'nearest' });
+    // Prep-sheet cast cards and maps open and close from their header.
+    hub.querySelectorAll('.advh-sb-hd').forEach(hd => hd.addEventListener('click', e => {
+      if(e.target.closest('button')) return;
+      const el = hd.closest('.advh-sb'), i = +el.dataset.i, open = el.classList.toggle('advh-sb-collapsed') === false;
+      openCast[i] = open; const ch = hd.querySelector('.advh-chev'); if(ch) ch.textContent = open ? '▴' : '▾';
+    }));
+    hub.querySelectorAll('.advh-smap-hd').forEach(hd => hd.addEventListener('click', e => {
+      if(e.target.closest('button')) return;
+      const el = hd.closest('.advh-smap'), i = +el.dataset.i, open = el.classList.toggle('collapsed') === false;
+      openMaps[i] = open; const ch = hd.querySelector('.advh-chev'); if(ch) ch.textContent = open ? '▴' : '▾';
+    }));
     // Prep-sheet stat blocks: + Add (a bubble in the Monitor bar) and View (the card in a popup).
     hub.querySelectorAll('.advh-sb-add').forEach(b => b.addEventListener('click', () => {
       const sb = (prep.statblocks || [])[+b.closest('.advh-sb').dataset.i];
@@ -9522,8 +9572,8 @@ function wireSessionPrepLoader(root) {
     // Send a map image to the Maps station (opens as a new Maps tab).
     hub.querySelectorAll('.advh-map-send').forEach(b => b.addEventListener('click', () => { const mp = maps()[+b.closest('.advh-map').dataset.i]; sendMap(mp, b); }));
   }
-  // Which scenes are expanded (kept across re-renders of the same chapter).
-  let openScenes = {};
+  // Which scenes / cast cards / maps are expanded (kept across re-renders of the same chapter).
+  let openScenes = {}, openCast = {}, openMaps = {};
   // A tracker this prep started just ran out: say so on the Hub.
   document.addEventListener('gm-tracker-finished', e => {
     const d = e.detail || {}; if(!hub || !prep || !d.srcKey || d.srcKey.indexOf('prep:' + ((prepMeta && prepMeta.docId) || '') + ':') !== 0) return;

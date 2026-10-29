@@ -193,8 +193,8 @@
     --pg-dark: #1c1c1f; --box-dark: #2a2a2e; --box-dark-line: rgba(255,255,255,.08);
     --ink-dark: #dcd8d0;
     
-    --enc-combat: #b0332a; --enc-exploration: #2d6a2d; --enc-social: #1a4a8a;
-    --enc-combat-dark: #ec6b5c; --enc-exploration-dark: #6cc46c; --enc-social-dark: #8fb7f2;}
+    --enc-combat: #b0332a; --enc-exploration: #2d6a2d; --enc-social: #1a4a8a; --enc-hazard: #a67c00;
+    --enc-combat-dark: #ec6b5c; --enc-exploration-dark: #6cc46c; --enc-social-dark: #8fb7f2; --enc-hazard-dark: #f2c94c;}
 .advh-sheet{background: var(--pg-light) !important;}
 .advh-sheet.dark-mode{background: var(--pg-dark) !important; color: var(--ink-dark);}
 .advh-sheet .clue-item,.advh-sheet .hook-item,.advh-sheet .haz-item,.advh-sheet .npc-block,.advh-sheet .mob-block,.advh-sheet .stat-block,.advh-sheet .mod-box,.advh-sheet .lotr-box,.advh-sheet .pb-box,.advh-sheet .lotr-oc{background: var(--box-light) !important; color: var(--ink);
@@ -238,14 +238,16 @@
     box-shadow: inset 0 0 0 1px var(--ra-border) !important; border-radius: 8px !important; padding: 6px 10px !important; font-style: italic;}
 .advh-sheet.dark-mode .sb-flavor{background: var(--ra-bg-dark) !important; color: var(--ra-text-dark) !important; border-left-color: var(--ra-bar-dark) !important;border-right-color: var(--ra-bar-dark) !important; box-shadow: inset 0 0 0 1px var(--ra-border-dark) !important;}
 .advh-sheet .sb-flavor *,.advh-sheet.dark-mode .sb-flavor *{color: inherit !important;}
-.advh-sheet .loc-name.enc-combat,.advh-sheet .loc-name.enc-exploration,.advh-sheet .loc-name.enc-social{display: block; font-family: var(--font-display); font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+.advh-sheet .loc-name.enc-combat,.advh-sheet .loc-name.enc-exploration,.advh-sheet .loc-name.enc-social,.advh-sheet .loc-name.enc-hazard{display: block; font-family: var(--font-display); font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
     padding-bottom: 1px; margin-bottom: 4px; border-bottom: 1.5px solid currentColor !important;}
 .advh-sheet .loc-name.enc-combat{color: var(--enc-combat) !important;}
 .advh-sheet .loc-name.enc-exploration{color: var(--enc-exploration) !important;}
 .advh-sheet .loc-name.enc-social{color: var(--enc-social) !important;}
+.advh-sheet .loc-name.enc-hazard{color: var(--enc-hazard) !important;}
 .advh-sheet.dark-mode .loc-name.enc-combat{color: var(--enc-combat-dark) !important;}
 .advh-sheet.dark-mode .loc-name.enc-exploration{color: var(--enc-exploration-dark) !important;}
 .advh-sheet.dark-mode .loc-name.enc-social{color: var(--enc-social-dark) !important;}
+.advh-sheet.dark-mode .loc-name.enc-hazard{color: var(--enc-hazard-dark) !important;}
 .advh-sheet .loc-lbl,.advh-sheet .det-grid .det-k{color: var(--ink) !important;}
 .advh-sheet.dark-mode .loc-lbl,.advh-sheet.dark-mode .det-grid .det-k{color: var(--ink-dark) !important;}
 .advh-sheet .loc-sub{font-family: var(--font-label-text, var(--font-body, 'Barlow', sans-serif)); font-size: var(--ty-label); font-weight: 700;
