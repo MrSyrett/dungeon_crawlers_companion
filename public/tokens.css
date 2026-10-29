@@ -25,7 +25,7 @@
      app is telling you (a save state, a roll result), used sparingly.
      --gold is Shadowdark's colour and the fallback for anything written before
      --accent existed, so on these surfaces it points at the accent. */
-  --accent: #5490c4;
+  --accent: #d0d5dc;
   --signal: #ff8419;
   --gold: var(--accent);
   /* Shadowdark's accent, its own token at last. */

@@ -198,8 +198,8 @@
                live indicator. Used sparingly — if it is on screen twice at
                once it has stopped meaning anything.
 
-   The accent is a blue that is deliberately darker and duller than ACE's sky
-   blue and JLU's vivid blue, so the furniture never reads as a game. The
+   The accent is a neutral light grey: the app's own furniture is monochrome,
+   so it never reads as a game and every system's colour stands apart from it. The
    signal is the one electric colour in the app; every system accent is matte
    beside it.
    ========================================================================= */
@@ -210,7 +210,7 @@
   --border: #2b3038;
   --muted: #8d96a3;
   --text: #e9edf2;
-  --accent: #5490c4;
+  --accent: #d0d5dc;
   --signal: #ff8419;
   /* Shadowdark's colour, and the fallback for anything written before --accent
      existed. NOT the app's accent any more: the chrome blocks below re-point

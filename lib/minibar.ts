@@ -204,7 +204,7 @@ ${titleRules("#dd-bar .dd-sys")}
    (down to 56px; the title's room is measured with the chip at that size):
    a long campaign name must not push the save status or the account icon off. */
 #dd-bar .dd-pin{flex:0 1 auto;box-sizing:border-box;min-width:56px;padding:2px 0 2px 11px;border:0;border-left:1px solid var(--muted,#8d96a3);border-radius:0;background:none;color:var(--text,#e9edf2);text-transform:none;letter-spacing:.02em;font-size:14px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:28vw}
-#dd-bar a.dd-pin:hover{color:var(--accent,#5490c4)}
+#dd-bar a.dd-pin:hover{color:var(--accent,#d0d5dc)}
 /* The campaign name in the game's second face (its skin's label font), keyed off
    the title just before it, so a live game switch restyles it too. */
 ${labelRules("#dd-bar .dd-sys", ".dd-pin")}
@@ -223,14 +223,14 @@ ${labelRules("#dd-bar .dd-sys", ".dd-pin")}
 #dd-bar #dd-status.is-saved{color:var(--signal,#ff8419)}
 #dd-bar #dd-status.is-error{color:#fff;background:var(--red,#b82018);border-color:var(--red,#b82018)}
 #dd-bar .dd-menu-btn{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:30px;height:28px;border:1px solid var(--border,#2b3038);border-radius:4px;background:var(--panel-2,#1c1f24);color:var(--text,#e9edf2);cursor:pointer;font:inherit}
-#dd-bar .dd-menu-btn:hover,#dd-bar .dd-menu-btn[aria-expanded="true"]{border-color:var(--accent,#5490c4)}
+#dd-bar .dd-menu-btn:hover,#dd-bar .dd-menu-btn[aria-expanded="true"]{border-color:var(--accent,#d0d5dc)}
 /* The account icon, mirroring SiteNav's .nav-acct (same 1px box, same muted
    colour, same hover) so these surfaces read like the rest of the site: menu at
    the left end, account at the right. */
 #dd-bar .dd-acct{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:30px;height:28px;border:1px solid var(--border,#2b3038);border-radius:4px;color:var(--muted,#8d96a3);transition:color .15s,border-color .15s}
 #dd-bar .dd-acct:hover{color:var(--text,#e9edf2);border-color:var(--muted,#8d96a3)}
 #dd-bar .dd-acct{background:transparent;cursor:pointer;padding:0}
-#dd-bar .dd-acct[aria-expanded="true"]{color:var(--accent,#5490c4);border-color:var(--accent,#5490c4)}
+#dd-bar .dd-acct[aria-expanded="true"]{color:var(--accent,#d0d5dc);border-color:var(--accent,#d0d5dc)}
 /* The account menu (My Characters · My Campaigns · Settings), under the icon at
    the RIGHT end — the same three entries as the main navbar's (ACCOUNT_LINKS). */
 #dd-acct-menu{position:absolute;right:8px;top:40px;width:200px;background:var(--panel,#14161a);border:1px solid var(--border,#2b3038);border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,.6);padding:4px;z-index:2147483001;text-transform:none;letter-spacing:.02em;font-weight:600;font-size:13px}
@@ -244,7 +244,7 @@ ${labelRules("#dd-bar .dd-sys", ".dd-pin")}
 #dd-menu .dd-menu-sec{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:2px}
 #dd-menu .dd-menu-sec.one{grid-template-columns:1fr}
 #dd-menu a,#dd-menu button{display:block;width:100%;box-sizing:border-box;text-align:left;padding:8px 10px;border:1px solid var(--border,#2b3038);border-radius:5px;background:transparent;color:var(--muted,#8d96a3);font:inherit;cursor:pointer}
-#dd-menu a:hover,#dd-menu button:hover{color:var(--text,#e9edf2);border-color:var(--accent,#5490c4);background:var(--panel-2,#1c1f24)}
+#dd-menu a:hover,#dd-menu button:hover{color:var(--text,#e9edf2);border-color:var(--accent,#d0d5dc);background:var(--panel-2,#1c1f24)}
 #dd-bar .dd-backdrop{position:fixed;inset:0;z-index:2147482999;background:transparent}
 @media (max-width:640px){#dd-bar{gap:7px;padding:0 8px}#dd-bar .dd-crumb .dd-crumb-k{display:none}#dd-bar .dd-crumb .dd-sep{display:none}}
 @media (prefers-reduced-motion:no-preference){#dd-menu{animation:dd-menu-in .12s ease-out}}

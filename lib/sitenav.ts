@@ -137,7 +137,7 @@ body:has(#dd-nav){--dd-bar-h:${SITE_NAV_H}px}
    The bar is a child of <body>, so it inherited all of it and wore each game's
    palette instead of the app's. Declaring the chrome tokens on #dd-nav itself is
    what .dcc-chrome does on the other side, and a theme can no longer reach in. */
-#dd-nav{--panel:#14161a;--panel-2:#1c1f24;--border:#2b3038;--text:#e9edf2;--muted:#8d96a3;--accent:#5490c4;--signal:#ff8419;--red:#b82018;
+#dd-nav{--panel:#14161a;--panel-2:#1c1f24;--border:#2b3038;--text:#e9edf2;--muted:#8d96a3;--accent:#d0d5dc;--signal:#ff8419;--red:#b82018;
   position:sticky;top:0;z-index:2147483000;flex:0 0 auto;box-sizing:border-box;background:var(--panel,#14161a);border-bottom:1px solid var(--border,#2b3038);color:var(--text,#e9edf2);font-family:"Geist",ui-sans-serif,system-ui,sans-serif;font-size:11px;line-height:1.5;font-weight:400;letter-spacing:normal;-webkit-user-select:none;user-select:none}
 #dd-nav *{box-sizing:border-box;font-family:inherit}
 #dd-nav a{text-decoration:none;color:inherit}
@@ -169,10 +169,10 @@ body:has(#dd-nav){--dd-bar-h:${SITE_NAV_H}px}
 #dd-nav #dd-status.is-saving{color:var(--muted,#8d96a3)}
 #dd-nav #dd-status.is-saved{color:var(--signal,#ff8419)}
 #dd-nav #dd-status.is-error{color:#fff;background:var(--red,#b82018);border-color:var(--red,#b82018)}
-#dd-nav .nav-admin{border:1px solid var(--accent,#5490c4);border-radius:4px;padding:4px 10px;font-size:10px;font-weight:600;line-height:1.5;letter-spacing:.06em;text-transform:uppercase;color:var(--accent,#5490c4)}
+#dd-nav .nav-admin{border:1px solid var(--accent,#d0d5dc);border-radius:4px;padding:4px 10px;font-size:10px;font-weight:600;line-height:1.5;letter-spacing:.06em;text-transform:uppercase;color:var(--accent,#d0d5dc)}
 #dd-nav .nav-admin:hover{background:var(--panel-2,#1c1f24)}
 #dd-nav .nav-acct{display:flex;flex:0 0 auto;align-items:center;padding:8px;border:1px solid var(--border,#2b3038);border-radius:4px;background:transparent;color:var(--muted,#8d96a3);cursor:pointer;transition:color .15s,border-color .15s}
-#dd-nav .nav-acct[aria-expanded="true"]{color:var(--accent,#5490c4);border-color:var(--accent,#5490c4)}
+#dd-nav .nav-acct[aria-expanded="true"]{color:var(--accent,#d0d5dc);border-color:var(--accent,#d0d5dc)}
 #dd-nav .nav-acctwrap{position:relative;flex:0 0 auto}
 #dd-nav .nav-acctwrap .nav-pop{left:auto;right:0;width:208px}
 #dd-nav .nav-acct-email{padding:8px 12px 4px;font-size:11px;color:var(--muted,#8d96a3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
