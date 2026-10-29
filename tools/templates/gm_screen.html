@@ -620,12 +620,12 @@ input[type="number"] { -moz-appearance: textfield; }
 .advh-trow.hit { background: rgba(84,144,196,.14); color: var(--white); }
 .advh-troll { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--accent); flex-shrink: 0; min-width: 34px; }
 /* Eight-tab Hub: pinned goal/prize, details, Run Scene bar, session ticks, trackers. */
-.advh-pin { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; font-size: 12px; color: var(--light); line-height: 1.4; }
-.advh-pin b { font-family: 'Geist', sans-serif; font-weight: 800; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin-right: 4px; }
 .advh-progress { font-size: 11.5px; color: var(--dim); letter-spacing: .02em; }
 .advh-det { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; margin-top: 6px; font-size: 12.5px; line-height: 1.45; color: var(--light); }
 .advh-det-k { font-family: 'Geist', sans-serif; font-weight: 800; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); padding-top: 2px; white-space: nowrap; }
 .advh-det-v { min-width: 0; overflow-wrap: anywhere; }
+.advh-det-sub { font-family: 'Geist', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); margin: 5px 0 2px; }
+.advh-det-sub:first-of-type { margin-top: 2px; }
 .advh-hooks { margin: 0; padding-left: 16px; }
 .advh-scene-top { display: flex; align-items: flex-start; gap: 8px; }
 .advh-scene-top .advh-scene-hd { flex: 1; }
@@ -8325,18 +8325,17 @@ function wireSessionPrepLoader(root) {
     // The eight baseline tabs (with each system's flavour names), plus the
     // hand-built LotR / Dragonbane / Pirate Borg sections after Scenes. Only tabs
     // with something in them show; the first tab is always there.
-    const ALL = ['adventure', 'tables', 'clues', 'treasure', 'scenes', 'travel', 'factions', 'vehicles', 'lotr', 'cast', 'maps'];
+    // Same order as the Adventure Prep's tabs and printed page.
+    const ALL = ['adventure', 'lotr', 'tables', 'clues', 'treasure', 'factions', 'travel', 'scenes', 'cast', 'vehicles', 'maps'];
     const TABS = ALL.filter(k => k === 'adventure' || c[k]).map(k => [k, lab(k)]);
     if(!TABS.some(([k]) => k === activeSec)) activeSec = 'adventure';
     const advTitle = (prepChapters[0] && prepChapters[0].title) || prep.title || prep._docTitle || 'Adventure';
     const D = DET();
-    // Pinned strip: the goal and the prize, a reminder of why the heroes are here.
-    const pin = [D.goal ? '<span><b>Goal</b> ' + advEsc(D.goal) + '</span>' : '', D.prize ? '<span><b>Prize</b> ' + advEsc(D.prize) + '</span>' : ''].filter(Boolean).join('');
+    // (Goal and Prize live in Adventure Details — no pinned strip under the title.)
     let h = '<div class="advh-head">'
       + '<div class="advh-titlerow"><div><div class="advh-title">' + advEsc(advTitle) + '</div>'
       + (!multi && prep.subtitle ? '<div class="advh-sub">' + advEsc(prep.subtitle) + '</div>' : '') + '</div>'
       + '<button class="btn small advh-full" title="Open the full printable prep in this pane">Full prep</button></div>'
-      + (pin ? '<div class="advh-pin">' + pin + '</div>' : '')
       + '</div>';
     if(multi) {
       h += '<div class="advh-outline' + (prepChaptersCollapsed ? ' collapsed' : '') + '">'
@@ -8362,11 +8361,13 @@ function wireSessionPrepLoader(root) {
       let h = prog.length ? '<div class="advh-progress">' + prog.map(advEsc).join(' · ') + '</div>' : '';
       const row = (k, v) => (v && String(v).trim()) ? '<div class="advh-det-k">' + k + '</div><div class="advh-det-v">' + v + '</div>' : '';
       const hooks = String(D.hooks || '').split('\n').map(x => x.trim()).filter(Boolean);
-      const det = row('Quest giver', advEsc(D.questgiver)) + row(hooks.length > 1 ? 'Hooks' : 'Hook', hooks.length > 1 ? '<ul class="advh-hooks">' + hooks.map(x => '<li>' + advEsc(x) + '</li>').join('') + '</ul>' : advEsc(hooks[0] || ''))
+      // The adventure's name is already the title / chapter; only Dragonbane's quest
+      // name and Pirate Borg's job name show, as a row.
+      const det = ((prepSys === 'PB' || prepSys === 'DB') ? row(prepSys === 'PB' ? 'Job' : 'Quest', advEsc(D.name)) : '') + row('Quest giver', advEsc(D.questgiver)) + row(hooks.length > 1 ? 'Hooks' : 'Hook', hooks.length > 1 ? '<ul class="advh-hooks">' + hooks.map(x => '<li>' + advEsc(x) + '</li>').join('') + '</ul>' : advEsc(hooks[0] || ''))
         + row('Goal', advEsc(D.goal)) + row('Prize', advEsc(D.prize)) + row('Stakes', advText(D.stakes || '')) + row('Opposition', advEsc(D.opposition))
         + row('Faction', advEsc(D.faction)) + row('Port', advEsc(D.port));
-      const detT = (lab('adventure') === 'Adventure' || lab('adventure') === 'Overview' ? 'Adventure Details' : lab('adventure')) + (D.name ? ' — ' + D.name : '');
-      if(det || D.name) h += '<div class="advh-card"><div class="advh-card-h">' + advEsc(detT) + '</div><div class="advh-det">' + det + '</div></div>';
+      const detT = (lab('adventure') === 'Adventure' || lab('adventure') === 'Overview' ? 'Adventure Details' : lab('adventure'));
+      if(det) h += '<div class="advh-card"><div class="advh-card-h">' + advEsc(detT) + '</div><div class="advh-det">' + det + '</div></div>';
       if(prep.overview) h += '<div class="advh-prose">' + advText(prep.overview) + '</div>';
       h += sysSectionsHtml();
       if((prep.trackers || []).length) h += '<div class="advh-notes"><div class="advh-scene-lbl">Trackers</div>' + trackersHtml(prep.trackers, 'adv') + '</div>';
@@ -8402,14 +8403,17 @@ function wireSessionPrepLoader(root) {
         if(nFoes) runBar += '<button type="button" class="btn small advh-send-combat advh-run-combat" title="' + advEsc(cast.filter(b => b.sbtype !== 'talk').map(b => (parseInt(b.qty, 10) > 1 ? b.qty + '× ' : '') + b.name).join(', ')) + '">⚔ Add ' + nFoes + ' to combat</button>';
         if(mp) runBar += '<button type="button" class="btn small advh-run-map" data-map="' + advEsc(mp.title || '') + '">🗺 ' + advEsc(mp.title || 'Map') + (L.mapkey ? ' #' + advEsc(L.mapkey) : '') + '</button>';
         tbs.forEach(ti => { runBar += '<button type="button" class="btn small advh-run-roll" data-ti="' + ti + '">🎲 ' + advEsc(tables()[ti].title || 'Roll') + '</button>'; });
+        // Details: who and what is here (cast, clues, treasure) — one section under
+        // Consequences, as on the Adventure Prep page.
+        let details = '';
+        if(cast.length) details += '<div class="advh-det-sub">Cast</div><div class="advh-desc">' + cast.map(b => advEsc((parseInt(b.qty, 10) > 1 ? b.qty + '× ' : '') + b.name) + (b.sbtype === 'talk' ? ' <span class="advh-tag">non-combat</span>' : '')).join(', ') + '</div>';
+        if(cls.length) details += '<div class="advh-det-sub">Clues</div>' + cls.map(([x, ci]) => clueRow(x, ci)).join('');
+        if(rws.length) details += '<div class="advh-det-sub">' + advEsc(lab('treasure')) + '</div>' + rws.map(([x, ri]) => treasureRow(x, ri)).join('');
+        const detailsHtml = details ? '<div class="advh-scene-sec"><div class="advh-scene-lbl">Details</div>' + details + '</div>' : '';
         let extra = '';
-        if(cast.length) extra += '<div class="advh-scene-sec"><div class="advh-scene-lbl">Cast here</div><div class="advh-desc">' + cast.map(b => advEsc((parseInt(b.qty, 10) > 1 ? b.qty + '× ' : '') + b.name) + (b.sbtype === 'talk' ? ' <span class="advh-tag">talk</span>' : '')).join(', ') + '</div></div>';
         if(hz.length) extra += '<div class="advh-scene-sec"><div class="advh-scene-lbl">Hazards &amp; traps</div>' + hz.map(z => '<div class="advh-haz"><b>' + advEsc(z.name || 'Hazard') + '</b>' + (z.trigger ? ' — ' + advEsc(z.trigger) : '') + (z.effect ? '<div>' + advText(z.effect) + '</div>' : '') + (z.spot ? '<div class="dim">Spot / disarm: ' + advEsc(z.spot) + '</div>' : '') + xHub('hazards', z) + '</div>').join('') + '</div>';
-        if(cls.length) extra += '<div class="advh-scene-sec"><div class="advh-scene-lbl">Clues here</div>' + cls.map(([x, ci]) => clueRow(x, ci)).join('') + '</div>';
-        if(rws.length) extra += '<div class="advh-scene-sec"><div class="advh-scene-lbl">' + advEsc(lab('treasure')) + ' here</div>' + rws.map(([x, ri]) => treasureRow(x, ri)).join('') + '</div>';
         const sT = sceneTrk(i);
         if(sT.length) extra += '<div class="advh-scene-sec"><div class="advh-scene-lbl">Scene trackers</div>' + trackersHtml(sT, 'scene' + i) + '</div>';
-        const R_ = window.PREP_REGISTRY, enc = R_ && R_.encounterInfo ? R_.encounterInfo(prepSys, s, prep) : null;
         const xh = xHub('scenes', s);
         const hasBody = s.readaloud || s.desc || s.consequences || s.notes;
         return '<div class="advh-scene' + (done ? ' done' : '') + '" data-i="' + i + '">'
@@ -8420,14 +8424,15 @@ function wireSessionPrepLoader(root) {
           + '<label class="advh-chk advh-done-chk" title="Mark this scene done"><input type="checkbox" class="advh-done"' + (done ? ' checked' : '') + '> Done</label></div>'
           + '<div class="advh-scene-body" style="display:none;">'
           + (runBar ? '<div class="advh-run">' + runBar + '</div><div class="advh-result advh-run-res" style="display:none;"></div>' : '')
-          + (enc ? '<div class="advh-desc"><b>Difficulty</b> · ' + advEsc(enc.text) + '</div>' : '') + xh
+          + xh
           + (s.tag ? '<div class="advh-scene-dq">' + advEsc(s.tag) + '</div>' : '')
           + (s.readaloud ? '<div class="advh-readaloud">' + advFmt(s.readaloud) + '</div>' : '')
           + scnSec('Interactions', s.desc)
           + scnSec('Consequences', s.consequences)
+          + detailsHtml
           + scnSec('Notes', s.notes)
           + extra
-          + (!hasBody && !extra && !runBar && !xh && !enc ? '<div class="advh-desc dim">No details recorded.</div>' : '')
+          + (!hasBody && !extra && !detailsHtml && !runBar && !xh ? '<div class="advh-desc dim">No details recorded.</div>' : '')
           + '</div></div>';
       }).join('') + looseHtml;
     }
@@ -8520,7 +8525,7 @@ function wireSessionPrepLoader(root) {
       if(!list.length) return '<div class="advh-empty">No NPCs, mobs, or bosses in this prep.</div>';
       // Talk-only cast get a small card; everyone else the read-only combat card.
       return list.map((sb, i) => sb.sbtype === 'talk'
-        ? '<div class="advh-card advh-talk" data-i="' + i + '"><div class="advh-card-h">' + advEsc(sb.name || 'NPC') + ' <span class="advh-tag">talk-only</span></div>'
+        ? '<div class="advh-card advh-talk" data-i="' + i + '"><div class="advh-card-h">' + advEsc(sb.name || 'NPC') + ' <span class="advh-tag">non-combat</span></div>'
           + (sb.flavor ? '<div class="advh-desc">' + advText(sb.flavor) + '</div>' : '')
           + ['wants', 'quirks', 'info', 'inventory'].map(k => sb[k] ? '<div class="advh-desc"><b>' + ({ wants: 'Wants', quirks: 'Quirks', info: 'Knows', inventory: 'Carries' })[k] + ':</b> ' + advText(sb[k]) + '</div>' : '').join('')
           + '<div class="advh-actions"><button type="button" class="btn small advh-send-social advh-talk-social">&rarr; Social</button></div></div>'

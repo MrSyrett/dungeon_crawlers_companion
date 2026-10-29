@@ -11,8 +11,10 @@
   var TABS = ['adventure', 'tables', 'clues', 'treasure', 'scenes', 'cast', 'maps'];
   var LABELS = { adventure: 'Adventure', tables: 'Tables', clues: 'Clues', treasure: 'Treasure', scenes: 'Encounters', cast: 'Monsters/NPCs', maps: 'Maps',
     travel: 'Travel', factions: 'Factions', vehicles: 'Vehicles' };
-  // Shared modules, in tab order (they sit after Encounters). A system turns one on
-  // in SYSTEMS[code].modules. (A Sites module was tried and dropped: a chapter is one
+  // Shared modules. Travel, Factions and Vehicles are on for every system (user,
+  // 2026-10-28/29) so every sheet has the same tabs. A system with its own journey
+  // rules adds a calculator in TRAVEL; the rest get plain legs. Tab order = print order: Treasure,
+  // Factions, Travel, Encounters, Cast, Vehicles. (A Sites module was tried and dropped: a chapter is one
   // site, and the Adventure tab holds it — see siteText.)
   var MODULE_TABS = ['travel', 'factions', 'vehicles'];
   // Flavour names (kept per system), loot drops, and the shared modules each system
@@ -391,7 +393,7 @@
   function sys(code) { return SYSTEMS[String(code || '').toUpperCase()] || null; }
   function label(code, tab) { var s = sys(code); return (s && s.labels && s.labels[tab]) || LABELS[tab] || tab; }
   function loot(code) { var s = sys(code); return s ? s.loot !== false : true; }
-  function modules(code) { var s = sys(code); return (s && s.modules) || []; }
+  function modules(code) { var s = sys(code), m = ((s && s.modules) || []).slice(); ['travel', 'factions', 'vehicles'].forEach(function (x) { if (m.indexOf(x) < 0) m.push(x); }); return m; }
   function itemList(code) {
     var it = ITEMS[String(code || '').toUpperCase()];
     if (!it) return [];

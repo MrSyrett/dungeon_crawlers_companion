@@ -961,7 +961,18 @@ body.flow-mode .page + .page {
   .page.dark-mode { --sys-hdr: var(--section-hdr-dark, var(--highlight)); --sys-hdr-ink: #1c1c1f; --sys-type: color-mix(in srgb, var(--sys-hdr) 72%, #fff); }
   .page .clue-item, .page .hook-item, .page .haz-item, .page .npc-block, .page .mob-block, .page .mod-box, .page .lotr-box, .page .pb-box, .page .lotr-oc,
   .page.dark-mode .clue-item, .page.dark-mode .hook-item, .page.dark-mode .haz-item, .page.dark-mode .npc-block, .page.dark-mode .mob-block, .page.dark-mode .mod-box, .page.dark-mode .lotr-box, .page.dark-mode .pb-box, .page.dark-mode .lotr-oc { border-left-color: var(--sys-hdr) !important; }
-  .page .stat-block, .page .stat-block.full-width, .page.dark-mode .stat-block, .page.dark-mode .stat-block.full-width { border-top-color: var(--sys-hdr) !important; }
+  /* A cast card's top bar wears its type colour (the same hues as the panel's type
+     radios): foe red, boss purple, NPC / ally blue, non-combat teal. */
+  :root { --sbt-mob: #b0332a; --sbt-boss: #6a2d8a; --sbt-npc: #1a4a8a; --sbt-talk: #1f7a8c;
+          --sbt-mob-dark: #ec6b5c; --sbt-boss-dark: #b08ad8; --sbt-npc-dark: #8fb7f2; --sbt-talk-dark: #5fb3c4; }
+  .page .stat-block, .page .stat-block.full-width, .page .stat-block.sbt-mob { border-top-color: var(--sbt-mob) !important; }
+  .page .stat-block.sbt-boss { border-top-color: var(--sbt-boss) !important; }
+  .page .stat-block.sbt-npc { border-top-color: var(--sbt-npc) !important; }
+  .page .stat-block.sbt-talk { border-top-color: var(--sbt-talk) !important; }
+  .page.dark-mode .stat-block, .page.dark-mode .stat-block.sbt-mob { border-top-color: var(--sbt-mob-dark) !important; }
+  .page.dark-mode .stat-block.sbt-boss { border-top-color: var(--sbt-boss-dark) !important; }
+  .page.dark-mode .stat-block.sbt-npc { border-top-color: var(--sbt-npc-dark) !important; }
+  .page.dark-mode .stat-block.sbt-talk { border-top-color: var(--sbt-talk-dark) !important; }
   .page .sl { border-bottom-color: var(--sys-hdr) !important; }
   .page .sb-type { color: var(--sys-type) !important; }
   .page .sb-table th, .page.dark-mode .sb-table th { background: var(--sys-hdr) !important; color: var(--sys-hdr-ink) !important; }
@@ -1020,7 +1031,7 @@ body.flow-mode .page + .page {
   .page.dark-mode .entry-name, .page.dark-mode .clue-hdr { color: #efebe3 !important; }
   .page .entry-name, .page .clue-hdr { color: var(--ink); }
   /* Editing panel: readable tabs and labels; the read-aloud field wears the read-aloud colour. */
-  .tab-btn { font-size: 9.5px; letter-spacing: .04em; padding: 8px 3px; min-width: 0; white-space: normal; line-height: 1.2; overflow-wrap: anywhere; }
+  .tab-btn { font-size: 9.5px; letter-spacing: .04em; padding: 8px 6px; flex: 1 1 auto !important; min-width: auto; white-space: normal; line-height: 1.2; overflow-wrap: normal; word-break: keep-all; hyphens: none; }
   .field-label { font-size: 10px; }
   .loc-ra-input, .so-ra-input, .sb-flavor-input, .reward-flavor-input { border-left: 3px solid var(--ra-bar-dark) !important; }
   .field-label.ra-label { color: var(--ra-bar-dark) !important; }
@@ -1045,16 +1056,17 @@ body.flow-mode .page + .page {
   <!-- Chapters: each tab is a self-contained chapter of this adventure. -->
   <div class="chapter-outline" id="chapter-tabs"></div>
   <div class="sidebar-tabs" id="sidebar-tabs">
+    <!-- Tab order = the order things print on the page. -->
     <button class="tab-btn active" data-tab="adventure" onclick="switchTab('adventure')">Adventure</button>
+
     <button class="tab-btn" data-tab="tables" onclick="switchTab('tables')">Tables</button>
     <button class="tab-btn" data-tab="clues" onclick="switchTab('clues')">Clues</button>
     <button class="tab-btn" data-tab="treasure" onclick="switchTab('treasure')">Treasure</button>
-    <button class="tab-btn" data-tab="scenes" onclick="switchTab('scenes')">Scenes</button>
-    <button class="tab-btn mod-off" data-tab="travel" data-module="travel" onclick="switchTab('travel')">Travel</button>
     <button class="tab-btn mod-off" data-tab="factions" data-module="factions" onclick="switchTab('factions')">Factions</button>
-    <button class="tab-btn mod-off" data-tab="vehicles" data-module="vehicles" onclick="switchTab('vehicles')">Vehicles</button>
-
+    <button class="tab-btn mod-off" data-tab="travel" data-module="travel" onclick="switchTab('travel')">Travel</button>
+    <button class="tab-btn" data-tab="scenes" onclick="switchTab('scenes')">Scenes</button>
     <button class="tab-btn" data-tab="cast" onclick="switchTab('cast')">Monsters</button>
+    <button class="tab-btn mod-off" data-tab="vehicles" data-module="vehicles" onclick="switchTab('vehicles')">Vehicles</button>
     <button class="tab-btn" data-tab="maps" onclick="switchTab('maps')">Maps</button>
   </div>
   <div class="sidebar-content">
@@ -1071,15 +1083,6 @@ body.flow-mode .page + .page {
         <input type="text" id="f-subtitle" placeholder="e.g. Chapter 1 — The Gatehouse" oninput="autosave()">
       </div>
 
-      <div class="section-divider">Overview</div>
-      <div class="field-group">
-        <label class="field-label">Overview Text</label>
-        <textarea id="f-overview" placeholder="Brief summary of the adventure..." oninput="autosave()"></textarea>
-      </div>
-      <button class="btn-add btn-roll" onclick="dbRollWholeAdventure()" title="Roll the Quest, Journey and Adventure Site tables and fill all three">🎲 Roll a whole adventure (Quest · Journey · Site)</button>
-      <div class="db-hint">The way in, what is inside, unexpected guests, a deadly challenge and the boss at the end — a chapter is one adventure site. Rolling one writes it into the Overview and sets the boss as the Opposition.</div>
-      <button class="btn-add btn-roll" onclick="dbRollSite()">🎲 Roll an Adventure Site</button>
-
       <div class="section-divider">Adventure Details</div>
       <div class="db-hint">The hook: who the player characters meet, what that person wants, and the thing it is all about. Roll the book's Quest table (one die of each type) or write your own.</div>
       <button class="btn-add btn-roll" onclick="dbRollQuest()">🎲 Roll a Quest</button>
@@ -1093,6 +1096,15 @@ body.flow-mode .page + .page {
       <div class="field-group"><label class="field-label">Opposition</label><input type="text" id="f-d-opposition" placeholder="The main villain or force against them" oninput="autosave()"></div>
       <div class="db-hint">Leaving the site: what happens if the player characters leave for at least a shift and come back. Goes into the GM Notes below.</div>
       <div style="display:flex;gap:6px;"><button class="btn-add btn-mini" style="flex:1" onclick="dbLeavingTable()">Use the book's D6 table</button><button class="btn-add btn-mini btn-roll" style="flex:1" onclick="dbLeavingRoll()">🎲 Roll it now</button></div>
+
+      <div class="section-divider">Overview</div>
+      <div class="field-group">
+        <label class="field-label">Overview Text</label>
+        <textarea id="f-overview" placeholder="Brief summary of the adventure..." oninput="autosave()"></textarea>
+      </div>
+      <button class="btn-add btn-roll" onclick="dbRollWholeAdventure()" title="Roll the Quest, Journey and Adventure Site tables and fill all three">🎲 Roll a whole adventure (Quest · Journey · Site)</button>
+      <div class="db-hint">The way in, what is inside, unexpected guests, a deadly challenge and the boss at the end — a chapter is one adventure site. Rolling one writes it into the Overview and sets the boss as the Opposition.</div>
+      <button class="btn-add btn-roll" onclick="dbRollSite()">🎲 Roll an Adventure Site</button>
 
       <div class="sys-sections" data-tab="adventure"></div>
       <div class="section-divider">Trackers</div>
@@ -1187,10 +1199,10 @@ body.flow-mode .page + .page {
         <button type="button" class="cf-chip" data-role="mob" onclick="setCastFilter('mob')">Monster</button>
         <button type="button" class="cf-chip" data-role="boss" onclick="setCastFilter('boss')">Boss</button>
         <button type="button" class="cf-chip" data-role="npc" onclick="setCastFilter('npc')">NPC / Ally</button>
-        <button type="button" class="cf-chip" data-role="talk" onclick="setCastFilter('talk')">Talk-only</button>
+        <button type="button" class="cf-chip" data-role="talk" onclick="setCastFilter('talk')">Non-Combat</button>
       </div>
       <div id="statblocks-list" class="entity-list" data-filter="all"></div>
-      <div style="display:flex;gap:6px;"><button class="btn-add" style="flex:1" onclick="addStatBlock();autosave()">+ Add Stat Block</button><button class="btn-add" style="flex:1" onclick="addStatBlock({sbtype:'talk'});autosave()">+ Talk-only NPC</button></div>
+      <div style="display:flex;gap:6px;"><button class="btn-add" style="flex:1" onclick="addStatBlock();autosave()">+ Add Stat Block</button><button class="btn-add" style="flex:1" onclick="addStatBlock({sbtype:'talk'});autosave()">+ Non-Combat NPC</button></div>
       <div class="sys-sections" data-tab="cast"></div>
     </div>
 
@@ -1976,16 +1988,16 @@ const _TAB_ALIASES = { basics:'adventure', encounters:'scenes', monsters:'cast' 
 // Flavour labels per system come from the shared registry (the GM Screen uses the same).
 function applyTabLabels(){
   if(!PREG) return;
-  document.querySelectorAll('.tab-btn[data-tab]').forEach(b=>{ b.textContent = PREG.label(PREP_CODE, b.dataset.tab); });
+  // A long label ("Imperials/NPCs") may wrap only after its slash, never mid-word.
+  document.querySelectorAll('.tab-btn[data-tab]').forEach(b=>{ b.innerHTML = escH(PREG.label(PREP_CODE, b.dataset.tab)).replace(/\//g,'/<wbr>'); });
   const sh=document.getElementById('scenes-heading'); if(sh) sh.textContent = PREG.label(PREP_CODE,'scenes');
   const th=document.getElementById('treasure-heading'); if(th) th.textContent = PREG.label(PREP_CODE,'treasure');
   { const va=document.getElementById('vehicles-add'); if(va) va.textContent='+ Add '+PREG.label(PREP_CODE,'vehicles').replace(/([^s])s$/,'$1'); }
   ((PREG && PREG.MODULE_TABS) || []).forEach(m=>{ const h=document.getElementById(m+'-heading'); if(h) h.textContent=PREG.label(PREP_CODE,m); });
   // Shared modules this system turns on (registry): show their tabs.
   document.querySelectorAll('.tab-btn[data-module]').forEach(b=>b.classList.toggle('mod-off', !modOn(b.dataset.module)));
-  // Lay the tab buttons out in two even rows (four a row for the baseline seven).
-  const n=document.querySelectorAll('.tab-btn[data-tab]:not(.mod-off)').length;
-  document.querySelectorAll('.tab-btn[data-tab]').forEach(b=>{ b.style.flexBasis=(100/Math.max(4,Math.ceil(n/2)))+'%'; });
+  // Tabs size to their label and wrap into rows that fill the width — a word is
+  // never split ("ADVENTUR-E"); a long label may break only after its slash.
 }
 function modOn(m){ return !!(PREG && PREG.hasModule && PREG.hasModule(PREP_CODE, m)); }
 function v(id){const el=document.getElementById(id);return el?el.value.trim():'';}
@@ -2762,19 +2774,19 @@ function locBlockInner(l){
   // Interactions / Consequences / Notes: true sub-sections, a label over a rule.
   const sec=(label,val)=>(val&&String(val).trim())?'<div class="loc-sub">'+escH(label)+'</div><p class="loc-desc">'+fmtText(val)+'</p>':'';
   const K=l.links||{};
-  // What's linked here, one kind per line. The map link stays on the GM Screen
-  // (it opens the map); on the page it's noise, so it isn't printed.
-  const ln=[
-    (K.cast||[]).length?'<b>Cast:</b> '+(K.cast||[]).map(escH).join(', '):'',
-    (K.clues||[]).length?'<b>Clues:</b> '+(K.clues||[]).map(escH).join(', '):'',
-    (K.treasure||[]).length?'<b>Treasure:</b> '+(K.treasure||[]).map(escH).join(', '):'',
-    (K.hazards||[]).length?'<b>Hazards:</b> '+(K.hazards||[]).map(escH).join(', '):'',
-    (K.tables||[]).length?'<b>Roll:</b> '+(K.tables||[]).map(escH).join(', '):'' ].filter(Boolean).map(x=>'<div class="loc-links">'+x+'</div>').join('');
-  return ln
+  const lines=a=>a.filter(Boolean).map(x=>'<div class="loc-links">'+x+'</div>').join('');
+  const list=(lbl,arr)=>(arr||[]).length?'<b>'+lbl+':</b> '+arr.map(escH).join(', '):'';
+  // Hazards and roll tables sit at the top (you need them as the scene opens).
+  // The map link stays on the GM Screen (it opens the map); on the page it's noise.
+  const top=lines([list('Hazards',K.hazards), list('Roll',K.tables)]);
+  // Who and what is here: its own Details sub-section under Consequences (as on the GM Screen).
+  const det=lines([list('Cast',K.cast), list('Clues',K.clues), list('Treasure',K.treasure)]);
+  return top
     + xLines('scenes', l)
     + (l.readaloud?'<div class="read-aloud"><p>'+fmtText(l.readaloud)+'</p></div>':'')
     + sec('Interactions', l.desc)
     + sec('Consequences', l.consequences)
+    + (det?'<div class="loc-sub">Details</div>'+det:'')
     + sec('Notes', l.notes)
     + ((l.trackers||[]).length?'<div class="loc-sub">Trackers</div>'+l.trackers.map(trackerLine).join(''):'');
 }
@@ -2968,9 +2980,9 @@ function addStatBlock(data={}) {
   const list=document.getElementById('statblocks-list');
   const div=document.createElement('div'); div.className='entity-card';
   const sbtype=data.sbtype||'mob';
-  const sbtypeColors={mob:'#C0392B',boss:'#6a2d8a',npc:'#1a4a8a',talk:'#3f7f8f'};
+  const sbtypeColors={mob:'#e0604f',boss:'#b08ad8',npc:'#6f9ee8',talk:'#5fb3c4'}; // = the type radios
   div.dataset.role=sbtype;
-  div.style.borderLeft=`2px solid ${sbtypeColors[sbtype]||sbtypeColors.mob}`;
+  div.style.borderLeft=`3px solid ${sbtypeColors[sbtype]||sbtypeColors.mob}`;
   const uid='sb'+Date.now()+Math.random().toString(36).slice(2);
   div.innerHTML=`
     <div class="entity-card-header">
@@ -2990,7 +3002,7 @@ function addStatBlock(data={}) {
           <input type="radio" class="sb-type-radio" name="sbtype-${uid}" value="npc" ${sbtype==='npc'?'checked':''} onchange="updateSbCardColor(this);toggleSocial(this);autosave()"> NPC / Ally
         </label>
         <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;font-weight:600;color:#5fb3c4;" title="Someone to talk to — no stat block">
-          <input type="radio" class="sb-type-radio" name="sbtype-${uid}" value="talk" ${sbtype==='talk'?'checked':''} onchange="updateSbCardColor(this);toggleSocial(this);autosave()"> Talk-only
+          <input type="radio" class="sb-type-radio" name="sbtype-${uid}" value="talk" ${sbtype==='talk'?'checked':''} onchange="updateSbCardColor(this);toggleSocial(this);autosave()"> Non-Combat
         </label>
       </div>
     </div>
@@ -3044,9 +3056,9 @@ function addStatBlock(data={}) {
 }
 
 function updateSbCardColor(radio) {
-  const colors={mob:'#C0392B',boss:'#6a2d8a',npc:'#1a4a8a',talk:'#3f7f8f'};
+  const colors={mob:'#e0604f',boss:'#b08ad8',npc:'#6f9ee8',talk:'#5fb3c4'};
   const card=radio.closest('.entity-card');
-  card.style.borderLeft=`2px solid ${colors[radio.value]||colors.mob}`;
+  card.style.borderLeft=`3px solid ${colors[radio.value]||colors.mob}`;
   card.dataset.role=radio.value;
 }
 // Cast filter chips (All / foes / bosses / NPCs / talk-only) — view only.
@@ -3106,18 +3118,23 @@ function renderPreview() {
 
     const L = t => (PREG ? PREG.label(PREP_CODE, t) : t);
     const D = state.details || {};
-    // ADVENTURE — overview, details, trackers, GM notes
-    sections.push('<div class="p-section"><div class="sl">Overview</div><p class="p-text">'+fmtText(state.overview)+'</p></div>');
+    // ADVENTURE — details, overview, trackers, GM notes (the GM Screen's order)
     {
       const rows=[], row=(k,v)=>{ if(v&&String(v).trim()) rows.push('<div class="det-k">'+escH(k)+'</div><div>'+v+'</div>'); };
+      // The adventure's name is already the chapter heading; only a system's own
+      // quest / job name (Dragonbane, Pirate Borg) prints, as a row.
+      if(document.getElementById('f-d-name')) row(PREP_CODE==='PB'?'Job':'Quest', escH(D.name||''));
       row('Quest giver', escH(D.questgiver||''));
       const hooks=String(D.hooks||'').split('\n').map(x=>x.trim()).filter(Boolean);
       if(hooks.length) row(hooks.length>1?'Hooks':'Hook', hooks.length>1?'<ul class="det-hooks">'+hooks.map(h=>'<li>'+escH(h)+'</li>').join('')+'</ul>':escH(hooks[0]));
       row('Goal', escH(D.goal||'')); row('Prize', escH(D.prize||'')); row('Stakes', fmtText(D.stakes||'')); row('Opposition', escH(D.opposition||''));
       if(typeof PLUG.detailRows==='function') (PLUG.detailRows(D)||[]).forEach(x=>row(x[0], escH(x[1]||'')));
-      const detT=(L('adventure')==='Adventure'?'Adventure Details':escH(L('adventure')))+(D.name?' — '+escH(D.name):'');
-      if(rows.length||D.name) sections.push('<div class="p-section"><div class="sl">'+detT+'</div><div class="det-grid">'+rows.join('')+'</div></div>');
+      const detT=(L('adventure')==='Adventure'?'Adventure Details':escH(L('adventure')));
+      if(rows.length) sections.push('<div class="p-section"><div class="sl">'+detT+'</div><div class="det-grid">'+rows.join('')+'</div></div>');
     }
+    sections.push('<div class="p-section"><div class="sl">Overview</div><p class="p-text">'+fmtText(state.overview)+'</p></div>');
+    // The system's own Adventure-tab sections sit under Overview, as in the panel.
+    previewSections('adventure').forEach(h=>sections.push(h));
     if((state.trackers||[]).length){
       sections.push('<div class="p-section"><div class="sl">Trackers</div>'+state.trackers.map(trackerLine).join('')+'</div>');
     }
@@ -3156,11 +3173,10 @@ function renderPreview() {
     }
 
     plugPreview('treasure', sections);
-    // MODULES: travel legs
+    // MODULES (print order = tab order): factions, then travel legs. Vehicles print after the cast.
+    previewFactions().forEach(h=>sections.push(h));
     previewTravel().forEach(h=>sections.push(h));
     plugPreview('travel', sections);
-    previewFactions().forEach(h=>sections.push(h));
-    previewVehicles().forEach(h=>sections.push(h));
 
     // HAZARDS & TRAPS, then the SCENES (which spill onto page 2 when they don't fit)
     if((state.hazards||[]).length){
@@ -3188,6 +3204,7 @@ function renderPreview() {
     }
 
     plugPreview('end', sections);
+    previewVehicles().forEach(h=>sections.push(h));
     // Put all items in left first to measure real heights
     // A header never ends a column on its own: a heading-only section is glued to
     // the block after it, so pagination moves them together.
@@ -3265,7 +3282,7 @@ function buildSB(s) {
   const div=document.createElement('div');
   const sbtypeColors={mob:'#C0392B',boss:'#6a2d8a',npc:'#1a4a8a'};
   const borderColor=sbtypeColors[s.sbtype]||sbtypeColors.mob;
-  div.className='stat-block'+(s.fullwidth?' full-width':'');
+  div.className='stat-block sbt-'+(['mob','boss','npc','talk'].includes(s.sbtype)?s.sbtype:'mob')+(s.fullwidth?' full-width':'');
   div.style.borderTopColor=borderColor;
   const hpCount=SB_CONFIG.hp ? (parseInt(s.hpcount)||1) : 0;
   let pips=''; for(let i=0;i<hpCount;i++) pips+=`<div class="hp-pip">${escH(s.hpval||'1')}</div>`;
@@ -3927,7 +3944,7 @@ function previewSections(tab){
 // adventure · clues · treasure · travel · scenes · end.
 function plugPreview(where, sections){
   // The system's own sections (registry SECTIONS) print where their tab sits.
-  const tabOf={ adventure:'adventure', clues:'clues', treasure:'treasure', travel:'travel', scenes:'scenes', end:'cast' }[where];
+  const tabOf={ clues:'clues', treasure:'treasure', travel:'travel', scenes:'scenes', end:'cast' }[where];
   if(tabOf) previewSections(tabOf).forEach(h=>sections.push(h));
   if(typeof PLUG.preview!=='function') return;
   try{ (PLUG.preview(where)||[]).forEach(h=>sections.push(h)); }catch(e){ console.error(e); }
