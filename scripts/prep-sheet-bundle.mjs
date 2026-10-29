@@ -26,6 +26,26 @@ function splitTop(str, sep) {
   return out;
 }
 
+// Font roles: every family in the page CSS becomes var(--ps-<role>, <its own stack>),
+// so the prep page looks exactly as before, while the GM Screen can set the five
+// roles to the system's own few faces (title · head · label · text · num).
+const ROLE_OF = [
+  [/^var\(--font-display/, 'head'], [/^var\(--font-label/, 'label'], [/^var\(--font-body/, 'text'], [/^var\(--font-blackletter/, 'title'],
+  [/^["']?(Share Tech Mono|Geist Mono)["']?|^monospace/i, 'num'],
+  [/^["']?(DnDC|Hideout|Ringbearer|JSL Blackletter|Dead Kansas|Anton|Marvel|Star Jedi|Ghostbusters|UnifrakturMaguntia)["']?/i, 'title'],
+  [/^["']?(Barlow Condensed|Oswald|Old Newspaper|Minion Pro|Aniron|1651 Alchemy|Cinzel|Archivo Narrow|Saira Condensed)["']?/i, 'label'],
+];
+function roleOf(stack) { const t = stack.trim(); for (const [re, r] of ROLE_OF) if (re.test(t)) return r; return 'text'; }
+function fontVars(decls) {
+  return decls.replace(/(^|[;{\s])font-family\s*:\s*([^;]+?)(\s*!important)?\s*(?=;|$)/g, (m, pre, v, imp) => {
+    if (/^var\(--ps-/.test(v.trim())) return m;
+    return pre + 'font-family: var(--ps-' + roleOf(v) + ', ' + v.trim() + ')' + (imp || '');
+  }).replace(/(^|[;{\s])font\s*:\s*([^;]*?\d[\d.]*(?:px|em|rem|%)(?:\s*\/\s*[\d.]+\w*)?\s+)([^;]+?)(\s*!important)?\s*(?=;|$)/g, (m, pre, head, fam, imp) => {
+    if (/var\(--ps-/.test(fam)) return m;
+    return pre + 'font: ' + head + 'var(--ps-' + roleOf(fam) + ', ' + fam.trim() + ')' + (imp || '');
+  });
+}
+
 function scopeSelector(sel) {
   sel = sel.trim();
   if (!sel || DROP.test(sel)) return null;
@@ -59,7 +79,7 @@ function scopeCss(css) {
     }
     // a stray ";" before a selector (e.g. after an @import) belongs to nothing
     const sels = splitTop(head.replace(/^[^{]*;/, ''), ',').map(scopeSelector).filter(Boolean);
-    if (sels.length) out += sels.join(',') + '{' + inner.trim() + '}\n';
+    if (sels.length) out += sels.join(',') + '{' + fontVars(inner.trim()) + '}\n';
   }
   return out;
 }
