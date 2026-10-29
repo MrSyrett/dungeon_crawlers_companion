@@ -1,1 +1,3 @@
   .adventure-title { font-family: var(--font-display); font-size: 28px; font-weight: var(--title-weight); color: var(--title-color); line-height: 0.95; text-transform: uppercase; letter-spacing: 0.02em; }
+  /* Dark-gold → bright-gold banner (as on the character sheet): a soft shadow keeps the light lettering readable on the bright end. */
+  .page-banner .adventure-title, .page-banner .adventure-subtitle, .page-banner .header-meta { text-shadow: 0 1px 2px rgba(60, 40, 5, .6); }
