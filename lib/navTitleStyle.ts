@@ -39,6 +39,34 @@ export const TITLE: Record<SystemKey, { f: string; c: string; x?: string }> = {
   MYZ: { f: '"Anton"', c: "var(--myz)" },
   VAE: { f: '"Fraunces"', c: "var(--vae)" },
 };
+/** Each game's home-page tile — its ground, cover texture, zoom, scrim and
+ *  texture anchor — for the standalone bar's Games menu (lib/sitenav.ts), which
+ *  draws the same mini tiles as SiteNav's GamesMenu without app/globals.css.
+ *  Copied from the [data-sys] tile map in app/globals.css (--tile-bg, --tile-tex,
+ *  --tile-zoom, --tile-scrim, --tile-tex-pos); keep the two in step. Missing
+ *  zoom / scrim / pos fall back to the .home-tile defaults: 1, 0.55, center. */
+export const TILE: Record<SystemKey, { bg: string; tex?: string; zoom?: number; scrim?: number; pos?: string }> = {
+  SD: { bg: "#08080a" },
+  ICRPG: { bg: "#14100d", tex: "/themes/icrpg-grain.webp", zoom: 2.6, scrim: 0.30 },
+  NIM: { bg: "#141816" },
+  DND: { bg: "#0d0b0c", tex: "/themes/dnd-cover.webp", zoom: 1, scrim: 0.18 },
+  DCC: { bg: "#060507", tex: "/themes/dcc-splatter.webp", zoom: 2.2, scrim: 0.38 },
+  KOB: { bg: "#15141a", tex: "/themes/kob-halftone.webp", zoom: 3, scrim: 0.32 },
+  CO: { bg: "#0c1512", tex: "/themes/co-grunge.webp", zoom: 2.2, scrim: 0.16 },
+  ACE: { bg: "#070d14", tex: "/themes/ace-speedlines.webp" },
+  SW: { bg: "#09090a", tex: "/themes/sw-starfield.webp", zoom: 2, scrim: 0.10 },
+  D62E: { bg: "#121214", tex: "/themes/d62e-blueprint.webp", zoom: 2.8, scrim: 0.18 },
+  YZE: { bg: "#07161a", tex: "/themes/yze-raster.webp" },
+  MMRPG: { bg: "#0b0809", tex: "/themes/mmrpg-burst.webp" },
+  JLU: { bg: "#0f1626", tex: "/themes/jlu-skyline.webp", zoom: 1, scrim: 0.22, pos: "bottom" },
+  GB: { bg: "#0e120a", tex: "/themes/gb-ectoplasm.webp", zoom: 1.3, scrim: 0.06, pos: "top" },
+  TWD: { bg: "#0b0909", tex: "/themes/twd-grunge.webp", scrim: 0.14 },
+  MYZ: { bg: "#100c0a", tex: "/themes/myz-metal.webp", scrim: 0.18 },
+  VAE: { bg: "#0c0a07", tex: "/themes/vae-paper.webp", scrim: 0.16 },
+  LOTR: { bg: "#07120c", tex: "/themes/lotr-mist.webp", zoom: 1.4, scrim: 0.12 },
+  DB: { bg: "#0f0e0d", tex: "/themes/db-parchment.webp?v=2026-10-22b", zoom: 1.2, scrim: 0.14 },
+  PB: { bg: "#0a0808", tex: "/themes/pb-splatter.webp", zoom: 1.15, scrim: 0.2 },
+};
 /** Two-colour wordmarks (SiteNav's NAME_PARTS). */
 export const NAME_PARTS: Partial<Record<SystemKey, [string, string]>> = { DCC: ["Dungeon", "Crawler Carl"], MMRPG: ["Marvel", "Multiverse RPG"] };
 

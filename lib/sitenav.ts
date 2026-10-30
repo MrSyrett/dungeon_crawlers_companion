@@ -1,6 +1,6 @@
 import { SYSTEMS, type SystemKey } from "@/components/systemStore";
 import { fitNavTitle } from "@/lib/navTitleFit";
-import { NAME_PARTS, titleRules } from "@/lib/navTitleStyle";
+import { NAME_PARTS, TILE, TITLE, titleRules } from "@/lib/navTitleStyle";
 import { TOOLS_NAV, compendiumFor, homebrewFor, CAMPAIGNS_LINK, ACCOUNT_LINKS, LIBRARY_LINK } from "@/components/navConfig";
 
 // The site navbar, for the surfaces that are NOT Next pages.
@@ -96,7 +96,7 @@ function navData(hiddenKeys: SystemKey[] = [], keep: SystemKey | null = null) {
   const hidden = new Set(hiddenKeys.filter((k) => k !== keep));
   const visible = SYSTEMS.filter((s) => !hidden.has(s.key));
   const list = visible.length ? visible : SYSTEMS;
-  const systems = list.map((s) => ({ k: s.key, n: s.name, a: s.accent }));
+  const systems = list.map((s) => ({ k: s.key, n: s.name, a: s.accent, t: TILE[s.key], c: TITLE[s.key].c }));
   const comp: Record<string, { h: string; l: string }[]> = {};
   const brew: Record<string, string | null> = {};
   for (const s of list) {
@@ -110,7 +110,7 @@ function titleCss(): string {
   const base = `#dd-nav .nav-sys-title{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;font-size:30.4px;line-height:1.2;letter-spacing:.02em;padding:.1em .1em .12em;margin-block:calc(16px - .71em);text-transform:none;color:var(--text,#e9edf2)}
 #dd-nav .nav-sys-title.is-wrap{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;white-space:normal;overflow-wrap:anywhere;line-height:1.02;margin-block:calc(16px - 1.13em)}
 `;
-  return base + "\n" + titleRules("#dd-nav .nav-sys-title");
+  return base + "\n" + titleRules("#dd-nav .nav-sys-title") + "\n" + titleRules("#dd-nav .gt-name");
 }
 
 const CSS = `
@@ -186,6 +186,24 @@ body:has(#dd-nav){--dd-bar-h:${SITE_NAV_H}px}
 #dd-nav .nav-pop a:hover,#dd-nav .nav-pop button:hover{background:var(--panel-2,#1c1f24);color:var(--text,#e9edf2)}
 #dd-nav .nav-pop button.on{background:var(--panel-2,#1c1f24)}
 #dd-nav .nav-wrap{position:relative;flex:0 0 auto}
+/* THE GAMES MENU — the home page's game tiles in miniature, two across, the same
+   menu SiteNav's GamesMenu draws (components/SiteNav.tsx, .home-tile-mini in
+   app/globals.css). This document has no globals.css, so the tile is rebuilt
+   here from the same facts: ground / texture / zoom / scrim from TILE and the
+   wordmark face and colour from TITLE (lib/navTitleStyle.ts, both copied from
+   the globals.css tile map). Each tile's height is the window's height shared
+   between the rows, so the menu never scrolls. Two ids in the selectors so the
+   plain list-button rules above (.nav-pop button) cannot reach in. */
+#dd-nav #dd-nav-syspop.gt-pop{width:24rem;max-height:none;overflow:hidden;padding:6px}
+#dd-nav #dd-nav-syspop .gt-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#dd-nav #dd-nav-syspop button.gt{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:clamp(26px,calc((100dvh - 92px) / var(--rows,9) - 6px),46px);padding:3px 10px;overflow:hidden;border:1px solid var(--border,#2b3038);border-radius:7px;background:var(--t-bg);text-align:center;text-transform:none;letter-spacing:.01em;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+#dd-nav #dd-nav-syspop button.gt::before{content:"";position:absolute;inset:0;z-index:0;background-image:var(--t-tex,none);background-size:cover;background-position:var(--t-pos,center);background-repeat:no-repeat;transform:scale(var(--t-zoom,1));opacity:.85}
+#dd-nav #dd-nav-syspop button.gt::after{content:"";position:absolute;inset:0;z-index:1;background:rgba(0,0,0,var(--t-scrim,.55))}
+#dd-nav #dd-nav-syspop button.gt:hover,#dd-nav #dd-nav-syspop button.gt.on{border-color:var(--t-acc);box-shadow:0 0 0 1px var(--t-acc);background:var(--t-bg)}
+#dd-nav #dd-nav-syspop button.gt.on{box-shadow:0 0 0 2px var(--t-acc)}
+#dd-nav #dd-nav-syspop button.gt:hover::before,#dd-nav #dd-nav-syspop button.gt.on::before{opacity:1}
+#dd-nav .gt-name{position:relative;z-index:2;display:inline-block;max-width:100%;font-size:13px;font-weight:700;line-height:1.12;text-wrap:balance;text-shadow:0 1px 3px rgba(0,0,0,.95),0 0 10px rgba(0,0,0,.7)}
+#dd-nav .gt-name.gt-unfit{opacity:0}
 #dd-nav .nav-item > svg{flex:0 0 auto}
 #dd-nav .nav-backdrop{position:fixed;inset:0;z-index:0;background:transparent;border:0;cursor:default}
 #dd-nav .nav-panel{position:relative;z-index:10;border-top:1px solid var(--border,#2b3038);background:var(--panel,#14161a);padding:12px}
@@ -328,9 +346,14 @@ function paint(){
   var pt=PARTS[e.k];
   if(pt){title.innerHTML='<span class="tn-1">'+esc(pt[0])+'</span> <span class="tn-2">'+esc(pt[1])+'</span>';}else{title.textContent=e.n;}
   titleLink.title=e.n+" — home";
-  sysPop.innerHTML=D.systems.map(function(s){
-    return '<button type="button" data-k="'+s.k+'" class="'+(s.k===cur?"on":"")+'"'+(s.k===cur?' style="color:'+s.a+'"':'')+'>'+esc(s.n)+'</button>';
-  }).join("");
+  sysPop.classList.add("gt-pop");
+  sysPop.style.setProperty("--rows",String(Math.ceil(D.systems.length/2)));
+  sysPop.innerHTML='<div class="gt-grid">'+D.systems.map(function(s){
+    var t=s.t||{},pt=PARTS[s.k];
+    var st="--t-bg:"+t.bg+";--t-acc:"+s.c+(t.tex?';--t-tex:url(&quot;'+t.tex+'&quot;)':"")+(t.zoom?";--t-zoom:"+t.zoom:"")+(t.scrim!=null?";--t-scrim:"+t.scrim:"")+(t.pos?";--t-pos:"+t.pos:"");
+    var nm=pt?'<span class="tn-1">'+esc(pt[0])+'</span> <span class="tn-2">'+esc(pt[1])+'</span>':esc(s.n);
+    return '<button type="button" data-k="'+s.k+'" title="'+esc(s.n)+'" class="gt'+(s.k===cur?" on":"")+'"'+(s.k===cur?' aria-current="true"':'')+' style="'+st+'"><span class="gt-name gt-unfit" data-sys="'+s.k+'">'+nm+'</span></button>';
+  }).join("")+'</div>';
   var links=D.comp[cur]||[];
   compPop.innerHTML=links.map(function(l){return '<a href="'+esc(l.h)+'">'+esc(l.l)+'</a>';}).join("");
   panelComp.innerHTML=links.map(function(l){return '<a href="'+esc(l.h)+'">'+esc(l.l)+'</a>';}).join("");
@@ -391,7 +414,24 @@ function show(which,pop,btn){
 }
 function onKey(e){if(e.key==="Escape"){e.preventDefault();shut();}}
 
-sysBtn.addEventListener("click",function(){show("system",sysPop,sysBtn);});
+// Fit each tile's name to its tile, as the home page and SiteNav do: the largest
+// size (8-16px) whose rendered box — the element's and its text's, whichever is
+// bigger — fits the tile's content box. Run once the menu is visible (a hidden
+// tile has no size) and again when a late face arrives.
+function fitGames(){
+  var rg=document.createRange();
+  sysPop.querySelectorAll(".gt-name").forEach(function(n){
+    var t=n.parentElement,cs=getComputedStyle(t);
+    var rw=t.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+    var rh=t.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
+    if(!(rw>0&&rh>0))return;
+    var lo=8,hi=16,best=8;
+    for(var i=0;i<8;i++){var mid=(lo+hi)/2;n.style.fontSize=mid+"px";var b=n.getBoundingClientRect();rg.selectNodeContents(n);var k=rg.getBoundingClientRect();
+      if(Math.max(b.width,k.width)<=rw+.5&&Math.max(b.height,k.height)<=rh+.5){best=mid;lo=mid;}else{hi=mid;}}
+    n.style.fontSize=best.toFixed(2)+"px";n.classList.remove("gt-unfit");
+  });
+}
+sysBtn.addEventListener("click",function(){show("system",sysPop,sysBtn);if(!sysPop.hidden){fitGames();try{document.fonts.ready.then(function(){if(!sysPop.hidden)fitGames();});}catch(e2){}}});
 compBtn.addEventListener("click",function(){show("compendium",compPop,compBtn);});
 acctBtn.addEventListener("click",function(){show("account",acctPop,acctBtn);});
 document.getElementById("dd-nav-burger").addEventListener("click",function(){
