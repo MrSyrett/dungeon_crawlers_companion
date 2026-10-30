@@ -1437,7 +1437,7 @@ body {
 }
 
 /* --- Dragonbane: green and gold on dark parchment --------------------------
-   Hideout letters the titles as the logo does — red inside a gold outline; Minion Pro takes the labels in old
+   Hideout letters the titles in the book's green (the red-in-gold is the wordmark's alone); Minion Pro takes the labels in old
    gold; EB Garamond carries the reading. The ground is an original aged-parchment
    texture recoloured to a deep forest green for dark mode
    (public/themes/db-parchment.webp), under a faint green glow from above and a
@@ -1445,7 +1445,7 @@ body {
    Green (the book's banners and boxes) is the accent, gold the second colour;
    the red belongs to the Hideout wordmark alone. */
 :root[data-system="DB"]:not([data-chrome]) body {
-  --sys-head: var(--db-logo);
+  --sys-head: var(--db-ink);
   --sys-sub: var(--db-gold);
   --sys-link: var(--db-ink);
   --sys-hilite: var(--db);
@@ -1482,26 +1482,15 @@ body {
   font-weight: 400;
   letter-spacing: 0.02em;
 }
-/* HIDEOUT IS ALWAYS THE LOGO: red letters inside a gold outline, wherever the
-   face appears (headings, card names, anything set .font-display) — over any
-   colour class at the usage site, which is why this is unlayered and names the
-   colour itself. paint-order draws the stroke first, so only its outer half
-   shows and the letter keeps its full weight; the stroke is in em so it grows
-   with the type — about 1px of gold on a card name, 1.5px on a page title.
-   Same recipe as the home tile / roster / navbar title rules further down, the
-   standalone prep builder and the GM screen. Not inside the navbar chrome. */
+/* Headings are Hideout in the Dragonbane green, with NO stroke: the red-in-gold
+   treatment belongs to the "Dragonbane" wordmark alone (the home tile, the roster
+   label and the navbar title, further down). --db-ink is the book's green lifted
+   for the dark ground; light mode points it at the book's heading green.
+   Named over any colour class at the usage site, hence unlayered. */
 :root[data-system="DB"]:not([data-chrome]) body :is(h1, h2, h3, [data-dash-head], .font-display):not(.dcc-chrome *) {
-  color: var(--db-logo);
-  -webkit-text-stroke: var(--db-stroke, 0.09em) var(--db-gold);
-  paint-order: stroke fill;
-}
-:root[data-system="DB"]:not([data-chrome]) body h1 { --db-stroke: 0.1em; }
-:root[data-system="DB"]:not([data-chrome]) body :is(h3, .font-display) { --db-stroke: 0.11em; }
-/* A heading's inline extras (an HB badge, a die) are not the wordmark. */
-:root[data-system="DB"]:not([data-chrome]) body :is(h1, h2, h3, [data-dash-head], .font-display) :is(span, small, a)[class*="border"] {
+  color: var(--db-ink);
   -webkit-text-stroke: 0;
 }
-
 /* --- Pirate Borg: blood on black -------------------------------------------
    JSL Blackletter letters the titles in white; 1651 Alchemy takes the
    labels and section eyebrows in bone; EB Garamond carries the reading. The
@@ -2496,6 +2485,53 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --bad: #b3261e;
 }
 
+/* Dark-ground systems: the root goes back to the dark values... */
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]):not([data-chrome]) {
+  color-scheme: dark;
+  --bg: #0b0c0e;
+  --panel: #14161a;
+  --panel-2: #1c1f24;
+  --border: #2b3038;
+  --muted: #8d96a3;
+  --text: #e9edf2;
+  --accent: #d0d5dc;
+  --on-accent: #1a1a1a;
+  --signal: #ff8419;
+  --red: #b82018;
+  --gold: #c8a020;
+  --crimson-ink: #ff3b30;
+  --gold-ink: #e2b23a;
+  --blue-ink: #8ab4f8;
+  --dcc-ink: #ee4a78;
+  --dcc-gold: #f2c230;
+  --kob-ink: #c9aaff;
+  --d62e-ink: #f0a050;
+  --nimble-ink: #7fd39a;
+  --icrpg-ink: #e8823c;
+  --jlu-ink: #6293f2;
+  --mmrpg-blue: #7fc0f5;
+  --lotr-ink: #e2c36b;
+  --db-ink: #5cb894;
+  --pb-ink: #e6463a;
+  --twd-bone: #d8cfbf;
+  --myz-steel: #d9d3c6;
+  --vae-bone: #e7dec9;
+  --pb-bone: #e8e0cc;
+  --gb-ecto: #b6e34a;
+  --sw-cyan: #30d5e8;
+  --candela-gold: #d8b24a;
+  --grade-1: #a7a7ad;
+  --grade-2: #5fbf72;
+  --grade-3: #5aa0e8;
+  --grade-4: #b07de0;
+  --grade-5: #e8a838;
+  --grade-6: #e06a5a;
+  --bronze: #c88a5a;
+  --silver: #c7ccd1;
+  --good: #8fd19e;
+  --bad: #f0a8a3;
+}
+
 :root[data-mode="light"][data-system="SD"]:not([data-chrome]) body {
   --panel: #fbfbf8;
   --panel-2: #efefec;
@@ -2538,7 +2574,47 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   background-repeat: no-repeat, no-repeat;
 }
 
-:root[data-mode="light"][data-system="DCC"]:not([data-chrome]) body {
+/* ...and its content sections are paper. */
+:root[data-mode="light"][data-system="DCC"]:not([data-chrome]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) {
+  color-scheme: light;
+  --mmrpg-ink: var(--crimson-ink);
+  --jlu-gold: var(--gold-ink);
+  --nimble-blue: var(--blue-ink);
+  --bg: #f1f2f4;
+  --accent: #2f3640;
+  --on-accent: #ffffff;
+  --signal: #c25700;
+  --crimson-ink: #b3141a;
+  --gold-ink: #8a6412;
+  --blue-ink: #2b5fb0;
+  --dcc-ink: #b8164a;
+  --dcc-gold: #8f6f0a;
+  --kob-ink: #5c3596;
+  --d62e-ink: #9a4d18;
+  --nimble-ink: #1f6f46;
+  --icrpg-ink: #8a3712;
+  --jlu-ink: #1c49a8;
+  --mmrpg-blue: #1c5a96;
+  --lotr-ink: #8a6a12;
+  --db-ink: #1e5842;
+  --pb-ink: #a3121a;
+  --twd-bone: #1a1512;
+  --myz-steel: #2e2a26;
+  --vae-bone: #1a1512;
+  --pb-bone: #7a4a2a;
+  --gb-ecto: #3f6a12;
+  --sw-cyan: #0f7180;
+  --candela-gold: #8a6a1c;
+  --grade-1: #66666d;
+  --grade-2: #2f8a45;
+  --grade-3: #2a68b8;
+  --grade-4: #7a45b0;
+  --grade-5: #9a650c;
+  --grade-6: #b3402f;
+  --bronze: #8f5a2e;
+  --silver: #646b72;
+  --good: #2f7a46;
+  --bad: #b3261e;
   --panel: #f5f3f0;
   --panel-2: #ede9e4;
   --border: #c9c1b6;
@@ -2551,16 +2627,51 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --sys-action: #8f6f0a;
   --gold: #8f6f0a;
   --sys: #8f6f0a;
-  background-color: #e8e4e0;
-  background-image:
-    radial-gradient(85% 40% at 50% 0%, rgba(232,39,95, 0.14) 0%, rgba(232,39,95, 0) 72%),
-    url("/themes/dcc-splatter-light.webp");
-  background-size: cover, cover;
-  background-position: center, center;
-  background-repeat: no-repeat, no-repeat;
+  --red: #b8164a;
+  color: var(--text);
 }
 
-:root[data-mode="light"][data-system="SW"]:not([data-chrome]) body {
+/* ...and its content sections are paper. */
+:root[data-mode="light"][data-system="SW"]:not([data-chrome]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) {
+  color-scheme: light;
+  --mmrpg-ink: var(--crimson-ink);
+  --jlu-gold: var(--gold-ink);
+  --nimble-blue: var(--blue-ink);
+  --bg: #f1f2f4;
+  --accent: #2f3640;
+  --on-accent: #ffffff;
+  --signal: #c25700;
+  --crimson-ink: #b3141a;
+  --gold-ink: #8a6412;
+  --blue-ink: #2b5fb0;
+  --dcc-ink: #b8164a;
+  --dcc-gold: #8f6f0a;
+  --kob-ink: #5c3596;
+  --d62e-ink: #9a4d18;
+  --nimble-ink: #1f6f46;
+  --icrpg-ink: #8a3712;
+  --jlu-ink: #1c49a8;
+  --mmrpg-blue: #1c5a96;
+  --lotr-ink: #8a6a12;
+  --db-ink: #1e5842;
+  --pb-ink: #a3121a;
+  --twd-bone: #1a1512;
+  --myz-steel: #2e2a26;
+  --vae-bone: #1a1512;
+  --pb-bone: #7a4a2a;
+  --gb-ecto: #3f6a12;
+  --sw-cyan: #0f7180;
+  --candela-gold: #8a6a1c;
+  --grade-1: #66666d;
+  --grade-2: #2f8a45;
+  --grade-3: #2a68b8;
+  --grade-4: #7a45b0;
+  --grade-5: #9a650c;
+  --grade-6: #b3402f;
+  --bronze: #8f5a2e;
+  --silver: #646b72;
+  --good: #2f7a46;
+  --bad: #b3261e;
   --panel: #f8f6ef;
   --panel-2: #efece2;
   --border: #c9c3b2;
@@ -2573,16 +2684,51 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --sys-action: #7a5f0e;
   --gold: #7a5f0e;
   --sys: #7a5f0e;
-  background-color: #e9e6dc;
-  background-image:
-    radial-gradient(85% 40% at 50% 0%, rgba(201,162,39, 0.14) 0%, rgba(201,162,39, 0) 72%),
-    url("/themes/sw-starfield-light.webp");
-  background-size: cover, cover;
-  background-position: center, center;
-  background-repeat: no-repeat, no-repeat;
+  --red: #b3261e;
+  color: var(--text);
 }
 
-:root[data-mode="light"][data-system="MMRPG"]:not([data-chrome]) body {
+/* ...and its content sections are paper. */
+:root[data-mode="light"][data-system="MMRPG"]:not([data-chrome]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) {
+  color-scheme: light;
+  --mmrpg-ink: var(--crimson-ink);
+  --jlu-gold: var(--gold-ink);
+  --nimble-blue: var(--blue-ink);
+  --bg: #f1f2f4;
+  --accent: #2f3640;
+  --on-accent: #ffffff;
+  --signal: #c25700;
+  --crimson-ink: #b3141a;
+  --gold-ink: #8a6412;
+  --blue-ink: #2b5fb0;
+  --dcc-ink: #b8164a;
+  --dcc-gold: #8f6f0a;
+  --kob-ink: #5c3596;
+  --d62e-ink: #9a4d18;
+  --nimble-ink: #1f6f46;
+  --icrpg-ink: #8a3712;
+  --jlu-ink: #1c49a8;
+  --mmrpg-blue: #1c5a96;
+  --lotr-ink: #8a6a12;
+  --db-ink: #1e5842;
+  --pb-ink: #a3121a;
+  --twd-bone: #1a1512;
+  --myz-steel: #2e2a26;
+  --vae-bone: #1a1512;
+  --pb-bone: #7a4a2a;
+  --gb-ecto: #3f6a12;
+  --sw-cyan: #0f7180;
+  --candela-gold: #8a6a1c;
+  --grade-1: #66666d;
+  --grade-2: #2f8a45;
+  --grade-3: #2a68b8;
+  --grade-4: #7a45b0;
+  --grade-5: #9a650c;
+  --grade-6: #b3402f;
+  --bronze: #8f5a2e;
+  --silver: #646b72;
+  --good: #2f7a46;
+  --bad: #b3261e;
   --panel: #f6f7f9;
   --panel-2: #eceef2;
   --border: #c9ccd4;
@@ -2595,13 +2741,8 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --sys-action: #b3141a;
   --gold: #b3141a;
   --sys: #b3141a;
-  background-color: #e8eaed;
-  background-image:
-    radial-gradient(85% 40% at 50% 0%, rgba(236,29,36, 0.14) 0%, rgba(236,29,36, 0) 72%),
-    url("/themes/mmrpg-burst-light.webp");
-  background-size: cover, cover;
-  background-position: center, center;
-  background-repeat: no-repeat, no-repeat;
+  --red: #b3261e;
+  color: var(--text);
 }
 
 :root[data-mode="light"][data-system="ACE"]:not([data-chrome]) body {
@@ -2626,7 +2767,47 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   background-repeat: no-repeat, no-repeat;
 }
 
-:root[data-mode="light"][data-system="KOB"]:not([data-chrome]) body {
+/* ...and its content sections are paper. */
+:root[data-mode="light"][data-system="KOB"]:not([data-chrome]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) {
+  color-scheme: light;
+  --mmrpg-ink: var(--crimson-ink);
+  --jlu-gold: var(--gold-ink);
+  --nimble-blue: var(--blue-ink);
+  --bg: #f1f2f4;
+  --accent: #2f3640;
+  --on-accent: #ffffff;
+  --signal: #c25700;
+  --crimson-ink: #b3141a;
+  --gold-ink: #8a6412;
+  --blue-ink: #2b5fb0;
+  --dcc-ink: #b8164a;
+  --dcc-gold: #8f6f0a;
+  --kob-ink: #5c3596;
+  --d62e-ink: #9a4d18;
+  --nimble-ink: #1f6f46;
+  --icrpg-ink: #8a3712;
+  --jlu-ink: #1c49a8;
+  --mmrpg-blue: #1c5a96;
+  --lotr-ink: #8a6a12;
+  --db-ink: #1e5842;
+  --pb-ink: #a3121a;
+  --twd-bone: #1a1512;
+  --myz-steel: #2e2a26;
+  --vae-bone: #1a1512;
+  --pb-bone: #7a4a2a;
+  --gb-ecto: #3f6a12;
+  --sw-cyan: #0f7180;
+  --candela-gold: #8a6a1c;
+  --grade-1: #66666d;
+  --grade-2: #2f8a45;
+  --grade-3: #2a68b8;
+  --grade-4: #7a45b0;
+  --grade-5: #9a650c;
+  --grade-6: #b3402f;
+  --bronze: #8f5a2e;
+  --silver: #646b72;
+  --good: #2f7a46;
+  --bad: #b3261e;
   --panel: #f6f3f8;
   --panel-2: #ece6f2;
   --border: #c9c0d6;
@@ -2639,13 +2820,8 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --sys-action: #5c3596;
   --gold: #5c3596;
   --sys: #5c3596;
-  background-color: #e6e2ee;
-  background-image:
-    radial-gradient(85% 40% at 50% 0%, rgba(124,77,189, 0.14) 0%, rgba(124,77,189, 0) 72%),
-    url("/themes/kob-halftone-light.webp");
-  background-size: cover, cover;
-  background-position: center, center;
-  background-repeat: no-repeat, no-repeat;
+  --red: #b3261e;
+  color: var(--text);
 }
 
 :root[data-mode="light"][data-system="D62E"]:not([data-chrome]) body {
@@ -2692,7 +2868,47 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   background-repeat: no-repeat, no-repeat;
 }
 
-:root[data-mode="light"][data-system="CO"]:not([data-chrome]) body {
+/* ...and its content sections are paper. */
+:root[data-mode="light"][data-system="CO"]:not([data-chrome]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) {
+  color-scheme: light;
+  --mmrpg-ink: var(--crimson-ink);
+  --jlu-gold: var(--gold-ink);
+  --nimble-blue: var(--blue-ink);
+  --bg: #f1f2f4;
+  --accent: #2f3640;
+  --on-accent: #ffffff;
+  --signal: #c25700;
+  --crimson-ink: #b3141a;
+  --gold-ink: #8a6412;
+  --blue-ink: #2b5fb0;
+  --dcc-ink: #b8164a;
+  --dcc-gold: #8f6f0a;
+  --kob-ink: #5c3596;
+  --d62e-ink: #9a4d18;
+  --nimble-ink: #1f6f46;
+  --icrpg-ink: #8a3712;
+  --jlu-ink: #1c49a8;
+  --mmrpg-blue: #1c5a96;
+  --lotr-ink: #8a6a12;
+  --db-ink: #1e5842;
+  --pb-ink: #a3121a;
+  --twd-bone: #1a1512;
+  --myz-steel: #2e2a26;
+  --vae-bone: #1a1512;
+  --pb-bone: #7a4a2a;
+  --gb-ecto: #3f6a12;
+  --sw-cyan: #0f7180;
+  --candela-gold: #8a6a1c;
+  --grade-1: #66666d;
+  --grade-2: #2f8a45;
+  --grade-3: #2a68b8;
+  --grade-4: #7a45b0;
+  --grade-5: #9a650c;
+  --grade-6: #b3402f;
+  --bronze: #8f5a2e;
+  --silver: #646b72;
+  --good: #2f7a46;
+  --bad: #b3261e;
   --panel: #f6f8f6;
   --panel-2: #eaf0ed;
   --border: #c2cec9;
@@ -2705,13 +2921,8 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --sys-action: #1c6b60;
   --gold: #1c6b60;
   --sys: #1c6b60;
-  background-color: #e6ebe9;
-  background-image:
-    radial-gradient(85% 40% at 50% 0%, rgba(47,165,149, 0.14) 0%, rgba(47,165,149, 0) 72%),
-    url("/themes/co-grunge-light.webp");
-  background-size: cover, cover;
-  background-position: center, center;
-  background-repeat: no-repeat, no-repeat;
+  --red: #b3261e;
+  color: var(--text);
 }
 
 :root[data-mode="light"][data-system="NIM"]:not([data-chrome]) body {
@@ -2756,7 +2967,47 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   background-repeat: no-repeat, repeat;
 }
 
-:root[data-mode="light"][data-system="YZE"]:not([data-chrome]) body {
+/* ...and its content sections are paper. */
+:root[data-mode="light"][data-system="YZE"]:not([data-chrome]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) {
+  color-scheme: light;
+  --mmrpg-ink: var(--crimson-ink);
+  --jlu-gold: var(--gold-ink);
+  --nimble-blue: var(--blue-ink);
+  --bg: #f1f2f4;
+  --accent: #2f3640;
+  --on-accent: #ffffff;
+  --signal: #c25700;
+  --crimson-ink: #b3141a;
+  --gold-ink: #8a6412;
+  --blue-ink: #2b5fb0;
+  --dcc-ink: #b8164a;
+  --dcc-gold: #8f6f0a;
+  --kob-ink: #5c3596;
+  --d62e-ink: #9a4d18;
+  --nimble-ink: #1f6f46;
+  --icrpg-ink: #8a3712;
+  --jlu-ink: #1c49a8;
+  --mmrpg-blue: #1c5a96;
+  --lotr-ink: #8a6a12;
+  --db-ink: #1e5842;
+  --pb-ink: #a3121a;
+  --twd-bone: #1a1512;
+  --myz-steel: #2e2a26;
+  --vae-bone: #1a1512;
+  --pb-bone: #7a4a2a;
+  --gb-ecto: #3f6a12;
+  --sw-cyan: #0f7180;
+  --candela-gold: #8a6a1c;
+  --grade-1: #66666d;
+  --grade-2: #2f8a45;
+  --grade-3: #2a68b8;
+  --grade-4: #7a45b0;
+  --grade-5: #9a650c;
+  --grade-6: #b3402f;
+  --bronze: #8f5a2e;
+  --silver: #646b72;
+  --good: #2f7a46;
+  --bad: #b3261e;
   --panel: #f4f7f8;
   --panel-2: #e8eef0;
   --border: #c2ccce;
@@ -2769,13 +3020,8 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --sys-action: #0b6c80;
   --gold: #0b6c80;
   --sys: #0b6c80;
-  background-color: #e2e8ea;
-  background-image:
-    radial-gradient(85% 40% at 50% 0%, rgba(22,189,214, 0.14) 0%, rgba(22,189,214, 0) 72%),
-    url("/themes/yze-raster-light.webp");
-  background-size: cover, cover;
-  background-position: center, center;
-  background-repeat: no-repeat, no-repeat;
+  --red: #b3261e;
+  color: var(--text);
 }
 
 :root[data-mode="light"][data-system="TWD"]:not([data-chrome]) body {
@@ -2852,12 +3098,12 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --text: #173523;
   --muted: #5d5a3f;
   --sys-head: #1f4a30;
-  --sys-sub: #8a6a12;
+  --sys-sub: #6e540c;
   --sys-link: #1f4a30;
-  --sys-hilite: #8a6a12;
-  --sys-action: #8a6a12;
-  --gold: #8a6a12;
-  --sys: #8a6a12;
+  --sys-hilite: #6e540c;
+  --sys-action: #6e540c;
+  --gold: #6e540c;
+  --sys: #6e540c;
   background-color: #e7dcbf;
   background-image:
     radial-gradient(85% 40% at 50% 0%, rgba(201,162,39, 0.14) 0%, rgba(201,162,39, 0) 72%),
@@ -2873,7 +3119,7 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --border: #cbc7c0;
   --text: #1d1b19;
   --muted: #5f5b55;
-  --sys-head: #e42a32;
+  --sys-head: #1e5842;
   --sys-sub: #8a6a1f;
   --sys-link: #1e5842;
   --sys-hilite: #8a6a1f;
@@ -2890,7 +3136,47 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   background-repeat: no-repeat, no-repeat, no-repeat;
 }
 
-:root[data-mode="light"][data-system="PB"]:not([data-chrome]) body {
+/* ...and its content sections are paper. */
+:root[data-mode="light"][data-system="PB"]:not([data-chrome]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) {
+  color-scheme: light;
+  --mmrpg-ink: var(--crimson-ink);
+  --jlu-gold: var(--gold-ink);
+  --nimble-blue: var(--blue-ink);
+  --bg: #f1f2f4;
+  --accent: #2f3640;
+  --on-accent: #ffffff;
+  --signal: #c25700;
+  --crimson-ink: #b3141a;
+  --gold-ink: #8a6412;
+  --blue-ink: #2b5fb0;
+  --dcc-ink: #b8164a;
+  --dcc-gold: #8f6f0a;
+  --kob-ink: #5c3596;
+  --d62e-ink: #9a4d18;
+  --nimble-ink: #1f6f46;
+  --icrpg-ink: #8a3712;
+  --jlu-ink: #1c49a8;
+  --mmrpg-blue: #1c5a96;
+  --lotr-ink: #8a6a12;
+  --db-ink: #1e5842;
+  --pb-ink: #a3121a;
+  --twd-bone: #1a1512;
+  --myz-steel: #2e2a26;
+  --vae-bone: #1a1512;
+  --pb-bone: #7a4a2a;
+  --gb-ecto: #3f6a12;
+  --sw-cyan: #0f7180;
+  --candela-gold: #8a6a1c;
+  --grade-1: #66666d;
+  --grade-2: #2f8a45;
+  --grade-3: #2a68b8;
+  --grade-4: #7a45b0;
+  --grade-5: #9a650c;
+  --grade-6: #b3402f;
+  --bronze: #8f5a2e;
+  --silver: #646b72;
+  --good: #2f7a46;
+  --bad: #b3261e;
   --panel: #fbf7ee;
   --panel-2: #efe6d3;
   --border: #d2c3a8;
@@ -2903,17 +3189,51 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --sys-action: #a3121a;
   --gold: #a3121a;
   --sys: #a3121a;
-  background-color: #e8e0cc;
-  background-image:
-    radial-gradient(85% 40% at 50% 0%, rgba(163,18,26, 0.14) 0%, rgba(163,18,26, 0) 72%),
-    linear-gradient(rgba(244, 237, 221, 0.7), rgba(244, 237, 221, 0.7)),
-    url("/themes/pb-splatter-light.webp");
-  background-size: cover, cover, cover;
-  background-position: center, center, center;
-  background-repeat: no-repeat, no-repeat, no-repeat;
+  --red: #b3261e;
+  color: var(--text);
 }
 
-:root[data-mode="light"][data-system="JLU"]:not([data-chrome]) body {
+/* ...and its content sections are paper. */
+:root[data-mode="light"][data-system="JLU"]:not([data-chrome]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) {
+  color-scheme: light;
+  --mmrpg-ink: var(--crimson-ink);
+  --jlu-gold: var(--gold-ink);
+  --nimble-blue: var(--blue-ink);
+  --bg: #f1f2f4;
+  --accent: #2f3640;
+  --on-accent: #ffffff;
+  --signal: #c25700;
+  --crimson-ink: #b3141a;
+  --gold-ink: #8a6412;
+  --blue-ink: #2b5fb0;
+  --dcc-ink: #b8164a;
+  --dcc-gold: #8f6f0a;
+  --kob-ink: #5c3596;
+  --d62e-ink: #9a4d18;
+  --nimble-ink: #1f6f46;
+  --icrpg-ink: #8a3712;
+  --jlu-ink: #1c49a8;
+  --mmrpg-blue: #1c5a96;
+  --lotr-ink: #8a6a12;
+  --db-ink: #1e5842;
+  --pb-ink: #a3121a;
+  --twd-bone: #1a1512;
+  --myz-steel: #2e2a26;
+  --vae-bone: #1a1512;
+  --pb-bone: #7a4a2a;
+  --gb-ecto: #3f6a12;
+  --sw-cyan: #0f7180;
+  --candela-gold: #8a6a1c;
+  --grade-1: #66666d;
+  --grade-2: #2f8a45;
+  --grade-3: #2a68b8;
+  --grade-4: #7a45b0;
+  --grade-5: #9a650c;
+  --grade-6: #b3402f;
+  --bronze: #8f5a2e;
+  --silver: #646b72;
+  --good: #2f7a46;
+  --bad: #b3261e;
   --panel: #f6f8fc;
   --panel-2: #e9eef8;
   --border: #c3cbdb;
@@ -2926,22 +3246,17 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --sys-action: #1c49a8;
   --gold: #1c49a8;
   --sys: #1c49a8;
-  background-color: #dbe3ef;
-  background-image:
-    radial-gradient(85% 40% at 50% 0%, rgba(47,111,237, 0.14) 0%, rgba(47,111,237, 0) 72%),
-    url("/themes/jlu-skyline-light.webp");
-  background-size: cover, cover;
-  background-position: center, bottom center;
-  background-repeat: no-repeat, no-repeat;
+  --red: #b3261e;
+  color: var(--text);
 }
 
-/* DCC re-points --red at its magenta; keep that on paper. */
-:root[data-mode="light"][data-system="DCC"]:not([data-chrome]) body { --red: var(--dcc-ink); }
-/* Pirate Borg's titles are white on black; on bone they take the ink. */
-:root[data-mode="light"][data-system="PB"]:not([data-chrome]) body :is(h1, h2, [data-dash-head]):not(.dcc-chrome *) { color: var(--sys-head); }
+/* Pirate Borg's titles are white on black; inside a paper section they take the ink. */
+:root[data-mode="light"][data-system="PB"]:not([data-chrome]) body [class*="bg-[var(--panel"] :is(h1, h2, [data-dash-head]):not(.dcc-chrome *) { color: var(--sys-head); }
 /* The home roster's names sit on the ground, not on a tile, so their dark
    halo would smudge on paper. */
 :root[data-mode="light"] .home-roster { --rtsh: none; }
+/* TWD's distressed headings are ink on paper: the pale grime reads on dark ink. */
+:root[data-mode="light"][data-system="TWD"]:not([data-chrome]) body :is(h1, h2, h3) { background-image: url("/themes/twd-grime-light.webp"); }
 /* The game and tool tiles are artwork — dark grounds in every mode — so they
    keep the dark-mode inks. */
 /* ...and so is the navbar, which stays the dark bar in both modes, the way the
@@ -2996,4 +3311,138 @@ div.roster-card:hover { border-color: var(--tile-accent); }
 /* The roster's system labels sit on the paper: the white wordmarks take the ink. */
 :root[data-mode="light"] .roster-sys[data-sys="PB"] .roster-sys-name,
 :root[data-mode="light"] .roster-sys[data-sys="GB"] .roster-sys-name { color: var(--text); -webkit-text-stroke: 0; }
+
+/* Brand colours as text, deepened for paper. */
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="text-[var(--dnd)]"],
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="hover:text-[var(--dnd)]"]:hover,
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) .group:hover [class~="group-hover:text-[var(--dnd)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--dnd)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--dnd)]"]:hover,
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--dnd)]"] { color: #c8102e; }
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="text-[var(--dcc)]"],
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="hover:text-[var(--dcc)]"]:hover,
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) .group:hover [class~="group-hover:text-[var(--dcc)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--dcc)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--dcc)]"]:hover,
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--dcc)]"] { color: #d5174e; }
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="text-[var(--sw)]"],
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="hover:text-[var(--sw)]"]:hover,
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) .group:hover [class~="group-hover:text-[var(--sw)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--sw)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--sw)]"]:hover,
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--sw)]"] { color: #876a09; }
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="text-[var(--mmrpg)]"],
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="hover:text-[var(--mmrpg)]"]:hover,
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) .group:hover [class~="group-hover:text-[var(--mmrpg)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--mmrpg)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--mmrpg)]"]:hover,
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--mmrpg)]"] { color: #c8102e; }
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="text-[var(--ace)]"],
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="hover:text-[var(--ace)]"]:hover,
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) .group:hover [class~="group-hover:text-[var(--ace)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--ace)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--ace)]"]:hover,
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--ace)]"] { color: #1972a0; }
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="text-[var(--kob)]"],
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="hover:text-[var(--kob)]"]:hover,
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) .group:hover [class~="group-hover:text-[var(--kob)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--kob)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--kob)]"]:hover,
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--kob)]"] { color: #8c46e2; }
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="text-[var(--nimble)]"],
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="hover:text-[var(--nimble)]"]:hover,
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) .group:hover [class~="group-hover:text-[var(--nimble)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--nimble)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--nimble)]"]:hover,
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--nimble)]"] { color: #267c4f; }
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="text-[var(--d62e)]"],
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="hover:text-[var(--d62e)]"]:hover,
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) .group:hover [class~="group-hover:text-[var(--d62e)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--d62e)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--d62e)]"]:hover,
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--d62e)]"] { color: #ac541b; }
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="text-[var(--gb)]"],
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="hover:text-[var(--gb)]"]:hover,
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) .group:hover [class~="group-hover:text-[var(--gb)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--gb)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--gb)]"]:hover,
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--gb)]"] { color: #527523; }
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="text-[var(--candela)]"],
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="hover:text-[var(--candela)]"]:hover,
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) .group:hover [class~="group-hover:text-[var(--candela)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--candela)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--candela)]"]:hover,
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--candela)]"] { color: #23796e; }
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="text-[var(--icrpg)]"],
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="hover:text-[var(--icrpg)]"]:hover,
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) .group:hover [class~="group-hover:text-[var(--icrpg)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--icrpg)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--icrpg)]"]:hover,
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--icrpg)]"] { color: #b6491b; }
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="text-[var(--yze)]"],
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="hover:text-[var(--yze)]"]:hover,
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) .group:hover [class~="group-hover:text-[var(--yze)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--yze)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--yze)]"]:hover,
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--yze)]"] { color: #0e7887; }
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="text-[var(--twd)]"],
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="hover:text-[var(--twd)]"]:hover,
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) .group:hover [class~="group-hover:text-[var(--twd)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--twd)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--twd)]"]:hover,
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--twd)]"] { color: #9e1b1b; }
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="text-[var(--myz)]"],
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="hover:text-[var(--myz)]"]:hover,
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) .group:hover [class~="group-hover:text-[var(--myz)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--myz)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--myz)]"]:hover,
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--myz)]"] { color: #a95622; }
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="text-[var(--vae)]"],
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="hover:text-[var(--vae)]"]:hover,
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) .group:hover [class~="group-hover:text-[var(--vae)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--vae)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--vae)]"]:hover,
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--vae)]"] { color: #8a691e; }
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="text-[var(--lotr)]"],
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="hover:text-[var(--lotr)]"]:hover,
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) .group:hover [class~="group-hover:text-[var(--lotr)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--lotr)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--lotr)]"]:hover,
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--lotr)]"] { color: #856b1a; }
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="text-[var(--db)]"],
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="hover:text-[var(--db)]"]:hover,
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) .group:hover [class~="group-hover:text-[var(--db)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--db)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--db)]"]:hover,
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--db)]"] { color: #236855; }
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="text-[var(--pb)]"],
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="hover:text-[var(--pb)]"]:hover,
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) .group:hover [class~="group-hover:text-[var(--pb)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--pb)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--pb)]"]:hover,
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--pb)]"] { color: #a3121a; }
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="text-[var(--jlu)]"],
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="hover:text-[var(--jlu)]"]:hover,
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) .group:hover [class~="group-hover:text-[var(--jlu)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--jlu)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--jlu)]"]:hover,
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--jlu)]"] { color: #1c62eb; }
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="text-[var(--sd)]"],
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="hover:text-[var(--sd)]"]:hover,
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) .group:hover [class~="group-hover:text-[var(--sd)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--sd)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--sd)]"]:hover,
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--sd)]"] { color: #826815; }
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="text-[var(--crimson)]"],
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="hover:text-[var(--crimson)]"]:hover,
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) .group:hover [class~="group-hover:text-[var(--crimson)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--crimson)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--crimson)]"]:hover,
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--crimson)]"] { color: #c8102e; }
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="text-[var(--signal)]"],
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) [class~="hover:text-[var(--signal)]"]:hover,
+:root[data-mode="light"]:not(:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"])) .group:hover [class~="group-hover:text-[var(--signal)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--signal)]"],
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--signal)]"]:hover,
+:root[data-mode="light"]:is([data-system="DCC"], [data-system="SW"], [data-system="PB"], [data-system="YZE"], [data-system="JLU"], [data-system="MMRPG"], [data-system="KOB"], [data-system="CO"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--signal)]"] { color: #ad5000; }
 /* LIGHT-MODE:END */

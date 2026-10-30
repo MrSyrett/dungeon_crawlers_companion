@@ -20,8 +20,8 @@ S = {
  'TWD':  ('#e7ddcd','#f4efe4','#ece2d3','#cdc0ae','#1a1512','#6d6156','#1a1512','#7a1414','#7a1414','#7a1414','158,27,27','/themes/twd-grime-light.webp'),
  'MYZ':  ('#e7ddcd','#f4efe4','#ece2d3','#cdc0ae','#1a1512','#6d6156','#2e2a26','#7e3a12','#7e3a12','#7e3a12','181,85,31',None),
  'VAE':  ('#e7ddcd','#f4efe4','#ece2d3','#cdc0ae','#1a1512','#6d6156','#7e5c14','#35508a','#7e5c14','#7e5c14','207,155,46',None),
- 'LOTR': ('#e7dcbf','#fbf6e6','#efe5c8','#d2c39b','#173523','#5d5a3f','#1f4a30','#8a6a12','#1f4a30','#8a6a12','201,162,39',None),
- 'DB':   ('#e8e6e2','#fbfbfa','#f0eeeb','#cbc7c0','#1d1b19','#5f5b55','#e42a32','#8a6a1f','#1e5842','#8a6a1f','35,104,85','/themes/db-parchment-light.webp'),
+ 'LOTR': ('#e7dcbf','#fbf6e6','#efe5c8','#d2c39b','#173523','#5d5a3f','#1f4a30','#6e540c','#1f4a30','#6e540c','201,162,39',None),
+ 'DB':   ('#e8e6e2','#fbfbfa','#f0eeeb','#cbc7c0','#1d1b19','#5f5b55','#1e5842','#8a6a1f','#1e5842','#8a6a1f','35,104,85','/themes/db-parchment-light.webp'),
  'PB':   ('#e8e0cc','#fbf7ee','#efe6d3','#d2c3a8','#1d1313','#6a5a4e','#1d1313','#7a4a2a','#a3121a','#a3121a','163,18,26','/themes/pb-splatter-light.webp'),
  'JLU':  ('#dbe3ef','#f6f8fc','#e9eef8','#c3cbdb','#111726','#586074','#1c49a8','#8a6412','#1c49a8','#1c49a8','47,111,237',None),
 }
@@ -29,23 +29,15 @@ S = {
 # the same art (public/themes/*-light.webp; see the doc for how they were made).
 TEX = {
  'DND': ('dnd-cover-light.webp', 'cover', 'center', 'no-repeat'),
- 'DCC': ('dcc-splatter-light.webp', 'cover', 'center', 'no-repeat'),
- 'SW': ('sw-starfield-light.webp', 'cover', 'center', 'no-repeat'),
- 'MMRPG': ('mmrpg-burst-light.webp', 'cover', 'center', 'no-repeat'),
  'ACE': ('ace-speedlines-light.webp', 'cover', 'center', 'no-repeat'),
- 'KOB': ('kob-halftone-light.webp', 'cover', 'center', 'no-repeat'),
  'D62E': ('d62e-blueprint-light.webp', 'cover', 'center', 'no-repeat'),
  'GB': ('gb-ectoplasm-light.webp', 'cover', 'top center', 'no-repeat'),
- 'CO': ('co-grunge-light.webp', 'cover', 'center', 'no-repeat'),
  'ICRPG': ('icrpg-grain-light.webp', '900px 560px', 'center', 'repeat'),
- 'YZE': ('yze-raster-light.webp', 'cover', 'center', 'no-repeat'),
  'TWD': ('twd-grime-light.webp', 'cover', 'center', 'no-repeat'),
  'MYZ': ('myz-metal-light.webp', 'cover', 'center', 'no-repeat'),
  'VAE': ('vae-paper-light.webp', 'cover', 'center', 'no-repeat'),
  'LOTR': ('lotr-mist-light.webp', 'cover', 'center', 'no-repeat'),
  'DB': ('db-parchment-light.webp', 'cover', 'center', 'no-repeat'),
- 'PB': ('pb-splatter-light.webp', 'cover', 'center', 'no-repeat'),
- 'JLU': ('jlu-skyline-light.webp', 'cover', 'bottom center', 'no-repeat'),
 }
 W = {'TWD': ('244, 239, 228', '0.25'), 'DB': ('248, 246, 242', '0.45'), 'PB': ('244, 237, 221', '0.7')}
 L = []
@@ -110,7 +102,43 @@ L.append('''/* =================================================================
   --bad: #b3261e;
 }
 ''')
+# Systems whose ground art reads wrong lightened: the page keeps its DARK ground
+# and texture in light mode, and only the content sections (anything filled with
+# --panel / --panel-2) turn to paper.
+DARK_GROUND = ['DCC', 'SW', 'PB', 'YZE', 'JLU', 'MMRPG', 'KOB', 'CO']
+SECTION = ':is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *)'
+_g = open(P, encoding='utf8').read()
+_dr = _g[_g.index(':root {\n  --bg: #0b0c0e'):]
+_dr = _dr[:_dr.index('\n}\n')]
+DARK_ROOT = dict(re.findall(r'^\s*(--[\w-]+):\s*([^;]+);', _dr, re.M))
+LIGHT_ROOT = re.findall(r'^\s*(--[\w-]+):\s*([^;]+);', L[0][L[0].index(':root[data-mode="light"] {'):], re.M)
+RED_LIGHT = {'DCC': '#b8164a'}
+L.append('/* Dark-ground systems: the root goes back to the dark values... */\n'
+         + ':root[data-mode="light"]:is(' + ', '.join('[data-system="%s"]' % k for k in DARK_GROUND) + '):not([data-chrome]) {\n  color-scheme: dark;\n'
+         + ''.join('  %s: %s;\n' % (n, DARK_ROOT[n]) for n, v in LIGHT_ROOT if n in DARK_ROOT) + '}\n')
 for k,(bg,pa,p2,bo,tx,mu,hd,sb,lk,ac,tint,tex) in S.items():
+    if k in DARK_GROUND:
+        L.append('''/* ...and its content sections are paper. */
+:root[data-mode="light"][data-system="%s"]:not([data-chrome]) body %s {
+  color-scheme: light;
+%s  --panel: %s;
+  --panel-2: %s;
+  --border: %s;
+  --text: %s;
+  --muted: %s;
+  --sys-head: %s;
+  --sys-sub: %s;
+  --sys-link: %s;
+  --sys-hilite: %s;
+  --sys-action: %s;
+  --gold: %s;
+  --sys: %s;
+  --red: %s;
+  color: var(--text);
+}
+''' % (k, SECTION, '  --mmrpg-ink: var(--crimson-ink);\n  --jlu-gold: var(--gold-ink);\n  --nimble-blue: var(--blue-ink);\n' + ''.join('  %s: %s;\n' % (n, v) for n, v in LIGHT_ROOT if n not in ('--panel', '--panel-2', '--border', '--text', '--muted', '--gold', '--red')),
+       pa, p2, bo, tx, mu, hd, sb, lk, ac, ac, ac, ac, RED_LIGHT.get(k, '#b3261e')))
+        continue
     sel = ':root[data-mode="light"][data-system="%s"]:not([data-chrome]) body' % k
     glow = 'radial-gradient(85%% 40%% at 50%% 0%%, rgba(%s, 0.14) 0%%, rgba(%s, 0) 72%%)' % (tint, tint)
     if k in TEX:
@@ -140,13 +168,13 @@ for k,(bg,pa,p2,bo,tx,mu,hd,sb,lk,ac,tint,tex) in S.items():
 %s}
 ''' % (sel, pa, p2, bo, tx, mu, hd, sb, lk, ac, ac, ac, ac, bg, ground))
 # per-system extras that hard-code dark-only colours
-L.append('''/* DCC re-points --red at its magenta; keep that on paper. */
-:root[data-mode="light"][data-system="DCC"]:not([data-chrome]) body { --red: var(--dcc-ink); }
-/* Pirate Borg's titles are white on black; on bone they take the ink. */
-:root[data-mode="light"][data-system="PB"]:not([data-chrome]) body :is(h1, h2, [data-dash-head]):not(.dcc-chrome *) { color: var(--sys-head); }
+L.append('''/* Pirate Borg's titles are white on black; inside a paper section they take the ink. */
+:root[data-mode="light"][data-system="PB"]:not([data-chrome]) body [class*="bg-[var(--panel"] :is(h1, h2, [data-dash-head]):not(.dcc-chrome *) { color: var(--sys-head); }
 /* The home roster's names sit on the ground, not on a tile, so their dark
    halo would smudge on paper. */
 :root[data-mode="light"] .home-roster { --rtsh: none; }
+/* TWD's distressed headings are ink on paper: the pale grime reads on dark ink. */
+:root[data-mode="light"][data-system="TWD"]:not([data-chrome]) body :is(h1, h2, h3) { background-image: url("/themes/twd-grime-light.webp"); }
 /* The game and tool tiles are artwork — dark grounds in every mode — so they
    keep the dark-mode inks. */
 /* ...and so is the navbar, which stays the dark bar in both modes, the way the
@@ -190,6 +218,38 @@ L.append('''/* The roster's system labels sit on the paper: the white wordmarks 
 :root[data-mode="light"] .roster-sys[data-sys="PB"] .roster-sys-name,
 :root[data-mode="light"] .roster-sys[data-sys="GB"] .roster-sys-name { color: var(--text); -webkit-text-stroke: 0; }
 ''')
+# Brand colours written straight onto text (text-[var(--lotr)] etc.) were picked
+# for the dark panels; on paper each takes its own hue darkened to 4.5:1. Matched
+# by whole class token, so the same colour used as a fill is untouched.
+import colorsys
+def _hex(h): h = h.lstrip('#'); return [int(h[i:i+2], 16) / 255 for i in (0, 2, 4)]
+def _lum(c): return sum(w * (v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4) for w, v in zip((0.2126, 0.7152, 0.0722), c))
+def _deep(h, paper='#f6f3ec'):
+    r, g, b = _hex(h); hh, ll, ss = colorsys.rgb_to_hls(r, g, b); pl = _lum(_hex(paper))
+    while ll > 0.05:
+        c = colorsys.hls_to_rgb(hh, ll, ss)
+        if (pl + 0.05) / (_lum(c) + 0.05) >= 4.6: break
+        ll -= 0.01
+    return '#%02x%02x%02x' % tuple(round(v * 255) for v in colorsys.hls_to_rgb(hh, ll, ss))
+BRAND = ['dnd', 'dcc', 'sw', 'mmrpg', 'ace', 'kob', 'nimble', 'd62e', 'gb', 'candela', 'icrpg', 'yze', 'twd', 'myz', 'vae', 'lotr', 'db', 'pb', 'jlu', 'sd', 'crimson', 'signal']
+def _resolve(n, seen=0):
+    v = DARK_ROOT.get(n, '')
+    m = re.match(r'var\((--[\w-]+)\)', v)
+    return _resolve(m.group(1), seen + 1) if m and seen < 5 else v
+DG = ':is(' + ', '.join('[data-system="%s"]' % k for k in DARK_GROUND) + ')'
+bl = []
+for t in BRAND:
+    v = _resolve('--' + t)
+    if not v.startswith('#'): continue
+    d = _deep(v)
+    # (spelled in pieces: Tailwind scans this file for class names, and a literal
+    # utility with a %s in it becomes an invalid generated rule)
+    cls = 'text-' + '[var(--' + t + ')]'
+    toks = ['[class~="%s"]' % cls, '[class~="hover:%s"]:hover' % cls, '.group:hover [class~="group-hover:%s"]' % cls]
+    sels = [':root[data-mode="light"]:not(%s) %s' % (DG, x) for x in toks] + \
+           [':root[data-mode="light"]%s body %s %s' % (DG, SECTION, x) for x in toks]
+    bl.append(',\n'.join(sels) + ' { color: %s; }' % d)
+L.append('/* Brand colours as text, deepened for paper. */\n' + '\n'.join(bl) + '\n')
 css = '\n'.join(L)
 s = open(P, encoding='utf8').read()
 A, B = '/* LIGHT-MODE:START */', '/* LIGHT-MODE:END */'
