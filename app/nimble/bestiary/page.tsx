@@ -5,6 +5,7 @@ import { NIMBLE_FAMILIES } from "@/lib/data/nimble-families";
 import type { NimbleMonster } from "@/lib/data/nimble-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { NimbleHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge, one, withParams, type Query, type RawQuery } from "@/components/NimbleRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -115,7 +116,7 @@ export default async function NimbleBestiaryPage({ searchParams }: { searchParam
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <NimbleHeader title="Bestiary" subtitle={`${NIMBLE_MONSTERS.length} monsters${hbRows.length ? ` + ${hbRows.length} homebrew` : ""} · ${NIMBLE_FAMILIES.length} families`} />
-      <div className="mb-6"><HomebrewEditor kind="nimble-monster" campaigns={campaigns} initial={hbOwn} /></div>
+      <CompendiumHomebrew><HomebrewEditor kind="nimble-monster" campaigns={campaigns} initial={hbOwn} /></CompendiumHomebrew>
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search monsters…" hidden={{ fam, kind }} />
       <ChipRow label="Family" base={BASE} current={current} param="fam" options={FAMILIES} active={fam} />

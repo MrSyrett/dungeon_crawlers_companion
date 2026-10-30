@@ -5,6 +5,7 @@ import { D62E_VEHICLES } from "@/lib/data/d62e-vehicles";
 import type { D62eEquipment } from "@/lib/data/d62e-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 import {
@@ -95,7 +96,7 @@ export default async function D62eEquipmentPage({ searchParams }: { searchParams
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <D62eHeader title="Equipment" subtitle={`${D62E_EQUIPMENT.length} items of gear · ${D62E_VEHICLES.length} starships & vehicles${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
 
-      <div className="mb-6"><HomebrewEditor kind="d62e-gear" campaigns={campaigns} initial={hbOwn} /></div>
+      <CompendiumHomebrew><HomebrewEditor kind="d62e-gear" campaigns={campaigns} initial={hbOwn} /></CompendiumHomebrew>
 
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search gear & vehicles…" hidden={{ era, cat }} />

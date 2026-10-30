@@ -5,6 +5,7 @@ import type { LotrMonster } from "@/lib/data/lotr-types";
 import type { DndMonsterAction } from "@/lib/data/dnd-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { LotrHeader, ChipRow, SearchForm, CountLine, EmptyState, BackLink, SectionNav, cardCls, nameCls, badge, hbBadge, eyebrow, sectionH, th, td, one, withParams, isHb, srcKey, srcChips, type RawQuery } from "@/components/LotrRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -138,8 +139,8 @@ export default async function LotrBestiaryPage({ searchParams }: { searchParams:
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <LotrHeader title="Bestiary" subtitle={`${LOTR_MONSTERS.length} adversaries${hbMonsters.length ? ` + ${hbMonsters.length} homebrew` : ""} · servants of the Shadow & folk of Eriador`} />
-      <HomebrewEditor kind="lotr-monster" campaigns={campaigns} initial={hbOwn} />
       <SectionNav items={[{ id: "adversaries", label: "Adversaries" }, { id: "traits", label: "Adversary Traits" }, { id: "nameless", label: "Nameless Things" }]} />
+      <CompendiumHomebrew><HomebrewEditor kind="lotr-monster" campaigns={campaigns} initial={hbOwn} /></CompendiumHomebrew>
 
       <section id="adversaries" className="scroll-mt-20">
         <InstantFilter>

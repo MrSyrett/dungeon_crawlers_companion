@@ -6,6 +6,7 @@ import { SD_ANCESTRIES } from "@/lib/data/ancestries";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import { effectLabel } from "@/lib/effects";
 import HomebrewManager from "@/components/HomebrewManager";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 
@@ -110,7 +111,9 @@ export default async function AncestriesPage({
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <PageHeader title="Ancestries" subtitle={<>{SD_ANCESTRIES.length} Shadowdark ancestries{hbRows.length ? ` + ${hbRows.length} homebrew` : ""}</>} />
 
-      <HomebrewManager type="ancestry" campaigns={campaigns} initial={hbOwn} />
+      <CompendiumHomebrew>
+        <HomebrewManager type="ancestry" campaigns={campaigns} initial={hbOwn} />
+      </CompendiumHomebrew>
 
       <InstantFilter>
       <form method="get" action="/ancestries" className="mb-4 flex gap-2" data-search>

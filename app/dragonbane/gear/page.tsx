@@ -4,6 +4,7 @@ import { DB_WEAPONS, DB_ARMOR, DB_HELMETS, DB_GEAR, DB_WEAPON_FEATURES, DB_MASTE
 import type { DbWeapon, DbArmor, DbGear } from "@/lib/data/db-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { DbHeader, ModeRow, ChipRow, SearchForm, CountLine, EmptyState, RuleNote, Bullets, cardCls, nameCls, badge, hbBadge, eyebrow, sectionH, th, td, one, isHb, srcKey, srcChips, costText, type RawQuery } from "@/components/DbRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -51,7 +52,9 @@ export default async function DbGearPage({ searchParams }: { searchParams: Promi
     const shown = weapons.filter(show).length;
     body = (
       <>
-        <HomebrewEditor kind="db-weapon" campaigns={campaigns} initial={hbWOwn} />
+        <CompendiumHomebrew>
+          <HomebrewEditor kind="db-weapon" campaigns={campaigns} initial={hbWOwn} />
+        </CompendiumHomebrew>
         <InstantFilter>
           <SearchForm base={BASE} q={one(raw.q)} placeholder="Search weapons or features…" hidden={{ skill, kind, supply, src }} />
           <ChipRow label="Kind" base={BASE} current={current} param="kind" options={kinds} active={kind} />
@@ -114,7 +117,9 @@ export default async function DbGearPage({ searchParams }: { searchParams: Promi
     );
     body = (
       <>
-        <HomebrewEditor kind="db-armor" campaigns={campaigns} initial={hbAOwn} />
+        <CompendiumHomebrew>
+          <HomebrewEditor kind="db-armor" campaigns={campaigns} initial={hbAOwn} />
+        </CompendiumHomebrew>
         <h2 className={sectionH}>Armor</h2>
         <div className="overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--panel)]">
           <table className="w-full min-w-[620px] border-collapse">
@@ -145,7 +150,9 @@ export default async function DbGearPage({ searchParams }: { searchParams: Promi
     const shown = gear.filter(show).length;
     body = (
       <>
-        <HomebrewEditor kind="db-gear" campaigns={campaigns} initial={hbGOwn} />
+        <CompendiumHomebrew>
+          <HomebrewEditor kind="db-gear" campaigns={campaigns} initial={hbGOwn} />
+        </CompendiumHomebrew>
         <RuleNote title="Encumbrance">
           <p>You can carry half your STR (rounded up) in items in your Inventory; a backpack adds {DB_TABLES.encumbrance.backpack}. Weapons at hand (up to {DB_TABLES.encumbrance.weaponsAtHand}) and worn armor and helmet don&apos;t count. Up to {DB_TABLES.encumbrance.rationsPerItem} food rations count as one item, a quiver is one item, tiny items don&apos;t count, and every {DB_TABLES.encumbrance.coinsPerItem} coins is one item. Heavy items count as their weight. Over the limit, roll STR to move in a combat round or walk a shift. Coins: 10 copper = 1 silver, 10 silver = 1 gold.</p>
         </RuleNote>

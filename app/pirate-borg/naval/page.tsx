@@ -8,6 +8,7 @@ import {
 import type { PbShip, PbCrewMod, PbShipwrightRow, PbShipTemplate, PbRollEntry } from "@/lib/data/pb-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { dot, TableCard, chipBase, chipOff, badge, dBadge, sourceRefs, srcKeys, PbHeader, ChipRow, SearchForm, CountLine, EmptyState, BackLink, SectionNav, RuleNote, Bullets, DieTable, ShipBlock, N, cardCls, eyebrow, sectionH, th, td, tdNum, tableWrap, one, srcChips, shipTypeLabel, signed, type RawQuery } from "@/components/PbRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -131,13 +132,15 @@ export default async function PbNavalPage({ searchParams }: { searchParams: Prom
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <PbHeader title="Naval" subtitle={`${PB_SHIPS.length} vessels${hbShips.length ? ` + ${hbShips.length} homebrew` : ""} · broadsides, boarding & sinking`} />
-      <HomebrewEditor kind="pb-ship" campaigns={campaigns} initial={hbOwn} />
       <SectionNav items={[
         { id: "ships", label: "Ships" }, { id: "templates", label: "Undead & Fleet Templates" }, { id: "stats", label: "Ship Stats" }, { id: "combat", label: "Naval Combat" }, { id: "actions", label: "Crew Actions" },
         { id: "sinking", label: "Sinking" }, { id: "crew", label: "Crew & Morale" }, { id: "shanties", label: "Sea Shanties" },
         { id: "wind", label: "Wind & Weather" }, { id: "shipwright", label: "Shipwright" }, { id: "travel", label: "Travel" },
         { id: "events", label: "Travel Events" }, { id: "at-sea", label: "Ships at Sea" }, { id: "cargo", label: "Cargo & Markets" }, { id: "derelict-gen", label: "Derelict Ships" },
       ]} />
+      <CompendiumHomebrew>
+        <HomebrewEditor kind="pb-ship" campaigns={campaigns} initial={hbOwn} />
+      </CompendiumHomebrew>
 
       <section id="ships" className="scroll-mt-20">
         <p className="mb-3 max-w-[72ch] text-[13px] leading-relaxed text-[var(--muted)]">Every vessel from the Core Rules, from a raft to a ship of the line and the shore fort, plus Fort Amsterdam from <em>Trapped in the Tropics</em>. Ghost ships, ships of bone and the captains&apos; fleets are <a href="#templates" className="text-[var(--sys-link)] hover:underline">templates</a> laid over one of these. Add your own vessels with Homebrew above.</p>

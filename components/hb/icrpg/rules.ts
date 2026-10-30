@@ -217,28 +217,37 @@ export const AREAS: [string, string][] = [["", "one target"], ["all CLOSE", "all
 //   extra.area  "" | "all CLOSE" | "all NEAR" | "all FAR" (→ "all NEAR enemies")
 //   extra.stat  "" (auto) | STR … CHA — the attack roll
 //   extra.txt   the attack as printed (legacy text that didn't re-compose) — wins
+//   extra.ef    EFFORT wording: "" "WEAPON Effort" | "bare" "WEAPON" | "lc" "Weapon Effort"
+//               | "dmg" "WEAPON damage" | "atk" "WEAPON attack"
+//   extra.rw    range wording: "" "NEAR range" (CLOSE unwritten) | "bare" "NEAR" / "CLOSE" | "reach" "NEAR reach"
+//   extra.sj    ";" → the special follows "; " instead of ", "
 //   special   free text rider, last
 // Composed: "Claw, WEAPON Effort, NEAR range, DEX attack, grabs on 6+" — the
 // GM Screen, the bestiary page and the prep builder read these strings.
 export const newIcrpgAttack = (p: Partial<AttackRow> = {}): AttackRow => ({
   name: "", count: 1, hit: null, dice: { n: 1, d: 6, m: 0 }, range: "CLOSE", special: "", extra: { area: "", stat: "", txt: "" }, ...p,
 });
-export function effortText(d: Dice): string {
+export const ICRPG_EFFORT_WORDING: [string, string][] = [["", "TYPE Effort"], ["bare", "TYPE"], ["lc", "Type Effort"], ["dmg", "TYPE damage"], ["atk", "TYPE attack"]];
+export const ICRPG_RANGE_WORDING: [string, string][] = [["", "RANGE range"], ["bare", "RANGE"], ["reach", "RANGE reach"]];
+const EF_TAIL: Record<string, string> = { "": " Effort", bare: "", lc: " Effort", dmg: " damage", atk: " attack" };
+export function effortText(d: Dice, ef = ""): string {
   if (d.n <= 0) return "";
   const e = effortOfDie(d.d);
-  const base = e ? `${d.n > 1 ? `${d.n}D${d.d} ` : ""}${e.word} Effort` : `${d.n}D${d.d}`;
+  const word = e ? (ef === "lc" ? e.word[0] + e.word.slice(1).toLowerCase() : e.word) : "";
+  const base = e ? `${d.n > 1 ? `${d.n}D${d.d} ` : ""}${word}${EF_TAIL[ef] ?? " Effort"}` : `${d.n}D${d.d}`;
   return base + (d.m ? ` ${sgn(d.m)}` : "");
 }
 export function composeIcrpgAttack(r: AttackRow): string {
   const x = r.extra ?? {}, name = s(r.name);
   if (s(x.txt)) return name ? `${name}, ${s(x.txt)}` : s(x.txt);
-  const area = s(x.area);
-  return [
-    name, effortText(r.dice),
-    area ? `${area} enemies` : r.range && r.range !== "CLOSE" ? `${r.range} range` : "",
-    s(x.stat) ? `${s(x.stat)} attack` : "",
-    s(r.special),
-  ].filter(Boolean).join(", ");
+  const area = s(x.area), rw = s(x.rw);
+  const rng = area ? `${area} enemies`
+    : rw === "bare" ? r.range || "CLOSE"
+    : rw === "reach" ? `${r.range || "CLOSE"} reach`
+    : r.range && r.range !== "CLOSE" ? `${r.range} range` : "";
+  const head = [name, effortText(r.dice, s(x.ef)), rng, s(x.stat) ? `${s(x.stat)} attack` : ""].filter(Boolean).join(", ");
+  const sp = s(r.special);
+  return !sp ? head : head ? `${head}${x.sj === ";" ? "; " : ", "}${sp}` : sp;
 }
 export const composeIcrpgAttacks = (rows: AttackRow[]) => rows.map(composeIcrpgAttack).filter(Boolean);
 
@@ -248,23 +257,34 @@ export function parseIcrpgAttack(text: string): AttackRow {
   const parts = t.split(/,\s*/);
   const name = parts.length > 1 && parts[0].length <= 40 ? parts[0] : "";
   const rest = name ? t.slice(t.indexOf(",") + 1).trim() : t;
-  // Strict pass: [effort], [range|area], [STAT attack], [special…]
-  const row = newIcrpgAttack({ name, dice: { n: 0, d: 6, m: 0 } });
-  const toks = name ? parts.slice(1) : parts;
-  let i = 0;
-  const em = toks[i]?.match(/^(?:(\d+)D(\d+) )?(BASIC|WEAPON|GUNS|MAGIC|ULTIMATE) Effort(?: ([+-]\d+))?$/);
-  if (em) {
-    const e = EFFORTS.find((x) => x.word === em[3])!;
-    if (!em[2] || int(em[2]) === e.die) { row.dice = { n: em[1] ? int(em[1]) : 1, d: e.die, m: em[4] ? int(em[4]) : 0 }; i++; }
-  }
-  const am = toks[i]?.match(/^(all (?:CLOSE|NEAR|FAR)) enemies$/), rm = toks[i]?.match(/^(NEAR|FAR) range$/);
-  if (am) { row.extra = { ...row.extra, area: am[1] }; i++; } else if (rm) { row.range = rm[1]; i++; }
-  const sm = toks[i]?.match(/^(STR|DEX|CON|INT|WIS|CHA) attack$/);
-  if (sm) { row.extra = { ...row.extra, stat: sm[1] }; i++; }
-  row.special = toks.slice(i).join(", ");
   // The effort die a printed attack implies, guessed from its words (as the GM Screen does).
   const g =/\bultimate\b/i.test(rest) ? 12 : /\b(magic|energy)\b/i.test(rest) ? 10 : /\bguns?\b/i.test(rest) ? 8 : /\bweapon\b/i.test(rest) ? 6 : /\bbasic\b/i.test(rest) ? 4 : 0;
-  if (composeIcrpgAttack(row) === t && (row.dice.n > 0 || !g)) return row;
+  // Strict pass: [effort], [range|area], [STAT attack], [special…] — the special
+  // may follow "; " (sj) and the effort / range may use the book's other wordings.
+  for (const sj of ["", ";"]) {
+    let head = name ? rest : t, special = "";
+    if (sj) { const k = head.indexOf("; "); if (k < 0) continue; special = head.slice(k + 2); head = head.slice(0, k); }
+    const row = newIcrpgAttack({ name, dice: { n: 0, d: 6, m: 0 } });
+    const x: Record<string, string> = { area: "", stat: "", txt: "" };
+    const toks = head.split(/,\s*/);
+    let i = 0;
+    const em = toks[i]?.match(/^(?:(\d+)D(\d+) )?(BASIC|WEAPON|GUNS|MAGIC|ULTIMATE|Basic|Weapon|Guns|Magic|Ultimate)(?: (Effort|damage|attack))?(?: ([+-]\d+))?$/);
+    if (em) {
+      const up = em[3].toUpperCase(), e = EFFORTS.find((y) => y.word === up)!;
+      const lc = em[3] !== up;
+      const ef = lc ? (em[4] === "Effort" ? "lc" : "?") : em[4] === "Effort" ? "" : em[4] === "damage" ? "dmg" : em[4] === "attack" ? "atk" : "bare";
+      if (e && ef !== "?" && (!em[2] || int(em[2]) === e.die)) { row.dice = { n: em[1] ? int(em[1]) : 1, d: e.die, m: em[5] ? int(em[5]) : 0 }; if (ef) x.ef = ef; i++; }
+    }
+    const am = toks[i]?.match(/^(all (?:CLOSE|NEAR|FAR)) enemies$/), rm = toks[i]?.match(/^(CLOSE|NEAR|FAR)(?: (range|reach))?$/);
+    if (am) { x.area = am[1]; i++; }
+    else if (rm && !(rm[1] === "CLOSE" && rm[2] === "range")) { row.range = rm[1]; if (rm[2] !== "range") x.rw = rm[2] === "reach" ? "reach" : "bare"; i++; }
+    const sm = toks[i]?.match(/^(STR|DEX|CON|INT|WIS|CHA) attack$/);
+    if (sm) { x.stat = sm[1]; i++; }
+    if (sj) { if (i < toks.length) continue; row.special = special; x.sj = ";"; } // ", rider; more" is the plain form
+    else row.special = toks.slice(i).join(", ");
+    row.extra = x;
+    if (composeIcrpgAttack(row) === t && (row.dice.n > 0 || !g)) return row;
+  }
   return newIcrpgAttack({ name, dice: { n: g ? 1 : 0, d: g || 6, m: 0 }, extra: { area: "", stat: "", txt: rest } });
 }
 export function cleanIcrpgAttackRows(v: unknown): AttackRow[] {
@@ -275,7 +295,11 @@ export function cleanIcrpgAttackRows(v: unknown): AttackRow[] {
     const range = (RANGES as readonly string[]).includes(s(o.range)) ? s(o.range) : "CLOSE";
     const area = AREAS.some(([k]) => k === s(x.area)) ? s(x.area) : "";
     const stat = (ICRPG_STATS as readonly string[]).includes(s(x.stat)) ? s(x.stat) : "";
-    return newIcrpgAttack({ name: s(o.name).slice(0, 60), dice, range, special: s(o.special).slice(0, 160), extra: { area, stat, txt: s(x.txt).slice(0, 240) } });
+    const opt: Record<string, string> = {};
+    if (ICRPG_EFFORT_WORDING.some(([k]) => k && k === s(x.ef))) opt.ef = s(x.ef);
+    if (ICRPG_RANGE_WORDING.some(([k]) => k && k === s(x.rw))) opt.rw = s(x.rw);
+    if (x.sj === ";") opt.sj = ";";
+    return newIcrpgAttack({ name: s(o.name).slice(0, 60), dice, range, special: s(o.special).slice(0, 160), extra: { area, stat, txt: s(x.txt).slice(0, 240), ...opt } });
   });
 }
 

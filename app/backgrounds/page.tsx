@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { SD_BACKGROUNDS } from "@/lib/data/backgrounds";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewManager from "@/components/HomebrewManager";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 
@@ -68,7 +69,9 @@ export default async function BackgroundsPage({
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <PageHeader title="Backgrounds" subtitle={<>{SD_BACKGROUNDS.length} Shadowdark backgrounds{hbRows.length ? ` + ${hbRows.length} homebrew` : ""}</>} />
 
-      <HomebrewManager type="background" campaigns={campaigns} initial={hbOwn} />
+      <CompendiumHomebrew>
+        <HomebrewManager type="background" campaigns={campaigns} initial={hbOwn} />
+      </CompendiumHomebrew>
 
       <InstantFilter>
       <form method="get" action="/backgrounds" className="mb-4 flex gap-2" data-search>

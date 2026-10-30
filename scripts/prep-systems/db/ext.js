@@ -97,6 +97,8 @@ function dbRandomTrap(){
 
 // ── Treasure: a random find from the gear lists, or a purse of coins ──
 function dbTreasureRandom() {
+  // The gear lists (+ the viewer's homebrew) load on first use.
+  if(PREG && !dbTreasureRandom._ready) { PREG.loadItems('DB', () => { dbTreasureRandom._ready = true; dbTreasureRandom(); }); return; }
   const c = v('tr-cat'); const pool = (PREG ? PREG.itemList('DB') : []).filter(x => !c || x.category === c);
   const x = dpick(pool); if(!x) return;
   addReward({ name: x.name, stats: x.desc || '', cat: x.category || '' }); autosave();

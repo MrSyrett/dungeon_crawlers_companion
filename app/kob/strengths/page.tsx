@@ -6,6 +6,7 @@ import { KOB_BOOKS } from "@/lib/data/kob-books";
 import type { KobStrength, KobFlaw, KobBook } from "@/lib/data/kob-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { KobHeader, SearchForm, ChipRow, CountLine, EmptyState, BOOKS, isBook, bookName, one, nameCls, cardCls, bookBadge, hbBadge, type Query, type RawQuery } from "@/components/KobRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -83,10 +84,10 @@ export default async function KobStrengthsPage({ searchParams }: { searchParams:
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <KobHeader title="Strengths & Flaws" subtitle={`${KOB_STRENGTHS.length} strengths · ${KOB_FLAWS.length} flaws${hbStrengths.length + hbFlaws.length ? ` + ${hbStrengths.length + hbFlaws.length} homebrew` : ""}`} />
-      <div className="mb-6 flex flex-col">
+      <CompendiumHomebrew>
         <HomebrewEditor kind="kob-strength" campaigns={campaigns} initial={hbStrOwn} />
         <HomebrewEditor kind="kob-flaw" campaigns={campaigns} initial={hbFlawOwn} />
-      </div>
+      </CompendiumHomebrew>
       <div className="mb-5 grid gap-2 md:grid-cols-3">
         {KOB_BOOKS.map((b) => (
           <div key={b.key} className={cardCls}>

@@ -1228,11 +1228,17 @@ function renderPicker(){
 var _pkRows=[];
 // Add an item from the store to the sheet (free). Returns without re-rendering
 // when silent, so pickBuy can control the flow.
+// The inventory row a store entry becomes (also used by the creation wizard for homebrew).
+function pickRowOf(kind,x){
+  if(kind==='weap'){ var w=x.data||{}; return {kind:'weapon',equipped:false,name:w.name||x.name,grip:w.grip||'',bonus:w.bonus||'',damage:w.damage!=null?w.damage:1,range:w.range||'',ammo:w.ammo||'—',weight:w.weight||'1',skill:(isAlien()&&HB_SKILL_MAP[w.skill])||w.skill||(isAlien()?'Ranged Combat':'Melee')}; }
+  if(kind==='armor'){ var a=x.data||{}, ar={kind:'armor',equipped:false,name:a.name||x.name,rating:num(a.rating),air:a.air||'',weight:a.weight||'1',note:a.note||''}; if(sbClean(a.skillBonus).length) ar.skillBonus=sbClean(a.skillBonus); return ar; }
+  var d=x.data||{}, gr={kind:'gear',name:d.name||x.name,weight:d.weight||'1',note:d.desc||d.note||''}; if(sbClean(d.skillBonus).length){ gr.skillBonus=sbClean(d.skillBonus); gr.equipped=false; } return gr;
+}
 function pickAddRow(x){
-  if(_pk==='weap'){ var w=x.data||{}; S.gear.push({kind:'weapon',equipped:false,name:w.name||x.name,grip:w.grip||'',bonus:w.bonus||'',damage:w.damage!=null?w.damage:1,range:w.range||'',ammo:w.ammo||'—',weight:w.weight||'1',skill:(isAlien()&&HB_SKILL_MAP[w.skill])||w.skill||(isAlien()?'Ranged Combat':'Melee')}); renderWeapons(); setTab('gear'); }
-  else if(_pk==='armor'){ var a=x.data||{}, ar={kind:'armor',equipped:false,name:a.name||x.name,rating:num(a.rating),air:a.air||'',weight:a.weight||'1',note:a.note||''}; if(sbClean(a.skillBonus).length) ar.skillBonus=sbClean(a.skillBonus); S.gear.push(ar); renderInventory(); setTab('gear'); }
+  if(_pk==='weap'){ S.gear.push(pickRowOf('weap',x)); renderWeapons(); setTab('gear'); }
+  else if(_pk==='armor'){ S.gear.push(pickRowOf('armor',x)); renderInventory(); setTab('gear'); }
   else if(_pk==='talent'){ var t=x.data||{}; S.talents.push({name:t.name||x.name,note:t.desc||t.note||''}); renderTalents(); setTab('story'); }
-  else { var d=x.data||{}, gr={kind:'gear',name:d.name||x.name,weight:d.weight||'1',note:d.desc||d.note||''}; if(sbClean(d.skillBonus).length){ gr.skillBonus=sbClean(d.skillBonus); gr.equipped=false; } S.gear.push(gr); renderGear(); setTab('gear'); }
+  else { S.gear.push(pickRowOf('gear',x)); renderGear(); setTab('gear'); }
 }
 function pickAdd(idx){ var x=_pkRows[idx]; if(!x)return; pickAddRow(x); scheduleAutosave(); renderPicker(); }
 function pickBuy(idx){

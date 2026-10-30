@@ -7,6 +7,7 @@
   function g(n) { try { return (0, eval)("typeof " + n + "!=='undefined'?" + n + ":undefined"); } catch (e) { return undefined; } }
   function arr(v) { return Array.isArray(v) ? v : []; }
   var STATS = [["str", "STR", "Strength"], ["dex", "DEX", "Dexterity"], ["con", "CON", "Constitution"], ["int", "INT", "Intelligence"], ["wis", "WIS", "Wisdom"], ["cha", "CHA", "Charisma"]];
+  var DAMAGE = ["Acid", "Cold", "Fire", "Lightning", "Necrotic", "Poison", "Psychic", "Radiant", "Thunder", "Bludgeoning", "Piercing", "Slashing", "Magic"];
   var KINDS = [
     { k: "plus", label: "Magic", amount: true, color: "gold", fmt: "{n} Magic", tip: "A +N weapon: +N to its attack and damage rolls. +N armor or shield: +N AC." },
     { k: "ac", label: "AC", amount: true, color: "blue", fmt: "{n} AC", tip: "+N Armor Class" },
@@ -15,6 +16,8 @@
     { k: "stat", label: "Stat", amount: true, target: "stat", color: "blue", fmt: "{n} {t}", tip: "+N to a stat" },
     { k: "hp", label: "HP", amount: true, color: "green", fmt: "{n} max HP", tip: "+N maximum Hit Points" },
     { k: "spell", label: "Spell", target: "text", color: "purple", fmt: "Spell: {t}", targetPh: "Spell name (and tier)", tip: "A spell the item holds (scroll / wand) or lets you cast", label_: function (b) { return "Spell: " + b.target; } },
+    { k: "resist", label: "Resist", target: "choice", choices: DAMAGE, color: "teal", fmt: "Resist {t}", tip: "Resistance to a damage type" },
+    { k: "immune", label: "Immune", target: "choice", choices: DAMAGE, color: "teal", fmt: "Immune {t}", tip: "Immunity to a damage type" },
     { k: "note", label: "Note", target: "text", color: "grey", tip: "A benefit, curse or anything the sheet can't automate — shown on the item" },
   ];
   function parse(text) {
@@ -25,6 +28,8 @@
     var re = /\+(\d)\s+(?:to\s+)?(STR|DEX|CON|INT|WIS|CHA|Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)\b(?!\s*check)/gi;
     while ((m = re.exec(t))) out.push({ kind: "stat", target: m[2], amount: +m[1] });
     if ((m = t.match(/\+(\d)\s+(?:to\s+)?(?:max(?:imum)?\s+)?(?:HP|hit points)\b/i))) out.push({ kind: "hp", amount: +m[1] });
+    var rr = /(resist(?:ance)?|immun(?:e|ity))\s+(?:to\s+)?(acid|cold|fire|lightning|necrotic|poison|psychic|radiant|thunder|bludgeoning|piercing|slashing|magic)/gi;
+    while ((m = rr.exec(t))) out.push({ kind: /^immun/i.test(m[1]) ? "immune" : "resist", target: m[2].charAt(0).toUpperCase() + m[2].slice(1).toLowerCase() });
     return out;
   }
   // A magic item from the book's Randomized Magic Items tables (via SDBookGen).

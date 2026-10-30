@@ -5,6 +5,7 @@ import { ICRPG_GEAR } from "@/lib/data/icrpg-gear";
 import type { IcrpgLoot, IcrpgGear } from "@/lib/data/icrpg-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import {
   IcrpgHeader, SearchForm, ChipRow, CountLine, EmptyState, SectionH, cardCls, nameCls, badge, hbBadge,
   WORLDS, worldName, one, type Query, type RawQuery,
@@ -69,10 +70,10 @@ export default async function IcrpgLootPage({ searchParams }: { searchParams: Pr
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <IcrpgHeader title="Loot &amp; Gear" subtitle={`${ICRPG_LOOT.length} loot · ${ICRPG_GEAR.length} gear`} />
 
-      <div className="mb-6 flex flex-col gap-6">
+      <CompendiumHomebrew>
         <HomebrewEditor kind="icrpg-loot" campaigns={campaigns} initial={ownLoot} />
         <HomebrewEditor kind="icrpg-gear" campaigns={campaigns} initial={ownGear} />
-      </div>
+      </CompendiumHomebrew>
 
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search loot &amp; gear…" hidden={{ world }} />

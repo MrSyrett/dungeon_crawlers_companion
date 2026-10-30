@@ -7,6 +7,7 @@ import { DND_MAGIC_ITEMS } from "@/lib/data/dnd-magic-items";
 import type { DndWeapon, DndArmor, DndGear, DndMagicItem } from "@/lib/data/dnd-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DndHomebrewEditor from "@/components/DndHomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { DndHeader, ModeRow, ChipRow, SearchForm, CountLine, EmptyState, cardCls, badge, one, srcKey, srcChips, type RawQuery } from "@/components/DndRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -56,8 +57,8 @@ export default async function DndEquipmentPage({ searchParams }: { searchParams:
   const head = () => (
     <>
       <DndHeader title="Equipment" subtitle="weapons · armor · gear · magic items" />
-      <DndHomebrewEditor kind="dnd-equipment" campaigns={campaigns} initial={hbOwn} />
       <ModeRow base={BASE} current={{ q: "", src }} param="mode" options={modeOpts} active={mode} />
+      <CompendiumHomebrew><DndHomebrewEditor kind="dnd-equipment" campaigns={campaigns} initial={hbOwn} /></CompendiumHomebrew>
     </>
   );
   const wrap = (inner: React.ReactNode) => (

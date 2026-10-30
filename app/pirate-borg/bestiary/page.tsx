@@ -4,6 +4,7 @@ import { PB_MONSTERS, PB_RULES, PB_ENEMY_BUILDER, PB_MARROW_CANNONS, PB_CAPTAINS
 import type { PbMonster } from "@/lib/data/pb-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { PbHeader, ChipRow, SearchForm, CountLine, EmptyState, BackLink, SectionNav, Bullets, DieTable, TableCard, MonsterBlock, MonsterCard, N, cardCls, chipBase, chipOff, eyebrow, sectionH, badge, dBadge, one, srcKeys, srcChips, sourceRefs, catLabel, hpLabel, moraleLabel, armorDie, BESTIARY, type RawQuery } from "@/components/PbRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -96,11 +97,13 @@ export default async function PbBestiaryPage({ searchParams }: { searchParams: P
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <PbHeader title="Bestiary" subtitle={`${PB_MONSTERS.length} creatures & NPCs${hbMonsters.length ? ` + ${hbMonsters.length} homebrew` : ""} · the dead, the deep & the damned`} />
-      <HomebrewEditor kind="pb-monster" campaigns={campaigns} initial={hbOwn} />
       <SectionNav items={[
         { id: "creatures", label: "Creatures" }, { id: "make-your-own", label: "Make Your Own Enemies" }, { id: "undead-crews", label: "Undead Crews" },
         { id: "marrow-cannons", label: "Marrow Cannons" }, { id: "captains", label: "Archetype Captains" }, { id: "fighting", label: "Fighting Enemies" },
       ]} />
+      <CompendiumHomebrew>
+        <HomebrewEditor kind="pb-monster" campaigns={campaigns} initial={hbOwn} />
+      </CompendiumHomebrew>
 
       <p className="mb-4 max-w-[75ch] text-[13px] leading-relaxed text-[var(--muted)]">
         Every creature block from the Core Rules (<N>{count("Core Rules")}</N>), its module <em>The Curse of Skeleton Point</em> (<N>{count("The Curse of Skeleton Point")}</N>), the <em>Trapped in the Tropics</em> adventure (<N>{count("Trapped in the Tropics")}</N>) and the few things the Player&apos;s Guidebook&apos;s magic calls up (<N>{count("Player's Guidebook")}</N>). A block printed in more than one book shows under each source. Add your own with Homebrew above.

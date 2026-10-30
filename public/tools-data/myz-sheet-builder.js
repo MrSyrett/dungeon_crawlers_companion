@@ -156,6 +156,23 @@
   function wpItem(it) { return { kind: 'weapon', equipped: true, name: it.name, bonus: it.bonus != null ? it.bonus : 0, damage: it.damage != null ? it.damage : 1, range: it.range || '', weight: it.slots != null ? it.slots : '1', skill: it._cc === false ? 'Shoot' : 'Fight' }; }
   function arItem(it) { return { kind: 'armor', equipped: true, name: it.name, rating: (typeof it.rating === 'number' ? it.rating : 0), weight: '1', note: it.comment || '' }; }
   function grItem(it) { return { kind: 'gear', name: it.name, weight: '1', note: it.comment || '' }; }
+  // Homebrew: the same rows the sheet's Item Shop lists (window.MYZ_HB_* via its
+  // pickerPool), turned into inventory rows by the sheet's pickRowOf, so bonuses,
+  // ammo, features and artifact flags carry over exactly as a shop pick does.
+  var HB_TABS = [['weap', 'Weapons'], ['armor', 'Armor'], ['gear', 'Gear'], ['artifact', 'Artifacts']];
+  function hbRows(kind) { try { return (typeof pickerPool === 'function') ? pickerPool(kind).filter(function (x) { return /^Homebrew/.test(x.note || ''); }) : []; } catch (e) { return []; } }
+  function hbKey(kind, x) { return 'hb:' + kind + ':' + x.name; }
+  function hbSection() {
+    var h = '';
+    HB_TABS.forEach(function (t) {
+      var rows = hbRows(t[0]); if (!rows.length) return;
+      h += '<div class="m-lbl" style="margin-top:12px;">' + esc(t[1]) + '</div><div class="yzeb-list">' + rows.map(function (x, idx) {
+        var chosen = startGear.some(function (g) { return g.optName === hbKey(t[0], x); });
+        return prow(x.name, x.cost, String(x.note || '').replace(/^Homebrew( · )?/, ''), chosen, "window.YZEB.toggleHb('" + t[0] + "'," + idx + ")", chosen ? '✓ Chosen' : '＋ Add');
+      }).join('') + '</div>';
+    });
+    return h ? '<div class="m-lbl" style="margin-top:16px;">Your homebrew <span class="yzeb-sub">(with GM approval — or buy it with Bullets on the sheet)</span></div>' + h : '';
+  }
   function stepGear() {
     var r = roleObj(role), g = roleGear();
     if (!r) return '<p class="m-hint">Go back and pick a role first — your starting weapon and supplies come from it.</p>';
@@ -180,6 +197,7 @@
     if (artifactPick) { var ao = artObj(artifactPick); h += '<div class="yzeb-list">' + prow(artifactPick, ao ? ('D666 ' + ao.roll) : '', ao ? ao.desc : '', true, "window.YZEB.rollArtifact()", '🎲 Reroll') + '</div>'; }
     else { h += '<p class="m-hint">No artifact yet — roll to receive a random one from the D666 table.</p>'; }
     // Item 3: Big Dream & Den.
+    h += hbSection();
     h += '<div class="m-lbl" style="margin-top:16px;">Big Dream</div><input class="m-input" value="' + esc(dream) + '" placeholder="What you dream the future could hold" oninput="window.YZEB.setDream(this.value)">';
     h += '<div class="m-lbl" style="margin-top:12px;">Your Den</div><input class="m-input" value="' + esc(den) + '" placeholder="Where and how you live in the Ark" oninput="window.YZEB.setDen(this.value)">';
     return h;
@@ -252,6 +270,13 @@
     setDen: function (v) { den = v; },
     setGearTab: function (t) { gearTab = t; render(); },
     removeGear: function (i) { startGear.splice(i, 1); render(); },
+    toggleHb: function (kind, idx) {
+      var x = hbRows(kind)[idx]; if (!x) return; var key = hbKey(kind, x);
+      for (var i = 0; i < startGear.length; i++) { if (startGear[i].optName === key) { startGear.splice(i, 1); render(); return; } }
+      var row = null; try { row = pickRowOf(kind, x); } catch (e) {}
+      row = row || { kind: kind === 'weap' ? 'weapon' : kind === 'armor' ? 'armor' : 'gear', name: x.name, weight: '1', note: '' };
+      row.optName = key; startGear.push(row); render();
+    },
     attr: function (k, d) { var v = attrs[k] + d; if (v < 2 || v > attrMax(k)) return; if (d > 0 && (ATTR_BUDGET - attrTotal()) <= 0) return; attrs[k] = v; render(); },
     skill: function (nm, d) { var v = (skills[nm] || 0) + d; if (v < 0 || v > skillCap()) return; if (d > 0 && (SKILL_BUDGET - skillSpent()) <= 0) return; skills[nm] = v; render(); },
     apply: function () {
@@ -271,6 +296,7 @@
       if (weaponPick) { var w = findWeapon(weaponPick); gearList.push(w ? wpItem(w) : { kind: 'weapon', equipped: true, name: weaponPick, bonus: 0, damage: 1, range: '', weight: '1', skill: 'Fight' }); }
       if (g && g.other) g.other.forEach(function (o) { if (!/no free weapon/i.test(o)) gearList.push({ kind: 'gear', name: o, weight: '1', note: 'Starting gear (' + role + ')' }); });
       if (artifactPick) { var ao = artObj(artifactPick); gearList.push({ kind: 'gear', name: artifactPick, weight: '1', note: ao ? ao.desc : '', artifact: true }); }
+      startGear.forEach(function (r) { gearList.push(r); });
       if (gearList.length) d.gear = gearList;
       try { applySheet(d); } catch (e) {}
       this.close();

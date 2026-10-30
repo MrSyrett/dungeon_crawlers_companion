@@ -7,6 +7,7 @@ import { DCC_ITEMS } from "@/lib/data/dcc-items";
 import type { DccItem } from "@/lib/data/dcc-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DccHomebrew from "@/components/DccHomebrew";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 
@@ -143,7 +144,7 @@ export default async function DccLootPage({ searchParams }: { searchParams: Prom
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <PageHeader title="Loot" subtitle={<>{DCC_ITEMS.length} items{homebrewCount ? ` + ${homebrewCount} homebrew` : ""}</>} />
 
-      <DccHomebrew campaigns={campaigns} initial={hbOwn} />
+      <CompendiumHomebrew><DccHomebrew campaigns={campaigns} initial={hbOwn} /></CompendiumHomebrew>
 
       <InstantFilter>
       <form method="get" action="/dcc/loot" className="mb-4 flex gap-2" data-search>

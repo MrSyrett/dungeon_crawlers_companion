@@ -6,6 +6,7 @@ import { MONSTERS, type Monster } from "@/lib/data/monsters";
 import { MONSTER_TYPES, typeOf } from "@/lib/data/monster-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewManager from "@/components/HomebrewManager";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 
@@ -198,12 +199,14 @@ export default async function BestiaryPage({
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <PageHeader title="Bestiary" subtitle={<>{MONSTERS.length} Shadowdark monsters{hbRows.length ? ` + ${hbRows.length} homebrew` : ""}</>} />
 
-      <HomebrewManager
-        type="monster"
-        campaigns={campaigns}
-        initial={hbOwn}
-        monsterTypes={[...MONSTER_TYPES]}
-      />
+      <CompendiumHomebrew>
+        <HomebrewManager
+          type="monster"
+          campaigns={campaigns}
+          initial={hbOwn}
+          monsterTypes={[...MONSTER_TYPES]}
+        />
+      </CompendiumHomebrew>
 
       <InstantFilter>
       {/* A plain GET form, so search works with JavaScript disabled. */}

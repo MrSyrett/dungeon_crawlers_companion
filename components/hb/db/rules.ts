@@ -256,3 +256,99 @@ export function cleanDbBenefits(v: unknown): DbBenefit[] {
   }
   return out;
 }
+
+// ═══ KIN & PROFESSIONS (server sanitisers, shared with the builders) ═══════════
+// Both store the book shapes (lib/data/db-types DbKin / DbProfession) so the
+// creation wizard (db-sheet-builder.js), the sheet and the reference pages treat
+// homebrew exactly like book entries once db-homebrew.js injects it into
+// window.DB_KIN / DB_PROFESSIONS.
+//   kin:        movement, text, abilities [{id, name, wp, wpNote?, timing, text}] (1–3),
+//               names (≤6, the D6 name table), traits (book kin traits + custom),
+//               size "Large" (from the Large trait), flying "wp", category, pcNotes
+//   profession: keyAttribute, text, skills (exactly 8), heroicAbilities (≤3) +
+//               heroicChoice, kits (1–3: items [{name, qty?, note?} | {choice}],
+//               food + silver dice), nicknames (≤6). A caster profession is
+//               mage: true with ONE school: schoolSkills {school: 8 skills incl.
+//               the school}, skills [], no heroic ability, the book's magic block.
+export const DB_KIN_TIMINGS: [string, string][] = [["action", "Action"], ["free", "Free (no action)"], ["reaction", "Reaction"], ["passive", "Passive (always on)"], ["rest", "During rest"]];
+export const DB_KIN_TRAITS = ["Nocturnal", "Nocturnal (foliage)", "Large", "Melancholy"] as const;
+export const DB_KIN_CATEGORIES = ["Rare Kin", "Nightkin"] as const;
+export const DB_KIT_DICE = ["D4", "D6", "D8", "D10", "D12", "D20"] as const;
+export const DB_PROF_SKILLS = 8;
+export const DB_MAGE_SCHOOLS = ["Animism", "Demonology", "Elementalism", "Illusionism", "Mentalism", "Necromancy", "Symbolism", "Witchcraft", "Alchemy", "Enchanting"] as const;
+export const DB_MAGE_MAGIC = { startingSpells: 3, startingRank: 1, startingTricks: 3, from: "your school or General Magic", grimoire: true };
+
+const slug = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
+const list = (v: unknown, n: number, len: number): string[] => {
+  const out: string[] = [];
+  for (const x of Array.isArray(v) ? v : []) { const t = s(x).slice(0, len); if (t && !out.includes(t)) out.push(t); if (out.length >= n) break; }
+  return out;
+};
+const among = <T extends string>(v: unknown, opts: readonly T[], d: T): T => (opts as readonly string[]).includes(s(v)) ? (s(v) as T) : d;
+const SKILL_SET = DB_SKILLS as readonly string[];
+
+/** Kin ability row → {id, name, wp, wpNote?, timing, text} (wp: number | "varies" | null). */
+export function cleanKinAbility(raw: unknown): Record<string, unknown> | null {
+  const o = (raw ?? {}) as Record<string, unknown>;
+  const name = s(o.name).slice(0, 80);
+  if (!name) return null;
+  const w = s(o.wp);
+  const wp = w === "" || w === "—" || w === "null" ? null : /^vari/i.test(w) ? "varies" : clamp(int(w, 1), 0, 10);
+  const out: Record<string, unknown> = { id: slug(name) || "ability", name, wp, timing: among(o.timing, DB_KIN_TIMINGS.map(([k]) => k), "free"), text: s(o.text).slice(0, 2000) };
+  if (wp === "varies" && s(o.wpNote)) out.wpNote = s(o.wpNote).slice(0, 120);
+  return out;
+}
+
+export function cleanDbKin(o: Record<string, unknown>, name: string): Record<string, unknown> {
+  const abilities = (Array.isArray(o.abilities) ? o.abilities : []).slice(0, 3).map(cleanKinAbility).filter(Boolean) as Record<string, unknown>[];
+  if (!abilities.length) throw new Error("A homebrew kin needs an innate ability.");
+  const traits = list(o.traits, 6, 60);
+  const data: Record<string, unknown> = {
+    id: `hb-${slug(name)}`, name, page: 0, movement: clamp(int(o.movement, 10), 2, 20), text: s(o.text).slice(0, 3000),
+    abilities, names: list(o.names, 6, 40), source: "Homebrew",
+  };
+  if (traits.length) data.traits = traits;
+  if (traits.includes("Large")) data.size = "Large";
+  if (o.flying === "wp" || o.flying === true) data.flying = "wp";
+  const cat = s(o.category);
+  if (cat) data.category = among(cat, DB_KIN_CATEGORIES, "Rare Kin");
+  if (s(o.pcNotes)) data.pcNotes = s(o.pcNotes).slice(0, 2000);
+  return data;
+}
+
+const DIE_SET = DB_KIT_DICE as readonly string[];
+const kitDie = (v: unknown, d: string) => { const t = s(v).toUpperCase().replace(/^1D/, "D"); return DIE_SET.includes(t) ? t : d; };
+export function cleanKitItem(raw: unknown): Record<string, unknown> | null {
+  const o = (raw ?? {}) as Record<string, unknown>;
+  const choice = list(o.choice, 4, 60);
+  if (choice.length >= 2) return { choice };
+  const name = s(o.name).slice(0, 60) || choice[0] || "";
+  if (!name) return null;
+  const out: Record<string, unknown> = { name };
+  const q = clamp(int(o.qty, 1), 1, 20);
+  if (q > 1) out.qty = q;
+  if (s(o.note)) out.note = s(o.note).slice(0, 60);
+  return out;
+}
+
+export function cleanDbProfession(o: Record<string, unknown>, name: string): Record<string, unknown> {
+  const mage = o.mage === true || s(o.mage) === "true";
+  const school = mage ? among(o.school ?? Object.keys((o.schoolSkills ?? {}) as object)[0], DB_MAGE_SCHOOLS, "Elementalism") : "";
+  const rawSkills = Array.isArray(o.skills) && (o.skills as unknown[]).length ? o.skills : ((o.schoolSkills ?? {}) as Record<string, unknown>)[school];
+  let skills = list(rawSkills, 12, 40).filter((x) => SKILL_SET.includes(x));
+  if (mage) skills = [school, ...skills.filter((x) => x !== school)];
+  skills = skills.slice(0, DB_PROF_SKILLS);
+  if (skills.length !== DB_PROF_SKILLS) throw new Error(`A profession needs exactly ${DB_PROF_SKILLS} profession skills (it has ${skills.length}).`);
+  const kits = (Array.isArray(o.kits) ? o.kits : []).slice(0, 3).map((k) => {
+    const x = (k ?? {}) as Record<string, unknown>;
+    return { items: (Array.isArray(x.items) ? x.items : []).slice(0, 10).map(cleanKitItem).filter(Boolean), food: kitDie(x.food, "D6"), silver: kitDie(x.silver, "D8") };
+  }).filter((k) => k.items.length);
+  if (!kits.length) throw new Error("A profession needs at least one starting gear kit.");
+  const data: Record<string, unknown> = {
+    id: `hb-${slug(name)}`, name, page: 0, keyAttribute: among(o.keyAttribute, DB_ATTRS, "STR"), text: s(o.text).slice(0, 3000),
+    skills: mage ? [] : skills, heroicAbilities: mage ? [] : list(o.heroicAbilities, 3, 80), kits, nicknames: list(o.nicknames, 6, 40), source: "Homebrew",
+  };
+  if (!mage && (data.heroicAbilities as string[]).length > 1 && (o.heroicChoice === true || s(o.heroicChoice) === "true")) data.heroicChoice = true;
+  if (mage) { data.mage = true; data.schoolSkills = { [school]: skills }; data.magic = { ...DB_MAGE_MAGIC }; }
+  return data;
+}

@@ -4,6 +4,7 @@ import { ACE_ROLES } from "@/lib/data/ace-roles";
 import type { AceRole, AceSettingKey, AceStat } from "@/lib/data/ace-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import {
   AceHeader, SearchForm, ChipRow, CountLine, EmptyState, BOOKS, settingName, one,
   nameCls, cardCls, bookBadge, hbBadge, type Query, type RawQuery,
@@ -71,9 +72,9 @@ export default async function AceRolesPage({ searchParams }: { searchParams: Pro
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <AceHeader title="Roles" subtitle={`${ACE_ROLES.length} roles${hbRows.length ? ` + ${hbRows.length} homebrew` : ""} · one special ability each`} />
 
-      <div className="mb-6">
+      <CompendiumHomebrew>
         <HomebrewEditor kind="ace-role" campaigns={campaigns} initial={hbOwn} />
-      </div>
+      </CompendiumHomebrew>
 
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search roles or abilities…" hidden={{ book, cat }} />

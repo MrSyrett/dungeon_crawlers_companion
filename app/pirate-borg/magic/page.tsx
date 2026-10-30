@@ -4,6 +4,7 @@ import { PB_RELICS, PB_RITUALS, PB_MISHAPS, PB_PRAYERS, PB_DEITIES, PB_SPELLS, P
 import type { PbRelic, PbRitual } from "@/lib/data/pb-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { PbHeader, ModeRow, ChipRow, SearchForm, CountLine, EmptyState, RuleNote, Bullets, DieTable, HbBadge, N, cardCls, nameCls, badge, dBadge, eyebrow, sectionH, one, srcKey, srcChips, rankLine, rollCls, rollTag, type RawQuery } from "@/components/PbRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -60,7 +61,9 @@ export default async function PbMagicPage({ searchParams }: { searchParams: Prom
     const base = viewKey ? `${BASE}?view=${viewKey}` : BASE;
     body = (
       <>
-        <HomebrewEditor kind={view === "relics" ? "pb-relic" : "pb-ritual"} campaigns={campaigns} initial={view === "relics" ? hbROwn : hbTOwn} />
+        <CompendiumHomebrew>
+          <HomebrewEditor kind={view === "relics" ? "pb-relic" : "pb-ritual"} campaigns={campaigns} initial={view === "relics" ? hbROwn : hbTOwn} />
+        </CompendiumHomebrew>
         {view === "relics" ? (
           <div className="mb-6 grid gap-4 md:grid-cols-2">
             <RuleNote title="Using a relic" className=""><p>{R.relics.text}</p></RuleNote>

@@ -88,7 +88,7 @@
     var newS = A((window.DB_MAGIC_RULES || {}).schools).filter(function (s) { return schools.indexOf(s) < 0; });
     var talents = SH().state.abilities.filter(function (a) { return a.name === 'Magic Talent'; }).length;
     h += '<div class="m-lbl">Learn a new school</div><p class="m-hint">Needs a Magic Talent heroic ability per new school (you have ' + talents + ', and know ' + schools.length + ' school' + (schools.length === 1 ? '' : 's') + '), a week with a teacher, then an INT roll: success gives your INT base chance as the school\'s level.</p><div class="m-row">' +
-      newS.map(function (s) { var why = schoolBlock(s); return '<button class="chip"' + (talents > Math.max(0, schools.length - (SH().state.profession === 'Mage' ? 1 : 0)) && !why ? '' : ' disabled') + (why ? ' title="' + esc(why) + '"' : '') + ' onclick="DBADV.school(\'' + s + '\')">' + s + (why ? ' <small>(' + esc(why) + ')</small>' : '') + '</button>'; }).join('') + '</div>' +
+      newS.map(function (s) { var why = schoolBlock(s); return '<button class="chip"' + (talents > Math.max(0, schools.length - ((SH().profDef() || {}).mage ? 1 : 0)) && !why ? '' : ' disabled') + (why ? ' title="' + esc(why) + '"' : '') + ' onclick="DBADV.school(\'' + s + '\')">' + s + (why ? ' <small>(' + esc(why) + ')</small>' : '') + '</button>'; }).join('') + '</div>' +
       '<p class="m-hint">Book of Magic: Harmonism uses Performance (needs Performance 12); Enchanting needs Crafting 12; Dracomancy is learned only in play, from a dracomancer, once you know a rank 5 spell.</p>';
     show('Advancement', h);
   }

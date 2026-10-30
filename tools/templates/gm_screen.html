@@ -1144,6 +1144,9 @@ button.cc-abil:hover { background: rgba(255,255,255,0.05); border-radius: 6px; }
 .cc-sec { font-family: var(--ff-ui,Geist), sans-serif; font-size: 10px; font-weight: 800; letter-spacing: 0.12em; color: var(--gold); text-transform: uppercase; margin: 2px 0 6px; }
 .cc-atk { display: flex; align-items: center; gap: 8px; padding: 6px 0; min-width: 0; }
 .cc-atk + .cc-atk { border-top: 1px dashed var(--border); }
+/* Text-dice fallback rows can carry several roll buttons: let them wrap. */
+.cc-atk:has(.cc-atk-textdie) { flex-wrap: wrap; gap: 6px; }
+.cc-atk:has(.cc-atk-textdie) > .cc-atk-t { flex: 1 1 100%; }
 .cc-atk-t { flex: 1; min-width: 0; font-size: 12.5px; color: var(--light); overflow-wrap: anywhere; }
 .cc-atk-t b { color: var(--white); font-family: var(--ff-ui,Geist), sans-serif; font-size: 14px; letter-spacing: 0.02em; }
 .cc-atk-t .ex { color: var(--mid); }
@@ -7419,6 +7422,14 @@ GMScenes.renderPins();
     if (category === 'weapon') { row.damage = String(d.damage || ''); row.range = String(d.range || ''); row.props = String(d.props || ''); }
     if (kind === 'armor' && !row.desc) row.desc = 'AC ' + (d.acBase || 10) + (d.acDex ? ' + DEX' : '');
     if (kind === 'shield' && !row.desc) row.desc = '+' + (d.acBonus || 0) + ' AC';
+    // Its item bonuses ride on the card as read-only "note" badges. The SD sheet
+    // already applies a homebrew item's `bonuses` by name (equippedItemBonusTotals →
+    // findHomebrewItem), so automating badges here would count them twice.
+    var BL = { ac: 'AC', hp: 'max HP', meleeAtk: 'melee attack', meleeDmg: 'melee damage', rangedAtk: 'ranged attack', rangedDmg: 'ranged damage', slots: 'gear slots', str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA' };
+    if (Array.isArray(d.bonuses) && d.bonuses.length) {
+      row.benefits = d.bonuses.filter(function (b) { return b && BL[b.target] && Number(b.amount); })
+        .map(function (b) { var n = Number(b.amount); return { kind: 'note', target: (n > 0 ? '+' : '') + n + ' ' + BL[b.target] }; });
+    }
     return row;
   }
   function pullSdHbGear() {
@@ -7439,6 +7450,10 @@ GMScenes.renderPins();
   if (typeof GMCamp !== 'undefined' && GMCamp.onChange) GMCamp.onChange(pullSdHbGear);
 })();
 </script>
+<!-- Item / power homebrew for the systems the per-sheet loaders don't feed here
+     (TWD, MYZ, VAE, MMRPG, YZE, D62e, ICRPG, LotR, DB, PB) → window.GMHB; the
+     XS_TREASURE catalogs, the MYZ artifact find and the MMRPG pools read it. -->
+<script src="/tools-data/gm-homebrew.js"></script>
 
 <script>
 // ══════════════════════════════════════════
@@ -11236,6 +11251,18 @@ function init_trackers(root) {
   // hit/dmg → one attack button (.npc-mon-attack: d20 to-hit + damage, or damage
   // alone with a save note, or a system roller named by `kind`); a bare roll →
   // .npc-mon-roll (kind picks the system roller: a pool, the Alien table…).
+  // Dice runs (NdM, NdM+K, dM) in a line's text, for lines that carry no
+  // structured roll ("See below", a damage in the rider, an unparsed book line).
+  // "4D+2" style pool codes have no sides and are left alone.
+  function ccTextDice(text) {
+    const out = [], re = /(^|[^A-Za-z0-9])(\d{0,3}[dD]\d{1,3}(?:\s*[+\-\u2212]\s*\d+(?![dD\d]))?)(?![A-Za-z0-9])/g;
+    let m;
+    while((m = re.exec(String(text || '')))) {
+      const d = m[2].replace(/\u2212/g, '-').replace(/\s+/g, '').replace(/^D/, 'd');
+      if(!/^\d*[dD]0/.test(d) && out.indexOf(d) < 0) out.push(d);
+    }
+    return out.slice(0, 6);
+  }
   function ccAtks(list) {
     const cs = (list || []).filter(Boolean);
     if(!cs.length) return '';
@@ -11251,6 +11278,13 @@ function init_trackers(root) {
       } else if(a.roll) {
         const tableAttr = a.table ? ` data-table="${escAttr(JSON.stringify(a.table))}"` : '';
         btn = `<button class="cc-atk-roll npc-mon-roll" data-roll="${escAttr(a.roll)}" data-rolllabel="${escAttr(a.rolllabel || a.name || 'roll')}"${kindAttr}${noteAttr}${tableAttr} title="Roll ${escAttr(a.roll)}${a.note ? ' — ' + escAttr(a.note) : ''}">\u{1F3B2} ${escAttr(a.roll)}</button>`;
+      }
+      // Fallback: no roll and no damage roll (only text, or a to-hit with "See
+      // below" / "No damage") → a roll button for each dice run in its text.
+      if(!a.roll && !/\d/.test(String(a.dmg || ''))) {
+        const lbl = (a.name && !/^(attack|ability|special)$/i.test(String(a.name).trim())) ? String(a.name).slice(0, 40) : 'roll';
+        btn += ccTextDice([a.name, a.ex, a.dmg, a.note].filter(Boolean).join(' · ')).map(d =>
+          `<button class="cc-atk-roll npc-mon-roll cc-atk-textdie" data-roll="${escAttr(d)}" data-rolllabel="${escAttr(lbl)}" title="Roll ${escAttr(d)}">\u{1F3B2} ${escAttr(d)}</button>`).join('');
       }
       // A generic fallback label ("Attack"/"Ability"/"Special") isn't a real title — the
       // content is the row text. So a titled entry shows its bold name + text; a titleless
@@ -22999,7 +23033,7 @@ function wireAiConsole(root) {
         notes: it ? ((bens.length && DCCB() && DCCB().fromText(it.effect||'').every(b=>b.kind!=='note')) ? '' : (it.effect||'')) : '' });
       setStatus(boxStatus, 'Added “'+name+'”.', 'ok'); } });
   function lootTier(t){ if(typeof DCC_LOOT==='undefined')return null; const tiers=DCC_LOOT.tiers||[]; return tiers.find(x=>x.tier===t)||tiers[0]||null; }
-  function itemsOfTier(t,cats){ if(typeof DCC_ITEMS==='undefined')return []; return DCC_ITEMS.filter(it=>it.tier===t&&cats.indexOf(it.category)>=0); }
+  function itemsOfTier(t,cats){ if(typeof DCC_ITEMS==='undefined')return []; return allItems().filter(it=>it&&it.tier===t&&cats.indexOf(it.category)>=0); }
   function rollGold(formula){ const f=String(formula||''); if(/none|nuthin/i.test(f))return 0; const m=f.match(/(\d+)\s*d\s*(\d+)/i); if(!m)return 0; let total=0; const num=+m[1],sides=+m[2]; for(let i=0;i<num;i++) total+=1+Math.floor(Math.random()*sides); const mult=f.match(/[x×]\s*([\d,]+)/i); if(mult) total*=(parseInt(mult[1].replace(/,/g,''),10)||1); return total; }
   function enchantCard(key, cat){
     const e = window.dccEnchantItem(key, cat||'');
@@ -23054,7 +23088,7 @@ function wireAiConsole(root) {
     { key:'magic',label:'Magic',cats:['magic'] },
   ];
   // Picker catalog = the unified gear list (same rows the SD sheet shop + Gear page use).
-  function sdCatalog(){ return gearList().map(g => ({ name:g.name, category:g.category, slot:'', tier:'', effect:gearDesc(g) })); }
+  function sdCatalog(){ return gearList().map(g => ({ name:g.name, category:g.category, slot:'', tier:g.homebrew ? 'Homebrew' : '', effect:gearDesc(g) })); }
   const flName=root.querySelector('.ai-fl-name'), flRoll=root.querySelector('.ai-fl-roll');
   const flType=root.querySelector('.ai-fl-type'), flCount=root.querySelector('.ai-fl-count');
   const flBody=root.querySelector('.ai-fl-body'), flAdd=root.querySelector('.ai-fl-add'), flMagic=root.querySelector('.ai-fl-magic');
@@ -23066,7 +23100,7 @@ function wireAiConsole(root) {
   if(flAdd) flAdd.addEventListener('click', ()=>makeRow(flBody,'','',''));
   buildPicker({ filters:root.querySelector('.ai-fl-filters'), search:root.querySelector('.ai-fl-search'), results:root.querySelector('.ai-fl-results'), groups:SD_GROUPS,
     catalog: sdCatalog,
-    onAdd:(name,notes)=>{ const g=gearList().find(x=>x.name===name); makeRow(flBody,name,1,notes, g?{category:g.category, benefits:sdBens(name)}:null); setStatus(flStatus,'Added “'+name+'”.','ok'); } });
+    onAdd:(name,notes)=>{ const g=gearList().find(x=>x.name===name); makeRow(flBody,name,1,notes, g?{category:g.category, benefits:(g.homebrew && Array.isArray(g.benefits)) ? g.benefits : sdBens(name)}:null); setStatus(flStatus,'Added “'+name+'”.','ok'); } });
   // +X bonus and gold both scale with party level (Shadowdark power curve).
   function magicBonus(tier){ const t=String(tier||'1'); if(t==='10') return 3; if(t==='7') return 2+(Math.random()<0.5?1:0); if(t==='4') return 1+(Math.random()<0.5?1:0); return 1; }
   function rollGold(tier){ let c=0; for(let i=0;i<3;i++) c+=1+Math.floor(Math.random()*6); c*=(5+Math.floor(Math.random()*20)); return c*(({'1':1,'4':3,'7':6,'10':10})[String(tier||'1')]||1); }
@@ -23120,7 +23154,7 @@ function wireAiConsole(root) {
         const pool=gearList().filter(g=>g.category===cat);
         if(!pool.length) continue;
         const g=R(pool);
-        makeRow(flBody, g.name, 1, gearDesc(g), {category:g.category});
+        makeRow(flBody, g.name, 1, gearDesc(g), g.homebrew && g.benefits ? {category:g.category, benefits:g.benefits} : {category:g.category});
       }
     }
     setStatus(flStatus,'Rolled treasure — tweak it, then send.','ok');
@@ -23152,52 +23186,61 @@ function wireAiConsole(root) {
   // (random spread + hand-picked rows + a claimable drop to the roll log) over
   // each system's own gear list. Rows carry `cat` so the player's sheet can route
   // a claim (weapon → attack row, gold/credits → the money box, else gear).
+  // The viewer's homebrew (window.GMHB, public/tools-data/gm-homebrew.js, for the
+  // systems whose book pools no loader fills here); D&D / Nimble / ACE! / SW
+  // homebrew is already injected into their book pools (source "Homebrew").
+  // Rows carry `hb` (picker tag "Homebrew") and, for the badge systems, the
+  // record's own LootBonus `benefits` (bensOf prefers them over its text parse).
+  const xsHb = type => (window.GMHB && typeof window.GMHB.get === 'function') ? window.GMHB.get(type) : [];
+  const xsIsHb = g => !!g && (g.source === 'Homebrew' || g.hb === true || g.homebrew === true);
+  const xsBen = g => (g && Array.isArray(g.benefits) && g.benefits.length) ? g.benefits : undefined;
+  const xsArr = v => (typeof v !== 'undefined' && Array.isArray(v)) ? v : [];
   const XS_TREASURE = {
     ace: {
-      list: () => ((typeof ACE_GEAR !== 'undefined' && Array.isArray(ACE_GEAR)) ? ACE_GEAR : []).map(g => ({ name: g.name, category: g.category, desc: [g.description, g.damage != null ? g.damage + ' damage' : '', g.tier && g.tier !== 'Normal' ? g.tier + ' (TN ' + g.tn + ')' : ''].filter(Boolean).join(' · '), setting: g.setting })),
+      list: () => ((typeof ACE_GEAR !== 'undefined' && Array.isArray(ACE_GEAR)) ? ACE_GEAR : []).map(g => ({ name: g.name, category: g.category, desc: [g.description, g.damage != null ? g.damage + ' damage' : '', g.tier && g.tier !== 'Normal' ? g.tier + ' (TN ' + g.tn + ')' : ''].filter(Boolean).join(' · '), setting: g.setting, hb: xsIsHb(g) })),
       groups: [{ key:'all',label:'All',cats:null },{ key:'Weapon',label:'Weapons',cats:['Weapon'] },{ key:'Armor',label:'Armor',cats:['Armor'] },{ key:'Gadget',label:'Gadgets',cats:['Gadget','Kit'] },{ key:'Consumable',label:'Consumables',cats:['Consumable'] },{ key:'Magic Item',label:'Magic',cats:['Magic Item'] },{ key:'other',label:'Other',cats:['Mount','Vehicle','Service','Property','Starship Weapon'] }],
       randomCats: ['Weapon','Armor','Gadget','Consumable','Magic Item','Kit'], money: null, label: 'GEAR DROP', empty: 'ACE! gear list',
     },
     nim: {
-      list: () => ((typeof NIMBLE_ITEMS !== 'undefined' && Array.isArray(NIMBLE_ITEMS)) ? NIMBLE_ITEMS : []).map(g => ({ name: g.name, category: /Weapon/.test(g.category) ? 'weapon' : /Cloth|Leather|Mail|Plate|Shield/.test(g.category) ? 'armor' : /Magic|Scroll|Wand/.test(g.category) ? 'magic' : 'gear', full: /Magic|Scroll|Wand/.test(g.category) ? (g.description || '') : '', desc: [g.damage, g.armor && 'Armor ' + g.armor, g.properties, g.rarity, g.description].filter(Boolean).join(' · ').slice(0, 160) })),
+      list: () => ((typeof NIMBLE_ITEMS !== 'undefined' && Array.isArray(NIMBLE_ITEMS)) ? NIMBLE_ITEMS : []).map(g => ({ name: g.name, category: /Weapon/.test(g.category) ? 'weapon' : /Cloth|Leather|Mail|Plate|Shield/.test(g.category) ? 'armor' : /Magic|Scroll|Wand/.test(g.category) ? 'magic' : 'gear', full: /Magic|Scroll|Wand/.test(g.category) ? (g.description || '') : '', desc: [g.damage, g.armor && 'Armor ' + g.armor, g.properties, g.rarity, g.description].filter(Boolean).join(' · ').slice(0, 160), hb: xsIsHb(g), benefits: xsBen(g) })),
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'magic',label:'Magic',cats:['magic'] }],
       randomCats: ['weapon','armor','gear','magic'], money: { name: 'Gold', unit: 'gp', cat: 'gold', roll: tier => { let c = 0; for(let i = 0; i < 3; i++) c += 1 + Math.floor(Math.random() * 6); c *= (5 + Math.floor(Math.random() * 20)); return c * (({ '1': 1, '4': 3, '7': 6, '10': 10 })[String(tier || '1')] || 1); } }, label: 'TREASURE', empty: 'Nimble equipment list',
     },
     sw: {
-      list: () => ((typeof SW_WEAPONS !== 'undefined' && Array.isArray(SW_WEAPONS)) ? SW_WEAPONS : []).filter(w => !/^(Starship|Capital|Vehicle|Artillery|Droid)$/.test(w.kind)).map(w => ({ name: w.name, category: 'weapon', desc: [w.damageText || swPipsCode(w.damage), w.range, w.cost && w.cost + ' cr'].filter(Boolean).join(' · ') }))
-        .concat(((typeof SW_GEAR !== 'undefined' && Array.isArray(SW_GEAR)) ? SW_GEAR : []).filter(g => !/^(Vehicle|Housing)$/.test(g.category) && !/^(Armor improvement|Equipment availability codes|Capital ship template|Droid equipment \(building dice\)|Medpac \(revised use\)|Passage \(starliner ticket\))$|Services$/.test(g.name) /* rules entries and services aren't loot */).map(g => ({ name: g.name, category: g.category === 'Armor' ? 'Armor' : g.category === 'Droid' ? 'Droid' : 'gear', desc: [g.stats, g.cost && g.cost + ' cr', g.description].filter(Boolean).join(' · ').slice(0, 160) }))),
+      list: () => ((typeof SW_WEAPONS !== 'undefined' && Array.isArray(SW_WEAPONS)) ? SW_WEAPONS : []).filter(w => !/^(Starship|Capital|Vehicle|Artillery|Droid)$/.test(w.kind)).map(w => ({ name: w.name, category: 'weapon', desc: [w.damageText || (n => { n = Math.round(Number(n) || 0); return n ? (Math.floor(n / 3) ? Math.floor(n / 3) + 'D' : '') + (n % 3 ? '+' + (n % 3) : '') : ''; })(w.damage), w.range, w.cost && w.cost + ' cr'].filter(Boolean).join(' · '), hb: xsIsHb(w) }))
+        .concat(((typeof SW_GEAR !== 'undefined' && Array.isArray(SW_GEAR)) ? SW_GEAR : []).filter(g => !/^(Vehicle|Housing)$/.test(g.category) && !/^(Armor improvement|Equipment availability codes|Capital ship template|Droid equipment \(building dice\)|Medpac \(revised use\)|Passage \(starliner ticket\))$|Services$/.test(g.name) /* rules entries and services aren't loot */).map(g => ({ name: g.name, category: g.category === 'Armor' ? 'Armor' : g.category === 'Droid' ? 'Droid' : 'gear', desc: [g.stats, g.cost && g.cost + ' cr', g.description].filter(Boolean).join(' · ').slice(0, 160), hb: xsIsHb(g) }))),
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'Armor',label:'Armor',cats:['Armor'] },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'Droid',label:'Droids',cats:['Droid'] }],
       randomCats: ['weapon','Armor','gear','gear'], money: { name: 'Credits', unit: 'cr', cat: 'credits', roll: () => (1 + Math.floor(Math.random() * 6)) * 100 + (Math.random() < 0.3 ? 500 * (1 + Math.floor(Math.random() * 4)) : 0) }, label: 'GEAR DROP', empty: 'Star Wars gear list',
     },
     dnd: {
       list: () => []
-        .concat(((typeof DND_WEAPONS !== 'undefined' && Array.isArray(DND_WEAPONS)) ? DND_WEAPONS : []).map(w => ({ name: w.name, category: 'weapon', desc: [w.damage + ' ' + w.damageType, (w.properties || []).join(', '), w.mastery && 'Mastery: ' + w.mastery, w.cost].filter(Boolean).join(' · ') })))
-        .concat(((typeof DND_ARMOR !== 'undefined' && Array.isArray(DND_ARMOR)) ? DND_ARMOR : []).map(a => ({ name: a.name, category: 'armor', desc: ['AC ' + a.baseAC, a.category, a.cost].filter(Boolean).join(' · ') })))
-        .concat(((typeof DND_GEAR !== 'undefined' && Array.isArray(DND_GEAR)) ? DND_GEAR : []).map(g => ({ name: g.name, category: 'gear', desc: [g.cost, g.description].filter(Boolean).join(' · ').slice(0, 160) })))
-        .concat(((typeof DND_MAGIC_ITEMS !== 'undefined' && Array.isArray(DND_MAGIC_ITEMS)) ? DND_MAGIC_ITEMS : []).map(m => ({ name: m.name, category: 'magic', full: m.description || '', desc: [m.rarity, m.type, m.attunement ? 'attunement' : '', m.description].filter(Boolean).join(' · ').slice(0, 160) }))),
+        .concat(((typeof DND_WEAPONS !== 'undefined' && Array.isArray(DND_WEAPONS)) ? DND_WEAPONS : []).map(w => ({ name: w.name, category: 'weapon', desc: [w.damage + ' ' + w.damageType, (w.properties || []).join(', '), w.mastery && 'Mastery: ' + w.mastery, w.cost].filter(Boolean).join(' · '), hb: xsIsHb(w), benefits: xsBen(w) })))
+        .concat(((typeof DND_ARMOR !== 'undefined' && Array.isArray(DND_ARMOR)) ? DND_ARMOR : []).map(a => ({ name: a.name, category: 'armor', desc: ['AC ' + a.baseAC, a.category, a.cost].filter(Boolean).join(' · '), hb: xsIsHb(a), benefits: xsBen(a) })))
+        .concat(((typeof DND_GEAR !== 'undefined' && Array.isArray(DND_GEAR)) ? DND_GEAR : []).map(g => ({ name: g.name, category: 'gear', desc: [g.cost, g.description].filter(Boolean).join(' · ').slice(0, 160), hb: xsIsHb(g), benefits: xsBen(g) })))
+        .concat(((typeof DND_MAGIC_ITEMS !== 'undefined' && Array.isArray(DND_MAGIC_ITEMS)) ? DND_MAGIC_ITEMS : []).map(m => ({ name: m.name, category: 'magic', full: m.description || '', desc: [m.rarity, m.type, m.attunement ? 'attunement' : '', m.description].filter(Boolean).join(' · ').slice(0, 160), hb: xsIsHb(m), benefits: xsBen(m) }))),
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'magic',label:'Magic',cats:['magic'] }],
       randomCats: ['weapon','armor','gear','magic'], money: { name: 'Gold', unit: 'gp', cat: 'gold', roll: tier => { let c = 0; for(let i = 0; i < 2; i++) c += 1 + Math.floor(Math.random() * 6); c *= (10 + Math.floor(Math.random() * 40)); return c * (({ '1': 1, '5': 4, '11': 12, '17': 30 })[String(tier || '1')] || 1); } }, label: 'TREASURE', empty: 'D&D item lists',
     },
     d62e: {
-      list: () => ((typeof D62E_EQUIPMENT !== 'undefined' && Array.isArray(D62E_EQUIPMENT)) ? D62E_EQUIPMENT : []).map(e => ({ name: e.name, category: (e.category === 'weapon' || e.category === 'armor') ? e.category : 'gear', desc: [e.damage ? e.damage + ' dmg' : '', e.protection ? '+' + e.protection + ' prot' : '', e.range, e.era && e.era !== 'core' ? e.era : '', e.cost != null ? e.cost + ' cr' : '', e.description].filter(Boolean).join(' · ').slice(0, 160) })),
+      list: () => ((typeof D62E_EQUIPMENT !== 'undefined' && Array.isArray(D62E_EQUIPMENT)) ? D62E_EQUIPMENT : []).concat(xsHb('d62e-gear')).map(e => ({ name: e.name, category: (e.category === 'weapon' || e.category === 'armor') ? e.category : 'gear', desc: [e.damage ? e.damage + ' dmg' : '', e.protection ? '+' + e.protection + ' prot' : '', e.range, e.era && e.era !== 'core' ? e.era : '', e.cost != null ? e.cost + ' cr' : '', e.description].filter(Boolean).join(' · ').slice(0, 160), hb: xsIsHb(e) })),
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] }],
       // D62e has no currency or prices (wealth is handled narratively), so no money roll.
       randomCats: ['weapon','armor','gear','gear'], money: null, label: 'GEAR DROP', empty: 'D6 2e equipment list',
     },
     mmrpg: {
-      list: () => ((typeof MMRPG_EQUIPMENT !== 'undefined' && Array.isArray(MMRPG_EQUIPMENT)) ? MMRPG_EQUIPMENT : []).map(e => {
+      list: () => ((typeof MMRPG_EQUIPMENT !== 'undefined' && Array.isArray(MMRPG_EQUIPMENT)) ? MMRPG_EQUIPMENT : []).concat(xsHb('mmrpg-iconic')).map(e => {
         const t = String(e.tier || 'Common').toLowerCase();
         const cat = t === 'iconic' ? 'iconic' : t === 'narrative' ? 'narrative' : t === 'vehicle' ? 'vehicle' : 'common';
         const desc = [ (e.type || e.category || ''), e.owner && e.owner !== '—' ? e.owner : '', e.range ? 'Range ' + e.range : '', (e.damageBonus && e.damageBonus !== '—') ? 'Dmg ' + e.damageBonus : '', e.powerValue ? 'PV ' + e.powerValue : '', e.special || e.notes || '' ].filter(Boolean).join(' · ').slice(0, 180);
-        return { name: e.name, category: cat, desc };
+        return { name: e.name, category: cat, desc, hb: xsIsHb(e) };
       }),
       groups: [{ key:'all',label:'All',cats:null },{ key:'common',label:'Common',cats:['common'] },{ key:'narrative',label:'Narrative',cats:['narrative'] },{ key:'iconic',label:'Iconic',cats:['iconic'] },{ key:'vehicle',label:'Vehicles',cats:['vehicle'] }],
       randomCats: ['common','common','common','narrative','iconic','vehicle'], money: null, label: 'GEAR DROP', empty: 'MMRPG equipment list',
     },
     icrpg: {
       list: () => []
-        .concat(((typeof ICRPG_GEAR !== 'undefined' && Array.isArray(ICRPG_GEAR)) ? ICRPG_GEAR : []).map(g => ({ name: g.name, category: /gun|weapon/i.test(g.category) ? 'weapon' : /armor/i.test(g.category) ? 'armor' : 'gear', desc: [g.category, g.world && g.world !== 'core' ? g.world : '', (g.effects || []).join('; '), g.desc].filter(Boolean).join(' · ').slice(0, 160) })))
-        .concat(((typeof ICRPG_LOOT !== 'undefined' && Array.isArray(ICRPG_LOOT)) ? ICRPG_LOOT : []).map(l => ({ name: l.name, category: 'loot', desc: [l.table, (l.effects || []).join('; '), l.desc].filter(Boolean).join(' · ').slice(0, 160) }))),
+        .concat(((typeof ICRPG_GEAR !== 'undefined' && Array.isArray(ICRPG_GEAR)) ? ICRPG_GEAR : []).concat(xsHb('icrpg-gear')).map(g => ({ name: g.name, category: /gun|weapon/i.test(g.category) ? 'weapon' : /armor/i.test(g.category) ? 'armor' : 'gear', desc: [g.category, g.world && g.world !== 'core' ? g.world : '', (g.effects || []).join('; '), g.desc].filter(Boolean).join(' · ').slice(0, 160), hb: xsIsHb(g), benefits: xsBen(g) })))
+        .concat(((typeof ICRPG_LOOT !== 'undefined' && Array.isArray(ICRPG_LOOT)) ? ICRPG_LOOT : []).concat(xsHb('icrpg-loot')).map(l => ({ name: l.name, category: 'loot', desc: [l.table, (l.effects || []).join('; '), l.desc].filter(Boolean).join(' · ').slice(0, 160), hb: xsIsHb(l), benefits: xsBen(l) }))),
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'loot',label:'Loot',cats:['loot'] }],
       randomCats: ['weapon','armor','gear','loot'], money: null, label: 'LOOT DROP', empty: 'ICRPG loot & gear lists',
     },
@@ -23205,7 +23248,11 @@ function wireAiConsole(root) {
       list: () => []
         .concat(((typeof ALIEN_WEAPONS !== 'undefined' && Array.isArray(ALIEN_WEAPONS)) ? ALIEN_WEAPONS : []).map(w => ({ name: w.name, category: 'weapon', desc: [w.bonus ? 'Bonus ' + w.bonus : '', w.damage != null ? 'Dmg ' + w.damage : '', w.range, w.class, w.cost].filter(Boolean).join(' · ').slice(0, 160) })))
         .concat(((typeof ALIEN_ARMOR !== 'undefined' && Array.isArray(ALIEN_ARMOR)) ? ALIEN_ARMOR : []).map(a => ({ name: a.name, category: 'armor', desc: ['Armor ' + a.rating, (a.air && a.air !== '—') ? 'Air ' + a.air : '', a.cost, a.comment].filter(Boolean).join(' · ').slice(0, 160) })))
-        .concat(((typeof ALIEN_GEAR !== 'undefined' && Array.isArray(ALIEN_GEAR)) ? ALIEN_GEAR : []).map(g => ({ name: g.name, category: 'gear', desc: [g.category, g.cost, g.effect].filter(Boolean).join(' · ').slice(0, 160) }))),
+        .concat(((typeof ALIEN_GEAR !== 'undefined' && Array.isArray(ALIEN_GEAR)) ? ALIEN_GEAR : []).map(g => ({ name: g.name, category: 'gear', desc: [g.category, g.cost, g.effect].filter(Boolean).join(' · ').slice(0, 160) })))
+        .concat(xsHb('yze-weapon').map(w => ({ name: w.name, category: 'weapon', hb: true, desc: [w.bonus && w.bonus !== '0' ? 'Bonus ' + w.bonus : '', w.damage != null ? 'Dmg ' + w.damage : '', w.range, w.class, w.ammo, w.cost, w.special].filter(Boolean).join(' · ').slice(0, 160) })))
+        .concat(xsHb('yze-gear').map(g => g.kind === 'armor'
+          ? { name: g.name, category: 'armor', hb: true, desc: ['Armor ' + (g.rating || 0), (g.air && g.air !== '—') ? 'Air ' + g.air : '', g.cost, g.desc].filter(Boolean).join(' · ').slice(0, 160) }
+          : { name: g.name, category: 'gear', hb: true, desc: [g.category, g.cost, g.desc].filter(Boolean).join(' · ').slice(0, 160) })),
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] }],
       randomCats: ['weapon','armor','gear','gear'], money: { name: 'Dollars', unit: '$', cat: 'money', roll: () => (1 + Math.floor(Math.random() * 6)) * 100 }, label: 'GEAR DROP', empty: 'Alien gear list',
     },
@@ -23214,7 +23261,11 @@ function wireAiConsole(root) {
         .concat(((typeof TWD_CLOSE_WEAPONS !== 'undefined' && Array.isArray(TWD_CLOSE_WEAPONS)) ? TWD_CLOSE_WEAPONS : []).map(w => ({ name: w.name, category: 'weapon', desc: ['Dmg ' + w.damage, w.bonus ? 'Bonus ' + w.bonus : '', 'Close', w.slots ? w.slots + ' slots' : ''].filter(Boolean).join(' · ') })))
         .concat(((typeof TWD_RANGED_WEAPONS !== 'undefined' && Array.isArray(TWD_RANGED_WEAPONS)) ? TWD_RANGED_WEAPONS : []).map(w => ({ name: w.name, category: 'weapon', desc: ['Dmg ' + w.damage, w.bonus ? 'Bonus ' + w.bonus : '', w.range, w.slots ? w.slots + ' slots' : ''].filter(Boolean).join(' · ') })))
         .concat(((typeof TWD_ARMOR !== 'undefined' && Array.isArray(TWD_ARMOR)) ? TWD_ARMOR : []).map(a => ({ name: a.name, category: 'armor', desc: ['Armor ' + a.level, a.penalty ? 'Mobility ' + a.penalty : ''].filter(Boolean).join(' · ') })))
-        .concat(((typeof TWD_GEAR !== 'undefined' && Array.isArray(TWD_GEAR)) ? TWD_GEAR : []).map(g => ({ name: g.name, category: 'gear', desc: [g.bonus, g.slots ? g.slots + ' slots' : ''].filter(Boolean).join(' · ') }))),
+        .concat(((typeof TWD_GEAR !== 'undefined' && Array.isArray(TWD_GEAR)) ? TWD_GEAR : []).map(g => ({ name: g.name, category: 'gear', desc: [g.bonus, g.slots ? g.slots + ' slots' : ''].filter(Boolean).join(' · ') })))
+        .concat(xsHb('twd-weapon').map(w => ({ name: w.name, category: 'weapon', hb: true, desc: [/^BP/i.test(String(w.damage)) ? w.damage : 'Dmg ' + w.damage, w.bonus && w.bonus !== '0' ? 'Bonus ' + w.bonus : '', w.kind === 'Ranged' ? w.range : 'Close', w.slots ? w.slots + ' slots' : '', w.noise, w.ammo, (w.features || []).join(', ')].filter(Boolean).join(' · ').slice(0, 160) })))
+        .concat(xsHb('twd-gear').map(g => g.kind === 'armor'
+          ? { name: g.name, category: 'armor', hb: true, desc: ['Armor ' + (g.level || 1), g.penalty && g.penalty !== '0' ? 'Mobility ' + g.penalty : '', g.desc].filter(Boolean).join(' · ').slice(0, 160) }
+          : { name: g.name, category: 'gear', hb: true, desc: [g.bonus, g.slots ? g.slots + ' slots' : '', g.desc].filter(Boolean).join(' · ').slice(0, 160) })),
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] }],
       randomCats: ['weapon','armor','gear','gear'], money: null, label: 'GEAR DROP', empty: 'TWD gear list',
     },
@@ -23225,7 +23276,13 @@ function wireAiConsole(root) {
         .concat(((typeof VAE_ARMOR !== 'undefined' && Array.isArray(VAE_ARMOR)) ? VAE_ARMOR : []).map(a => ({ name: a.name, category: 'armor', desc: ['Protection ' + a.protection, a.comment].filter(Boolean).join(' · ') })))
         .concat(((typeof VAE_GEAR !== 'undefined' && Array.isArray(VAE_GEAR)) ? VAE_GEAR : []).map(g => ({ name: g.name, category: 'gear', desc: [g.comment || g.effect || '', g.cost != null && g.cost !== '' ? 'cost ' + g.cost : ''].filter(Boolean).join(' · ') })))
         .concat(((typeof VAE_ITEMS_OF_POWER !== 'undefined' && Array.isArray(VAE_ITEMS_OF_POWER)) ? VAE_ITEMS_OF_POWER : []).map(p => ({ name: p.name, category: 'power', desc: ['Item of Power', p.effect || ''].filter(Boolean).join(' · ') })))
-        .concat(((typeof VAE_MAGIC_ITEMS !== 'undefined' && Array.isArray(VAE_MAGIC_ITEMS)) ? VAE_MAGIC_ITEMS : []).map(p => ({ name: p.name, category: 'magic', desc: ['Magic Item', p.effect || '', p.risk ? 'Risk: ' + p.risk : ''].filter(Boolean).join(' · ') }))),
+        .concat(((typeof VAE_MAGIC_ITEMS !== 'undefined' && Array.isArray(VAE_MAGIC_ITEMS)) ? VAE_MAGIC_ITEMS : []).map(p => ({ name: p.name, category: 'magic', desc: ['Magic Item', p.effect || '', p.risk ? 'Risk: ' + p.risk : ''].filter(Boolean).join(' · ') })))
+        .concat(xsHb('vae-weapon').map(w => ({ name: w.name, category: 'weapon', hb: true, desc: ['Dmg ' + w.damage, w.bonus && w.bonus !== '0' ? 'Bonus ' + w.bonus : '', w.skill === 'Close Combat' ? 'Melee' : 'Range ' + w.range, w.skill, (w.features || []).join(', '), w.cost ? 'cost ' + w.cost : ''].filter(Boolean).join(' · ').slice(0, 160) })))
+        .concat(xsHb('vae-gear').map(g => {
+          const k = g.kind === 'armor' ? 'armor' : g.kind === 'power' ? 'power' : g.kind === 'magic' ? 'magic' : 'gear';
+          const lead = k === 'armor' ? 'Protection ' + (g.rating || 1) + (g.penalty ? ' · Agility −' + g.penalty : '') : k === 'power' ? 'Item of Power' : k === 'magic' ? 'Magic Item' : g.bonus;
+          return { name: g.name, category: k, hb: true, desc: [lead, g.effect || '', g.risk ? 'Risk: ' + g.risk : '', g.desc, g.cost ? 'cost ' + g.cost : ''].filter(Boolean).join(' · ').slice(0, 160) };
+        })),
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'power',label:'Items of Power',cats:['power'] },{ key:'magic',label:'Magic Items',cats:['magic'] }],
       randomCats: ['weapon','armor','gear','gear','power','magic'], money: null, label: 'GEAR DROP', empty: 'Vaesen gear list',
     },
@@ -23235,7 +23292,13 @@ function wireAiConsole(root) {
         .concat(((typeof MYZ_RANGED_WEAPONS !== 'undefined' && Array.isArray(MYZ_RANGED_WEAPONS)) ? MYZ_RANGED_WEAPONS : []).map(w => ({ name: w.name, category: 'weapon', desc: ['Dmg ' + w.damage, w.bonus != null ? 'Bonus ' + w.bonus : '', w.range, w.comment].filter(Boolean).join(' · ') })))
         .concat(((typeof MYZ_ARMOR !== 'undefined' && Array.isArray(MYZ_ARMOR)) ? MYZ_ARMOR : []).map(a => ({ name: a.name, category: 'armor', desc: ['Armor ' + (a.rating != null ? a.rating : ''), a.comment].filter(Boolean).join(' · ') })))
         .concat(((typeof MYZ_GEAR !== 'undefined' && Array.isArray(MYZ_GEAR)) ? MYZ_GEAR : []).map(g => ({ name: g.name, category: 'gear', desc: [g.comment || g.effect || '', g.bonus ? 'Bonus ' + g.bonus : ''].filter(Boolean).join(' · ') })))
-        .concat(((typeof MYZ_ARTIFACTS !== 'undefined' && Array.isArray(MYZ_ARTIFACTS)) ? MYZ_ARTIFACTS : []).map(a => ({ name: a.name, category: 'artifact', desc: ['Artifact', a.roll ? 'D666 ' + a.roll : '', (typeof MYZ_VALUES !== 'undefined' && MYZ_VALUES[a.name] != null) ? MYZ_VALUES[a.name] + ' bullets' : '', a.desc].filter(Boolean).join(' · ') }))),
+        .concat(((typeof MYZ_ARTIFACTS !== 'undefined' && Array.isArray(MYZ_ARTIFACTS)) ? MYZ_ARTIFACTS : []).map(a => ({ name: a.name, category: 'artifact', desc: ['Artifact', a.roll ? 'D666 ' + a.roll : '', (typeof MYZ_VALUES !== 'undefined' && MYZ_VALUES[a.name] != null) ? MYZ_VALUES[a.name] + ' bullets' : '', a.desc].filter(Boolean).join(' · ') })))
+        .concat(xsHb('myz-weapon').map(w => ({ name: w.name, category: 'weapon', hb: true, desc: [w.artifact ? 'Artifact' : '', 'Dmg ' + w.damage, w.blast ? 'Blast ' + w.blast : '', w.bonus ? 'Bonus ' + w.bonus : '', w.skill === 'Shoot' ? w.range : 'Melee', w.ammo, (w.features || []).join(', '), w.value ? w.value + ' bullets' : '', w.desc].filter(Boolean).join(' · ').slice(0, 160) })))
+        .concat(xsHb('myz-gear').map(g => {
+          const k = g.kind === 'armor' ? 'armor' : g.artifact ? 'artifact' : 'gear';
+          const bon = (g.skillBonus || []).map(b => b && b.skill ? b.skill + ' +' + b.amount : '').filter(Boolean).join(', ');
+          return { name: g.name, category: k, hb: true, desc: [k === 'armor' ? 'Armor ' + (g.rating || 1) : k === 'artifact' ? 'Artifact' : '', bon ? 'Bonus ' + bon : '', g.value ? g.value + ' bullets' : '', g.desc].filter(Boolean).join(' · ').slice(0, 160) };
+        })),
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'artifact',label:'Artifacts',cats:['artifact'] }],
       randomCats: ['weapon','armor','gear','gear','artifact'], money: { name: 'Bullets', unit: '', cat: 'money', roll: () => (1 + Math.floor(Math.random() * 6)) }, label: 'GEAR DROP', empty: 'MYZ gear list',
     },
@@ -23243,9 +23306,9 @@ function wireAiConsole(root) {
       // Weapons / armour / gear from the LotR data layer, plus the enchanted
       // rewards a Famous Weapon or Armour can carry. Coins are in silver.
       list: () => []
-        .concat(((typeof LOTR_WEAPONS !== 'undefined' && Array.isArray(LOTR_WEAPONS)) ? LOTR_WEAPONS : []).map(w => ({ name: w.name, category: 'weapon', desc: [w.damage ? w.damage + (w.damageType ? ' ' + w.damageType : '') : '', (w.properties || []).join ? (w.properties || []).join(', ') : w.properties, w.cost].filter(Boolean).join(' · ') })))
+        .concat(((typeof LOTR_WEAPONS !== 'undefined' && Array.isArray(LOTR_WEAPONS)) ? LOTR_WEAPONS : []).concat(xsHb('lotr-weapon')).map(w => ({ name: w.name, category: 'weapon', desc: [w.damage ? w.damage + (w.damageType ? ' ' + w.damageType : '') : '', (w.properties || []).join ? (w.properties || []).join(', ') : w.properties, w.cost].filter(Boolean).join(' · '), hb: xsIsHb(w), benefits: xsBen(w) })))
         .concat(((typeof LOTR_ARMOR !== 'undefined' && Array.isArray(LOTR_ARMOR)) ? LOTR_ARMOR : []).map(a => ({ name: a.name, category: 'armor', desc: [a.baseAC != null ? 'AC ' + a.baseAC : (a.ac != null ? 'AC ' + a.ac : ''), a.category, a.cost].filter(Boolean).join(' · ') })))
-        .concat(((typeof LOTR_GEAR !== 'undefined' && Array.isArray(LOTR_GEAR)) ? LOTR_GEAR : []).map(g => ({ name: g.name, category: 'gear', desc: [g.cost, g.description].filter(Boolean).join(' · ').slice(0, 160) })))
+        .concat(((typeof LOTR_GEAR !== 'undefined' && Array.isArray(LOTR_GEAR)) ? LOTR_GEAR : []).concat(xsHb('lotr-gear')).map(g => ({ name: g.name, category: 'gear', desc: [g.cost, g.description].filter(Boolean).join(' · ').slice(0, 160), hb: xsIsHb(g), benefits: xsBen(g) })))
         .concat(((typeof LOTR_ENCHANTED_REWARDS !== 'undefined' && Array.isArray(LOTR_ENCHANTED_REWARDS)) ? LOTR_ENCHANTED_REWARDS : []).map(e => ({ name: e.name || String(e), category: 'magic', full: e.description || e.effect || '', desc: ['Enchanted reward', e.item || e.appliesTo || '', e.description || e.effect || ''].filter(Boolean).join(' · ').slice(0, 160) }))),
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armour',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'magic',label:'Enchanted',cats:['magic'] }],
       randomCats: ['weapon','armor','gear','gear'], money: { name: 'Silver', unit: 's', cat: 'silver', roll: () => (1 + Math.floor(Math.random() * 6)) * (1 + Math.floor(Math.random() * 6)) }, label: 'TREASURE', empty: 'LotR gear list',
@@ -23258,10 +23321,10 @@ function wireAiConsole(root) {
         const arr = v => (typeof v !== 'undefined' && Array.isArray(v)) ? v : [];
         const cost = c => c && c.amount != null ? c.amount + ' ' + c.unit : '';
         return []
-          .concat(arr(typeof DB_WEAPONS !== 'undefined' ? DB_WEAPONS : undefined).filter(w => !w.natural && w.cost).map(w => ({ name: w.name, category: 'weapon', desc: [w.skill, w.damage ? 'Damage ' + w.damage : '', w.grip, w.range ? 'Range ' + w.range : '', (w.features || []).join(', '), cost(w.cost)].filter(Boolean).join(' · ') })))
-          .concat(arr(typeof DB_ARMOR !== 'undefined' ? DB_ARMOR : undefined).map(a => ({ name: a.name, category: 'armor', desc: ['Armor ' + a.rating, (a.banes || []).length ? 'Bane: ' + a.banes.join(', ') : '', cost(a.cost)].filter(Boolean).join(' · ') })))
-          .concat(arr(typeof DB_HELMETS !== 'undefined' ? DB_HELMETS : undefined).map(a => ({ name: a.name, category: 'armor', desc: ['Helmet · Armor +' + a.rating, (a.banes || []).length ? 'Bane: ' + a.banes.join(', ') : '', cost(a.cost)].filter(Boolean).join(' · ') })))
-          .concat(arr(typeof DB_GEAR !== 'undefined' ? DB_GEAR : undefined).filter(g => !/^(Services|Animals)$/.test(g.category)).map(g => ({ name: g.name, category: 'gear', desc: [g.category, g.effect, cost(g.cost)].filter(Boolean).join(' · ').slice(0, 160) })))
+          .concat(arr(typeof DB_WEAPONS !== 'undefined' ? DB_WEAPONS : undefined).filter(w => !w.natural && w.cost).concat(xsHb('db-weapon')).map(w => ({ name: w.name, category: 'weapon', desc: [w.skill, w.damage ? 'Damage ' + w.damage : '', w.grip, w.range ? 'Range ' + w.range : '', (w.features || []).join(', '), cost(w.cost)].filter(Boolean).join(' · '), hb: xsIsHb(w), benefits: xsBen(w) })))
+          .concat(arr(typeof DB_ARMOR !== 'undefined' ? DB_ARMOR : undefined).concat(xsHb('db-armor').filter(a => a.slot !== 'helmet')).map(a => ({ name: a.name, category: 'armor', desc: ['Armor ' + a.rating, (a.banes || []).length ? 'Bane: ' + a.banes.join(', ') : '', cost(a.cost)].filter(Boolean).join(' · '), hb: xsIsHb(a), benefits: xsBen(a) })))
+          .concat(arr(typeof DB_HELMETS !== 'undefined' ? DB_HELMETS : undefined).concat(xsHb('db-armor').filter(a => a.slot === 'helmet')).map(a => ({ name: a.name, category: 'armor', desc: ['Helmet · Armor +' + a.rating, (a.banes || []).length ? 'Bane: ' + a.banes.join(', ') : '', cost(a.cost)].filter(Boolean).join(' · '), hb: xsIsHb(a), benefits: xsBen(a) })))
+          .concat(arr(typeof DB_GEAR !== 'undefined' ? DB_GEAR : undefined).filter(g => !/^(Services|Animals)$/.test(g.category)).concat(xsHb('db-gear')).map(g => ({ name: g.name, category: 'gear', desc: [g.category, g.effect, cost(g.cost)].filter(Boolean).join(' · ').slice(0, 160), hb: xsIsHb(g), benefits: xsBen(g) })))
           .concat(arr(window.DB_GM && window.DB_GM.valuables).map(v => ({ name: v.name, category: 'valuable', desc: 'Valuable — worth ' + v.value })));
       },
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'valuable',label:'Valuables',cats:['valuable'] }],
@@ -23275,13 +23338,13 @@ function wireAiConsole(root) {
         const arr = v => (typeof v !== 'undefined' && Array.isArray(v)) ? v : [];
         const cost = c => c == null ? '' : c + 's';
         return []
-          .concat(arr(typeof PB_WEAPONS !== 'undefined' ? PB_WEAPONS : undefined).filter(w => w.cost != null).map(w => ({ name: w.name, category: 'weapon', desc: [w.damage ? 'Damage ' + w.damage : '', w.hands === 2 ? 'two-handed' : '', w.reach ? w.reach + "' reach" : '', w.range ? "range " + w.range + "'" : '', w.reload ? 'Reload ' + w.reload : '', w.blackPowder ? 'black powder' : '', cost(w.cost)].filter(Boolean).join(' · ') })))
-          .concat(arr(typeof PB_CLOTHING !== 'undefined' ? PB_CLOTHING : undefined).filter(a => a.cost != null).map(a => ({ name: a.name, category: 'armor', desc: ['Tier ' + a.tier + (a.armorDie ? ' −' + a.armorDie : ''), a.special || '', cost(a.cost)].filter(Boolean).join(' · ') })))
-          .concat(arr(typeof PB_HATS !== 'undefined' ? PB_HATS : undefined).filter(h => !h.none && h.cost != null).map(h => ({ name: h.name, category: 'armor', desc: ['Hat', h.special || '', cost(h.cost)].filter(Boolean).join(' · ') })))
+          .concat(arr(typeof PB_WEAPONS !== 'undefined' ? PB_WEAPONS : undefined).filter(w => w.cost != null).concat(xsHb('pb-weapon')).map(w => ({ name: w.name, category: 'weapon', desc: [w.damage ? 'Damage ' + w.damage : '', w.hands === 2 ? 'two-handed' : '', w.reach ? w.reach + "' reach" : '', w.range ? "range " + w.range + "'" : '', w.reload ? 'Reload ' + w.reload : '', w.blackPowder ? 'black powder' : '', cost(w.cost)].filter(Boolean).join(' · '), hb: xsIsHb(w), benefits: xsBen(w) })))
+          .concat(arr(typeof PB_CLOTHING !== 'undefined' ? PB_CLOTHING : undefined).filter(a => a.cost != null).concat(xsHb('pb-armor').filter(a => a.slot !== 'hat')).map(a => ({ name: a.name, category: 'armor', desc: ['Tier ' + a.tier + (a.armorDie ? ' −' + a.armorDie : ''), a.special || '', cost(a.cost)].filter(Boolean).join(' · '), hb: xsIsHb(a), benefits: xsBen(a) })))
+          .concat(arr(typeof PB_HATS !== 'undefined' ? PB_HATS : undefined).filter(h => !h.none && h.cost != null).concat(xsHb('pb-armor').filter(a => a.slot === 'hat')).map(h => ({ name: h.name, category: 'armor', desc: ['Hat', h.special || '', cost(h.cost)].filter(Boolean).join(' · '), hb: xsIsHb(h), benefits: xsBen(h) })))
           .concat(arr(typeof PB_BOMBS !== 'undefined' ? PB_BOMBS : undefined).map(b => ({ name: b.name, category: 'gear', desc: ['Bomb', b.damage ? 'Damage ' + b.damage : '', b.effect || '', cost(b.cost)].filter(Boolean).join(' · ') })))
           .concat(arr(typeof PB_AMMO !== 'undefined' ? PB_AMMO : undefined).map(b => ({ name: b.name, category: 'gear', desc: ['Ammo ×' + b.qty, b.damage ? 'Damage ' + b.damage : '', b.effect || '', cost(b.cost)].filter(Boolean).join(' · ') })))
-          .concat(arr(typeof PB_GEAR !== 'undefined' ? PB_GEAR : undefined).map(g => ({ name: g.name, category: 'gear', desc: [g.effect || '', g.costText || cost(g.cost)].filter(Boolean).join(' · ').slice(0, 160) })))
-          .concat(arr(typeof PB_RELICS !== 'undefined' ? PB_RELICS : undefined).map(r => ({ name: r.name, category: 'relic', desc: ['Ancient relic', r.text].filter(Boolean).join(' · ').slice(0, 160) })));
+          .concat(arr(typeof PB_GEAR !== 'undefined' ? PB_GEAR : undefined).concat(xsHb('pb-gear')).map(g => ({ name: g.name, category: 'gear', desc: [g.effect || '', g.costText || cost(g.cost)].filter(Boolean).join(' · ').slice(0, 160), hb: xsIsHb(g), benefits: xsBen(g) })))
+          .concat(arr(typeof PB_RELICS !== 'undefined' ? PB_RELICS : undefined).concat(xsHb('pb-relic')).map(r => ({ name: r.name, category: 'relic', desc: ['Ancient relic', r.text].filter(Boolean).join(' · ').slice(0, 160), hb: xsIsHb(r) })));
       },
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Clothing & hats',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'relic',label:'Relics',cats:['relic'] }],
       randomCats: ['weapon','armor','gear','gear','relic'], money: { name: 'Silver', unit: 's', cat: 'money', roll: () => (1 + Math.floor(Math.random() * 10)) + (1 + Math.floor(Math.random() * 10)) + (1 + Math.floor(Math.random() * 10)) }, label: 'PLUNDER', empty: 'Pirate Borg gear list',
@@ -23301,13 +23364,14 @@ function wireAiConsole(root) {
     // A catalog item's bonuses, read from its full text (badge systems only).
     const bensOf = g => {
       if(!hasLB || !g) return [];
+      if(g.hb && Array.isArray(g.benefits)) return LB().normalize(sys, g.benefits);   // a homebrew item's own badges
       if(sys === 'pb' && g.category === 'relic') return [{ kind:'relic', target:g.name }];
       return LB().fromText(sys, g.name + '. ' + (g.full || g.desc || ''));
     };
     panel._addItem = (name, qty, notes, meta) => makeRow(trBody, name, qty, notes, meta);
     if(trAdd) trAdd.addEventListener('click', () => makeRow(trBody, '', '', ''));
     buildPicker({ filters: q('.xs-tr-filters'), search: q('.xs-tr-search'), results: q('.xs-tr-results'), groups: cfg.groups,
-      catalog: () => cfg.list().map(g => ({ name: g.name, category: g.category, slot: '', tier: g.setting && g.setting !== 'core' ? g.setting : '', effect: g.desc })),
+      catalog: () => cfg.list().map(g => ({ name: g.name, category: g.category, slot: '', tier: g.hb ? 'Homebrew' : g.setting && g.setting !== 'core' ? g.setting : '', effect: g.desc })),
       onAdd: (name, notes) => { const g = cfg.list().find(x => x.name === name); makeRow(trBody, name, 1, notes, g ? { category: g.category, benefits: bensOf(g) } : null); setStatus(trStatus, 'Added “' + name + '”.', 'ok'); } });
     const addMoney = tier => { if(cfg.money) makeRow(trBody, cfg.money.name, cfg.money.roll(tier), cfg.money.unit, { category: cfg.money.cat }); };
     trRoll.addEventListener('click', () => {
@@ -23319,6 +23383,10 @@ function wireAiConsole(root) {
       if(type !== 'coins' && type !== 'credits') {
         for(let i = 0; i < count; i++) {
           const cat = type === 'random_all' ? R(cfg.randomCats) : type;
+          // The badge systems' magic roll comes from the LootBonus generator; the
+          // GM's own homebrew magic items take 1 in 4 of those rolls when any exist.
+          const hbMagic = (hasLB && cat === 'magic') ? list.filter(g => g.hb && g.category === 'magic') : [];
+          if(hbMagic.length && Math.random() < 0.25) { const g = R(hbMagic); makeRow(trBody, g.name, 1, g.desc, { category: 'magic', benefits: bensOf(g) }); continue; }
           if(hasLB && cat === 'magic' && sys !== 'lotr') {
             const r = LB().roll(sys, trTier ? trTier.value : '1', 'magic');
             if(r && r.name) { const g = list.find(x => x.name === r.name); makeRow(trBody, r.name, 1, g ? g.desc : r.notes, { category: 'magic', benefits: r.benefits }); continue; }
@@ -23982,6 +24050,8 @@ window.init_vtt = init_vtt;
   function T(){ return (typeof MYZ_GM_TABLES!=='undefined')?MYZ_GM_TABLES:(window.MYZ_GM_TABLES||null); }
   function NPCS(){ return (typeof MYZ_NPCS!=='undefined')?MYZ_NPCS:(window.MYZ_NPCS||[]); }
   function ARTIFACTS(){ return (typeof MYZ_ARTIFACTS!=='undefined')?MYZ_ARTIFACTS:(window.MYZ_ARTIFACTS||[]); }
+  // The viewer's homebrew artifacts (myz-gear / myz-weapon built with origin "Artifact").
+  function HB_ARTIFACTS(){ var G=window.GMHB; if(!G) return []; return G.get('myz-gear').concat(G.get('myz-weapon')).filter(function(x){ return x && x.artifact; }); }
   function d6(){ return 1+Math.floor(Math.random()*6); }
   function esc(s){ return String(s==null?'':s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
   function bounds(tok){ tok=String(tok).trim(); var m;
@@ -24057,7 +24127,10 @@ window.init_vtt = init_vtt;
         html=card((sub2==='arkEvents'?'Ark Event':'Zone Event')+' · '+r3.code,'',esc(r3.row.result));
       } else if(kind==='myzfind'){
         var sub3=o.sub||'artifact';
-        if(sub3==='artifact'){ var ar=ARTIFACTS(); if(!ar.length){ html=card('Artifact','','Artifact list did not load.'); } else { var a=rollTable(ar); html=card('Artifact · '+a.code, a.row.name||'', esc(a.row.desc||a.row.result||'')); } }
+        if(sub3==='artifact'){ var ar=ARTIFACTS(), hba=HB_ARTIFACTS();
+          // A homebrew artifact has no D666 code: it comes up in proportion to the list sizes.
+          if(hba.length && Math.random() < hba.length/(hba.length+ar.length)){ var h=hba[Math.floor(Math.random()*hba.length)]; html=card('Artifact · Homebrew', h.name, esc([h.desc, h.value ? h.value+' bullets' : ''].filter(Boolean).join(' · '))); }
+          else if(!ar.length){ html=card('Artifact','','Artifact list did not load.'); } else { var a=rollTable(ar); html=card('Artifact · '+a.code, a.row.name||'', esc(a.row.desc||a.row.result||'')); } }
         else { var sc=rollTable(d.scrap); html=card('Scrap · '+sc.code,'',esc(sc.row.result)); }
       }
       return html;

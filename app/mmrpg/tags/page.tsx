@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { MMRPG_TAGS } from "@/lib/data/mmrpg-tags";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import InstantFilter from "@/components/InstantFilter";
 import {
   MmrpgHeader, SearchForm, CountLine, EmptyState, RefDetails, cardCls, nameCls, hbBadge,
@@ -39,9 +40,9 @@ export default async function MmrpgTagsPage({ searchParams }: { searchParams: Pr
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <MmrpgHeader title="Tags" subtitle={`${MMRPG_TAGS.length} tags${hbCount ? ` + ${hbCount} homebrew` : ""}`} />
 
-      <div className="mb-6 flex flex-col gap-4">
+      <CompendiumHomebrew>
         <HomebrewEditor kind="mmrpg-tag" campaigns={campaigns} initial={hbTagOwn} />
-      </div>
+      </CompendiumHomebrew>
 
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search tags…" hidden={{}} />

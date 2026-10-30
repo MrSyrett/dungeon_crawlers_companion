@@ -783,7 +783,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
     <div class="main-col">
       <div class="card st-card">
-        <div class="section-bar"><span>Status</span><span class="hdr-right"><button class="hdr-btn" onclick="openRestPanel()">Rest</button><button class="hdr-btn" onclick="rollFear()" title="A fear attack: roll WIL — failure rolls on the fear table">Fear</button></span></div>
+        <div class="section-bar"><span>Status</span><span class="hdr-right"><button class="hdr-btn" onclick="openTakeDamage()" title="Take damage: armor (and any resist vs Cold / Fire, or armor bonus vs a weapon damage type) soaks it">Damage</button><button class="hdr-btn" onclick="openRestPanel()">Rest</button><button class="hdr-btn" onclick="rollFear()" title="A fear attack: roll WIL — failure rolls on the fear table">Fear</button></span></div>
         <div class="dead-banner" id="dead-banner">☠ Dead</div>
         <div class="vitals">
           <div class="vital half">
@@ -1163,8 +1163,8 @@ function renderStatus(){
   var wa=wornArmor(), wh=wornHelmet(), ar=armorRating(), at=[];
   if(wa) at.push(wa.name+' '+wa.rating); if(wh) at.push(wh.name+' '+wh.rating);
   var atip=at.length?at.join(' + '):'No armor or helmet worn';
-  if(S.opts.damageTypes&&wa&&wa.bonusVs) Object.keys(wa.bonusVs).forEach(function(t){ atip+=' · +'+wa.bonusVs[t]+' vs '+t; });
-  var ib=itemBonus(); if(ib.why.armor.length) atip=(at.length?atip+' + ':'')+ib.why.armor.join(' + '); Object.keys(ib.resist).forEach(function(t){ atip+=' · +'+ib.resist[t]+' vs '+t; });
+  if(wa&&wa.bonusVs) Object.keys(wa.bonusVs).forEach(function(t){ atip+=' · +'+wa.bonusVs[t]+' vs '+t; });
+  var ib=itemBonus(); if(ib.why.armor.length) atip=(at.length?atip+' + ':'')+ib.why.armor.join(' + '); Object.keys(ib.resist).forEach(function(t){ atip+=' · +'+ib.resist[t]+' vs '+t; }); if(Object.keys(ib.resist).length||(wa&&wa.bonusVs&&Object.keys(wa.bonusVs).length)) atip+=' (pick the damage type under Status ▸ Damage)';
   morphHTML($('derived'),'<div class="dv" id="dv-armor" title="'+esc(atip)+'"><span class="dl">Armor</span><span class="dval">'+(ar||'—')+'</span></div>'+
     '<div class="dv" title="Kin '+((kinDef()||{}).movement||10)+' + AGL '+attr('AGL')+(ib.why.move.length?' + '+esc(ib.why.move.join(' + ')):'')+'"><span class="dl">Movement</span><span class="dval">'+movement()+'</span></div>'+
     '<div class="dv" title="STR '+attr('STR')+'"><span class="dl">Damage Bonus STR</span><span class="dval">'+(sb?'+'+sb:'—')+'</span></div>'+
@@ -1408,9 +1408,31 @@ function rollSkill(n,extra){ var d0=skillDef(n); if(d0&&d0.type==='secondary'&&!
 function spendWp(n,why){ n=num(n); if(n<=0) return true; if(S.wp<n){ addLog(why||'Willpower','Not enough WP','Needs '+n+' WP, you have '+S.wp,'fumble'); return false; } S.wp-=n; return true; }
 
 // ═══ DAMAGE, HEALING, DEATH ═════════════════════════════════════════════════
-function armorRating(type){ var a=wornArmor(), h=wornHelmet(), ib=itemBonus(); var r=(a?a.rating:0)+(h?h.rating:0)+ib.armor;
-  if(type&&ib.resist[String(type).toLowerCase()]) r+=ib.resist[String(type).toLowerCase()];
-  if(S.opts.damageTypes&&a&&a.bonusVs&&type&&a.bonusVs[type]) r+=a.bonusVs[type]; return r; }
+// type: none = physical / other damage (the default: plain armor + helmet). A typed
+// hit adds item resist vs that type (Cold / Fire) and, for a weapon damage type the
+// player picked (the optional damage-type rule), the armor's bonus vs it.
+function armorRating(type){ var a=wornArmor(), h=wornHelmet(), ib=itemBonus(); var r=(a?a.rating:0)+(h?h.rating:0)+ib.armor, t=String(type||'').toLowerCase();
+  if(t&&ib.resist[t]) r+=ib.resist[t];
+  if(t&&a&&a.bonusVs&&a.bonusVs[t]) r+=num(a.bonusVs[t]); return r; }
+// Damage types the Take Damage dialog offers: physical/other (default), the weapon
+// types armor can be better against, and the elements item resists cover.
+var DMG_TYPES=[['','Physical / other'],['bludgeoning','Bludgeoning'],['slashing','Slashing'],['piercing','Piercing'],['cold','Cold'],['fire','Fire']];
+function openTakeDamage(){
+  var ib=itemBonus(), extra=Object.keys(ib.resist).filter(function(t){ return !DMG_TYPES.some(function(d){ return d[0]===t; }); });
+  var types=DMG_TYPES.concat(extra.map(function(t){ return [t, t.charAt(0).toUpperCase()+t.slice(1)]; })), sel='';
+  var body='<div class="m-lbl">Damage</div><input id="td-n" class="m-input" type="number" min="0" inputmode="numeric" value="" placeholder="damage rolled">'+
+    '<div class="m-lbl">Damage type</div><div class="m-row" id="td-types">'+types.map(function(d){ return '<button class="chip'+(d[0]===sel?' sel':'')+'" data-t="'+esc(d[0])+'">'+esc(d[1])+'</button>'; }).join('')+'</div>'+
+    '<label class="m-check"><input type="checkbox" id="td-ign"><span>Ignores armor<small>e.g. a hit through a gap, poison or a fall</small></span></label>'+
+    '<p class="m-hint" id="td-prev" style="margin-top:10px;"></p>';
+  openDlg('Take Damage',body,[{t:'Take damage',f:function(){ var n=num($('td-n').value); if(n<=0){ $('td-n').focus(); return; } var ign=$('td-ign').checked; closeDlg(true);
+    var lbl=(DMG_TYPES.concat(extra.map(function(t){ return [t,t]; })).find(function(d){ return d[0]===sel; })||['',''])[1];
+    takeDamage(n,{type:sel?lbl:undefined,ignoreArmor:ign,label:'Damage taken'+(ign?' (ignores armor)':'')}); }}]);
+  var prev=function(){ var n=num($('td-n').value), ign=$('td-ign').checked, base=armorRating(), ar=ign?0:armorRating(sel), why=[];
+    if(!ign&&ar>base) why.push('+'+(ar-base)+' vs '+(sel||'this type'));
+    $('td-prev').innerHTML='Armor <b>'+ar+'</b>'+(why.length?' ('+base+' '+why.join(' ')+')':'')+(n>0?' → you take <b>'+Math.max(0,n-ar)+'</b> HP':''); };
+  $('td-types').onclick=function(e){ var b=e.target.closest('[data-t]'); if(!b) return; sel=b.dataset.t; [].forEach.call(this.children,function(c){ c.classList.toggle('sel', c===b); }); prev(); };
+  $('td-n').oninput=prev; $('td-ign').onchange=prev; prev(); setTimeout(function(){ var i=$('td-n'); if(i) i.focus(); },30);
+}
 function takeDamage(n,opt){ opt=opt||{}; n=Math.max(0,num(n)); var soak=opt.ignoreArmor?0:armorRating(opt.type); var dmg=Math.max(0,n-soak);
   var before=S.hp; var mx=hpMax();
   if(before<=0&&dmg>0&&!S.death.dead){ S.death.f=Math.min(3,S.death.f+1); if(S.death.f>=3) S.death.dead=true; addLog('Damage at 0 HP','Death roll failed',n+' damage'+(soak?' − '+soak+' armor':'')+' · failures '+S.death.f+'/3','fumble'); changed(); return dmg; }

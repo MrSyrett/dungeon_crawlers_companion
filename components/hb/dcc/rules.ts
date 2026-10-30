@@ -8,7 +8,12 @@
 //   damageType, range "30ft range, 10ft Blast radius", rider}
 //   composeDccAttack(row) / parseDccAttack(a) / cleanDccAttackRows(raw)
 //   AttackRow.extra: area ("" | blast | cone | burst | line), size ("10"),
-//   ap ("" | "ap" → ", Armor-Piercing"), dmgF ("" | "F" → damage "+F").
+//   ap ("" | "ap" → ", Armor-Piercing"), dmgF ("" | "F" → damage "+F"),
+//   hitSfx ("" → "13+F" | "none" → "13" | "FF" → "13+F+F" | "+5" → "13+5"),
+//   hitWord (to-hit with no number: "" | "None" | "Passive" | "See below"),
+//   dmgMark ("" | "*" → damage "7d8+7*", a book footnote marker).
+// A printed range the area/AP pickers can't reproduce exactly ("5 ft range",
+// "20ft Burst Radius") is kept verbatim as the row's range.
 // Notes ⇄ "Name—rules text"                composeDccNote / parseDccNote
 // Upgrades ⇄ {rank, text} where the text carries the sheet-parsed clauses
 //   "+1d4 base damage" and "add 1 Rank damage die" (dcc_character_sheet
@@ -42,6 +47,13 @@ export const DCC_ATTACK_RANGES = [
 export const DCC_AREAS: [string, string][] = [["", "—"], ["blast", "Blast radius"], ["cone", "Cone"], ["burst", "Burst radius"], ["line", "Line"]];
 export const DCC_AREA_SIZES = ["5", "10", "15", "20", "25", "30", "40", "50", "60"];
 const AREA_TEXT: Record<string, string> = { blast: "Blast radius", cone: "Cone", burst: "Burst radius", line: "Line" };
+// To-hit forms: the Floor bonus suffix, or a word when there is no roll number.
+export const DCC_HIT_SFX: [string, string][] = [["", "+F"], ["none", "flat"], ["FF", "+F+F"]];
+export const DCC_HIT_WORDS: [string, string][] = [["", "—"], ["None", "None"], ["Passive", "Passive"], ["See below", "See below"]];
+const HIT_SFX_TEXT = (k: string) => (k === "none" ? "" : k === "FF" ? "+F+F" : /^\+\d{1,2}$/.test(k) ? k : "+F");
+const cleanHitSfx = (v: unknown) => { const k = String(v ?? ""); return k === "none" || k === "FF" || /^\+\d{1,2}$/.test(k) ? k : ""; };
+const cleanHitWord = (v: unknown) => DCC_HIT_WORDS.find(([k]) => k && k === String(v ?? ""))?.[0] ?? "";
+const blankExtra = (): Record<string, string> => ({ area: "", size: "10", ap: "", dmgF: "", hitSfx: "", hitWord: "", dmgMark: "" });
 
 const int = (v: unknown, dflt = 0) => {
   const n = parseInt(String(v ?? "").replace(/^\+/, ""), 10);
@@ -67,17 +79,18 @@ export function composeDccRange(r: AttackRow): string {
 export function composeDccDamage(r: AttackRow): string {
   const d = formatDice(r.dice);
   const f = r.extra?.dmgF === "F";
-  if (!d) return f ? "F" : "No damage";
-  return f ? `${d}+F` : d;
+  const mark = r.extra?.dmgMark === "*" ? "*" : "";
+  if (!d) return f ? "F" + mark : "No damage";
+  return (f ? `${d}+F` : d) + mark;
 }
 
 export function composeDccAttack(r: AttackRow): DccAttackOut {
   const out: DccAttackOut = {
     name: txt(r.name, 120),
-    toHit: r.hit == null ? "" : `${r.hit}+F`,
+    toHit: r.hit == null ? cleanHitWord(r.extra?.hitWord) : `${r.hit}${HIT_SFX_TEXT(r.extra?.hitSfx ?? "")}`,
     damage: composeDccDamage(r),
   };
-  if (r.dtype) out.damageType = txt(r.dtype, 40);
+  if (r.dtype) out.damageType = txt(r.dtype, 80);
   const range = composeDccRange(r);
   if (range) out.range = range.slice(0, 80);
   if (txt(r.special, 600)) out.rider = txt(r.special, 600);
@@ -89,7 +102,7 @@ export const composeDccAttacks = (rows: AttackRow[]) => rows.map(composeDccAttac
 /** Parse a stored range string into range + area extras; unknown text stays as the range verbatim. */
 function parseRange(raw: string): { range: string; extra: Record<string, string> } {
   const t = String(raw ?? "").trim();
-  const extra: Record<string, string> = { area: "", size: "10", ap: "", dmgF: "" };
+  const extra = blankExtra();
   let rest = t;
   if (/,\s*Armor-Piercing$/i.test(rest) || /^Armor-Piercing$/i.test(rest)) {
     extra.ap = "ap";
@@ -101,14 +114,14 @@ function parseRange(raw: string): { range: string; extra: Record<string, string>
     extra.area = area;
     extra.size = m[2];
     const range = m[1] ?? "Self";
-    if (area !== "blast" && m[1]) return { range: t, extra: { area: "", size: "10", ap: "", dmgF: "" } }; // e.g. "30ft range, 15ft Cone" — keep verbatim
+    if (area !== "blast" && m[1]) return { range: t, extra: blankExtra() }; // e.g. "30ft range, 15ft Cone" — keep verbatim
     return { range, extra };
   }
   m = rest.match(/^(\d+)\s*ft\.?\s*range$/i);
   if (m) return { range: `${m[1]}ft range`, extra };
   if (!rest) return { range: "", extra };
   // Unrecognised: keep the full original string as the range (AttackRows shows it).
-  return { range: t, extra: { area: "", size: "10", ap: "", dmgF: "" } };
+  return { range: t, extra: blankExtra() };
 }
 
 /** A stored DccMonsterAttack → an AttackRow. Anything that won't structure is kept in `special`. */
@@ -116,12 +129,20 @@ export function parseDccAttack(a: Record<string, unknown>): AttackRow {
   const rider: string[] = [];
   const hitRaw = String(a.toHit ?? "").trim();
   let hit: number | null = null;
-  const hm = hitRaw.match(/^(-?\d+)\s*\+\s*F$/i);
-  if (hm) hit = int(hm[1]);
-  else if (hitRaw && !/^(none|passive|—|-)$/i.test(hitRaw)) rider.push(`To hit ${hitRaw}.`);
+  let hitSfx = "", hitWord = "";
+  const hm = hitRaw.match(/^(-?\d+)(\+F\+F|\+F|\+\d{1,2})?$/);
+  if (hm) { hit = int(hm[1]); hitSfx = hm[2] === "+F" ? "" : hm[2] === "+F+F" ? "FF" : hm[2] ?? "none"; }
+  else if (cleanHitWord(hitRaw)) hitWord = hitRaw;
+  else if (/^(-?\d+)\s*\+\s*F$/i.test(hitRaw)) hit = int(hitRaw);
+  else if (hitRaw && !/^(—|-)$/i.test(hitRaw)) rider.push(`To hit ${hitRaw}.`);
 
-  const { range, extra } = parseRange(String(a.range ?? ""));
-  const dmgRaw = String(a.damage ?? "").trim();
+  const rawRange = String(a.range ?? "").trim();
+  let { range, extra } = parseRange(rawRange);
+  if (composeDccRange({ name: "", count: 1, hit: null, dice: { n: 0, d: 6, m: 0 }, special: "", range, extra }) !== rawRange) ({ range, extra } = { range: rawRange, extra: blankExtra() });
+  extra.hitSfx = hitSfx;
+  extra.hitWord = hitWord;
+  let dmgRaw = String(a.damage ?? "").trim();
+  if (/^(?:\d*d\d+(?:\s*[+-]\s*\d+)?(?:\s*\+\s*F)?|F)\*$/i.test(dmgRaw)) { extra.dmgMark = "*"; dmgRaw = dmgRaw.slice(0, -1); }
   let dice: Dice = { n: 0, d: 6, m: 0 };
   const dm = dmgRaw.match(/^(\d*)d(\d+)\s*(?:([+-])\s*(\d+))?\s*(\+\s*F)?$/i);
   if (dm) {
@@ -152,7 +173,7 @@ export function cleanDccAttackRows(raw: unknown): AttackRow[] {
     const e = (o.extra ?? {}) as Record<string, unknown>;
     const area = String(e.area ?? "");
     const size = String(e.size ?? "10");
-    const hit = o.hit == null || o.hit === "" ? null : clamp(int(o.hit), -10, 60);
+    const hit = o.hit == null || o.hit === "" ? null : clamp(int(o.hit), -10, 200); // 200: the book prints a "152+F"
     if (!txt(o.name, 120)) return [];
     return [{
       name: txt(o.name, 120),
@@ -160,13 +181,16 @@ export function cleanDccAttackRows(raw: unknown): AttackRow[] {
       hit,
       dice: cleanDice(o.dice, { maxCount: 40, dice: DCC_DICE, minMod: -20, maxMod: 99 }),
       range: txt(o.range, 80),
-      dtype: txt(o.dtype, 40),
+      dtype: txt(o.dtype, 80),
       special: txt(o.special, 600),
       extra: {
         area: AREA_TEXT[area] ? area : "",
         size: /^\d{1,3}$/.test(size) ? size : "10",
         ap: e.ap === "ap" ? "ap" : "",
         dmgF: e.dmgF === "F" ? "F" : "",
+        hitSfx: cleanHitSfx(e.hitSfx),
+        hitWord: hit == null ? cleanHitWord(e.hitWord) : "",
+        dmgMark: e.dmgMark === "*" ? "*" : "",
       },
     }];
   });

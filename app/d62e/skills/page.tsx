@@ -5,6 +5,7 @@ import { D62E_ATTRIBUTE_INFO } from "@/lib/data/d62e-attributes";
 import type { D62eSkill } from "@/lib/data/d62e-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 import {
@@ -75,6 +76,9 @@ export default async function D62eSkillsPage({ searchParams }: { searchParams: P
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
       <D62eHeader title="Skills" subtitle={`${D62E_SKILLS.length} skills under the attributes${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
+
+      <CompendiumHomebrew><HomebrewEditor kind="d62e-skill" campaigns={campaigns} initial={hbOwn} /></CompendiumHomebrew>
+
       <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Every skill sits under a governing attribute and starts at that attribute&rsquo;s die code; the dice you add go on top. Roll a skill (or the bare attribute) against a Difficulty Number. The four core attributes appear in every game; the rest are optional or genre attributes, each bringing its own skills.</p>
 
       <section className={`${cardCls} mb-6`}>
@@ -90,8 +94,6 @@ export default async function D62eSkillsPage({ searchParams }: { searchParams: P
           ))}
         </ul>
       </section>
-
-      <div className="mb-6"><HomebrewEditor kind="d62e-skill" campaigns={campaigns} initial={hbOwn} /></div>
 
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search skills…" hidden={{ genre }} />

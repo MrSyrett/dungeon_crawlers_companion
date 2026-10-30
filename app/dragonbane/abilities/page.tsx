@@ -4,6 +4,7 @@ import { DB_HEROIC_ABILITIES, DB_PROFESSIONS } from "@/lib/data/db-data";
 import type { DbHeroicAbility, DbRequirement } from "@/lib/data/db-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { DbHeader, ChipRow, SearchForm, CountLine, EmptyState, BackLink, RuleNote, cardCls, nameCls, badge, hbBadge, one, isHb, srcKey, srcChips, type RawQuery } from "@/components/DbRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -80,7 +81,9 @@ export default async function DbAbilitiesPage({ searchParams }: { searchParams: 
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
       <DbHeader title="Heroic Abilities" subtitle={`${DB_HEROIC_ABILITIES.length} heroic abilities${hbList.length ? ` · +${hbList.length} homebrew` : ""}`} />
-      <HomebrewEditor kind="db-ability" campaigns={campaigns} initial={hbOwn} />
+      <CompendiumHomebrew>
+        <HomebrewEditor kind="db-ability" campaigns={campaigns} initial={hbOwn} />
+      </CompendiumHomebrew>
       <RuleNote title="Gaining heroic abilities">
         <p>Everyone but mages starts with their profession&apos;s heroic ability, ignoring its requirement. You gain another of your choice whenever a skill reaches 18, and the GM may award one after a grand heroic deed (at most once per adventure). New abilities must meet their requirement. Abilities can be combined in one action, paying the WP for each.</p>
       </RuleNote>

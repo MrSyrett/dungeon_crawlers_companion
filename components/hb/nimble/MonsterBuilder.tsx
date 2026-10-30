@@ -165,7 +165,12 @@ export default function MonsterBuilder({ value: m, onChange }: { value: MonsterD
           modRange={[-10, 100]}
           ranges={NIM_ATK_RANGES}
           damageTypes={[...NIM_DAMAGE_TYPES]}
-          extras={[{ key: "join", label: "Chain", options: JOIN }]}
+          extras={[
+            { key: "join", label: "Chain", options: JOIN },
+            { key: "dw", label: "“damage”", options: [["", "with type"], ["1", "always"]] },
+            { key: "sj", label: "Rider after", options: [["", "a sentence"], ["sp", "a space"]] },
+            { key: "end", label: "End", options: [["", "."], ["none", "no ."]] },
+          ]}
           namePh="Stab, Bite & Claw…"
           specialPh="Rider: On hit: Grappled (escape DC 12). / (or Sling, Range 8)"
           blank={newAtk}

@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { TWD_ARMOR, TWD_GEAR, TWD_CLOSE_WEAPONS, TWD_RANGED_WEAPONS } from "@/lib/data/twd-data";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { TwdHeader, ModeRow, SectionH, cardCls, nameCls, hbBadge, one, type RawQuery } from "@/components/TwdRef";
 
 export const dynamic = "force-dynamic";
@@ -53,12 +54,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {/* General gear */}
       {mode === "general" && (
       <section className="mb-8">
-        <p className="mb-4 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-          Your carry limit is your Strength + 2 slots (Strength 2 carries four). Most items take one slot; heavy ones take more, light ones
-          (a knife, a ration) take ½, and tiny items are free. Most gear grants a bonus to one skill — you may use the bonus from
-          only one item on a given roll.
-        </p>
-        <div className={`${panelCls} mb-4`}>
+        <CompendiumHomebrew>
+        <div className={panelCls}>
           <h3 className={hbHead}>Your homebrew gear</h3>
           <HomebrewEditor kind="twd-gear" campaigns={campaigns} initial={gOwn} />
           {gHbGear.length > 0 && (
@@ -76,6 +73,12 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
             </ul>
           )}
         </div>
+        </CompendiumHomebrew>
+        <p className="mb-4 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
+          Your carry limit is your Strength + 2 slots (Strength 2 carries four). Most items take one slot; heavy ones take more, light ones
+          (a knife, a ration) take ½, and tiny items are free. Most gear grants a bonus to one skill — you may use the bonus from
+          only one item on a given roll.
+        </p>
         <div className={tableWrap}>
           <table className="w-full border-collapse text-[13px]">
             <thead>
@@ -98,12 +101,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {/* Weapons */}
       {mode === "weapons" && (
       <section className="mb-8">
-        <SectionH>Weapons</SectionH>
-        <p className="mb-3 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-          DAMAGE is the base damage on a hit; each extra success adds one more. BONUS is the gear dice the
-          weapon adds to your attack pool. SLOTS is how much of your carry limit it takes.
-        </p>
-        <div className={`${panelCls} mb-4`}>
+        <CompendiumHomebrew>
+        <div className={panelCls}>
           <h3 className={hbHead}>Your homebrew weapons</h3>
           <HomebrewEditor kind="twd-weapon" campaigns={campaigns} initial={wOwn} />
           {wHb.length > 0 && (
@@ -129,6 +128,12 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
             </div>
           )}
         </div>
+        </CompendiumHomebrew>
+        <SectionH>Weapons</SectionH>
+        <p className="mb-3 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
+          DAMAGE is the base damage on a hit; each extra success adds one more. BONUS is the gear dice the
+          weapon adds to your attack pool. SLOTS is how much of your carry limit it takes.
+        </p>
         <h3 className="mb-2 text-[13px] font-bold uppercase tracking-[0.12em] text-[var(--text)]">Close combat weapons</h3>
         <div className={tableWrap}>
           <table className="w-full border-collapse text-[13px]">
@@ -172,11 +177,17 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {/* Armor */}
       {mode === "armor" && (
       <section>
+        <CompendiumHomebrew>
+        <div className={panelCls}>
+          <h3 className={hbHead}>Your homebrew armor</h3>
+          <p className="mb-3 text-[12px] text-[var(--muted)]">Build a suit below: open the gear editor and pick Kind: Armor. Homebrew armor lists in the table with a Homebrew badge.</p>
+          <HomebrewEditor kind="twd-gear" campaigns={campaigns} initial={gOwn} />
+        </div>
+        </CompendiumHomebrew>
         <SectionH>Armor</SectionH>
         <p className="mb-3 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
           When you&rsquo;re hit, roll a number of dice equal to the Armor Level; each success stops one
-          point of damage. The penalty is subtracted from Mobility rolls while you wear it. (Make homebrew armor
-          in the General gear editor: pick Kind → Armor.)
+          point of damage. The penalty is subtracted from Mobility rolls while you wear it.
         </p>
         <div className={tableWrap}>
           <table className="w-full border-collapse text-[13px]">

@@ -16,7 +16,9 @@
     'db-armor': 'DB_ARMOR',
     'db-gear': 'DB_GEAR',
     'db-monster': 'DB_MONSTERS',
-    'db-npc': 'DB_NPCS'
+    'db-npc': 'DB_NPCS',
+    'db-kin': 'DB_KIN',
+    'db-profession': 'DB_PROFESSIONS'
   };
   function arr(x) { return Array.isArray(x) ? x : (x == null || x === '' ? [] : String(x).split(/\s*,\s*/).filter(Boolean)); }
   function n(x, d) { var v = Number(x); return isNaN(v) ? d : v; }
@@ -27,7 +29,10 @@
     'db-armor': function (r) { r.banes = arr(r.banes); r.rating = n(r.rating, 1); r.metal = !!r.metal; return r; },
     'db-gear': function (r) { r.category = r.category || 'Homebrew'; if (r.weight === undefined || r.weight === '') r.weight = 1; else if (r.weight !== null) r.weight = n(r.weight, 1); return r; },
     'db-monster': function (r) { r.attacks = Array.isArray(r.attacks) ? r.attacks : []; return r; },
-    'db-npc': function (r) { r.weapons = Array.isArray(r.weapons) ? r.weapons : []; r.abilities = arr(r.abilities); r.traits = arr(r.traits); r.skills = (r.skills && typeof r.skills === 'object') ? r.skills : {}; return r; }
+    'db-npc': function (r) { r.weapons = Array.isArray(r.weapons) ? r.weapons : []; r.abilities = arr(r.abilities); r.traits = arr(r.traits); r.skills = (r.skills && typeof r.skills === 'object') ? r.skills : {}; return r; },
+    // Kin / professions: the wizard and sheet read them like book entries (no table roll).
+    'db-kin': function (r) { r.abilities = Array.isArray(r.abilities) ? r.abilities : []; r.names = arr(r.names); r.movement = n(r.movement, 10); r.text = r.text || ''; return r; },
+    'db-profession': function (r) { r.skills = arr(r.skills); r.heroicAbilities = arr(r.heroicAbilities); r.nicknames = arr(r.nicknames); r.kits = Array.isArray(r.kits) ? r.kits : []; r.keyAttribute = r.keyAttribute || 'STR'; r.text = r.text || ''; return r; }
   };
   var _busy = false, _pending = null;
   function pool(type) { var p = window[TARGETS[type]]; return Array.isArray(p) ? p : null; }

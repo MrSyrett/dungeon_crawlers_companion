@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { VAE_MELEE_WEAPONS, VAE_RANGED_WEAPONS, VAE_ARMOR, VAE_GEAR, VAE_MAGIC, VAE_RESOURCES } from "@/lib/data/vae-data";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { VaesenHeader, ModeRow, cardCls, nameCls, hbBadge, one, type RawQuery } from "@/components/VaesenRef";
 import { gearRuleText, cleanResist, cleanSkillBonus, type GearKind } from "@/components/hb/vae/rules";
 
@@ -68,7 +69,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {/* Gear & Tools */}
       {mode === "gear" && (
         <section>
-          <div className={`${panelCls} mb-4`}>
+          <CompendiumHomebrew>
+          <div className={panelCls}>
             <h3 className={hbHead}>Your homebrew gear</h3>
             <HomebrewEditor kind="vae-gear" campaigns={campaigns} initial={gOwn} />
             {gHbBy("gear").length > 0 && (
@@ -86,6 +88,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
               </ul>
             )}
           </div>
+          </CompendiumHomebrew>
           <div className={tableWrap}>
             <table className="w-full border-collapse text-[13px]">
               <thead>
@@ -135,7 +138,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {/* Melee weapons */}
       {mode === "melee" && (
         <section>
-          <div className={`${panelCls} mb-4`}>
+          <CompendiumHomebrew>
+          <div className={panelCls}>
             <h3 className={hbHead}>Your homebrew weapons</h3>
             <HomebrewEditor kind="vae-weapon" campaigns={campaigns} initial={wOwn} />
             {wHbMelee.length > 0 && (
@@ -160,6 +164,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
               </div>
             )}
           </div>
+          </CompendiumHomebrew>
           <div className={tableWrap}>
             <table className="w-full border-collapse text-[13px]">
               <thead>
@@ -184,7 +189,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {/* Ranged weapons */}
       {mode === "ranged" && (
         <section>
-          <div className={`${panelCls} mb-4`}>
+          <CompendiumHomebrew>
+          <div className={panelCls}>
             <h3 className={hbHead}>Your homebrew weapons</h3>
             <HomebrewEditor kind="vae-weapon" campaigns={campaigns} initial={wOwn} />
             {wHbRanged.length > 0 && (
@@ -209,6 +215,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
               </div>
             )}
           </div>
+          </CompendiumHomebrew>
           <div className={tableWrap}>
             <table className="w-full border-collapse text-[13px]">
               <thead>
@@ -291,7 +298,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
 // the builder's Kind chips decide which tab a new entry lands on.
 function HbGearPanel({ title, rows, campaigns, own }: { title: string; rows: GearRow[]; campaigns: Parameters<typeof HomebrewEditor>[0]["campaigns"]; own: Parameters<typeof HomebrewEditor>[0]["initial"] }) {
   return (
-    <div className={`${panelCls} mb-4`}>
+    <CompendiumHomebrew>
+    <div className={panelCls}>
       <h3 className={hbHead}>{title}</h3>
       <HomebrewEditor kind="vae-gear" campaigns={campaigns} initial={own} />
       {rows.length > 0 && (
@@ -311,5 +319,6 @@ function HbGearPanel({ title, rows, campaigns, own }: { title: string; rows: Gea
         </ul>
       )}
     </div>
+    </CompendiumHomebrew>
   );
 }

@@ -1203,12 +1203,18 @@ function renderPicker(){
   _pkRows=rows;
 }
 var _pkRows=[];
+// The inventory row a picker entry becomes (also used by the creation wizard for homebrew).
+function pickRowOf(kind,x){
+  if(kind==='weap'){ var w=x.data||{}, wr={kind:'weapon',equipped:false,name:w.name||x.name,grip:w.grip||'',bonus:w.bonus||'',damage:w.damage!=null?w.damage:1,range:w.range||'',weight:w.weight||'1',skill:w.skill||(isAlien()?'Ranged Combat':'Melee')}; if(w.ammo)wr.ammo=w.ammo; if(w.noise)wr.noise=w.noise; if(w.features&&w.features.length)wr.features=w.features; return wr; }
+  if(kind==='armor'){ var a=x.data||{}, ar={kind:'armor',equipped:false,name:a.name||x.name,rating:num(a.rating),weight:a.weight||'1',note:a.note||''}; if(a.penalty!=null)ar.penalty=a.penalty; return ar; }
+  var d=x.data||{}, gr={kind:'gear',name:d.name||x.name,weight:d.weight||'1',note:d.desc||d.note||''}; if(sbClean(d.skillBonus).length){ gr.skillBonus=sbClean(d.skillBonus); gr.equipped=false; } return gr;
+}
 function pickAdd(idx){
   var x=_pkRows[idx]; if(!x)return;
-  if(_pk==='weap'){ var w=x.data||{}, wr={kind:'weapon',equipped:false,name:w.name||x.name,grip:w.grip||'',bonus:w.bonus||'',damage:w.damage!=null?w.damage:1,range:w.range||'',weight:w.weight||'1',skill:w.skill||(isAlien()?'Ranged Combat':'Melee')}; if(w.ammo)wr.ammo=w.ammo; if(w.noise)wr.noise=w.noise; if(w.features&&w.features.length)wr.features=w.features; S.gear.push(wr); renderWeapons(); setTab('gear'); }
-  else if(_pk==='armor'){ var a=x.data||{}, ar={kind:'armor',equipped:false,name:a.name||x.name,rating:num(a.rating),weight:a.weight||'1',note:a.note||''}; if(a.penalty!=null)ar.penalty=a.penalty; S.gear.push(ar); renderInventory(); setTab('gear'); }
+  if(_pk==='weap'){ S.gear.push(pickRowOf('weap',x)); renderWeapons(); setTab('gear'); }
+  else if(_pk==='armor'){ S.gear.push(pickRowOf('armor',x)); renderInventory(); setTab('gear'); }
   else if(_pk==='talent'){ var t=x.data||{}; S.talents.push({name:t.name||x.name,note:t.desc||t.note||''}); renderTalents(); setTab('story'); }
-  else { var d=x.data||{}, gr={kind:'gear',name:d.name||x.name,weight:d.weight||'1',note:d.desc||d.note||''}; if(sbClean(d.skillBonus).length){ gr.skillBonus=sbClean(d.skillBonus); gr.equipped=false; } S.gear.push(gr); renderGear(); setTab('gear'); }
+  else { S.gear.push(pickRowOf('gear',x)); renderGear(); setTab('gear'); }
   scheduleAutosave(); renderPicker();
 }
 function addCustomFromPicker(){

@@ -4,6 +4,7 @@ import { LOTR_BACKGROUNDS, LOTR_CULTURES, LOTR_DISTINCTIVE_FEATURES } from "@/li
 import type { LotrBackground } from "@/lib/data/lotr-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { LotrHeader, ChipRow, SearchForm, CountLine, EmptyState, Field, cardCls, nameCls, badge, hbBadge, eyebrow, one, isHb, srcKey, srcChips, type RawQuery } from "@/components/LotrRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -39,7 +40,7 @@ export default async function LotrBackgroundsPage({ searchParams }: { searchPara
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
       <LotrHeader title="Backgrounds" subtitle={`${LOTR_BACKGROUNDS.length} backgrounds · six per culture${hbBgs.length ? ` · +${hbBgs.length} homebrew` : ""}`} />
-      <HomebrewEditor kind="lotr-background" campaigns={campaigns} initial={hbOwn} />
+      <CompendiumHomebrew><HomebrewEditor kind="lotr-background" campaigns={campaigns} initial={hbOwn} /></CompendiumHomebrew>
 
       <section className={`${cardCls} mb-6`}>
         <p className={eyebrow}>How backgrounds work</p>

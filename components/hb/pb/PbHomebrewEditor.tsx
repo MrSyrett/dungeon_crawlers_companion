@@ -8,8 +8,10 @@
 // file and each documents its storage shape. lib/homebrew.ts normalizePb* is
 // the real validator.
 import { campaignsFor } from "@/lib/homebrew-systems";
-import { useState, type CSSProperties, type ReactElement } from "react";
+import { useMemo, useState, type CSSProperties, type ReactElement } from "react";
 import { useRouter } from "next/navigation";
+import TemplatePicker, { templateCopyName, type TemplateOption } from "@/components/hb/TemplatePicker";
+import { pbTemplates } from "./templates";
 import {
   WeaponBuilder, WeaponPreview, blankWeapon, weaponFromData, weaponPayload, ArmorBuilder, ArmorPreview, blankArmor, armorFromData, armorPayload,
   GearBuilder, GearPreview, blankGear, gearFromData, gearPayload, type WeaponDraft, type ArmorDraft, type GearDraft,
@@ -105,12 +107,33 @@ export default function PbHomebrewEditor({ kind, campaigns: allCampaigns, initia
   const [campaignIds, setCampaignIds] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  // Name of the entry a new draft was started from (Template), for the strip.
+  const [fromTemplate, setFromTemplate] = useState("");
+
+  // Template list: your own homebrew of this kind first, then the book's
+  // entries (lazy-loaded — ./templates.ts). Memoised so the picker's per-source
+  // cache survives re-renders (a save changes `items` → fresh list).
+  const templates = useMemo(() => {
+    const book = pbTemplates(kind);
+    return async (): Promise<TemplateOption[]> => [
+      ...items.map((r) => ({ key: `hb:${r.id}`, name: r.name, group: "Your homebrew", meta: "Homebrew", data: r.data || {} })),
+      ...(book ? await book() : []),
+    ];
+  }, [items, kind]);
 
   if (!sc) return null;
   const active = editId !== null && draft !== null;
 
-  const openNew = () => { setName(""); setDraft(sc.blank()); setCampaignIds([]); setEditId(""); setError(""); };
-  const openEdit = (rec: HomebrewRecord) => { setName(rec.name); setDraft(sc.fromData(rec.data || {})); setCampaignIds(rec.campaignIds ?? []); setEditId(rec.id); setError(""); };
+  const openNew = () => { setName(""); setDraft(sc.blank()); setCampaignIds([]); setEditId(""); setFromTemplate(""); setError(""); };
+  const openEdit = (rec: HomebrewRecord) => { setName(rec.name); setDraft(sc.fromData(rec.data || {})); setCampaignIds(rec.campaignIds ?? []); setEditId(rec.id); setFromTemplate(""); setError(""); };
+  // A template opens as a NEW, unsaved draft through the same legacy→draft
+  // path a stored record takes (sc.fromData), named "<original> (copy)". Share
+  // picks are kept only when a new draft was already open.
+  const startFromTemplate = (opt: TemplateOption) => {
+    if (editId !== "") setCampaignIds([]);
+    setName(templateCopyName(opt.name)); setDraft(sc.fromData(opt.data || {})); setEditId(""); setFromTemplate(opt.name); setError("");
+  };
+  const templateButton = <TemplatePicker source={templates} onPick={startFromTemplate} noun={sc.noun.toLowerCase()} disabled={busy} className={btn} />;
   const close = () => { setEditId(null); setDraft(null); setError(""); };
   const toggleCampaign = (id: string) => setCampaignIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
 
@@ -177,7 +200,15 @@ export default function PbHomebrewEditor({ kind, campaigns: allCampaigns, initia
 
           {active ? (
             <div className="grid gap-4 rounded border border-[var(--border)] bg-[var(--panel-2)] p-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-              <div>
+              <div className="min-w-0">
+                {editId === "" ? (
+                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] pb-3">
+                    <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
+                      {fromTemplate ? <>New {sc.noun.toLowerCase()} · from <b className="text-[var(--text)]">{fromTemplate}</b></> : `New ${sc.noun.toLowerCase()}`}
+                    </span>
+                    {templateButton}
+                  </div>
+                ) : null}
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="sm:col-span-2">
                     <label className={labelCls}>Name</label>
@@ -208,7 +239,10 @@ export default function PbHomebrewEditor({ kind, campaigns: allCampaigns, initia
               <div className="lg:sticky lg:top-20 lg:self-start"><P name={name} value={draft} /></div>
             </div>
           ) : (
-            <button className={btnAccent} onClick={openNew}>+ New Homebrew {sc.noun}</button>
+            <div className="flex flex-wrap gap-2">
+              <button className={btnAccent} onClick={openNew}>+ New Homebrew {sc.noun}</button>
+              {templateButton}
+            </div>
           )}
         </div>
       ) : null}

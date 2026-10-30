@@ -4,6 +4,7 @@ import { LOTR_VIRTUES, LOTR_CULTURES, LOTR_CALLINGS } from "@/lib/data/lotr-data
 import type { LotrVirtue } from "@/lib/data/lotr-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { LotrHeader, ChipRow, SearchForm, CountLine, EmptyState, Bullets, cardCls, nameCls, badge, hbBadge, eyebrow, one, isHb, srcKey, srcChips, type RawQuery } from "@/components/LotrRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -55,7 +56,7 @@ export default async function LotrVirtuesPage({ searchParams }: { searchParams: 
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
       <LotrHeader title="Virtues" subtitle={`${LOTR_VIRTUES.length} virtues · common & cultural${hbVirtues.length ? ` · +${hbVirtues.length} homebrew` : ""}`} />
-      <HomebrewEditor kind="lotr-virtue" campaigns={campaigns} initial={hbOwn} />
+      <CompendiumHomebrew><HomebrewEditor kind="lotr-virtue" campaigns={campaigns} initial={hbOwn} /></CompendiumHomebrew>
 
       <section className={`${cardCls} mb-6`}>
         <p className={eyebrow}>Virtues replace feats and ability increases</p>

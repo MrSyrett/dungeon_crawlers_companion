@@ -4,6 +4,7 @@ import { DND_FEATS } from "@/lib/data/dnd-feats";
 import type { DndFeat } from "@/lib/data/dnd-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DndHomebrewEditor from "@/components/DndHomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { DndHeader, ChipRow, SearchForm, CountLine, EmptyState, cardCls, badge, one, srcKey, srcChips, type RawQuery } from "@/components/DndRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -49,7 +50,7 @@ export default async function DndFeatsPage({ searchParams }: { searchParams: Pro
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
       <DndHeader title="Feats" subtitle="2024 feats" />
-      <DndHomebrewEditor kind="dnd-feat" campaigns={campaigns} initial={hbFeatOwn} />
+      <CompendiumHomebrew><DndHomebrewEditor kind="dnd-feat" campaigns={campaigns} initial={hbFeatOwn} /></CompendiumHomebrew>
       <InstantFilter>
       <SearchForm base={BASE} q={one(raw.q)} placeholder="Search feats…" hidden={{ cat, src }} />
       <ChipRow label="Category" base={BASE} current={current} param="cat" options={cats.map((c) => ({ key: c, label: c }))} active={cat} />

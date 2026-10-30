@@ -4,6 +4,7 @@ import { DB_SPELLS, DB_MAGIC_TRICKS, DB_SUMMONS, DB_SUMMONS_EXTRA, DB_MAGIC_RULE
 import type { DbSpell, DbMagicTrick, DbSummon, DbMagicSchool, DbNamedText } from "@/lib/data/db-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { DbHeader, ChipRow, SearchForm, CountLine, EmptyState, BackLink, SectionNav, DieTable, Bullets, cardCls, nameCls, badge, hbBadge, eyebrow, sectionH, th, td, one, isHb, srcKey, srcChips, srcPage, type RawQuery } from "@/components/DbRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -262,8 +263,10 @@ export default async function DbMagicPage({ searchParams }: { searchParams: Prom
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <DbHeader title="Magic" subtitle={`${DB_SPELLS.length - nRecipes} spells · ${nRecipes} alchemy recipes · ${DB_MAGIC_TRICKS.length} magic tricks · ${R.schools.length} schools + General Magic${hbData.length ? ` · +${hbData.length} homebrew` : ""}`} />
-      <HomebrewEditor kind="db-spell" campaigns={campaigns} initial={hbOwn} />
       <SectionNav items={[{ id: "casting", label: "Casting Rules" }, { id: "schools", label: "Schools" }, { id: "spells", label: "Spells" }, { id: "tricks", label: "Magic Tricks" }, { id: "familiars", label: "Familiars" }, { id: "summons", label: "Summoned Creatures" }, { id: "learning", label: "Learning Magic" }, { id: "mishaps", label: "Magical Mishaps" }]} />
+      <CompendiumHomebrew>
+        <HomebrewEditor kind="db-spell" campaigns={campaigns} initial={hbOwn} />
+      </CompendiumHomebrew>
 
       <section id="casting" className="scroll-mt-20">
         <div className="grid gap-4 md:grid-cols-2">

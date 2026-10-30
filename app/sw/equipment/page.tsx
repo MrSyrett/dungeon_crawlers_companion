@@ -5,6 +5,7 @@ import { SW_GEAR } from "@/lib/data/sw-gear";
 import type { SwWeapon, SwGear, SwBook } from "@/lib/data/sw-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { SwHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, hbBadge, code, one, BookTag, type Query, type RawQuery } from "@/components/SwRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -89,10 +90,10 @@ export default async function SwEquipmentPage({ searchParams }: { searchParams: 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <SwHeader title="Weapons & Equipment" subtitle={`${SW_WEAPONS.length} weapons · ${SW_GEAR.length} items of gear${hbCount ? ` + ${hbCount} homebrew` : ""}`} />
-      <div className="mb-6 flex flex-col gap-6">
+      <CompendiumHomebrew>
         <HomebrewEditor kind="sw-weapon" campaigns={campaigns} initial={hbWeaponsOwn} />
         <HomebrewEditor kind="sw-gear" campaigns={campaigns} initial={hbGearOwn} />
-      </div>
+      </CompendiumHomebrew>
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search weapons & gear…" hidden={{ cat }} />
       <ChipRow label="Type" base={BASE} current={current} param="cat" options={CATS} active={cat} />

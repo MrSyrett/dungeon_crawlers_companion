@@ -6,6 +6,7 @@ import { SW_FORCE } from "@/lib/data/sw-force";
 import { SW_ATTRIBUTES, type SwForcePower, type SwBook } from "@/lib/data/sw-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { SwHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge, one, BookTag, BOOK_NAME, type Query, type RawQuery } from "@/components/SwRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -68,8 +69,10 @@ export default async function SwSkillsPage({ searchParams }: { searchParams: Pro
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
       <SwHeader title="Skills & The Force" subtitle={`${SW_SKILLS.length} skills under six attributes · ${SW_FORCE.length} Force powers${hbPowers.length ? ` + ${hbPowers.length} homebrew` : ""}`} />
+      <CompendiumHomebrew>
+        <HomebrewEditor kind="sw-force" campaigns={campaigns} initial={hbOwn} />
+      </CompendiumHomebrew>
       <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Every skill starts at the code of the attribute it sits under; the dice you add go on top. Roll the skill against a difficulty number — or the attribute itself when no skill applies. Reaction skills (dodge, the parries, evasion, shields) can be used out of turn against an attack. Force skills — Control, Sense and Alter — belong to no attribute; the powers they unlock are listed at the bottom. <span className="text-[var(--sw)]">RC</span> marks Rules Companion revisions, with the core version folded underneath.</p>
-      <div className="mb-6"><HomebrewEditor kind="sw-force" campaigns={campaigns} initial={hbOwn} /></div>
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search skills…" hidden={{ attr }} />
       <ChipRow label="Attribute" base={BASE} current={current} param="attr" options={ATTRS} active={attr} />

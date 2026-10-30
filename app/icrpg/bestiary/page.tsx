@@ -4,6 +4,7 @@ import { ICRPG_MONSTERS } from "@/lib/data/icrpg-monsters";
 import type { IcrpgMonster } from "@/lib/data/icrpg-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import {
   IcrpgHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge,
   WORLDS, worldName, one, withParams, type Query, type RawQuery,
@@ -129,7 +130,9 @@ export default async function IcrpgBestiaryPage({ searchParams }: { searchParams
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <IcrpgHeader title="Bestiary" subtitle={`${ICRPG_MONSTERS.length} monsters${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
 
-      <div className="mb-6"><HomebrewEditor kind="icrpg-monster" campaigns={campaigns} initial={hbOwn} /></div>
+      <CompendiumHomebrew>
+        <HomebrewEditor kind="icrpg-monster" campaigns={campaigns} initial={hbOwn} />
+      </CompendiumHomebrew>
 
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search monsters…" hidden={{ world }} />

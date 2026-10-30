@@ -8,7 +8,9 @@
 // the builders live beside this file and each documents its storage shape.
 // lib/homebrew.ts normalizeKob* is the real validator.
 import { campaignsFor } from "@/lib/homebrew-systems";
-import { useState, type CSSProperties, type ReactElement } from "react";
+import { useMemo, useState, type CSSProperties, type ReactElement } from "react";
+import TemplatePicker, { templateCopyName, type TemplateOption } from "@/components/hb/TemplatePicker";
+import { kobBookTemplates } from "./templates";
 import { useRouter } from "next/navigation";
 import TropeBuilder, { TropePreview, blankTrope, tropeFromData, tropePayload, tropeProblems, type TropeDraft } from "./TropeBuilder";
 import { FlawBuilder, FlawPreview, StrengthBuilder, StrengthPreview, blankFlaw, blankStrength, flawFromData, flawPayload, strengthFromData, strengthPayload, type FlawDraft, type StrengthDraft } from "./StrengthFlawBuilder";
@@ -78,14 +80,35 @@ export default function KobHomebrewEditor({ kind, campaigns: allCampaigns, initi
   const [campaignIds, setCampaignIds] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  // Name of the entry a new draft was started from (Template), for the strip.
+  const [fromTemplate, setFromTemplate] = useState("");
+  // Template list: your own homebrew of this kind first, then the book's
+  // entries (lazy-loaded — ./templates.ts). Stable per items/kind so the
+  // picker's cache survives re-renders and reloads after a save.
+  const templates = useMemo(() => {
+    const book = kobBookTemplates(kind);
+    return async (): Promise<TemplateOption[]> => [
+      ...items.map((r) => ({ key: `hb:${r.id}`, name: r.name, group: "Your homebrew", meta: "Homebrew", data: r.data || {} })),
+      ...(book ? await book() : []),
+    ];
+  }, [items, kind]);
 
   if (!sc) return null;
   const active = editId !== null && draft !== null;
 
-  const openNew = () => { setName(""); setDraft(sc.blank()); setCampaignIds([]); setEditId(""); setError(""); };
-  const openEdit = (rec: HomebrewRecord) => { setName(rec.name); setDraft(sc.fromData(rec.data || {})); setCampaignIds(rec.campaignIds ?? []); setEditId(rec.id); setError(""); };
+  const openNew = () => { setFromTemplate(""); setName(""); setDraft(sc.blank()); setCampaignIds([]); setEditId(""); setError(""); };
+  const openEdit = (rec: HomebrewRecord) => { setFromTemplate(""); setName(rec.name); setDraft(sc.fromData(rec.data || {})); setCampaignIds(rec.campaignIds ?? []); setEditId(rec.id); setError(""); };
   const close = () => { setEditId(null); setDraft(null); setError(""); };
   const toggleCampaign = (id: string) => setCampaignIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
+  // A template opens as a NEW, unsaved draft through the same legacy→draft path
+  // an old record takes (sc.fromData), named "<original> (copy)". Share picks
+  // carry over only when a new draft was already open.
+  const startFromTemplate = (opt: TemplateOption) => {
+    if (!(editId === "" && draft !== null)) setCampaignIds([]);
+    setName(templateCopyName(opt.name)); setDraft(sc.fromData(opt.data)); setEditId(""); setFromTemplate(opt.name); setError("");
+  };
+  const noun = sc.noun.toLowerCase();
+  const templateButton = <TemplatePicker source={templates} onPick={startFromTemplate} noun={noun} disabled={busy} className={btn} />;
 
   async function submit() {
     if (!name.trim()) { setError(`Give the ${sc.noun.toLowerCase()} a name.`); return; }
@@ -152,7 +175,15 @@ export default function KobHomebrewEditor({ kind, campaigns: allCampaigns, initi
 
           {active ? (
             <div className="grid gap-4 rounded border border-[var(--border)] bg-[var(--panel-2)] p-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-              <div>
+              <div className="min-w-0">
+                {editId === "" ? (
+                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] pb-3">
+                    <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
+                      {fromTemplate ? <>New {noun} · from <b className="text-[var(--text)]">{fromTemplate}</b></> : `New ${noun}`}
+                    </span>
+                    {templateButton}
+                  </div>
+                ) : null}
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="sm:col-span-2">
                     <label className={labelCls}>Name</label>
@@ -183,7 +214,10 @@ export default function KobHomebrewEditor({ kind, campaigns: allCampaigns, initi
               <div className="lg:sticky lg:top-20 lg:self-start"><P name={name} value={draft} /></div>
             </div>
           ) : (
-            <button className={btnAccent} onClick={openNew}>+ New Homebrew {sc.noun}</button>
+            <div className="flex flex-wrap gap-2">
+              <button className={btnAccent} onClick={openNew}>+ New Homebrew {sc.noun}</button>
+              {templateButton}
+            </div>
           )}
         </div>
       ) : null}

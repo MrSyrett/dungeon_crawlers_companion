@@ -163,12 +163,29 @@
     var g = find(arr(W.ALIEN_GEAR)); if (g) return { kind: 'gear', it: g };
     return null;
   }
+  // Homebrew: the same rows the sheet's Item Store lists (window.*_HB_* via its
+  // pickerPool), turned into inventory rows by the sheet's pickRowOf, so bonuses and
+  // fields carry over exactly as a store pick does.
+  var HB_TABS = [['weap', 'Weapons'], ['armor', 'Armor'], ['gear', 'Gear']];
+  function hbRows(kind) { try { return (typeof pickerPool === 'function') ? pickerPool(kind).filter(function (x) { return /^Homebrew/.test(x.note || ''); }) : []; } catch (e) { return []; } }
+  function hbKey(kind, x) { return 'hb:' + kind + ':' + x.name; }
+  function hbSection() {
+    var h = '', full = startGear.length >= 2;
+    HB_TABS.forEach(function (t) {
+      var rows = hbRows(t[0]); if (!rows.length) return;
+      h += '<div class="m-lbl" style="margin-top:12px;">' + esc(t[1]) + '</div><div class="yzeb-list">' + rows.map(function (x, idx) {
+        var chosen = startGear.some(function (g) { return g.optName === hbKey(t[0], x); });
+        return prow(x.name, x.cost, String(x.note || '').replace(/^Homebrew( · )?/, ''), chosen, "window.YZEB.toggleHb('" + t[0] + "'," + idx + ")", chosen ? '✓ Chosen' : (full && !chosen ? 'Full' : '＋ Add'));
+      }).join('') + '</div>';
+    });
+    return h ? '<div class="m-lbl" style="margin-top:16px;">Your homebrew <span class="yzeb-sub">(with GM approval, in place of career gear)</span></div>' + h : '';
+  }
   function stepGear() {
     var c = careerObj(career);
     if (!c) return '<p class="m-hint">Go back and pick a career first — starting gear comes from it.</p>';
     var opts = arr(c.startGear);
     var h = '<p class="m-hint">Choose <b style="color:#5fd6ea;">two</b> items from your career’s starting gear. You can buy more from the Item Store on the sheet afterward. <b>Chosen: ' + startGear.length + '/2</b></p>';
-    if (!opts.length) { h += '<p class="m-hint">This career has no listed starting gear — add items from the Item Store once you finish.</p>'; return h; }
+    if (!opts.length) { h += '<p class="m-hint">This career has no listed starting gear — add items from the Item Store once you finish.</p>'; return h + hbSection(); }
     h += '<div class="yzeb-list">' + opts.map(function (name, idx) {
       var chosen = startGear.some(function (g) { return g.optName === name; });
       var r = resolveItem(name), meta = 'Gear', desc = '';
@@ -178,7 +195,7 @@
       var full = (!chosen && startGear.length >= 2);
       return prow(name, meta, desc, chosen, "window.YZEB.toggleStartGear(" + idx + ")", chosen ? '✓ Chosen' : (full ? 'Full' : '＋ Add'));
     }).join('') + '</div>';
-    return h;
+    return h + hbSection();
   }
 
   function renderSteps() {
@@ -266,9 +283,18 @@
       else if (r && r.kind === 'gear') { var g = r.it; obj = { kind: 'gear', optName: name, name: g.name, weight: g.weight || '1', note: g.effect || g.note || '' }; }
       // "D6 doses Naproleve": roll the doses now; the count rides on the name ("Naproleve ×4"), which the sheet's Action tab uses up one at a time.
       if (obj && obj.kind === 'gear' && /^d6\s+(doses|flares)\b/i.test(name)) { var dq = 1 + Math.floor(Math.random() * 6); obj.name = obj.name + (dq > 1 ? ' ×' + dq : ''); }
-      else { obj = { kind: 'gear', optName: name, name: name, weight: '1', note: '' }; }
+      else if (!obj) { obj = { kind: 'gear', optName: name, name: name, weight: '1', note: '' }; }
       startGear.push(obj); render();
     },
+    toggleHb: function (kind, idx) {
+      var x = hbRows(kind)[idx]; if (!x) return; var key = hbKey(kind, x);
+      for (var i = 0; i < startGear.length; i++) { if (startGear[i].optName === key) { startGear.splice(i, 1); render(); return; } }
+      if (startGear.length >= 2) return;
+      var row = null; try { row = pickRowOf(kind, x); } catch (e) {}
+      row = row || { kind: kind === 'weap' ? 'weapon' : kind === 'armor' ? 'armor' : 'gear', name: x.name, weight: '1', note: '' };
+      row.optName = key; startGear.push(row); render();
+    },
+
     attr: function (k, d) { var v = attrs[k] + d; if (v < 2 || v > attrMax(k)) return; if (d > 0 && (ATTR_BUDGET - attrTotal()) <= 0) return; attrs[k] = v; render(); },
     skill: function (nm, d) { var v = skills[nm] + d; if (v < 0 || v > skillCap(nm)) return; if (d > 0 && (SKILL_BUDGET - skillSpent()) <= 0) return; skills[nm] = v; render(); },
     apply: function () {

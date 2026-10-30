@@ -32,8 +32,19 @@ function dbMobPool() {
 function dbAttackLines(m) {
   return (m.attacks || []).map((a, i) => {
     const g = Array.isArray(a.rolls) ? a.rolls : (Array.isArray(m.attackRolls) && m.attackRolls[i]) ? m.attackRolls[i] : [a.roll || i + 1, a.roll || i + 1];
-    return (g[0] === g[1] ? g[0] : g[0] + '–' + g[1]) + '. ' + a.name + ': ' + (a.text || '');
+    return (g[0] === g[1] ? g[0] : g[0] + '–' + g[1]) + '. ' + a.name + ': ' + dbAttackText(a);
   });
+}
+// A row's printed effect; a homebrew row left blank (or "—") is described from its fields.
+function dbAttackText(a) {
+  const t = String(a.text || '').trim();
+  if(t && t !== '—') return t;
+  const dmg = a.damage ? a.damage + (a.type ? ' ' + a.type : '') + ' damage' : '';
+  const tg = a.targets && a.targets !== 'one' ? a.targets : 'one target' + (a.range ? ' within ' + a.range + ' m' : '');
+  return [tg.charAt(0).toUpperCase() + tg.slice(1) + (dmg ? ' takes ' + dmg : ''), a.fear ? 'fear attack' + (a.fear === 'bane' ? ' (bane)' : '') : '',
+    a.poison ? (a.poison.type || 'lethal') + ' poison ' + (a.poison.potency || '') : '', (a.conditions || []).length ? 'condition: ' + a.conditions.join(', ') : '',
+    a.prone ? 'knocked prone' : '', a.ignoresArmor ? 'armor has no effect' : '', a.parry ? 'can be parried' : '', a.dodge === false ? 'cannot be dodged' : a.dodge === 'bane' ? 'dodge with a bane' : '']
+    .filter(Boolean).join('; ') + '.';
 }
 function dbMobToCard(m) {
   const kind = m._dbkind || (Array.isArray(m.attacks) && m.ferocity != null ? 'monster' : m.attack ? 'animal' : 'npc');
@@ -44,11 +55,13 @@ function dbMobToCard(m) {
     return {
       sbtype: m.ferocity >= 3 || /dragon|demon/i.test(m.name || '') ? 'boss' : 'mob', name: m.name || '',
       type: ['MONSTER', String(m.size || '').toUpperCase(), 'FEROCITY ' + (m.ferocity ?? 1)].filter(Boolean).join(' // '), flavor: m.text || '',
-      hp: String(m.hp ?? '') + (m.hpPer ? ' per ' + m.hpPer : ''), wp: '', armor: m.armor == null ? '—' : String(m.armor), move: String(m.movement ?? '') + (m.flying ? ' (fly)' : ''), ferocity: String(m.ferocity ?? 1),
+      hp: String(m.hp ?? '') + (m.hpPer ? ' per ' + m.hpPer : ''), wp: '', armor: m.armor == null ? '—' : String(m.armor), move: String(m.movement ?? '') + (m.flying ? ' (fly)' : m.swimming ? ' (swim)' : ''), ferocity: String(m.ferocity ?? 1),
       abilities: dbAttackLines(m).concat(
-        (m.traits || []).map(t => t.name + ': ' + t.text),
+        (m.traits || []).map(t => t.text ? t.name + ': ' + t.text : t.name),
         m.resistances && m.resistances.length ? ['Resistant: ' + m.resistances.join(', ')] : [],
         m.immunities && m.immunities.length ? ['Immune: ' + m.immunities.join(', ')] : [],
+        m.weaknesses && m.weaknesses.length ? ['Weak to: ' + m.weaknesses.join(', ')] : [],
+        m.persuadable ? ['Persuadable: can be reasoned with'] : [],
         m.gear && m.gear.length ? ['Gear: ' + [].concat(m.gear).join(', ')] : [],
         ['Dodge: 15 (uses one of its turns)']).join('\n')
     };

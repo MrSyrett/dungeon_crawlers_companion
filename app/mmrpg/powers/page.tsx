@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { MMRPG_POWERS } from "@/lib/data/mmrpg-powers";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import {
   MmrpgHeader, SearchForm, ChipRow, CountLine, EmptyState, SectionH, RefDetails, cardCls, nameCls, badge, hbBadge,
   one, type Query, type RawQuery,
@@ -54,7 +55,7 @@ export default async function MmrpgPowersPage({ searchParams }: { searchParams: 
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <MmrpgHeader title="Powers" subtitle={`${MMRPG_POWERS.length} powers across the power sets${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
 
-      <div className="mb-6"><HomebrewEditor kind="mmrpg-power" campaigns={campaigns} initial={hbOwn} /></div>
+      <CompendiumHomebrew><HomebrewEditor kind="mmrpg-power" campaigns={campaigns} initial={hbOwn} /></CompendiumHomebrew>
 
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search powers…" hidden={{ set }} />

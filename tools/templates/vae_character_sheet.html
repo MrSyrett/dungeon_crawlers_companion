@@ -722,7 +722,7 @@ body.dark .act-badge.warn{color:#f0c060;}
           <div class="blk" style="padding:12px 10px 16px;display:flex;align-items:center;justify-content:center;min-height:72px;cursor:pointer;" onclick="rollArmor()" title="Sum of equipped armor protection — click to roll; each 6 cancels one point of damage"><span class="stress-val" id="armor-val" style="font-size:56px;font-weight:800;line-height:1;">0</span></div>
         </div>
         <div class="card m-cond" style="flex:1 1 0;min-width:0;">
-          <div class="section-bar accent cbar"><span>Conditions</span></div>
+          <div class="section-bar accent cbar"><span>Conditions</span><span class="hdr-right" style="margin-left:auto;"><button class="hdr-btn" onclick="openWardRoll('fear')" title="Fear test: Logic or Empathy, + wards and allies">Fear Test</button><button class="hdr-btn" onclick="openWardRoll('magic')" title="Resist a spell, curse or vaesen power, + wards">Resist Magic</button></span></div>
           <div class="conds">
             <div class="cond-grp"><div class="cg-lbl">Physical</div><div class="cond-row" id="cond-phys"></div></div>
             <div class="cond-grp"><div class="cg-lbl">Mental</div><div class="cond-row" id="cond-ment"></div></div>
@@ -819,6 +819,7 @@ body.dark .act-badge.warn{color:#f0c060;}
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">Vaesen — Quick Rules</div><button class="x" onclick="closeRules()">✕</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">✕</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
 <div id="advance-overlay" class="ov" onclick="if(event.target===this)closeAdvance()"><div class="modal"><div class="modal-hd"><div class="ttl">✦ Advancement</div><button class="x" onclick="closeAdvance()">✕</button></div><div class="modal-bd" id="advance-body"></div></div></div>
+<div id="ward-overlay" class="ov" onclick="if(event.target===this)closeWardRoll()"><div class="modal"><div class="modal-hd"><div class="ttl" id="ward-title">Fear Test</div><button class="x" onclick="closeWardRoll()">✕</button></div><div class="modal-bd" id="ward-body"></div></div></div>
 <div id="crit-overlay" class="ov" onclick="if(event.target===this)closeCritInfo()"><div class="modal"><div class="modal-hd"><div class="ttl">Critical Injury</div><button class="x" onclick="closeCritInfo()">✕</button></div><div class="modal-bd" id="crit-info-body"></div></div></div>
 <script>
 // ═══ Vaesen Character Sheet ═════════════════════════════════════════════════
@@ -1008,7 +1009,17 @@ function gDel(i){ S.gear.splice(i,1); renderInventory(); renderAttacks(); schedu
 function gEquip(i,on){ var g=S.gear[i]; if(!g)return; g.equipped=!!on; renderAttacks(); renderArmorVal(); if(g.kind==='armor'||(g.kind||'gear')==='gear') renderAttrSkills(); scheduleAutosave(); }
 function invIn(i,f,val,cls,ph){ return '<input'+(cls?' class="'+cls+'"':'')+' value="'+esc(val==null?'':val)+'" oninput="gEdit('+i+',\''+f+'\',this.value)"'+(ph?' placeholder="'+ph+'"':'')+'>'; }
 function eqBox(i,on,tip){ return '<input type="checkbox" class="eqbox" data-nolock '+(on?'checked':'')+' onchange="gEquip('+i+',this.checked)" title="'+(tip||'Equip')+'">'; }
-function gearUsable(g){ return (g.kind||'gear')==='gear' && (cleanSB(g.skillBonus).length>0 || (Array.isArray(g.resist)&&g.resist.length>0)); }
+function gearUsable(g){ return (g.kind||'gear')==='gear' && (cleanSB(g.skillBonus).length>0 || gearWards(g).length>0); }
+// Wards: an item's protection vs Fear tests or vaesen magic. Homebrew rows carry
+// `resist` [{against,amount}] + `resistFrom`; book items (and older rows) are read
+// from their note — "+2 to resist Curses from trolls", "+1 to Fear tests" — and the
+// Bible's "Add Inspiration to your attribute when making a Fear test".
+function gearWards(g){ if(!g||(g.kind||'gear')!=='gear') return [];
+  if(Array.isArray(g.resist)&&g.resist.length) return g.resist.map(function(x){ return {against:String(x.against||''),amount:num(x.amount),from:String(g.resistFrom||'').trim()}; }).filter(function(x){ return x.against&&x.amount>0; });
+  var t=String(g.note||''), out=[], m, rx=/\+\s*(\d+)\s*(?:to\s+)?(?:resist\s+|vs\.?\s+|on\s+)?(curses|trollcraft|enchantments|vaesen powers|fear tests?)(?:\s+from\s+([^.;,()—]+))?/ig;
+  while((m=rx.exec(t))){ var a=m[2].toLowerCase(); out.push({against:/^fear/.test(a)?'Fear':a==='vaesen powers'?'Vaesen powers':a.charAt(0).toUpperCase()+a.slice(1),amount:num(m[1]),from:String(m[3]||'').trim()}); }
+  var b=t.match(/add (\w+) to your attribute when making a fear test/i); if(b&&skillObj(b[1].charAt(0).toUpperCase()+b[1].slice(1).toLowerCase())){ var sk=b[1].charAt(0).toUpperCase()+b[1].slice(1).toLowerCase(); out.push({against:'Fear',amount:num(S.skills[sk]),skill:sk,from:''}); }
+  return out; }
 function resText(g){ var r=Array.isArray(g.resist)?g.resist:[]; return r.map(function(x){ return x.against==='Fear'?'+'+num(x.amount)+' Fear tests':'+'+num(x.amount)+' vs '+x.against; }).join(', ')+(r.length&&g.resistFrom?' ('+g.resistFrom+')':''); }
 function renderInventory(){
   var body=$('inv-body');
@@ -1139,7 +1150,7 @@ function pickAdd(idx,mode){
 function gearRowOf(d,nm,eq){ var o={kind:'gear',name:d.name||nm||'',weight:d.weight||'',note:d.note||d.desc||''}, sb=cleanSB(d.skillBonus);
   if(sb.length) o.skillBonus=sb; if(Array.isArray(d.resist)&&d.resist.length){ o.resist=d.resist.map(function(r){ return {against:String(r.against||''),amount:num(r.amount)}; }); if(d.resistFrom) o.resistFrom=String(d.resistFrom); }
   if(d.consumable===true){ o.consumable=true; if(d.risk) o.risk=String(d.risk); }
-  if(sb.length||o.resist) o.equipped=!!eq; if(d.hb) o.hb=true; return o; }
+  if(sb.length||o.resist||gearWards(o).length) o.equipped=!!eq; if(d.hb) o.hb=true; return o; }
 function addCustomFromPicker(){
   if(_pk==='weap'){ S.gear.push({kind:'weapon',equipped:false,name:'',bonus:0,damage:1,range:'0',weight:'',skill:'Close Combat'}); renderWeapons(); setTab('gear'); }
   else if(_pk==='armor'){ S.gear.push({kind:'armor',equipped:false,name:'',rating:0,weight:'',note:''}); renderInventory(); setTab('gear'); }
@@ -1151,6 +1162,7 @@ function addCustomFromPicker(){
 // ═══ ROLLING ════════════════════════════════════════════════════════════════
 function poolStr(a){ return a.length+'d('+a.join(',')+')'; }
 function count6(a){ var n=0; a.forEach(function(v){ if(v===6)n++; }); return n; }
+function fearTier(succ,fear){ return succ>=fear?{t:'PASS vs Fear '+fear,type:'crit'}:{t:'TERRIFIED · '+(fear-succ)+' mental Condition'+(fear-succ===1?'':'s'),type:'fumble'}; }
 function tierOf(succ){ if(succ>=2) return {t:'SUCCESS ×'+succ,type:'crit'}; if(succ===1) return {t:'SUCCESS',type:'crit'}; return {t:'FAILURE',type:'fumble'}; }
 function rollSet(n){ var a=[]; for(var i=0;i<Math.max(0,n);i++)a.push(die6()); return a; }
 function animDice(base, skill, gear, glow){ try{ var spec=[],i;
@@ -1170,6 +1182,7 @@ function doRoll(label, baseN, skillN, gearN, attrKey, ctx){
   var detail=poolStr(base)+(skill.length?' + '+skill.length+'sk('+skill.join(',')+')':'')+(gear.length?' + '+gear.length+'gr('+gear.join(',')+')':'')+(floored?' · min 1 die':'')+' · '+succ+' succ';
   animDice(base,skill,gear,glowFor(succ));
   if(ctx&&ctx.kind==='attack'){ var hit=succ>=1, dmg=hit?(num(ctx.wdmg)+(succ-1)):0; var th=hit?{t:'HIT · '+dmg+' Conditions',type:'crit'}:{t:'MISS',type:'fumble'}; addLog(label, succ+'  '+th.t, detail, th.type); }
+  else if(ctx&&ctx.fear>0){ var ft=fearTier(succ,ctx.fear); addLog(label, succ+'  '+ft.t, detail, ft.type); }
   else { var t=tierOf(succ); addLog(label, succ+'  '+t.t, detail, t.type); }
   _lastRoll={label:label, base:base, skill:skill, gear:gear, attr:attrKey, ctx:ctx||null};
   showPushOption();
@@ -1186,6 +1199,34 @@ function rollAttack(i){
 }
 function rollQuick(){ var n=Math.max(1,Math.min(12,trayTake('tray-mod'))); var a=rollSet(n), succ=count6(a); animDice(a,[],[],glowFor(succ)); addLog(n+'d6 free pool', succ+'  '+tierOf(succ).t, poolStr(a)+' · '+succ+' succ', tierOf(succ).type); _lastRoll=null; }
 function rollArmor(){ var r=armorRating(); if(r<1){ addLog('Armor','—','No armor equipped — equip armor on the Gear tab.','fumble'); return; } var a=rollSet(Math.min(12,r)), blk=count6(a); animDice(a,[],[],blk?'crit':'normal'); addLog('Armor ('+r+')', blk+' blocked', poolStr(a)+' · each 6 cancels 1 damage', blk?'crit':'fumble'); }
+
+// ── Fear test / Resist magic (Fear = Logic or Empathy, +1 die per PC present,
+// max +3; magic is resisted with the skill the GM names). Wards from gear are opt-in:
+// generic in-use wards start ticked, ones tied to a source ("from trolls") start unticked.
+// One item bonus per roll, so the best ticked ward applies.
+var _ward={mode:'fear',act:false};
+function wardList(mode){ var L=[]; S.gear.forEach(function(g,i){ gearWards(g).forEach(function(w){ if(mode==='fear'?w.against==='Fear':w.against!=='Fear') L.push({i:i,g:g,w:w}); }); }); return L; }
+function openWardRoll(mode,fromAct){ _ward={mode:mode==='magic'?'magic':'fear',act:!!fromAct}; var fear=_ward.mode==='fear';
+  $('ward-title').textContent=fear?'Fear Test':'Resist Magic';
+  var L=wardList(_ward.mode), h='<p class="m-hint">'+(fear?'Roll Logic or Empathy (no skill). +1 die per other player character present (max +3). You need successes equal to the Fear value; each one short is a mental Condition.':'Resist a spell, curse or vaesen power with the skill the GM names; it is usually opposed by the vaesen’s Magic.')+'</p>';
+  if(fear){ h+='<div class="m-lbl">Attribute</div><select id="ward-attr" class="m-input">'+['LOG','EMP'].map(function(k){ return '<option value="'+k+'">'+esc(attrName(k))+' ('+attrBase(k)+')</option>'; }).join('')+'</select>'
+      +'<div style="display:flex;gap:10px;"><div style="flex:1"><div class="m-lbl">Other PCs present (0–3)</div><input id="ward-pcs" class="m-input" type="number" min="0" max="3" value="0"></div><div style="flex:1"><div class="m-lbl">Fear value (0 = ask GM)</div><input id="ward-fear" class="m-input" type="number" min="0" max="10" value="0"></div></div>'; }
+  else { h+='<div class="m-lbl">Skill the GM calls for</div><select id="ward-skill" class="m-input">'+SKILLS.map(function(s){ return '<option'+(s.name==='Observation'?' selected':'')+'>'+esc(s.name)+'</option>'; }).join('')+'</select>'; }
+  h+='<div class="m-lbl">Wards that apply</div>';
+  h+=L.length?L.map(function(o,k){ var on=!o.w.from&&!!o.g.equipped; return '<label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin:4px 0;cursor:pointer;"><input type="checkbox" class="ward-cb" data-k="'+k+'"'+(on?' checked':'')+'><span><b>'+esc(o.g.name||'Item')+'</b> · +'+o.w.amount+(o.w.skill?' ('+esc(o.w.skill)+')':'')+(fear?' Fear':' vs '+esc(o.w.against))+(o.w.from?' <i>from '+esc(o.w.from)+'</i>':'')+(o.g.equipped?'':' <span style="opacity:.7">· not in use</span>')+'</span></label>'; }).join('')+'<p class="m-hint" style="margin-top:6px;">Only the best ticked ward adds dice (one item per roll).</p>'
+    :'<p class="m-hint">No items with '+(fear?'Fear':'magic')+' wards in your inventory.</p>';
+  h+='<button class="m-btn" style="width:100%;margin-top:10px;" onclick="rollWard()">Roll</button>';
+  $('ward-body').innerHTML=h; $('ward-overlay').classList.add('open'); }
+function closeWardRoll(){ $('ward-overlay').classList.remove('open'); }
+function rollWard(){ var fear=_ward.mode==='fear', L=wardList(_ward.mode), best=null;
+  [].forEach.call(document.querySelectorAll('#ward-body .ward-cb'),function(cb){ var o=L[num(cb.dataset.k)]; if(cb.checked&&o&&(!best||o.w.amount>best.w.amount)) best=o; });
+  var wn=best?best.w.amount:0, wl=best?' +'+wn+' ward ('+(best.g.name||'item')+')':'';
+  if(fear){ var k=$('ward-attr').value==='EMP'?'EMP':'LOG', pcs=clamp(num($('ward-pcs').value),0,3), fv=clamp(num($('ward-fear').value),0,10);
+    doRoll('Fear test · '+attrName(k)+(pcs?' +'+pcs+' allies':'')+wl, attrBase(k)-condPenaltyFor(k)-critModFor(null), 0, pcs+wn, k, {ctype:'Mental',fear:fv}); }
+  else { var sk=$('ward-skill').value, s=skillObj(sk); if(!s) return; var gb=gearSkillBonus(sk), useW=wn>=gb.n;
+    doRoll('Resist magic · '+sk+' ('+s.attr+')'+(useW?wl:gbLabel(gb)), attrBase(s.attr)-skillPen(sk), num(S.skills[sk]), useW?wn:gb.n, s.attr, {ctype:attrType(s.attr)}); }
+  if(_ward.act&&actSpend('fast')){ renderAction(); scheduleAutosave(); }
+  closeWardRoll(); }
 
 // ── Push (Vaesen): keep 6s, reroll blanks; cost = one Condition of the roll's type ──
 function clearPushButtons(){ var es=$('log-entries'); if(!es)return; [].forEach.call(es.querySelectorAll('.push-inline'),function(b){ b.remove(); }); }
@@ -1207,6 +1248,7 @@ function doPush(){
   var marked=addCondition(ctype), brokeNote='';
   if(!marked){ brokeNote=' · '+ctype+' BROKEN — roll a critical injury'; }
   var th; if(pr.ctx&&pr.ctx.kind==='attack'){ var hit=succ>=1, dmg=hit?(num(pr.ctx.wdmg)+(succ-1)):0; th=hit?{t:'HIT · '+dmg+' Conditions',type:'crit'}:{t:'MISS',type:'fumble'}; }
+  else if(pr.ctx&&pr.ctx.fear>0) th=fearTier(succ,pr.ctx.fear);
   else th=tierOf(succ);
   var detail=poolStr(base)+(skill.length?' + '+skill.length+'sk('+skill.join(',')+')':'')+(gear.length?' + '+gear.length+'gr('+gear.join(',')+')':'')+' · '+succ+' succ · PUSHED — '+(marked?('+1 '+ctype.toLowerCase()+' Condition ('+marked+')'):('already full'))+brokeNote;
   animDice(base,skill,gear,glowFor(succ));
@@ -1362,7 +1404,7 @@ var ACT_SYS={
     {n:'Break Free', skill:'Force', mb:true, once:'brokeFree', d:'Force roll to break a grapple — once per round. The holder may resist (opposed).'},
     {n:'Hold', skill:'Force', mb:true, d:'Resist someone breaking free of your grapple — turns it into an opposed Force roll.'},
     {n:'Chase', skill:'Agility', mb:true, d:'Stop an enemy fleeing from your zone — each success removes one of theirs.'},
-    {n:'Resist Magic', mb:true, d:'Resist a spell or curse cast on you; the GM says which skill the magic calls for.'}
+    {n:'Resist Magic', mb:true, d:'Resist a spell or curse cast on you; the GM says which skill the magic calls for. Tick any wards that apply.', run:function(){ openWardRoll('magic',true); return false; }}
   ],
   slow:[
     {n:'Grapple', skill:'Force', d:'Wrestle, push or grapple — can be parried. On a hit the target is restrained: they can only try to break free or shout (an extra success silences them).'},

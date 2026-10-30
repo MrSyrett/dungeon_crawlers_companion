@@ -6,6 +6,7 @@ import { DCC_RACES } from "@/lib/data/dcc-races";
 import type { DccRace } from "@/lib/data/dcc-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DccHomebrewEditor from "@/components/DccHomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 
@@ -111,7 +112,7 @@ export default async function DccRacesPage({
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <PageHeader title="Races" subtitle={<>{DCC_RACES.length} races{homebrewCount ? ` + ${homebrewCount} homebrew` : ""}</>} />
 
-      <DccHomebrewEditor kind="dcc-race" campaigns={campaigns} initial={hbOwn} />
+      <CompendiumHomebrew><DccHomebrewEditor kind="dcc-race" campaigns={campaigns} initial={hbOwn} /></CompendiumHomebrew>
 
       <InstantFilter>
       <form method="get" action="/dcc/races" className="mb-4 flex gap-2" data-search>

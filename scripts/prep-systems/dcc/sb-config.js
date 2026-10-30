@@ -23,7 +23,7 @@ function dccMobToCard(m) {
     return a.name + (bits ? ': ' + bits : '');
   });
   return {
-    sbtype, name: m.name || '', type: typeLine, flavor: '',
+    sbtype, name: m.name || '', type: typeLine, flavor: String(m.flavor || ''),
     hpval: hb.length ? String(hb[0]) : '', hpcount: hb.length ? String(hb.length) : '',
     level: (m.level != null ? String(m.level) : ''), surprise: String(m.surprise || ''),
     evade: String(m.evade || ''), move: String(m.move || ''), dr: String(m.dr != null ? m.dr : ''),

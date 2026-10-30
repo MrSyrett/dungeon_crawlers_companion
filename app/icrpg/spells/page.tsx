@@ -4,6 +4,7 @@ import { ICRPG_SPELLS } from "@/lib/data/icrpg-spells";
 import type { IcrpgSpell } from "@/lib/data/icrpg-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import {
   IcrpgHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge,
   one, type Query, type RawQuery,
@@ -55,9 +56,10 @@ export default async function IcrpgSpellsPage({ searchParams }: { searchParams: 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <IcrpgHeader title="Spells" subtitle={`${ICRPG_SPELLS.length} spells${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
+      <CompendiumHomebrew>
+        <HomebrewEditor kind="icrpg-spell" campaigns={campaigns} initial={hbOwn} />
+      </CompendiumHomebrew>
       <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Casting is a d20 + stat roll vs the TARGET; success unleashes the effect, often with Magic EFFORT (d10). A natural 1 can backfire — the GM decides how the magic turns on you.</p>
-
-      <div className="mb-6"><HomebrewEditor kind="icrpg-spell" campaigns={campaigns} initial={hbOwn} /></div>
 
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search spells…" hidden={{ school }} />

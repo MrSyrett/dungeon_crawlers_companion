@@ -13,7 +13,7 @@
     { k: "stat", label: "Stat", amount: true, target: "stat", color: "blue", fmt: "{n} {t}", tip: "+N to a STAT" },
     { k: "allstats", label: "All Stats", amount: true, color: "blue", fmt: "{n} all STATS", tip: "+N to every STAT (every ATTEMPT)" },
     { k: "def", label: "Defense", amount: true, color: "teal", fmt: "{n} DEFENSE", tip: "+N DEFENSE" },
-    { k: "effort", label: "Effort", amount: true, target: "choice", choices: EFFORTS, color: "red", fmt: "{n} {t} EFFORT", tip: "+N to an EFFORT die's result" },
+    { k: "effort", label: "Effort", amount: true, target: "choice", choices: EFFORTS, color: "red", fmt: "{n} {t} EFFORT", tip: "+N to an EFFORT die's result. On a weapon it powers that weapon's attacks only (its own EFFORT or ULTIMATE); on other items it applies to every roll of that EFFORT" },
     { k: "heart", label: "Hearts", amount: true, color: "green", fmt: "{n} HEART", tip: "+N HEARTS (10 HP each)" },
     { k: "spell", label: "Spell", target: "list:spell", color: "purple", fmt: "Spell: {t}", tip: "A spell the item holds or lets you cast" },
     { k: "note", label: "Note", target: "text", color: "grey", tip: "Anything the sheet can't automate — shown on the item" },

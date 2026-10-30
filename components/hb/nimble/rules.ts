@@ -296,7 +296,9 @@ export function cleanSaves(raw: unknown): NimSaves {
 }
 
 // Attack rows → book ability lines. Row: name, count (×N), dice, dtype, special,
-// range ("Melee" | "Reach" | "Range"), extra { dist, target, join ("" | OR | Then) }.
+// range ("Melee" | "Reach" | "Range"), extra { dist, target, join ("" | OR | Then) },
+// plus book-wording flags: dw "1" → "2d6 damage" with no type, sj "sp" → the special
+// follows a space ("1d6 melee/ranged (…)"), end "none" → no closing "." ("1d4 (escape DC 9) OR:").
 export const NIM_ATK_RANGES = ["Melee", "Reach", "Range"];
 export type NimTrait = { name: string; text: string; at: number };
 
@@ -306,10 +308,10 @@ export function composeNimAttack(r: AttackRow): { name: string; text: string } {
   // Distance normally leads ("(Reach 2) 1d6+15."); book rows written "1d6+2 (Range 8)." keep it trailing (extra.rpos "after").
   const after = !!dist && r.extra?.rpos === "after" && !(r.extra?.target ?? "").trim();
   const pre = after ? "" : [dist, (r.extra?.target ?? "").trim()].filter(Boolean).join(", ");
-  let body = (pre ? `(${pre}) ` : "") + formatDice(r.dice) + (r.dtype ? ` ${r.dtype} damage` : "") + (after ? ` (${dist})` : "");
+  let body = (pre ? `(${pre}) ` : "") + formatDice(r.dice) + (r.dtype ? ` ${r.dtype} damage` : r.extra?.dw === "1" ? " damage" : "") + (after ? ` (${dist})` : "");
   const sp = r.special.trim();
-  if (sp) body += (sp[0] === "(" ? " " : sp[0] === "," ? "" : ". ") + sp;
-  if (!/[.!?:)]$/.test(body) || /\)$/.test(body)) body += ".";
+  if (sp) body += (sp[0] === "(" || r.extra?.sj === "sp" ? " " : sp[0] === "," ? "" : ". ") + sp;
+  if (r.extra?.end !== "none" && (!/[.!?:)]$/.test(body) || /\)$/.test(body))) body += ".";
   const join = r.extra?.join ?? "";
   if (join === "OR" || join === "Then") body += ` ${join}:`;
   return { name, text: body };
@@ -324,32 +326,39 @@ export function parseNimAttack(a: { name: string; text: string }): AttackRow | n
   const j = / (OR|Then):$/.exec(t);
   if (j) { join = j[1]; t = t.slice(0, j.index); }
   const types = NIM_DAMAGE_TYPES.join("|");
-  const m = new RegExp(`^(?:\\(([^)]*)\\) )?(\\d+)d(\\d+)(?:([+-])(\\d+))?(?: (${types}) damage)?(.*)$`).exec(t);
+  const m = new RegExp(`^(?:\\(([^)]*)\\) )?(\\d+)d(\\d+)(?:([+-])(\\d+))?(?: (?:(${types}) )?(damage)(?=[ .,]|$))?(.*)$`).exec(t);
   if (!m) return null;
   let range = "Melee", dist = "", target = "";
   if (m[1] != null) {
     const p = /^(Reach|Range) (\d+)(?:, (.*))?$/.exec(m[1]);
     if (p) { range = p[1]; dist = p[2]; target = p[3] ?? ""; } else target = m[1];
   }
-  let rest = m[7];
+  let rest = m[8];
   let rpos = "";
   const post = /^ \((Reach|Range) (\d+)\)(?=\.|$)/.exec(rest);
   if (post && m[1] == null) { range = post[1]; dist = post[2]; rpos = "after"; rest = rest.slice(post[0].length); }
-  if (rest.endsWith(".")) rest = rest.slice(0, -1);
-  let special = "";
-  if (rest.startsWith(". ")) special = rest.slice(2) + ".";
-  else if (rest.startsWith(" ")) special = rest.slice(1) + (rest.endsWith(")") ? "" : ".");
-  else if (rest.startsWith(",")) special = rest + ".";
-  else if (rest) return null;
-  if (special.endsWith("..")) special = special.slice(0, -1);
-  const row: AttackRow = {
-    name, count, hit: null,
-    dice: { n: int(m[2]), d: int(m[3]), m: m[4] ? (m[4] === "-" ? -1 : 1) * int(m[5]) : 0 },
-    range, dtype: m[6] ?? "", special,
-    extra: { dist: dist || (range === "Melee" ? "" : "1"), target, join, ...(rpos ? { rpos } : {}) },
-  };
-  const back = composeNimAttack(row);
-  return back.name === a.name.trim() && back.text === a.text.trim() ? row : null;
+  // The special and how it joins: ". On hit…" | " (…)" | ", on hit…" | " to all enemies…" (sj "sp").
+  let base: string, sj = "";
+  if (rest === "." || rest === "") base = "";
+  else if (rest.startsWith(". ")) base = rest.slice(2);
+  else if (rest.startsWith(" (")) base = rest.slice(1);
+  else if (rest.startsWith(",")) base = rest;
+  else if (rest.startsWith(" ")) { base = rest.slice(1); sj = "sp"; }
+  else return null;
+  const flags = { ...(m[7] && !m[6] ? { dw: "1" } : {}), ...(sj ? { sj } : {}) };
+  for (const special of base.endsWith(".") ? [base, base.slice(0, -1)] : [base]) {
+    for (const end of ["", "none"]) {
+      const row: AttackRow = {
+        name, count, hit: null,
+        dice: { n: int(m[2]), d: int(m[3]), m: m[4] ? (m[4] === "-" ? -1 : 1) * int(m[5]) : 0 },
+        range, dtype: m[6] ?? "", special,
+        extra: { dist: dist || (range === "Melee" ? "" : "1"), target, join, ...(rpos ? { rpos } : {}), ...flags, ...(end ? { end } : {}) },
+      };
+      const back = composeNimAttack(row);
+      if (back.name === a.name.trim() && back.text === a.text.trim()) return row;
+    }
+  }
+  return null;
 }
 
 /** Interleave traits (each placed after `at` attacks) and attacks into book abilities. */
@@ -389,6 +398,9 @@ export function cleanNimAttackRows(v: unknown): AttackRow[] {
         target: s(ex.target).trim().slice(0, 60),
         join: ex.join === "OR" || ex.join === "Then" ? s(ex.join) : "",
         ...(ex.rpos === "after" ? { rpos: "after" } : {}),
+        ...(ex.dw === "1" ? { dw: "1" } : {}),
+        ...(ex.sj === "sp" ? { sj: "sp" } : {}),
+        ...(ex.end === "none" ? { end: "none" } : {}),
       },
     };
   });

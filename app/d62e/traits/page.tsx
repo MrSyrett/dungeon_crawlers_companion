@@ -5,6 +5,7 @@ import { D62E_POWERS } from "@/lib/data/d62e-powers";
 import { D62E_LIMITATIONS } from "@/lib/data/d62e-limitations";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 import {
@@ -137,11 +138,11 @@ export default async function D62eTraitsPage({ searchParams }: { searchParams: P
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <D62eHeader title="Options" subtitle={`${builtinCount} perks, flaws, talents, assets, troubles, superpowers, limitations, magic & psionics${hbCount ? ` + ${hbCount} homebrew` : ""}`} />
 
-      <div className="mb-6 flex flex-col gap-4">
+      <CompendiumHomebrew>
         <HomebrewEditor kind="d62e-trait" campaigns={campaigns} initial={hbTraitOwn} />
         <HomebrewEditor kind="d62e-power" campaigns={campaigns} initial={hbPowerOwn} />
         <HomebrewEditor kind="d62e-limitation" campaigns={campaigns} initial={hbLimOwn} />
-      </div>
+      </CompendiumHomebrew>
 
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search options…" hidden={{ kind }} />

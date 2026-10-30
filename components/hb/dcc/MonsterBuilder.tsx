@@ -16,11 +16,12 @@ import AttackRows, { newAttackRow, type AttackRow } from "../AttackRows";
 import ChipPicker from "../ChipPicker";
 import Preview from "../Preview";
 import Stepper from "../Stepper";
+import styles from "../hb.module.css";
 import {
   BOSS_SEVERITY, bossSeverity, damageDiceForLevel, dccStatMod, hbSlotCount, statBase, statBudget, STAT_IDS, STAT_ABBR,
 } from "@/lib/dcc-build-menu";
 import {
-  DCC_AREAS, DCC_AREA_SIZES, DCC_ATTACK_RANGES, DCC_DAMAGE_TYPES, DCC_DICE, DCC_MONSTER_TAGS,
+  DCC_AREAS, DCC_AREA_SIZES, DCC_ATTACK_RANGES, DCC_DAMAGE_TYPES, DCC_DICE, DCC_HIT_SFX, DCC_HIT_WORDS, DCC_MONSTER_TAGS,
   composeDccAttacks, composeDccNote, parseDccAttack, parseDccNote, sizeName, type DccNote,
 } from "./rules";
 
@@ -321,6 +322,7 @@ export default function MonsterBuilder({ value: m, onChange }: { value: MonsterD
             { key: "dmgF", label: "Dmg +F", options: [["", "—"], ["F", "+F"]] },
             { key: "ap", label: "Armor-Piercing", options: [["", "No"], ["ap", "Yes"]] },
           ]}
+          slot={(r, patch) => <HitForm r={r} patch={patch} />}
           namePh="Claw, Grappling Gun, Boil the Air…"
           specialPh="Rider / on-hit effect: Any hit crawler gains the Held Debuff…"
           blank={() => atkRow(m.level)}
@@ -412,3 +414,34 @@ export function MonsterPreview({ name, m }: { name: string; m: MonsterDraft }) {
   );
 }
 
+// To-hit form (a "+F" suffix variant, or a word when the to-hit is cleared) and
+// the damage footnote marker. Book values outside the lists (e.g. "+5") stay selectable.
+function HitForm({ r, patch }: { r: AttackRow; patch: (p: Partial<AttackRow>) => void }) {
+  const e = r.extra ?? {};
+  const setE = (p: Record<string, string>) => patch({ extra: { ...e, ...p } });
+  const sfx = e.hitSfx ?? "";
+  const sfxOpts = DCC_HIT_SFX.some(([k]) => k === sfx) ? DCC_HIT_SFX : [...DCC_HIT_SFX, [sfx, sfx] as [string, string]];
+  return (
+    <>
+      <label className={styles.atkCell}>
+        <span className={styles.atkLbl}>{r.hit == null ? "No roll" : "Roll"}</span>
+        {r.hit == null ? (
+          <select className={styles.diceSel} value={e.hitWord ?? ""} onChange={(ev) => setE({ hitWord: ev.target.value })}>
+            {DCC_HIT_WORDS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+          </select>
+        ) : (
+          <select className={styles.diceSel} value={sfx} onChange={(ev) => setE({ hitSfx: ev.target.value })}>
+            {sfxOpts.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+          </select>
+        )}
+      </label>
+      <label className={styles.atkCell}>
+        <span className={styles.atkLbl}>Dmg mark</span>
+        <select className={styles.diceSel} value={e.dmgMark ?? ""} onChange={(ev) => setE({ dmgMark: ev.target.value })}>
+          <option value="">—</option>
+          <option value="*">*</option>
+        </select>
+      </label>
+    </>
+  );
+}

@@ -4,6 +4,7 @@ import { D62E_CREATURES } from "@/lib/data/d62e-creatures";
 import type { D62eCreature } from "@/lib/data/d62e-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 import {
@@ -132,7 +133,7 @@ export default async function D62eBestiaryPage({ searchParams }: { searchParams:
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <D62eHeader title="Bestiary" subtitle={`${D62E_CREATURES.length} creatures & NPCs${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
 
-      <div className="mb-6"><HomebrewEditor kind="d62e-creature" campaigns={campaigns} initial={hbOwn} /></div>
+      <CompendiumHomebrew><HomebrewEditor kind="d62e-creature" campaigns={campaigns} initial={hbOwn} /></CompendiumHomebrew>
 
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search creatures…" hidden={{ genre }} />

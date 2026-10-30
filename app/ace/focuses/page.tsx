@@ -4,6 +4,7 @@ import { ACE_FOCUSES } from "@/lib/data/ace-focuses";
 import type { AceFocus, AceStat, AceSettingKey } from "@/lib/data/ace-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import {
   AceHeader, SearchForm, ChipRow, CountLine, EmptyState, BOOKS, settingName, one,
   cardCls, bookBadge, hbBadge, type Query, type RawQuery,
@@ -64,9 +65,9 @@ export default async function AceFocusesPage({ searchParams }: { searchParams: P
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <AceHeader title="Stats & Focuses" subtitle={`${ACE_FOCUSES.length} focuses${hbRows.length ? ` + ${hbRows.length} homebrew` : ""} across five stats`} />
 
-      <div className="mb-6">
+      <CompendiumHomebrew>
         <HomebrewEditor kind="ace-focus" campaigns={campaigns} initial={hbOwn} />
-      </div>
+      </CompendiumHomebrew>
 
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search focuses…" hidden={{ book, stat }} />

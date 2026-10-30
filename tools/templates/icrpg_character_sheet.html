@@ -1039,15 +1039,29 @@ function collectRows(kind){
 // the Spells tab while equipped. Unequip / delete reverses exactly what was applied.
 var LB_SYS='icrpg';
 var IC_ABIL_KINDS=['stat','allstats','def','effort'];   // what a homebrew ABILITY may add (always on)
-var _icIB={ stat:{}, all:0, def:0, effort:{}, why:{ stat:{STR:[],DEX:[],CON:[],INT:[],WIS:[],CHA:[]}, all:[], def:[], effort:{} } };
+var _icIB={ stat:{}, all:0, def:0, effort:{}, weff:{}, why:{ stat:{STR:[],DEX:[],CON:[],INT:[],WIS:[],CHA:[]}, all:[], def:[], effort:{} } };
 function icLbHasBonus(list){ return (list||[]).some(function(b){ return b.kind!=='note'; }); }
 function icApplied(tr){ if(tr.dataset.equipped!=='1' || !tr.dataset.applied) return null; try{ var r=JSON.parse(tr.dataset.applied); return r && r.v===2 && Array.isArray(r.benefits) ? r : null; }catch(e){ return null; } }
 function icLootName(tr){ var n=tr.querySelector('.it-name'); return (n&&n.value.trim())||'LOOT'; }
 function icItemBonus(){
-  var o={ stat:{}, all:0, def:0, effort:{}, why:{ stat:{}, all:[], def:[], effort:{} } };
+  var o={ stat:{}, all:0, def:0, effort:{}, weff:{}, why:{ stat:{}, all:[], def:[], effort:{} } };
   STAT_ABBR.forEach(function(a){ o.stat[a]=0; o.why.stat[a]=[]; });
   var src=[];
-  [].forEach.call(document.querySelectorAll('#loot-body tr'), function(tr){ var r=icApplied(tr); if(r) src.push([icLootName(tr), r.benefits]); });
+  // An EFFORT bonus on LOOT that is itself a weapon powers that weapon's attacks only
+  // (its own EFFORT type, "All", Basic/Weapons/Guns, or its ULTIMATE d12) — kept in
+  // o.weff[weapon name]. Other items' EFFORT bonuses (and a MAGIC bonus on a non-energy
+  // weapon, e.g. a staff that boosts spells) stay global.
+  [].forEach.call(document.querySelectorAll('#loot-body tr'), function(tr){ var r=icApplied(tr); if(!r) return;
+    var nm=icLootName(tr), w=icWeapon({ name:nm, tag:(tr.querySelector('.it-tag')||{}).value||'', note:(tr.querySelector('.it-note')||{}).value||'', bv:true });
+    if(!w){ src.push([nm, r.benefits]); return; }
+    var own=IC_EFF[w.die]||'', wk=icNorm(nm);
+    src.push([nm, r.benefits.filter(function(b){
+      if(b.kind!=='effort') return true;
+      var e=String(b.target||'All').replace(/[^A-Za-z]/g,'')||'All';
+      if(e==='MagicEnergy' && own!=='MagicEnergy') return true;
+      var slot=e==='Ultimate'?'ult':'eff', W=o.weff[wk]=o.weff[wk]||{ eff:0, ult:0, why:[] };
+      W[slot]+=num(b.amount); W.why.push(nm+' '+icSgn(num(b.amount))+(slot==='ult'?' ULTIMATE':'')); return false; })]);
+  });
   // Homebrew ABILITIES with bonuses (bv:2) count for as long as they're on the sheet.
   [].forEach.call(document.querySelectorAll('#abil-body tr[data-bv="2"]'), function(tr){ var l; try{ l=JSON.parse(tr.dataset.benefits); }catch(e){ l=[]; } src.push([icLootName(tr), l.filter(function(b){ return IC_ABIL_KINDS.indexOf(b.kind)>=0; })]); });
   src.forEach(function(sx){ var nm=sx[0];
@@ -1061,6 +1075,7 @@ function icItemBonus(){
   return o;
 }
 function icItemStat(ab){ return (_icIB.stat[ab]||0)+_icIB.all; }
+function icWeaponEffort(name){ return _icIB.weff && _icIB.weff[icNorm(name)] || { eff:0, ult:0, why:[] }; }
 function icItemEffort(key, noAll){ return (_icIB.effort[key]||0)+(noAll?0:(_icIB.effort.All||0)); }
 function icPaintEquip(tr){ var b=tr.querySelector('.it-eq'); if(!b) return; var on=tr.dataset.equipped==='1'; b.classList.toggle('on', on); b.textContent=on?'Equipped':'Carried'; b.title=on?'EQUIPPED — its bonuses apply. Click to carry it instead.':'CARRIED — bonuses only apply when EQUIPPED. Click to equip.'; }
 function icToggleEquip(tr){
@@ -1222,7 +1237,7 @@ function icEffort(dieCode, crit, extra, alwaysUlt, opt){
   var n=dieVal(dieCode), cnt=Math.max(1,opt.count||1), rs=[], r=0;
   for(var k=0;k<cnt;k++){ var x=die(n); rs.push(x); r+=x; }
   var bon=icEffBonus(opt.bonusDie||dieCode)+(extra||0), tot=r+bon, parts=(cnt>1?cnt:'')+dieCode+'('+rs.join('+')+')'+(bon?' '+icSgn(bon):'');
-  if(crit || alwaysUlt){ var ud=(crit&&opt.ultDice)||1, ub=icEffBonus('d12', true); for(var j=0;j<ud;j++){ var u=die(12); tot+=u; parts+=' + ULTIMATE d12('+u+')'; } tot+=ub; if(ub) parts+=' '+icSgn(ub); }
+  if(crit || alwaysUlt){ var ud=(crit&&opt.ultDice)||1, ub=icEffBonus('d12', true)+(opt.ultBonus||0); for(var j=0;j<ud;j++){ var u=die(12); tot+=u; parts+=' + ULTIMATE d12('+u+')'; } tot+=ub; if(ub) parts+=' '+icSgn(ub); }
   return { total:tot, detail:parts };
 }
 
@@ -1412,12 +1427,12 @@ function icBuildOpts(){
   var weapons=loot.map(icWeapon).filter(Boolean);
   weapons.push({ name:'Unarmed', stat:'STR', die:'d4', critOn:20 });
   weapons.forEach(function(w){
-    var xb=(w.strDmg?statTotal('STR'):0)+(w.effBonus||0), eb=icEffBonus(w.die)+xb;
+    var we=icWeaponEffort(w.name), xb=(w.strDmg?statTotal('STR'):0)+(w.effBonus||0)+we.eff, eb=icEffBonus(w.die)+xb;
     add('attacks', { name:w.name, kind:'action', btn:'Attack',
       sub:'d20'+icSgn(statTotal(w.stat)+(w.attBonus||0))+' '+w.stat+' · Effort '+w.die+(eb?icSgn(eb):'')+(w.alwaysUlt?' + d12':'')+(w.critOn<20?' · crit '+w.critOn+'+':''),
       run:function(){
         var c=icCheck(w.stat, w.critOn, { bonus:w.attBonus||0 }), res=icVerdict(c), det=icCheckDetail(c, w.stat);
-        if(c.hit){ var e=icEffort(w.die, c.crit, xb, w.alwaysUlt, { ultDice:w.ultDice }); res+='  |  Effort '+e.total; det+='  |  '+e.detail; }
+        if(c.hit){ var e=icEffort(w.die, c.crit, xb, w.alwaysUlt, { ultDice:w.ultDice, ultBonus:we.ult }); res+='  |  Effort '+e.total; det+='  |  '+e.detail; }
         addLog(w.name, res, det, c.crit?'crit':c.fumble?'fumble':'normal');
       } });
   });

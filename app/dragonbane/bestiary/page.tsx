@@ -4,6 +4,7 @@ import { DB_MONSTERS, DB_MONSTER_RULES, DB_NPCS, DB_ANIMALS, DB_NPC_TRAITS, DB_N
 import type { DbMonster, DbMonsterAttack, DbNpc } from "@/lib/data/db-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { DbHeader, ModeRow, ChipRow, SearchForm, CountLine, EmptyState, BackLink, SectionNav, Bullets, cardCls, nameCls, badge, hbBadge, eyebrow, sectionH, th, td, one, isHb, srcKey, srcChips, srcPage, rollText, type RawQuery } from "@/components/DbRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -196,8 +197,10 @@ async function MonstersTab({ userId, raw }: { userId: string; raw: RawQuery }) {
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <DbHeader title="Bestiary" subtitle={`${DB_MONSTERS.length} monsters${hbMonsters.length ? ` + ${hbMonsters.length} homebrew` : ""} · Core Rules + Bestiary · dragons, demons & worse`} />
       <Tabs active="monsters" />
-      <HomebrewEditor kind="db-monster" campaigns={campaigns} initial={hbOwn} />
       <SectionNav items={[{ id: "monsters", label: "Stat Blocks" }, { id: "rules", label: "Fighting Monsters" }, { id: "families", label: "Monster Families" }]} />
+      <CompendiumHomebrew>
+        <HomebrewEditor kind="db-monster" campaigns={campaigns} initial={hbOwn} />
+      </CompendiumHomebrew>
 
       <section id="monsters" className="scroll-mt-20">
         <InstantFilter>
@@ -288,8 +291,10 @@ async function NpcsTab({ userId, raw }: { userId: string; raw: RawQuery }) {
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <DbHeader title="Bestiary" subtitle={`${DB_NPCS.length} NPC stat blocks · ${DB_ANIMALS.length} animals${hbNpcs.length ? ` · +${hbNpcs.length} homebrew` : ""}`} />
       <Tabs active="npcs" />
-      <HomebrewEditor kind="db-npc" campaigns={campaigns} initial={hbOwn} />
       <SectionNav items={[{ id: "npcs", label: "Stat Blocks" }, { id: "encounters", label: "Encounters & Seeds" }, { id: "running", label: "Running NPCs" }, { id: "animals", label: "Common Animals" }, { id: "generator", label: "Random NPCs" }]} />
+      <CompendiumHomebrew>
+        <HomebrewEditor kind="db-npc" campaigns={campaigns} initial={hbOwn} />
+      </CompendiumHomebrew>
 
       <section id="npcs" className="scroll-mt-20">
         <InstantFilter>

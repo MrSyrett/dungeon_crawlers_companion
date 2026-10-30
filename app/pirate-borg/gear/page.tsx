@@ -4,6 +4,7 @@ import { PB_WEAPONS, PB_AMMO, PB_BOMBS, PB_BOMB_RULES, PB_CLOTHING, PB_CLOTHING_
 import type { PbWeapon, PbClothing, PbHat, PbGear } from "@/lib/data/pb-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { PbHeader, ModeRow, ChipRow, SearchForm, CountLine, EmptyState, RuleNote, Bullets, WeaponTable, ClothingTable, HatTable, HbBadge, N, cardCls, nameCls, badge, eyebrow, sectionH, th, td, tdNum, tableWrap, one, srcKey, srcChips, silver, armorDie, type RawQuery } from "@/components/PbRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -46,7 +47,9 @@ export default async function PbGearPage({ searchParams }: { searchParams: Promi
     const shown = weapons.filter(show).length;
     body = (
       <>
-        <HomebrewEditor kind="pb-weapon" campaigns={campaigns} initial={hbWOwn} />
+        <CompendiumHomebrew>
+          <HomebrewEditor kind="pb-weapon" campaigns={campaigns} initial={hbWOwn} />
+        </CompendiumHomebrew>
         <InstantFilter>
           <SearchForm base={BASE} q={one(raw.q)} placeholder="Search weapons…" hidden={{ kind, powder, src }} />
           <ChipRow label="Kind" base={BASE} current={current} param="kind" options={kinds} active={kind} />
@@ -90,7 +93,9 @@ export default async function PbGearPage({ searchParams }: { searchParams: Promi
   } else if (view === "armor") {
     body = (
       <>
-        <HomebrewEditor kind="pb-armor" campaigns={campaigns} initial={hbAOwn} />
+        <CompendiumHomebrew>
+          <HomebrewEditor kind="pb-armor" campaigns={campaigns} initial={hbAOwn} />
+        </CompendiumHomebrew>
         <RuleNote title="Pirates & armor"><p>{PB_CLOTHING_RULES.text}</p></RuleNote>
         <h2 className={sectionH}>Clothing &amp; armor <N className="text-[20px] text-[var(--muted)]">d10</N></h2>
         <ClothingTable rows={clothing} />
@@ -126,7 +131,9 @@ export default async function PbGearPage({ searchParams }: { searchParams: Promi
     const shown = list.filter(show).length;
     body = (
       <>
-        <HomebrewEditor kind="pb-gear" campaigns={campaigns} initial={hbGOwn} />
+        <CompendiumHomebrew>
+          <HomebrewEditor kind="pb-gear" campaigns={campaigns} initial={hbGOwn} />
+        </CompendiumHomebrew>
         <RuleNote title="Carrying"><p>{PB_RULES.carrying.text}</p></RuleNote>
         <InstantFilter>
           <SearchForm base={BASE} q={one(raw.q)} placeholder="Search gear…" hidden={{ view: "gear", cat, src }} />

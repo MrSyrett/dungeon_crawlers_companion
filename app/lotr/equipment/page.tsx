@@ -4,6 +4,7 @@ import { LOTR_WEAPONS, LOTR_ARMOR, LOTR_ARMOR_NOTE, LOTR_GEAR, LOTR_MOUNTS, LOTR
 import type { LotrWeapon, LotrArmor, LotrGear } from "@/lib/data/lotr-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { LotrHeader, ModeRow, ChipRow, SearchForm, CountLine, EmptyState, Bullets, cardCls, nameCls, badge, hbBadge, eyebrow, sectionH, th, td, one, isHb, srcKey, srcChips, type RawQuery } from "@/components/LotrRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -49,9 +50,9 @@ export default async function LotrEquipmentPage({ searchParams }: { searchParams
   const head = (
     <>
       <LotrHeader title="Equipment" subtitle="weapons · armour · gear · mounts · standards of living" />
-      {mode === "weapons" ? <HomebrewEditor kind="lotr-weapon" campaigns={campaigns} initial={hbWOwn} /> : null}
-      {mode === "gear" ? <HomebrewEditor kind="lotr-gear" campaigns={campaigns} initial={hbGOwn} /> : null}
       <ModeRow base={BASE} current={{}} param="mode" options={modeOpts} active={mode} />
+      {mode === "weapons" ? <CompendiumHomebrew><HomebrewEditor kind="lotr-weapon" campaigns={campaigns} initial={hbWOwn} /></CompendiumHomebrew> : null}
+      {mode === "gear" ? <CompendiumHomebrew><HomebrewEditor kind="lotr-gear" campaigns={campaigns} initial={hbGOwn} /></CompendiumHomebrew> : null}
     </>
   );
   const clearBase = mode === "weapons" ? BASE : `${BASE}?mode=${mode}`;

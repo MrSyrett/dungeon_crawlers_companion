@@ -8,6 +8,8 @@ export const dynamic = "force-dynamic";
 
 // Every Dragonbane homebrew type, in the order they appear on the reference pages.
 const KINDS: { kind: HbType; label: string }[] = [
+  { kind: "db-kin", label: "Kin" },
+  { kind: "db-profession", label: "Professions" },
   { kind: "db-ability", label: "Heroic Abilities" },
   { kind: "db-spell", label: "Spells & Tricks" },
   { kind: "db-weapon", label: "Weapons" },
@@ -29,7 +31,7 @@ export default async function DbHomebrewHubPage() {
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
       <DbHeader title="Homebrew" subtitle={total ? `${total} creation${total === 1 ? "" : "s"} across ${KINDS.length} types` : "create and manage all your homebrew"} />
       <p className="mb-6 max-w-[62ch] text-[13px] leading-relaxed text-[var(--muted)]">
-        Everything you make here flows into the Dragonbane reference pages — heroic abilities, magic, gear,
+        Everything you make here flows into the Dragonbane reference pages and the character creator — kin, professions, heroic abilities, magic, gear,
         the bestiary and NPCs. Share a creation to a campaign to let your party use it too.
       </p>
       {KINDS.map((k, i) => (

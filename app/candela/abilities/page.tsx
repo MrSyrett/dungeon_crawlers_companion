@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { CO_ROLES } from "@/lib/data/candela-data";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import {
   CandelaHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge,
   one, type Query, type RawQuery,
@@ -56,7 +57,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <CandelaHeader title="Abilities" subtitle={`Candela Obscura · Role & Specialty${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
 
-      <div className="mb-6"><HomebrewEditor kind="co-ability" campaigns={campaigns} initial={hbOwn} /></div>
+      <CompendiumHomebrew><HomebrewEditor kind="co-ability" campaigns={campaigns} initial={hbOwn} /></CompendiumHomebrew>
 
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search abilities…" hidden={{ source }} />

@@ -2323,6 +2323,15 @@ function rollSneak(btn){ doAttack(_atkRow(btn), sneakDice()); }
 // ── proficiency tokens: calling + culture/subculture grants + Herald + Weapon-Craft ──
 function canonWeapon(s){ return norm(s).replace(/[^a-z ]/g,' ').split(/\s+/).filter(Boolean).sort().join(' '); }
 function weaponByName(n){ const k = canonWeapon(n); return D.weapons().find(w => canonWeapon(w.name) === k) || null; }
+// The catalog weapon an item name is built on, by its words in any order ("Elven Long Sword",
+// "Longsword of Gondolin" → Sword, Long; "Orc Axe" → Axe); the one with the most words wins. "Sting" → null.
+function baseWeaponFor(name){
+  const words = norm(name).replace(/[^a-z ]/g, ' ').split(/\s+/).filter(Boolean); let best = null, bs = 0;
+  D.weapons().forEach(w => { const t = canonWeapon(w.name).split(' ').filter(Boolean); if(!t.length) return;
+    const hit = t.every(x => words.indexOf(x) >= 0) || (t.length > 1 && (words.indexOf(t.join('')) >= 0 || words.indexOf(t.slice().reverse().join('')) >= 0));
+    const sc = t.length * 100 + w.name.length; if(hit && sc > bs){ best = w; bs = sc; } });
+  return best;
+}
 function profTokens(){
   const armor = new Set(); let shields = false; const weapons = new Set();
   const addA = (a) => { const s = norm(a); if(/heavy/.test(s)) armor.add('heavy'); if(/medium/.test(s)) armor.add('medium'); if(/light/.test(s)) armor.add('light'); if(/shield/.test(s)) shields = true; if(/^all armou?r/.test(s)){ armor.add('heavy'); armor.add('medium'); armor.add('light'); shields = true; } };
@@ -2479,7 +2488,7 @@ function renderInvActions(tr){
   const kind = invRowKind(tr);
   const eq = tr.dataset.equipped === '1';
   const bonusOnly = !(kind === 'weapon' || kind === 'armor' || kind === 'shield') && invHasBonus(tr);
-  const canEquip = (kind === 'weapon' || kind === 'armor' || kind === 'shield') || bonusOnly;
+  const canEquip = (kind === 'weapon' || kind === 'armor' || kind === 'shield') || bonusOnly || isGenericWeaponRow(tr);
   if(!eq && tr.dataset.applied) delete tr.dataset.applied;   // unequipped by another item (armour swap, shield vs two-handed)
   // Equip / unequip is a pip in front of the name (the D&D sheet's Prepared-pip look);
   // rows that can't be equipped keep an empty slot so every name lines up.
@@ -2690,7 +2699,9 @@ function updateCarry(){ const el = $('carry-weight'); if(!el) return;
 function invRowRef(tr){ return tr.dataset.ref || tr.querySelector('.inv-name').value; }
 function invRowKind(tr){ return itemKind(invRowRef(tr)); }
 function invRowDisplay(tr){ const nm = tr.querySelector('.inv-name'); return (nm && nm.value) || invRowRef(tr); }
-function invRowSlot(tr){ const k = itemKind(invRowRef(tr)); return (k === 'armor' || k === 'shield' || k === 'weapon') ? k : ''; }
+function invRowSlot(tr){ const k = itemKind(invRowRef(tr)); return (k === 'armor' || k === 'shield' || k === 'weapon') ? k : isGenericWeaponRow(tr) ? 'weapon' : ''; }
+// A weapon-category loot row with no catalog weapon behind it attacks with a generic row.
+function isGenericWeaponRow(tr){ return tr.dataset.cat === 'weapon' && itemKind(invRowRef(tr)) === 'gear'; }
 function equippedRow(kind){ return invRows().find(r => r.dataset.equipped === '1' && invRowKind(r) === kind) || null; }
 function equippedShieldRow(){ return equippedRow('shield'); }
 function hasShield(){ return !!equippedShieldRow(); }
@@ -2755,8 +2766,14 @@ function weaponVsShield(tr, display){
 }
 function equipWeaponRow(tr){
   const display = invRowDisplay(tr);
-  const w = weaponByName(invRowRef(tr)); if(!w) return;
+  const w = weaponByName(invRowRef(tr));
   if(invAttackHasRid(tr.dataset.rid)) return;
+  if(!w){   // generic: 1d6 melee STR, proficient — unlock to edit the ability, dice and type
+    if(!isGenericWeaponRow(tr)) return;
+    const row = addAttackRow({ name: display.replace(/\s+—\s.*$/, ''), abil:'STR', prof:true, bonus:0, damage:'1d6', type:'', rid: tr.dataset.rid });
+    const nm = row.querySelector('.atk-name'); if(nm) nm.title = 'Generic attack (no catalog weapon) — unlock to edit its ability, damage dice and type';
+    return;
+  }
   const finesse = (w.properties || []).some(p => /finesse/i.test(p));
   const abil = w.kind === 'Ranged' ? 'DEX' : (finesse ? (modOf('DEX') > modOf('STR') ? 'DEX' : 'STR') : 'STR');
   addAttackRow({ name: display, abil, prof: isProficientWithWeapon(w), bonus: 0, damage: w.damage, type: w.damageType, weapon: w.name, rid: tr.dataset.rid });
@@ -4116,7 +4133,11 @@ $('log-entries').addEventListener('click', function(e){
 });
 // A claimed drop goes into the equipment table.
 function claimLootItem(it){
-  const row = { name: (it.item || '?') + (it.notes ? ' — ' + it.notes : ''), qty: (it.qty != null && it.qty !== '' ? num(it.qty) : 1), ref: resolveItemRef(it.item || '') || undefined, cat: it.cat || undefined };
+  // A weapon the catalog doesn't know by name rides on the catalog weapon its name is built on;
+  // with none ("Sting") it equips as a generic attack row (isGenericWeaponRow).
+  let ref = resolveItemRef(it.item || '') || resolveItemRef(String(it.item || '').replace(/\s*\+\d+\s*/g, ' ').trim());
+  if(!ref && it.cat === 'weapon'){ const bw = baseWeaponFor(it.item || ''); if(bw) ref = bw.name; }
+  const row = { name: (it.item || '?') + (it.notes ? ' — ' + it.notes : ''), qty: (it.qty != null && it.qty !== '' ? num(it.qty) : 1), ref: ref || undefined, cat: it.cat || undefined };
   if(it.bv === 2 && it.benefits != null){ row.bv = 2; row.benefits = it.benefits; }   // GM-built badges — trusted only from the bv:2 builder
   addInvRow(row);
   addLog('Claimed', 'Loot', it.item || 'Item', 'normal'); return true;

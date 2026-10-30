@@ -2181,7 +2181,7 @@ function itemSearch(){
   const pool=PREG.itemList(PREP_CODE);
   const hits=(q?pool.filter(m=>(m.name||'').toLowerCase().includes(q)):pool).slice(0,80);
   if(!hits.length){ list.innerHTML='<div class="mob-pick-empty">No match.</div>'; list.classList.add('show'); return; }
-  list.innerHTML=hits.map((m,i)=>'<button type="button" class="mob-pick-item" data-item="'+escA(m.name)+'" onclick="itemAdd(this.dataset.item)">'+escH(m.name)+' <span style="opacity:.55">— '+escH(m.category||'')+'</span></button>').join('');
+  list.innerHTML=hits.map((m,i)=>'<button type="button" class="mob-pick-item" data-item="'+escA(m.name)+'" onclick="itemAdd(this.dataset.item)">'+escH(m.name)+' <span style="opacity:.55">— '+escH(m.category||'')+'</span>'+(m.homebrew?' <span style="opacity:.5;font-style:italic">· homebrew</span>':'')+'</button>').join('');
   list.classList.add('show');
 }
 function itemAdd(name){
@@ -2672,7 +2672,7 @@ const SB_CONFIG = {
   mobs: { placeholder: 'Search the ICRPG Bestiary…', pool: () => ((typeof ICRPG_MONSTERS !== 'undefined' && Array.isArray(ICRPG_MONSTERS)) ? ICRPG_MONSTERS : []).concat(_hbMobs), toCard: m => { const s = m.stats || {}; const st = k => s[k] == null ? '' : ((s[k] >= 0 ? '+' : '') + s[k]); return {
     sbtype: /boss|big five|villain/i.test(m.tier||'') ? 'boss' : 'mob', name: m.name || '',
     type: ['MONSTER', (m.tier||'').toUpperCase(), String(m.world||'').toUpperCase()].filter(Boolean).join(' // '), flavor: m.desc || '',
-    tier: m.tier || '', hearts: m.hearts != null ? String(m.hearts) : '', hp: m.hp != null ? String(m.hp) : '', def: m.defense != null ? String(m.defense) : '',
+    tier: m.tier || '', hearts: m.hearts != null ? String(m.hearts) : '', hp: m.hp != null ? String(m.hp) : (m.hearts != null ? String(m.hearts * 10) : ''), def: m.defense != null ? String(m.defense) : '',
     str: st('STR'), dex: st('DEX'), con: st('CON'), int: st('INT'), wis: st('WIS'), cha: st('CHA'),
     abilities: [...(m.attacks||[]).map(a => 'ATK: ' + a), ...(m.abilities||[])].join('\n'),
   }; }, sub: m => [m.tier, m.hearts != null ? m.hearts + '♥' : '', m.world].filter(Boolean).join(' · ') },

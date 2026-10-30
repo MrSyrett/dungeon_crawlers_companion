@@ -5,6 +5,7 @@ import { MMRPG_EQUIPMENT } from "@/lib/data/mmrpg-equipment";
 import type { MmrpgEquipment } from "@/lib/data/mmrpg-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import MmrpgHeadquarters from "@/components/MmrpgHeadquarters";
 import MmrpgStarships from "@/components/MmrpgStarships";
 import { MmrpgHeader, SearchForm, ChipRow, CountLine, EmptyState, SectionH, RefDetails, cardCls, nameCls, badge, hbBadge, one, withParams, type Query, type RawQuery } from "@/components/MmrpgRef";
@@ -178,10 +179,10 @@ export default async function MmrpgEquipmentPage({ searchParams }: { searchParam
         const groups = ICONIC_TYPES.filter((t) => iconicAll.some((e) => typeOf(e) === t));
         return (
           <>
-            <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">An <b>Iconic Item</b> is a signature weapon, suit of armor or gadget tied to a hero — like Captain America&rsquo;s Shield or the Iron Man Armor. It grants an origin and a list of powers, costs a number of power picks equal to its <b>Power Value</b>, and usually carries restrictions. Build your own below, then browse the catalog.</p>
-            <div className="mb-5">
+            <CompendiumHomebrew>
               <HomebrewEditor kind="mmrpg-iconic" campaigns={campaigns} initial={hbIconicOwn} />
-            </div>
+            </CompendiumHomebrew>
+            <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">An <b>Iconic Item</b> is a signature weapon, suit of armor or gadget tied to a hero — like Captain America&rsquo;s Shield or the Iron Man Armor. It grants an origin and a list of powers, costs a number of power picks equal to its <b>Power Value</b>, and usually carries restrictions. Build your own with the homebrew builder above (or start from any item here with Template), then browse the catalog.</p>
             <InstantFilter>
             <SearchForm base={BASE} q={q} placeholder="Search iconic items…" hidden={{ type, tab }} />
             <ChipRow label="Type" base={BASE} current={current} param="type" options={ICONIC_TYPES.map((t) => ({ key: t, label: t + "s" }))} active={type} />
@@ -200,9 +201,24 @@ export default async function MmrpgEquipmentPage({ searchParams }: { searchParam
         );
       })() : null}
 
-      {tab === "hq" ? <MmrpgHeadquarters campaigns={campaigns} own={hbHqOwn} visible={hbHq} /> : null}
+      {/* HQ / starship homebrew sits in the standard slot under the tabs, above each tab's section. */}
+      {tab === "hq" ? (
+        <>
+          <CompendiumHomebrew>
+            <HomebrewEditor kind="mmrpg-hq" campaigns={campaigns} initial={hbHqOwn} />
+          </CompendiumHomebrew>
+          <MmrpgHeadquarters visible={hbHq} />
+        </>
+      ) : null}
 
-      {tab === "ships" ? <MmrpgStarships campaigns={campaigns} own={hbShipOwn} visible={hbShip} /> : null}
+      {tab === "ships" ? (
+        <>
+          <CompendiumHomebrew>
+            <HomebrewEditor kind="mmrpg-starship" campaigns={campaigns} initial={hbShipOwn} />
+          </CompendiumHomebrew>
+          <MmrpgStarships visible={hbShip} />
+        </>
+      ) : null}
     </div>
   );
 }

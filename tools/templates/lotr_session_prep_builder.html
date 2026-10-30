@@ -2376,7 +2376,7 @@ function itemSearch(){
   const pool=PREG.itemList(PREP_CODE);
   const hits=(q?pool.filter(m=>(m.name||'').toLowerCase().includes(q)):pool).slice(0,80);
   if(!hits.length){ list.innerHTML='<div class="mob-pick-empty">No match.</div>'; list.classList.add('show'); return; }
-  list.innerHTML=hits.map((m,i)=>'<button type="button" class="mob-pick-item" data-item="'+escA(m.name)+'" onclick="itemAdd(this.dataset.item)">'+escH(m.name)+' <span style="opacity:.55">— '+escH(m.category||'')+'</span></button>').join('');
+  list.innerHTML=hits.map((m,i)=>'<button type="button" class="mob-pick-item" data-item="'+escA(m.name)+'" onclick="itemAdd(this.dataset.item)">'+escH(m.name)+' <span style="opacity:.55">— '+escH(m.category||'')+'</span>'+(m.homebrew?' <span style="opacity:.5;font-style:italic">· homebrew</span>':'')+'</button>').join('');
   list.classList.add('show');
 }
 function itemAdd(name){

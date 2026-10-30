@@ -4,6 +4,7 @@ import { DND_CLASSES } from "@/lib/data/dnd-classes";
 import type { DndClass, DndSubclass } from "@/lib/data/dnd-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DndHomebrewEditor from "@/components/DndHomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { DndHeader, ChipRow, cardCls, badge, one, srcKey, srcChips, type RawQuery } from "@/components/DndRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -47,7 +48,7 @@ export default async function DndClassesPage({ searchParams }: { searchParams: P
     return (
       <div className="mx-auto w-full max-w-5xl px-5 py-10">
         <DndHeader title="Classes" subtitle={`${DND_CLASSES.length} classes${hbSubs.length ? ` · +${hbSubs.length} homebrew subclass${hbSubs.length === 1 ? "" : "es"}` : ""} · levels 1–20`} />
-        <DndHomebrewEditor kind="dnd-subclass" campaigns={campaigns} initial={hbOwn} />
+        <CompendiumHomebrew><DndHomebrewEditor kind="dnd-subclass" campaigns={campaigns} initial={hbOwn} /></CompendiumHomebrew>
         <InstantFilter>
         <ChipRow label="Source" base={BASE} current={current} param="src" options={srcChips(classes.flatMap((c) => [c.source, ...c.subclasses.map((s) => s.source)]))} active={src} />
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">

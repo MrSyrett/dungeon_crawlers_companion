@@ -4,6 +4,7 @@ import { DND_SPELLS } from "@/lib/data/dnd-spells";
 import type { DndSpell } from "@/lib/data/dnd-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DndHomebrewEditor from "@/components/DndHomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { DndHeader, ChipRow, SearchForm, CountLine, EmptyState, cardCls, badge, one, srcKey, srcChips, type RawQuery } from "@/components/DndRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -62,7 +63,7 @@ export default async function DndSpellsPage({ searchParams }: { searchParams: Pr
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
       <DndHeader title="Spells" subtitle={`${DND_SPELLS.length} spells${hbSpells.length ? ` + ${hbSpells.length} homebrew` : ""} · cantrips–level 9`} />
-      <DndHomebrewEditor kind="dnd-spell" campaigns={campaigns} initial={hbOwn} />
+      <CompendiumHomebrew><DndHomebrewEditor kind="dnd-spell" campaigns={campaigns} initial={hbOwn} /></CompendiumHomebrew>
       <InstantFilter>
       <SearchForm base={BASE} q={one(raw.q)} placeholder="Search spells by name or effect…" hidden={{ lvl, cls, school, src }} />
       <ChipRow label="Level" base={BASE} current={current} param="lvl" options={[...Array(10).keys()].map((n) => ({ key: String(n), label: n === 0 ? "Cantrip" : String(n) }))} active={lvl} />

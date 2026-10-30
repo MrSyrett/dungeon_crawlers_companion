@@ -8,11 +8,11 @@ const SB_CONFIG = {
     [{ key:'move', label:'SPEED', th:'Speed Code (creatures)' }, { key:'force', label:'FORCE PTS', th:'Force Points' }, { key:'armor', label:'ARMOR' }],
   ],
   abilitiesLabel: 'Skills, Equipment & Notes', abilitiesPlaceholder: 'One per line — blaster 4D · Stormtrooper armor (+1D)',
-  mobs: { placeholder: 'Search the Star Wars Bestiary…', pool: () => (typeof SW_CHARACTERS !== 'undefined' && Array.isArray(SW_CHARACTERS)) ? SW_CHARACTERS : [], toCard: m => { const A = m.attributes || {}; const c = k => A[k] == null ? '' : _swCode(A[k]); return {
+  mobs: { placeholder: 'Search the Star Wars Bestiary…', pool: () => ((typeof SW_CHARACTERS !== 'undefined' && Array.isArray(SW_CHARACTERS)) ? SW_CHARACTERS : []).concat(_hbMobs), toCard: m => { const A = m.attributes || {}; const c = k => A[k] == null ? '' : _swCode(A[k]); return {
     sbtype: /villain/i.test(m.group||'') ? 'boss' : /hero|rebel|civilian|alien/i.test(m.group||'') ? 'npc' : 'mob', name: m.name || '',
-    type: [String(m.group||'').toUpperCase(), m.book === 'sourcebook' ? 'SOURCEBOOK' : m.book === 'companion' ? 'RULES COMPANION' : ''].filter(Boolean).join(' // '), flavor: m.description || '',
+    type: [String(m.group||'').toUpperCase(), m.homebrew ? 'HOMEBREW' : m.book === 'sourcebook' ? 'SOURCEBOOK' : m.book === 'companion' ? 'RULES COMPANION' : ''].filter(Boolean).join(' // '), flavor: m.description || '',
     dex: c('Dexterity'), kno: c('Knowledge'), mec: c('Mechanical'), per: c('Perception'), str: c('Strength'), tec: c('Technical'),
-    move: String(m.move || '').replace(/^Speed Code\s*/i, ''), force: '', armor: ((m.equipment||[]).find(e => /armor/i.test(e)) || '').split(/[:(]/)[0].trim(),
-    abilities: [...(m.skills||[]).map(x => 'Skill: ' + x), ...(m.equipment||[]).map(x => 'Gear: ' + x), m.notes ? 'Notes: ' + m.notes : ''].filter(Boolean).join('\n'),
-  }; }, sub: m => String(m.group||'') + (m.book !== 'core' ? ' · ' + m.book : '') },
+    move: String(m.move || '').replace(/^Speed Code\s*/i, ''), force: m.forcePoints ? String(m.forcePoints) : '', armor: ((m.equipment||[]).find(e => /armor/i.test(e)) || '').split(/[:(]/)[0].trim(),
+    abilities: [...(m.skills||[]).map(x => 'Skill: ' + x), ...(m.equipment||[]).map(x => 'Gear: ' + x), m.darkSidePoints ? 'Dark Side Points: ' + m.darkSidePoints : '', m.notes ? 'Notes: ' + m.notes : ''].filter(Boolean).join('\n'),
+  }; }, sub: m => String(m.group||'') + (m.homebrew ? '' : m.book !== 'core' ? ' · ' + m.book : '') },
 };

@@ -2,7 +2,10 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { DB_KIN, DB_TABLES, DB_KIN_TABLE20, DB_KIN_LORE, DB_NPC_TRAITS } from "@/lib/data/db-data";
 import type { DbKin } from "@/lib/data/db-types";
-import { DbHeader, BackLink, RuleNote, cardCls, nameCls, badge, eyebrow, sectionH, th, td, one, srcPage, type RawQuery } from "@/components/DbRef";
+import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
+import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
+import { DbHeader, BackLink, RuleNote, cardCls, nameCls, badge, hbBadge, eyebrow, sectionH, th, td, one, isHb, srcPage, type RawQuery } from "@/components/DbRef";
 
 export const dynamic = "force-dynamic";
 const BASE = "/dragonbane/kin";
@@ -13,6 +16,8 @@ const wpText = (wp: number | string | null) => (wp == null ? "No WP" : wp === "v
 const timingText = (t: string) => ({ action: "Action", free: "No action", reaction: "Reaction", passive: "Always on", downtime: "During rest", rest: "During rest", roundStart: "Start of round" } as Record<string, string>)[t] ?? t;
 const rollRange = (r?: [number, number]) => !r ? "—" : (r[0] === r[1] ? `${r[0]}` : `${r[0]}–${r[1]}`);
 const isCore = (k: DbKin) => (k.source ?? "core") === "core";
+// Book kin come from the Core Rules or the Bestiary; homebrew kin (db-kin) get their own section.
+const isBestiary = (k: DbKin) => !isCore(k) && !isHb(k);
 const TRAITS = DB_NPC_TRAITS as Record<string, string>;
 
 function KinDetail({ k }: { k: DbKin }) {
@@ -21,12 +26,13 @@ function KinDetail({ k }: { k: DbKin }) {
   return (
     <div className={`${cardCls} border-l-4 border-r-4`} style={{ borderLeftColor: "var(--db)", borderRightColor: "var(--db)" }}>
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <h2 className="text-3xl text-[var(--sys-link)]">{k.name}</h2>
+        <h2 className="text-3xl text-[var(--sys-link)]">{k.name} {isHb(k) ? <span className={hbBadge}>HB</span> : null}</h2>
         <span className="flex flex-wrap gap-1.5">
-          <span className={badge}>D20 {rollRange(k.roll20)}</span>
+          {k.roll20 ? <span className={badge}>D20 {rollRange(k.roll20)}</span> : null}
           {k.roll ? <span className={badge}>D12 {rollRange(k.roll)}</span> : null}
           <span className={badge}>Movement {k.movement}</span>
-          {!isCore(k) ? <span className={badge}>Bestiary</span> : null}
+          {isBestiary(k) ? <span className={badge}>Bestiary</span> : null}
+          {k.flying ? <span className={badge}>Flies (WP)</span> : null}
         </span>
       </div>
       <p className="mt-2 text-[14px] leading-relaxed text-[var(--muted)]">{k.text}</p>
@@ -52,10 +58,10 @@ function KinDetail({ k }: { k: DbKin }) {
             </dl>
           ) : null}
           {k.pcNotes ? <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">{k.pcNotes}</p> : null}
-          {!isCore(k) ? <p className="mt-2 text-[12px] italic text-[var(--muted)]">Bestiary kin are playable if your gaming group agrees. Create the character in the usual way — the NPC stat blocks show typical members, not player characters.</p> : null}
+          {isBestiary(k) ? <p className="mt-2 text-[12px] italic text-[var(--muted)]">Bestiary kin are playable if your gaming group agrees. Create the character in the usual way — the NPC stat blocks show typical members, not player characters.</p> : null}
         </>
       ) : null}
-      <h3 className={`${sectionH} mt-5`}>Names</h3>
+      {k.names.length ? <h3 className={`${sectionH} mt-5`}>Names</h3> : null}
       <ol className="grid grid-cols-2 gap-x-6 gap-y-0.5 text-[13px] text-[var(--muted)] sm:grid-cols-3">
         {k.names.map((n, i) => <li key={n}><span className="mr-2 font-mono text-[11px] text-[var(--db-ink)]">{i + 1}</span>{n}</li>)}
       </ol>
@@ -77,8 +83,8 @@ function KinCard({ k }: { k: DbKin }) {
     <li className={cardCls}>
       <a href={`${BASE}?k=${k.id}`} className="group block">
         <div className="flex items-start justify-between gap-2">
-          <h3 className={`${nameCls} group-hover:underline`}>{k.name}</h3>
-          <span className="flex gap-1.5">{!isCore(k) ? <span className={badge}>Bestiary</span> : null}<span className={badge}>D20 {rollRange(k.roll20)}</span></span>
+          <h3 className={`${nameCls} group-hover:underline`}>{k.name} {isHb(k) ? <span className={hbBadge}>HB</span> : null}</h3>
+          <span className="flex gap-1.5">{isBestiary(k) ? <span className={badge}>Bestiary</span> : null}{k.roll20 ? <span className={badge}>D20 {rollRange(k.roll20)}</span> : null}</span>
         </div>
         <p className="mt-1 line-clamp-3 text-[12.5px] leading-relaxed text-[var(--muted)]">{k.text}</p>
         <p className="mt-2 flex flex-wrap gap-x-3 gap-y-0.5 text-[12px] text-[var(--muted)]">
@@ -94,8 +100,15 @@ export default async function DbKinPage({ searchParams }: { searchParams: Promis
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   const raw = await searchParams;
+  const [hbV, hbOwn, campaigns] = await Promise.all([
+    visibleHomebrew(user.id, { type: "db-kin" }),
+    ownHomebrew(user.id, "db-kin"),
+    userCampaigns(user.id),
+  ]);
+  const homebrew = hbV.map((h) => h.data as unknown as DbKin).filter((k) => k && k.name && Array.isArray(k.abilities));
+  const all = [...DB_KIN, ...homebrew];
   const pick = one(raw.k);
-  const selected = pick ? DB_KIN.find((k) => k.id === pick || k.name === pick) ?? null : null;
+  const selected = pick ? all.find((k) => k.id === pick || k.name === pick) ?? null : null;
   if (selected) {
     return (
       <div className="mx-auto w-full max-w-3xl px-5 py-10">
@@ -105,11 +118,14 @@ export default async function DbKinPage({ searchParams }: { searchParams: Promis
       </div>
     );
   }
-  const core = DB_KIN.filter(isCore), bestiary = DB_KIN.filter((k) => !isCore(k));
+  const core = DB_KIN.filter(isCore), bestiary = DB_KIN.filter(isBestiary);
 
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
-      <DbHeader title="Kin" subtitle={`${DB_KIN.length} playable kin · ${core.length} core + ${bestiary.length} from the Bestiary · roll D20 or choose`} />
+      <DbHeader title="Kin" subtitle={`${DB_KIN.length} playable kin · ${core.length} core + ${bestiary.length} from the Bestiary · roll D20 or choose${homebrew.length ? ` · +${homebrew.length} homebrew` : ""}`} />
+      <CompendiumHomebrew>
+        <HomebrewEditor kind="db-kin" campaigns={campaigns} initial={hbOwn} />
+      </CompendiumHomebrew>
       <RuleNote title="Choosing a kin">
         <p>Kin sets your base Movement, your innate ability (mallards have two) and a list of typical names. Everyone speaks, reads and writes the common tongue; other kin also know their own language. Most innate abilities cost Willpower Points to use.</p>
         <p className="mt-1.5">The Bestiary adds nine kin — orcs, ogres, goblins, hobgoblins, frog people, karkions, cat people, lizard people and satyrs — playable if your group agrees. All have base Movement 10. With them in play, roll on the D20 table below instead of the core D12 table.</p>
@@ -121,6 +137,12 @@ export default async function DbKinPage({ searchParams }: { searchParams: Promis
         <>
           <h2 className={`${sectionH} mt-8`}>Bestiary kin</h2>
           <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">{bestiary.map((k) => <KinCard key={k.id} k={k} />)}</ul>
+        </>
+      ) : null}
+      {homebrew.length ? (
+        <>
+          <h2 className={`${sectionH} mt-8`}>Homebrew kin</h2>
+          <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">{homebrew.map((k, i) => <KinCard key={`${k.id}-${i}`} k={k} />)}</ul>
         </>
       ) : null}
 
@@ -138,7 +160,7 @@ export default async function DbKinPage({ searchParams }: { searchParams: Promis
         <div className="grid gap-4 md:grid-cols-2">
           <table className="w-full border-collapse">
             <thead><tr><th className={th}>Kin</th><th className={th}>Base</th></tr></thead>
-            <tbody>{DB_KIN.map((k) => <tr key={k.id}><td className={td}>{k.name}</td><td className={td}>{k.movement}</td></tr>)}</tbody>
+            <tbody>{all.map((k, i) => <tr key={`${k.id}-${i}`}><td className={td}>{k.name}</td><td className={td}>{k.movement}</td></tr>)}</tbody>
           </table>
           <table className="w-full border-collapse">
             <thead><tr><th className={th}>AGL</th><th className={th}>Modifier</th></tr></thead>

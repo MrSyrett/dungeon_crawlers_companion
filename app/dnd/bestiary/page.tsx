@@ -4,6 +4,7 @@ import { DND_MONSTERS } from "@/lib/data/dnd-monsters";
 import type { DndMonster, DndMonsterAction } from "@/lib/data/dnd-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DndHomebrewEditor from "@/components/DndHomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { DndHeader, ChipRow, SearchForm, CountLine, EmptyState, cardCls, badge, one, withParams, srcKey, srcChips, type RawQuery } from "@/components/DndRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -138,7 +139,7 @@ export default async function DndBestiaryPage({ searchParams }: { searchParams: 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <DndHeader title="Bestiary" subtitle={`${DND_MONSTERS.length} creatures${hbMonsters.length ? ` + ${hbMonsters.length} homebrew` : ""} · CR 0–30`} />
-      <DndHomebrewEditor kind="dnd-monster" campaigns={campaigns} initial={hbOwn} />
+      <CompendiumHomebrew><DndHomebrewEditor kind="dnd-monster" campaigns={campaigns} initial={hbOwn} /></CompendiumHomebrew>
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search creatures by name or type…" hidden={{ group, cr, src }} />
       <ChipRow label="Type" base={BASE} current={current} param="group" options={groups.map((g) => ({ key: g, label: g }))} active={group} />

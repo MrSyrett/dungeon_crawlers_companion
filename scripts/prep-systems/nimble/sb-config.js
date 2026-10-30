@@ -8,8 +8,8 @@ const SB_CONFIG = {
   abilitiesLabel: 'Abilities', abilitiesPlaceholder: 'One per line — Name: effect',
   mobs: { placeholder: 'Search the Nimble Bestiary…', pool: () => ((typeof NIMBLE_MONSTERS !== 'undefined' && Array.isArray(NIMBLE_MONSTERS)) ? NIMBLE_MONSTERS : []).concat(_hbMobs), toCard: m => ({
     sbtype: m.legendary ? 'boss' : 'mob', name: m.name || '',
-    type: [...new Set([m.legendary ? 'LEGENDARY' : m.minion ? 'MINION' : 'MONSTER', String(m.family||'').toUpperCase(), String(m.size||'').toUpperCase()].filter(Boolean))].join(' // '), flavor: '',
+    type: [...new Set([m.legendary ? 'LEGENDARY' : m.minion ? 'MINION' : 'MONSTER', String(m.family||'').toUpperCase(), String(m.size||'').toUpperCase()].filter(Boolean))].join(' // '), flavor: m.description || '',
     level: String(m.level ?? ''), size: m.size || '', hp: m.hp != null ? String(m.hp) : (m.minion ? '1' : ''), armor: m.armor || '', saves: m.saves || '',
-    abilities: [...(m.abilities||[]).map(a => a.name + ': ' + a.text), m.familyTrait ? 'Family trait: ' + m.familyTrait : ''].filter(Boolean).join('\n'),
+    abilities: [m.speed != null && m.speed !== '' ? 'Speed: ' + m.speed : '', ...(m.abilities||[]).map(a => a.name + ': ' + a.text), m.familyTrait ? 'Family trait: ' + m.familyTrait : ''].filter(Boolean).join('\n'),
   }), sub: m => (m.family || '') + ' · L' + m.level + (m.legendary ? ' · legendary' : m.minion ? ' · minion' : '') },
 };

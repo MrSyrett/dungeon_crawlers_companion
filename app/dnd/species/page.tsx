@@ -4,6 +4,7 @@ import { DND_SPECIES } from "@/lib/data/dnd-species";
 import type { DndSpecies } from "@/lib/data/dnd-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DndHomebrewEditor from "@/components/DndHomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { DndHeader, ChipRow, cardCls, badge, one, srcKey, srcChips, type RawQuery } from "@/components/DndRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -40,7 +41,7 @@ export default async function DndSpeciesPage({ searchParams }: { searchParams: P
     return (
       <div className="mx-auto w-full max-w-5xl px-5 py-10">
         <DndHeader title="Species" subtitle={`${DND_SPECIES.length} species${hbSpecies.length ? ` + ${hbSpecies.length} homebrew` : ""}`} />
-        <DndHomebrewEditor kind="dnd-species" campaigns={campaigns} initial={hbOwn} />
+        <CompendiumHomebrew><DndHomebrewEditor kind="dnd-species" campaigns={campaigns} initial={hbOwn} /></CompendiumHomebrew>
         <InstantFilter>
         <ChipRow label="Source" base={BASE} current={current} param="src" options={srcChips(allSpecies.map((x) => x.source))} active={src} />
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">

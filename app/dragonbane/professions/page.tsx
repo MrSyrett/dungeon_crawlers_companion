@@ -2,13 +2,17 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { DB_PROFESSIONS, DB_HEROIC_ABILITIES, DB_TABLES, DB_WEAKNESSES, DB_MEMENTOS, DB_APPEARANCES, DB_MAGIC_RULES } from "@/lib/data/db-data";
 import type { DbProfession, DbKitItem } from "@/lib/data/db-types";
-import { DbHeader, BackLink, RuleNote, DieTable, SectionNav, cardCls, nameCls, badge, eyebrow, sectionH, th, td, one, type RawQuery } from "@/components/DbRef";
+import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
+import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
+import { DbHeader, BackLink, RuleNote, DieTable, SectionNav, cardCls, nameCls, badge, hbBadge, eyebrow, sectionH, th, td, one, isHb, srcPage, type RawQuery } from "@/components/DbRef";
 
 export const dynamic = "force-dynamic";
 const BASE = "/dragonbane/professions";
 
 const itemText = (i: DbKitItem) => `${i.qty && i.qty > 1 ? `${i.qty}× ` : ""}${i.choice ? i.choice.join(" / ") : i.name ?? ""}${i.note ? ` (${i.note})` : ""}`;
-const kitRoll = ["1–2", "3–4", "5–6"];
+// The book's three kits roll 1–2 / 3–4 / 5–6; a homebrew profession may have one or two.
+const kitRolls = (n: number) => (n >= 3 ? ["1–2", "3–4", "5–6"] : n === 2 ? ["1–3", "4–6"] : ["1–6"]);
 
 function abilityLine(name: string) {
   const a = DB_HEROIC_ABILITIES.find((x) => x.name === name);
@@ -19,8 +23,8 @@ function ProfessionDetail({ p }: { p: DbProfession }) {
   return (
     <div className={`${cardCls} border-l-4 border-r-4`} style={{ borderLeftColor: "var(--db)", borderRightColor: "var(--db)" }}>
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <h2 className="text-3xl text-[var(--sys-link)]">{p.name}</h2>
-        <span className={badge}>D10 {p.roll} · Key attribute {p.keyAttribute}</span>
+        <h2 className="text-3xl text-[var(--sys-link)]">{p.name} {isHb(p) ? <span className={hbBadge}>HB</span> : null}</h2>
+        <span className={badge}>{p.roll ? `D10 ${p.roll} · ` : ""}Key attribute {p.keyAttribute}</span>
       </div>
       <p className="mt-2 text-[14px] leading-relaxed text-[var(--muted)]">{p.text}</p>
 
@@ -59,7 +63,7 @@ function ProfessionDetail({ p }: { p: DbProfession }) {
       <div className="grid gap-3 md:grid-cols-3">
         {p.kits.map((k, i) => (
           <div key={i} className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-3">
-            <p className="font-mono text-[11px] text-[var(--db-ink)]">{kitRoll[i]}</p>
+            <p className="font-mono text-[11px] text-[var(--db-ink)]">{kitRolls(p.kits.length)[i]}</p>
             <ul className="mt-1 flex list-disc flex-col gap-0.5 pl-4 text-[12.5px] text-[var(--muted)] marker:text-[var(--db)]">
               {k.items.map((it, j) => <li key={j}>{itemText(it)}</li>)}
               <li>{k.food} food rations</li>
@@ -74,7 +78,7 @@ function ProfessionDetail({ p }: { p: DbProfession }) {
       <ol className="grid grid-cols-2 gap-x-6 gap-y-0.5 text-[13px] text-[var(--muted)] sm:grid-cols-3">
         {p.nicknames.map((n, i) => <li key={n}><span className="mr-2 font-mono text-[11px] text-[var(--db-ink)]">{i + 1}</span>{n}</li>)}
       </ol>
-      <p className="mt-4 text-[12px] italic text-[var(--muted)]">Core Rules p.{p.page}.</p>
+      <p className="mt-4 text-[12px] italic text-[var(--muted)]">{srcPage(p)}.</p>
     </div>
   );
 }
@@ -83,8 +87,15 @@ export default async function DbProfessionsPage({ searchParams }: { searchParams
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   const raw = await searchParams;
+  const [hbV, hbOwn, campaigns] = await Promise.all([
+    visibleHomebrew(user.id, { type: "db-profession" }),
+    ownHomebrew(user.id, "db-profession"),
+    userCampaigns(user.id),
+  ]);
+  const homebrew = hbV.map((h) => h.data as unknown as DbProfession).filter((p) => p && p.name && Array.isArray(p.kits));
+  const all = [...DB_PROFESSIONS, ...homebrew];
   const pick = one(raw.p);
-  const selected = pick ? DB_PROFESSIONS.find((p) => p.id === pick || p.name === pick) ?? null : null;
+  const selected = pick ? all.find((p) => p.id === pick || p.name === pick) ?? null : null;
   if (selected) {
     return (
       <div className="mx-auto w-full max-w-4xl px-5 py-10">
@@ -98,17 +109,20 @@ export default async function DbProfessionsPage({ searchParams }: { searchParams
 
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
-      <DbHeader title="Professions" subtitle={`${DB_PROFESSIONS.length} professions · roll D10 or choose`} />
+      <DbHeader title="Professions" subtitle={`${DB_PROFESSIONS.length} professions · roll D10 or choose${homebrew.length ? ` · +${homebrew.length} homebrew` : ""}`} />
       <SectionNav items={[{ id: "professions", label: "Professions" }, { id: "creation", label: "Creating a Character" }, { id: "age", label: "Age & Attributes" }, { id: "extras", label: "Weakness, Memento, Appearance" }]} />
+      <CompendiumHomebrew>
+        <HomebrewEditor kind="db-profession" campaigns={campaigns} initial={hbOwn} />
+      </CompendiumHomebrew>
 
       <section id="professions" className="scroll-mt-20">
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
-          {DB_PROFESSIONS.map((p) => (
-            <li key={p.id} className={cardCls}>
+          {all.map((p, i) => (
+            <li key={`${p.id}-${i}`} className={cardCls}>
               <a href={`${BASE}?p=${p.id}`} className="group block">
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className={`${nameCls} group-hover:underline`}>{p.name}</h3>
-                  <span className="flex gap-1.5"><span className={badge}>{p.keyAttribute}</span><span className={badge}>D10 {p.roll}</span></span>
+                  <h3 className={`${nameCls} group-hover:underline`}>{p.name} {isHb(p) ? <span className={hbBadge}>HB</span> : null}</h3>
+                  <span className="flex gap-1.5"><span className={badge}>{p.keyAttribute}</span>{p.roll ? <span className={badge}>D10 {p.roll}</span> : null}</span>
                 </div>
                 <p className="mt-1 line-clamp-2 text-[12.5px] leading-relaxed text-[var(--muted)]">{p.text}</p>
                 <p className="mt-2 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Heroic ability:</span> {p.mage ? "— (magic instead)" : p.heroicAbilities.join(p.heroicChoice ? " / " : ", ")}</p>

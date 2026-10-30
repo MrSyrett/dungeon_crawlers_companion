@@ -4,6 +4,7 @@ import { KOB_TROPES } from "@/lib/data/kob-tropes";
 import { KOB_STATS, type KobTrope, type KobBook, type KobDie, type KobStat } from "@/lib/data/kob-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { KobHeader, SearchForm, ChipRow, CountLine, EmptyState, BOOKS, isBook, bookName, one, nameCls, cardCls, bookBadge, hbBadge, type Query, type RawQuery } from "@/components/KobRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -77,9 +78,9 @@ export default async function KobTropesPage({ searchParams }: { searchParams: Pr
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <KobHeader title="Tropes" subtitle={`${KOB_TROPES.length} tropes across three books${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
-      <div className="mb-6">
+      <CompendiumHomebrew>
         <HomebrewEditor kind="kob-trope" campaigns={campaigns} initial={hbOwn} />
-      </div>
+      </CompendiumHomebrew>
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search tropes, strengths, flaws…" hidden={{ book, age }} />
       <ChipRow label="Book" base={BASE} current={current} param="book" options={BOOKS} active={book} />

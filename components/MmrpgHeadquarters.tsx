@@ -1,12 +1,13 @@
 import { MMRPG_HQ_PROFILES } from "@/lib/data/mmrpg-hq-profiles";
 import { MMRPG_HQ_TRAITS } from "@/lib/data/mmrpg-hq-traits";
 import { MMRPG_HQ_TAGS } from "@/lib/data/mmrpg-hq-tags";
-import HomebrewEditor, { type CampaignRef, type HomebrewRecord } from "@/components/HomebrewEditor";
+import type { HomebrewRecord } from "@/components/HomebrewEditor";
 import { SectionH, cardCls, badge, hbBadge } from "@/components/MmrpgRef";
 
-// The Headquarters section of the Equipment page: a homebrew builder (kind
-// "mmrpg-hq"), the user's saved HQs + the book's sample HQ profiles as cards, and
-// a reference of every HQ trait (with its downtime activity) and tag.
+// The Headquarters section of the Equipment page: the user's visible HQs + the
+// book's sample HQ profiles as cards, and a reference of every HQ trait (with
+// its downtime activity) and tag. The homebrew builder (kind "mmrpg-hq") is
+// rendered by the page in the standard CompendiumHomebrew slot above this.
 
 type HqTrait = { name: string; n?: number };
 type HqTag = { name: string; note?: string };
@@ -49,18 +50,14 @@ function HqCard({ hq }: { hq: Hq }) {
   );
 }
 
-export default function MmrpgHeadquarters({ campaigns, own, visible }: { campaigns: CampaignRef[]; own: HomebrewRecord[]; visible: HomebrewRecord[] }) {
+export default function MmrpgHeadquarters({ visible }: { visible: HomebrewRecord[] }) {
   const homebrew: Hq[] = visible.map((h) => ({ ...(h.data as unknown as Hq), name: h.name, homebrew: true }));
   const samples = MMRPG_HQ_PROFILES as unknown as Hq[];
 
   return (
     <section className={`${cardCls} mb-4`}>
       <SectionH>Headquarters</SectionH>
-      <p className="mb-3 mt-2 text-[13px] leading-relaxed text-[var(--muted)]">A team&rsquo;s base. Its <b>team rank</b> is the average of the members&rsquo; ranks (top six), rounded up, and it can have <b>3 traits per team rank</b> plus as many <b>tags</b> as you like. Each trait grants a downtime activity; some tags can&rsquo;t be combined. Build your own below, then browse the book&rsquo;s famous headquarters for inspiration.</p>
-
-      <div className="mb-5">
-        <HomebrewEditor kind="mmrpg-hq" campaigns={campaigns} initial={own} />
-      </div>
+      <p className="mb-3 mt-2 text-[13px] leading-relaxed text-[var(--muted)]">A team&rsquo;s base. Its <b>team rank</b> is the average of the members&rsquo; ranks (top six), rounded up, and it can have <b>3 traits per team rank</b> plus as many <b>tags</b> as you like. Each trait grants a downtime activity; some tags can&rsquo;t be combined. Build your own with the homebrew builder above (Template starts from any of these), and browse the book&rsquo;s famous headquarters for inspiration.</p>
 
       <div className="grid gap-3 md:grid-cols-2">
         {homebrew.map((hq) => <HqCard key={`hb-${hq.name}`} hq={hq} />)}

@@ -2181,7 +2181,7 @@ function itemSearch(){
   const pool=PREG.itemList(PREP_CODE);
   const hits=(q?pool.filter(m=>(m.name||'').toLowerCase().includes(q)):pool).slice(0,80);
   if(!hits.length){ list.innerHTML='<div class="mob-pick-empty">No match.</div>'; list.classList.add('show'); return; }
-  list.innerHTML=hits.map((m,i)=>'<button type="button" class="mob-pick-item" data-item="'+escA(m.name)+'" onclick="itemAdd(this.dataset.item)">'+escH(m.name)+' <span style="opacity:.55">— '+escH(m.category||'')+'</span></button>').join('');
+  list.innerHTML=hits.map((m,i)=>'<button type="button" class="mob-pick-item" data-item="'+escA(m.name)+'" onclick="itemAdd(this.dataset.item)">'+escH(m.name)+' <span style="opacity:.55">— '+escH(m.category||'')+'</span>'+(m.homebrew?' <span style="opacity:.5;font-style:italic">· homebrew</span>':'')+'</button>').join('');
   list.classList.add('show');
 }
 function itemAdd(name){
@@ -2670,19 +2670,44 @@ const SB_CONFIG = {
     [{ key:'move', label:'SPEED', th:'Speed Code (creatures)' }, { key:'force', label:'FORCE PTS', th:'Force Points' }, { key:'armor', label:'ARMOR' }],
   ],
   abilitiesLabel: 'Skills, Equipment & Notes', abilitiesPlaceholder: 'One per line — blaster 4D · Stormtrooper armor (+1D)',
-  mobs: { placeholder: 'Search the Star Wars Bestiary…', pool: () => (typeof SW_CHARACTERS !== 'undefined' && Array.isArray(SW_CHARACTERS)) ? SW_CHARACTERS : [], toCard: m => { const A = m.attributes || {}; const c = k => A[k] == null ? '' : _swCode(A[k]); return {
+  mobs: { placeholder: 'Search the Star Wars Bestiary…', pool: () => ((typeof SW_CHARACTERS !== 'undefined' && Array.isArray(SW_CHARACTERS)) ? SW_CHARACTERS : []).concat(_hbMobs), toCard: m => { const A = m.attributes || {}; const c = k => A[k] == null ? '' : _swCode(A[k]); return {
     sbtype: /villain/i.test(m.group||'') ? 'boss' : /hero|rebel|civilian|alien/i.test(m.group||'') ? 'npc' : 'mob', name: m.name || '',
-    type: [String(m.group||'').toUpperCase(), m.book === 'sourcebook' ? 'SOURCEBOOK' : m.book === 'companion' ? 'RULES COMPANION' : ''].filter(Boolean).join(' // '), flavor: m.description || '',
+    type: [String(m.group||'').toUpperCase(), m.homebrew ? 'HOMEBREW' : m.book === 'sourcebook' ? 'SOURCEBOOK' : m.book === 'companion' ? 'RULES COMPANION' : ''].filter(Boolean).join(' // '), flavor: m.description || '',
     dex: c('Dexterity'), kno: c('Knowledge'), mec: c('Mechanical'), per: c('Perception'), str: c('Strength'), tec: c('Technical'),
-    move: String(m.move || '').replace(/^Speed Code\s*/i, ''), force: '', armor: ((m.equipment||[]).find(e => /armor/i.test(e)) || '').split(/[:(]/)[0].trim(),
-    abilities: [...(m.skills||[]).map(x => 'Skill: ' + x), ...(m.equipment||[]).map(x => 'Gear: ' + x), m.notes ? 'Notes: ' + m.notes : ''].filter(Boolean).join('\n'),
-  }; }, sub: m => String(m.group||'') + (m.book !== 'core' ? ' · ' + m.book : '') },
+    move: String(m.move || '').replace(/^Speed Code\s*/i, ''), force: m.forcePoints ? String(m.forcePoints) : '', armor: ((m.equipment||[]).find(e => /armor/i.test(e)) || '').split(/[:(]/)[0].trim(),
+    abilities: [...(m.skills||[]).map(x => 'Skill: ' + x), ...(m.equipment||[]).map(x => 'Gear: ' + x), m.darkSidePoints ? 'Dark Side Points: ' + m.darkSidePoints : '', m.notes ? 'Notes: ' + m.notes : ''].filter(Boolean).join('\n'),
+  }; }, sub: m => String(m.group||'') + (m.homebrew ? '' : m.book !== 'core' ? ' · ' + m.book : '') },
 };
 /* SB_CONFIG_END */
 // ── Homebrew monsters in the bestiary picker ──────────────────────────────
 // Pull the viewer's brewed monsters and merge them into the picker pool.
 // Standalone-safe: no /api/homebrew (or a 401/offline) leaves the list book-only.
 let _hbMobs = [];
+async function loadHomebrewMobs() {
+  let rows;
+  try {
+    const r = await fetch('/api/homebrew?type=sw-character', { credentials: 'same-origin' });
+    if(!r.ok) return;
+    const data = await r.json();
+    rows = Array.isArray(data.items) ? data.items : [];
+  } catch(e) { return; }
+  const seen = new Set();
+  const next = [];
+  rows.forEach(row => {
+    if(!row || row.type !== 'sw-character' || !row.data) return;
+    const d = row.data;
+    const nm = String(d.name || '').trim();
+    if(!nm || seen.has(nm.toLowerCase())) return;
+    seen.add(nm.toLowerCase());
+    // The server composes the book SW_CHARACTERS shape from the builder (attributes
+    // as pips, skills[] / equipment[] lines, group, move "Speed Code 2D") and adds
+    // forcePoints / darkSidePoints.
+    next.push(Object.assign({ homebrew: true }, d, { name: nm, group: d.group || 'Homebrew' }));
+  });
+  _hbMobs = next;
+  try { const list = document.getElementById('mobpick-list'); if(list && list.classList.contains('show') && typeof mobSearch === 'function') mobSearch(); } catch(e) {}
+}
+loadHomebrewMobs();
 // Values of the schema-driven stat fields on a card, keyed by field key.
 function sbFieldValues(card) {
   const out = {};

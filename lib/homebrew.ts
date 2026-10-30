@@ -58,7 +58,7 @@ import {
 } from "@/components/hb/sw/rules";
 import {
   DB_ABILITY_TAGS, DB_DMG_KINDS as DB_ARMOR_DMG, DB_FEATURES as DB_FEATURE_LIST, DB_POISONS, DB_MON_CATEGORIES, DB_DMG_TYPES as DB_HB_DMG_TYPES,
-  cleanDbBenefits,
+  cleanDbBenefits, cleanDbKin, cleanDbProfession,
 } from "@/components/hb/db/rules";
 
 // Homebrew is stored in the exact object shapes the character sheet already
@@ -84,7 +84,7 @@ export type HbType =
   | "myz-weapon" | "myz-gear"
   | "vae-weapon" | "vae-gear"
   | "lotr-virtue" | "lotr-background" | "lotr-weapon" | "lotr-gear" | "lotr-monster"
-  | "db-ability" | "db-spell" | "db-weapon" | "db-armor" | "db-gear" | "db-monster" | "db-npc"
+  | "db-ability" | "db-spell" | "db-weapon" | "db-armor" | "db-gear" | "db-monster" | "db-npc" | "db-kin" | "db-profession"
   | "pb-weapon" | "pb-armor" | "pb-gear" | "pb-relic" | "pb-ritual" | "pb-monster" | "pb-ship"
   | "mmrpg-power" | "mmrpg-trait" | "mmrpg-tag" | "mmrpg-iconic" | "mmrpg-hq" | "mmrpg-starship";
 
@@ -104,7 +104,7 @@ const HB_TYPES = [
   "myz-weapon", "myz-gear",
   "vae-weapon", "vae-gear",
   "lotr-virtue", "lotr-background", "lotr-weapon", "lotr-gear", "lotr-monster",
-  "db-ability", "db-spell", "db-weapon", "db-armor", "db-gear", "db-monster", "db-npc",
+  "db-ability", "db-spell", "db-weapon", "db-armor", "db-gear", "db-monster", "db-npc", "db-kin", "db-profession",
   "pb-weapon", "pb-armor", "pb-gear", "pb-relic", "pb-ritual", "pb-monster", "pb-ship",
   "mmrpg-power", "mmrpg-trait", "mmrpg-tag", "mmrpg-iconic", "mmrpg-hq", "mmrpg-starship",
 ] as const;
@@ -2822,6 +2822,21 @@ function normalizeDbNpc(input: unknown): { name: string; data: Record<string, un
   return { name, data };
 }
 
+// Kin and professions: the book shapes (DbKin / DbProfession); the sanitisers
+// live in components/hb/db/rules.ts (cleanDbKin / cleanDbProfession).
+function normalizeDbKin(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew kin needs a name.");
+  return { name, data: cleanDbKin(o, name) };
+}
+function normalizeDbProfession(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew profession needs a name.");
+  return { name, data: cleanDbProfession(o, name) };
+}
+
 // ── Pirate Borg (PB) ────────────────────────────────────────────────────────
 // Each normaliser emits the lib/data/pb-types shape its book dataset uses
 // (source "Homebrew", homebrew: true, an id slug), so the /pirate-borg reference
@@ -3364,6 +3379,8 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "db-gear": return normalizeDbGear(data);
     case "db-monster": return normalizeDbMonster(data);
     case "db-npc": return normalizeDbNpc(data);
+    case "db-kin": return normalizeDbKin(data);
+    case "db-profession": return normalizeDbProfession(data);
     case "pb-weapon": return normalizePbWeapon(data);
     case "pb-armor": return normalizePbArmor(data);
     case "pb-gear": return normalizePbGear(data);

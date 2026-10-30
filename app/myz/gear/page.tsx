@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { MYZ_MELEE_WEAPONS, MYZ_RANGED_WEAPONS, MYZ_ARMOR, MYZ_GEAR, MYZ_ARTIFACTS, MYZ_VALUES } from "@/lib/data/myz-data";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { cleanSkillBonus, fmtDev, cleanDevReq, cleanDevBonus, fmtSkillBonus, suggestValue } from "@/components/hb/myz/rules";
 import { MyzHeader, ModeRow, cardCls, nameCls, hbBadge, one, type RawQuery } from "@/components/MyzRef";
 
@@ -87,7 +88,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {/* Melee */}
       {mode === "melee" && (
         <section>
-          <div className={`${panelCls} mb-4`}>
+          <CompendiumHomebrew>
+          <div className={panelCls}>
             <h3 className={hbHead}>Your homebrew weapons</h3>
             <HomebrewEditor kind="myz-weapon" campaigns={campaigns} initial={wOwn} />
             {wHbMelee.length > 0 && (
@@ -107,6 +109,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
               </div>
             )}
           </div>
+          </CompendiumHomebrew>
           <div className={tableWrap}>
             <table className="w-full border-collapse text-[12px]"><thead>{wpHead}</thead>
               <tbody>
@@ -127,7 +130,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {/* Ranged */}
       {mode === "ranged" && (
         <section>
-          <div className={`${panelCls} mb-4`}>
+          <CompendiumHomebrew>
+          <div className={panelCls}>
             <h3 className={hbHead}>Your homebrew weapons</h3>
             <HomebrewEditor kind="myz-weapon" campaigns={campaigns} initial={wOwn} />
             {wHbRanged.length > 0 && (
@@ -147,6 +151,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
               </div>
             )}
           </div>
+          </CompendiumHomebrew>
           <div className={tableWrap}>
             <table className="w-full border-collapse text-[12px]"><thead>{wpHead}</thead>
               <tbody>
@@ -167,11 +172,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {/* Armor */}
       {mode === "armor" && (
         <section>
-          <p className="mb-4 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-            When you take damage, roll dice equal to the Armor Rating; each 6 stops one point. Homebrew armor is
-            gear built as &ldquo;Armor&rdquo;.
-          </p>
-          <div className={`${panelCls} mb-4`}>
+          <CompendiumHomebrew>
+          <div className={panelCls}>
             <h3 className={hbHead}>Your homebrew armor</h3>
             <HomebrewEditor kind="myz-gear" campaigns={campaigns} initial={gOwn} />
             {gHbArmor.length > 0 && (
@@ -192,6 +194,11 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
               </div>
             )}
           </div>
+          </CompendiumHomebrew>
+          <p className="mb-4 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
+            When you take damage, roll dice equal to the Armor Rating; each 6 stops one point. Homebrew armor is
+            gear built as &ldquo;Armor&rdquo;.
+          </p>
           <div className={tableWrap}>
             <table className="w-full border-collapse text-[13px]">
               <thead><tr className={thRow}><th className="p-2">Armor</th><th className="p-2">Rating</th><th className="p-2">Value</th><th className="p-2">Notes</th></tr></thead>
@@ -213,7 +220,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {/* Supplies */}
       {mode === "supplies" && (
         <section>
-          <div className={`${panelCls} mb-4`}>
+          <CompendiumHomebrew>
+          <div className={panelCls}>
             <h3 className={hbHead}>Your homebrew gear</h3>
             <HomebrewEditor kind="myz-gear" campaigns={campaigns} initial={gOwn} />
             {gHbGear.length > 0 && (
@@ -234,6 +242,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
               </ul>
             )}
           </div>
+          </CompendiumHomebrew>
           <div className={tableWrap}>
             <table className="w-full border-collapse text-[13px]">
               <thead><tr className={thRow}><th className="p-2">Item</th><th className="p-2">Slots</th><th className="p-2">Value</th><th className="p-2">Notes</th></tr></thead>

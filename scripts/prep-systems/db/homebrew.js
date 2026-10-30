@@ -17,7 +17,7 @@ async function loadHomebrewMobs() {
       const nm = String(d.name || '').trim();
       if(!nm || seen.has(nm.toLowerCase())) return;
       seen.add(nm.toLowerCase());
-      next.push(Object.assign({ homebrew: true }, d, { name: nm, _dbkind: kind, group: kind === 'monster' ? 'Monster' : (d.boss ? 'Boss' : 'NPC') }));
+      next.push(Object.assign({ homebrew: true }, d, { name: nm, _dbkind: kind, group: kind === 'monster' ? (d.category ? 'Monster · ' + d.category : 'Monster') : (d.boss ? 'Boss' : (!d.kind || d.kind === 'Typical') ? 'NPC' : String(d.kind)) }));
     });
   }
   _hbMobs = next;

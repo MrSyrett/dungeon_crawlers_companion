@@ -1,14 +1,16 @@
 "use client";
 // ── Dragonbane homebrew editor shell ─────────────────────────────────────────
-// Rendered by components/HomebrewEditor for the seven db-* kinds (the
+// Rendered by components/HomebrewEditor for the nine db-* kinds (the
 // /dragonbane reference pages + /dragonbane/homebrew): an accordion listing the
 // user's entries with Edit/Delete, a builder + live preview, and per-campaign
 // share checkboxes (Dragonbane campaigns only). Same look and flow as the other
 // systems' shells (accent --db); the builders live beside this file and each
 // documents its storage shape. lib/homebrew.ts normalizeDb* is the real validator.
 import { campaignsFor } from "@/lib/homebrew-systems";
-import { useState, type CSSProperties, type ReactElement } from "react";
+import { useMemo, useState, type CSSProperties, type ReactElement } from "react";
 import { useRouter } from "next/navigation";
+import TemplatePicker, { templateCopyName, type TemplateOption } from "@/components/hb/TemplatePicker";
+import { dbTemplates } from "./templates";
 import AbilityBuilder, { AbilityPreview, abilityFromData, abilityPayload, blankAbility, type AbilityDraft } from "./AbilityBuilder";
 import SpellBuilder, { SpellPreview, blankSpell, spellFromData, spellPayload, type SpellDraft } from "./SpellBuilder";
 import {
@@ -17,6 +19,8 @@ import {
 } from "./ItemBuilder";
 import MonsterBuilder, { MonsterPreview, blankMonster, monsterFromData, monsterPayload, type MonsterDraft } from "./MonsterBuilder";
 import NpcBuilder, { NpcPreview, blankNpc, npcFromData, npcPayload, type NpcDraft } from "./NpcBuilder";
+import KinBuilder, { KinPreview, blankKin, kinFromData, kinPayload, kinProblems, type KinDraft } from "./KinBuilder";
+import ProfessionBuilder, { ProfessionPreview, blankProfession, professionFromData, professionPayload, professionProblems, type ProfessionDraft } from "./ProfessionBuilder";
 
 type CampaignRef = { id: string; name: string; code: string; system?: string | null };
 type HomebrewRecord = { id: string; type: string; name: string; campaignIds: string[]; data: Record<string, unknown>; updatedAt: string; owner: boolean };
@@ -27,6 +31,8 @@ type Schema<D> = {
   blank: () => D; fromData: (d: Data) => D; payload: (name: string, d: D) => Data;
   Builder: (p: { value: D; onChange: (v: D) => void }) => ReactElement;
   Preview: (p: { name: string; value: D }) => ReactElement;
+  /** Rule problems that block saving (shown above the Save button). */
+  problems?: (d: D) => string[];
 };
 const sv = (d: Data, k: string) => (d[k] == null ? "" : String(d[k]));
 const cnt = (d: Data, k: string) => (Array.isArray(d[k]) ? (d[k] as unknown[]).length : 0);
@@ -85,6 +91,20 @@ const SCHEMAS: Record<string, Schema<unknown>> = {
     Builder: (p) => <NpcBuilder value={p.value} onChange={p.onChange} />,
     Preview: (p) => <NpcPreview name={p.name} n={p.value} />,
   }),
+  "db-kin": schema<KinDraft>({
+    title: "Homebrew Kin", noun: "Kin", plural: "kin",
+    summary: (d) => [`Movement ${sv(d, "movement") || 10}`, (Array.isArray(d.abilities) ? (d.abilities as Data[]) : []).map((a) => sv(a, "name")).join(", ")].filter(Boolean).join(" · "),
+    blank: blankKin, fromData: kinFromData, payload: kinPayload, problems: kinProblems,
+    Builder: (p) => <KinBuilder value={p.value} onChange={p.onChange} />,
+    Preview: (p) => <KinPreview name={p.name} k={p.value} />,
+  }),
+  "db-profession": schema<ProfessionDraft>({
+    title: "Homebrew Professions", noun: "Profession",
+    summary: (d) => [`Key ${sv(d, "keyAttribute")}`, d.mage ? `mage · ${Object.keys((d.schoolSkills ?? {}) as Data)[0] ?? ""}` : (Array.isArray(d.heroicAbilities) ? (d.heroicAbilities as string[]).join(d.heroicChoice ? " / " : ", ") : ""), `${cnt(d, "kits")} kit${cnt(d, "kits") === 1 ? "" : "s"}`].filter(Boolean).join(" · "),
+    blank: blankProfession, fromData: professionFromData, payload: professionPayload, problems: professionProblems,
+    Builder: (p) => <ProfessionBuilder value={p.value} onChange={p.onChange} />,
+    Preview: (p) => <ProfessionPreview name={p.name} p={p.value} />,
+  }),
 };
 
 const fieldBase = "rounded border border-[var(--border)] bg-[var(--panel-2)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--hb-accent)]";
@@ -106,17 +126,40 @@ export default function DbHomebrewEditor({ kind, campaigns: allCampaigns, initia
   const [campaignIds, setCampaignIds] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  // Name of the entry a new draft was started from (Template), for the strip.
+  const [fromTemplate, setFromTemplate] = useState("");
+
+  // Template list: your own homebrew of this kind first, then the book's
+  // entries (lazy-loaded — ./templates.ts). Memoised so the picker's per-source
+  // cache survives re-renders (a save changes `items` → fresh list).
+  const templates = useMemo(() => {
+    const book = dbTemplates(kind);
+    return async (): Promise<TemplateOption[]> => [
+      ...items.map((r) => ({ key: `hb:${r.id}`, name: r.name, group: "Your homebrew", meta: "Homebrew", data: r.data || {} })),
+      ...(book ? await book() : []),
+    ];
+  }, [items, kind]);
 
   if (!sc) return null;
   const active = editId !== null && draft !== null;
 
-  const openNew = () => { setName(""); setDraft(sc.blank()); setCampaignIds([]); setEditId(""); setError(""); };
-  const openEdit = (rec: HomebrewRecord) => { setName(rec.name); setDraft(sc.fromData(rec.data || {})); setCampaignIds(rec.campaignIds ?? []); setEditId(rec.id); setError(""); };
+  const openNew = () => { setName(""); setDraft(sc.blank()); setCampaignIds([]); setEditId(""); setFromTemplate(""); setError(""); };
+  const openEdit = (rec: HomebrewRecord) => { setName(rec.name); setDraft(sc.fromData(rec.data || {})); setCampaignIds(rec.campaignIds ?? []); setEditId(rec.id); setFromTemplate(""); setError(""); };
+  // A template opens as a NEW, unsaved draft through the same legacy→draft
+  // path a stored record takes (sc.fromData), named "<original> (copy)". Share
+  // picks are kept only when a new draft was already open.
+  const startFromTemplate = (opt: TemplateOption) => {
+    if (editId !== "") setCampaignIds([]);
+    setName(templateCopyName(opt.name)); setDraft(sc.fromData(opt.data || {})); setEditId(""); setFromTemplate(opt.name); setError("");
+  };
+  const templateButton = <TemplatePicker source={templates} onPick={startFromTemplate} noun={sc.noun.toLowerCase()} disabled={busy} className={btn} />;
   const close = () => { setEditId(null); setDraft(null); setError(""); };
   const toggleCampaign = (id: string) => setCampaignIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
 
   async function submit() {
     if (!name.trim()) { setError(`Give the ${sc.noun.toLowerCase()} a name.`); return; }
+    const probs = sc.problems?.(draft) ?? [];
+    if (probs.length) { setError(probs.join(" ")); return; }
     setBusy(true); setError("");
     try {
       const isNew = editId === "";
@@ -178,13 +221,21 @@ export default function DbHomebrewEditor({ kind, campaigns: allCampaigns, initia
 
           {active ? (
             <div className="grid gap-4 rounded border border-[var(--border)] bg-[var(--panel-2)] p-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-              <div>
+              <div className="min-w-0">
+                {editId === "" ? (
+                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] pb-3">
+                    <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
+                      {fromTemplate ? <>New {sc.noun.toLowerCase()} · from <b className="text-[var(--text)]">{fromTemplate}</b></> : `New ${sc.noun.toLowerCase()}`}
+                    </span>
+                    {templateButton}
+                  </div>
+                ) : null}
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="sm:col-span-2">
                     <label className={labelCls}>Name</label>
                     <input className={`${fieldBase} w-full`} value={name} maxLength={80} placeholder={`${sc.noun} name…`} onChange={(e) => setName(e.target.value)} />
                   </div>
-                  <B value={draft} onChange={setDraft} />
+                  <B value={draft} onChange={(v) => { setDraft(v); if (error) setError(""); }} />
                 </div>
                 {campaigns.length ? (
                   <div className="mt-3">
@@ -200,6 +251,7 @@ export default function DbHomebrewEditor({ kind, campaigns: allCampaigns, initia
                     <p className="mt-1 text-[11px] text-[var(--muted)]">Unchecked = personal (only you see it).</p>
                   </div>
                 ) : null}
+                {!error && sc.problems?.(draft).length ? <p className="mt-3 text-[12px] text-[var(--muted)]">To save: {sc.problems(draft).join(" ")}</p> : null}
                 {error ? <p className="mt-3 text-[13px] text-[var(--bad)]">{error}</p> : null}
                 <div className="mt-4 flex gap-2">
                   <button className={btnAccent} disabled={busy} onClick={submit}>{busy ? "Saving…" : editId === "" ? `Create ${sc.noun}` : "Save Changes"}</button>
@@ -209,7 +261,10 @@ export default function DbHomebrewEditor({ kind, campaigns: allCampaigns, initia
               <div className="lg:sticky lg:top-20 lg:self-start"><P name={name} value={draft} /></div>
             </div>
           ) : (
-            <button className={btnAccent} onClick={openNew}>+ New Homebrew {sc.noun}</button>
+            <div className="flex flex-wrap gap-2">
+              <button className={btnAccent} onClick={openNew}>+ New Homebrew {sc.noun}</button>
+              {templateButton}
+            </div>
           )}
         </div>
       ) : null}

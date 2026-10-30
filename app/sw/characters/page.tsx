@@ -4,6 +4,7 @@ import { SW_CHARACTERS } from "@/lib/data/sw-characters";
 import { SW_ATTRIBUTES, type SwCharacter, type SwAttribute, type SwBook } from "@/lib/data/sw-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { SwHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge, code, one, withParams, BookTag, BOOK_NAME, type Query, type RawQuery } from "@/components/SwRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -98,7 +99,9 @@ export default async function SwCharactersPage({ searchParams }: { searchParams:
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <SwHeader title="Bestiary" subtitle={`${SW_CHARACTERS.length} stat blocks${hbRows.length ? ` + ${hbRows.length} homebrew` : ""} · Imperials, aliens, Droids, creatures, heroes & villains`} />
-      <div className="mb-6"><HomebrewEditor kind="sw-character" campaigns={campaigns} initial={hbOwn} /></div>
+      <CompendiumHomebrew>
+        <HomebrewEditor kind="sw-character" campaigns={campaigns} initial={hbOwn} />
+      </CompendiumHomebrew>
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search characters…" hidden={{ group }} />
       <ChipRow label="Group" base={BASE} current={current} param="group" options={GROUPS} active={group} />

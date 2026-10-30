@@ -1272,19 +1272,24 @@ function renderPicker(){
   }).join('');
   _pkRows=rows;
 }
+// The inventory row a shop entry becomes (also used by the creation wizard for homebrew).
+function pickRowOf(kind,x){
+  if(kind==='weap'){ var w=x.data||{}; var wr={kind:'weapon',equipped:false,name:w.name||x.name,bonus:w.bonus!=null?w.bonus:0,damage:w.damage!=null?w.damage:1,range:w.range||'',weight:w.slots!=null?w.slots:(w.weight||'1'),skill:x.skill||'Fight'};
+    if(w.ammo) wr.ammo=w.ammo; if(Array.isArray(w.features)&&w.features.length) wr.features=w.features.slice(); if(w.blast) wr.blast=num(w.blast); if(w.artifact) wr.artifact=true; return wr; }
+  if(kind==='armor'){ var a=x.data||{}; return {kind:'armor',equipped:false,name:a.name||x.name,rating:num(a.rating),weight:a.weight||'1',note:a.note||''}; }
+  var d=x.data||{}; var gr={kind:'gear',name:d.name||x.name,weight:d.weight||'1',note:d.hb?hbNote(d):(d.note||d.desc||''),artifact:!!d.artifact};
+  if(Array.isArray(d.skillBonus)&&d.skillBonus.length){ gr.skillBonus=d.skillBonus.map(function(b){ return {skill:b.skill,amount:num(b.amount)}; }); gr.equipped=false; }
+  return gr;
+}
 function pickAdd(idx){
   var x=_pkRows[idx]; if(!x)return;
   var fam=GEAR_FAM(_pk), p=fam?num(x.price):0;
   if(p>0){ if(bulletsOnHand()<p){ addLog('Item Shop','Not enough Bullets','“'+(x.name||'Item')+'” costs '+p+' · you have '+bulletsOnHand(),'fumble'); return; } bumpSupply('bullets',-p); }
-  if(_pk==='weap'){ var w=x.data||{}; var wr={kind:'weapon',equipped:false,name:w.name||x.name,bonus:w.bonus!=null?w.bonus:0,damage:w.damage!=null?w.damage:1,range:w.range||'',weight:w.slots!=null?w.slots:(w.weight||'1'),skill:x.skill||'Fight'};
-    if(w.ammo) wr.ammo=w.ammo; if(Array.isArray(w.features)&&w.features.length) wr.features=w.features.slice(); if(w.blast) wr.blast=num(w.blast); if(w.artifact) wr.artifact=true;
-    S.gear.push(wr); renderWeapons(); setTab('gear'); }
-  else if(_pk==='armor'){ var a=x.data||{}; S.gear.push({kind:'armor',equipped:false,name:a.name||x.name,rating:num(a.rating),weight:a.weight||'1',note:a.note||''}); renderInventory(); setTab('gear'); }
+  if(_pk==='weap'){ S.gear.push(pickRowOf('weap',x)); renderWeapons(); setTab('gear'); }
+  else if(_pk==='armor'){ S.gear.push(pickRowOf('armor',x)); renderInventory(); setTab('gear'); }
   else if(_pk==='talent'){ var t=x.data||{}; S.talents.push({name:t.name||x.name,note:t.desc||t.note||''}); renderTalents(); setTab('story'); }
   else if(_pk==='mutation'){ var mu=x.data||{}; if((S.mutations||[]).length>=4){ addLog('Mutations','Max 4','You can never have more than four mutations.','fumble'); } else { S.mutations.push({name:mu.name||x.name,note:mu.desc||'',spend:1}); if(!num(S.mp))S.mp=S.mutations.length; renderMutations(); renderMP(); setTab('mut'); } }
-  else { var d=x.data||{}; var gr={kind:'gear',name:d.name||x.name,weight:d.weight||'1',note:d.hb?hbNote(d):(d.note||d.desc||''),artifact:!!d.artifact};
-    if(Array.isArray(d.skillBonus)&&d.skillBonus.length){ gr.skillBonus=d.skillBonus.map(function(b){ return {skill:b.skill,amount:num(b.amount)}; }); gr.equipped=false; }
-    S.gear.push(gr); renderGear(); setTab('gear'); }
+  else { S.gear.push(pickRowOf(_pk,x)); renderGear(); setTab('gear'); }
   if(p>0) addLog('Item Shop','Bought '+x.name,'−'+p+' Bullets → '+bulletsOnHand()+' left','crit');
   scheduleAutosave(); updatePickerCap(); renderPicker();
 }

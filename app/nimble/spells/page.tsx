@@ -4,6 +4,7 @@ import { NIMBLE_SPELLS } from "@/lib/data/nimble-spells";
 import type { NimbleSpell } from "@/lib/data/nimble-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { NimbleHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge, one, type Query, type RawQuery } from "@/components/NimbleRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -57,8 +58,8 @@ export default async function NimbleSpellsPage({ searchParams }: { searchParams:
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <NimbleHeader title="Spells" subtitle={`${NIMBLE_SPELLS.length} spells${hbRows.length ? ` + ${hbRows.length} homebrew` : ""} · six schools + utility`} />
+      <CompendiumHomebrew><HomebrewEditor kind="nimble-spell" campaigns={campaigns} initial={hbOwn} /></CompendiumHomebrew>
       <p className="mb-5 text-sm leading-relaxed text-[var(--muted)]">A spell&rsquo;s mana cost equals its tier; cantrips are free. Casting needs a free hand (or focus) and the ability to speak. Upcast only up to the tier you&rsquo;ve unlocked. Attack spells miss on a 1 and crit on the primary die&rsquo;s max, like weapons.</p>
-      <div className="mb-6"><HomebrewEditor kind="nimble-spell" campaigns={campaigns} initial={hbOwn} /></div>
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search spells…" hidden={{ school, tier }} />
       <ChipRow label="School" base={BASE} current={current} param="school" options={SCHOOLS} active={school} />

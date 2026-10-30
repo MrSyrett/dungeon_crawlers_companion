@@ -660,7 +660,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
           <div class="derived-lbl"><span>Defence</span></div>
           <div class="def-row">
             <div class="derived-big" id="def-val">8</div>
-            <div class="derived-formula" style="margin-left:auto;">gear <input type="number" id="def-bonus" data-nolock value="0" oninput="recalc()"> <button class="small-btn" onclick="rollDefence()" title="Roll Moves as a full opposed roll instead of using Defence">🎲</button></div>
+            <div class="derived-formula" style="margin-left:auto;"><span title="Any other Defence bonus. Worn gear with a Defence value (Gear tab) counts automatically.">other</span> <input type="number" id="def-bonus" title="Any other Defence bonus. Worn gear with a Defence value (Gear tab) counts automatically." data-nolock value="0" oninput="recalc()"> <button class="small-btn" onclick="rollDefence()" title="Roll Moves as a full opposed roll instead of using Defence">🎲</button></div>
           </div>
         </div>
         <div class="derived-cell">
@@ -933,8 +933,11 @@ function recalc() {
   const dodging = hasFocus('moves', /^dodg/i);
   let def = statVal('moves') * 3 + (dodging ? 6 : 0);
   if(def < CREATION.minDef) def = CREATION.minDef;
-  def += num($('def-bonus').value) + hbFocusBonus('defence');
+  const gDef = gearDefBonus();
+  def += num($('def-bonus').value) + hbFocusBonus('defence') + gDef;
   $('def-val').textContent = def;
+  $('def-val').title = gDef ? 'Includes ' + (gDef > 0 ? '+' : '') + gDef + ' from worn gear (Gear tab)' : '';
+  document.querySelectorAll('#gear-body tr').forEach(refreshGearDef);
 
   // Health: Brawn, +2 with Tough, + bonus (Ogre etc.)
   const tough = hasFocus('brawn', /^tough/i);
@@ -1176,8 +1179,10 @@ function addGearRow(g) {
   g = g || { name:'', note:'' };
   const tr = document.createElement('tr');
   if(g.link) tr.dataset.link = g.link;
-  tr.innerHTML = `<td style="width:45%;"><input type="text" class="gear-name" placeholder="Item" value="${esc(g.name)}"></td>` +
+  if(g.stowed) tr.dataset.stowed = '1';
+  tr.innerHTML = `<td style="width:45%;"><input type="text" class="gear-name" placeholder="Item" value="${esc(g.name)}" oninput="recalc()"></td>` +
                  `<td><input type="text" class="gear-note" placeholder="notes" value="${esc(g.note)}"></td>` +
+                 `<td class="gear-def" style="width:1%;white-space:nowrap;"></td>` +
                  `<td style="width:24px;"><button class="row-x" onclick="deleteGearRow(this)" title="Remove">✕</button></td>`;
   $('gear-body').appendChild(tr);
   return tr;
@@ -1188,7 +1193,34 @@ function deleteGearRow(btn) {
   const link = tr.dataset.link;
   tr.remove();
   if(link) { const atk = document.querySelector('#attacks-body tr[data-link="' + link + '"]'); if(atk) atk.remove(); }
-  scheduleAutosave();
+  recalc(); scheduleAutosave();
+}
+// Gear with a `defence` value (book Magic Armor, homebrew gear's Defence stepper)
+// adds it to Defence while worn. A row's Worn/Stowed toggle (saved as `stowed`)
+// and deleting the row both reverse it; a typed name that matches counts too.
+function gearDefOf(name) {
+  const n = norm(name); if(!n) return 0;
+  const g = D.gear().find(x => x && norm(x.name) === n && typeof x.defence === 'number' && x.defence);
+  return g ? g.defence : 0;
+}
+function gearDefBonus() {
+  let n = 0;
+  document.querySelectorAll('#gear-body tr').forEach(tr => { if(tr.dataset.stowed !== '1') n += gearDefOf(tr.querySelector('.gear-name').value); });
+  return n;
+}
+function refreshGearDef(tr) {
+  const cell = tr.querySelector('.gear-def'); if(!cell) return;
+  const d = gearDefOf(tr.querySelector('.gear-name').value);
+  if(!d) { if(cell.innerHTML) cell.innerHTML = ''; return; }
+  const on = tr.dataset.stowed !== '1', lbl = (on ? 'Worn ' : 'Stowed ') + (d > 0 ? '+' : '') + d + ' Def';
+  const b = cell.querySelector('button');
+  if(b && b.textContent === lbl) return;
+  cell.innerHTML = '<button class="small-btn' + (on ? '' : ' ghost') + '" onclick="toggleGearDef(this)" title="' + (on ? 'Worn: its Defence counts. Click to stow it.' : 'Stowed: its Defence does not count. Click to wear it.') + '">' + lbl + '</button>';
+}
+function toggleGearDef(btn) {
+  const tr = btn.closest('tr'); if(!tr) return;
+  if(tr.dataset.stowed === '1') delete tr.dataset.stowed; else tr.dataset.stowed = '1';
+  recalc(); scheduleAutosave();
 }
 function isWeaponGear(g) { return !!(g && g.category === 'Weapon'); }
 // Tie a gear row and a fresh attack row together with one link token.
@@ -1211,7 +1243,8 @@ function addGearFromData(name) {
   if(blank) { blank.querySelector('.gear-name').value = g.name; blank.querySelector('.gear-note').value = note; gearTr = blank; }
   else gearTr = addGearRow({ name: g.name, note });
   if(isWeaponGear(g)) linkGearAttack(gearTr, attackFromGear(g));
-  scheduleAutosave();
+  delete gearTr.dataset.stowed;
+  recalc(); scheduleAutosave();
 }
 function fillGearPick() {
   const sel = $('gear-pick'); if(!sel) return;
@@ -1456,7 +1489,8 @@ function collectSheet() {
     hpCur, karma,
     ability: $('f-ability').value, traitNotes: $('f-trait-notes').value, notes: $('f-notes').value,
     attacks: [...document.querySelectorAll('#attacks-body tr')].map(tr => ({ name: tr.querySelector('.atk-name').value, kind: tr.querySelector('.atk-kind').value, damage: tr.querySelector('.atk-dmg').value, link: tr.dataset.link || undefined })),
-    gear: [...document.querySelectorAll('#gear-body tr')].map(tr => ({ name: tr.querySelector('.gear-name').value, note: tr.querySelector('.gear-note').value, link: tr.dataset.link || undefined })).filter(g => g.name || g.note),
+    gear: [...document.querySelectorAll('#gear-body tr')].map(tr => ({ name: tr.querySelector('.gear-name').value, note: tr.querySelector('.gear-note').value, link: tr.dataset.link || undefined, stowed: tr.dataset.stowed === '1' || undefined })).filter(g => g.name || g.note),
+    gearDefAuto: true,
     tab: _tab,
     campaign: (typeof _campaign !== 'undefined' && _campaign) ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
   };
@@ -1487,6 +1521,9 @@ function applySheet(d) {
   [...document.querySelectorAll('#attacks-body tr[data-link], #gear-body tr[data-link]')].forEach(tr => {
     const m = /(\d+)$/.exec(tr.dataset.link || ''); if(m) _linkSeq = Math.max(_linkSeq, +m[1]);
   });
+  // Saves from before worn gear's Defence counted automatically may have typed it
+  // into the "gear" bonus box; take it back out once so it isn't counted twice.
+  if(!d.gearDefAuto) { const gd = gearDefBonus(), db = num($('def-bonus').value); if(gd > 0 && db >= gd) $('def-bonus').value = db - gd; }
   _tab = TABS.includes(d.tab) ? d.tab : _tab;
   if(typeof campaignRestore === 'function') campaignRestore(d.campaign);
   recalc();
@@ -1758,6 +1795,7 @@ function claimLootItem(it){
   if((it.cat === 'Weapon' || (g && g.category === 'Weapon')) && typeof addAttackRow === 'function') {
     linkGearAttack(gearTr, { name: it.item, kind: /gun|pistol|rifle|bow|blaster|laser|thrown/i.test(it.item + ' ' + note) ? 'ranged' : 'melee', damage: g && g.damage != null ? String(g.damage) : '' });
   }
+  if(typeof recalc === 'function') recalc();
   addLog('Claimed', 'Loot', it.item, 'normal'); return true;
 }
 async function campaignPoll() {

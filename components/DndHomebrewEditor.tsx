@@ -1,7 +1,9 @@
 "use client";
 
 import { campaignsFor } from "@/lib/homebrew-systems";
-import { useState, type CSSProperties, type ReactElement } from "react";
+import { useMemo, useState, type CSSProperties, type ReactElement } from "react";
+import TemplatePicker, { templateCopyName, type TemplateOption } from "@/components/hb/TemplatePicker";
+import { dndTemplates } from "@/components/hb/dnd/templates";
 import { useRouter } from "next/navigation";
 import MonsterBuilder, { MonsterPreview, blankMonster, monsterFromData, monsterPayload, type MonsterDraft } from "@/components/hb/dnd/MonsterBuilder";
 import EquipmentBuilder, { EquipPreview, blankEquip, equipFromData, equipPayload, type EquipDraft } from "@/components/hb/dnd/EquipmentBuilder";
@@ -144,19 +146,30 @@ export default function DndHomebrewEditor({
   const [campaignIds, setCampaignIds] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  // Name of the entry a new draft was started from (Template), for the strip.
+  const [fromTemplate, setFromTemplate] = useState("");
+  // Template list: your own homebrew of this kind first, then the book's
+  // entries (lazy-loaded — see the templates module beside the builders).
+  const templates = useMemo(() => {
+    const book = dndTemplates(kind);
+    return async (): Promise<TemplateOption[]> => [
+      ...items.map((r) => ({ key: `hb:${r.id}`, name: r.name, group: "Your homebrew", meta: "Homebrew", data: r.data || {} })),
+      ...(book ? await book() : []),
+    ];
+  }, [items, kind]);
 
   if (!sc) return null;
 
   const active = editId !== null && draft !== null;
 
-  const openNew = () => {
+  const openNew = () => { setFromTemplate("");
     setName("");
     setDraft(sc.blank());
     setCampaignIds([]);
     setEditId("");
     setError("");
   };
-  const openEdit = (rec: HomebrewRecord) => {
+  const openEdit = (rec: HomebrewRecord) => { setFromTemplate("");
     setName(rec.name);
     setDraft(sc.fromData(rec.data || {}));
     setCampaignIds(rec.campaignIds ?? []);
@@ -164,6 +177,20 @@ export default function DndHomebrewEditor({
     setError("");
   };
   const close = () => { setEditId(null); setDraft(null); setError(""); };
+
+  // A template opens as a NEW, unsaved draft through the same legacy→draft
+  // path a stored record takes (sc.fromData), named "<original> (copy)".
+  const noun = sc.noun.toLowerCase();
+  const startFromTemplate = (opt: TemplateOption) => {
+    const keepShare = editId === "" && draft !== null; // a new draft was already open
+    setName(templateCopyName(opt.name));
+    setDraft(sc.fromData(opt.data || {}));
+    if (!keepShare) setCampaignIds([]);
+    setEditId("");
+    setFromTemplate(opt.name);
+    setError("");
+  };
+  const templateButton = <TemplatePicker source={templates} onPick={startFromTemplate} noun={noun} disabled={busy} className={btn} />;
 
   const toggleCampaign = (id: string) =>
     setCampaignIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
@@ -219,7 +246,7 @@ export default function DndHomebrewEditor({
   const P = sc.Preview;
 
   return (
-    <div className="mb-6 rounded-lg border border-[var(--border)] bg-[var(--panel)]">
+    <div className="mb-6 rounded-lg border border-[var(--border)] bg-[var(--panel)]" style={ACCENT}>
       <button onClick={() => setOpen((o) => !o)} className="flex w-full items-center justify-between px-4 py-3 text-left">
         <span className="text-sm font-bold uppercase tracking-[0.15em]">
           {sc.title} {items.length ? <span className="text-[var(--muted)]">({items.length})</span> : null}
@@ -256,6 +283,14 @@ export default function DndHomebrewEditor({
           {active ? (
             <div style={ACCENT} className="grid gap-4 rounded border border-[var(--border)] bg-[var(--panel-2)] p-4 lg:grid-cols-[minmax(0,1fr)_320px]">
               <div>
+                {editId === "" ? (
+                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] pb-3">
+                    <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
+                      {fromTemplate ? <>New {noun} · from <b className="text-[var(--text)]">{fromTemplate}</b></> : `New ${noun}`}
+                    </span>
+                    {templateButton}
+                  </div>
+                ) : null}
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="sm:col-span-2">
                     <label className={labelCls}>Name</label>
@@ -293,7 +328,10 @@ export default function DndHomebrewEditor({
               </div>
             </div>
           ) : (
-            <button className={btnRed} onClick={openNew}>+ New Homebrew {sc.noun}</button>
+            <div className="flex flex-wrap gap-2">
+              <button className={btnRed} onClick={openNew}>+ New Homebrew {sc.noun}</button>
+              {templateButton}
+            </div>
           )}
         </div>
       ) : null}

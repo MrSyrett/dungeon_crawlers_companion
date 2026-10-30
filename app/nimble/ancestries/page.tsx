@@ -6,6 +6,7 @@ import { NIMBLE_MOTIVATIONS } from "@/lib/data/nimble-motivations";
 import type { NimbleAncestry } from "@/lib/data/nimble-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { NimbleHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge, one, type Query, type RawQuery } from "@/components/NimbleRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -61,7 +62,7 @@ export default async function NimbleAncestriesPage({ searchParams }: { searchPar
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <NimbleHeader title="Ancestries & Backgrounds" subtitle={`${NIMBLE_ANCESTRIES.length} ancestries${hbRows.length ? ` + ${hbRows.length} homebrew` : ""} · ${NIMBLE_BACKGROUNDS.length} backgrounds · ${NIMBLE_MOTIVATIONS.length} motivations`} />
-      <div className="mb-6"><HomebrewEditor kind="nimble-ancestry" campaigns={campaigns} initial={hbOwn} /></div>
+      <CompendiumHomebrew><HomebrewEditor kind="nimble-ancestry" campaigns={campaigns} initial={hbOwn} /></CompendiumHomebrew>
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search…" hidden={{ kind }} />
       <ChipRow label="Show" base={BASE} current={current} param="kind" options={KINDS} active={kind} />

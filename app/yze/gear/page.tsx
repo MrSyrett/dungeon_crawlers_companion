@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { ALIEN_ARMOR, ALIEN_WEAPONS, ALIEN_GEAR, ALIEN_VEHICLES, ALIEN_VEHICLE_WEAPONS } from "@/lib/data/yze-alien-data";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { YzeHeader, ModeRow, cardCls, nameCls, hbBadge, one, type RawQuery } from "@/components/YzeRef";
 
 export const dynamic = "force-dynamic";
@@ -68,7 +69,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
 
       {mode === "general" && (
         <section>
-          <div className={`${panelCls} mb-4`}>
+          <CompendiumHomebrew>
+          <div className={panelCls}>
             <h3 className={hbHead}>Your homebrew gear</h3>
             <HomebrewEditor kind="yze-gear" campaigns={campaigns} initial={gOwn} />
             {gHb.length > 0 && (
@@ -88,6 +90,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
               </ul>
             )}
           </div>
+          </CompendiumHomebrew>
           {gearCategories.map((cat) => (
             <div key={cat} className="mb-4">
               <h3 className={hbHead}>{cat}</h3>
@@ -116,7 +119,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
 
       {mode === "weapons" && (
         <section>
-          <div className={`${panelCls} mb-4`}>
+          <CompendiumHomebrew>
+          <div className={panelCls}>
             <h3 className={hbHead}>Your homebrew weapons</h3>
             <HomebrewEditor kind="yze-weapon" campaigns={campaigns} initial={wOwn} />
             {wHb.length > 0 && (
@@ -144,6 +148,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
               </div>
             )}
           </div>
+          </CompendiumHomebrew>
           <div className={tableWrap}>
             <table className="w-full border-collapse text-[13px]">
               <thead>
@@ -171,7 +176,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
 
       {mode === "armor" && (
         <section>
-          <div className={`${panelCls} mb-4`}>
+          <CompendiumHomebrew>
+          <div className={panelCls}>
             <h3 className={hbHead}>Your homebrew armor</h3>
             <p className="mb-3 text-[12px] text-[var(--muted)]">Build a suit below: open the gear editor and pick Kind: Armor / suit.</p>
             <HomebrewEditor kind="yze-gear" campaigns={campaigns} initial={gOwn} />
@@ -197,6 +203,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
               </div>
             )}
           </div>
+          </CompendiumHomebrew>
           <div className={tableWrap}>
             <table className="w-full border-collapse text-[13px]">
               <thead>

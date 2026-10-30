@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { MMRPG_TRAITS } from "@/lib/data/mmrpg-traits";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import {
   MmrpgHeader, SearchForm, CountLine, EmptyState, RefDetails, cardCls, nameCls, hbBadge,
   one, type RawQuery,
@@ -43,9 +44,9 @@ export default async function MmrpgTraitsPage({ searchParams }: { searchParams: 
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <MmrpgHeader title="Traits" subtitle={`${MMRPG_TRAITS.length} traits${hbCount ? ` + ${hbCount} homebrew` : ""}`} />
 
-      <div className="mb-6 flex flex-col gap-4">
+      <CompendiumHomebrew>
         <HomebrewEditor kind="mmrpg-trait" campaigns={campaigns} initial={hbTraitOwn} />
-      </div>
+      </CompendiumHomebrew>
 
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search traits…" hidden={{}} />

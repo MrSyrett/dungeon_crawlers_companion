@@ -24,7 +24,7 @@ import Stepper from "../Stepper";
 import styles from "../hb.module.css";
 import { parseDice, formatDice } from "../dice";
 import {
-  ABILS, ALIGNMENTS, ATK_KINDS, CONDITIONS, CREATURE_TYPES, CR_LIST, CR_XP, DAMAGE_TYPES, LANGUAGES, SIZES, SIZE_DIE, SKILLS, TYPE_GROUP,
+  ABILS, ALIGNMENTS, ATK_KINDS, CONDITIONS, DND_ALT_WORDING, CREATURE_TYPES, CR_LIST, CR_XP, DAMAGE_TYPES, LANGUAGES, SIZES, SIZE_DIE, SKILLS, TYPE_GROUP,
   abilMod, blankBlock, blockHp, composeDndActions, composeDndBlock, crPB, parseDndAttack, parseDndBlock, passivePerception,
   saveValue, signed, skillValue, syncDndAttacks, type DndBlock,
 } from "./rules";
@@ -322,8 +322,22 @@ function AtkCells({ r, patch }: { r: AttackRow; patch: (p: Partial<AttackRow>) =
   const setE = (p: Record<string, string>) => patch({ extra: { ...e, ...p } });
   const [nr, lr] = String(e.rng || "30/120").split("/").map((x) => parseInt(x, 10) || 0);
   const d2 = parseDice(e.d2 ?? "") ?? { n: 0, d: 6, m: 0 };
+  const alt = parseDice(e.alt ?? "") ?? { n: 1, d: 6, m: 0 };
+  const typeSel = (k: string, label: string) => (
+    <select className={styles.diceSel} aria-label={label} value={e[k] ?? ""} onChange={(ev) => setE({ [k]: ev.target.value })}>
+      <option value="">—</option>
+      {DAMAGE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+    </select>
+  );
   return (
     <>
+      <label className={styles.atkCell}><span className={styles.atkLbl}>On hit</span>
+        <select className={styles.diceSel} value={e.nodmg === "1" ? "1" : ""} onChange={(ev) => setE({ nodmg: ev.target.value })}>
+          <option value="">Damage</option>
+          <option value="1">Effect only (no damage)</option>
+        </select>
+      </label>
+      <label className={styles.atkCell}><span className={styles.atkLbl}>Or type</span>{typeSel("tor", "second damage type")}</label>
       {e.kind !== "ranged" ? (
         <label className={styles.atkCell}><span className={styles.atkLbl}>Reach ft.</span>
           <Stepper value={parseInt(e.reach || "5", 10)} min={5} max={120} step={5} width="2.2em" ariaLabel="reach" onChange={(v) => setE({ reach: String(v ?? 5) })} />
@@ -344,6 +358,20 @@ function AtkCells({ r, patch }: { r: AttackRow; patch: (p: Partial<AttackRow>) =
             <option value="">—</option>
             {DAMAGE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
           </select>
+        </span>
+      </label>
+      <label className={styles.atkCell}><span className={styles.atkLbl}>Alt. damage</span>
+        <span className="flex items-center gap-1">
+          <select className={styles.diceSel} aria-label="alternative damage wording" value={e.aw ?? ""} onChange={(ev) => setE({ aw: ev.target.value, alt: ev.target.value ? formatDice(alt) : "", ac: ev.target.value === "or" && !e.ac ? "if used with two hands" : e.ac ?? "" })}>
+            {DND_ALT_WORDING.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+          </select>
+          {e.aw ? (
+            <>
+              <DiceInput value={alt} ariaLabel="alternative damage" onChange={(v) => setE({ alt: v.n > 0 ? formatDice(v) : "" })} />
+              {typeSel("at", "alternative damage type")}
+              {e.aw === "or" ? <input className="h-[34px] w-[180px] rounded border border-[var(--border)] bg-[var(--panel-2)] px-2 text-sm text-[var(--text)] outline-none focus:border-[var(--hb-accent)]" aria-label="alternative damage condition" value={e.ac ?? ""} maxLength={120} placeholder="if used with two hands" onChange={(ev) => setE({ ac: ev.target.value })} /> : null}
+            </>
+          ) : null}
         </span>
       </label>
       <label className={styles.atkCell}><span className={styles.atkLbl}>Wording</span>

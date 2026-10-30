@@ -8,6 +8,7 @@ import { SPELLS } from "@/lib/data/spells";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import { effectLabel } from "@/lib/effects";
 import HomebrewManager from "@/components/HomebrewManager";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 
@@ -174,14 +175,16 @@ export default async function ClassesPage({
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <PageHeader title="Classes" subtitle={<>{SD_CLASSES.length} Shadowdark classes{hbRows.length ? ` + ${hbRows.length} homebrew` : ""}</>} />
 
-      <HomebrewManager
-        type="class"
-        campaigns={campaigns}
-        initial={hbOwn}
-        weaponOptions={WEAPON_OPTIONS}
-        armorOptions={ARMOR_OPTIONS}
-        spellListOptions={SPELL_LIST_OPTIONS}
-      />
+      <CompendiumHomebrew>
+        <HomebrewManager
+          type="class"
+          campaigns={campaigns}
+          initial={hbOwn}
+          weaponOptions={WEAPON_OPTIONS}
+          armorOptions={ARMOR_OPTIONS}
+          spellListOptions={SPELL_LIST_OPTIONS}
+        />
+      </CompendiumHomebrew>
 
       <InstantFilter>
       <form method="get" action="/classes" className="mb-4 flex gap-2" data-search>

@@ -5,6 +5,7 @@ import { ICRPG_ABILITIES } from "@/lib/data/icrpg-abilities";
 import type { IcrpgType, IcrpgAbility } from "@/lib/data/icrpg-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import {
   IcrpgHeader, SearchForm, ChipRow, CountLine, EmptyState, SectionH, cardCls, nameCls, badge, hbBadge,
   WORLDS, worldName, one, type Query, type RawQuery,
@@ -72,10 +73,10 @@ export default async function IcrpgHeroesPage({ searchParams }: { searchParams: 
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <IcrpgHeader title="Heroes" subtitle={`${ICRPG_TYPES.length} types · ${ICRPG_ABILITIES.length} abilities`} />
 
-      <div className="mb-6 flex flex-col gap-6">
+      <CompendiumHomebrew>
         <HomebrewEditor kind="icrpg-type" campaigns={campaigns} initial={ownTypes} />
         <HomebrewEditor kind="icrpg-ability" campaigns={campaigns} initial={ownAbilities} />
-      </div>
+      </CompendiumHomebrew>
 
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search heroes…" hidden={{ world }} />
@@ -105,7 +106,7 @@ export default async function IcrpgHeroesPage({ searchParams }: { searchParams: 
           <SectionH>Abilities, Powers &amp; Augments</SectionH>
           <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
             {abilities.map((a) => (
-              <li key={`${a.homebrew ? "hb" : "bk"}-a-${a.name}`} className={cardCls} hidden={!showAbility(a)} data-f={facetAttr(abilityFacets(a))}>
+              <li key={`${a.homebrew ? "hb" : "bk"}-a-${a.world}-${a.name}`} className={cardCls} hidden={!showAbility(a)} data-f={facetAttr(abilityFacets(a))}>
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   <h3 className={nameCls}>{a.name}</h3>
                   <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{a.kind}</span>

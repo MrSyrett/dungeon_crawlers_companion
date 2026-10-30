@@ -15,7 +15,7 @@ import { cleanDice, formatDice, parseDice, type Dice } from "../dice";
 import type { AttackRow } from "../AttackRows";
 
 export const SD_DICE = [4, 6, 8, 10, 12, 20];
-export const SD_ATTACK_RANGES = ["Close", "Near", "Far", "Close/Near", "Close/Far", "Double near"];
+export const SD_ATTACK_RANGES = ["Close", "Near", "Far", "Close/Near", "Close/Far", "Double near", "Near line"];
 export const SD_ALIGNMENTS: [string, string][] = [["L", "Lawful"], ["N", "Neutral"], ["C", "Chaotic"]];
 export const SD_STATS: [string, string][] = [["s", "STR"], ["d", "DEX"], ["c", "CON"], ["i", "INT"], ["w", "WIS"], ["ch", "CHA"]];
 export const SD_MOD_MIN = -5;
@@ -45,7 +45,8 @@ export function composeSdAttack(a: AttackRow): string {
   if (a.hit != null) parts.push(signed(a.hit));
   const dmg = formatDice(a.dice, { spaced: true });
   const special = soften(a.special);
-  const inner = [dmg, special].filter(Boolean).join(dmg ? " + " : "");
+  // extra.sep "," → the book's "(1d10, ignites flammables)" instead of "(1d10 + …)".
+  const inner = [dmg, special].filter(Boolean).join(dmg ? (a.extra?.sep === "," ? ", " : " + ") : "");
   if (inner) parts.push(`(${inner})`);
   return parts.join(" ");
 }
@@ -61,12 +62,12 @@ export function composeSdAttacks(rows: AttackRow[]): string {
   return out;
 }
 
-const RANGE_RE = /^(?:double near|(close|near|far)(\/(close|near|far))?)$/i;
+const RANGE_RE = /^(?:double near|near line|(close|near|far)(\/(close|near|far))?)$/i;
 
-function parseDamageGroup(g: string): { dice: Dice; special: string } {
+function parseDamageGroup(g: string): { dice: Dice; special: string; sep?: string } {
   const t = g.trim();
-  let m = t.match(/^(\d+)d(\d+)(?:\s*([+-])\s*(\d+)(?![\dd]))?\s*(?:[,+]\s*(.+))?$/i);
-  if (m) return { dice: { n: int(m[1]), d: int(m[2]), m: m[3] ? (m[3] === "-" ? -1 : 1) * int(m[4]) : 0 }, special: (m[5] ?? "").trim() };
+  let m = t.match(/^(\d+)d(\d+)(?:\s*([+-])\s*(\d+)(?![\dd]))?\s*(?:([,+])\s*(.+))?$/i);
+  if (m) return { dice: { n: int(m[1]), d: int(m[2]), m: m[3] ? (m[3] === "-" ? -1 : 1) * int(m[4]) : 0 }, special: (m[6] ?? "").trim(), sep: m[5] === "," ? "," : "" };
   m = t.match(/^(\d+)(?:\s*[,+]\s*(.+))?$/);
   if (m) return { dice: { n: 0, d: 6, m: int(m[1]) }, special: (m[2] ?? "").trim() };
   return { dice: { n: 0, d: 6, m: 0 }, special: t };
@@ -75,7 +76,7 @@ function parseDamageGroup(g: string): { dice: Dice; special: string } {
 /** One "N name (range) +H (dmg)" chunk → row; anything unreadable → { name: "", special: text }. */
 export function parseSdAttack(text: string): AttackRow {
   const t = text.trim();
-  const m = t.match(/^(?:(\d+)\s+)?([A-Za-z][\w' \-/]*?)\s*(?:\(([^)]*)\))?\s*([+-]\s*\d+)?\s*(?:\(([^)]*)\))?\s*$/);
+  const m = t.match(/^(?:(\d+)\s+)?((?:\+\d+ )?[A-Za-z][\w' \-/]*?)\s*(?:\(([^)]*)\))?\s*([+-]\s*\d+)?\s*(?:\(([^)]*)\))?\s*$/);
   if (!m) return { name: "", count: 1, hit: null, dice: { n: 0, d: 6, m: 0 }, range: "Close", special: t };
   let range = "Close";
   let dmgGroup = m[5];
@@ -84,8 +85,9 @@ export function parseSdAttack(text: string): AttackRow {
     else if (dmgGroup == null && m[4] == null) dmgGroup = m[3];
     else return { name: "", count: 1, hit: null, dice: { n: 0, d: 6, m: 0 }, range: "Close", special: t };
   }
-  const dg = dmgGroup != null ? parseDamageGroup(dmgGroup) : { dice: { n: 0, d: 6, m: 0 }, special: "" };
+  const dg = dmgGroup != null ? parseDamageGroup(dmgGroup) : { dice: { n: 0, d: 6, m: 0 }, special: "", sep: "" };
   return {
+    ...(dg.sep ? { extra: { sep: dg.sep } } : {}),
     name: m[2].trim(),
     count: m[1] ? int(m[1], 1) : 1,
     hit: m[4] != null ? int(m[4].replace(/\s+/g, "")) : null,
@@ -103,7 +105,7 @@ export function parseSdAttacks(atk: string): AttackRow[] {
   const rows: AttackRow[] = [];
   for (let i = 0; i < bits.length; i += 2) {
     const r = parseSdAttack(bits[i]);
-    if (i > 0) r.extra = { join: String(bits[i - 1]).toLowerCase() === "and" ? "and" : "or" };
+    if (i > 0) r.extra = { ...(r.extra ?? {}), join: String(bits[i - 1]).toLowerCase() === "and" ? "and" : "or" };
     rows.push(r);
   }
   return rows;
@@ -125,6 +127,7 @@ export function cleanSdAttackRows(raw: unknown): AttackRow[] {
       special: String(o.special ?? "").trim().slice(0, 160),
     };
     if (i > 0) row.extra = { join: ex.join === "and" ? "and" : "or" };
+    if (ex.sep === ",") row.extra = { ...(row.extra ?? {}), sep: "," };
     return row;
   }).filter((r) => r.name || r.special);
 }

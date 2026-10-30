@@ -6,7 +6,7 @@ const SB_CONFIG = {
     [{ key:'health', label:'HEALTH' }, { key:'defence', label:'DEFENCE' }, { key:'focuses', label:'FOCUSES' }],
   ],
   abilitiesLabel: 'Attacks & Notes', abilitiesPlaceholder: 'One per line — Attack: dice, damage',
-  mobs: { placeholder: 'Search the ACE! Bestiary…', pool: () => (typeof ACE_EXTRAS !== 'undefined' && Array.isArray(ACE_EXTRAS)) ? ACE_EXTRAS : [], toCard: m => ({
+  mobs: { placeholder: 'Search the ACE! Bestiary…', pool: () => ((typeof ACE_EXTRAS !== 'undefined' && Array.isArray(ACE_EXTRAS)) ? ACE_EXTRAS : []).concat(_hbMobs), toCard: m => ({
     sbtype: /boss|villain|monster/i.test(m.type||'') ? 'boss' : /npc|ally|civilian/i.test(m.type||'') ? 'npc' : 'mob',
     name: m.name || '', type: [String(m.type||'Extra').toUpperCase(), m.setting && m.setting !== 'core' ? String(m.setting).toUpperCase() : ''].filter(Boolean).join(' // '), flavor: m.description || '',
     smarts: String(m.smarts ?? ''), moves: String(m.moves ?? ''), style: String(m.style ?? ''), brawn: String(m.brawn ?? ''), power: m.power != null ? String(m.power) : '',

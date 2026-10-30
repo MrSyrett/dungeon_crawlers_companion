@@ -7,6 +7,7 @@ import { DCC_SPELLS } from "@/lib/data/dcc-spells";
 import type { DccSkill, DccSpell } from "@/lib/data/dcc-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DccHomebrewEditor from "@/components/DccHomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 
@@ -151,7 +152,7 @@ async function SkillsSection({ userId, raw }: { userId: string; raw: Raw }) {
 
   return (
     <>
-      <DccHomebrewEditor kind="dcc-skill" campaigns={campaigns} initial={hbOwn} />
+      <CompendiumHomebrew><DccHomebrewEditor kind="dcc-skill" campaigns={campaigns} initial={hbOwn} /></CompendiumHomebrew>
 
       <InstantFilter>
       <form method="get" action={BASE} className="mb-4 flex gap-2" data-search>
@@ -342,7 +343,7 @@ async function SpellsSection({ userId, raw }: { userId: string; raw: Raw }) {
 
   return (
     <>
-      <DccHomebrewEditor kind="dcc-spell" campaigns={campaigns} initial={hbOwn} />
+      <CompendiumHomebrew><DccHomebrewEditor kind="dcc-spell" campaigns={campaigns} initial={hbOwn} /></CompendiumHomebrew>
 
       <InstantFilter>
       <form method="get" action={BASE} className="mb-4 flex gap-2" data-search>

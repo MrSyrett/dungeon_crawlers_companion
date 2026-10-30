@@ -1,7 +1,7 @@
 "use client";
 
 import { campaignsFor } from "@/lib/homebrew-systems";
-import { useState, type CSSProperties } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import { GEAR } from "@/lib/data/gear";
 import { SPELLS } from "@/lib/data/spells";
@@ -9,6 +9,8 @@ import BonusBadges, { BadgeStrip } from "@/components/hb/BonusBadges";
 import ChipPicker from "@/components/hb/ChipPicker";
 import Preview from "@/components/hb/Preview";
 import Stepper from "@/components/hb/Stepper";
+import TemplatePicker, { templateCopyName, type TemplateOption } from "@/components/hb/TemplatePicker";
+import { sdBookTemplates } from "@/components/hb/sd/templates";
 import MonsterBuilder, { MonsterPreview, blankMonster, monsterFromData, monsterPayload, type MonsterDraft } from "@/components/hb/sd/MonsterBuilder";
 import GearBuilder, { GearPreview, blankGear, gearFromData, gearPayload, type GearDraft } from "@/components/hb/sd/GearBuilder";
 import SpellBuilder, { SpellPreview, blankSpell, spellFromData, spellPayload, type SpellDraft } from "@/components/hb/sd/SpellBuilder";
@@ -51,7 +53,7 @@ type HbType =
   | "myz-weapon" | "myz-gear"
   | "vae-weapon" | "vae-gear"
   | "lotr-virtue" | "lotr-background" | "lotr-weapon" | "lotr-gear" | "lotr-monster"
-  | "db-ability" | "db-spell" | "db-weapon" | "db-armor" | "db-gear" | "db-monster" | "db-npc"
+  | "db-ability" | "db-spell" | "db-weapon" | "db-armor" | "db-gear" | "db-monster" | "db-npc" | "db-kin" | "db-profession"
   | "pb-weapon" | "pb-armor" | "pb-gear" | "pb-relic" | "pb-ritual" | "pb-monster" | "pb-ship"
   | "mmrpg-power" | "mmrpg-trait" | "mmrpg-tag" | "mmrpg-iconic" | "mmrpg-hq" | "mmrpg-starship";
 type CampaignRef = { id: string; name: string; code: string; system?: string | null };
@@ -354,7 +356,30 @@ export default function HomebrewManager({
   const [form, setForm] = useState<Form | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  // Name of the entry a new draft was started from (Template), for the strip.
+  const [fromTemplate, setFromTemplate] = useState("");
 
+  // Template list: your own homebrew of this type first, then the book's
+  // entries (lazy-loaded — components/hb/sd/templates.ts).
+  const templates = useMemo(() => {
+    const book = sdBookTemplates(type);
+    return async (): Promise<TemplateOption[]> => [
+      ...items.map((rec) => ({ key: `hb:${rec.id}`, name: rec.name, group: "Your homebrew", meta: "Homebrew", data: rec.data || {} })),
+      ...(book ? await book() : []),
+    ];
+  }, [items, type]);
+
+  // A template opens as a NEW, unsaved draft through the same legacy→draft
+  // path an old record takes (formFromRecord), named "<original> (copy)".
+  function startFromTemplate(opt: TemplateOption) {
+    const f = formFromRecord({ id: "", type, name: opt.name, campaignIds: [], data: opt.data, updatedAt: "", owner: true });
+    f.id = null;
+    f.name = templateCopyName(opt.name);
+    f.campaignIds = form?.id === null ? form.campaignIds : [];
+    setFromTemplate(opt.name);
+    setError("");
+    setForm(f);
+  }
   const noun =
     type === "spell"
       ? "spell"
@@ -367,6 +392,9 @@ export default function HomebrewManager({
             : type === "background"
               ? "background"
               : "item";
+  const templateButton = (
+    <TemplatePicker source={templates} onPick={startFromTemplate} noun={noun} disabled={busy} className={btn} />
+  );
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => (f ? { ...f, [k]: v } : f));
 
   const patchTalent = (i: number, patch: Partial<TalentRow>) =>
@@ -670,7 +698,7 @@ export default function HomebrewManager({
                     </div>
                   </div>
                   <div className="flex shrink-0 gap-2">
-                    <button className={btn} onClick={() => setForm(formFromRecord(rec))} disabled={busy}>
+                    <button className={btn} onClick={() => { setFromTemplate(""); setForm(formFromRecord(rec)); }} disabled={busy}>
                       Edit
                     </button>
                     <button className={btn} onClick={() => remove(rec)} disabled={busy}>
@@ -685,6 +713,14 @@ export default function HomebrewManager({
           {form ? (
             <div className="grid gap-4 rounded border border-[var(--border)] bg-[var(--panel-2)] p-4 lg:grid-cols-[minmax(0,1fr)_300px]">
               <div className="min-w-0">
+              {form.id === null ? (
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] pb-3">
+                  <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
+                    {fromTemplate ? <>New {noun} · from <b className="text-[var(--text)]">{fromTemplate}</b></> : `New ${noun}`}
+                  </span>
+                  {templateButton}
+                </div>
+              ) : null}
               <div className="grid gap-3 sm:grid-cols-2">
                 {type === "class" ? (
                   <div className="sm:col-span-2 flex gap-3">
@@ -937,9 +973,12 @@ export default function HomebrewManager({
               <div className="lg:sticky lg:top-20 lg:self-start">{preview}</div>
             </div>
           ) : (
-            <button className={btnGold} onClick={() => setForm(blankForm())} disabled={busy}>
-              + Add homebrew {noun}
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button className={btnGold} onClick={() => { setFromTemplate(""); setForm(blankForm()); }} disabled={busy}>
+                + Add homebrew {noun}
+              </button>
+              {templateButton}
+            </div>
           )}
 
           {error && !form ? <p className="mt-3 text-[13px] text-[var(--red)]">{error}</p> : null}

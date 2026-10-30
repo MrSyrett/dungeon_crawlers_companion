@@ -754,6 +754,7 @@ body.dark #d6-action .turn-badge.warn{color:#f0c060;}
           <div class="vlbl"><span>Armor</span></div>
           <div class="vbig"><input type="text" id="f-armor-pips" class="code" placeholder="+1D" style="width:64px;" oninput="recalc()"></div>
           <div class="vline"><input type="text" id="f-armor" list="dl-armor" placeholder="none (set from Equipment)" style="width:100%;text-align:left;" oninput="recalc()"></div>
+          <div class="vline"><small id="armor-dexnote" style="font-size:10px;color:var(--muted);"></small></div>
         </div>
       </div>
 
@@ -951,14 +952,34 @@ function fromCode(str) {
 const codeOrZero = str => fromCode(str) || 0;
 
 // ═══ LOOKUPS ══════════════════════════════════════════════════════════════
-function attr(id) { return codeOrZero($('at-' + id).value); }
+// attrRaw = the attribute as built (saved, used for Advancement costs); attr = the
+// code you actually roll, i.e. less any worn armor's Dexterity penalty.
+function attrRaw(id) { return codeOrZero($('at-' + id).value); }
+function attr(id) { const p = attrRaw(id); return id === 'Dexterity' ? p - armorDexPen() : p; }
+// Worn armor's Dexterity penalty in pips (R&E p.47 / core: armor subtracts from Dexterity
+// and every Dexterity-based skill while worn). Read from the worn armor's data each time,
+// so clearing / changing the armor reverses it. Homebrew composes "...; -1D Dexterity";
+// book armor states it in the description ("-1D to dexterity", "subtracts +1 from
+// dexterity", "reduces dexterity by the same amount" = the armor code).
+function armorDexPen() {
+  const el = $('f-armor'); const g = el && el.value ? findGear(el.value, 'Armor') : null; if(!g) return 0;
+  const st = String(g.stats || '');
+  let m = /-\s*(\d+D(?:\+\d)?|\d+)\s+Dexterity\b/i.exec(st);
+  if(m && !/per pip/i.test(st)) return Math.max(0, fromCode(m[1]) || 0);
+  // The current entry's text first; if it is silent, the superseded (core) entry's rule.
+  const ds = String(g.description || '') + ' ' + String((g.superseded && g.superseded.description) || '');
+  m = /-\s*(\d+D(?:\+\d)?|\d+)\s+(?:to\s+)?dexterity\b/i.exec(ds) || /subtract(?:s|ed)?\s+\+?(\d+D(?:\+\d)?|\d+)\s+from\s+(?:the\s+wearer's\s+)?dexterity\b/i.exec(ds);
+  if(m) return Math.max(0, fromCode(m[1]) || 0);
+  if(/(?:reduces\s+dexterity\s+by\s+the\s+same\s+amount|subtracted\s+from\s+the\s+wearer's\s+dexterity)/i.test(ds)) return Math.max(0, fromCode(($('f-armor-pips') || {}).value || '') || 0);
+  return 0;
+}
 function template() { return D.templates().find(t => t.name === $('f-template').value) || null; }
 function skillRows() { return [...document.querySelectorAll('#skills-body tr[data-skill]')]; }
 function skillPips(name) {
   const n = norm(name); const tr = skillRows().find(r => norm(r.querySelector('.sk-name-in').value) === n);
   if(!tr) return null; return rowTotal(tr);
 }
-function rowTotal(tr) { const a = tr.dataset.attr; const adds = codeOrZero(tr.querySelector('.sk-adds').value); return a === 'Force' ? adds : attr(a) + adds; }
+function rowTotal(tr, raw) { const a = tr.dataset.attr; const adds = codeOrZero(tr.querySelector('.sk-adds').value); return a === 'Force' ? adds : (raw ? attrRaw(a) : attr(a)) + adds; }
 function findWeapon(name) { const n = norm(name); return n ? D.weapons().find(w => norm(w.name) === n) || null : null; }
 function findGear(name, cat) { const n = norm(name); return n ? D.gear().find(g => norm(g.name) === n && (!cat || g.category === cat)) || null : null; }
 function findVehicle(name) { const n = norm(name); return n ? D.vehicles().find(v => norm(v.name) === n) || null : null; }
@@ -1020,7 +1041,9 @@ function hasCharacter() { return !!(($('f-name') && $('f-name').value.trim()) ||
 function refreshWizardButtons() { const built = hasCharacter(); const bb = $('build-btn'), lb = $('level-btn'); if(bb) bb.style.display = built ? 'none' : ''; if(lb) lb.style.display = built ? '' : 'none'; }
 function recalc() {
   refreshWizardButtons();
-  ATTRS.forEach(a => { const b = $('atb-' + a); if(b) b.textContent = toCode(attr(a)); });
+  const dexPen = armorDexPen();
+  ATTRS.forEach(a => { const b = $('atb-' + a); if(b) { b.textContent = toCode(attr(a)); b.title = 'Roll ' + a + (a === 'Dexterity' && dexPen ? ' (' + toCode(attrRaw(a)) + ' −' + toCode(dexPen).replace(/^\+/, '') + ' armor)' : ''); } });
+  const an = $('armor-dexnote'); if(an) an.textContent = dexPen ? '−' + toCode(dexPen).replace(/^\+/, '') + ' Dexterity & Dex skills while worn' : '';
   let used = 0;
   skillRows().forEach(tr => {
     const adds = codeOrZero(tr.querySelector('.sk-adds').value); if(tr.dataset.attr !== 'Force') used += Math.max(0, adds); else used += Math.max(0, adds - 3);
@@ -1050,8 +1073,8 @@ function _lvlSpent() { const all = _lvlAllSkills(); return Object.keys(_lvlAlloc
 // Every skill: those on the sheet, then the standard list, then Force skills.
 function _lvlAllSkills() {
   const rows = skillRows(); const seen = new Set(); const out = [];
-  rows.forEach(tr => { const nm = tr.querySelector('.sk-name-in').value.trim() || '(unnamed)'; seen.add(norm(nm)); out.push({ key: norm(nm), name: nm, attr: tr.dataset.attr, tr: tr, base: rowTotal(tr), owned: true }); });
-  D.skills().slice().sort((a, b) => a.name.localeCompare(b.name)).forEach(def => { if(seen.has(norm(def.name))) return; seen.add(norm(def.name)); out.push({ key: norm(def.name), name: def.name, attr: def.attribute, tr: null, base: attr(def.attribute), owned: false }); });
+  rows.forEach(tr => { const nm = tr.querySelector('.sk-name-in').value.trim() || '(unnamed)'; seen.add(norm(nm)); out.push({ key: norm(nm), name: nm, attr: tr.dataset.attr, tr: tr, base: rowTotal(tr, true), owned: true }); });
+  D.skills().slice().sort((a, b) => a.name.localeCompare(b.name)).forEach(def => { if(seen.has(norm(def.name))) return; seen.add(norm(def.name)); out.push({ key: norm(def.name), name: def.name, attr: def.attribute, tr: null, base: attrRaw(def.attribute), owned: false }); });
   FORCE_SKILLS.forEach(fs => { if(seen.has(norm(fs))) return; seen.add(norm(fs)); out.push({ key: norm(fs), name: fs, attr: 'Force', tr: null, base: 0, owned: false }); });
   return out;
 }
@@ -1834,7 +1857,7 @@ function toggleDarkMode() { setDarkMode(!document.body.classList.contains('dark'
 
 // ═══ SAVE / LOAD ══════════════════════════════════════════════════════════
 function collectSheet() {
-  const v = id => $(id).value; const attrs = {}; ATTRS.forEach(a => attrs[a] = attr(a));
+  const v = id => $(id).value; const attrs = {}; ATTRS.forEach(a => attrs[a] = attrRaw(a));
   return {
     system:'SW', v:1,
     name: v('f-name'), template: v('f-template'), species: v('f-species'), sex: v('f-sex'), age: v('f-age'), height: v('f-height'), weight: v('f-weight'), physical: v('f-physical'),

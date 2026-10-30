@@ -5,6 +5,7 @@ import { NIMBLE_TABLES } from "@/lib/data/nimble-tables";
 import type { NimbleItem } from "@/lib/data/nimble-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import { NimbleHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, hbBadge, one, type Query, type RawQuery } from "@/components/NimbleRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -61,7 +62,7 @@ export default async function NimbleEquipmentPage({ searchParams }: { searchPara
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <NimbleHeader title="Equipment" subtitle={`${NIMBLE_ITEMS.length} items${hbRows.length ? ` + ${hbRows.length} homebrew` : ""} · armor, weapons, gear & magic`} />
-      <div className="mb-6"><HomebrewEditor kind="nimble-item" campaigns={campaigns} initial={hbOwn} /></div>
+      <CompendiumHomebrew><HomebrewEditor kind="nimble-item" campaigns={campaigns} initial={hbOwn} /></CompendiumHomebrew>
       <details className="mb-5 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"><summary className="cursor-pointer text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--sys-link)]">Weapon properties</summary><ul className="mt-2 grid gap-1 md:grid-cols-2">{NIMBLE_TABLES.weaponProperties.map((p) => <li key={p.name} className="text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">{p.name}.</span> {p.text}</li>)}</ul></details>
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search equipment…" hidden={{ cat }} />

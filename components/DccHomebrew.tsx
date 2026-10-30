@@ -1,7 +1,9 @@
 "use client";
 
 import { campaignsFor } from "@/lib/homebrew-systems";
-import { useState, type CSSProperties } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
+import TemplatePicker, { templateCopyName, type TemplateOption } from "@/components/hb/TemplatePicker";
+import { dccTemplates } from "@/components/hb/dcc/templates";
 import { useRouter } from "next/navigation";
 import ItemBuilder, { ItemPreview, blankItem, itemFromData, itemPayload, type ItemDraft } from "@/components/hb/dcc/ItemBuilder";
 import { useDccNames } from "@/components/hb/dcc/data";
@@ -57,6 +59,30 @@ export default function DccHomebrew({
   const [form, setForm] = useState<Form | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  // Name of the entry a new draft was started from (Template), for the strip.
+  const [fromTemplate, setFromTemplate] = useState("");
+
+  // Template list: your own homebrew items first, then the book's loot
+  // (lazy-loaded — components/hb/dcc/templates.ts).
+  const templates = useMemo(() => {
+    const book = dccTemplates("dcc-item");
+    return async (): Promise<TemplateOption[]> => [
+      ...items.map((r) => ({ key: `hb:${r.id}`, name: r.name, group: "Your homebrew", meta: "Homebrew", data: r.data || {} })),
+      ...(book ? await book() : []),
+    ];
+  }, [items]);
+
+  // A template opens as a NEW, unsaved draft through the same legacy→draft path
+  // an old record takes (formFromRecord / itemFromData), named "<original> (copy)".
+  function startFromTemplate(opt: TemplateOption) {
+    const f = formFromRecord({ id: "", type: "dcc-item", name: opt.name, campaignIds: [], data: opt.data, updatedAt: "", owner: true });
+    f.id = null;
+    f.name = templateCopyName(opt.name);
+    f.campaignIds = form?.id === null ? form.campaignIds : [];
+    setFromTemplate(opt.name);
+    setError("");
+    setForm(f);
+  }
 
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => (f ? { ...f, [k]: v } : f));
   const toggleCampaign = (id: string) =>
@@ -66,6 +92,7 @@ export default function DccHomebrew({
         : f,
     );
   const names = useDccNames();
+  const templateButton = <TemplatePicker source={templates} onPick={startFromTemplate} noun="item" disabled={busy} className={btn} />;
 
   async function submit() {
     if (!form) return;
@@ -127,7 +154,7 @@ export default function DccHomebrew({
   const campaignName = (id: string) => campaigns.find((c) => c.id === id)?.name ?? "a campaign";
 
   return (
-    <div className="mb-6 rounded-lg border border-[var(--border)] bg-[var(--panel)]">
+    <div className="mb-6 rounded-lg border border-[var(--border)] bg-[var(--panel)]" style={ACCENT}>
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-center justify-between px-4 py-3 text-left"
@@ -161,7 +188,7 @@ export default function DccHomebrew({
                     <span className="text-[10px] uppercase tracking-[0.08em] text-[var(--muted)]">personal</span>
                   )}
                   <span className="ml-auto flex gap-2">
-                    <button className={btn} disabled={busy} onClick={() => { setForm(formFromRecord(rec)); setError(""); }}>
+                    <button className={btn} disabled={busy} onClick={() => { setForm(formFromRecord(rec)); setFromTemplate(""); setError(""); }}>
                       Edit
                     </button>
                     <button className={btn} disabled={busy} onClick={() => remove(rec)}>
@@ -181,6 +208,14 @@ export default function DccHomebrew({
           {form ? (
             <div style={ACCENT} className="grid gap-4 rounded border border-[var(--border)] bg-[var(--panel-2)] p-4 lg:grid-cols-[minmax(0,1fr)_300px]">
               <div>
+              {form.id === null ? (
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] pb-3">
+                  <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
+                    {fromTemplate ? <>New item · from <b className="text-[var(--text)]">{fromTemplate}</b></> : "New item"}
+                  </span>
+                  {templateButton}
+                </div>
+              ) : null}
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="sm:col-span-2">
                   <label className={label}>Name</label>
@@ -221,9 +256,12 @@ export default function DccHomebrew({
               </div>
             </div>
           ) : (
-            <button className={btnRed} onClick={() => { setForm(blank()); setError(""); }}>
-              + New Homebrew Item
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button className={btnRed} onClick={() => { setForm(blank()); setFromTemplate(""); setError(""); }}>
+                + New Homebrew Item
+              </button>
+              {templateButton}
+            </div>
           )}
         </div>
       ) : null}

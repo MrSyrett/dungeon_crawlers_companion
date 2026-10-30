@@ -20,7 +20,7 @@ import Preview from "../Preview";
 import Stepper from "../Stepper";
 import styles from "../hb.module.css";
 import {
-  AREAS, EFFORT_BONUS_KEYS, EFFORT_DICE, ICRPG_STATS, ICRPG_WORLDS, MONSTER_TIERS, RANGES, cleanEffortBonus, composeIcrpgAttack, composeMonsterLine,
+  AREAS, EFFORT_BONUS_KEYS, EFFORT_DICE, ICRPG_EFFORT_WORDING, ICRPG_RANGE_WORDING, ICRPG_STATS, ICRPG_WORLDS, MONSTER_TIERS, RANGES, cleanEffortBonus, composeIcrpgAttack, composeMonsterLine,
   effortOfDie, newIcrpgAttack, parseIcrpgAttack, parseMonsterLine, type EffortBonus,
 } from "./rules";
 import { Cell, Select, TextRows, Toggle, fieldCls, selCls } from "./ui";
@@ -125,7 +125,11 @@ export default function MonsterBuilder({ value: m, onChange }: { value: MonsterD
       <Cell label="Attacks" className="sm:col-span-2" help="Damage = EFFORT: d4 Basic · d6 Weapon · d8 Guns · d10 Magic · d12 Ultimate (dice count for “4D12”, 0 = no damage). The GM Screen rolls d20 + the stat to hit and the EFFORT.">
         <AttackRows
           rows={m.attacks} onChange={(r) => set({ attacks: r })} count={false} hit={false} dice={EFFORT_DICE} modRange={[-10, 30]} ranges={[...RANGES]}
-          extras={[{ key: "area", label: "Targets", options: AREAS }, { key: "stat", label: "Roll", options: [["", "auto"], ...ICRPG_STATS.map((s) => [s, s] as [string, string])] }]}
+          extras={[
+            { key: "area", label: "Targets", options: AREAS }, { key: "stat", label: "Roll", options: [["", "auto"], ...ICRPG_STATS.map((s) => [s, s] as [string, string])] },
+            { key: "ef", label: "EFFORT as", options: ICRPG_EFFORT_WORDING }, { key: "rw", label: "Range as", options: ICRPG_RANGE_WORDING },
+            { key: "sj", label: "Rider after", options: [["", "comma"], [";", "semicolon"]] },
+          ]}
           namePh="Claw, Spit acid…" specialPh="Rider: DEX halves, grabs on a 6…" blank={() => newIcrpgAttack()} max={10}
           slot={(r, patch) => {
             const e = effortOfDie(r.dice.d), x = r.extra ?? {};

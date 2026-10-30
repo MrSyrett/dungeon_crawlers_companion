@@ -4,6 +4,7 @@ import { ACE_TRAITS } from "@/lib/data/ace-traits";
 import type { AceTrait, AceSettingKey } from "@/lib/data/ace-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import {
   AceHeader, SearchForm, ChipRow, CountLine, EmptyState, BOOKS, settingName, one,
   cardCls, bookBadge, hbBadge, type Query, type RawQuery,
@@ -52,9 +53,9 @@ export default async function AceTraitsPage({ searchParams }: { searchParams: Pr
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <AceHeader title="Traits" subtitle={`${ACE_TRAITS.length} traits${hbRows.length ? ` + ${hbRows.length} homebrew` : ""} · one complication each`} />
 
-      <div className="mb-6">
+      <CompendiumHomebrew>
         <HomebrewEditor kind="ace-trait" campaigns={campaigns} initial={hbOwn} />
-      </div>
+      </CompendiumHomebrew>
 
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search traits…" hidden={{ book }} />

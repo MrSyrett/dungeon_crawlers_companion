@@ -232,6 +232,13 @@ body:not(.hd-mode) .sd-vital-def{display:none;}
 body:not(.hd-mode) .ds-stress{display:none;}
 body.hd-mode .sd-vital-ac{display:none;}
 .ds-stress{display:flex;align-items:center;gap:8px;padding:6px 10px 8px;border-bottom:1px solid var(--rule);}
+/* RESISTANCES / IMMUNITIES: chips from equipped items (read-only) + the player's own list */
+.sd-defs{display:flex;align-items:center;gap:6px 14px;padding:6px 10px 8px;border-bottom:1px solid var(--rule);flex-wrap:wrap;}
+.sd-defs .df-grp{display:flex;align-items:center;gap:5px;flex:1 1 220px;min-width:0;flex-wrap:wrap;}
+.sd-defs .df-lbl{font-family:'Montserrat',sans-serif;font-weight:800;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);flex:0 0 auto;min-width:50px;}
+.sd-defs .df-chip{font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.04em;border:1px solid var(--gold-ink);color:var(--gold-ink);border-radius:10px;padding:1px 8px;line-height:15px;white-space:nowrap;cursor:default;}
+.sd-defs .df-in{flex:1 1 90px;min-width:70px;height:22px;border:1px solid var(--input-border,var(--rule));border-radius:5px;background:var(--input-bg);color:var(--ink);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;padding:0 6px;outline:none;}
+.sd-defs .df-in::placeholder{color:var(--muted);font-weight:500;}
 .ds-stress .st-lbl{font-family:'Montserrat',sans-serif;font-weight:800;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);flex:0 0 auto;}
 .ds-stress .st-pips{display:flex;gap:5px;flex:1 1 auto;}
 .ds-stress .st-pip{flex:1 1 auto;height:14px;border:1px solid var(--rule);border-radius:3px;background:var(--box);cursor:pointer;padding:0;transition:background .1s,border-color .1s;}
@@ -859,6 +866,18 @@ body.dark .sdt-badge.bad{color:#f08a84;border-color:#a8433d;}
         <div class="st-pips" id="stress-pips"></div>
         <span class="st-pen" id="stress-pen"></span>
       </div>
+
+      <!-- RESISTANCES / IMMUNITIES: equipped items add chips (gone when the item leaves Equipment); the field is your own list -->
+      <div class="sd-defs" id="sd-defs">
+        <div class="df-grp" title="Resistances — chips come from equipped items; type your own (comma-separated) in the field">
+          <span class="df-lbl">Resist</span><span class="df-chips" id="df-resist-chips"></span>
+          <input type="text" class="df-in" id="f-resist" placeholder="e.g. Fire, Cold" oninput="scheduleAutosave()">
+        </div>
+        <div class="df-grp" title="Immunities — chips come from equipped items; type your own (comma-separated) in the field">
+          <span class="df-lbl">Immune</span><span class="df-chips" id="df-immune-chips"></span>
+          <input type="text" class="df-in" id="f-immune" placeholder="e.g. Poison" oninput="scheduleAutosave()">
+        </div>
+      </div>
       </div><!-- end vitals card -->
 
 
@@ -1453,7 +1472,8 @@ function equippedItemBonusTotals() {
     const cb = row.querySelector('.gear-equip');
     if(!cb || !cb.checked) return;                                   // not equipped
     // GM-built loot badges ("plus" is per-item: see deriveEquipWeapon / acParseRow).
-    sdLbOf(row).forEach(b => {
+    const lb = sdLbOf(row);
+    lb.forEach(b => {
       const n = parseInt(b.amount) || 0;
       if(b.kind === 'ac') totals.ac += n;
       else if(b.kind === 'attack') { totals.meleeAtk += n; totals.rangedAtk += n; }
@@ -1461,6 +1481,9 @@ function equippedItemBonusTotals() {
       else if(b.kind === 'hp') totals.hp += n;
       else if(b.kind === 'stat' && b.target in totals) totals[b.target] += n;
     });
+    // A row that carries its own loot badges already counted them above — don't
+    // also add the same item's homebrew bonuses by name (no double count).
+    if(lb.some(b => b.kind !== 'note' && b.kind !== 'spell')) return;
     const name = row.querySelector('.gear-name')?.value || '';
     const hb = (typeof findHomebrewItem === 'function') ? findHomebrewItem(name) : null;
     if(!hb || !Array.isArray(hb.bonuses)) return;
@@ -1481,8 +1504,7 @@ function reapplyEquippedWeaponAttacks() {
   document.querySelectorAll('#gear-list .gear-slot').forEach(row => {
     const cb = row.querySelector('.gear-equip');
     if(!cb || !cb.checked) return;
-    const kind = (typeof gearItemKind === 'function')
-      ? gearItemKind(row.querySelector('.gear-name')?.value) : null;
+    const kind = (typeof gearRowKind === 'function') ? gearRowKind(row) : null;
     if(kind !== 'weapon') return;
     // Skip weapons whose derived attack row hasn't actually changed — otherwise
     // the destructive remove+add below makes equipped-weapon attacks visibly
@@ -1535,10 +1557,56 @@ function applyItemBonuses() {
     if(typeof refreshGearSlots === 'function') refreshGearSlots();
     if(typeof refreshAutoAC === 'function') refreshAutoAC();
     reapplyEquippedWeaponAttacks();
+    try { renderSdDefenses(); } catch(e) {}
     if(sdLbSyncSpells() && typeof saveSheet === 'function') saveSheet(false);
   } finally {
     _applyingItemBonuses = false;
   }
+}
+
+// ── RESISTANCES / IMMUNITIES from equipped items ─────────────────────────────
+// Read from each equipped Equipment slot's loot badges: a "resist" / "immune"
+// badge (target = damage type) once sd-loot-bonus.js defines those kinds, and
+// today a "note" badge worded like "Resistance to fire", "Resist Cold and Poison",
+// "Immune to poison damage" or "resistant to magic". Derived on every
+// applyItemBonuses(), so stowing / deleting the item removes its chips and a
+// reload rebuilds them. The player's own list lives in #f-resist / #f-immune.
+const SD_DMG_TYPES = ['Acid','Cold','Fire','Lightning','Necrotic','Poison','Psychic','Radiant','Thunder','Bludgeoning','Piercing','Slashing','Magic'];
+function sdDmgTypesIn(text){
+  const t = String(text || '').toLowerCase();
+  if(/\ball (?:damage|types)\b/.test(t)) return SD_DMG_TYPES.slice(0, 12);
+  return SD_DMG_TYPES.filter(d => new RegExp('\\b' + d.toLowerCase() + '\\b').test(t));
+}
+function sdItemDefenses(){
+  const out = { resist:{}, immune:{} };
+  const add = (k, types, from) => types.forEach(d => { if(!out[k][d]) out[k][d] = from; });
+  document.querySelectorAll('#gear-list .gear-slot').forEach(row => {
+    if(row.classList.contains('gear-slot-disabled') || !row.querySelector('.gear-equip')?.checked) return;
+    const from = (row.querySelector('.gear-name')?.value || '').trim();
+    sdLbOf(row).forEach(b => {
+      if(b.kind === 'resist' || b.kind === 'immune'){ add(b.kind, sdDmgTypesIn(b.target), from); return; }
+      if(b.kind !== 'note') return;
+      String(b.target || '').split(/[.;]/).forEach(cl => {
+        if(/\bcurse/i.test(cl) && /vulnerab/i.test(cl)) return;
+        if(/\bimmun/i.test(cl)) add('immune', sdDmgTypesIn(cl), from);
+        else if(/\bresist/i.test(cl)) add('resist', sdDmgTypesIn(cl), from);
+      });
+    });
+  });
+  Object.keys(out.immune).forEach(d => { delete out.resist[d]; });   // immunity covers resistance
+  return out;
+}
+function renderSdDefenses(){
+  const d = sdItemDefenses();
+  const paint = (id, map) => { const el = document.getElementById(id); if(!el) return;
+    el.innerHTML = Object.keys(map).map(t => '<span class="df-chip" title="From ' + String(map[t]).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])) + ' — goes away when it leaves your Equipment">' + t + '</span>').join(''); };
+  paint('df-resist-chips', d.resist); paint('df-immune-chips', d.immune);
+}
+// Everything the character resists / is immune to (items + own list), for other readers.
+function sdDefensesAll(){
+  const d = sdItemDefenses(), own = id => String(document.getElementById(id)?.value || '').split(/[,;\/]/).map(x => x.trim()).filter(Boolean);
+  const merge = (a, b) => { const seen = {}, o = []; a.concat(b).forEach(x => { const k = x.toLowerCase(); if(!seen[k]){ seen[k] = 1; o.push(x); } }); return o; };
+  return { resist: merge(Object.keys(d.resist), own('f-resist')), immune: merge(Object.keys(d.immune), own('f-immune')) };
 }
 
 // ── LOOT BONUS BADGES (GM-built items — public/tools-data/loot-bonus.js) ─────
@@ -1565,10 +1633,34 @@ function sdLbOf(row){
   if(!nm || nm !== lb.name){ row._lb = null; return []; }
   return lb.benefits || [];
 }
-function sdLbSet(row, benefits, id){
+function sdLbSet(row, benefits, id, base){
   const b = sdLbNorm(benefits);
-  row._lb = b.length ? { id: id || sdLbNewId(), name: (row.querySelector('.gear-name')?.value || '').trim(), benefits: b } : null;
+  row._lb = (b.length || base) ? { id: id || sdLbNewId(), name: (row.querySelector('.gear-name')?.value || '').trim(), benefits: b } : null;
+  if(row._lb && base) row._lb.base = String(base);
   sdLbPaintRow(row);
+}
+// The live loot record of a slot (badges and/or a base weapon), or null.
+function sdLbLive(row){ sdLbOf(row); return row && row._lb ? row._lb : null; }
+// A weapon loot item the catalog doesn't know by name rides on a base weapon:
+// the catalog weapon whose name its name contains (longest, whole words) —
+// "Flaming Longsword" → Longsword — else '*' (a generic 1d6 Close weapon). '' = not a weapon.
+function sdBaseWeaponFor(name){
+  const ws = String(name || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().split(' '), n = ' ' + ws.join(' ') + ' ' + ws.slice(1).map((w, i) => ws[i] + w).join(' ') + ' ';   // "long sword" also reads as "longsword"
+  let best = null, bk = '';
+  allWeapons().forEach(w => { if(!w || !w.name || w.name === 'Strikes') return; const k = ' ' + w.name.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() + ' ';
+    if(k.trim().length > 2 && n.indexOf(k) >= 0 && k.length > bk.length){ best = w; bk = k; } });
+  return best;
+}
+function sdLootWeaponBase(name, cat){
+  if(String(cat || '').toLowerCase() !== 'weapon' || gearItemKind(name) === 'weapon') return '';
+  const w = sdBaseWeaponFor(String(name || '').replace(/^\+\d+\s+/, ''));
+  return w ? w.name : '*';
+}
+const SD_GENERIC_WEAPON = { name:'Weapon', type:'M', range:'Close', damage:'1d6', props:'', generic:true };
+function sdRowBaseWeapon(row){
+  const lb = sdLbLive(row); if(!lb || !lb.base) return null;
+  if(lb.base === '*') return SD_GENERIC_WEAPON;
+  return allWeapons().find(x => x.name.toLowerCase() === lb.base.toLowerCase()) || SD_GENERIC_WEAPON;
 }
 // Sum of the item's "plus" badges, or null when it has none (→ the name's "+N").
 function sdLbPlus(row){
@@ -1588,7 +1680,7 @@ function sdLbPaintCard(card, items){
 }
 // Equip kind of a slot: the name's own kind, else "magic" when it carries badges.
 function gearRowKind(row){
-  return gearItemKind(row.querySelector('.gear-name')?.value) || (sdLbOf(row).length ? 'magic' : null);
+  return gearItemKind(row.querySelector('.gear-name')?.value) || (sdRowBaseWeapon(row) ? 'weapon' : null) || (sdLbOf(row).length ? 'magic' : null);
 }
 function sdLbSpellBadge(srow, from){
   if(!srow) return;
@@ -2739,7 +2831,7 @@ function deriveEquipWeapon(row) {
   const lbPlus = sdLbPlus(row);   // a loot item's "plus" badge wins over the name's "+N"
   const bonus = lbPlus != null ? lbPlus : (m ? (parseInt(m[1])||0) : 0);
   const type = raw.replace(/^\+\d+\s+/, '');
-  const w = (typeof SD_WEAPONS!=='undefined') ? allWeapons().find(x=>x.name.toLowerCase()===type.toLowerCase()) : null;
+  const w = ((typeof SD_WEAPONS!=='undefined') ? allWeapons().find(x=>x.name.toLowerCase()===type.toLowerCase()) : null) || sdRowBaseWeapon(row);
   if(!w) return null;
   const isFinesse = (w.props||'').toLowerCase().includes('finesse');
   const useDex = (w.type==='R') || (isFinesse && getStatMod('dex') > getStatMod('str'));
@@ -2795,6 +2887,7 @@ function addEquipAttack(row) {
   if(f.damage) f.damage.value = dv.damage;
   if(f.stat)   f.stat.value   = dv.stat;
   if(f.range)  f.range.value  = dv.range;
+  if(dv.w.generic && f.name) f.name.title = 'Generic attack (no catalog weapon) — unlock to edit its damage, stat and range';
   refreshAtkDamageToggle(tr);
 
   // Thief: also add a linked Backstab row for this weapon.
@@ -2812,7 +2905,7 @@ function addEquipAttack(row) {
       bsRow.dataset.eq = eqId;                 // linked so unequip removes it too
       bsRow.dataset.eqBackstab = '1';
       const bf = atkFields(bsRow);
-      if(bf.name)   bf.name.value   = 'Backstab ('+dv.w.name+')';
+      if(bf.name)   bf.name.value   = 'Backstab ('+(dv.w.generic ? dv.raw : dv.w.name)+')';
       if(bf.bonus)  bf.bonus.value  = dv.bonus;
       if(bf.damage) bf.damage.value = dv.applyDmg(dv.w.damage.replace(/1d/g, bsDice+'d'));
       if(bf.stat)   bf.stat.value   = dv.stat;
@@ -2835,6 +2928,7 @@ function equipAttackUnchanged(row) {
   const rows = [...document.querySelectorAll('#attacks-body tr[data-eq="'+eqId+'"]')];
   const mainTr = rows.find(tr => tr.dataset.eqBackstab !== '1');
   if(!mainTr) return false;                                 // main row missing
+  if(dv.w.generic) return true;                             // a generic weapon row is the player's to edit
   const f = atkFields(mainTr);
   const same = (f.name?.value||'')   === dv.name
             && (f.bonus?.value||'')  === dv.bonus
@@ -3251,8 +3345,8 @@ function stowGearRow(btn){
   const nameEl = row.querySelector('.gear-name'), qtyEl = row.querySelector('.gear-qty');
   const name = (nameEl.value || '').trim(); if(!name) return;
   if(/^↳ /.test(name)) return;   // continuation rows aren't stowable on their own
-  const lbB = sdLbOf(row), inv = { name: name, qty: (qtyEl.value || '').trim() };
-  if(lbB.length) { inv.benefits = lbB; inv.lbId = row._lb.id; }
+  const lbB = sdLbOf(row), lbL = sdLbLive(row), inv = { name: name, qty: (qtyEl.value || '').trim() };
+  if(lbL) { inv.benefits = lbB; inv.lbId = lbL.id; if(lbL.base) inv.lbBase = lbL.base; }
   _inventory.push(inv);
   row._lb = null;
   nameEl.value = ''; qtyEl.value = '';
@@ -3297,7 +3391,7 @@ function invEquip(idx){
   const target = open[0];
   const nameEl = target.querySelector('.gear-name'), qtyEl = target.querySelector('.gear-qty');
   nameEl.value = item.name; qtyEl.value = item.qty || '';
-  sdLbSet(target, item.benefits || [], item.lbId);   // its loot badges move with it
+  sdLbSet(target, item.benefits || [], item.lbId, item.lbBase);   // its loot badges (and base weapon) move with it
   if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);   // auto-equip if weapon/armor/magic
   // Reserve the extra slots with continuation rows (↳), matching the shop/builder.
   for(let s = 1; s < cost; s++){
@@ -4170,9 +4264,9 @@ function collectSheet(){
         qty:      row.querySelector('.gear-qty')?.value || '',
         equipped: !!row.querySelector('.gear-equip')?.checked,
         disabled: row.classList.contains('gear-slot-disabled'),
-        ...(sdLbOf(row).length ? { benefits: row._lb.benefits, lbId: row._lb.id } : {})
+        ...(sdLbLive(row) ? Object.assign({ benefits: row._lb.benefits, lbId: row._lb.id }, row._lb.base ? { lbBase: row._lb.base } : {}) : {})
       })),
-      inventory: (Array.isArray(_inventory) ? _inventory : []).map(it => Object.assign({ name: String(it.name||''), qty: String(it.qty||'') }, (it.benefits && it.benefits.length) ? { benefits: it.benefits, lbId: it.lbId || '' } : {})).filter(it => it.name.trim()),
+      inventory: (Array.isArray(_inventory) ? _inventory : []).map(it => Object.assign({ name: String(it.name||''), qty: String(it.qty||'') }, ((it.benefits && it.benefits.length) || it.lbBase) ? { benefits: it.benefits || [], lbId: it.lbId || '' } : {}, it.lbBase ? { lbBase: it.lbBase } : {})).filter(it => it.name.trim()),
       gearQtys: [...document.querySelectorAll('#gear-list .gear-qty')].map(el => el.value || ''),
       gearDisabled: [...document.querySelectorAll('#gear-list > div')].map(row => row.classList.contains('gear-slot-disabled')),
       gearEquipped: [...document.querySelectorAll('#gear-list .gear-slot')].map(row => !!row.querySelector('.gear-equip')?.checked),
@@ -4191,6 +4285,9 @@ function collectSheet(){
       hbFeatureCharges: _hbFeatureChargeBonus,
       hbFeatureBaseUses: _hbFeatureBaseUses,
       spellSources: Array.isArray(_charSpellSources) ? _charSpellSources : [],
+      resist: document.getElementById('f-resist')?.value || '',      // the player's own lists (items' are derived)
+      immune: document.getElementById('f-immune')?.value || '',
+      defenses: sdDefensesAll(),                                     // items + own, for read-only consumers
     }
   };
 }
@@ -4274,7 +4371,7 @@ function _applySDData(d){
     el.value = gearRows ? (gearRows[i]?.name || '')
                         : (gearSlotted[i] ? (gearSlotted[i].name || '') : '');
     const gRow = el.closest('.gear-slot');
-    if(gRow) sdLbSet(gRow, (gearRows && gearRows[i] && gearRows[i].benefits) || [], gearRows && gearRows[i] && gearRows[i].lbId);
+    if(gRow) sdLbSet(gRow, (gearRows && gearRows[i] && gearRows[i].benefits) || [], gearRows && gearRows[i] && gearRows[i].lbId, gearRows && gearRows[i] && gearRows[i].lbBase);
   });
   gearQtyInputs.forEach((el, i) => {
     const qty = gearRows
@@ -4300,7 +4397,8 @@ function _applySDData(d){
   if(Array.isArray(d._sheet?.inventory)){
     _inventory = d._sheet.inventory.map(it => {
       const o = { name: String(it && it.name || ''), qty: String(it && it.qty || '') };
-      const b = sdLbNorm(it && it.benefits); if(b.length) { o.benefits = b; o.lbId = String(it.lbId || '') || sdLbNewId(); }
+      const b = sdLbNorm(it && it.benefits); if(b.length || (it && it.lbBase)) { o.benefits = b; o.lbId = String(it.lbId || '') || sdLbNewId(); }
+      if(it && it.lbBase) o.lbBase = String(it.lbBase);
       return o;
     }).filter(it => it.name.trim());
   } else {
@@ -4322,6 +4420,7 @@ function _applySDData(d){
     _charExtraWeapons = Array.isArray(d._sheet?.extraWeapons) ? d._sheet.extraWeapons.slice() : [];
     _charExtraArmor = Array.isArray(d._sheet?.extraArmor) ? d._sheet.extraArmor.slice() : [];
     _charSpellSources = Array.isArray(d._sheet?.spellSources) ? d._sheet.spellSources.slice() : [];
+    set('f-resist', d._sheet?.resist || ''); set('f-immune', d._sheet?.immune || '');
     if(typeof campaignRestore === 'function') campaignRestore(d._sheet?.campaign);
     _hbBonusSlots = parseInt(d._sheet?.hbBonusSlots) || 0;
     _hbFeatureChargeBonus = (d._sheet && d._sheet.hbFeatureCharges && typeof d._sheet.hbFeatureCharges === 'object') ? d._sheet.hbFeatureCharges : {};
@@ -6576,12 +6675,12 @@ function _flClaimed(dropId){const all=_flRead('sd_found_claimed');return all[dro
 function _flMarkClaimed(dropId,idx,by){const all=_flRead('sd_found_claimed');(all[dropId]=all[dropId]||{})[idx]=by;_flWrite('sd_found_claimed',all);}
 
 // Find the first empty gear slot and drop a claimed item into it.
-function sdAddGearItem(name, qty, benefits){
+function sdAddGearItem(name, qty, benefits, cat){
   const names=[...document.querySelectorAll('#gear-list .gear-name')];
   const empty=names.find(inp=>!inp.value.trim());
   if(!empty){ if(typeof showRollToast==='function') showRollToast('Gear full','—','Free a gear slot to claim more loot.','normal'); return false; }
   empty.value=name||'';
-  { const r0=empty.closest('.gear-slot'); if(r0) sdLbSet(r0, benefits||[]); }   // GM-built bonus badges ride on the slot
+  { const r0=empty.closest('.gear-slot'); if(r0) sdLbSet(r0, benefits||[], undefined, sdLootWeaponBase(name, cat)); }   // GM-built bonus badges (and an unlisted weapon's base) ride on the slot
   if(typeof onGearNameInput==='function'){ try{onGearNameInput(empty);}catch(e){} }
   const row=empty.closest('.gear-slot'); const q=row&&row.querySelector('.gear-qty');
   if(q && qty!=null && String(qty)!=='' && String(qty)!=='1') q.value=String(qty);
@@ -6615,7 +6714,7 @@ function sdAddGold(amt){
 function sdClaimItem(it){
   const gold = sdItemGold(it);
   if(gold != null){ sdAddGold(gold); return true; }
-  return sdAddGearItem(it.item, it.qty, sdLbFromLoot(it));
+  return sdAddGearItem(it.item, it.qty, sdLbFromLoot(it), it.cat);
 }
 
 function renderNormalRemote(roll){

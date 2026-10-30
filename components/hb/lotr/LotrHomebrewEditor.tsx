@@ -7,7 +7,9 @@
 // (accent --lotr); the builders live beside this file and each documents its
 // storage shape. lib/homebrew.ts normalizeLotr* is the real validator.
 import { campaignsFor } from "@/lib/homebrew-systems";
-import { useState, type CSSProperties, type ReactElement } from "react";
+import { useMemo, useState, type CSSProperties, type ReactElement } from "react";
+import TemplatePicker, { templateCopyName, type TemplateOption } from "@/components/hb/TemplatePicker";
+import { lotrTemplates } from "./templates";
 import { useRouter } from "next/navigation";
 import VirtueBuilder, { VirtuePreview, blankVirtue, virtueFromData, virtuePayload, type VirtueDraft } from "./VirtueBuilder";
 import BackgroundBuilder, { BackgroundPreview, blankBackground, backgroundFromData, backgroundPayload, type BackgroundDraft } from "./BackgroundBuilder";
@@ -86,13 +88,38 @@ export default function LotrHomebrewEditor({ kind, campaigns: allCampaigns, init
   const [campaignIds, setCampaignIds] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  // Name of the entry a new draft was started from (Template), for the strip.
+  const [fromTemplate, setFromTemplate] = useState("");
+  // Template list: your own homebrew of this kind first, then the book's
+  // entries (lazy-loaded — see the templates module beside the builders).
+  const templates = useMemo(() => {
+    const book = lotrTemplates(kind);
+    return async (): Promise<TemplateOption[]> => [
+      ...items.map((r) => ({ key: `hb:${r.id}`, name: r.name, group: "Your homebrew", meta: "Homebrew", data: r.data || {} })),
+      ...(book ? await book() : []),
+    ];
+  }, [items, kind]);
 
   if (!sc) return null;
   const active = editId !== null && draft !== null;
 
-  const openNew = () => { setName(""); setDraft(sc.blank()); setCampaignIds([]); setEditId(""); setError(""); };
-  const openEdit = (rec: HomebrewRecord) => { setName(rec.name); setDraft(sc.fromData(rec.data || {})); setCampaignIds(rec.campaignIds ?? []); setEditId(rec.id); setError(""); };
+  const openNew = () => { setFromTemplate(""); setName(""); setDraft(sc.blank()); setCampaignIds([]); setEditId(""); setError(""); };
+  const openEdit = (rec: HomebrewRecord) => { setFromTemplate(""); setName(rec.name); setDraft(sc.fromData(rec.data || {})); setCampaignIds(rec.campaignIds ?? []); setEditId(rec.id); setError(""); };
   const close = () => { setEditId(null); setDraft(null); setError(""); };
+  // A template opens as a NEW, unsaved draft through the same legacy→draft
+  // path a stored record takes (sc.fromData), named "<original> (copy)".
+  const noun = sc.noun.toLowerCase();
+  const startFromTemplate = (opt: TemplateOption) => {
+    const keepShare = editId === "" && draft !== null; // a new draft was already open
+    setName(templateCopyName(opt.name));
+    setDraft(sc.fromData(opt.data || {}));
+    if (!keepShare) setCampaignIds([]);
+    setEditId("");
+    setFromTemplate(opt.name);
+    setError("");
+  };
+  const templateButton = <TemplatePicker source={templates} onPick={startFromTemplate} noun={noun} disabled={busy} className={btn} />;
+
   const toggleCampaign = (id: string) => setCampaignIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
 
   async function submit() {
@@ -159,6 +186,14 @@ export default function LotrHomebrewEditor({ kind, campaigns: allCampaigns, init
           {active ? (
             <div className="grid gap-4 rounded border border-[var(--border)] bg-[var(--panel-2)] p-4 lg:grid-cols-[minmax(0,1fr)_320px]">
               <div>
+                {editId === "" ? (
+                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] pb-3">
+                    <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
+                      {fromTemplate ? <>New {noun} · from <b className="text-[var(--text)]">{fromTemplate}</b></> : `New ${noun}`}
+                    </span>
+                    {templateButton}
+                  </div>
+                ) : null}
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="sm:col-span-2">
                     <label className={labelCls}>Name</label>
@@ -189,7 +224,10 @@ export default function LotrHomebrewEditor({ kind, campaigns: allCampaigns, init
               <div className="lg:sticky lg:top-20 lg:self-start"><P name={name} value={draft} /></div>
             </div>
           ) : (
-            <button className={btnAccent} onClick={openNew}>+ New Homebrew {sc.noun}</button>
+            <div className="flex flex-wrap gap-2">
+              <button className={btnAccent} onClick={openNew}>+ New Homebrew {sc.noun}</button>
+              {templateButton}
+            </div>
           )}
         </div>
       ) : null}

@@ -39,7 +39,12 @@
   // the skill a caster must have trained from the start: the mage's school, or Performance for a harmonist
   function forcedSkill() { var p = prof(); return !p ? '' : p.mage ? B.school : harmonist() ? 'Performance' : ''; }
   function kinRoll(x) { return B.kinSet === 'core' ? x.roll : x.roll20; }
-  function kinList() { return A(window.DB_KIN).filter(function (x) { return B.kinSet !== 'core' || (x.source || 'core') === 'core'; }); }
+  // Homebrew kin and professions (db-homebrew.js pushes them into DB_KIN / DB_PROFESSIONS, source
+  // 'Homebrew') have no table roll: they're picked, and listed with either kin set.
+  function isHb(x) { return !!x && x.source === 'Homebrew'; }
+  function coreOk(x) { return (x.source || 'core') === 'core' || isHb(x); }
+  function kinList() { return A(window.DB_KIN).filter(function (x) { return B.kinSet !== 'core' || coreOk(x); }); }
+  function pickOf(list) { list = A(list).filter(Boolean); return list.length ? list[Math.floor(Math.random() * list.length)] : ''; }
   function last() { return steps().length - 1; }
   // School summaries, titles and starting skills come from DB_MAGIC_SCHOOLS (Book of Magic).
   var ENCH_TOOLS = ['Blacksmithing Tools', 'Carpentry Tools', 'Tanning Tools'];
@@ -136,14 +141,14 @@
     switch (steps()[step]) {
       case 'Kin':
         h += sub(rollBtn(B.kinSet === 'core' ? 'Roll D12' : 'Roll D20', 'DBB.rollKin()') + chip('All kin <small>(Bestiary, D20)</small>', B.kinSet !== 'core', "DBB.set('kinSet','all')") + chip('Core kin only <small>(D12)</small>', B.kinSet === 'core', "DBB.set('kinSet','core')"));
-        h += picks(kinList().map(function (x) { return { name: x.name, on: B.kin === x.name, act: "DBB.set('kin','" + jsq(x.name) + "')", roll: rng(kinRoll(x)), meta: 'Movement ' + x.movement + ' · ' + A(x.abilities).map(function (y) { return y.name; }).join(', ') + (x.source === 'bestiary' ? ' · Bestiary' : '') }; }));
-        if (k) { h += box('<b>' + esc(k.name) + '</b> — ' + esc(k.text) + '<br>Movement <b>' + k.movement + '</b>.' + (k.source === 'bestiary' ? ' <small>(Bestiary p.' + k.page + ' — playable if your group agrees)</small>' : ''));
+        h += picks(kinList().map(function (x) { return { name: x.name, on: B.kin === x.name, act: "DBB.set('kin','" + jsq(x.name) + "')", roll: rng(kinRoll(x)), meta: 'Movement ' + x.movement + ' · ' + A(x.abilities).map(function (y) { return y.name; }).join(', ') + (x.source === 'bestiary' ? ' · Bestiary' : isHb(x) ? ' · Homebrew' : '') }; }));
+        if (k) { h += box('<b>' + esc(k.name) + '</b> — ' + esc(k.text) + '<br>Movement <b>' + k.movement + '</b>.' + (k.source === 'bestiary' ? ' <small>(Bestiary p.' + k.page + ' — playable if your group agrees)</small>' : isHb(k) ? ' <small>(homebrew)</small>' : '') + (A(k.traits).length ? '<br>Traits: ' + A(k.traits).map(esc).join(', ') + '.' : ''));
           h += '<div class="m-lbl">Innate abilit' + (A(k.abilities).length > 1 ? 'ies' : 'y') + '</div>' + A(k.abilities).map(function (x) { return box('<b>' + esc(x.name) + '</b>' + (x.wp === 'varies' ? ' · ' + esc(x.wpNote || 'WP varies') : x.wp ? ' · ' + x.wp + ' WP' : '') + '<br>' + esc(x.text)); }).join('');
           if (k.pcNotes) h += '<div class="m-lbl">As a player character</div>' + box(esc(k.pcNotes)); }
         return h;
       case 'Profession':
         h += sub(rollBtn('Roll D10', 'DBB.rollProf()')) + picks(A(window.DB_PROFESSIONS).map(function (x) { var hs = A(x.heroicAbilities);
-          return { name: x.name, on: B.prof === x.name, act: "DBB.set('prof','" + jsq(x.name) + "')", roll: rng(x.roll), meta: 'Key ' + x.keyAttribute + ' · ' + (x.mage ? 'school of magic' : x.heroicChoice ? 'choice of ' + hs.length + ' abilities' : hs.join(', ') + (bardSchools(x).length ? ' or Harmonism' : '')) }; }));
+          return { name: x.name, on: B.prof === x.name, act: "DBB.set('prof','" + jsq(x.name) + "')", roll: rng(x.roll), meta: 'Key ' + x.keyAttribute + ' · ' + (x.mage ? 'school of magic' : x.heroicChoice ? 'choice of ' + hs.length + ' abilities' : hs.join(', ') + (bardSchools(x).length ? ' or Harmonism' : '')) + (isHb(x) ? ' · Homebrew' : '') }; }));
         if (p) { h += box('<b>' + esc(p.name) + '</b> — ' + esc(p.text) + '<br>Key attribute <b>' + p.keyAttribute + '</b>.'); h += profAbilities(p); }
         return h;
       case 'Age':
@@ -191,7 +196,7 @@
     var sec = function (title, s, body) { return '<div class="bd-rev"><div class="bd-rev-hd"><span>' + title + '</span>' + edit(s) + '</div>' + body + '</div>'; };
     var dash = '<span class="bd-dim">—</span>';
     h += '<div class="bd-rev-name">' + (B.name ? esc(B.name) : '<span class="bd-dim">Unnamed</span>') + (B.nick ? ' <span class="bd-rev-nick">' + esc(B.nick) + '</span>' : '') + '</div>';
-    h += '<div class="bd-rev-sub">' + ([k && k.name, p && (p.mage && B.school ? ((schoolRec(B.school) || {}).title || 'Mage') : harmonist() ? 'Bard (Harmonist)' : p.name), a && a.name].filter(Boolean).map(esc).join(' · ') || '—') + ' ' + edit('Kin') + '</div>';
+    h += '<div class="bd-rev-sub">' + ([k && k.name, p && (p.mage && B.school && !isHb(p) ? ((schoolRec(B.school) || {}).title || 'Mage') : harmonist() ? 'Bard (Harmonist)' : p.name), a && a.name].filter(Boolean).map(esc).join(' · ') || '—') + ' ' + edit('Kin') + '</div>';
     var fa = {}; ATTRS.forEach(function (x) { fa[x] = finalAttr(x); });
     h += sec('Attributes', 'Attributes', '<div class="bd-attrs">' + ATTRS.map(function (x) { return '<div class="bd-attr"><span>' + x + '</span><b>' + (fa[x] == null ? '—' : fa[x]) + '</b></div>'; }).join('') + '</div>');
     if (ATTRS.every(function (x) { return fa[x] != null; })) {
@@ -254,7 +259,8 @@
   function need(label, why) { var i = steps().indexOf(label === 'Magic' ? 'Heroic Ability' : label);
     return '<div class="res-box">Choose your <b>' + esc(label === 'Magic' ? 'school of magic' : label.toLowerCase()) + '</b> first, ' + esc(why) + '. <a href="#" style="color:#5cb894;" onclick="DBB.go(' + i + ');return false;">Go to ' + esc(label) + '</a></div>'; }
   function schoolCards(p) {
-    var R = window.DB_MAGIC_RULES || {}, schools = A((R.creationSchools || {}).Mage).length ? R.creationSchools.Mage : A(R.schools).length ? R.schools : Object.keys(p.schoolSkills || {});
+    // a homebrew caster profession offers only its own school(s)
+    var R = window.DB_MAGIC_RULES || {}, schools = isHb(p) && Object.keys(p.schoolSkills || {}).length ? Object.keys(p.schoolSkills) : A((R.creationSchools || {}).Mage).length ? R.creationSchools.Mage : A(R.schools).length ? R.schools : Object.keys(p.schoolSkills || {});
     return '<div class="m-lbl">School of magic</div><div class="bd-schools">' + schools.map(function (s) { var on = B.school === s;
       var sk = A(window.DB_SKILLS).find(function (x) { return x.name === s; });
       var rec = schoolRec(s) || {}, recipe = s === 'Alchemy';
@@ -297,9 +303,10 @@
   function kitItems(k) { return k.items.map(function (it, ix) { var n = it.choice ? (B.kitChoice[ix] || '') : it.name; return { name: n, qty: it.qty || 1, note: it.note || '', choice: it.choice, ix: ix }; }); }
   // Each kit is a card: its D6 range, the items as a list (a choice marked as one), and the
   // food and silver dice; the rolled supplies sit below in a plain box of their own.
-  var KIT_ROLL = ['1–2', '3–4', '5–6'], KIT_NUM = ['I', 'II', 'III'];
+  var KIT_NUM = ['I', 'II', 'III'];
+  function kitRolls(n) { return n >= 3 ? ['1–2', '3–4', '5–6'] : n === 2 ? ['1–3', '4–6'] : ['1–6']; }
   function gearPage() {
-    var p = prof(), h = sub(rollBtn('Roll D6', 'DBB.rollKit()'));
+    var p = prof(), h = sub(rollBtn('Roll D6', 'DBB.rollKit()')), KIT_ROLL = kitRolls(A(p.kits).length);
     h += '<div class="bd-kits">' + A(p.kits).map(function (k, i) { var on = B.kit === i;
       return '<button class="bd-kit' + (on ? ' sel' : '') + '" aria-pressed="' + on + '" onclick="DBB.kit(' + i + ')">' +
         '<span class="bd-kit-hd"><b>Kit ' + (KIT_NUM[i] || i + 1) + '</b><span class="bd-kit-roll">D6 · ' + (KIT_ROLL[i] || '') + '</span></span>' +
@@ -326,15 +333,19 @@
       if (k === 'harmonist') { var on = v === '1'; if (!!B.harmonist === on) return; B.harmonist = on ? '1' : ''; B.school = on ? 'Harmonism' : ''; B.spells = []; B.tricks = [];
         if (on) { if (B.profSkills.indexOf('Performance') < 0) { B.profSkills = ['Performance'].concat(B.profSkills).slice(0, nProf()); } B.freeSkills = B.freeSkills.filter(function (x) { return x !== 'Performance'; }); }
         render(); return; }
-      if (k === 'kinSet') { B.kinSet = v === 'core' ? 'core' : 'all'; if (B.kinSet === 'core' && kin() && (kin().source || 'core') !== 'core') B.kin = ''; render(); return; } if (k === 'prof' && B.prof !== v) { B.harmonist = ''; B.tools = ''; B.profSkills = []; B.freeSkills = []; B.school = ''; B.ability = ''; B.spells = []; B.tricks = []; B.kit = -1; B.kitChoice = {}; B.food = null; B.silver = null; }
+      if (k === 'kinSet') { B.kinSet = v === 'core' ? 'core' : 'all'; if (B.kinSet === 'core' && kin() && !coreOk(kin())) B.kin = ''; render(); return; } if (k === 'prof' && B.prof !== v) { B.harmonist = ''; B.tools = ''; B.profSkills = []; B.freeSkills = []; B.school = ''; B.ability = ''; B.spells = []; B.tricks = []; B.kit = -1; B.kitChoice = {}; B.food = null; B.silver = null; }
       if (k === 'age' && B.age !== v) { B.freeSkills = B.freeSkills.slice(0, (A(T().ages).find(function (a) { return a.id === v; }) || {}).freeSkills || 4); }
-      B[k] = String(v); if (step > last()) step = last(); render(); },
+      B[k] = String(v);
+      // a homebrew caster profession with a single school: that school is the choice
+      if (k === 'prof') { var hp = prof(), ks = hp && isHb(hp) && hp.mage ? Object.keys(hp.schoolSkills || {}) : []; if (ks.length === 1 && !B.school) { B.school = ks[0]; B.profSkills = [ks[0]]; } }
+      if (step > last()) step = last(); render(); },
     setq: function (k, v) { B[k] = v; var ft = $('builder-ft'); if (ft) { var nb = ft.querySelector('.m-btn:last-child'); if (nb) nb.disabled = !(step === last() ? allValid() : valid(step)); } },
     rollKin: function () { var core = B.kinSet === 'core', n = d(core ? 12 : 20); var k = kinList().find(function (x) { return inRoll(kinRoll(x), n); }); if (k) { api.set('kin', k.name); log('Kin', k.name, (core ? 'd12(' : 'd20(') + n + ')'); } },
     rollProf: function () { var n = d(10); var p = A(window.DB_PROFESSIONS).find(function (x) { return x.roll === n; }); if (p) { api.set('prof', p.name); log('Profession', p.name, 'd10(' + n + ')'); } },
     rollAge: function () { var n = d(6); var a = A(T().ages).find(function (x) { return inRoll(x.roll, n); }); if (a) { api.set('age', a.id); log('Age', a.name, 'd6(' + n + ')'); } },
-    rollName: function () { var n = d(6); var k = kin(); if (!k) return; api.set('name', A(k.names)[n - 1]); },
-    rollNick: function () { var n = d(6); if (!prof()) return; api.set('nick', A(prof().nicknames)[n - 1]); },
+    // the book's D6 tables have six entries; a shorter homebrew list rolls among its own
+    rollName: function () { var k = kin(); if (!k) return; var l = A(k.names); var v = l.length === 6 ? l[d(6) - 1] : pickOf(l); if (v) api.set('name', v); },
+    rollNick: function () { if (!prof()) return; var l = A(prof().nicknames); var v = l.length === 6 ? l[d(6) - 1] : pickOf(l); if (v) api.set('nick', v); },
     method: function (m) { if (m !== B.method) { B.assign = [0, 1, 2, 3, 4, 5]; B.swap = []; B.swapped = false; } B.method = m === 'order' || m === 'pool' ? 'roll' : m; if (m === 'pool') B.order = 'assign'; syncAttrs(); render(); },
     order: function (o) { B.order = o === 'assign' ? 'assign' : 'order'; B.assign = [0, 1, 2, 3, 4, 5]; B.swap = []; B.swapped = false; syncAttrs(); render(); },
     // Give attribute `a` the pool / array slot `idx`; whichever attribute held it takes a's old slot.
@@ -359,7 +370,8 @@
     toggleList: function (k, n) { n = String(n).replace(/&#39;/g, "'"); var l = B[k]; var i = l.indexOf(n); if (i >= 0) l.splice(i, 1); else if (l.length < 3) l.push(n); render(); },
     rollTable: function (which) { var list = which === 'weakness' ? window.DB_WEAKNESSES : which === 'memento' ? window.DB_MEMENTOS : window.DB_APPEARANCES; var n = d(20);
       var row = A(list).find(function (x) { return x.roll === n; }); if (!row) return; B[which] = which === 'weakness' ? row.name + ' — ' + row.text : row.text; log(which.charAt(0).toUpperCase() + which.slice(1), which === 'weakness' ? row.name : row.text, 'd20(' + n + ')'); render(); },
-    rollKit: function () { var n = d(6); api.kit(Math.floor((n - 1) / 2)); log('Starting gear', 'Kit ' + ['1–2', '3–4', '5–6'][Math.floor((n - 1) / 2)], 'd6(' + n + ')'); },
+    // three kits = 1–2 / 3–4 / 5–6 (the book); a homebrew profession may have one or two
+    rollKit: function () { var len = Math.max(1, Math.min(3, A(prof() && prof().kits).length)), n = d(6), i = Math.floor((n - 1) * len / 6); api.kit(i); log('Starting gear', 'Kit ' + kitRolls(len)[i], 'd6(' + n + ')'); },
     kit: function (i) { if (B.kit !== i) { B.kit = i; B.kitChoice = {}; api.rollSupplies(true); } render(); },
     kitChoice: function (ix, c) { B.kitChoice[ix] = String(c).replace(/&#39;/g, "'"); render(); },
     rollSupplies: function (quiet) { var k = A(prof().kits)[B.kit]; if (!k) return; var f = SH().rollExpr(k.food), s = SH().rollExpr(k.silver); B.food = f.total; B.silver = s.total; B.foodTxt = '(' + f.text + ')'; B.silverTxt = '(' + s.text + ')'; if (quiet !== true) render(); },

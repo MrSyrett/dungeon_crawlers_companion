@@ -4,6 +4,7 @@ import { ACE_EXTRAS } from "@/lib/data/ace-extras";
 import type { AceExtra, AceExtraAttack, AceExtraFocus, AceStat, AceSettingKey } from "@/lib/data/ace-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import {
   AceHeader, SearchForm, ChipRow, CountLine, EmptyState, BOOKS, settingName, one,
   nameCls, cardCls, bookBadge, hbBadge, type Query, type RawQuery,
@@ -96,9 +97,9 @@ export default async function AceExtrasPage({ searchParams }: { searchParams: Pr
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <AceHeader title="Bestiary" subtitle={`${ACE_EXTRAS.length} mooks, monsters & villains${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
 
-      <div className="mb-6">
+      <CompendiumHomebrew>
         <HomebrewEditor kind="ace-extra" campaigns={campaigns} initial={hbOwn} />
-      </div>
+      </CompendiumHomebrew>
 
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search extras…" hidden={{ book, type }} />

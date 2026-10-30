@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { SPELLS, type Spell } from "@/lib/data/spells";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewManager from "@/components/HomebrewManager";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 
@@ -126,7 +127,9 @@ export default async function SpellsPage({
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <PageHeader title="Spells" subtitle={<>{SPELLS.length} Shadowdark spells{hbRows.length ? ` + ${hbRows.length} homebrew` : ""}</>} />
 
-      <HomebrewManager type="spell" campaigns={campaigns} initial={hbOwn} />
+      <CompendiumHomebrew>
+        <HomebrewManager type="spell" campaigns={campaigns} initial={hbOwn} />
+      </CompendiumHomebrew>
 
       <InstantFilter>
       <form method="get" action="/spells" className="mb-4 flex gap-2" data-search>

@@ -74,42 +74,64 @@ const strArr = (v: unknown, maxItems: number, maxLen: number) => (Array.isArray(
 //   tgt   "one target" (2014 wording; optional in 2024)
 //   abil  "" (manual) | STR… → to-hit = PB + mod, damage +mod, kept live
 //   d2/t2 a second "plus 7 (2d6) fire damage" rider    slot "action" | "bonus"
+//   tor   a second damage type ("bludgeoning or slashing damage")
+//   alt/at/aw/ac  alternative damage: aw "or" → ", or 13 (2d8 + 4) piercing damage
+//         if used with two hands" (ac = the condition), aw "melee" → " in melee or
+//         5 (1d6 + 2) piercing damage at range" (main damage is the melee one)
+//   nodmg "1" → no damage: "Hit: The target is restrained."  rj "and" → "reach 5 ft. and range…"
+//   avg / avg2 / avg3  a printed average that isn't the dice's ("14@2d6+4"); used only
+//         while the dice still read 2d6+4, so editing the dice re-derives it
 // row.special is whatever follows the damage (", and the target is grappled…").
 export const ATK_KINDS: [string, string][] = [["melee", "Melee"], ["ranged", "Ranged"], ["both", "Melee or Ranged"]];
 const KIND_WORD: Record<string, string> = { melee: "Melee", ranged: "Ranged", both: "Melee or Ranged" };
 
 export const dndAvg = (x: Dice) => (x.n > 0 && x.d > 0 ? Math.floor((x.n * (x.d + 1)) / 2) : 0) + (x.m || 0);
 
-function dmgText(x: Dice, type: string, legacy: boolean): string {
-  const t = type ? (legacy ? type.toLowerCase() : cap(type.toLowerCase())) + " " : "";
+const typeWord = (type: string, legacy: boolean) => (legacy ? type.toLowerCase() : cap(type.toLowerCase()));
+function dmgText(x: Dice, type: string, legacy: boolean, avgOv = "", type2 = ""): string {
+  const t = type ? typeWord(type, legacy) + (type2 ? " or " + typeWord(type2, legacy) : "") + " " : "";
   if (x.n <= 0) return `${x.m || 0} ${t}damage`;
-  return `${dndAvg(x)} (${formatDice(x, { spaced: true })}) ${t}damage`;
+  const ov = avgOv.match(/^(\d+)@(.+)$/);
+  const avg = ov && ov[2] === formatDice(x) ? ov[1] : dndAvg(x);
+  return `${avg} (${formatDice(x, { spaced: true })}) ${t}damage`;
 }
+export const DND_ALT_WORDING: [string, string][] = [["", "—"], ["or", ", or … if"], ["melee", "in melee or … at range"]];
 
 export function composeDndAttack(r: AttackRow): string {
   const e = r.extra ?? {};
   const kind = KIND_WORD[e.kind ?? "melee"] ? e.kind ?? "melee" : "melee";
   const legacy = e.atype === "Weapon" || e.atype === "Spell";
   const hit = signed(r.hit ?? 0);
-  const where = [kind !== "ranged" ? `reach ${e.reach || "5"} ft.` : "", kind !== "melee" ? `range ${e.rng || "30/120"} ft.` : ""].filter(Boolean).join(" or ");
+  const where = [kind !== "ranged" ? `reach ${e.reach || "5"} ft.` : "", kind !== "melee" ? `range ${e.rng || "30/120"} ft.` : ""].filter(Boolean).join(e.rj === "and" ? " and " : " or ");
   const head = legacy
     ? `${KIND_WORD[kind]} ${e.atype} Attack: ${hit} to hit, ${where}, ${e.tgt || "one target"}.`
     : `${KIND_WORD[kind]} Attack Roll: ${hit}, ${where}${e.tgt ? ", " + e.tgt : ""}`.replace(/\.?$/, ".");
   const d2 = e.d2 ? parseDice(e.d2) : null;
-  const plus = d2 && (d2.n > 0 || d2.m) ? ` plus ${dmgText(d2, e.t2 ?? "", legacy)}` : "";
+  const plus = d2 && (d2.n > 0 || d2.m) ? ` plus ${dmgText(d2, e.t2 ?? "", legacy, e.avg2 ?? "")}` : "";
+  const ad = e.aw && e.alt ? parseDice(e.alt) : null;
+  const alt = !ad || !(ad.n > 0 || ad.m) ? ""
+    : e.aw === "melee" ? ` in melee or ${dmgText(ad, e.at ?? "", legacy, e.avg3 ?? "")} at range`
+    : `, or ${dmgText(ad, e.at ?? "", legacy, e.avg3 ?? "")}${(e.ac ?? "").trim() ? " " + (e.ac ?? "").trim() : ""}`;
   const sp = (r.special ?? "").trim().replace(/\.$/, "");
+  if (e.nodmg === "1") return `${head} Hit: ${sp || "—"}.`;
   const tail = !sp ? "." : /^[,;]/.test(sp) || /^or\b/.test(sp) ? (sp.startsWith("or") ? " " : "") + sp + "." : ". " + sp + ".";
-  return `${head} Hit: ${dmgText(r.dice, r.dtype ?? "", legacy)}${plus}${tail}`;
+  return `${head} Hit: ${dmgText(r.dice, r.dtype ?? "", legacy, e.avg ?? "", e.tor ?? "")}${plus}${alt}${tail}`;
 }
 
-const DMG_RE = /^(\d+) \((\d+d\d+(?: [+-] \d+)?)\) (?:([A-Za-z]+) )?damage/;
+const DMG_RE = /^(\d+) \((\d+d\d+(?: [+-] \d+)?)\) (?:([A-Za-z]+)(?: or ([A-Za-z]+))? )?damage/;
 const FLAT_RE = /^(\d+) (?:([A-Za-z]+) )?damage/;
+const ALT_OR_RE = /^, or (\d+) \((\d+d\d+(?: [+-] \d+)?)\) ([A-Za-z]+) damage( if [^.;]+?)?(?=\.$|\. |, |; )/;
+const ALT_MELEE_RE = /^ in melee or (\d+) \((\d+d\d+(?: [+-] \d+)?)\) ([A-Za-z]+) damage at range/;
+/** "14@2d6+4" when the printed average isn't the dice's own, else "". */
+const avgNote = (printed: string, x: Dice) => (x.n > 0 && int(printed) !== dndAvg(x) ? `${int(printed)}@${formatDice(x)}` : "");
 
 /** Parse one stat-block action into an attack row, or null. Only accepted when
  *  composing the row reproduces the text exactly, so nothing is ever reworded. */
 export function parseDndAttack(name: string, desc: string, pb?: number, abilities?: Record<string, number>): AttackRow | null {
   const t = String(desc ?? "").trim();
-  let m = t.match(/^(Melee or Ranged|Melee|Ranged) (Weapon|Spell) Attack: ([+-]\d+) to hit, (.+?), ([^,.]+?)\. Hit: ([\s\S]*)$/);
+  // A target may hold commas ("one willing creature or one that is grappled, incapacitated, or restrained").
+  let m = t.match(/^(Melee or Ranged|Melee|Ranged) (Weapon|Spell) Attack: ([+-]\d+) to hit, ([^,]+?), (one [^.]+?)\. Hit: ([\s\S]*)$/)
+    ?? t.match(/^(Melee or Ranged|Melee|Ranged) (Weapon|Spell) Attack: ([+-]\d+) to hit, (.+?), ([^,.]+?)\. Hit: ([\s\S]*)$/);
   let kindW: string, atype = "", hit: number, where: string, tgt = "", rest: string;
   if (m) { [, kindW, atype] = m; hit = int(m[3]); where = m[4]; tgt = m[5]; rest = m[6]; }
   else {
@@ -122,22 +144,39 @@ export function parseDndAttack(name: string, desc: string, pb?: number, abilitie
   const reach = where.match(/reach (\d+) ft/)?.[1] ?? "";
   const rng = where.match(/range (\d+(?:\/\d+)?) ft/)?.[1] ?? "";
   let dice: Dice, dtype = "", after: string;
+  const ex: Record<string, string> = {};
   let dm = rest.match(DMG_RE);
-  if (dm) { dice = parseDice(dm[2].replace(/\s+/g, "")) ?? { n: 0, d: 6, m: 0 }; dtype = (dm[3] ?? "").toLowerCase(); after = rest.slice(dm[0].length); }
-  else {
-    dm = rest.match(FLAT_RE);
-    if (!dm) return null;
+  if (dm) {
+    dice = parseDice(dm[2].replace(/\s+/g, "")) ?? { n: 0, d: 6, m: 0 }; dtype = (dm[3] ?? "").toLowerCase(); after = rest.slice(dm[0].length);
+    if (dm[4]) ex.tor = dm[4].toLowerCase();
+    if (avgNote(dm[1], dice)) ex.avg = avgNote(dm[1], dice);
+  } else if ((dm = rest.match(FLAT_RE))) {
     dice = { n: 0, d: 6, m: int(dm[1]) }; dtype = (dm[2] ?? "").toLowerCase(); after = rest.slice(dm[0].length);
-  }
+  } else if (/^[A-Z]/.test(rest)) {
+    dice = { n: 0, d: 6, m: 0 }; ex.nodmg = "1"; after = ". " + rest; // "Hit: The target is restrained."
+  } else return null;
   let d2 = "", t2 = "";
   const pm = after.match(/^ plus (\d+) \((\d+d\d+(?: [+-] \d+)?)\) ([A-Za-z]+) damage/);
-  if (pm) { d2 = pm[2].replace(/\s+/g, ""); t2 = pm[3].toLowerCase(); after = after.slice(pm[0].length); }
+  if (pm) {
+    d2 = pm[2].replace(/\s+/g, ""); t2 = pm[3].toLowerCase(); after = after.slice(pm[0].length);
+    const x2 = parseDice(d2); if (x2 && avgNote(pm[1], x2)) ex.avg2 = avgNote(pm[1], x2);
+  }
+  const am = after.match(ALT_MELEE_RE) ?? after.match(ALT_OR_RE);
+  if (am) {
+    const x3 = parseDice(am[2].replace(/\s+/g, ""));
+    if (x3) {
+      Object.assign(ex, { alt: formatDice(x3), at: am[3].toLowerCase(), aw: am[0].startsWith(" in melee") ? "melee" : "or", ac: (am[4] ?? "").trim() });
+      if (avgNote(am[1], x3)) ex.avg3 = avgNote(am[1], x3);
+      after = after.slice(am[0].length);
+    }
+  }
+  if (kind === "both" && / and range /.test(where)) ex.rj = "and";
   let special = after.trim();
   if (special.startsWith(". ")) special = special.slice(2);
   special = special.replace(/\.$/, "").replace(/^\.$/, "");
   const row: AttackRow = {
     name: String(name ?? "").trim(), count: 1, hit, dice, dtype, special,
-    extra: { kind, atype, reach: reach || "5", rng: rng || "30/120", tgt, abil: "", d2, t2, slot: "action" },
+    extra: { kind, atype, reach: reach || "5", rng: rng || "30/120", tgt, abil: "", d2, t2, slot: "action", ...ex },
   };
   if (composeDndAttack(row) !== t) return null;
   if (pb != null && abilities && dice.n > 0) {
@@ -170,23 +209,37 @@ export function cleanDndAttackRows(v: unknown): AttackRow[] {
     const kind = ["melee", "ranged", "both"].includes(String(e.kind)) ? String(e.kind) : "melee";
     const rng = txt(e.rng, 12).match(/^\d{1,4}(\/\d{1,4})?$/)?.[0] ?? "30/120";
     const d2p = parseDice(txt(e.d2, 16));
+    const altp = parseDice(txt(e.alt, 16));
+    const dtypeOf = (v: unknown) => ((DAMAGE_TYPES as readonly string[]).includes(String(v ?? "").toLowerCase()) ? String(v).toLowerCase() : "");
+    const avgOf = (v: unknown) => txt(v, 24).match(/^\d{1,4}@\d{1,2}d\d{1,3}(?:[+-]\d{1,2})?$/)?.[0] ?? "";
+    const opt: Record<string, string> = {};
+    if (dtypeOf(e.tor)) opt.tor = dtypeOf(e.tor);
+    if (avgOf(e.avg)) opt.avg = avgOf(e.avg);
+    if (avgOf(e.avg2)) opt.avg2 = avgOf(e.avg2);
+    if (avgOf(e.avg3)) opt.avg3 = avgOf(e.avg3);
+    if (e.nodmg === "1") opt.nodmg = "1";
+    if (e.rj === "and") opt.rj = "and";
+    if ((e.aw === "or" || e.aw === "melee") && altp && altp.n > 0) {
+      Object.assign(opt, { aw: String(e.aw), alt: formatDice({ n: clamp(altp.n, 1, 40), d: clamp(altp.d, 2, 100), m: clamp(altp.m, -20, 99) }), at: dtypeOf(e.at), ac: txt(e.ac, 120) });
+    }
     return {
       name: txt(o.name, 60),
       count: 1,
       hit: clamp(int(o.hit), -5, 30),
       dice: { n: clamp(int(dice.n), 0, 40), d: d === 0 ? 6 : clamp(d, 2, 100), m: clamp(int(dice.m), -20, 99) },
       dtype: (DAMAGE_TYPES as readonly string[]).includes(String(o.dtype ?? "").toLowerCase()) ? String(o.dtype).toLowerCase() : "",
-      special: txt(o.special, 600),
+      special: txt(o.special, 1500),
       extra: {
         kind,
         atype: ["Weapon", "Spell"].includes(String(e.atype)) ? String(e.atype) : "",
-        reach: String(clamp(int(e.reach, 5), 5, 120)),
+        reach: String(clamp(int(e.reach, 5), 0, 120)), // 0: swarms ("reach 0 ft., one creature in the swarm's space")
         rng,
-        tgt: txt(e.tgt, 60),
+        tgt: txt(e.tgt, 120),
         abil: (ABILS as readonly string[]).includes(String(e.abil)) ? String(e.abil) : "",
         d2: d2p && d2p.n > 0 ? formatDice({ n: clamp(d2p.n, 1, 40), d: clamp(d2p.d, 2, 100), m: clamp(d2p.m, -20, 99) }) : "",
         t2: (DAMAGE_TYPES as readonly string[]).includes(String(e.t2 ?? "").toLowerCase()) ? String(e.t2).toLowerCase() : "",
         slot: e.slot === "bonus" ? "bonus" : "action",
+        ...opt,
       },
     };
   });

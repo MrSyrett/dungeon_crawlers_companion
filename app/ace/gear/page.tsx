@@ -5,6 +5,7 @@ import { ACE_TABLES } from "@/lib/data/ace-tables";
 import type { AceGear, AceGearTier, AceSettingKey } from "@/lib/data/ace-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import {
   AceHeader, SearchForm, ChipRow, CountLine, EmptyState, BOOKS, settingName, one,
   nameCls, cardCls, bookBadge, hbBadge, type Query, type RawQuery,
@@ -65,6 +66,9 @@ export default async function AceGearPage({ searchParams }: { searchParams: Prom
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <AceHeader title="Gear" subtitle={`${ACE_GEAR.length} items${hbRows.length ? ` + ${hbRows.length} homebrew` : ""} · money isn't tracked`} />
+      <CompendiumHomebrew>
+        <HomebrewEditor kind="ace-gear" campaigns={campaigns} initial={hbOwn} />
+      </CompendiumHomebrew>
       <div className="mb-6 overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--panel)]">
         <table className="w-full text-[12px]">
           <thead>
@@ -82,9 +86,6 @@ export default async function AceGearPage({ searchParams }: { searchParams: Prom
             ))}
           </tbody>
         </table>
-      </div>
-      <div className="mb-6">
-        <HomebrewEditor kind="ace-gear" campaigns={campaigns} initial={hbOwn} />
       </div>
 
       <InstantFilter>

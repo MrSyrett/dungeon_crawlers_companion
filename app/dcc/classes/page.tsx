@@ -6,6 +6,7 @@ import { DCC_CLASSES } from "@/lib/data/dcc-classes";
 import type { DccClass } from "@/lib/data/dcc-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DccHomebrewEditor from "@/components/DccHomebrewEditor";
+import CompendiumHomebrew from "@/components/hb/CompendiumHomebrew";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 
@@ -119,7 +120,7 @@ export default async function DccClassesPage({
         subtitle={<>{DCC_CLASSES.length} classes{homebrewCount ? ` + ${homebrewCount} homebrew` : ""}</>}
       />
 
-      <DccHomebrewEditor kind="dcc-class" campaigns={campaigns} initial={hbOwn} />
+      <CompendiumHomebrew><DccHomebrewEditor kind="dcc-class" campaigns={campaigns} initial={hbOwn} /></CompendiumHomebrew>
 
       <InstantFilter>
       <form method="get" action="/dcc/classes" className="mb-4 flex gap-2" data-search>

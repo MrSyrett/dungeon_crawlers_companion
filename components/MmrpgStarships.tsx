@@ -1,12 +1,13 @@
 import { MMRPG_STARSHIP_TRAITS } from "@/lib/data/mmrpg-starship-traits";
 import { MMRPG_STARSHIP_TAGS } from "@/lib/data/mmrpg-starship-tags";
 import { MMRPG_STARSHIP_PROFILES } from "@/lib/data/mmrpg-starship-profiles";
-import HomebrewEditor, { type CampaignRef, type HomebrewRecord } from "@/components/HomebrewEditor";
+import type { HomebrewRecord } from "@/components/HomebrewEditor";
 import { SectionH, cardCls, badge, hbBadge } from "@/components/MmrpgRef";
 
-// The Starships section of the Equipment page: a homebrew builder (kind
-// "mmrpg-starship"), the user's saved ships + the book's sample starship profiles
-// as cards, and a reference of the ship-specific traits (with downtime) and tags.
+// The Starships section of the Equipment page: the user's visible ships + the
+// book's sample starship profiles as cards, and a reference of the ship-specific
+// traits (with downtime) and tags. The homebrew builder (kind "mmrpg-starship")
+// is rendered by the page in the standard CompendiumHomebrew slot above this.
 // Large starships use a Headquarters profile plus the ship-specific systems below.
 
 type ShipTrait = { name: string; n?: number };
@@ -67,14 +68,14 @@ function ShipCard({ s }: { s: Ship }) {
   );
 }
 
-export default function MmrpgStarships({ campaigns, own, visible }: { campaigns: CampaignRef[]; own: HomebrewRecord[]; visible: HomebrewRecord[] }) {
+export default function MmrpgStarships({ visible }: { visible: HomebrewRecord[] }) {
   const homebrew: Ship[] = visible.map((h) => ({ ...(h.data as unknown as Ship), name: h.name, homebrew: true }));
   const samples = MMRPG_STARSHIP_PROFILES as unknown as Ship[];
 
   return (
     <section className={`${cardCls} mb-4`}>
       <SectionH>Starships</SectionH>
-      <p className="mb-3 mt-2 text-[13px] leading-relaxed text-[var(--muted)]">A starfaring ship works like a mobile headquarters. Larger craft use a <b>Headquarters profile</b> (3 traits per team rank) plus ship-specific systems — <b>Shields</b>, <b>Plasma Cannons</b>, <b>Mines</b>, <b>Star Drive</b>, <b>Boarding Equipment</b> — and the <b>FTL Drive</b> / <b>Spaceworthy</b> tags. A ship&rsquo;s team rank sets its Size, Health and passenger capacity. Build your own below, then browse the famous ships of the Multiverse.</p>
+      <p className="mb-3 mt-2 text-[13px] leading-relaxed text-[var(--muted)]">A starfaring ship works like a mobile headquarters. Larger craft use a <b>Headquarters profile</b> (3 traits per team rank) plus ship-specific systems — <b>Shields</b>, <b>Plasma Cannons</b>, <b>Mines</b>, <b>Star Drive</b>, <b>Boarding Equipment</b> — and the <b>FTL Drive</b> / <b>Spaceworthy</b> tags. A ship&rsquo;s team rank sets its Size, Health and passenger capacity. Build your own with the homebrew builder above (Template starts from any of these), and browse the famous ships of the Multiverse.</p>
 
       <div className="mb-4 overflow-x-auto">
         <table className="w-full min-w-[420px] border-collapse text-[12px]">
@@ -91,10 +92,6 @@ export default function MmrpgStarships({ campaigns, own, visible }: { campaigns:
             ))}
           </tbody>
         </table>
-      </div>
-
-      <div className="mb-5">
-        <HomebrewEditor kind="mmrpg-starship" campaigns={campaigns} initial={own} />
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">

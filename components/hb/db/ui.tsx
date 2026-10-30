@@ -8,7 +8,7 @@
 // book data (public/tools-data/db-data.js), loaded once through the LootBonus
 // loader so the badge lists and the pickers share one script tag.
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Stepper from "../Stepper";
 import { useLootBonus } from "../LootBonusBadges";
 import styles from "../hb.module.css";
@@ -26,7 +26,7 @@ export const DB_JS = ["/tools-data/db-data.js"];
 type Named = { name: string; [k: string]: unknown };
 export type DbData = {
   skills: Named[]; abilities: Named[]; spells: Named[]; tricks: Named[]; weapons: Named[]; armor: Named[]; helmets: Named[]; gear: Named[];
-  npcTraits: Record<string, string>;
+  npcTraits: Record<string, string>; kin: Named[]; professions: Named[];
 };
 const g = (k: string): Named[] => { const v = (globalThis as Record<string, unknown>)[k]; return Array.isArray(v) ? (v as Named[]).filter((x) => x && x.name) : []; };
 /** The book data, or null until db-data.js has loaded. */
@@ -38,7 +38,22 @@ export function useDbData(): DbData | null {
     skills: g("DB_SKILLS"), abilities: g("DB_HEROIC_ABILITIES"), spells: g("DB_SPELLS"), tricks: g("DB_MAGIC_TRICKS"),
     weapons: g("DB_WEAPONS"), armor: g("DB_ARMOR"), helmets: g("DB_HELMETS"), gear: g("DB_GEAR"),
     npcTraits: t && typeof t === "object" ? (t as Record<string, string>) : {},
+    kin: g("DB_KIN"), professions: g("DB_PROFESSIONS"),
   };
+}
+
+/** The viewer's homebrew entries of a db-* type (their `data`), fetched once; [] until loaded or off-line. */
+export function useDbHomebrew(type: string): Named[] {
+  const [rows, setRows] = useState<Named[]>([]);
+  useEffect(() => {
+    let live = true;
+    fetch(`/api/homebrew?type=${encodeURIComponent(type)}`, { credentials: "same-origin" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j: { items?: { data?: Named }[] } | null) => { if (live) setRows((j?.items ?? []).map((i) => i.data).filter((d): d is Named => !!d && !!d.name)); })
+      .catch(() => {});
+    return () => { live = false; };
+  }, [type]);
+  return rows;
 }
 
 export function Cell({ label, children, className = "", help }: { label: ReactNode; children: ReactNode; className?: string; help?: ReactNode }) {
