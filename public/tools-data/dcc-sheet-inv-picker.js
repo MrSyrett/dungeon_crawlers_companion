@@ -223,7 +223,9 @@
   // it to be pinned to the Hotlist.
   function autoEquip(tr, it) {
     var equipped = false;
-    if (tr && it && isBodySlot(it.slot) && window.DCCEquip && typeof window.DCCEquip.isEquipType === "function" && window.DCCEquip.isEquipType(tr)) {
+    // Not when the hands are full — picking up a third weapon just carries it.
+    if (tr && it && isBodySlot(it.slot) && window.DCCEquip && typeof window.DCCEquip.isEquipType === "function" && window.DCCEquip.isEquipType(tr)
+        && (!window.DCCEquip.fits || window.DCCEquip.fits(tr))) {
       var pin = tr.querySelector(".hot-pin");
       if (pin && tr.dataset.equipped !== "1") { try { window.DCCEquip.click(pin); equipped = true; } catch (e) {} }
     }

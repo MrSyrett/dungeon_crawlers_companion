@@ -11,7 +11,7 @@
 //   dr / evade / move / step  → DR·Armor, Evade buffs, Move, Step
 //   skill                     → ranks on the Skill's row (the row is created if the
 //                               crawler doesn't have it); Rank = Floor uses the Floor
-//   spell                     → a Spell row (an Inherent Spell: no Mana)
+//   spell                     → a Spell row while worn (access only — casting costs Mana)
 //   buff                      → the Buffs tracker
 //   note                      → shown on the item only
 // The badges on an Inventory row are read-only: bonuses are set where the item is
@@ -166,7 +166,8 @@
     if (sel && d && d.stat) sel.value = String(d.stat).toLowerCase();
     if (kind === "spell") {
       if (ins[2]) ins[2].value = "Spell";
-      if (ins[3]) ins[3].value = "Inherent · no Mana" + (d && d.type ? " · " + d.type : "");
+      // Gear grants ACCESS to the spell; casting it costs its Mana like any other.
+      if (ins[3]) ins[3].value = [d && d.mana != null ? d.mana + " Mana" : "", d && d.type ? d.type : "", "from gear"].filter(Boolean).join(" · ");
     } else {
       if (ins[2]) ins[2].value = d && d.passive ? "Passive" : "Active";
       if (ins[3]) ins[3].value = d && d.group ? d.group : "";
@@ -189,7 +190,7 @@
     else if (kind === "skill") addRank(tr, rank);
     var g = grantsOf(tr); g.push({ iid: iid, item: item, kind: kind, rank: kind === "skill" ? rank : 0 });
     setGrants(tr, g);
-    return { name: tr.dataset.src || name, kind: kind, rank: kind === "skill" ? rank : 0, created: created };
+    return { name: tr.dataset.src || name, kind: kind, rank: kind === "skill" ? rank : 0, created: created, floor: !!(kind === "skill" && b.floor) };
   }
   function ungrant(iid, rec) {
     var tr = skillRowByName(rec.name); if (!tr) return;
@@ -210,10 +211,56 @@
   function writeBuffs(list) { var f = buffField(); if (!f) return; f.value = list.join(", "); fire(f); try { if (window.DCCBuffs) window.DCCBuffs.refresh(); } catch (e) {} }
 
   // ── equip / unequip ──────────────────────────────────────────────────────────
+  // ── Hands (Core: a crawler has two) ──────────────────────────────────────────
+  // How many hands an item takes while worn: a two-handed weapon 2 (its own text, or
+  // its weapon skill "Requires two hands to wield."), any other weapon or held item
+  // (a shield / buckler — slot "Hands/Holding") 1, gloves (slot "Hands") 0.
+  function skillEntry(n) {
+    if (!n) return null;
+    var k = String(n).toLowerCase();
+    var all = [];
+    try { if (typeof DCC_SKILLS !== "undefined") all = all.concat(DCC_SKILLS); } catch (e) {}
+    if (Array.isArray(window.__DCC_HB_SKILLS)) all = window.__DCC_HB_SKILLS.concat(all);
+    return all.find(function (x) { return x && String(x.name).toLowerCase() === k; }) || null;
+  }
+  function weaponSkillOf(tr) {
+    try { return window.DCCSkills && window.DCCSkills.weaponSkillFor ? window.DCCSkills.weaponSkillFor(rowName(tr), tr.dataset.base || "", rowNotes(tr)) : null; } catch (e) { return null; }
+  }
+  function handsOf(tr, meta) {
+    meta = meta || rowMeta(tr);
+    var slot = String(meta.slot || "");
+    if (meta.cat === "weapon") {
+      var it = lookup(rowName(tr)) || lookup(tr.dataset.base || "");
+      var sk = skillEntry(weaponSkillOf(tr));
+      var txt = [it && it.effect, sk && sk.limitations, sk && sk.desc, rowNotes(tr)].filter(Boolean).join(" ");
+      return /two hands|two-handed|both hands/i.test(txt) ? 2 : 1;
+    }
+    if (/holding/i.test(slot) && meta.cat !== "accessory") return 1;
+    return 0;
+  }
+  function holders(except) {
+    return [].slice.call(document.querySelectorAll("#inv-body tr")).filter(function (r) {
+      return r !== except && r.dataset.equipped === "1" && handsOf(r) > 0;
+    });
+  }
+
   function equip(tr) {
     var meta = rowMeta(tr);
     var name = norm(rowName(tr));
     if (!name) return;
+    // Only two hands: wielding this may mean putting something else away first.
+    var need = handsOf(tr, meta);
+    if (need > 0) {
+      var held = holders(tr), used = held.reduce(function (a, r) { return a + handsOf(r); }, 0);
+      if (used + need > 2) {
+        var list = held.map(function (r) { return norm(rowName(r)) + (handsOf(r) > 1 ? " (two-handed)" : ""); }).join(", ");
+        var ok = false;
+        try { ok = window.confirm(name + (need > 1 ? " needs both hands" : " needs a free hand") + ". Your hands hold: " + list + ".\n\nPut " + (held.length > 1 ? "them" : "it") + " away and wield " + name + "?"); } catch (e) {}
+        if (!ok) return;
+        // Put away the fewest held items that frees enough hands, last-equipped first.
+        for (var hi = held.length - 1; hi >= 0 && used + need > 2; hi--) { used -= handsOf(held[hi]); unequip(held[hi]); }
+      }
+    }
     var placed = "";
     if (meta.cat === "accessory") {
       var slot = accInputs().find(function (i) { return !norm(i.value); });
@@ -288,8 +335,17 @@
     if (rec.v === 2) {
       (rec.grants || []).forEach(function (g) { ungrant(tr.dataset.iid, g); });
       if ((rec.buffs || []).length) {
-        var drop = rec.buffs.map(function (n) { return n.toLowerCase(); });
-        writeBuffs(buffNames().filter(function (n) { return drop.indexOf(n.toLowerCase()) < 0; }));
+        // Another worn item that grants the same Buff keeps it on — and takes over
+        // owning it, so it comes off when THAT item does.
+        var drop = rec.buffs.filter(function (bn) {
+          var other = [].slice.call(document.querySelectorAll("#inv-body tr")).find(function (r) {
+            return r !== tr && r.dataset.equipped === "1" && benefitsOf(r).some(function (b) { return b.kind === "buff" && String(b.target).toLowerCase() === String(bn).toLowerCase(); });
+          });
+          if (!other) return true;
+          try { var orec = JSON.parse(other.dataset.equipBonus || "{}"); orec.buffs = (orec.buffs || []).concat([bn]); other.dataset.equipBonus = JSON.stringify(orec); } catch (e) {}
+          return false;
+        }).map(function (n) { return n.toLowerCase(); });
+        if (drop.length) writeBuffs(buffNames().filter(function (n) { return drop.indexOf(n.toLowerCase()) < 0; }));
       }
     } else {
       // Equipped before the rebuild: { skills:[{name,rank,created}] }.
@@ -334,6 +390,15 @@
   function refreshRow(btn) { var tr = btn && btn.closest ? btn.closest("tr") : null; if (tr) refreshRowEl(tr); }
   function refreshAll() {
     [].slice.call(document.querySelectorAll("#inv-body tr")).forEach(function (tr) { if (norm(rowName(tr))) renderBonus(tr); });
+    // Gear spells used to be written "Inherent · no Mana". They cost Mana like any
+    // spell (the gear grants access), so an old note is rewritten with the real cost.
+    skillRows().forEach(function (tr) {
+      var ins = tr.querySelectorAll('input[type="text"]');
+      if (!ins[3] || !/^Inherent · no Mana/.test(ins[3].value)) return;
+      var d = B() ? B().findSpell(tr.dataset.src || (ins[0] ? ins[0].value : "")) : null;
+      ins[3].value = [d && d.mana != null ? d.mana + " Mana" : "", d && d.type ? d.type : "", "from gear"].filter(Boolean).join(" · ");
+      fire(ins[3]);
+    });
     renderAllGrantBadges();
   }
 
@@ -366,7 +431,40 @@
   }
   injectCss();
 
+  // A "Passive Skill at Rank = Floor" from worn gear follows the Floor: when it
+  // changes, each such grant moves by the difference (and remembers its new Rank, so
+  // unequipping still takes back exactly what it gave).
+  function refloor() {
+    var F = floorNow();
+    [].slice.call(document.querySelectorAll("#inv-body tr")).forEach(function (tr) {
+      if (tr.dataset.equipped !== "1") return;
+      var rec; try { rec = JSON.parse(tr.dataset.equipBonus || "{}"); } catch (e) { return; }
+      if (rec.v !== 2 || !(rec.grants || []).length) return;
+      var floorSkills = benefitsOf(tr).filter(function (b) { return b.kind === "skill" && b.floor; }).map(function (b) { return String(b.target).toLowerCase(); });
+      var changed = false;
+      rec.grants.forEach(function (g) {
+        if (g.kind !== "skill" || !(g.floor || floorSkills.indexOf(String(g.name).toLowerCase()) >= 0)) return;
+        var delta = F - (g.rank || 0); if (!delta) return;
+        var row = skillRowByName(g.name); if (!row) return;
+        addRank(row, delta);
+        g.rank = F; g.floor = true; changed = true;
+        setGrants(row, grantsOf(row).map(function (x) { return x.iid === tr.dataset.iid ? Object.assign({}, x, { rank: F }) : x; }));
+      });
+      if (changed) { tr.dataset.equipBonus = JSON.stringify(rec); save(); }
+    });
+  }
+  // The equipped weapon rows that wield a given attack skill (for "is it in hand?").
+  function wielding(skillName) {
+    var k = String(skillName || "").toLowerCase(); if (!k) return [];
+    return [].slice.call(document.querySelectorAll("#inv-body tr")).filter(function (r) {
+      if (r.dataset.equipped !== "1" || rowMeta(r).cat !== "weapon") return false;
+      return String(weaponSkillOf(r) || "").toLowerCase() === k;
+    });
+  }
   window.DCCEquip = {
+    handsOf: handsOf, wielding: wielding, refloor: refloor,
+    // Would this row fit in the free hands right now (no prompt)?
+    fits: function (tr) { var need = handsOf(tr); if (!need) return true; return holders(tr).reduce(function (a, r) { return a + handsOf(r); }, 0) + need <= 2; },
     click: click, isEquipType: isEquipType, refreshRow: refreshRow, refreshAll: refreshAll,
     removeRow: removeRow, equip: equip, unequip: unequip, setBenefits: setBenefits, benefitsOf: benefitsOf,
     renderGrantBadges: renderGrantBadges,

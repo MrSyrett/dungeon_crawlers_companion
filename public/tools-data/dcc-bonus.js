@@ -9,7 +9,7 @@
 //   allstats +N to every Stat            amount
 //   skill    +N ranks in a Skill (added to the sheet if missing)       target: skill name, amount
 //            floor:true → Rank = Floor Number (Passive Skill at Rank = Floor)
-//   spell    knows a Spell while worn (an Inherent Spell: no Mana)     target: spell name
+//   spell    knows a Spell while worn (casting still costs its Mana)  target: spell name
 //   buff     a Buff while worn (added to the sheet's Buffs tracker)    target: buff name
 //   dr | evade | move | step                                           amount
 //   note     anything the sheet can't automate (Unique, resistances…)  target: the text
@@ -27,7 +27,7 @@
     { k: "stat", label: "Stat", tip: "+N to a Stat" },
     { k: "allstats", label: "All Stats", tip: "+N to every Stat" },
     { k: "skill", label: "Skill", tip: "+N ranks in a Skill (added if the crawler doesn't have it)" },
-    { k: "spell", label: "Spell", tip: "A Spell — gear grants it while worn (an Inherent Spell, no Mana); a scroll or tome holds it" },
+    { k: "spell", label: "Spell", tip: "A Spell — gear grants access while worn (casting costs Mana as normal); a scroll or tome holds it (a scroll casts it once, free)" },
     { k: "buff", label: "Buff", tip: "A Buff while the item is worn" },
     { k: "dr", label: "DR", tip: "+N Damage Resistance" },
     { k: "evade", label: "Evade", tip: "+N Evade" },

@@ -79,6 +79,40 @@
         { rank: 15, dice: "2d8", stat: "str", debuffsEnd: ["Held"], toss: true, cond: "Target up to two sizes larger" },
       ] },
   ];
+  // ATTACK OPTIONS from other skills: not Damage Effects, but the same idea — a skill
+  // that changes an attack when you choose to use it. `minRank` = the option only
+  // exists from that Rank. Tier extras: adv / dis (the attack roll), hitRank (add
+  // this skill's Rank to the Attack Check), flat (extra damage dice that are NOT base
+  // damage, so not doubled on a Critical Hit).
+  var OPTIONS = [
+    // "When making a Ranged Attack, you can add your Ranks in this Skill to your Attack
+    // Skill Check if you choose to make the Check with Disadvantage. On Success, add 1d4
+    // to the damage." R5 +1d4 damage, R10/R15 +1d4 base damage each.
+    { name: "Aiming", groups: ["Ranged"], option: true,
+      tiers: [
+        { rank: 0, dis: true, hitRank: true, flat: "1d4" },
+        { rank: 5, dis: true, hitRank: true, flat: "2d4" },
+        { rank: 10, dis: true, hitRank: true, flat: "2d4", dice: "1d4" },
+        { rank: 15, dis: true, hitRank: true, flat: "2d4", dice: "2d4" },
+      ] },
+    // A surprise Attack (after winning the Ambush Check): unseen, so with Advantage;
+    // R5+ adds an Ambush Rank damage die.
+    { name: "Ambush", groups: ["Edged", "Bashing", "Ranged", "Reach", "Hand-to-Hand", "Animal/Pet Strike"], option: true,
+      condition: "Your surprise Action, after winning the Ambush Check",
+      tiers: [
+        { rank: 0, adv: true },
+        { rank: 5, adv: true, rankDice: 1 },
+      ] },
+    // R10: "Add 1 Cesta Punta Rank damage die to thrown damaging Attacks."
+    { name: "Cesta Punta", option: true, minRank: 10, condition: "Thrown with the xistera",
+      attacks: ["Javelin", "Shuriken", "Throwing Knives", "Boomerang", "Bolas", "Throwing Hammer", "Molotov Cocktail"],
+      tiers: [{ rank: 10, rankDice: 1 }] },
+    // R5: "Your Pugilism and Slice Attacks with the Paw add 1 Astral Paw Rank damage die."
+    { name: "Astral Paw", option: true, minRank: 5, condition: "Attacking with the conjured Paw",
+      attacks: ["Pugilism", "Slice Attack"],
+      tiers: [{ rank: 5, rankDice: 1 }] },
+  ];
+  BOOK = BOOK.concat(OPTIONS);
 
   function norm(s) { return String(s == null ? "" : s).toLowerCase().replace(/[^a-z0-9]/g, ""); }
   function arr(v) { return Array.isArray(v) ? v : []; }
@@ -144,10 +178,12 @@
     var names = [norm(tr.dataset && tr.dataset.src), norm(t ? t.value : ""), e ? norm(e.name) : ""].filter(Boolean);
     var group = e && e.group ? norm(e.group) : "";
     // "Cannot choose a Damage Effect" (Unarmed Combat) shuts every effect out.
-    if (e && /cannot choose a damage effect/i.test(String(e.desc || "") + " " + String(e.limitations || ""))) return [];
+    var noFx = e && /cannot choose a damage effect/i.test(String(e.desc || "") + " " + String(e.limitations || ""));
     if (e && norm(e.group) === "damageeffect") return [];
     return owned().filter(function (o) {
       var fx = o.fx;
+      if (o.rank < (fx.minRank || 0)) return false;
+      if (noFx && !fx.option) return false;   // "Cannot choose a Damage Effect" — other options still apply
       if (arr(fx.attacks).some(function (a) { return names.indexOf(norm(a)) >= 0; })) return true;
       return !!group && arr(fx.groups).some(function (g) { return norm(g) === group; });
     });
@@ -161,6 +197,10 @@
   function summary(fx, rank) {
     var t = tierAt(fx, rank); if (!t) return "";
     var bits = [];
+    if (t.adv) bits.push("Advantage");
+    if (t.dis) bits.push("Disadvantage");
+    if (t.hitRank) bits.push("+" + rank + " to hit (Rank)");
+    if (t.flat) bits.push("+" + t.flat + " damage");
     if (t.dice) bits.push("+" + t.dice + " base damage");
     if (t.rankDice) bits.push("+" + (t.rankDice > 1 ? t.rankDice + "× " : "") + "Rank die");
     if (t.stat) bits.push("+" + t.stat.toUpperCase());

@@ -14679,7 +14679,7 @@ function dccResolveProperty(propText, tierKey, typeTableNum) {
   }
   if(/inherent spell/i.test(p)) {
     const sp = dccRandomSpell();
-    return 'Inherent Spell: <b>' + (sp ? esc(sp.name) : 'a Spell') + '</b> <span style="opacity:.7">(no Mana; GM-set cooldown)</span>';
+    return 'Inherent Spell: <b>' + (sp ? esc(sp.name) : 'a Spell') + '</b> <span style="opacity:.7">(grants access while worn; casting costs Mana)</span>';
   }
   if(/resistance to an uncommon damage type/i.test(p)) {
     return 'Grants the <b>Resistance: ' + esc(dccPick(DCC_DMG_UNCOMMON)) + '</b> buff';

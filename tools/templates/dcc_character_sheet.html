@@ -1703,6 +1703,17 @@ function dccWeaponSkillMigrate(){
   });
 }
 
+// A weapon attack (Edged / Bashing / Ranged / Reach skill) with no weapon for it
+// equipped in hand. A reminder only — a sheet that doesn't track equipping still rolls.
+function dccNotWielded(row){
+  if(!window.DCCEquip || !DCCEquip.wielding || !row) return '';
+  const t = row.querySelector('input[type="text"]');
+  const e = dccCombatEntry(row.dataset.src || (t ? t.value : ''));
+  const g = e && e.src ? String(e.src.group || '') : '';
+  if(!e || e.kind !== 'skill' || !/^(edged|bashing|ranged|reach)$/i.test(g)) return '';
+  return DCCEquip.wielding(e.name).length ? '' : e.name;
+}
+
 // ── DAMAGE EFFECTS (Core p.180) ──
 // A Damage Effect Skill on the sheet (Skullcracker, Powerful Strike, Toss… or a
 // homebrew one) adds a roll option to every attack it works with — the effects and
@@ -1993,6 +2004,19 @@ function turnSpend(kind, label){
   return true;
 }
 function turnAfter(){ renderTurn(); refreshSpellManaState(); if(typeof scheduleAutosave === 'function') scheduleAutosave(); }
+// Shocked: "Lose your next Action" — lasts "once that Action is forfeited". The
+// next Action you take (attack, spell, skill, Move…) is spent doing nothing, and
+// Shocked ends. Free actions don't count.
+function dccShockedForfeit(kind, name){
+  if(kind === 'free') return false;
+  if(!/(^|,)\s*shocked\b/i.test(document.getElementById('debuffs')?.value || '')) return false;
+  if(!turnCan(kind)) return false;          // nothing left to lose — the normal "no Actions" path explains it
+  turnSpend(kind, 'Shocked');
+  dccRemoveDebuff('Shocked');
+  addLog('Shocked', 'Action lost', (name ? name + ' — ' : '') + 'the Action is forfeited and Shocked ends', 'fumble');
+  turnAfter();
+  return true;
+}
 // Rolls made from the main sheet (Stat mods, the Evade box) also spend the turn —
 // quietly: the roll always goes through, and an already-spent turn just isn't charged.
 function turnSpendQuiet(kind, label){
@@ -2021,6 +2045,7 @@ function sheetRollSkill(btn, fxName){
   const row = btn && btn.closest('tr'); if(!row) return;
   const kind = skillDmgOf(row) ? 'attack' : 'other';
   if(!turnCan(kind)) { refreshSpellManaState(); return; }
+  if(dccShockedForfeit(kind, row.querySelector('input[type="text"]')?.value || '')) return;
   const r = rollSkill(btn, fxName);
   if(!r) return;                          // out of Mana — nothing rolled, no Action spent
   turnSpend(kind, r.name || 'Skill');
@@ -2124,7 +2149,7 @@ function turnBuildOpts(){
     const fx = window.DCCDmgFx ? DCCDmgFx.forAttack(r.tr) : [];
     add('attacks', {
       name: r.name, kind: 'attack',
-      sub: turnHitStr(r) + ' to hit · ' + turnDmgStr(r) + (r.rank > 0 ? '' : ' · untrained (Disadvantage)'),
+      sub: turnHitStr(r) + ' to hit · ' + turnDmgStr(r) + (r.rank > 0 ? '' : ' · untrained (Disadvantage)') + (dccNotWielded(r.tr) ? ' · not in hand' : ''),
       btn: 'Attack', run: () => turnRollRow(r),
       btns: fx.length ? [['Attack', () => turnRollRow(r)]].concat(fx.map(o => [o.fx.name, () => turnRollRow(r, o.fx.name)])) : undefined,
     });
@@ -2187,6 +2212,7 @@ function turnDo(i, j){
   const run = (o.btns && o.btns[j]) ? o.btns[j][1] : o.run;
   if(o.blocked) { addLog(o.name, o.blocked, '', 'normal'); return; }
   if(!turnCan(o.kind)) { turnSpend(o.kind, o.name); return; }
+  if(dccShockedForfeit(o.kind, o.name)) return;
   const ok = run();
   if(!ok) { renderTurn(); return; }          // e.g. out of Mana — no Action spent
   turnSpend(o.kind, o.name);
@@ -2429,10 +2455,8 @@ function atkStatOf(a) {
 function spellManaOf(row) {
   const texts = row.querySelectorAll('input[type="text"]');
   const note = texts[3] ? texts[3].value : '';
-  // A spell worn on gear is an Inherent Spell — no Mana (Tables 39/41). Equipping
-  // writes "Inherent · no Mana" and records the grant on the row.
-  if(/\bno\s+mana\b/i.test(note)) return 0;
-  try { if(JSON.parse(row.dataset.grants || '[]').some(g => g && g.kind === 'spell')) return 0; } catch(e) {}
+  // Every cast costs Mana — a spell granted by gear included (the gear grants
+  // access, not free casting). Only a Spell Scroll casts free (castFromScroll).
   const m = String(note).match(/(\d+)\s*mana/i);
   if(m) return parseInt(m[1], 10) || 0;
   const src = row.dataset.src || (texts[0] ? texts[0].value : '');
@@ -2514,15 +2538,18 @@ function rollSkill(btn, fxName) {
   const diceStr = skillDmgOf(row);
   const wooz = !!diceStr && dm.noDex && statId === 'dex';    // Woozy: no DEX Mod on an Attack Check (damage unaffected)
   const statMod = statId && !wooz ? getStatMod(statId) : 0;
-  const totalMod = rank + statMod + dm.penalty;
-  const {result: roll, detail: advDetail} = rollWithAdv(20, mergeExtra(untrainedDis(inputs[1]), (dm.dis || (diceStr && dm.atkDis)) ? 'disadvantage' : null));
-  const total = roll + totalMod;
-  let type = roll===20?'crit':roll===1?'fumble':'normal';
-  const statLabel = statId ? ` + ${statId.toUpperCase()}(${statMod}${wooz?' — Woozy':''})` : '';
-  const base = advDetail ? advDetail : `d20(${roll})`;
-  // A chosen Damage Effect (dcc-damage-effects.js), at that effect Skill's own Rank.
+  // A chosen Damage Effect / attack option (dcc-damage-effects.js), at that Skill's own
+  // Rank. Options can roll with Advantage (Ambush) or Disadvantage + Ranks to hit (Aiming).
   const fxo = (fxName && diceStr && window.DCCDmgFx) ? DCCDmgFx.forAttack(row).find(o => o.fx.name === fxName) : null;
   const fxT = fxo ? DCCDmgFx.tierAt(fxo.fx, fxo.rank) : null;
+  const fxMode = fxT ? (fxT.adv ? 'advantage' : fxT.dis ? 'disadvantage' : null) : null;
+  const fxHit = fxT && fxT.hitRank ? fxo.rank : 0;
+  const totalMod = rank + statMod + dm.penalty + fxHit;
+  const {result: roll, detail: advDetail} = rollWithAdv(20, mergeExtra(mergeExtra(untrainedDis(inputs[1]), (dm.dis || (diceStr && dm.atkDis)) ? 'disadvantage' : null), fxMode));
+  const total = roll + totalMod;
+  let type = roll===20?'crit':roll===1?'fumble':'normal';
+  const statLabel = statId ? ` + ${statId.toUpperCase()}(${statMod}${wooz?' — Woozy':''})` + (fxHit ? ` + ${fxo.fx.name}(${fxHit})` : '') : (fxHit ? ` + ${fxo.fx.name}(${fxHit})` : '');
+  const base = advDetail ? advDetail : `d20(${roll})`;
   if(diceStr) {
     // Attack skill: To Hit (vs the target's Evade) and Damage in one roll.
     const m = diceStr.match(/^(\d*)d(\d+)$/i);
@@ -2545,6 +2572,17 @@ function rollSkill(btn, fxName) {
       bangTxt = '+Bang Bro(2' + (bn ? '+' + bn + 'd6:' + brs.join('+') : '') + ')';
     }
     let baseSum = rolls.reduce((a,b)=>a+b,0);
+    // A rank upgrade that multiplies base damage ("This attack deals base damage x3",
+    // Magic Missile R15).
+    let multTxt = '';
+    {
+      const ent = dccCombatEntry(row.dataset.src || name) || (row.dataset.src ? dccCombatEntry(name) : null);
+      (ent ? ent.upgrades : []).forEach(u => {
+        if(Number(u.rank) > rank) return;
+        const mm = String(u.text || '').match(/base damage\s*[x×]\s*(\d+)/i);
+        if(mm) { const k = parseInt(mm[1], 10) || 1; baseSum *= k; multTxt += `×${k}(R${u.rank})`; }
+      });
+    }
     let fxTxt = '', fxAdd = 0, fxLate = '';
     if(fxT) {
       const fr = fxo.rank;
@@ -2555,6 +2593,14 @@ function rollSkill(btn, fxName) {
         const fr2 = Array.from({length: fn}, () => d(fs));
         baseSum += fr2.reduce((a,b)=>a+b,0);
         fxTxt += `+${fn}d${fs}(${fr2.join('+')})`;
+      }
+      // Extra damage that isn't base damage (Aiming's +1d4) — rolled once, never doubled.
+      const fl = String(fxT.flat || '').match(/^(\d*)d(\d+)$/i);
+      if(fl) {
+        const fn2 = parseInt(fl[1] || '1', 10), fs2 = parseInt(fl[2], 10);
+        const fr3 = Array.from({length: fn2}, () => d(fs2));
+        fxAdd += fr3.reduce((a,b)=>a+b,0);
+        fxTxt += `+${fn2}d${fs2}(${fr3.join('+')})`;
       }
       // "Multiply your base damage dice result by your Rank" (Powerful Strike).
       if(fxT.multOf !== 'total' && fxT.mult) {
@@ -2568,8 +2614,9 @@ function rollSkill(btn, fxName) {
     let dmg = baseSum + rk.total + dMod + bang + fxAdd;
     if(fxLate) dmg *= parseInt(fxLate.slice(1), 10);
     const sm = rk.txt + (dStat ? `+${dStat.toUpperCase()}(${dMod})` : '') + bangTxt;
+    const nw = dccNotWielded(row);
     addLog(`${name}` + (fxo ? ' · ' + fxo.fx.name : '') + (roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':''), `Hit: ${total}  |  Dmg: ${dmg}`,
-      `${base}+Rank(${rank})${statLabel.replace(' + ','+')}${debuffTag(dm)}=${total}  |  ${num}d${sides}${roll===20?' crit':''}(${rolls.join('+')})${fxTxt ? ' ' + fxo.fx.name + '[' + fxTxt + ']' : ''}${sm}${fxLate ? ' then ' + fxLate + ' total' : ''}=${dmg}`, type);
+      (nw ? `⚠ No ${nw} weapon equipped · ` : '') + `${base}+Rank(${rank})${statLabel.replace(' + ','+')}${debuffTag(dm)}=${total}  |  ${num}d${sides}${roll===20?' crit':''}(${rolls.join('+')})${multTxt}${fxTxt ? ' ' + fxo.fx.name + '[' + fxTxt + ']' : ''}${sm}${fxLate ? ' then ' + fxLate + ' total' : ''}=${dmg}`, type);
     // Rank upgrades that do more than damage ("the target gains the Woozy Debuff") —
     // in the log (which the GM sees) rather than only in the row's hover title.
     {
@@ -3672,7 +3719,8 @@ if(typeof renderTurn === 'function') setTimeout(() => switchTab('turn'), 0);
   };
   if(bf) bf.addEventListener('input', recalc);
   const fl = document.getElementById('f-floor');
-  if(fl) fl.addEventListener('input', recalc);
+  // The Floor also moves "Passive Skill at Rank = Floor" gear grants.
+  if(fl) fl.addEventListener('input', () => { recalc(); try { if(window.DCCEquip && DCCEquip.refloor) DCCEquip.refloor(); } catch(e) {} });
 })();
 
 // autoLoad() is deferred to the end of the campaign <script> block below, so

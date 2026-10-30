@@ -239,20 +239,121 @@
     if (v <= 299) return 9; return 10;
   }
 
-  // Parse a race's grant bullets into per-stat modifiers.
-  function raceStatMods(race) {
+  // ── Race/Class stat grants ──────────────────────────────────────────────────
+  // statGrant(g) classifies one grant bullet:
+  //   { kind:"fixed", amt, stats:[ids] }   "+3 Dexterity and Charisma", "+2 to all Stats"
+  //   { kind:"split", amt, stats:[ids] }   "+6 to split as you please between INT, DEX, and CHA"
+  //   { kind:"pick",  amt, stats:[ids] }   "+2 a Stat", "+N to one Stat of your choice", "+N STR or DEX"
+  //   { kind:"cond" }                      "+5 Intelligence during the day…" — not permanent (→ Notes)
+  //   null                                 not a stat grant ("+1 Popularity … Charisma Skill Check",
+  //                                        "+2 in all Charisma-based Skills", "-3 Ranks in all Dexterity Skills")
+  // `extra` = a trailing "; …" clause ("Charisma is capped at 10"), kept for the Notes.
+  const STAT_WORD_RE = /\b(strength|intelligence|constitution|dexterity|charisma|str|int|con|dex|cha)\b/gi;
+  const STAT_ABBR_TO_ID = { str: "str", int: "int", con: "con", dex: "dex", cha: "cha" };
+  const statIdOf = (w) => STAT_NAME_TO_ID[String(w).toLowerCase()] || STAT_ABBR_TO_ID[String(w).toLowerCase()] || "";
+  function statGrant(g) {
+    const m = String(g || "").trim().match(/^([+-]\d+)\s+(.+)$/);
+    if (!m) return null;
+    const amt = parseInt(m[1], 10);
+    const parts = m[2].split(/\s*;\s*/);
+    const rest = parts[0].replace(/\.$/, "").trim(), extra = parts.slice(1).join("; ");
+    const named = [...new Set((rest.match(STAT_WORD_RE) || []).map(statIdOf).filter(Boolean))];
+    const allStats = /\ball\s+stats\b/i.test(rest);
+    const anyStat = /\b(?:a|one|any)\s+stat\b/i.test(rest);
+    if (!named.length && !allStats && !anyStat) return null;
+    // Anything left once the stat words and list glue are gone decides the shape.
+    const glue = rest.replace(STAT_WORD_RE, " ").replace(/\b(?:to|and|or|the|all|stats?|a|one|any|of|your|choice|between|among|split|as|you|please|points?|in)\b|,|\//gi, " ").replace(/\s+/g, "");
+    // Stat words used inside a Skill/Check/Popularity rule aren't a stat grant at all.
+    if (/\b(skills?|checks?|ranks?|popularity|spells?|mana|damage|dr)\b/i.test(rest)) return null;
+    const cond = /\b(during|while|when|whenever|if|unless|against|at\s+night|at\s+level|by\s+day|each\s+time|per|after|before|until|vs\.?|versus|for\s+\d|on\s+a|in\s+combat)\b/i.test(rest);
+    if (cond) return { kind: "cond", amt, extra };
+    if (glue) return null;   // stat words inside some other rule ("…Charisma Skill Check")
+    const pool = named.length ? named : STAT_IDS.slice();
+    if (/\bsplit\b|\bdistribute\b|\bdivide\b/i.test(rest)) return pool.length > 1 ? { kind: "split", amt, stats: pool, extra } : { kind: "fixed", amt, stats: pool, extra };
+    if (anyStat || /\bchoice\b/i.test(rest) || (/\bor\b/i.test(rest) && named.length > 1)) return pool.length > 1 ? { kind: "pick", amt, stats: pool, extra } : { kind: "fixed", amt, stats: pool, extra };
+    return { kind: "fixed", amt, stats: allStats ? STAT_IDS.slice() : named, extra };
+  }
+  // Default split: even, remainder to the first listed stat.
+  function defaultSplit(sg) {
+    const n = sg.stats.length, each = Math.floor(sg.amt / n), out = {};
+    sg.stats.forEach((k, i) => { out[k] = each + (i === 0 ? sg.amt - each * n : 0); });
+    return out;
+  }
+  // The stored split/pick for a grant key (or the default split; a pick has no default).
+  function statChoiceOf(key, sg) {
+    const C = (W && W.statSplits) || {};
+    if (sg.kind === "split") return C[key] && typeof C[key] === "object" ? C[key] : defaultSplit(sg);
+    if (sg.kind === "pick") return typeof C[key] === "string" ? C[key] : "";
+    return null;
+  }
+  function statChoiceDone(key, sg) {
+    const c = statChoiceOf(key, sg);
+    if (sg.kind === "split") return sg.stats.reduce((t, k) => t + (parseInt(c[k], 10) || 0), 0) === sg.amt && sg.stats.every((k) => (parseInt(c[k], 10) || 0) >= 0);
+    if (sg.kind === "pick") return sg.stats.indexOf(c) >= 0;
+    return true;
+  }
+  // Per-stat modifiers from a race/class entry. `src` ("race" | "class") keys the
+  // player's split/pick choices (same keys as grantList). Only real stat grants count.
+  function raceStatMods(entry, src) {
     const mods = { str: 0, int: 0, con: 0, dex: 0, cha: 0 };
-    (race && race.grants || []).forEach((g) => {
-      const m = String(g).match(/^\s*([+-]\d+)\s+(.+)$/);
-      if (!m) return;
-      const amt = parseInt(m[1], 10);
-      const rest = m[2];
-      if (/to all stats|^all stats/i.test(rest)) { STAT_IDS.forEach((k) => (mods[k] += amt)); return; }
-      Object.keys(STAT_NAME_TO_ID).forEach((nm) => {
-        if (new RegExp("\\b" + nm + "\\b", "i").test(rest)) mods[STAT_NAME_TO_ID[nm]] += amt;
-      });
+    (entry && entry.grants || []).forEach((g, i) => {
+      const sg = statGrant(g);
+      if (!sg || sg.kind === "cond") return;
+      if (sg.kind === "fixed") { sg.stats.forEach((k) => (mods[k] += sg.amt)); return; }
+      const key = (src || "race") + "|" + entry.name + "|" + i;
+      const c = statChoiceOf(key, sg);
+      if (sg.kind === "split") sg.stats.forEach((k) => (mods[k] += (parseInt(c[k], 10) || 0) * (sg.amt < 0 ? -1 : 1)));
+      else if (c) mods[c] += sg.amt;
     });
     return mods;
+  }
+  // Every split/pick stat grant for a step, with its key.
+  function statChoiceGrants(src) {
+    const e = src === "class" ? classByName(W.class) : raceByName(W.race);
+    if (!e) return [];
+    return (e.grants || []).map((g, i) => ({ g, i, key: src + "|" + e.name + "|" + i, sg: statGrant(g) }))
+      .filter((x) => x.sg && (x.sg.kind === "split" || x.sg.kind === "pick"));
+  }
+  function statChoicesDone(src) { return statChoiceGrants(src).every((x) => statChoiceDone(x.key, x.sg)); }
+  // Human-readable result of the made choices (for the stats / review previews).
+  function statChoiceSummary() {
+    const out = [];
+    ["race", "class"].forEach((src) => statChoiceGrants(src).forEach((x) => {
+      const c = statChoiceOf(x.key, x.sg), sgn = x.sg.amt < 0 ? "−" : "+";
+      if (x.sg.kind === "split") out.push(x.sg.stats.map((k) => `${STAT_ABBR[k]} ${sgn}${parseInt(c[k], 10) || 0}`).join(", "));
+      else out.push(c ? `${STAT_ABBR[c]} ${sgn}${Math.abs(x.sg.amt)}` : `${sgn}${Math.abs(x.sg.amt)} — not picked yet`);
+    }));
+    return out;
+  }
+  // The split / pick controls on the Race or Class step.
+  function renderStatChoices(src) {
+    if (!isThird()) return "";
+    const list = statChoiceGrants(src);
+    if (!list.length) return "";
+    let h = "";
+    list.forEach((x) => {
+      const sg = x.sg, c = statChoiceOf(x.key, sg), n = Math.abs(sg.amt);
+      h += `<div class="dccw-field" style="margin-top:8px;"><label>${esc(x.g)}</label>`;
+      if (sg.kind === "split") {
+        const tot = sg.stats.reduce((t, k) => t + (parseInt(c[k], 10) || 0), 0);
+        h += `<div class="dccw-row" style="margin-bottom:0;">` + sg.stats.map((k) => {
+          const v = parseInt(c[k], 10) || 0;
+          return `<div class="dccw-statbox" style="flex:1;min-width:110px;text-align:center;"><div class="k">${STAT_ABBR[k]}</div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;">
+              <button class="dccw-btn" style="padding:2px 10px;" onclick="DCCW.setStatSplit('${src}',${x.i},'${k}',-1)" ${v <= 0 ? "disabled" : ""}>−</button>
+              <span style="min-width:26px;font-weight:800;">${sg.amt < 0 ? "−" : "+"}${v}</span>
+              <button class="dccw-btn" style="padding:2px 10px;" onclick="DCCW.setStatSplit('${src}',${x.i},'${k}',1)" ${v >= n || tot >= n ? "disabled" : ""}>+</button>
+            </div></div>`;
+        }).join("") + `</div>`;
+        if (tot !== n) h += `<p class="dccw-warn" style="margin-top:4px;">Assign exactly ${n} points (${n - tot > 0 ? n - tot + " left" : tot - n + " too many"}).</p>`;
+      } else {
+        h += `<select onchange="DCCW.setStatPick('${src}',${x.i},this.value)"><option value="">— pick a stat —</option>` +
+          sg.stats.map((k) => `<option value="${k}" ${c === k ? "selected" : ""}>${STAT_ABBR[k]} ${sg.amt < 0 ? "−" : "+"}${n}</option>`).join("") + `</select>`;
+        if (!c) h += `<p class="dccw-warn" style="margin-top:4px;">Choose a stat for: ${esc(x.g)}</p>`;
+      }
+      h += `</div>`;
+    });
+    return `<div class="dccw-card" style="margin-top:10px;"><b>Your stat bonuses</b><p class="dccw-sub" style="margin:2px 0 4px;">Choose where these points go — only your choice is applied to your scores.</p>${h}</div>`;
   }
 
   function raceByName(n) { return allRaces().find((r) => r.name === n) || null; }
@@ -426,15 +527,11 @@
     const raw = String(g || "").trim();
     if (!raw) return;
     const sm = raw.match(/^([+-]\d+)\s+(.+)$/);
-    // A pure stat bonus/penalty is already baked into the scores — skip it.
-    if (sm) {
-      const rest = sm[2];
-      const leftover = rest
-        .replace(/\b(strength|intelligence|constitution|dexterity|charisma|str|int|con|dex|cha)\b/gi, "")
-        .replace(/to all stats|all stats/gi, "").replace(/\band\b|\bto\b|,/gi, "").replace(/\s+/g, "");
-      const hasStat = /(strength|intelligence|constitution|dexterity|charisma|\bstr\b|\bint\b|\bcon\b|\bdex\b|\bcha\b|all stats)/i.test(rest);
-      if (hasStat && leftover === "") return;
-    }
+    // A stat bonus/penalty (fixed, split or picked) is already baked into the scores
+    // by raceStatMods — skip it, but keep a "; …capped at 10" rider in the Notes. A
+    // conditional one ("+5 Intelligence during the day") is never applied → Notes.
+    const sg = statGrant(raw);
+    if (sg) { if (sg.kind === "cond" || sg.extra) notes.push(raw); return; }
     // "+2 DR", "+3 DR Buff", "+10ft Move" … → the combat boxes (summed by the caller).
     if (fx) { const c = combatGrant(raw); if (c) { fx[c.field] = (fx[c.field] || 0) + c.n; return; } }
     // Penalties to a skill/spell aren't auto-applied (and never as a bonus).
@@ -665,6 +762,7 @@
       lootSpellSub: true,  // Floor 4/5: swap a duplicate loot Spell for another book Spell
       boosts: [],       // Floor 4/5: names of the 6 / 8 Skills chosen for the extra 2d2/1d2 boost
       grantChoices: {}, // Race/Class choice grants: { "race|<name>|<i>": [pick, pick…] }
+      statSplits: {},   // Race/Class stat splits/picks: { "race|<name>|<i>": {int:2,dex:2,cha:2} | "dex" }
       story: { trauma: "", loose: "", regret: "" },
       gear: { clothes: "", useful: "", junk: "", weapon: "", extra: "" },
       gearInit: false,
@@ -924,7 +1022,7 @@
         `<option value="${attr(r.name)}" ${r.name === W.race ? "selected" : ""}>${esc(r.name)}${r.source === "Homebrew" ? " (Homebrew)" : ""}</option>`).join("") + `</optgroup>`
     ).join("");
     const race = raceByName(W.race);
-    const mods = raceStatMods(race);
+    const mods = raceStatMods(race, "race");
     const modLine = STAT_IDS.filter((k) => mods[k]).map((k) => `${STAT_ABBR[k]} ${mods[k] > 0 ? "+" : ""}${mods[k]}`).join(", ") || "no stat changes";
     const grants = race ? race.grants : [];
     return `
@@ -938,7 +1036,7 @@
           <span class="dccw-sub">${esc(race.group)}-based · Size ${race.size} (${SIZE_NAME[race.size] || "—"}) · Stat mods: ${modLine}</span>
         </div>
         <ul class="dccw-grants">${grants.map((g) => `<li>${esc(g)}</li>`).join("")}</ul>
-      </div>${renderGrantChoices("race")}` : ""}`;
+      </div>${renderStatChoices("race")}${renderGrantChoices("race")}` : ""}`;
   }
 
   // ── step: class (Third-Floor+) ──────────────────────────────────────────────
@@ -947,7 +1045,7 @@
     const classes = allClasses().slice().sort((a, b) => a.name.localeCompare(b.name));
     const opts = ['<option value="">— choose a class —</option>'].concat(classes.map((c) => `<option value="${attr(c.name)}" ${c.name === W.class ? "selected" : ""}>${esc(c.name)}${c.source === "Homebrew" ? " (Homebrew)" : ""}</option>`)).join("");
     const cls = classByName(W.class);
-    const mods = cls ? raceStatMods(cls) : ZERO_MODS;
+    const mods = cls ? raceStatMods(cls, "class") : ZERO_MODS;
     const modLine = STAT_IDS.filter((k) => mods[k]).map((k) => `${STAT_ABBR[k]} ${mods[k] > 0 ? "+" : ""}${mods[k]}`).join(", ") || "no stat changes";
     return `
       <h3>Choose a class</h3>
@@ -960,7 +1058,7 @@
         </div>
         ${cls.prerequisites ? `<p class="dccw-sub" style="margin-bottom:6px;">Prerequisite: ${esc(cls.prerequisites)}</p>` : ""}
         <ul class="dccw-grants">${cls.grants.map((g) => `<li>${esc(g)}</li>`).join("")}</ul>
-      </div>${renderGrantChoices("class")}` : `<p class="dccw-warn">Choose a class to continue.</p>`}`;
+      </div>${renderStatChoices("class")}${renderGrantChoices("class")}` : `<p class="dccw-warn">Choose a class to continue.</p>`}`;
   }
 
   // ── step: experiences (Third-Floor+) ────────────────────────────────────────
@@ -1108,8 +1206,8 @@
     // Racial/class stat mods are applied when they're first unlocked — the Third-Floor
     // fast-forward and the upgrade flow. On the tutorial floors race is flavor and grants
     // nothing.
-    const rmods = isThird() ? raceStatMods(raceByName(W.race)) : ZERO_MODS;
-    const cmods = isThird() && W.class ? raceStatMods(classByName(W.class)) : ZERO_MODS;
+    const rmods = isThird() ? raceStatMods(raceByName(W.race), "race") : ZERO_MODS;
+    const cmods = isThird() && W.class ? raceStatMods(classByName(W.class), "class") : ZERO_MODS;
     const pts = isThird() ? W.statPoints : ZERO_MODS;
     const out = {};
     STAT_IDS.forEach((k) => {
@@ -1119,7 +1217,10 @@
     return out;
   }
   function renderStats() {
-    const mods = isThird() ? raceStatMods(raceByName(W.race)) : ZERO_MODS;
+    const rM = isThird() ? raceStatMods(raceByName(W.race), "race") : ZERO_MODS;
+    const cM = isThird() && W.class ? raceStatMods(classByName(W.class), "class") : ZERO_MODS;
+    const mods = {}; STAT_IDS.forEach((k) => { mods[k] = (rM[k] || 0) + (cM[k] || 0); });
+    const splitLine = isThird() ? statChoiceSummary() : [];
     let assign;
     if (W.statMethod === "array") {
       assign = `<p class="dccw-hint">Assign the Standard Array — <b>6, 5, 4, 3, 2</b>. Pick a number that's already on another stat and the two <b>swap</b> automatically.</p>` +
@@ -1152,6 +1253,7 @@
       ${assign}
       <p class="dccw-sub">Big number = your <b>Score</b>${isThird() ? ` (base + ${esc(W.race)} race + class mods, shown small)` : ""}. The <b>mod</b> is derived from the score — they aren't added together.</p>
       ${grid}
+      ${splitLine.length ? `<p class="dccw-sub" style="margin-top:6px;">Your chosen stat bonuses (included above): ${esc(splitLine.join(" · "))}</p>` : ""}
       <p class="dccw-sub" style="margin-top:10px;">Derived: <b>Health</b> ${statMod(fin.con) * 10} (10 × CON mod) · <b>Mana</b> ${fin.int} (= INT) · <b>Evade</b> d20 + DEX mod ${statMod(fin.dex)}</p>
       ${!statsAssigned() ? `<p class="dccw-warn">Assign a value to every stat to continue.</p>` : ""}`;
   }
@@ -1468,7 +1570,7 @@
         <div class="dccw-statgrid">${STAT_IDS.map((k) => `<div class="dccw-statbox"><div class="k">${STAT_ABBR[k]}</div><div class="v">${fin[k]}</div><div class="m">mod ${statMod(fin[k]) >= 0 ? "+" : ""}${statMod(fin[k])}</div></div>`).join("")}</div>
         <p class="dccw-sub" style="margin-top:8px;">Health ${statMod(fin.con) * 10} · Mana ${fin.int} · Popularity ${statMod(fin.cha) * 2}</p>
         <div class="dccw-card" style="margin-top:12px;"><b>Applied when you finish:</b><ul class="dccw-list">
-          <li>Race + Class bonuses and ${statBudget()} stat points (already in the scores above)</li>
+          <li>Race + Class bonuses and ${statBudget()} stat points (already in the scores above)${statChoiceSummary().length ? " — your chosen stat bonuses: " + esc(statChoiceSummary().join(" · ")) : ""}</li>
           <li>Racial Size, and starting Popularity (CHA mod × 2)</li>
           <li><b>Kept as-is:</b> your skills, attacks, gear, loot and AI Favor</li>
         </ul></div>
@@ -1489,6 +1591,7 @@
       const chosen = W.experiences.filter((s) => s.exp).map((s) => s.exp);
       extra = `<div class="dccw-card"><b>Fast-forward — Floor ${W.floor}:</b><ul class="dccw-list">
         <li>Class: ${esc(W.class || "—")}</li>
+        ${statChoiceSummary().length ? `<li>Chosen stat bonuses: ${esc(statChoiceSummary().join(" · "))}</li>` : ""}
         <li>${W.experiences.length} Experiences: ${esc(chosen.join(", ") || "—")}</li>
         <li>${cfg.statPoints} stat points distributed · Popularity ${statMod(fin.cha) * (W.floor === 3 ? 2 : 3)}</li>
         <li>Loot (Spread ${esc(String(W.loot || "—"))}): ${esc(W.lootRolled ? [W.lootRolled.weapon, W.lootRolled.armor, W.lootRolled.item, W.lootRolled.consumable].concat(W.lootExtra || []).map((o) => o.spells ? o.tier + " " + ((o === W.lootRolled.weapon && "Weapon") || (o === W.lootRolled.armor && "Armor") || (o === W.lootRolled.item && "Item") || ("bonus " + (o.slot || ""))) + " as Spells: " + o.spells.list.map((r) => r.name + " R" + r.rank).join(", ") + (o.spells.potions ? " +" + o.spells.potions + " Mana Potions" : "") : o.name).join(" · ") : "—")}</li>
@@ -1510,8 +1613,8 @@
   // ── validation ────────────────────────────────────────────────────────────────
   function canAdvance() {
     const key = steps()[W.step].key;
-    if (key === "race") return isThird() ? (!!W.race && grantChoicesDone("race")) : true;
-    if (key === "class") return !!W.class && grantChoicesDone("class");
+    if (key === "race") return isThird() ? (!!W.race && grantChoicesDone("race") && statChoicesDone("race")) : true;
+    if (key === "class") return !!W.class && grantChoicesDone("class") && statChoicesDone("class");
     if (key === "stats") return statsAssigned();
     if (key === "background") return ERAS.every((e) => W.bg[e] && (W.bg[e].skills || []).length === 2);
     if (key === "combat") return W.combat.type === "weapon" ? !!W.combat.weapon : (finalStats().int >= 4 && !!W.combat.spell);
@@ -1811,6 +1914,23 @@
       render();
     },
     setClass(v) { W.class = v; render(); },
+    // Race/Class stat split: move one point onto/off stat k (kept within 0..N, total ≤ N).
+    setStatSplit(src, i, k, delta) {
+      const x = statChoiceGrants(src).find((g) => g.i === i); if (!x || x.sg.kind !== "split") return;
+      const C = W.statSplits || (W.statSplits = {});
+      const cur = Object.assign({}, statChoiceOf(x.key, x.sg)), n = Math.abs(x.sg.amt);
+      const tot = x.sg.stats.reduce((t, s) => t + (parseInt(cur[s], 10) || 0), 0);
+      const v = (parseInt(cur[k], 10) || 0) + delta;
+      if (v < 0 || v > n || (delta > 0 && tot >= n)) return;
+      cur[k] = v; C[x.key] = cur;
+      render();
+    },
+    setStatPick(src, i, k) {
+      const x = statChoiceGrants(src).find((g) => g.i === i); if (!x || x.sg.kind !== "pick") return;
+      const C = W.statSplits || (W.statSplits = {});
+      if (k && x.sg.stats.indexOf(k) >= 0) C[x.key] = k; else delete C[x.key];
+      render();
+    },
     // Race/Class choice grant pick: src "race"|"class", i = grant index, j = pick index.
     setGrantChoice(src, i, j, value) {
       const x = grantList().find((g) => g.src === src && g.i === i); if (!x) return;

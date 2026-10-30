@@ -36,7 +36,7 @@ export function dccKinds(n: DccNames): BadgeKind[] {
     { k: "allstats", label: "All Stats", color: "blue", amount: true, tip: "+N to every Stat", format: fmt },
     { k: "skill", label: "Skill", color: "green", amount: true, amountPh: "ranks", target: "list", list: n.skills, targetPh: "Skill name…", tip: "+N ranks in a Skill (added if the crawler doesn't have it)", format: fmt },
     { k: "skillFloor", label: "Skill = Floor", color: "green", target: "list", list: n.skills, targetPh: "Skill name…", tip: "A Passive Skill whose Rank equals the Floor Number", format: fmt },
-    { k: "spell", label: "Spell", color: "purple", amount: true, optAmount: true, amountPh: "Rank", target: "list", list: n.spells, targetPh: "Spell name…", tip: "An Inherent Spell while worn (no Mana); a scroll or tome holds it. Rank optional.", format: fmt },
+    { k: "spell", label: "Spell", color: "purple", amount: true, optAmount: true, amountPh: "Rank", target: "list", list: n.spells, targetPh: "Spell name…", tip: "Grants access to a Spell while worn (casting costs its Mana); a scroll casts it once free, a tome teaches it. Rank optional.", format: fmt },
     { k: "buff", label: "Buff", color: "teal", target: "list", list: n.buffs, targetPh: "Buff name…", tip: "A Buff while the item is worn", format: fmt },
     { k: "dr", label: "DR", color: "gold", amount: true, tip: "+N Damage Resistance", format: fmt },
     { k: "evade", label: "Evade", color: "gold", amount: true, tip: "+N Evade", format: fmt },
