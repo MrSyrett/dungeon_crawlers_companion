@@ -114,11 +114,12 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   // caller wants, but membership is decided by the column, not a full scan.
   const docs = await prisma.document.findMany({
     where: memberWhere,
-    select: { id: true, title: true, updatedAt: true, data: true, tool: true, userId: true },
+    select: { id: true, title: true, updatedAt: true, data: true, tool: true },
     orderBy: { updatedAt: "desc" },
   });
-  // The GM (campaign owner) may open and edit every linked sheet; a player only
-  // their own. Mirrors docAccess() in lib/campaign-member.ts, without a query per row.
+  // Only the GM (campaign owner) gets an open-and-edit link to the party's sheets
+  // (docAccess in lib/campaign-member.ts). Players just see the party listed —
+  // they open their own sheet from their own pages, never from here.
   const isGm = campaign.ownerId === user.id;
 
   const characters = [];
@@ -161,7 +162,7 @@ export async function GET(req: NextRequest, ctx: Ctx) {
       updatedAt: doc.updatedAt,
       system: TOOLS[doc.tool as keyof typeof TOOLS]?.system ?? "SD",
       tool: doc.tool,
-      canEdit: isGm || doc.userId === user.id,
+      canEdit: isGm,
       sheet,
     });
   }

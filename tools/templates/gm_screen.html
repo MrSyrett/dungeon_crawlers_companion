@@ -21621,7 +21621,7 @@ function init_party(root) {
     // Re-syncing or re-importing the same character replaces the old copy
     const i = chars.findIndex(x => x.sheet.name.toLowerCase() === c.name.toLowerCase());
     // A synced sheet carries its document (docId + tool) and whether we may edit it
-    // — the campaign's GM may open any linked sheet, a player only their own.
+    // — true only for the campaign's GM (see pcEditLink).
     const doc = (raw && raw.docId && raw.tool && raw.canEdit) ? { docId: String(raw.docId), tool: String(raw.tool) } : { docId: null, tool: null };
     if(i >= 0) chars[i] = { ...chars[i], ...doc, source, sheet:c };
     else chars.push({ id: nextId++, ...doc, source, sheet: c });
@@ -21637,9 +21637,10 @@ function init_party(root) {
   // Every system builds its own parts; pcShell wraps them in the accent-band card.
   // Viewed two ways: the compact monitor bubble, and this card self-contained in a
   // popup (charPop) — so it carries full detail.
-  // "✎ Sheet" — opens the character's own sheet in a new tab, where the campaign's
-  // GM may edit it (a player sees it only on their own character). Only for synced
-  // sheets the server said we may edit; an imported JSON file has no document.
+  // "✎ Sheet" — opens the character's sheet in a new tab, where the campaign's GM
+  // may edit it. GM only: the server sets canEdit just for the campaign's owner, so
+  // anyone else sees the party listed with no button. An imported JSON file has no
+  // document and gets no button either.
   function pcEditLink(entry) {
     if(!entry || !entry.docId || !/^[\w-]+$/.test(entry.tool || '') || !/^[\w-]+$/.test(entry.docId)) return '';
     return '<a class="pty-edit" href="/tools/' + entry.tool + '/' + entry.docId + '" target="_blank" rel="noopener" title="Open this character\'s sheet in a new tab to view or edit it">✎ Sheet</a>';
