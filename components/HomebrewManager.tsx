@@ -1,10 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { campaignsFor } from "@/lib/homebrew-systems";
+import { useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import { GEAR } from "@/lib/data/gear";
 import { SPELLS } from "@/lib/data/spells";
-import { TALENT_TARGETS } from "@/lib/effects";
+import BonusBadges, { BadgeStrip } from "@/components/hb/BonusBadges";
+import ChipPicker from "@/components/hb/ChipPicker";
+import Preview from "@/components/hb/Preview";
+import Stepper from "@/components/hb/Stepper";
+import MonsterBuilder, { MonsterPreview, blankMonster, monsterFromData, monsterPayload, type MonsterDraft } from "@/components/hb/sd/MonsterBuilder";
+import GearBuilder, { GearPreview, blankGear, gearFromData, gearPayload, type GearDraft } from "@/components/hb/sd/GearBuilder";
+import SpellBuilder, { SpellPreview, blankSpell, spellFromData, spellPayload, type SpellDraft } from "@/components/hb/sd/SpellBuilder";
+import {
+  badgeToEffect, badgesToGearBonuses, effectKinds, effectToBadge, gearBonusKinds, gearBonusStats, gearBonusesToBadges,
+  type Effect,
+} from "@/components/hb/sd/effects";
+
+// Shadowdark's homebrew editor (all six bare types). Monsters, gear and spells
+// are built by the dedicated builders in components/hb/sd/ (each owns its
+// draft shape, legacy→draft parsing and payload); classes, ancestries and
+// backgrounds are built here. Every mechanical effect is a badge (shared kit in
+// components/hb/) over SD's existing, already-automated storage.
 
 // Weapons available to the shared Effect Builder (Weapon Damage Die). Derived
 // from the same gear data everywhere, so every effect builder lists the same
@@ -37,7 +54,7 @@ type HbType =
   | "db-ability" | "db-spell" | "db-weapon" | "db-armor" | "db-gear" | "db-monster" | "db-npc"
   | "pb-weapon" | "pb-armor" | "pb-gear" | "pb-relic" | "pb-ritual" | "pb-monster" | "pb-ship"
   | "mmrpg-power" | "mmrpg-trait" | "mmrpg-tag" | "mmrpg-iconic" | "mmrpg-hq" | "mmrpg-starship";
-type CampaignRef = { id: string; name: string; code: string };
+type CampaignRef = { id: string; name: string; code: string; system?: string | null };
 type HomebrewRecord = {
   id: string;
   type: HbType;
@@ -48,94 +65,21 @@ type HomebrewRecord = {
   owner: boolean;
 };
 
-const BONUS_TARGETS: [string, string][] = [
-  ["ac", "AC"], ["hp", "HP"], ["meleeAtk", "Melee Attack"], ["meleeDmg", "Melee Damage"],
-  ["rangedAtk", "Ranged Attack"], ["rangedDmg", "Ranged Damage"], ["slots", "Gear Slots"],
-  ["str", "Strength"], ["dex", "Dexterity"], ["con", "Constitution"],
-  ["int", "Intelligence"], ["wis", "Wisdom"], ["cha", "Charisma"],
-];
-const GEAR_KINDS: [string, string][] = [
-  ["gear", "Gear"], ["weapon", "Weapon"], ["armor", "Armor"],
-  ["shield", "Shield"], ["magic", "Magic Item"], ["ammo", "Ammo"],
-];
-const TIERS = ["1", "2", "3", "4", "5"];
-const ALIGNMENTS: [string, string][] = [["L", "Lawful"], ["N", "Neutral"], ["C", "Chaotic"]];
-// Stored lowercase to match the book's stat blocks ("near"), shown capitalised.
-const MOVEMENTS: [string, string][] = [["near", "Near"], ["close", "Close"], ["far", "Far"]];
-const ABILITIES: [keyof Form, string][] = [
-  ["mS", "STR"], ["mD", "DEX"], ["mC", "CON"], ["mI", "INT"], ["mW", "WIS"], ["mCh", "CHA"],
-];
-// Mirrors WEAPON_RANGES / SPELL_RANGES in lib/homebrew.ts (kept local so this
-// client component doesn't import the server module).
-const WEAPON_RANGES = ["Close", "Near", "Far", "Close/Near", "Close/Far"];
-const SPELL_RANGES = [
-  "Self", "Touch", "Close", "Near", "Far", "Double near", "1 mile", "Same plane", "Unlimited",
-];
 // Mirrors HD_DICE / CAST_STATS in lib/homebrew.ts (kept local so this client
-// component doesn't import the server module). TALENT_TARGETS is imported from
-// lib/effects, which is dependency-free and safe for a client component.
+// component doesn't import the server module).
 const HD_DICE = ["1d4", "1d6", "1d8", "1d10", "1d12"];
 const CAST_STATS = ["INT", "WIS", "CHA"];
-
-// The Effect Builder groups the granular targets above into simple categories.
-// Combat picks a scope (Melee / Ranged / both) then a kind (Attack / Damage /
-// both); Stat picks one ability or "Player Choice".
-const EFFECT_CATEGORIES: [string, string][] = [
-  ["melee", "Melee"],
-  ["ranged", "Ranged"],
-  ["mr", "Melee & Ranged"],
-  ["ac", "AC"],
-  ["hp", "HP"],
-  ["gearSlots", "Gear Slots"],
-  ["stat", "Stat"],
-  ["spellKnown", "Learn Spell"],
-  ["spellCheck", "Spellcasting Checks"],
-  ["weaponDie", "Weapon Damage Die"],
-  ["advSpell", "Advantage: Cast Spell"],
-  ["featureCharges", "Charges"],
-  ["playerTalent", "Player Choice"],
+// The book's languages (common, then rare). Ancestries may add custom ones.
+const SD_LANGUAGES = [
+  "Common", "Dwarvish", "Elvish", "Giant", "Goblin", "Merran", "Orcish", "Reptilian", "Sylvan", "Thanian",
+  "Celestial", "Diabolic", "Draconic", "Primordial",
 ];
-const COMBAT_KINDS: [string, string][] = [
-  ["atk", "Attack"],
-  ["dmg", "Damage"],
-  ["atkdmg", "Attack and Damage"],
-];
-const COMBAT_MAP: Record<string, Record<string, string>> = {
-  melee: { atk: "meleeAtk", dmg: "meleeDmg", atkdmg: "meleeAtkDmg" },
-  ranged: { atk: "rangedAtk", dmg: "rangedDmg", atkdmg: "rangedAtkDmg" },
-  mr: { atk: "mrAtk", dmg: "mrDmg", atkdmg: "mrAtkDmg" },
-};
-const STAT_OPTIONS: [string, string][] = [
-  ["str", "Strength"],
-  ["dex", "Dexterity"],
-  ["con", "Constitution"],
-  ["int", "Intelligence"],
-  ["wis", "Wisdom"],
-  ["cha", "Charisma"],
-  ["statChoice", "Player Choice"],
-];
-const STAT_KEYS = STAT_OPTIONS.map(([k]) => k);
-// Derive the category and combat-kind for a stored target.
-function targetCategory(t: string): string {
-  if (t === "meleeAtk" || t === "meleeDmg" || t === "meleeAtkDmg") return "melee";
-  if (t === "rangedAtk" || t === "rangedDmg" || t === "rangedAtkDmg") return "ranged";
-  if (t === "mrAtk" || t === "mrDmg" || t === "mrAtkDmg") return "mr";
-  if (STAT_KEYS.includes(t)) return "stat";
-  return t;
-}
-function targetKind(t: string): string {
-  if (t.endsWith("AtkDmg")) return "atkdmg";
-  if (t.endsWith("Dmg")) return "dmg";
-  return "atk";
-}
+const EFFECT_KINDS = effectKinds(EFFECT_SPELLS, ["Player Choice", ...EFFECT_WEAPONS]);
 
 // One roll-band of a class talent table. Rows 1/4/5 are fixed (2 / 10-11 / 12);
 // rows 2 & 3 shift with `talentSplit`. Each row carries up to 2 effects.
-// One mechanical effect: an amount + a target. `weapon` is used only for the
-// "weaponDie" target; `spell` for spell targets (Learn Spell / Advantage: Cast
-// Spell). Shared by class talents, class features, and ancestry traits.
-type Effect = { amount: string; target: string; weapon: string; spell: string; feature: string };
-type TalentEffectRow = Effect; // alias kept for existing talent code
+// One mechanical effect (an amount + a target, see components/hb/sd/effects).
+// Shared by class talents, class features, and ancestry traits.
 type TalentRow = { text: string; effects: Effect[]; choose: boolean };
 
 // A trait/feature: descriptive text plus a list of effects (one Effect Builder).
@@ -163,37 +107,12 @@ type Form = {
   id: string | null; // null while creating
   name: string;
   campaignIds: string[]; // empty = personal
-  // spell
-  tier: string;
-  range: string;
-  duration: string;
-  damage: string;
+  // monster / gear / spell — owned by the builders in components/hb/sd/
+  mon: MonsterDraft;
+  gear: GearDraft;
+  spell: SpellDraft;
+  // background
   desc: string;
-  // gear
-  kind: string;
-  cost: string;
-  costUnit: string;
-  slots: string;
-  qty: string;
-  note: string;
-  wtype: string;
-  ammo: string; // "" = needs no ammo (explicit, outranks the sheet's name guess)
-  acBase: string;
-  acDex: boolean;
-  acBonus: string;
-  props: string;
-  bonuses: BonusRow[];
-  equippable: boolean;
-  // monster
-  ac: string;
-  hp: string;
-  atk: string;
-  mv: string;
-  lv: string;
-  al: string;
-  mS: string; mD: string; mC: string; mI: string; mW: string; mCh: string;
-  notes: string;
-  ctype: string;
   // class
   hd: string;
   weaponsAll: boolean;
@@ -211,46 +130,23 @@ type Form = {
   titlesLawful: string[];
   titlesNeutral: string[];
   titlesChaotic: string[];
-  // ancestry (also reuses `bonuses`)
+  // ancestry
   traits: AncestryTraitRow[];
   languages: string;
+  bonuses: BonusRow[]; // flat ancestry bonuses (older records) — shown as badges
 };
 
 const s = (v: unknown): string => (typeof v === "string" ? v : v == null ? "" : String(v));
 
-function blankForm(type: HbType): Form {
+function blankForm(): Form {
   return {
     id: null,
     name: "",
     campaignIds: [],
-    tier: "1",
-    range: type === "spell" ? "Close" : "",
-    duration: "Instant",
-    damage: "",
+    mon: blankMonster(),
+    gear: blankGear(),
+    spell: blankSpell(),
     desc: "",
-    kind: "gear",
-    cost: "",
-    costUnit: "gp",
-    slots: "",
-    qty: "",
-    note: "",
-    wtype: "M",
-    ammo: "",
-    acBase: "11",
-    acDex: true,
-    acBonus: "2",
-    props: "",
-    bonuses: [],
-    equippable: false,
-    ac: "10",
-    hp: "1",
-    atk: "",
-    mv: "near",
-    lv: "1",
-    al: "N",
-    mS: "+0", mD: "+0", mC: "+0", mI: "+0", mW: "+0", mCh: "+0",
-    notes: "",
-    ctype: "Monster",
     hd: "1d6",
     weaponsAll: false,
     weapons: [],
@@ -269,28 +165,20 @@ function blankForm(type: HbType): Form {
     titlesChaotic: emptyTitles(),
     traits: [],
     languages: "",
+    bonuses: [],
   };
 }
 
 function formFromRecord(rec: HomebrewRecord): Form {
   const d = rec.data || {};
-  const base = blankForm(rec.type);
+  const base = blankForm();
   base.id = rec.id;
   base.name = rec.name;
   base.campaignIds = rec.campaignIds ?? [];
   if (rec.type === "monster") {
-    base.ac = s(d.ac); base.hp = s(d.hp); base.atk = s(d.atk);
-    base.mv = s(d.mv); base.lv = s(d.lv); base.al = s(d.al) || "N";
-    base.mS = s(d.s); base.mD = s(d.d); base.mC = s(d.c);
-    base.mI = s(d.i); base.mW = s(d.w); base.mCh = s(d.ch);
-    base.notes = s(d.notes);
-    base.ctype = s(d.ctype) || "Monster";
+    base.mon = monsterFromData(d);
   } else if (rec.type === "spell") {
-    base.tier = s(d.tier) || "1";
-    base.range = s(d.range);
-    base.duration = s(d.duration);
-    base.damage = s(d.damage);
-    base.desc = s(d.desc);
+    base.spell = spellFromData(d);
   } else if (rec.type === "class") {
     base.hd = s(d.hd) || "1d6";
     base.weaponsAll = !!d.weaponsAll;
@@ -349,47 +237,14 @@ function formFromRecord(rec: HomebrewRecord): Form {
   } else if (rec.type === "background") {
     base.desc = s(d.desc);
   } else {
-    base.kind = s(d.kind) || "gear";
-    const unit = ["gp", "sp", "cp"].find((u) => d[u] != null) || "gp";
-    base.costUnit = unit;
-    base.cost = d[unit] != null ? s(d[unit]) : "";
-    base.slots = s(d.slots);
-    base.qty = s(d.qty);
-    base.note = s(d.note);
-    base.wtype = s(d.wtype) || "M";
-    base.ammo = s(d.ammo);
-    base.range = s(d.range);
-    base.damage = s(d.damage);
-    base.props = s(d.props);
-    base.acBase = d.acBase != null ? s(d.acBase) : "11";
-    base.acDex = !!d.acDex;
-    base.acBonus = d.acBonus != null ? s(d.acBonus) : "2";
-    base.bonuses = Array.isArray(d.bonuses)
-      ? (d.bonuses as Record<string, unknown>[]).map((b) => ({ amount: s(b.amount), target: s(b.target) }))
-      : [];
-    base.equippable = !!d.equippable;
+    base.gear = gearFromData(d);
   }
   return base;
 }
 
 function payloadFromForm(type: HbType, f: Form): Record<string, unknown> {
-  if (type === "monster") {
-    return {
-      name: f.name, ac: f.ac, hp: f.hp, atk: f.atk, mv: f.mv, lv: f.lv, al: f.al,
-      s: f.mS, d: f.mD, c: f.mC, i: f.mI, w: f.mW, ch: f.mCh,
-      notes: f.notes, ctype: f.ctype,
-    };
-  }
-  if (type === "spell") {
-    return {
-      name: f.name,
-      tier: f.tier,
-      range: f.range,
-      duration: f.duration,
-      damage: f.damage,
-      desc: f.desc,
-    };
-  }
+  if (type === "monster") return monsterPayload(f.name, f.mon);
+  if (type === "spell") return spellPayload(f.name, f.spell);
   if (type === "class") {
     const mapEffects = (effects: Effect[]) =>
       effects
@@ -449,25 +304,7 @@ function payloadFromForm(type: HbType, f: Form): Record<string, unknown> {
   if (type === "background") {
     return { name: f.name, desc: f.desc };
   }
-  return {
-    name: f.name,
-    kind: f.kind,
-    cost: f.cost,
-    costUnit: f.costUnit,
-    slots: f.slots,
-    qty: f.qty,
-    note: f.note,
-    wtype: f.wtype,
-    ammo: f.ammo,
-    range: f.range,
-    damage: f.damage,
-    props: f.props,
-    acBase: f.acBase,
-    acDex: f.acDex,
-    acBonus: f.acBonus,
-    bonuses: f.bonuses,
-    equippable: f.equippable,
-  };
+  return gearPayload(f.name, f.gear);
 }
 
 // `fieldBase` carries no width, so callers can set their own without fighting
@@ -482,9 +319,12 @@ const btn =
 const btnGold =
   "rounded border border-[var(--gold)] bg-[var(--panel-2)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[var(--on-accent)] disabled:opacity-50";
 
+// Shadowdark's accent drives the shared builder kit (components/hb/*).
+const ACCENT = { "--hb-accent": "var(--gold)" } as CSSProperties;
+
 export default function HomebrewManager({
   type,
-  campaigns,
+  campaigns: allCampaigns,
   initial,
   ammoOptions = [],
   monsterTypes = [],
@@ -506,6 +346,8 @@ export default function HomebrewManager({
   /** Spell lists a homebrew caster class can draw from. */
   spellListOptions?: string[];
 }) {
+  // Share only with campaigns running this system (the API enforces it too).
+  const campaigns = campaignsFor(type, allCampaigns);
   const router = useRouter();
   const [items, setItems] = useState<HomebrewRecord[]>(initial);
   const [open, setOpen] = useState(false);
@@ -543,9 +385,6 @@ export default function HomebrewManager({
   const setTitle = (field: "titlesLawful" | "titlesNeutral" | "titlesChaotic", i: number, v: string) =>
     setForm((f) => (f ? { ...f, [field]: f[field].map((x, j) => (j === i ? v : x)) } : f));
 
-  // Shared Effect Builder — one amount + target row (plus a weapon picker when
-  // the target is Weapon Damage Die). Used by class features, class talents,
-  // and ancestry traits so authoring is identical everywhere.
   // Shared "choose one" toggle — identical across features, talents, and traits.
   function chooseToggle(checked: boolean, onToggle: () => void) {
     return (
@@ -556,120 +395,19 @@ export default function HomebrewManager({
     );
   }
 
+  // Shared effect badges — class features, class talents and ancestry traits
+  // all author the same HbEffect rows (lib/effects vocabulary) through the
+  // badge strip, so the stored shape the wizard applies is unchanged.
   function effectsEditor(effects: Effect[], setEffects: (next: Effect[]) => void, max = 6) {
-    const patch = (k: number, p: Partial<Effect>) => setEffects(effects.map((e, m) => (m === k ? { ...e, ...p } : e)));
-    const isSpell = (t: string) => t === "spellKnown" || t === "advSpell";
-    const noAmount = (t: string) => isSpell(t) || t === "playerTalent";
-    // Changing the top-level category recomputes the stored target.
-    const changeCategory = (k: number, cat: string, cur: string) => {
-      if (cat === "melee" || cat === "ranged" || cat === "mr") {
-        patch(k, { target: COMBAT_MAP[cat][targetKind(cur)] || COMBAT_MAP[cat].atk });
-      } else if (cat === "stat") {
-        patch(k, { target: STAT_KEYS.includes(cur) ? cur : "str" });
-      } else {
-        patch(k, { target: cat });
-      }
-    };
     return (
-      <div className="flex flex-col gap-2">
-        {effects.map((e, k) => {
-          const cat = targetCategory(e.target);
-          const isCombat = cat === "melee" || cat === "ranged" || cat === "mr";
-          return (
-            <div key={k} className="flex flex-wrap gap-2">
-              {noAmount(e.target) ? null : (
-                <input
-                  className={`${fieldBase} w-16 shrink-0`}
-                  type="number"
-                  value={e.amount}
-                  placeholder={e.target === "perDay" ? "/day" : e.target === "weaponDie" ? "die" : "+1"}
-                  onChange={(ev) => patch(k, { amount: ev.target.value })}
-                />
-              )}
-              <select
-                className={`${fieldBase} min-w-0 flex-1`}
-                value={cat}
-                onChange={(ev) => changeCategory(k, ev.target.value, e.target)}
-              >
-                {EFFECT_CATEGORIES.map(([key, lbl]) => (
-                  <option key={key} value={key}>{lbl}</option>
-                ))}
-              </select>
-              {isCombat ? (
-                <select
-                  className={`${fieldBase} min-w-0 flex-1`}
-                  value={targetKind(e.target)}
-                  onChange={(ev) => patch(k, { target: COMBAT_MAP[cat][ev.target.value] })}
-                >
-                  {COMBAT_KINDS.map(([key, lbl]) => (
-                    <option key={key} value={key}>{lbl}</option>
-                  ))}
-                </select>
-              ) : null}
-              {cat === "stat" ? (
-                <select
-                  className={`${fieldBase} min-w-0 flex-1`}
-                  value={e.target}
-                  onChange={(ev) => patch(k, { target: ev.target.value })}
-                >
-                  {STAT_OPTIONS.map(([key, lbl]) => (
-                    <option key={key} value={key}>{lbl}</option>
-                  ))}
-                </select>
-              ) : null}
-              {e.target === "weaponDie" ? (
-                <select
-                  className={`${fieldBase} min-w-0 flex-1`}
-                  value={e.weapon}
-                  onChange={(ev) => patch(k, { weapon: ev.target.value })}
-                >
-                  <option value="">Player Choice</option>
-                  <option value="Strikes">Strikes (unarmed)</option>
-                  {EFFECT_WEAPONS.map((w) => (
-                    <option key={w} value={w}>{w}</option>
-                  ))}
-                </select>
-              ) : null}
-              {isSpell(e.target) ? (
-                <>
-                  <input
-                    className={`${fieldBase} min-w-0 flex-1`}
-                    list="hb-spell-list"
-                    value={e.spell}
-                    placeholder="Spell name, or Player Choice"
-                    onChange={(ev) => patch(k, { spell: ev.target.value })}
-                  />
-                  <datalist id="hb-spell-list">
-                    <option value="Player Choice" />
-                    {EFFECT_SPELLS.map((sp) => (
-                      <option key={sp} value={sp} />
-                    ))}
-                  </datalist>
-                </>
-              ) : null}
-              {e.target === "featureCharges" ? (
-                <input
-                  className={`${fieldBase} min-w-0 flex-1`}
-                  value={e.feature}
-                  placeholder="Feature name (blank = this feature)"
-                  onChange={(ev) => patch(k, { feature: ev.target.value })}
-                />
-              ) : null}
-              <button className={`${btn} shrink-0`} onClick={() => setEffects(effects.filter((_, m) => m !== k))}>
-                ✕
-              </button>
-            </div>
-          );
-        })}
-        {effects.length < max ? (
-          <button
-            className={`${btn} self-start`}
-            onClick={() => setEffects([...effects, { amount: "", target: TALENT_TARGETS[0][0], weapon: "", spell: "", feature: "" }])}
-          >
-            + Add effect
-          </button>
-        ) : null}
-      </div>
+      <BonusBadges
+        value={effects.map(effectToBadge)}
+        kinds={EFFECT_KINDS}
+        max={max}
+        addLabel="+ Effect"
+        empty="No mechanical effect (flavour only)"
+        onChange={(v) => setEffects(v.map(badgeToEffect))}
+      />
     );
   }
 
@@ -694,57 +432,21 @@ export default function HomebrewManager({
     );
   }
 
-  // Shared bonus editor — used by gear (applied when equipped) and ancestry
-  // (applied at creation). Both validate against the same BONUS_TARGETS.
-  function bonusEditor(labelText: string) {
-    if (!form) return null;
+  // Flat ancestry bonuses (applied at creation). Older records carry these;
+  // new ancestries put bonuses on their traits instead, so the strip only
+  // shows when a record already has some.
+  function ancestryBonusEditor() {
+    if (!form || !form.bonuses.length) return null;
     return (
       <div className="sm:col-span-2">
-        <label className={label}>{labelText}</label>
-        <div className="flex flex-col gap-2">
-          {form.bonuses.map((b, i) => (
-            <div key={i} className="flex gap-2">
-              <input
-                className={`${fieldBase} w-16 shrink-0`}
-                type="number"
-                value={b.amount}
-                placeholder="+1"
-                onChange={(e) =>
-                  set(
-                    "bonuses",
-                    form.bonuses.map((x, j) => (j === i ? { ...x, amount: e.target.value } : x)),
-                  )
-                }
-              />
-              <select
-                className={`${fieldBase} min-w-0 flex-1`}
-                value={b.target}
-                onChange={(e) =>
-                  set(
-                    "bonuses",
-                    form.bonuses.map((x, j) => (j === i ? { ...x, target: e.target.value } : x)),
-                  )
-                }
-              >
-                {BONUS_TARGETS.map(([k, l]) => (
-                  <option key={k} value={k}>{l}</option>
-                ))}
-              </select>
-              <button
-                className={`${btn} shrink-0`}
-                onClick={() => set("bonuses", form.bonuses.filter((_, j) => j !== i))}
-              >
-                ✕
-              </button>
-            </div>
-          ))}
-        </div>
-        <button
-          className={`${btn} mt-2`}
-          onClick={() => set("bonuses", [...form.bonuses, { amount: "", target: "ac" }])}
-        >
-          + Add bonus
-        </button>
+        <label className={label}>Ancestry bonuses (applied at creation)</label>
+        <BonusBadges
+          value={gearBonusesToBadges(form.bonuses)}
+          kinds={gearBonusKinds}
+          stats={gearBonusStats}
+          max={12}
+          onChange={(v) => set("bonuses", badgesToGearBonuses(v).map((b) => ({ amount: String(b.amount), target: b.target })))}
+        />
       </div>
     );
   }
@@ -759,8 +461,8 @@ export default function HomebrewManager({
       <div className="sm:col-span-2">
         <label className={label}>{labelText}</label>
         <p className="mb-2 text-[11px] text-[var(--muted)]">
-          Describe the ability, then add effects — use <b>Per Day (uses)</b> for limited-use abilities
-          (Rage, Luck); leave effects empty for passive flavor.
+          Describe the ability, then add effect badges — use <b>Uses / Day</b> for limited-use abilities
+          (Rage, Luck); leave it without badges for passive flavor.
         </p>
         <div className="flex flex-col gap-2">
           {rows.map((r, i) => (
@@ -800,8 +502,8 @@ export default function HomebrewManager({
       <div className="sm:col-span-2">
         <label className={label}>Traits</label>
         <p className="mb-2 text-[11px] text-[var(--muted)]">
-          Describe the trait, then add effects — bonuses (attack, AC, HP, stats…) apply at character
-          creation; use <b>Per Day (uses)</b> for limited-use traits. Tick <b>Choose one</b> to make
+          Describe the trait, then add effect badges — bonuses (attack, AC, HP, stats…) apply at character
+          creation; use <b>Uses / Day</b> for limited-use traits. Tick <b>Choose one</b> to make
           the player pick a single effect at creation (Elf Farsight style).
         </p>
         <div className="flex flex-col gap-2">
@@ -924,8 +626,10 @@ export default function HomebrewManager({
     }
   }
 
+  const preview = form ? <SdPreview type={type} f={form} /> : null;
+
   return (
-    <div className="mb-6 rounded-lg border border-[var(--border)] bg-[var(--panel)]">
+    <div className="mb-6 rounded-lg border border-[var(--border)] bg-[var(--panel)]" style={ACCENT}>
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-center justify-between px-4 py-3 text-left"
@@ -979,7 +683,8 @@ export default function HomebrewManager({
           )}
 
           {form ? (
-            <div className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-4">
+            <div className="grid gap-4 rounded border border-[var(--border)] bg-[var(--panel-2)] p-4 lg:grid-cols-[minmax(0,1fr)_300px]">
+              <div className="min-w-0">
               <div className="grid gap-3 sm:grid-cols-2">
                 {type === "class" ? (
                   <div className="sm:col-span-2 flex gap-3">
@@ -1011,130 +716,22 @@ export default function HomebrewManager({
                       placeholder={
                         type === "spell"
                           ? "Spell name"
-                          : type === "ancestry"
-                            ? "Ancestry name"
-                            : type === "background"
-                              ? "Background name"
-                              : "Item name"
+                          : type === "monster"
+                            ? "Monster name"
+                            : type === "ancestry"
+                              ? "Ancestry name"
+                              : type === "background"
+                                ? "Background name"
+                                : "Item name"
                       }
                     />
                   </div>
                 )}
 
                 {type === "monster" ? (
-                  <>
-                    <div>
-                      <label className={label}>Creature type</label>
-                      <select className={field} value={form.ctype} onChange={(e) => set("ctype", e.target.value)}>
-                        {(monsterTypes.length ? monsterTypes : ["Monster"]).map((t) => (
-                          <option key={t} value={t}>{t}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className={label}>Level</label>
-                      <input className={field} value={form.lv} onChange={(e) => set("lv", e.target.value)} placeholder="1" />
-                    </div>
-                    <div>
-                      <label className={label}>AC</label>
-                      <input className={field} value={form.ac} onChange={(e) => set("ac", e.target.value)} placeholder="12" />
-                    </div>
-                    <div>
-                      <label className={label}>HP</label>
-                      <input className={field} value={form.hp} onChange={(e) => set("hp", e.target.value)} placeholder="8" />
-                    </div>
-                    <div>
-                      <label className={label}>Movement</label>
-                      <select className={field} value={form.mv} onChange={(e) => set("mv", e.target.value)}>
-                        {MOVEMENTS.map(([v, l]) => (
-                          <option key={v} value={v}>{l}</option>
-                        ))}
-                        {form.mv && !MOVEMENTS.some(([v]) => v === form.mv) ? (
-                          <option value={form.mv}>{form.mv}</option>
-                        ) : null}
-                      </select>
-                    </div>
-                    <div>
-                      <label className={label}>Alignment</label>
-                      <select className={field} value={form.al} onChange={(e) => set("al", e.target.value)}>
-                        {ALIGNMENTS.map(([k, l]) => (
-                          <option key={k} value={k}>{l}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className={label}>Attacks</label>
-                      <input
-                        className={field}
-                        value={form.atk}
-                        onChange={(e) => set("atk", e.target.value)}
-                        placeholder="1 claw +2 (1d6) or 1 bite +1 (1d8)"
-                      />
-                      <p className="mt-1 text-[11px] text-[var(--muted)]">
-                        Written like the book — the GM screen turns each “+bonus (dice)” into a roll button.
-                      </p>
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className={label}>Ability modifiers</label>
-                      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-                        {ABILITIES.map(([key, lbl]) => (
-                          <div key={String(key)}>
-                            <div className="mb-1 text-center text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--muted)]">{lbl}</div>
-                            <input
-                              className={`${field} text-center`}
-                              value={String(form[key])}
-                              onChange={(e) => set(key, e.target.value as never)}
-                              placeholder="+0"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className={label}>Traits</label>
-                      <textarea
-                        className={field}
-                        rows={3}
-                        value={form.notes}
-                        onChange={(e) => set("notes", e.target.value)}
-                        placeholder="Fire Breath: Fills a near cube. DC 15 DEX or 4d6 damage."
-                      />
-                      <p className="mt-1 text-[11px] text-[var(--muted)]">
-                        Use “Name: description.” for each trait. Any dice become roll buttons in the tracker.
-                      </p>
-                    </div>
-                  </>
+                  <MonsterBuilder value={form.mon} monsterTypes={monsterTypes} onChange={(v) => set("mon", v)} />
                 ) : type === "spell" ? (
-                  <>
-                    <div>
-                      <label className={label}>Tier</label>
-                      <select className={field} value={form.tier} onChange={(e) => set("tier", e.target.value)}>
-                        {TIERS.map((t) => (
-                          <option key={t} value={t}>{t}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className={label}>Range</label>
-                      <select className={field} value={form.range} onChange={(e) => set("range", e.target.value)}>
-                        {SPELL_RANGES.map((r) => (
-                          <option key={r} value={r}>{r}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className={label}>Duration</label>
-                      <input className={field} value={form.duration} onChange={(e) => set("duration", e.target.value)} placeholder="Instant / Focus / 5 rounds" />
-                    </div>
-                    <div>
-                      <label className={label}>Damage / Healing (optional)</label>
-                      <input className={field} value={form.damage} onChange={(e) => set("damage", e.target.value)} placeholder="e.g. 1d6" />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className={label}>Description</label>
-                      <textarea className={field} rows={3} value={form.desc} onChange={(e) => set("desc", e.target.value)} />
-                    </div>
-                  </>
+                  <SpellBuilder value={form.spell} onChange={(v) => set("spell", v)} />
                 ) : type === "class" ? (
                   <>
                     {allowEditor("weapons", "weaponsAll", "Weapons", weaponOptions)}
@@ -1172,7 +769,7 @@ export default function HomebrewManager({
                         </div>
                         <div>
                           <label className={label}>Spells known (tier 1)</label>
-                          <input className={field} type="number" value={form.castKnown} onChange={(e) => set("castKnown", e.target.value)} placeholder="2" />
+                          <Stepper value={parseInt(form.castKnown, 10) || 0} min={0} max={10} ariaLabel="spells known" onChange={(v) => set("castKnown", String(v ?? 2))} />
                         </div>
                         <div className="sm:col-span-2">
                           <p className="text-[11px] text-[var(--muted)]">Spellcasting DC is 10 + the spell’s tier.</p>
@@ -1194,7 +791,7 @@ export default function HomebrewManager({
                         </select>
                       </div>
                       <p className="mb-2 text-[11px] text-[var(--muted)]">
-                        Each roll band can carry up to four effects — the amount, then what it boosts.
+                        Each roll band can carry up to four effect badges.
                         Add a note for anything that isn’t a simple bonus.
                       </p>
                       <div className="flex flex-col gap-2">
@@ -1268,14 +865,16 @@ export default function HomebrewManager({
                   <>
                     <div className="sm:col-span-2">
                       <label className={label}>Languages</label>
-                      <input
-                        className={field}
-                        value={form.languages}
-                        onChange={(e) => set("languages", e.target.value)}
-                        placeholder="Common, Sylvan"
+                      <ChipPicker
+                        options={SD_LANGUAGES}
+                        value={form.languages.split(",").map((x) => x.trim()).filter(Boolean)}
+                        custom
+                        customPh="Other (e.g. +1 common language)"
+                        onChange={(v) => set("languages", v.join(", "))}
                       />
                     </div>
                     {ancestryTraitEditor()}
+                    {ancestryBonusEditor()}
                   </>
                 ) : type === "background" ? (
                   <>
@@ -1291,115 +890,7 @@ export default function HomebrewManager({
                     </div>
                   </>
                 ) : (
-                  <>
-                    <div>
-                      <label className={label}>Kind</label>
-                      <select className={field} value={form.kind} onChange={(e) => set("kind", e.target.value)}>
-                        {GEAR_KINDS.map(([k, l]) => (
-                          <option key={k} value={k}>{l}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="flex gap-2">
-                      <div className="flex-1">
-                        <label className={label}>Cost</label>
-                        <input className={field} type="number" value={form.cost} onChange={(e) => set("cost", e.target.value)} placeholder="0" />
-                      </div>
-                      <div className="w-20">
-                        <label className={label}>Unit</label>
-                        <select className={field} value={form.costUnit} onChange={(e) => set("costUnit", e.target.value)}>
-                          <option value="gp">gp</option>
-                          <option value="sp">sp</option>
-                          <option value="cp">cp</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div>
-                      <label className={label}>Gear slots</label>
-                      <input className={field} value={form.slots} onChange={(e) => set("slots", e.target.value)} placeholder="1" />
-                    </div>
-                    <div>
-                      <label className={label}>Quantity per slot (optional)</label>
-                      <input className={field} value={form.qty} onChange={(e) => set("qty", e.target.value)} placeholder="e.g. 20" />
-                    </div>
-
-                    {form.kind === "weapon" ? (
-                      <>
-                        <div>
-                          <label className={label}>Weapon type</label>
-                          <select className={field} value={form.wtype} onChange={(e) => set("wtype", e.target.value)}>
-                            <option value="M">Melee</option>
-                            <option value="R">Ranged</option>
-                            <option value="M/R">Melee / Ranged</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className={label}>Range</label>
-                          <select className={field} value={form.range} onChange={(e) => set("range", e.target.value)}>
-                            {WEAPON_RANGES.map((r) => (
-                              <option key={r} value={r}>{r}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className={label}>Requires ammo</label>
-                          <select className={field} value={form.ammo} onChange={(e) => set("ammo", e.target.value)}>
-                            <option value="">— None —</option>
-                            {ammoOptions.map((a) => (
-                              <option key={a} value={a}>{a}</option>
-                            ))}
-                            {form.ammo && !ammoOptions.includes(form.ammo) ? (
-                              <option value={form.ammo}>{form.ammo} (missing)</option>
-                            ) : null}
-                          </select>
-                        </div>
-                        <div>
-                          <label className={label}>Damage</label>
-                          <input className={field} value={form.damage} onChange={(e) => set("damage", e.target.value)} placeholder="1d6" />
-                        </div>
-                        <div>
-                          <label className={label}>Properties</label>
-                          <input className={field} value={form.props} onChange={(e) => set("props", e.target.value)} placeholder="Finesse, Thrown" />
-                        </div>
-                      </>
-                    ) : null}
-
-                    {form.kind === "armor" ? (
-                      <>
-                        <div>
-                          <label className={label}>Base AC</label>
-                          <input className={field} type="number" value={form.acBase} onChange={(e) => set("acBase", e.target.value)} placeholder="11" />
-                        </div>
-                        <div className="flex items-end pb-2">
-                          <label className="flex items-center gap-2 text-sm text-[var(--text)]">
-                            <input type="checkbox" checked={form.acDex} onChange={(e) => set("acDex", e.target.checked)} />
-                            Adds DEX modifier
-                          </label>
-                        </div>
-                      </>
-                    ) : null}
-
-                    {form.kind === "shield" ? (
-                      <div>
-                        <label className={label}>AC bonus</label>
-                        <input className={field} type="number" value={form.acBonus} onChange={(e) => set("acBonus", e.target.value)} placeholder="2" />
-                      </div>
-                    ) : null}
-
-                    <div className="sm:col-span-2">
-                      <label className={label}>Description</label>
-                      <textarea className={field} rows={2} value={form.note} onChange={(e) => set("note", e.target.value)} />
-                    </div>
-
-                    {/* Bonuses + equippable — same system the sheet applies when the item is equipped */}
-                    {bonusEditor("Bonuses (applied when equipped)")}
-                    <div className="sm:col-span-2">
-                      <label className="flex items-center gap-2 text-sm text-[var(--text)]">
-                        <input type="checkbox" checked={form.equippable} onChange={(e) => set("equippable", e.target.checked)} />
-                        Equippable (shows an equip checkbox in the gear list)
-                      </label>
-                    </div>
-                  </>
+                  <GearBuilder value={form.gear} ammoOptions={ammoOptions} onChange={(v) => set("gear", v)} />
                 )}
 
                 <div className="sm:col-span-2">
@@ -1442,9 +933,11 @@ export default function HomebrewManager({
                   Cancel
                 </button>
               </div>
+              </div>
+              <div className="lg:sticky lg:top-4 lg:self-start">{preview}</div>
             </div>
           ) : (
-            <button className={btnGold} onClick={() => setForm(blankForm(type))} disabled={busy}>
+            <button className={btnGold} onClick={() => setForm(blankForm())} disabled={busy}>
               + Add homebrew {noun}
             </button>
           )}
@@ -1453,5 +946,60 @@ export default function HomebrewManager({
         </div>
       ) : null}
     </div>
+  );
+}
+
+// ── Live previews (classes / ancestries / backgrounds here; the rest live
+// beside their builders in components/hb/sd/) ────────────────────────────────
+function SdPreview({ type, f }: { type: HbType; f: Form }) {
+  if (type === "monster") return <MonsterPreview name={f.name} m={f.mon} />;
+  if (type === "spell") return <SpellPreview name={f.name} s={f.spell} />;
+  if (type === "gear") return <GearPreview name={f.name} g={f.gear} />;
+  const fx = (effects: Effect[]) =>
+    effects.length ? <BadgeStrip value={effects.map(effectToBadge)} kinds={EFFECT_KINDS} /> : null;
+  if (type === "class") {
+    const allow = (all: boolean, list: string[]) => (all ? "All" : list.length ? list.join(", ") : "None");
+    return (
+      <Preview title={f.name || "Unnamed class"} subtitle={`Hit die ${f.hd}`}>
+        <p className="text-[13px]"><b className="text-[var(--hb-accent)]">Weapons:</b> {allow(f.weaponsAll, f.weapons)}</p>
+        <p className="text-[13px]"><b className="text-[var(--hb-accent)]">Armor:</b> {allow(f.armorAll, f.armor)}</p>
+        {f.isCaster ? (
+          <p className="text-[13px]"><b className="text-[var(--hb-accent)]">Spellcasting:</b> {f.castStat}, {f.castList} list, {f.castKnown} tier-1 known</p>
+        ) : null}
+        {f.features.filter((r) => r.text.trim()).map((r, i) => (
+          <div key={i} className="mt-1.5 text-[13px]">
+            {r.text}
+            {r.choose ? <span className="ml-1 text-[11px] text-[var(--muted)]">(choose one)</span> : null}
+            {fx(r.effects)}
+          </div>
+        ))}
+        <div className="mt-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Talents (2d6)</div>
+        {f.talents.map((t, i) => (
+          <div key={i} className="flex gap-2 text-[12px]">
+            <span className="w-10 shrink-0 font-bold text-[var(--hb-accent)]">{talentRollLabel(i, f.talentSplit)}</span>
+            <span className="min-w-0">{t.text || (t.effects.length ? null : "—")}{fx(t.effects)}</span>
+          </div>
+        ))}
+      </Preview>
+    );
+  }
+  if (type === "ancestry") {
+    return (
+      <Preview title={f.name || "Unnamed ancestry"} subtitle={f.languages ? `Languages: ${f.languages}` : undefined}>
+        {f.traits.filter((r) => r.text.trim()).map((r, i) => (
+          <div key={i} className="mt-1.5 text-[13px]">
+            {r.text}
+            {r.choose ? <span className="ml-1 text-[11px] text-[var(--muted)]">(choose one)</span> : null}
+            {fx(r.effects)}
+          </div>
+        ))}
+        {f.bonuses.length ? <BadgeStrip value={gearBonusesToBadges(f.bonuses)} kinds={gearBonusKinds} stats={gearBonusStats} /> : null}
+      </Preview>
+    );
+  }
+  return (
+    <Preview title={f.name || "Unnamed background"}>
+      <p className="text-[13px] leading-relaxed">{f.desc || "—"}</p>
+    </Preview>
   );
 }

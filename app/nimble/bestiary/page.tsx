@@ -33,6 +33,7 @@ function hbToMonster(data: Record<string, unknown>, name: string): MonRow {
     abilities,
     size: s("size") || undefined,
     saves: s("saves") || undefined,
+    speed: typeof data.speed === "number" ? data.speed : undefined,
     familyTrait: s("familyTrait") || undefined,
     description: s("description") || undefined,
     page: 0,
@@ -50,7 +51,7 @@ function HeadRow({ m, link }: { m: MonRow; link?: boolean }) {
         ? <a href={withParams(BASE, {}, { m: m.name })} className={`${nameCls} hover:underline`}>{m.name}</a>
         : <h2 className={nameCls}>{m.name}</h2>}
       <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">Lvl {m.level}{m.legendary ? " Solo" : ""}{m.size ? ` · ${m.size}` : ""}</span>
-      <span className="font-mono text-[12px] text-[var(--text)]">{m.minion ? "minion" : `${m.hp ?? "—"} HP`}{m.armor ? ` · ${m.armor}` : ""}{m.saves ? ` · ${m.saves}` : ""}</span>
+      <span className="font-mono text-[12px] text-[var(--text)]">{m.minion ? "minion" : `${m.hp ?? "—"} HP`}{m.armor ? ` · ${m.armor}` : ""}{m.speed != null ? ` · Speed ${m.speed}` : ""}{m.saves ? ` · ${m.saves}` : ""}</span>
       {m.homebrew ? <span className={hbBadge}>Homebrew</span> : <span className={badge}>{m.family} · p.{m.page}</span>}
     </div>
   );

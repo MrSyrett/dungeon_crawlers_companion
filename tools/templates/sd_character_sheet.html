@@ -6239,7 +6239,9 @@ function spellShopRender() {
     : s.caster==='Sorcerer' ? _spellShopSor
     : s.caster==='Necromancer' ? _spellShopNec
     : s.caster==='Seer' ? _spellShopSee
-    : s.caster==='Homebrew' ? _spellShopHb
+    // A homebrew spell may also name class lists (lists: ['Wizard', …]) —
+    // it then shows under those caster filters as well as Homebrew.
+    : s.caster==='Homebrew' ? (_spellShopHb || (Array.isArray(s.lists) && s.lists.some(l => casterOk({ caster: l }))))
     : true;
   const spells = allSpells().filter(s=>s.tier===_spellShopTier && casterOk(s)).sort((a,b)=>a.name.localeCompare(b.name));
 

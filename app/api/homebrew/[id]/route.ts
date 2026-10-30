@@ -35,7 +35,7 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
       update.data = normalized.data;
     }
     if (body.campaignIds !== undefined) {
-      campaignIds = await resolveShareTargets(user.id, body.campaignIds);
+      campaignIds = await resolveShareTargets(user.id, body.campaignIds, existing.type as HbType);
     }
   } catch (err) {
     return new Response(err instanceof Error ? err.message : "Bad request", { status: 400 });

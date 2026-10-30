@@ -7,7 +7,8 @@ import { YzeHeader, ModeRow, cardCls, nameCls, hbBadge, one, type RawQuery } fro
 
 export const dynamic = "force-dynamic";
 
-type GearRow = { name: string; weight: string; desc: string };
+type GearRow = { name: string; weight: string; desc: string; category: string; cost: string; supply: string };
+type ArmorRow = { name: string; rating: string; air: string; weight: string; cost: string; desc: string };
 type WpRow = { name: string; cls: string; bonus: string; damage: string; range: string; ammo: string; weight: string; cost: string; special: string };
 
 const panelCls = "rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4";
@@ -31,9 +32,15 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
     userCampaigns(user.id),
   ]);
 
-  const gHb: GearRow[] = gVis.map((h) => {
+  const gs = (d: Record<string, unknown>, k: string) => (typeof d[k] === "string" ? (d[k] as string) : "");
+  // yze-gear built as armor (kind "armor") lists under Armor; the rest is general gear.
+  const gHb: GearRow[] = gVis.filter((h) => (h.data as Record<string, unknown>).kind !== "armor").map((h) => {
     const d = h.data as Record<string, unknown>;
-    return { name: h.name, weight: typeof d.weight === "string" ? d.weight : "1", desc: typeof d.desc === "string" ? d.desc : "" };
+    return { name: h.name, weight: gs(d, "weight") || "1", desc: gs(d, "desc"), category: gs(d, "category"), cost: gs(d, "cost"), supply: gs(d, "supply") };
+  });
+  const aHb: ArmorRow[] = gVis.filter((h) => (h.data as Record<string, unknown>).kind === "armor").map((h) => {
+    const d = h.data as Record<string, unknown>;
+    return { name: h.name, rating: d.rating != null ? String(d.rating) : "0", air: gs(d, "air") || "—", weight: gs(d, "weight") || "1", cost: gs(d, "cost") || "—", desc: gs(d, "desc") };
   });
   const wHb: WpRow[] = wVis.map((h) => {
     const d = h.data as Record<string, unknown>;
@@ -71,6 +78,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
                     <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                       <h4 className={nameCls}>{g.name}</h4>
                       <span className={hbBadge}>{g.weight} wt</span>
+                      {g.category ? <span className={hbBadge}>{g.category}</span> : null}
+                      {g.cost ? <span className={hbBadge}>{g.cost}</span> : null}
+                      {g.supply ? <span className={hbBadge}>{g.supply}</span> : null}
                     </div>
                     {g.desc ? <p className="mt-2 text-[13px] leading-relaxed text-[var(--text)]">{g.desc}</p> : null}
                   </li>
@@ -113,7 +123,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
               <div className={`${tableWrap} mt-3`}>
                 <table className="w-full border-collapse text-[13px]">
                   <thead>
-                    <tr className={thRow}><th className="p-2">Weapon</th><th className="p-2">Class</th><th className="p-2">Dmg</th><th className="p-2">Mod</th><th className="p-2">Range</th><th className="p-2">Ammo</th><th className="p-2">Wt</th><th className="p-2">Special</th></tr>
+                    <tr className={thRow}><th className="p-2">Weapon</th><th className="p-2">Class</th><th className="p-2">Dmg</th><th className="p-2">Mod</th><th className="p-2">Range</th><th className="p-2">Ammo</th><th className="p-2">Wt</th><th className="p-2">Cost</th><th className="p-2">Special</th></tr>
                   </thead>
                   <tbody>
                     {wHb.map((w, i) => (
@@ -125,6 +135,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
                         <td className="p-2">{w.range}</td>
                         <td className="p-2 font-mono text-[var(--muted)]">{w.ammo}</td>
                         <td className="p-2 font-mono text-[var(--muted)]">{w.weight}</td>
+                        <td className="p-2 font-mono text-[var(--muted)]">{w.cost}</td>
                         <td className="p-2 text-[var(--muted)]">{w.special}</td>
                       </tr>
                     ))}
@@ -160,6 +171,32 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
 
       {mode === "armor" && (
         <section>
+          <div className={`${panelCls} mb-4`}>
+            <h3 className={hbHead}>Your homebrew armor</h3>
+            <p className="mb-3 text-[12px] text-[var(--muted)]">Build a suit below: open the gear editor and pick Kind: Armor / suit.</p>
+            <HomebrewEditor kind="yze-gear" campaigns={campaigns} initial={gOwn} />
+            {aHb.length > 0 && (
+              <div className={`${tableWrap} mt-3`}>
+                <table className="w-full border-collapse text-[13px]">
+                  <thead>
+                    <tr className={thRow}><th className="p-2">Suit</th><th className="p-2">Armor</th><th className="p-2">Air</th><th className="p-2">Wt</th><th className="p-2">Cost</th><th className="p-2">Notes</th></tr>
+                  </thead>
+                  <tbody>
+                    {aHb.map((a, i) => (
+                      <tr key={`${a.name}-${i}`} className="border-t border-[var(--border)]">
+                        <td className="p-2 font-semibold text-[var(--sys-link)]">{a.name} <span className={hbBadge}>Homebrew</span></td>
+                        <td className="p-2 font-mono">{a.rating}</td>
+                        <td className="p-2 font-mono text-[var(--muted)]">{a.air}</td>
+                        <td className="p-2 font-mono text-[var(--muted)]">{a.weight}</td>
+                        <td className="p-2 font-mono text-[var(--muted)]">{a.cost}</td>
+                        <td className="p-2 text-[var(--muted)]">{a.desc}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
           <div className={tableWrap}>
             <table className="w-full border-collapse text-[13px]">
               <thead>

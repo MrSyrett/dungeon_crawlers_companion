@@ -1,7 +1,9 @@
 // Runtime homebrew loader for the Year Zero Engine sheet. Mirrors
 // co-homebrew.js: fetches the viewer's yze-weapon / yze-gear homebrew from
 // /api/homebrew and injects it into the sheet's mutable pools (window.YZE_HB_*)
-// so the Weapons and Gear pickers show it alongside the SRD content.
+// so the Weapons and Gear pickers show it alongside the SRD content. yze-gear
+// records built as armor (kind "armor") go to window.YZE_HB_ARMOR (the Armor
+// tab) instead of the gear pool.
 // Idempotent; standalone-safe (no /api → no-op).
 (function () {
   'use strict';
@@ -16,12 +18,15 @@
       .catch(function () { return []; });
   }
   function load(onChange) {
+    if (typeof window !== 'undefined' && !Array.isArray(window.YZE_HB_ARMOR)) window.YZE_HB_ARMOR = [];
+    var armor = (typeof window !== 'undefined') ? window.YZE_HB_ARMOR : [];
+    armor.length = 0;
     var jobs = Object.keys(TARGETS).map(function (type) {
       var pool = null; try { pool = TARGETS[type](); } catch (e) { pool = null; }
       if (!pool) return Promise.resolve();
       return pull(type).then(function (rows) {
         pool.length = 0;
-        rows.forEach(function (d) { if (d && d.name) { d.source = 'Homebrew'; pool.push(d); } });
+        rows.forEach(function (d) { if (d && d.name) { d.source = 'Homebrew'; (type === 'yze-gear' && d.kind === 'armor' ? armor : pool).push(d); } });
       });
     });
     return Promise.all(jobs).then(function () { if (typeof onChange === 'function') try { onChange(); } catch (e) {} });

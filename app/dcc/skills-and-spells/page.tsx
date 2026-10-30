@@ -427,6 +427,14 @@ async function SpellsSection({ userId, raw }: { userId: string; raw: Raw }) {
                 {hb ? <span className={hbBadge}>Homebrew</span> : <span className={srcBadge}>{s.source}{s.page ? ` · p.${s.page}` : ""}</span>}
                 {s.passive ? <span className={badge}><span className="text-[var(--text)]">Passive</span></span> : null}
                 {typeof s.aiFavor === "number" ? <span className={badge}>AI Favor <span className="text-[var(--text)]">{s.aiFavor}</span></span> : null}
+                {s.damage ? (
+                  <span className={badge}>
+                    {s.type === "heal" ? "Heals" : "Damage"}{" "}
+                    <span className="text-[var(--text)]">
+                      {s.damage}{s.damageStat && s.damageStat !== "none" ? ` + ${s.damageStat}` : ""}{s.damageType ? ` ${s.damageType}` : ""}
+                    </span>
+                  </span>
+                ) : null}
               </div>
               {s.desc ? <p className="mt-3 text-[13px] leading-relaxed text-[var(--muted)]">{s.desc}</p> : null}
               {s.upgrades.length ? (

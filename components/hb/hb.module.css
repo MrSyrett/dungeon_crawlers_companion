@@ -1,0 +1,81 @@
+/* Homebrew builder kit styles (components/hb/*). Themed by the tokens every
+   page already sets: --hb-accent (per system; set it on the editor container),
+   --panel, --panel-2, --border, --text, --muted. Colour mixing is done against
+   currentColor so the same rules read in light and dark mode.
+   The badge rules mirror the GM Screen loot builder (public/tools-data/
+   loot-bonus.js, `.lbn-*`) so homebrew and loot badges look identical. */
+
+/* ── Stepper ─────────────────────────────────────────────────────────────── */
+.stepper { display: inline-flex; align-items: stretch; border: 1px solid var(--border); border-radius: 4px; background: var(--panel-2); overflow: hidden; height: 34px; }
+.stepper:focus-within { border-color: var(--hb-accent, var(--gold)); }
+.stepBtn { all: unset; cursor: pointer; width: 24px; text-align: center; font: 700 14px/34px system-ui, sans-serif; color: var(--muted); user-select: none; }
+.stepBtn:hover { color: var(--text); background: color-mix(in srgb, currentColor 10%, transparent); }
+.stepBtn[aria-disabled="true"] { opacity: .3; cursor: default; }
+.stepVal { width: 3.2em; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--text); text-align: center; font-family: inherit; font-size: 14px; font-weight: 600; line-height: 34px; font-variant-numeric: tabular-nums; padding: 0; -moz-appearance: textfield; appearance: textfield; }
+.stepVal::-webkit-outer-spin-button, .stepVal::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.stepClear { all: unset; cursor: pointer; padding: 0 6px; font: 700 11px/34px system-ui, sans-serif; color: var(--muted); border-left: 1px solid var(--border); }
+.stepClear:hover { color: var(--text); }
+
+/* ── Dice input ──────────────────────────────────────────────────────────── */
+.dice { display: inline-flex; align-items: center; gap: 4px; flex-wrap: nowrap; }
+.diceSel { height: 34px; border: 1px solid var(--border); border-radius: 4px; background: var(--panel-2); color: var(--text); font-size: 14px; padding: 0 4px; outline: 0; }
+.diceSel:focus { border-color: var(--hb-accent, var(--gold)); }
+.diceSep { font-size: 11px; color: var(--muted); font-weight: 700; }
+
+/* ── Attack rows ─────────────────────────────────────────────────────────── */
+.atkList { display: flex; flex-direction: column; gap: 8px; }
+.atkRow { border: 1px solid var(--border); border-left: 3px solid var(--hb-accent, var(--gold)); border-radius: 4px; padding: 8px; background: color-mix(in srgb, var(--panel) 60%, transparent); }
+.atkLine { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: flex-end; }
+.atkCell { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.atkLbl { font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.atkGrow { flex: 1 1 140px; }
+.atkCtl { display: flex; gap: 4px; margin-left: auto; align-self: center; }
+.atkJoin { display: flex; align-items: center; gap: 6px; margin: -2px 0 -2px 10px; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.iconBtn { all: unset; cursor: pointer; width: 26px; height: 26px; border-radius: 4px; border: 1px solid var(--border); text-align: center; font: 700 12px/26px system-ui, sans-serif; color: var(--muted); }
+.iconBtn:hover { color: var(--text); border-color: var(--hb-accent, var(--gold)); }
+.iconBtn[aria-disabled="true"] { opacity: .3; cursor: default; }
+
+/* ── Bonus badges (≙ .lbn-*) ─────────────────────────────────────────────── */
+.badges { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; min-height: 22px; }
+.badge { --c: #7f8a99; display: inline-flex; align-items: center; gap: 3px; max-width: 100%; padding: 1px 3px 1px 7px; border-radius: 999px; font-weight: 600; font-size: 11px; line-height: 18px; letter-spacing: .01em; color: var(--text); background: color-mix(in srgb, var(--c) 16%, transparent); border: 1px solid color-mix(in srgb, var(--c) 55%, transparent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.badge.ro { padding-right: 7px; }
+.badge > span { overflow: hidden; text-overflow: ellipsis; }
+.c-blue { --c: #4a8fd8; } .c-green { --c: #3aa86b; } .c-purple { --c: #9a62d8; } .c-teal { --c: #22a6a6; }
+.c-gold { --c: #c08a2a; } .c-red { --c: #d0574b; } .c-grey { --c: #8a8f98; font-weight: 500; }
+.badgeX { all: unset; cursor: pointer; width: 16px; height: 16px; border-radius: 50%; text-align: center; font: 700 12px/16px system-ui, sans-serif; opacity: .65; }
+.badgeX:hover { opacity: 1; background: color-mix(in srgb, #d33 30%, transparent); }
+.badgeAdd { all: unset; cursor: pointer; padding: 1px 8px; border-radius: 999px; font-weight: 700; font-size: 11px; line-height: 18px; color: var(--text); border: 1px dashed color-mix(in srgb, currentColor 45%, transparent); opacity: .8; }
+.badgeAdd:hover { opacity: 1; border-style: solid; }
+.badgeEmpty { font-size: 11px; opacity: .55; font-style: italic; color: var(--text); }
+
+.pop { position: fixed; z-index: 1000; width: 300px; max-width: calc(100vw - 16px); box-sizing: border-box; padding: 10px; border-radius: 8px; background: var(--panel); color: var(--text); border: 1px solid var(--border); box-shadow: 0 12px 36px rgba(0, 0, 0, .35); font-size: 13px; line-height: 1.35; }
+.pop * { box-sizing: border-box; }
+.kinds { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+.kind { all: unset; cursor: pointer; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; border: 1px solid color-mix(in srgb, currentColor 25%, transparent); }
+.kind.on { background: color-mix(in srgb, currentColor 18%, transparent); border-color: currentColor; }
+.tip { font-size: 11px; opacity: .7; margin: 0 0 8px; }
+.popRow { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+.popRow input, .popRow select { flex: 1; min-width: 0; padding: 5px 7px; border-radius: 5px; border: 1px solid color-mix(in srgb, currentColor 25%, transparent); background: color-mix(in srgb, currentColor 6%, transparent); color: inherit; font: inherit; }
+.popRow select option { color: #111; background: #fff; }
+.popRow .amt { flex: 0 0 78px; }
+.sug { max-height: 160px; overflow: auto; border: 1px solid color-mix(in srgb, currentColor 18%, transparent); border-radius: 5px; margin-bottom: 6px; }
+.sug:empty { display: none; }
+.sug button { all: unset; box-sizing: border-box; width: 100%; padding: 4px 8px; cursor: pointer; font-size: 12px; display: flex; justify-content: space-between; gap: 8px; }
+.sug button:hover { background: color-mix(in srgb, currentColor 12%, transparent); }
+.sug small { opacity: .6; }
+.acts { display: flex; justify-content: flex-end; gap: 6px; margin-top: 4px; }
+.popBtn { all: unset; cursor: pointer; padding: 4px 12px; border-radius: 5px; font-weight: 700; font-size: 12px; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); }
+.popBtn.go { background: var(--hb-accent, var(--gold)); color: var(--on-accent, #111); border-color: transparent; }
+.err { color: #e0574b; font-size: 11px; min-height: 14px; }
+
+/* ── Chips (multi-pick lists) ────────────────────────────────────────────── */
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip { all: unset; cursor: pointer; padding: 2px 9px; border-radius: 999px; font-size: 12px; line-height: 20px; color: var(--muted); border: 1px solid var(--border); }
+.chip:hover { color: var(--text); border-color: var(--hb-accent, var(--gold)); }
+.chip.on { color: var(--text); border-color: var(--hb-accent, var(--gold)); background: color-mix(in srgb, var(--hb-accent, var(--gold)) 18%, transparent); }
+
+/* ── Preview card ────────────────────────────────────────────────────────── */
+.preview { border: 1px solid var(--border); border-top: 3px solid var(--hb-accent, var(--gold)); border-radius: 6px; background: var(--panel); padding: 12px 14px; color: var(--text); font-size: 13px; line-height: 1.45; }
+.previewLbl { font-size: 9px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.previewTitle { font-size: 15px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--hb-accent, var(--gold)); }
+.previewSub { font-size: 11px; font-style: italic; color: var(--muted); margin-bottom: 6px; }

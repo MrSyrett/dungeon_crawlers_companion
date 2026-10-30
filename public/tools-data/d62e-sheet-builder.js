@@ -30,8 +30,9 @@
   const templates = () => (typeof D62E_TEMPLATES !== 'undefined' ? D62E_TEMPLATES : []);
   const skillsData = () => (typeof D62E_SKILLS !== 'undefined' ? D62E_SKILLS : []);
   const equipData = () => (typeof D62E_EQUIPMENT !== 'undefined' ? D62E_EQUIPMENT : []);
-  const powersData = () => (typeof D62E_POWERS !== 'undefined' ? D62E_POWERS : []);
-  const limitsData = () => (typeof D62E_LIMITATIONS !== 'undefined' ? D62E_LIMITATIONS : []);
+  // Book + the viewer's homebrew (the sheet's D map concats window.D62E_HB_*), like perksData().
+  const powersData = () => (typeof D !== 'undefined' && D.powers) ? D.powers() : (typeof D62E_POWERS !== 'undefined' ? D62E_POWERS : []);
+  const limitsData = () => (typeof D !== 'undefined' && D.limitations) ? D.limitations() : (typeof D62E_LIMITATIONS !== 'undefined' ? D62E_LIMITATIONS : []);
   const genreOk = item => { const g = item && item.genre; if (genre === 'all') return true; return !g || g === 'core' || g === genre; };
   // Templates only: All shows everything, Core shows only core, a specific genre shows only that genre (no core).
   const templateGenreOk = t => { const g = t && t.genre; if (genre === 'all') return true; if (genre === 'core') return g === 'core'; return g === genre; };
@@ -80,7 +81,9 @@
   function powerCostFor(p, rank) { if (p.kind !== 'superpower' || p.cost == null) return 0; return isPerRank(p.cost) ? leadingInt(p.cost) * (rank || 1) : leadingInt(p.cost); }
   function powerPerRank(p) { return p.kind === 'superpower' && isPerRank(p.cost); }
   function powerLimits(n) { return (Array.isArray(limitPicks[n]) ? limitPicks[n] : []).filter(l => limitObj(l)); }
-  function limitCut(n) { return powerLimits(n).reduce((a, l) => a + (+limitObj(l).value || 0), 0); }
+  // A homebrew power can carry built-in limitations ([{name, value}], from the homebrew builder) on top of the ones picked here.
+  function builtInCut(n) { const p = powersData().find(x => x.name === n); return (p && Array.isArray(p.limitations)) ? p.limitations.reduce((a, l) => a + (+(l && l.value) || 0), 0) : 0; }
+  function limitCut(n) { return powerLimits(n).reduce((a, l) => a + (+limitObj(l).value || 0), 0) + builtInCut(n); }
   // A power's cost after its own limitations — never below 1 (p.224).
   function netPowerCost(p, rank) { const base = powerCostFor(p, rank); if (!base) return base; return Math.max(1, base - limitCut(p.name)); }
   function powerPoolSpent() { let s = 0; Object.keys(powerPicks).forEach(n => { const p = powersData().find(x => x.name === n); if (p) s += netPowerCost(p, powerPicks[n] || 1); }); return s; }

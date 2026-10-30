@@ -1285,7 +1285,11 @@ function refreshWeaponRows() { document.querySelectorAll('#weapons-body .wp-skil
 function addWeaponFromData(name, link) {
   const w = findWeapon(name); if(!w) return null;
   const skillName = w.skill ? (D.skills().find(s => norm(s.name) === norm(w.skill)) || {}).name || w.skill : '';
-  const tr = addWeaponRow({ name: w.name, skill: skillName, damage: w.damageText || toCode(w.damage), range: w.range || '', notes: w.kind === 'Melee' ? 'melee' : '', link: link }); scheduleAutosave(); return tr;
+  // A damage note ("3D (stun damage only)") moves to the row's notes so the damage cell stays a rollable code;
+  // homebrew weapons may carry ammo (shots per pack).
+  let dmg = w.damageText || toCode(w.damage), dnote = '';
+  const dm = /^(.*?) \(([^()]+)\)$/.exec(dmg); if(dm && (fromCode(dm[1]) !== null || /^str/i.test(dm[1]))) { dmg = dm[1]; dnote = dm[2]; }
+  const tr = addWeaponRow({ name: w.name, skill: skillName, damage: dmg, range: w.range || '', notes: [w.kind === 'Melee' ? 'melee' : '', dnote, w.ammo ? 'ammo ' + w.ammo : ''].filter(Boolean).join(' · '), link: link }); scheduleAutosave(); return tr;
 }
 // True when an Attack (weapon) row with this name already exists.
 function weaponRowExists(name) {

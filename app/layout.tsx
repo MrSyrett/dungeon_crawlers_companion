@@ -500,6 +500,9 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
+      // The boot script below sets data-system / --sys / data-mode on <html>
+      // before React hydrates, so its attributes legitimately differ.
+      suppressHydrationWarning
       data-mode={mode}
       style={{ colorScheme: mode }}
       className={`${geist.variable} ${geistMono.variable} ${cinzel.variable} ${barlow.variable} ${montserrat.variable} ${ebGaramond.variable} ${anton.variable} ${shareTech.variable} ${archivoBlack.variable} ${libreFranklin.variable} ${oswald.variable} ${sourceSans.variable} ${lilitaOne.variable} ${nunito.variable} ${mulish.variable} ${sairaCond.variable} ${saira.variable} ${asap.variable} ${cormorant.variable} ${lora.variable} ${fraunces.variable} ${figtree.variable} ${permanentMarker.variable} ${archivo.variable} ${archivoNarrow.variable} ${plexSans.variable} ${russoOne.variable} ${rubik.variable} h-full antialiased`}

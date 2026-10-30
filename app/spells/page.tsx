@@ -92,6 +92,7 @@ export default async function SpellsPage({
       range: String(d.range ?? ""),
       duration: String(d.duration ?? ""),
       damage: String(d.damage ?? ""),
+      ...(d.heal ? { heal: String(d.heal) } : {}),
       desc: String(d.desc ?? ""),
       homebrew: true,
     };

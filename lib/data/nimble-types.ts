@@ -141,6 +141,8 @@ export interface NimbleMonster {
   hp: number | null;
   /** "M" medium / "H" heavy / null. */
   armor: "M" | "H" | null;
+  /** Speed in spaces (homebrew monsters; the book omits it). */
+  speed?: number;
   /** Legendary saves line, e.g. "STR+++, DEX–". */
   saves?: string;
   legendary: boolean;

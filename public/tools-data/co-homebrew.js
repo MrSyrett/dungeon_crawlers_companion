@@ -21,7 +21,9 @@
       if (!pool) return Promise.resolve();
       return pull(type).then(function (rows) {
         pool.length = 0;
-        rows.forEach(function (d) { if (d && d.name) { d.source = 'Homebrew'; pool.push(d); } });
+        // grantedBy keeps an ability's Role / Specialty (the wizard reads it) before
+        // `source` is overwritten with the 'Homebrew' tag.
+        rows.forEach(function (d) { if (d && d.name) { if (d.source && d.source !== 'Homebrew') d.grantedBy = d.source; d.source = 'Homebrew'; pool.push(d); } });
       });
     });
     return Promise.all(jobs).then(function () { if (typeof onChange === 'function') try { onChange(); } catch (e) {} });

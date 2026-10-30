@@ -1015,11 +1015,15 @@ function ammoRow(ref){ return S.items.find(function(x){ return x.kind==='ammo'&&
 function ammoCount(ref){ var t=0; S.items.forEach(function(x){ if(x.kind==='ammo'&&x.ref===ref) t+=num(x.qty); }); return t; }
 
 // ── make inventory rows from the data ──
+// A homebrew weapon / clothing / hat / gear entry built with bonus badges (its `benefits`, LootBonus
+// "pb" format) puts them on the new row exactly as a claimed loot item does (bv:2), so equipping it
+// applies them and unequipping / deleting reverses them (syncItemBonuses).
+function hbBon(def,row){ if(def&&def.source==='Homebrew'&&Array.isArray(def.benefits)&&def.benefits.length&&window.LootBonus){ var b=LootBonus.normalize(LB_SYS,def.benefits); if(b.length){ row.benefits=b; row.bv=2; } } return row; }
 function mkWeapon(def,extra){ def=def||{}; var w={uid:uid(),kind:'weapon',ref:def.id||'',name:def.name||'Weapon',dmg:def.damage||null,wtype:def.type||'melee',blackPowder:!!def.blackPowder,reload:def.reload||null,
     loaded:true,prog:0,ammo:def.ammo||null,range:def.range||null,reach:def.reach||null,hands:def.hands||1,sword:!!def.sword,thrown:def.thrown||null,pistol:!!def.pistol,closeDamage:def.closeDamage||null,
-    special:def.special||null,equipped:true,slots:1,qty:1}; if(def.damageFromAmmo) w.damageFromAmmo=true; if(def.targetTest) w.targetTest=def.targetTest; return Object.assign(w,extra||{}); }
-function mkClothing(def,extra){ return Object.assign({uid:uid(),kind:'clothing',ref:def.id,name:def.name,tier:num(def.tier),origTier:num(def.tier),agilityDR:num(def.agilityDR),defenseDR:num(def.defenseDR),metal:!!def.metal,special:def.special||'',equipped:false,ruined:false,qty:1},extra||{}); }
-function mkHat(def,extra){ return Object.assign({uid:uid(),kind:'hat',ref:def.id,name:def.name,dr:num(def.damageReduction),metal:!!def.metal,sacrifice:!!def.sacrifice,special:def.special||'',equipped:false,broken:false,qty:1},extra||{}); }
+    special:def.special||null,equipped:true,slots:1,qty:1}; if(def.damageFromAmmo) w.damageFromAmmo=true; if(def.targetTest) w.targetTest=def.targetTest; return Object.assign(hbBon(def,w),extra||{}); }
+function mkClothing(def,extra){ return Object.assign(hbBon(def,{uid:uid(),kind:'clothing',ref:def.id,name:def.name,tier:num(def.tier),origTier:num(def.tier),agilityDR:num(def.agilityDR),defenseDR:num(def.defenseDR),metal:!!def.metal,special:def.special||'',equipped:false,ruined:false,qty:1}),extra||{}); }
+function mkHat(def,extra){ return Object.assign(hbBon(def,{uid:uid(),kind:'hat',ref:def.id,name:def.name,dr:num(def.damageReduction),metal:!!def.metal,sacrifice:!!def.sacrifice,special:def.special||'',equipped:false,broken:false,qty:1}),extra||{}); }
 var STACKS=/^(candle|torch|dried-food|lantern-oil|tobacco|smoked-meat)$/;
 function mkGear(def,qty,extra){ def=def||{}; var g={uid:uid(),kind:'gear',ref:def.id||'',name:def.name||'Item',qty:qty||1,note:'',slots:1};
   if(def.category==='container'||def.capacity!==undefined&&def.category==='container'){ g.container=true; g.capacity=def.capacity==null?null:def.capacity; g.carried=!/^sea-chest/.test(def.id||''); }
@@ -1029,7 +1033,7 @@ function mkGear(def,qty,extra){ def=def||{}; var g={uid:uid(),kind:'gear',ref:de
   if(def.id==='tobacco') g.uses=null;
   if(def.light) g.light=true; if(def.fuel) g.fuel=def.fuel;
   if(def.drink) g.drink=true; if(def.heal&&def.id!=='medical-kit') g.heal=def.heal;
-  return Object.assign(g,extra||{}); }
+  return Object.assign(hbBon(def,g),extra||{}); }
 function mkBomb(def,qty){ return {uid:uid(),kind:'bomb',ref:def.id,name:def.name,qty:qty||1,dmg:def.damage||null,effect:def.effect||'',slots:1}; }
 function mkAmmo(ref,qty){ var a=byId(D('PB_AMMO'),ref)||{}; if(ref==='shot') return {uid:uid(),kind:'ammo',ref:'shot',name:'Rounds of shot',qty:qty,stack:true,slots:1};
   return {uid:uid(),kind:'ammo',ref:ref,name:String(a.name||ref).replace(/^\d+\s+/,'').replace(/^./,function(c){ return c.toUpperCase(); }),qty:qty||a.qty||10,dmg:a.damage||null,effect:a.effect||'',targetTest:a.targetTest||null,failDamage:a.failDamage||null,stack:true,slots:1,dart:!!a.dart}; }
@@ -1050,7 +1054,7 @@ function addByName(name,qty,note,solo){ qty=qty||1; var n=String(name||'').trim(
   var r=byName(D('PB_RELICS'),n); if(r){ addRelic(r.id); return 'relic'; }
   var g=gearDef(n)||byName(D('PB_HOSPITALITY'),n);
   if(g){ var ex=S.items.find(function(x){ return x.kind==='gear'&&x.ref===(g.id||g.name)&&x.uses==null&&!x.container; });
-    if(ex&&!g.capacity&&!solo){ ex.qty=num(ex.qty,1)+qty; } else { var row=g.id?mkGear(g,qty):{uid:uid(),kind:'gear',ref:g.name,name:g.name,qty:qty,slots:1,drink:!!g.drink,note:''}; if(note) row.note=note; S.items.push(row); } return 'gear'; }
+    if(ex&&!g.capacity&&!solo&&!(Array.isArray(g.benefits)&&g.benefits.length)){ ex.qty=num(ex.qty,1)+qty; } else { var row=g.id?mkGear(g,qty):{uid:uid(),kind:'gear',ref:g.name,name:g.name,qty:qty,slots:1,drink:!!g.drink,note:''}; if(note) row.note=note; S.items.push(row); } return 'gear'; }
   var drink=/\b(grog|rum|wine)\b/i.test(n);
   S.items.push({uid:uid(),kind:'gear',ref:'',name:n,qty:qty,slots:1,note:note||'',drink:drink||undefined}); return 'other'; }
 

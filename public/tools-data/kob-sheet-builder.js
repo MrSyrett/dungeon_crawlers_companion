@@ -157,7 +157,7 @@
     return (
       '<p class="m-hint">Choose the Trope you\'re most interested in playing. It sets your stat dice and suggests Strengths, Flaws' + (st.book === "bikes" ? ", a bike" : "") + ' and two questions to answer about yourself.</p>' +
       '<input class="m-input" data-k="tropeQuery" placeholder="Search tropes…" value="' + esc(st.tropeQuery) + '">' +
-      '<div class="kb-list" style="margin-top:8px;">' + list.map((t) => '<div class="kb-card' + (st.trope === t ? " on" : "") + '" data-trope="' + esc(t.name) + '"><span class="tag">' + esc(t.ages.join(" / ")) + "</span><b>" + esc(t.name) + "</b>" + diceChips(t.dice) + "<small>" + esc(t.questions[0]) + "</small></div>").join("") + "</div>"
+      '<div class="kb-list" style="margin-top:8px;">' + list.map((t) => '<div class="kb-card' + (st.trope === t ? " on" : "") + '" data-trope="' + esc(t.name) + '"><span class="tag">' + esc(t.ages.join(" / ")) + "</span><b>" + esc(t.name) + "</b>" + diceChips(t.dice) + "<small>" + esc(t.questions[0] || "") + "</small></div>").join("") + "</div>"
     );
   }
   function rAge() {
@@ -311,7 +311,7 @@
       brooms: { wood: st.wood, core: st.core, broom: st.broom, familiar: st.familiar, favoriteClass: st.favClass, story: "" },
       capes: { cape: st.cape, power: [st.powerCat, st.powerDesc].filter(Boolean).join(" — "), powerDie: 0, powerBonus: 0, gp: 0, stressBoost: st.boost, stressReduce: st.reduce, identity: "", skills: [] },
       relationships: [],
-      notes: st.trope ? "Trope questions:\n1. " + st.trope.questions[0] + "\n2. " + st.trope.questions[1] + "\n" : "",
+      notes: st.trope && st.trope.questions.length ? "Trope questions:\n" + st.trope.questions.map((q, i) => (i + 1) + ". " + q).join("\n") + "\n" : "",
       campaign: (typeof _campaign !== "undefined" && _campaign) ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
     };
     if (typeof applySheet === "function") applySheet(data);

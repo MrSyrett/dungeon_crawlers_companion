@@ -1543,10 +1543,17 @@ function dccCombatEntry(name) {
   const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const nk = norm(key), lk = key.toLowerCase();
   const find = arr => (arr && arr.length) ? (arr.find(e => String(e.name).toLowerCase() === lk) || arr.find(e => norm(e.name) === nk)) : null;
-  const sk = find(typeof DCC_SKILLS !== 'undefined' ? DCC_SKILLS : null);
-  if(sk && sk.damage) return { kind: 'skill', name: sk.name, base: sk.damage, upgrades: sk.upgrades || [] };
-  const sp = find(typeof DCC_SPELLS !== 'undefined' ? DCC_SPELLS : null);
-  if(sp) { const m = String(sp.desc || '').match(/Base Damage:\s*(\d*d\d+)/i); if(m) return { kind: 'spell', name: sp.name, base: m[1], upgrades: sp.upgrades || [] }; }
+  // Book lists plus the user's homebrew (pulled by dcc-sheet-skills.js).
+  const hbSk = Array.isArray(window.__DCC_HB_SKILLS) ? window.__DCC_HB_SKILLS : [];
+  const hbSp = Array.isArray(window.__DCC_HB_SPELLS) ? window.__DCC_HB_SPELLS : [];
+  const sk = find((typeof DCC_SKILLS !== 'undefined' ? DCC_SKILLS : []).concat(hbSk));
+  if(sk && sk.damage) return { kind: 'skill', name: sk.name, base: sk.damage, upgrades: sk.upgrades || [], src: sk };
+  const sp = find((typeof DCC_SPELLS !== 'undefined' ? DCC_SPELLS : []).concat(hbSp));
+  if(sp) {
+    // A homebrew attack spell carries its Base Damage in `damage` (the builder's dice).
+    if(sp.damage && sp.type === 'attack') return { kind: 'spell', name: sp.name, base: sp.damage, upgrades: sp.upgrades || [], src: sp };
+    const m = String(sp.desc || '').match(/Base Damage:\s*(\d*d\d+)/i); if(m) return { kind: 'spell', name: sp.name, base: m[1], upgrades: sp.upgrades || [], src: sp };
+  }
   return null;
 }
 // base "NdM" + every "+KdM base damage" from upgrades unlocked at this Rank. Every
@@ -1603,8 +1610,9 @@ function dccDmgStatOf(row, hitStat) {
   const key = row.dataset.src || (inputs[0] ? inputs[0].value : '');
   const e = dccCombatEntry(key) || (row.dataset.src && inputs[0] ? dccCombatEntry(inputs[0].value) : null);
   if(!e) return hitStat;
-  const list = e.kind === 'skill' ? (typeof DCC_SKILLS !== 'undefined' ? DCC_SKILLS : []) : (typeof DCC_SPELLS !== 'undefined' ? DCC_SPELLS : []);
-  const src = list.find(x => x.name === e.name);
+  const src = e.src;
+  // Homebrew names its damage Stat outright ("none" = no Stat Mod on damage).
+  if(src && src.damageStat) return src.damageStat === 'none' ? '' : String(src.damageStat).toLowerCase();
   const m = String(src && src.desc || '').match(/Base Damage:?\s*(?:is\s+)?\d*d\d+\s*(?:\+\s*(STR|DEX|INT|CON|CHA)\b)?/i);
   if(!m) return hitStat;
   return m[1] ? m[1].toLowerCase() : '';

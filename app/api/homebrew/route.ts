@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
   let campaignIds: string[];
   try {
     normalized = normalize(type, body?.data);
-    campaignIds = await resolveShareTargets(user.id, body?.campaignIds);
+    campaignIds = await resolveShareTargets(user.id, body?.campaignIds, type);
   } catch (err) {
     return new Response(err instanceof Error ? err.message : "Bad request", { status: 400 });
   }

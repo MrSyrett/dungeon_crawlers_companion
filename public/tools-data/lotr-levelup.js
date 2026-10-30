@@ -94,6 +94,7 @@
   // ── helpers ────────────────────────────────────────────────────────────
   function isDwarf() { return /^dwarves/i.test(d.culture || ""); }
   function hasVirtue(n) { return (d.virtues || []).some((v) => norm(v.name) === norm(n)); }
+  function vData(n) { return (window.LOTR_VIRTUES || []).find((v) => norm(v.name) === norm(n)) || null; }
   function newVirtue() { return lu.pick.mode !== "craft" && ctx.virtue ? lu.pick.virtue : ""; }
   function scoresAfter() { const sc = Object.assign({}, d.scores); if (newVirtue()) { const fx = C().virtueEffects(lu.pick); Object.keys(fx.abil).forEach((k) => sc[k] = Math.min(20, num(sc[k]) + fx.abil[k])); } return sc; }
   function hpGain() {
@@ -101,8 +102,8 @@
     const base = lu.hpMethod === "roll" && lu.roll != null ? lu.roll : avg;
     let n = Math.max(1, base + con); const bits = [(lu.hpMethod === "roll" && lu.roll != null ? "rolled " + lu.roll : "average " + avg) + " " + sgn(con) + " CON"];
     if (isDwarf()) { n += 1; bits.push("+1 Endurance of the Dwarves"); }
-    if (hasVirtue("Hardiness")) { n += 1; bits.push("+1 Hardiness"); }
-    if (/^hardiness$/i.test(newVirtue())) { n += ctx.newLevel; bits.push("+" + ctx.newLevel + " Hardiness (taken now)"); }
+    (d.virtues || []).forEach((t) => { const v = vData(t.name), k = v && v.mods ? num(v.mods.hpPerLevel) : 0; if (k) { n += k; bits.push("+" + k + " " + v.name); } });
+    { const v = newVirtue() ? vData(newVirtue()) : null, k = v && v.mods ? num(v.mods.hpPerLevel) : 0; if (k && !hasVirtue(v.name)) { n += k * ctx.newLevel; bits.push("+" + (k * ctx.newLevel) + " " + v.name + " (taken now)"); } }
     const slayerNow = norm(lu.subclass || d.subclass) === "slayer";
     if (slayerNow && ctx.newLevel === 3) { n += 3; bits.push("+3 Sterner Than Steel"); }
     else if (slayerNow && ctx.newLevel > 3) { n += 1; bits.push("+1 Sterner Than Steel"); }

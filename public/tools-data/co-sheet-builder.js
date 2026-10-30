@@ -16,6 +16,21 @@
   var DRIVES = (typeof window !== 'undefined' && Array.isArray(window.CO_DRIVES)) ? window.CO_DRIVES : [];
   var ACTION_NAMES = ACTIONS.map(function (a) { return a.name; });
   var DRIVE_NAMES = DRIVES.map(function (d) { return d.name; });
+  // Book abilities plus the viewer's homebrew ones granted by this role /
+  // specialty (CO_HB_ABILITIES, filled by co-homebrew.js; read at render time).
+  function hbFor(source, owner) {
+    var hb = (typeof window !== 'undefined' && Array.isArray(window.CO_HB_ABILITIES)) ? window.CO_HB_ABILITIES : [];
+    return hb.filter(function (d) { return d && d.name && (d.grantedBy || 'Role') === source && String(d.owner || '').trim() === owner; })
+      .map(function (d) { return { name: d.name, desc: d.desc || '', hb: d }; });
+  }
+  function roleAbs() { var ro = roleObj(role); return ro.abilities.concat(hbFor('Role', ro.role)); }
+  function specAbs() { var sp = specObj(role, specialty); return sp.abilities.concat(hbFor('Specialty', sp.name)); }
+  // Carry a homebrew ability's structured uses / cost / actions onto its sheet row.
+  function abilRow(a, tag) {
+    var row = { name: a.name, tag: tag + (a.hb ? ' · Homebrew' : ''), note: a.desc };
+    if (a.hb) { if (a.hb.uses) row.uses = a.hb.uses; if (a.hb.cost && a.hb.cost.length) row.cost = a.hb.cost; if (a.hb.actions && a.hb.actions.length) row.actions = a.hb.actions; }
+    return row;
+  }
   function actionDrive(a) { var f = ACTIONS.find(function (x) { return x.name === a; }); return f ? f.drive : ''; }
 
   var step = 0, _last = -1;
@@ -115,9 +130,9 @@
     } else if (step === 4) {
       var ro = roleObj(role), sp4 = specObj(role, specialty);
       h += '<div class="m-lbl">Role ability (' + ro.role + ')</div><div style="display:flex;flex-direction:column;gap:5px;">';
-      h += ro.abilities.map(function (a) { return '<label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;font-size:12px;"><input type="radio" name="cob-roleab" ' + (roleAb === a.name ? 'checked' : '') + ' onchange="window.COB.pickRole(\'' + a.name.replace(/'/g, "\\'") + '\')"><span><b>' + esc(a.name) + '.</b> ' + esc(a.desc) + '</span></label>'; }).join('');
+      h += roleAbs().map(function (a) { return '<label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;font-size:12px;"><input type="radio" name="cob-roleab" ' + (roleAb === a.name ? 'checked' : '') + ' onchange="window.COB.pickRole(\'' + a.name.replace(/'/g, "\\'") + '\')"><span><b>' + esc(a.name) + '.</b> ' + (a.hb ? '<i>Homebrew.</i> ' : '') + esc(a.desc) + '</span></label>'; }).join('');
       h += '</div><div class="m-lbl" style="margin-top:12px;">Specialty ability (' + sp4.name + ')</div><div style="display:flex;flex-direction:column;gap:5px;">';
-      h += sp4.abilities.map(function (a) { return '<label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;font-size:12px;"><input type="radio" name="cob-specab" ' + (specAb === a.name ? 'checked' : '') + ' onchange="window.COB.pickSpec(\'' + a.name.replace(/'/g, "\\'") + '\')"><span><b>' + esc(a.name) + '.</b> ' + esc(a.desc) + '</span></label>'; }).join('');
+      h += specAbs().map(function (a) { return '<label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;font-size:12px;"><input type="radio" name="cob-specab" ' + (specAb === a.name ? 'checked' : '') + ' onchange="window.COB.pickSpec(\'' + a.name.replace(/'/g, "\\'") + '\')"><span><b>' + esc(a.name) + '.</b> ' + (a.hb ? '<i>Homebrew.</i> ' : '') + esc(a.desc) + '</span></label>'; }).join('');
       h += '</div>';
     }
     b.innerHTML = h; if (keep) b.scrollTop = sc; _last = step;
@@ -128,15 +143,16 @@
     var gl = {}; ACTION_NAMES.forEach(function (a) { gl[a] = false; });
     gl[sp.gilded] = true; if (extraGild) gl[extraGild] = true;
     var dv = {}; DRIVE_NAMES.forEach(function (d) { dv[d] = { max: drives[d] || 0, cur: drives[d] || 0 }; });
-    var roleA = ro.abilities.find(function (x) { return x.name === roleAb; }) || ro.abilities[0];
-    var specA = sp.abilities.find(function (x) { return x.name === specAb; }) || sp.abilities[0];
+    var rl = roleAbs(), sl = specAbs();
+    var roleA = rl.find(function (x) { return x.name === roleAb; }) || rl[0];
+    var specA = sl.find(function (x) { return x.name === specAb; }) || sl[0];
     var built = {
       system: 'CO', role: role, specialty: specialty,
       actions: actions, gilded: gl, drives: dv,
       illumination: sp.illumination.slice(0, 3),
       abilities: [
-        { name: roleA.name, tag: ro.role + ' (Role)', note: roleA.desc },
-        { name: specA.name, tag: sp.name + ' (Specialty)', note: specA.desc }
+        abilRow(roleA, ro.role + ' (Role)'),
+        abilRow(specA, sp.name + ' (Specialty)')
       ],
       gear: (sp.gear || []).slice(0, 2).map(function (g) { return { name: g, tag: sp.name + ' gear', note: '' }; })
     };

@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { campaignsFor } from "@/lib/homebrew-systems";
 import { prisma } from "@/lib/prisma";
 import { CHARACTER_TOOL_IDS } from "@/lib/tools";
 import { MONSTER_TYPES } from "@/lib/data/monster-types";
@@ -10,6 +11,51 @@ import { TALENT_TARGET_KEYS } from "@/lib/effects";
 import {
   sanitizeSelections, summarizeBuild, dccStatMod, statBase, hbSlotCount,
 } from "@/lib/dcc-build-menu";
+import {
+  cleanSdAttackRows, composeSdAttacks, composeSdMove, composeSdTraits, parseSdDuration, composeSdDuration,
+  parseSdMove, sdModStr, SD_SPELL_LISTS,
+} from "@/components/hb/sd/rules";
+import { parseDice } from "@/components/hb/dice";
+import {
+  cleanGrants as nimCleanGrants, cleanItemBuild as nimCleanItemBuild, cleanNimAttackRows, cleanNimBenefits, cleanNimTraits, cleanSaves as nimCleanSaves,
+  cleanSpellBuild as nimCleanSpellBuild, composeAncTraitText as nimAncTraitText, composeItemFields as nimItemFields, composeNimAbilities,
+  composeNimSaves, composeNimSpellText, nimMonsterHp, NIM_ACTIONS, NIM_SIZES, NIM_TARGETING as NIMBLE_TARGETING,
+} from "@/components/hb/nimble/rules";
+import { cleanDccAttackRows, composeDccAttacks } from "@/components/hb/dcc/rules";
+import * as AceRules from "@/components/hb/ace/rules";
+import * as KobRules from "@/components/hb/kob/rules";
+import * as D62eRules from "@/components/hb/d62e/rules";
+import * as CoRules from "@/components/hb/co/rules";
+import * as YzeRules from "@/components/hb/yze/rules";
+import * as TwdRules from "@/components/hb/twd/rules";
+import {
+  cleanFear, cleanLotrAttackRows, cleanLotrBenefits, cleanLotrBlock, cleanUseRows as cleanLotrUseRows, cleanVirtueFields as lotrVirtueFields,
+  composeLotrActions, composeLotrBlock, composeUses as lotrComposeUses, parseUses as lotrParseUses, composeUseRows as lotrUseRowsOut,
+  SKILLS as LOTR_SKILLS, WEAPON_REWARDS as LOTR_WEAPON_REWARDS,
+} from "@/components/hb/lotr/rules";
+import {
+  EXTRA_BONUS_TARGETS as DND_EXTRA_BONUS_TARGETS, benefitsToBonuses as dndBenefitsToBonuses, cleanDndAttackRows, cleanDndBlock,
+  cleanNameDesc as dndNameDesc, composeDndActions, composeDndBlock, composeMagicType as dndMagicType, MAGIC_TYPES as DND_MAGIC_TYPES,
+} from "@/components/hb/dnd/rules";
+import {
+  ABILITY_KINDS as ICRPG_ABILITY_KINDS, SPELL_RANGES as ICRPG_SPELL_RANGES, SPELL_TARGETS as ICRPG_SPELL_TARGETS, cleanBuild as cleanIcrpgItemBuild,
+  cleanEffortBonus as cleanIcrpgEffortBonus, cleanIcrpgAttackRows, cleanIcrpgBenefits, composeIcrpgAttacks, composeItemDesc as composeIcrpgItemDesc,
+  composeItemEffects as composeIcrpgItemEffects, composeMonsterLine as composeIcrpgMonsterLine, composeSpellTarget as composeIcrpgSpellTarget,
+  composeStartLoot as icrpgStartLoot, effortOfCode as icrpgEffortOfCode,
+} from "@/components/hb/icrpg/rules";
+import {
+  cleanMagic as pbCleanMagic, cleanPbAttackRows, cleanPbBenefits, cleanTest as pbCleanTest, composeMagic as pbComposeMagic, composePbAttacks,
+} from "@/components/hb/pb/rules";
+import {
+  SW_ATTRS, SW_CHAR_GROUPS as SW_HB_CHAR_GROUPS, SW_GEAR_CATEGORIES, SW_WEAPON_KINDS, cleanCharBuild as swCleanCharBuild, cleanForceBuild as swCleanForceBuild,
+  cleanGearBuild as swCleanGearBuild, cleanWeaponBuild as swCleanWeaponBuild, composeChar as swComposeChar, composeCost as swComposeCost,
+  composeForceAttr as swComposeForceAttr, composeForceDiff as swComposeForceDiff, composeForceTime as swComposeForceTime,
+  composeGearStats as swComposeGearStats, composeWeapon as swComposeWeapon,
+} from "@/components/hb/sw/rules";
+import {
+  DB_ABILITY_TAGS, DB_DMG_KINDS as DB_ARMOR_DMG, DB_FEATURES as DB_FEATURE_LIST, DB_POISONS, DB_MON_CATEGORIES, DB_DMG_TYPES as DB_HB_DMG_TYPES,
+  cleanDbBenefits,
+} from "@/components/hb/db/rules";
 
 // Homebrew is stored in the exact object shapes the character sheet already
 // consumes, so a sheet can merge it straight into its `_homebrewSpells` /
@@ -62,7 +108,7 @@ export function isHbType(v: unknown): v is HbType {
   return typeof v === "string" && (HB_TYPES as readonly string[]).includes(v);
 }
 
-export type CampaignRef = { id: string; name: string; code: string };
+export type CampaignRef = { id: string; name: string; code: string; system?: string | null };
 
 // What the pages, the manager UI and the sheet all receive over the wire.
 export type HomebrewRecord = {
@@ -167,7 +213,7 @@ export const userCampaigns = cache(async function userCampaigns(
 ): Promise<CampaignRef[]> {
   const owned = await prisma.campaign.findMany({
     where: { ownerId: userId },
-    select: { id: true, name: true, code: true },
+    select: { id: true, name: true, code: true, system: true },
   });
 
   // A character sheet's campaign link now lives in the indexed linkedCampaignId
@@ -188,7 +234,7 @@ export const userCampaigns = cache(async function userCampaigns(
   if (missing.length) {
     const linked = await prisma.campaign.findMany({
       where: { id: { in: missing } },
-      select: { id: true, name: true, code: true },
+      select: { id: true, name: true, code: true, system: true },
     });
     for (const c of linked) byId.set(c.id, c);
   }
@@ -259,15 +305,24 @@ function normalizeSpell(input: unknown): { name: string; data: Record<string, un
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew spell needs a name.");
   const tierNum = num(o.tier);
+  // Duration is built from parts in the builder; anything it composes parses
+  // back here — free text (a "custom" duration) is kept, bounded.
+  const dur = parseSdDuration(str(o.duration).slice(0, 60));
   const data: Record<string, unknown> = {
     name,
     tier: String(tierNum && tierNum >= 1 && tierNum <= 5 ? tierNum : 1),
     caster: "Homebrew",
     range: (SPELL_RANGES as readonly string[]).includes(str(o.range)) ? str(o.range) : "Close",
-    duration: str(o.duration),
-    damage: str(o.damage),
+    duration: composeSdDuration(dur),
+    damage: str(o.damage).slice(0, 40),
     desc: str(o.desc).slice(0, 4000),
   };
+  // Healing dice (the sheet rolls `heal` and labels it Heal) — "scaling" is
+  // Cure Wounds' (1 + half level)d6.
+  const heal = str(o.heal);
+  if (heal === "scaling" || (heal && parseDice(heal))) { data.heal = heal; data.damage = ""; }
+  const lists = Array.isArray(o.lists) ? SD_SPELL_LISTS.filter((l) => (o.lists as unknown[]).map(str).includes(l)) : [];
+  if (lists.length) data.lists = lists;
   return { name, data };
 }
 
@@ -322,38 +377,55 @@ function normalizeGear(input: unknown): { name: string; data: Record<string, unk
 
 // A stat block in SD_MONSTERS shape. Ability scores are stored as written
 // modifiers ("+2"), matching the book's tables and what the GM screen renders.
+// The builder also sends structured `attackRows` / `traitRows`; when present
+// they are the source of truth and `atk` / `notes` are re-composed from them
+// (components/hb/sd/rules), so every consumer keeps reading the same strings.
 function normalizeMonster(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew monster needs a name.");
 
-  // "+2" / "2" / "-1" → "+2" / "-1"; anything unreadable becomes "+0".
-  const mod = (v: unknown): string => {
-    const n = parseInt(String(v ?? "").trim().replace(/^\+/, ""), 10);
-    const val = Number.isFinite(n) ? n : 0;
-    return (val >= 0 ? "+" : "") + val;
-  };
-
   const types = MONSTER_TYPES as readonly string[];
-  // Movement is one of the book's three distances, stored lowercase as the
-  // stat blocks write it.
-  const MOVES = ["near", "close", "far"];
-  const mv = MOVES.includes(str(o.mv).toLowerCase()) ? str(o.mv).toLowerCase() : "near";
-  return {
-    name,
-    data: {
-      name,
-      ac: str(o.ac) || "10",
-      hp: str(o.hp) || "1",
-      atk: str(o.atk).slice(0, 500),
-      mv,
-      lv: str(o.lv) || "1",
-      al: ["L", "N", "C"].includes(str(o.al).toUpperCase()) ? str(o.al).toUpperCase() : "N",
-      s: mod(o.s), d: mod(o.d), c: mod(o.c), i: mod(o.i), w: mod(o.w), ch: mod(o.ch),
-      notes: str(o.notes).slice(0, 4000),
-      ctype: types.includes(str(o.ctype)) ? str(o.ctype) : "Monster",
-    },
+  // Movement: the book's grammar ("double near (fly, swim)", "none"); anything
+  // else falls back to near.
+  const mvIn = str(o.mv).toLowerCase();
+  const mvParsed = parseSdMove(mvIn);
+  const mv = mvIn && mvParsed ? composeSdMove(mvParsed) : "near";
+  // Numbers are clamped to the builder's bounds; a non-numeric legacy value is kept.
+  const bounded = (v: unknown, lo: number, hi: number, dflt: string) => {
+    const t = str(v);
+    if (!t) return dflt;
+    const n = num(t);
+    return n != null && /^\d+$/.test(t) ? String(Math.min(hi, Math.max(lo, n))) : t.slice(0, 40);
   };
+  const data: Record<string, unknown> = {
+    name,
+    ac: bounded(o.ac, 1, 25, "10"),
+    hp: bounded(o.hp, 1, 999, "1"),
+    atk: str(o.atk).slice(0, 500),
+    mv,
+    lv: bounded(o.lv, 0, 30, "1"),
+    al: ["L", "N", "C"].includes(str(o.al).toUpperCase()) ? str(o.al).toUpperCase() : "N",
+    s: sdModStr(o.s), d: sdModStr(o.d), c: sdModStr(o.c), i: sdModStr(o.i), w: sdModStr(o.w), ch: sdModStr(o.ch),
+    notes: str(o.notes).slice(0, 4000),
+    ctype: types.includes(str(o.ctype)) ? str(o.ctype) : "Monster",
+  };
+  if (Array.isArray(o.attackRows)) {
+    const rows = cleanSdAttackRows(o.attackRows);
+    data.attackRows = rows;
+    data.atk = composeSdAttacks(rows).slice(0, 500);
+  }
+  if (Array.isArray(o.traitRows)) {
+    const rows = (o.traitRows as unknown[]).slice(0, 20).map((t) => {
+      const to = (t ?? {}) as Record<string, unknown>;
+      return { name: str(to.name).replace(/:/g, "").slice(0, 40), text: str(to.text).slice(0, 800) };
+    }).filter((t) => t.name || t.text);
+    data.traitRows = rows;
+    data.notes = composeSdTraits(rows).slice(0, 4000);
+  }
+  if (typeof o.hpAuto === "boolean") data.hpAuto = o.hpAuto;
+  if (str(o.acNote)) data.acNote = str(o.acNote).replace(/[()]/g, "").slice(0, 40);
+  return { name, data };
 }
 
 // ── Backgrounds ──────────────────────────────────────────────────────────────
@@ -658,7 +730,12 @@ function normalizeDccMonster(input: unknown): { name: string; data: Record<strin
     hbSlots = Array.from({ length: count }, () => hp);
   }
 
-  const attacks = Array.isArray(o.attacks)
+  // Builder rows (components/hb/dcc/MonsterBuilder) win: `attacks` is composed
+  // from them so every consumer keeps reading the DccMonsterAttack shape.
+  const attackRows = cleanDccAttackRows(o.attackRows);
+  const attacks = attackRows.length
+    ? composeDccAttacks(attackRows).slice(0, 12)
+    : Array.isArray(o.attacks)
     ? (o.attacks as unknown[])
         .map((a) => {
           const ao = (a ?? {}) as Record<string, unknown>;
@@ -699,8 +776,15 @@ function normalizeDccMonster(input: unknown): { name: string; data: Record<strin
       stats,
       attacks,
       notes: strList(o.notes, 20, 800),
+      ...(str(o.flavor) ? { flavor: str(o.flavor).slice(0, 2000) } : {}),
       page: num(o.page) ?? 0,
       source: "Homebrew",
+      // builder data (ignored by the readers above)
+      floor,
+      ...(attackRows.length ? { attackRows } : {}),
+      ...(o.auto && typeof o.auto === "object"
+        ? { auto: Object.fromEntries(["slots", "hp", "surprise", "evade", "dr"].map((k) => [k, !!(o.auto as Record<string, unknown>)[k]])) }
+        : {}),
     },
   };
 }
@@ -734,6 +818,8 @@ function normalizeDccSkill(input: unknown): { name: string; data: Record<string,
     if (str(o.damageType)) data.damageType = str(o.damageType).slice(0, 40);
     if (str(o.range)) data.range = str(o.range).slice(0, 60);
     if (str(o.cooldown)) data.cooldown = str(o.cooldown).slice(0, 60);
+    const ds = dccDamageStat(o.damageStat);
+    if (ds) data.damageStat = ds;
   }
   if (str(o.limitations)) data.limitations = str(o.limitations).slice(0, 200);
   return { name, data };
@@ -762,7 +848,23 @@ function normalizeDccSpell(input: unknown): { name: string; data: Record<string,
   };
   const aiFavor = num(o.aiFavor);
   if (aiFavor != null) data.aiFavor = aiFavor;
+  // Optional structured dice (components/hb/dcc/SpellBuilder): attack = base
+  // damage the sheet links like a book spell's "Base Damage:", heal = healed.
+  const dmg = parseDice(str(o.damage));
+  if (type !== "utility" && dmg && dmg.n > 0) {
+    data.damage = `${Math.min(40, dmg.n)}d${Math.min(100, Math.max(2, dmg.d))}`;
+    const ds = dccDamageStat(o.damageStat);
+    if (ds) data.damageStat = ds;
+    if (type === "attack" && str(o.damageType)) data.damageType = str(o.damageType).slice(0, 40);
+  }
   return { name, data };
+}
+
+// The Stat Mod a homebrew skill/spell adds to damage: a DccStat, "none", or unset.
+function dccDamageStat(v: unknown): string {
+  const t = str(v).toUpperCase();
+  if (t === "NONE") return "none";
+  return (DCC_STATS as readonly string[]).includes(t) ? t : "";
 }
 
 // Races & classes carry their stat bonuses the way the book does: as grant
@@ -908,6 +1010,30 @@ function dndBonusList(v: unknown): { target: string; amount: number }[] {
     : [];
 }
 
+// LootBonus `benefits` for a homebrew magic item (sys "dnd" — the kinds of
+// public/tools-data/dnd-loot-bonus.js, which the GM Screen loot builder and the
+// character sheet's equip automation use). Unknown kinds drop, amounts clamp.
+const DND_LB_STATS = ["str", "dex", "con", "int", "wis", "cha"];
+const DND_LB_DAMAGE = ["Acid", "Bludgeoning", "Cold", "Fire", "Force", "Lightning", "Necrotic", "Piercing", "Poison", "Psychic", "Radiant", "Slashing", "Thunder"];
+function dndBenefits(v: unknown): { kind: string; target?: string; amount?: number }[] {
+  if (!Array.isArray(v)) return [];
+  const out: { kind: string; target?: string; amount?: number }[] = [];
+  for (const raw of v.slice(0, 24)) {
+    const o = (raw ?? {}) as Record<string, unknown>;
+    const kind = str(o.kind).toLowerCase(), n = Math.trunc(num(o.amount) ?? 0), t = str(o.target);
+    const amt = (lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
+    if (["plus", "ac", "attack", "damage", "save"].includes(kind)) { if (n) out.push({ kind, amount: amt(-10, 10) }); }
+    else if (kind === "speed") { if (n) out.push({ kind, amount: amt(-60, 120) }); }
+    else if (kind === "stat" || kind === "setstat") {
+      const tt = t.toLowerCase().slice(0, 3);
+      if (DND_LB_STATS.includes(tt) && n) out.push({ kind, target: tt, amount: kind === "stat" ? amt(-10, 10) : amt(1, 30) });
+    } else if (kind === "resist") { const d = DND_LB_DAMAGE.find((x) => x.toLowerCase() === t.toLowerCase()); if (d) out.push({ kind, target: d }); }
+    else if (kind === "spell") { if (t) out.push({ kind, target: t.slice(0, 60) }); }
+    else if (kind === "note") { if (t) out.push({ kind, target: t.slice(0, 160) }); }
+  }
+  return out;
+}
+
 // Challenge Rating → XP and Proficiency Bonus (2024 tables), for auto-deriving a
 // homebrew creature's XP/PB from its CR when they're left blank.
 const CR_XP: Record<string, number> = {
@@ -993,18 +1119,38 @@ function normalizeDndEquipment(input: unknown): { name: string; data: Record<str
   if (hbKind === "magic") {
     // A base weapon makes this a magic weapon: the type becomes "Weapon (base)",
     // which the sheet reads to build the attack row and fold in the atk bonus.
-    const baseWeapon = str(o.baseWeapon).slice(0, 60);
+    // The builder sends `itemType` (+ baseWeapon / baseArmor); older records only
+    // a `type` string (kept as-is).
+    const itemType = oneOf(o.itemType, [...DND_MAGIC_TYPES, "Custom"] as const, "" as "Custom");
+    const baseWeapon = itemType && itemType !== "Weapon" ? "" : str(o.baseWeapon).slice(0, 60);
+    const baseArmor = itemType === "Armor" ? str(o.baseArmor).slice(0, 60) : "";
+    const type = itemType
+      ? dndMagicType(itemType, itemType === "Weapon" ? baseWeapon : baseArmor, str(o.type).slice(0, 80)).slice(0, 80)
+      : baseWeapon ? `Weapon (${baseWeapon})` : (str(o.type).slice(0, 80) || "Wondrous Item");
     const magic: Record<string, unknown> = {
       ...base,
-      type: baseWeapon ? `Weapon (${baseWeapon})` : (str(o.type).slice(0, 80) || "Wondrous Item"),
+      type,
       rarity: oneOf(o.rarity, DND_RARITIES, "Uncommon"),
       attunement: !!o.attunement,
       attunementNote: str(o.attunementNote).slice(0, 200),
       description: str(o.description).slice(0, 6000),
     };
     if (baseWeapon) magic.baseWeapon = baseWeapon;   // remembered so the editor can re-populate it
-    const bonuses = dndBonusList(o.bonuses);
-    if (bonuses.length) magic.bonuses = bonuses;     // mechanical effects the sheet applies while equipped
+    if (baseArmor) magic.baseArmor = baseArmor;
+    if (itemType) magic.itemType = itemType;
+    if (Array.isArray(o.benefits)) {
+      // Builder record: LootBonus badges (the sheet copies them onto the inventory
+      // row, bv:2) + the sheet-only extras, and a legacy `bonuses` mirror for
+      // inventory rows saved before benefits existed.
+      const benefits = dndBenefits(o.benefits);
+      const extras = dndBonusList(o.bonuses).filter((b) => (DND_EXTRA_BONUS_TARGETS as readonly string[]).includes(b.target));
+      magic.benefits = benefits;
+      const bonuses = [...extras, ...dndBonusList(dndBenefitsToBonuses(benefits, type))];
+      if (bonuses.length) magic.bonuses = bonuses.slice(0, 14);
+    } else {
+      const bonuses = dndBonusList(o.bonuses);
+      if (bonuses.length) magic.bonuses = bonuses;     // mechanical effects the sheet applies while equipped
+    }
     return { name, data: magic };
   }
   return { name, data: {
@@ -1098,9 +1244,11 @@ function normalizeDndSpecies(input: unknown): { name: string; data: Record<strin
   if (!name) throw new Error("A homebrew species needs a name.");
   const speed = num(o.speed);
   const dv = num(o.darkvision);
+  // One size, or (like the book's Human) a choice of sizes.
+  const sizes = pickList(Array.isArray(o.size) ? o.size : [o.size], DND_SIZES).slice(0, 3);
   const data: Record<string, unknown> = {
     name,
-    size: oneOf(o.size, DND_SIZES, "Medium"),
+    size: sizes.length > 1 ? sizes : sizes[0] ?? "Medium",
     speed: speed != null && speed >= 0 ? speed : 30,
     darkvision: dv != null && dv >= 0 ? dv : 0,
     creatureType: str(o.creatureType).slice(0, 60) || "Humanoid",
@@ -1111,7 +1259,7 @@ function normalizeDndSpecies(input: unknown): { name: string; data: Record<strin
   // Optional lineages (High-Elf / Wood-Elf style sub-options): each has a name and
   // its own traits, entered one "Name — description" per line.
   const lineages = (Array.isArray(o.lineages) ? (o.lineages as unknown[]) : [])
-    .map((l) => { const r = (l ?? {}) as Record<string, unknown>; return { name: str(r.name).slice(0, 120), traits: parseTraitLines(r.traits, 12) }; })
+    .map((l) => { const r = (l ?? {}) as Record<string, unknown>; return { name: str(r.name).slice(0, 120), traits: Array.isArray(r.traits) ? nameDescList(r.traits, 12) : parseTraitLines(r.traits, 12) }; })
     .filter((l) => l.name)
     .slice(0, 8);
   if (lineages.length) data.lineages = lineages;
@@ -1125,7 +1273,7 @@ function normalizeDndMonster(input: unknown): { name: string; data: Record<strin
   if (!name) throw new Error("A homebrew creature needs a name.");
   const ab = (o.abilities ?? {}) as Record<string, unknown>;
   const abilities: Record<string, number> = {};
-  for (const k of DND_ABILITIES) { const n = num(ab[k]); abilities[k] = n != null && n >= 1 ? n : 10; }
+  for (const k of DND_ABILITIES) { const n = num(ab[k]); abilities[k] = n != null && n >= 1 ? Math.min(30, n) : 10; }
   const hp = num(o.hp);
   const ac = num(o.ac);
   const xp = num(o.xp);
@@ -1162,6 +1310,26 @@ function normalizeDndMonster(input: unknown): { name: string; data: Record<strin
   const bonus = nameDescList(o.bonusActions, 20); if (bonus.length) data.bonusActions = bonus;
   const reac = nameDescList(o.reactions, 20); if (reac.length) data.reactions = reac;
   const leg = nameDescList(o.legendaryActions, 20); if (leg.length) data.legendaryActions = leg;
+  // Builder record: re-compose every legacy string from the structured block and
+  // the attack rows (components/hb/dnd/rules — the same functions the preview uses).
+  if (o.sb && typeof o.sb === "object") {
+    const sb = cleanDndBlock(o.sb);
+    const cr2 = CR_XP[cr] != null ? cr : "0";
+    const block = composeDndBlock(sb, abilities, cr2, data.size as string);
+    for (const k of ["hp", "hpFormula", "speed", "senses", "languages", "xp", "proficiencyBonus"] as const) data[k] = block[k];
+    for (const k of ["savingThrows", "skills", "damageResistances", "damageImmunities", "damageVulnerabilities", "conditionImmunities"] as const) {
+      if (block[k]) data[k] = block[k]; else delete data[k];
+    }
+    data.sb = sb;
+  }
+  if (Array.isArray(o.attackRows)) {
+    const rows = cleanDndAttackRows(o.attackRows);
+    const actionRows = dndNameDesc(o.actionRows, 20), bonusRows = dndNameDesc(o.bonusRows, 20);
+    const { actions, bonusActions } = composeDndActions(rows, actionRows, bonusRows);
+    data.actions = actions.slice(0, 30);
+    if (bonusActions.length) data.bonusActions = bonusActions.slice(0, 20); else delete data.bonusActions;
+    data.attackRows = rows; data.actionRows = actionRows; data.bonusRows = bonusRows;
+  }
   return { name, data };
 }
 
@@ -1199,13 +1367,24 @@ function normalizeDndSubclass(input: unknown): { name: string; data: Record<stri
     .sort((a, b) => (a.level as number) - (b.level as number))
     .slice(0, 40);
 
-  return { name, data: {
+  const data: Record<string, unknown> = {
     name,
     className,
     flavor: str(o.flavor).slice(0, 2000),
     features,
     source: "Homebrew",
-  } };
+  };
+  // Always-prepared subclass spells by class level ({"3": ["Bless", …]}) — the
+  // same field book subclasses use; the sheet adds them once the level is reached.
+  const ap: Record<string, string[]> = {};
+  Object.entries((o.alwaysPrepared ?? {}) as Record<string, unknown>).slice(0, 20).forEach(([k, v]) => {
+    const lvl = num(k);
+    if (lvl == null || lvl < 1 || lvl > 20) return;
+    const list = strList(v, 10, 80);
+    if (list.length) ap[String(Math.trunc(lvl))] = [...(ap[String(Math.trunc(lvl))] ?? []), ...list].slice(0, 10);
+  });
+  if (Object.keys(ap).length) data.alwaysPrepared = ap;
+  return { name, data };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1234,76 +1413,120 @@ const truthy = (v: unknown): boolean => v === true || str(v) === "true";
 // ── Nimble ──────────────────────────────────────────────────────────────────
 const NIMBLE_ITEM_CATEGORIES = ["Cloth", "Leather", "Mail", "Plate", "Shield", "Melee Weapon", "Ranged Weapon", "Key Equipment", "Adventuring Gear", "Magic Item", "Spell Scroll", "Wand"] as const;
 const NIMBLE_SCHOOLS = ["Fire", "Ice", "Lightning", "Wind", "Radiant", "Necrotic", "Utility"] as const;
-const NIMBLE_TARGETING = ["Single Target", "AoE", "Self", "Utility"] as const;
 const NIMBLE_ANCESTRY_GROUPS = ["Common", "Exotic"] as const;
 const NIMBLE_ARMOR = ["M", "H"] as const;
+const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
 
+// Items: the builder posts `build` (structured) — damage / armor / properties /
+// cost are composed from it; legacy text-only posts keep their strings.
+// `benefits` are LootBonus "nim" badges the sheet applies on equip (bv:2).
 function normalizeNimbleItem(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew item needs a name.");
-  const data: Record<string, unknown> = { name, category: oneOf(o.category, NIMBLE_ITEM_CATEGORIES, "Adventuring Gear"), page: 0, source: "Homebrew" };
-  if (str(o.armor)) data.armor = str(o.armor).slice(0, 40);
-  if (str(o.damage)) data.damage = str(o.damage).slice(0, 60);
-  if (str(o.properties)) data.properties = str(o.properties).slice(0, 200);
-  if (str(o.cost)) data.cost = str(o.cost).slice(0, 40);
-  if (str(o.rarity)) data.rarity = str(o.rarity).slice(0, 60);
+  const category = oneOf(o.category, NIMBLE_ITEM_CATEGORIES, "Adventuring Gear");
+  const data: Record<string, unknown> = { name, category, page: 0, source: "Homebrew" };
+  const rarity = str(o.rarity).slice(0, 60);
+  if (isObj(o.build)) {
+    const b = nimCleanItemBuild(o.build);
+    data.build = b;
+    Object.assign(data, nimItemFields(category, b, rarity));
+  } else {
+    if (str(o.armor)) data.armor = str(o.armor).slice(0, 40);
+    if (str(o.damage)) data.damage = str(o.damage).slice(0, 60);
+    if (str(o.properties)) data.properties = str(o.properties).slice(0, 200);
+    if (str(o.cost)) data.cost = str(o.cost).slice(0, 40);
+  }
+  if (rarity) data.rarity = rarity;
   if (str(o.description)) data.description = str(o.description).slice(0, 2000);
+  const benefits = cleanNimBenefits(o.benefits);
+  if (benefits.length) data.benefits = benefits;
   return { name, data };
 }
+// Spells: `sb` (structured) composes `text` in the book's "Range: 8. Damage: …" form.
 function normalizeNimbleSpell(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew spell needs a name.");
-  const tier = num(o.tier);
+  const t0 = num(o.tier);
+  const tier = t0 != null && t0 >= 0 ? Math.min(9, Math.floor(t0)) : 0;
   const data: Record<string, unknown> = {
-    name, school: oneOf(o.school, NIMBLE_SCHOOLS, "Utility"),
-    tier: tier != null && tier >= 0 ? Math.min(9, Math.floor(tier)) : 0,
-    actions: str(o.actions).slice(0, 40) || "1 Action",
+    name, school: oneOf(o.school, NIMBLE_SCHOOLS, "Utility"), tier,
+    actions: (NIM_ACTIONS as readonly string[]).includes(str(o.actions)) ? str(o.actions) : str(o.actions).slice(0, 40) || "1 Action",
     text: str(o.text).slice(0, 3000), page: 0, source: "Homebrew",
   };
+  if (isObj(o.sb)) { const sb = nimCleanSpellBuild(o.sb); data.sb = sb; data.text = composeNimSpellText(tier, sb).slice(0, 3000); }
   if (str(o.targeting)) data.targeting = oneOf(o.targeting, NIMBLE_TARGETING, "Single Target");
   if (truthy(o.utility)) data.utility = true;
   return { name, data };
 }
+// Monsters: attackRows + traitRows compose `abilities` (what the GM Screen,
+// bestiary and prep builder read); saveMods compose `saves`; hpAuto takes HP
+// from the GM's Guide Monster Builder table.
 function normalizeNimbleMonster(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew monster needs a name.");
+  const armor = (NIMBLE_ARMOR as readonly string[]).includes(str(o.armor)) ? str(o.armor) : null;
+  const level = str(o.level).slice(0, 20) || "1";
+  const minion = truthy(o.minion);
   const data: Record<string, unknown> = {
     name, family: str(o.family).slice(0, 60) || "Homebrew",
-    level: str(o.level).slice(0, 20) || "1", hp: num(o.hp),
-    armor: (NIMBLE_ARMOR as readonly string[]).includes(str(o.armor)) ? str(o.armor) : null,
-    legendary: truthy(o.legendary), minion: truthy(o.minion),
+    level, hp: num(o.hp), armor,
+    legendary: truthy(o.legendary), minion,
     abilities: objList(o.abilities, ["name", "text"], 30, 1000),
     page: 0, source: "Homebrew",
   };
+  if (Array.isArray(o.attackRows) || Array.isArray(o.traitRows)) {
+    const attackRows = cleanNimAttackRows(o.attackRows), traitRows = cleanNimTraits(o.traitRows);
+    data.attackRows = attackRows; data.traitRows = traitRows;
+    data.abilities = composeNimAbilities(attackRows, traitRows).slice(0, 30);
+  }
+  if (truthy(o.hpAuto)) { const hp = nimMonsterHp(level, armor ?? ""); if (hp != null) { data.hp = hp; data.hpAuto = true; } }
+  if (minion) data.hp = null;
+  if (typeof data.hp === "number") data.hp = Math.max(1, Math.min(9999, Math.round(data.hp)));
+  const sp = num(o.speed);
+  if (sp != null) data.speed = Math.max(0, Math.min(60, Math.round(sp)));
   if (str(o.size)) data.size = str(o.size).slice(0, 20);
-  if (str(o.saves)) data.saves = str(o.saves).slice(0, 80);
+  if (isObj(o.saveMods)) { const sv = nimCleanSaves(o.saveMods); data.saveMods = sv; const t = composeNimSaves(sv); if (t) data.saves = t; }
+  else if (str(o.saves)) data.saves = str(o.saves).slice(0, 80);
   if (str(o.familyTrait)) data.familyTrait = str(o.familyTrait).slice(0, 1000);
   if (str(o.description)) data.description = str(o.description).slice(0, 2000);
   return { name, data };
 }
+// Ancestries: traitRows ({name, text, grants}) compose the book `traits` text;
+// `grants` (flattened) is what the sheet applies (skills, Armor, Speed, Wounds…).
 function normalizeNimbleAncestry(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew ancestry needs a name.");
+  const sizes = Array.isArray(o.size) ? (o.size as unknown[]).map(str).filter((x) => (NIM_SIZES as readonly string[]).includes(x)) : [];
   const data: Record<string, unknown> = {
     name, group: oneOf(o.group, NIMBLE_ANCESTRY_GROUPS, "Common"),
-    size: str(o.size).slice(0, 40) || "Medium",
+    size: (sizes.length ? sizes.join(" or ") : str(o.size)).slice(0, 40) || "Medium",
     description: str(o.description).slice(0, 2000),
     traits: objList(o.traits, ["name", "text"], 20, 1000),
     page: 0, source: "Homebrew",
   };
+  if (Array.isArray(o.traitRows)) {
+    const rows = (o.traitRows as unknown[]).slice(0, 20).map((r) => {
+      const x = (r ?? {}) as Record<string, unknown>;
+      return { name: str(x.name).slice(0, 120), text: str(x.text).slice(0, 1000), grants: nimCleanGrants(x.grants) };
+    }).filter((r) => r.name || r.text || r.grants.length);
+    data.traitRows = rows;
+    data.traits = rows.map((r) => ({ name: r.name, text: nimAncTraitText(r) }));
+    data.grants = rows.flatMap((r) => r.grants);
+  }
   return { name, data };
 }
 
 // ── SW ────────────────────────────────────────────────────────────────────
-const SW_WEAPON_KINDS = ["Blaster", "Melee", "Grenade", "Heavy", "Vehicle", "Starship", "Capital", "Artillery", "Droid"] as const;
-const SW_GEAR_CATEGORIES = ["Armor", "Medical", "Tool", "Communication", "Survival", "Droid", "Misc"] as const;
+// Builders (components/hb/sw/) post a structured `build`; the book fields every
+// consumer reads (SwWeapon / SwGear / SwForcePower / SwCharacter) are composed
+// from it here with the shared rules. Records without a build keep the legacy path.
 const SW_BOOKS = ["core", "sourcebook", "companion"] as const;
-const SW_ATTRIBUTES = ["Dexterity", "Knowledge", "Mechanical", "Perception", "Strength", "Technical"] as const;
-const SW_CHAR_GROUPS = ["Imperial", "Rebel", "Civilian", "Alien", "Droid", "Creature"] as const;
+const SW_ATTRIBUTES = SW_ATTRS;
+const SW_CHAR_GROUPS = SW_HB_CHAR_GROUPS;
 
 // A die code "3D+2" / "4D" / "5D-1" → pips (1D = 3). null if blank/unparseable.
 function swPips(v: unknown): number | null {
@@ -1311,22 +1534,27 @@ function swPips(v: unknown): number | null {
   if (!m) return null;
   return parseInt(m[1], 10) * 3 + (m[2] ? parseInt(m[2].replace(/\s+/g, ""), 10) : 0);
 }
+const swHasBuild = (o: Record<string, unknown>) => !!o.build && typeof o.build === "object" && !Array.isArray(o.build);
 function normalizeSwWeapon(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew weapon needs a name.");
-  const damageText = str(o.damageText || o.damage).slice(0, 20);
-  const data: Record<string, unknown> = {
-    name, kind: oneOf(o.kind, SW_WEAPON_KINDS, "Blaster"),
-    damage: swPips(damageText), book: oneOf(o.book, SW_BOOKS, "companion"),
-    page: 0, source: "Homebrew",
-  };
+  const base = { name, book: oneOf(o.book, SW_BOOKS, "companion"), page: 0, source: "Homebrew" };
+  if (swHasBuild(o)) {
+    const build = swCleanWeaponBuild(o.build);
+    build.kind = oneOf(build.kind, SW_WEAPON_KINDS, "Blaster");
+    const data: Record<string, unknown> = { ...base, ...swComposeWeapon(build, typeof o.damage === "number" ? o.damage : null), build };
+    if (str(o.notes)) data.notes = str(o.notes).slice(0, 400);
+    return { name, data };
+  }
+  const damageText = str(o.damageText || o.damage).slice(0, 400);
+  const data: Record<string, unknown> = { ...base, kind: oneOf(o.kind, SW_WEAPON_KINDS, "Blaster"), damage: swPips(damageText) };
   if (damageText) data.damageText = damageText;
-  if (str(o.range)) data.range = str(o.range).slice(0, 60);
-  if (str(o.skill)) data.skill = str(o.skill).slice(0, 40);
+  if (str(o.range)) data.range = str(o.range).slice(0, 80);
+  if (str(o.skill)) data.skill = str(o.skill).slice(0, 60);
   if (str(o.notes)) data.notes = str(o.notes).slice(0, 400);
-  if (str(o.cost)) data.cost = str(o.cost).slice(0, 40);
-  if (str(o.availability)) data.availability = str(o.availability).slice(0, 40);
+  if (str(o.cost)) data.cost = str(o.cost).slice(0, 80);
+  if (str(o.availability)) data.availability = str(o.availability).slice(0, 80);
   return { name, data };
 }
 function normalizeSwGear(input: unknown): { name: string; data: Record<string, unknown> } {
@@ -1338,7 +1566,15 @@ function normalizeSwGear(input: unknown): { name: string; data: Record<string, u
     description: str(o.description).slice(0, 2000), book: oneOf(o.book, SW_BOOKS, "companion"),
     page: 0, source: "Homebrew",
   };
-  if (str(o.cost)) data.cost = str(o.cost).slice(0, 40);
+  if (swHasBuild(o)) {
+    const build = swCleanGearBuild(o.build);
+    const stats = swComposeGearStats(build, data.category as string), cost = swComposeCost(build.cost);
+    if (stats) data.stats = stats;
+    if (cost) data.cost = cost;
+    data.build = build;
+    return { name, data };
+  }
+  if (str(o.cost)) data.cost = str(o.cost).slice(0, 80);
   if (str(o.stats)) data.stats = str(o.stats).slice(0, 200);
   return { name, data };
 }
@@ -1348,10 +1584,18 @@ function normalizeSwForce(input: unknown): { name: string; data: Record<string, 
   if (!name) throw new Error("A homebrew Force power needs a name.");
   const data: Record<string, unknown> = {
     name, attribute: str(o.attribute).slice(0, 60) || "Control",
-    difficulty: str(o.difficulty).slice(0, 200), description: str(o.description).slice(0, 3000),
+    difficulty: str(o.difficulty).slice(0, 2000), description: str(o.description).slice(0, 3000),
     book: oneOf(o.book, SW_BOOKS, "companion"), page: 0, source: "Homebrew",
   };
-  if (str(o.time)) data.time = str(o.time).slice(0, 120);
+  if (str(o.time)) data.time = str(o.time).slice(0, 200);
+  if (swHasBuild(o)) {
+    const build = swCleanForceBuild(o.build);
+    data.attribute = swComposeForceAttr(build.keys);
+    data.difficulty = swComposeForceDiff(build);
+    const time = swComposeForceTime(build);
+    if (time) data.time = time; else delete data.time;
+    data.build = build;
+  }
   const req = strList(o.requires, 20, 80); if (req.length) data.requires = req;
   return { name, data };
 }
@@ -1359,38 +1603,50 @@ function normalizeSwCharacter(input: unknown): { name: string; data: Record<stri
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew character needs a name.");
-  const attributes: Record<string, number> = {};
-  for (const a of SW_ATTRIBUTES) { const p = swPips(o[a]); if (p != null) attributes[a] = p; }
-  const data: Record<string, unknown> = {
-    name, group: oneOf(o.group, SW_CHAR_GROUPS, "Alien"), attributes,
-    skills: strList(o.skills, 40, 200), equipment: strList(o.equipment, 40, 200),
-    book: oneOf(o.book, SW_BOOKS, "companion"), page: 0, source: "Homebrew",
-  };
+  const base: Record<string, unknown> = { name, group: oneOf(o.group, SW_CHAR_GROUPS, "Alien") };
+  let data: Record<string, unknown>;
+  if (swHasBuild(o)) {
+    const build = swCleanCharBuild(o.build);
+    data = { ...base, ...swComposeChar(build), build };
+  } else {
+    // Legacy form: attributes as code text per attribute key (or an `attributes` pips map).
+    const attributes: Record<string, number> = {};
+    const A = (o.attributes ?? {}) as Record<string, unknown>;
+    for (const a of SW_ATTRIBUTES) { const p = swPips(o[a]) ?? (typeof A[a] === "number" ? (A[a] as number) : null); if (p != null) attributes[a] = p; }
+    data = { ...base, attributes, skills: strList(o.skills, 40, 200), equipment: strList(o.equipment, 40, 200) };
+    if (str(o.move)) data.move = str(o.move).slice(0, 80);
+  }
+  data.book = oneOf(o.book, SW_BOOKS, "companion"); data.page = 0; data.source = "Homebrew";
   if (str(o.description)) data.description = str(o.description).slice(0, 2000);
-  if (str(o.move)) data.move = str(o.move).slice(0, 40);
   if (str(o.notes)) data.notes = str(o.notes).slice(0, 400);
   return { name, data };
 }
 
 // ── ACE ─────────────────────────────────────────────────────────────────────
-const ACE_STATS = ["Smarts", "Moves", "Style", "Brawn", "Power"] as const;
-const ACE_GEAR_TIERS = ["Free", "Normal", "Hard", "Herculean", "Impossible"] as const;
+// Builders: components/hb/ace/* (pure rules in components/hb/ace/rules.ts).
+// Storage stays in the book shapes (lib/data/ace-types); optional extras are
+// role.startingGear, gear.attack, extra.attackRows/auto, focus.health/defence.
+const ACE_STATS = AceRules.ACE_STATS;
+const ACE_GEAR_TIERS = AceRules.ACE_TIERS;
+const aceSetting = (v: unknown) => oneOf(v, AceRules.SETTING_KEYS as string[], "core");
+const aceClamp = (v: unknown, lo: number, hi: number): number | null => { const n = num(v); return n == null ? null : Math.min(hi, Math.max(lo, n)); };
 
 function normalizeAceRole(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew role needs a name.");
-  const statMods: Record<string, number> = {};
-  for (const st of ACE_STATS) { const n = num(o["mod" + st]); if (n != null && n !== 0) statMods[st] = n; }
+  // statMods: the builder posts an object; the legacy form posted mod<Stat> fields.
+  const statMods = AceRules.cleanStatMods(o);
   const data: Record<string, unknown> = {
     name, category: str(o.category).slice(0, 60) || "Species",
-    setting: str(o.setting).slice(0, 40) || "core",
+    setting: aceSetting(o.setting),
     ability: str(o.ability).slice(0, 4000), page: 0, source: "Homebrew",
   };
   if (truthy(o.power)) data.power = true;
   const gf = strList(o.grantsFocus, 20, 60); if (gf.length) data.grantsFocus = gf;
   if (Object.keys(statMods).length) data.statMods = statMods;
-  const hb = num(o.healthBonus); if (hb != null && hb !== 0) data.healthBonus = hb;
+  const hb = aceClamp(o.healthBonus, -5, 10); if (hb != null && hb !== 0) data.healthBonus = hb;
+  const sg = strList(o.startingGear, 20, 80); if (sg.length) data.startingGear = sg;
   return { name, data };
 }
 function normalizeAceGear(input: unknown): { name: string; data: Record<string, unknown> } {
@@ -1398,38 +1654,50 @@ function normalizeAceGear(input: unknown): { name: string; data: Record<string, 
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew gear entry needs a name.");
   const data: Record<string, unknown> = {
-    name, setting: str(o.setting).slice(0, 40) || "core",
-    tier: oneOf(o.tier, ACE_GEAR_TIERS, "Normal"), tn: num(o.tn),
+    name, setting: aceSetting(o.setting),
+    tier: oneOf(o.tier, ACE_GEAR_TIERS, "Normal"), tn: aceClamp(o.tn, 0, 99),
     category: str(o.category).slice(0, 40) || "Gadget",
     description: str(o.description).slice(0, 2000), page: 0, source: "Homebrew",
   };
-  const dmg = num(o.damage); if (dmg != null) data.damage = dmg;
-  const def = num(o.defence); if (def != null) data.defence = def;
+  const dmg = aceClamp(o.damage, 0, 20);
+  if (dmg != null) { data.damage = dmg; const atk = str(o.attack); if ((AceRules.GEAR_ATTACKS as readonly string[]).includes(atk)) data.attack = atk; }
+  const def = aceClamp(o.defence, -20, 20); if (def != null) data.defence = def;
   return { name, data };
 }
 function normalizeAceExtra(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew extra needs a name.");
-  const focuses = (Array.isArray(o.focuses) ? o.focuses : []).map((r) => {
-    const f = (r ?? {}) as Record<string, unknown>;
-    const row: Record<string, unknown> = { stat: oneOf(f.stat, ACE_STATS, "Brawn"), name: str(f.name).slice(0, 60) };
-    const d = num(f.dice); if (d != null) row.dice = d;
-    return row;
-  }).filter((r) => r.name).slice(0, 20);
-  const attacks = (Array.isArray(o.attacks) ? o.attacks : []).map((r) => {
-    const a = (r ?? {}) as Record<string, unknown>;
-    const row: Record<string, unknown> = { name: str(a.name).slice(0, 60), dice: num(a.dice), damage: num(a.damage) };
-    if (str(a.note)) row.note = str(a.note).slice(0, 200);
-    return row;
-  }).filter((r) => r.name).slice(0, 20);
+  const stats = AceRules.cleanStats(o);
+  const focusRows = AceRules.cleanFocuses(o.focuses);
+  const focuses = focusRows.map((f) => (f.dice != null ? { stat: f.stat, name: f.name, dice: f.dice } : { stat: f.stat, name: f.name }));
+  const type = str(o.type).slice(0, 40) || "Monster";
+  let attacks: Record<string, unknown>[];
+  let attackRows: AceRules.AceAtkRow[] | null = null;
+  if (Array.isArray(o.attackRows)) {
+    // Builder: compose the book `attacks` from the structured rows.
+    attackRows = AceRules.cleanAtkRows(o.attackRows);
+    attacks = attackRows.map((r) => AceRules.composeAttack(r, stats, focusRows));
+  } else {
+    attacks = (Array.isArray(o.attacks) ? o.attacks : []).map((r) => {
+      const a = (r ?? {}) as Record<string, unknown>;
+      const row: Record<string, unknown> = { name: str(a.name).slice(0, 60), dice: aceClamp(a.dice, 0, 30), damage: aceClamp(a.damage, 0, 20) };
+      if (str(a.note)) row.note = str(a.note).slice(0, 200);
+      return row;
+    }).filter((r) => r.name).slice(0, 20);
+  }
+  const au = (o.auto && typeof o.auto === "object" ? o.auto : null) as Record<string, unknown> | null;
+  const auto = au ? { health: truthy(au.health), defence: truthy(au.defence) } : null;
   const data: Record<string, unknown> = {
-    name, setting: str(o.setting).slice(0, 40) || "core", type: str(o.type).slice(0, 40) || "Monster",
-    smarts: num(o.smarts), moves: num(o.moves), style: num(o.style), brawn: num(o.brawn),
-    health: num(o.health), defence: num(o.defence), focuses, attacks,
-    notes: strList(o.notes, 20, 200), page: 0, source: "Homebrew",
+    name, setting: aceSetting(o.setting), type,
+    smarts: stats.smarts, moves: stats.moves, style: stats.style, brawn: stats.brawn,
+    health: auto?.health ? AceRules.deriveHealth(type, stats, focusRows) : aceClamp(o.health, 0, 99),
+    defence: auto?.defence ? AceRules.deriveDefence(stats, focusRows) : aceClamp(o.defence, 0, 99),
+    focuses, attacks, notes: strList(o.notes, 20, 200), page: 0, source: "Homebrew",
   };
-  const p = num(o.power); if (p != null) data.power = p;
+  if (stats.power != null) data.power = stats.power;
+  if (attackRows) data.attackRows = attackRows;
+  if (auto) data.auto = auto;
   if (str(o.description)) data.description = str(o.description).slice(0, 2000);
   return { name, data };
 }
@@ -1437,30 +1705,35 @@ function normalizeAceFocus(input: unknown): { name: string; data: Record<string,
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew focus needs a name.");
-  const data: Record<string, unknown> = { name, stat: oneOf(o.stat, ACE_STATS, "Smarts"), setting: str(o.setting).slice(0, 40) || "core", source: "Homebrew" };
-  if (str(o.note)) data.note = str(o.note).slice(0, 200);
+  const data: Record<string, unknown> = { name, stat: oneOf(o.stat, ACE_STATS, "Smarts"), setting: aceSetting(o.setting), source: "Homebrew" };
+  const health = aceClamp(o.health, -10, 20) || null, defence = aceClamp(o.defence, -20, 30) || null;
+  if (health) data.health = health;
+  if (defence) data.defence = defence;
+  const note = str(o.note).slice(0, 200) || AceRules.focusNote(health, defence);
+  if (note) data.note = note;
   return { name, data };
 }
 function normalizeAceTrait(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew trait needs a name.");
-  const data: Record<string, unknown> = { name, setting: str(o.setting).slice(0, 40) || "core", source: "Homebrew" };
+  const data: Record<string, unknown> = { name, setting: aceSetting(o.setting), source: "Homebrew" };
   if (str(o.description)) data.description = str(o.description).slice(0, 500);
   return { name, data };
 }
 
 // ── KOB ─────────────────────────────────────────────────────────────────────
-const KOB_BOOKS = ["bikes", "brooms", "capes"] as const;
-const KOB_STATS = ["Brains", "Brawn", "Fight", "Flight", "Charm", "Grit"] as const;
-const KOB_DICE = ["4", "6", "8", "10", "12", "20"] as const;
+// Rules + composers shared with the builders: components/hb/kob/rules.ts.
+const KOB_BOOKS = KobRules.KOB_BOOKS;
 
 function normalizeKobTrope(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew trope needs a name.");
-  const dice: Record<string, number> = {};
-  for (const st of KOB_STATS) { const d = str(o["dice" + st]); if ((KOB_DICE as readonly string[]).includes(d)) dice[st] = parseInt(d, 10); }
+  // A full d4–d20 set, each die once: the creation wizard copies it onto the character.
+  const dice = KobRules.readDice(o);
+  const problems = KobRules.diceProblems(dice);
+  if (problems.length) throw new Error(problems.join(" "));
   const data: Record<string, unknown> = {
     name, book: oneOf(o.book, KOB_BOOKS, "bikes"), dice,
     ages: strList(o.ages, 6, 20),
@@ -1475,11 +1748,28 @@ function normalizeKobStrength(input: unknown): { name: string; data: Record<stri
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew strength needs a name.");
+  const book = oneOf(o.book, KOB_BOOKS, "bikes");
+  // Legacy shape (no `text`): cost + description stored as typed.
+  if (o.text == null && o.effects == null && o.costAT == null) {
+    return { name, data: { name, book, cost: str(o.cost).slice(0, 60), description: str(o.description).slice(0, 1000), page: 0, source: "Homebrew" } };
+  }
+  const ages = KobRules.ageNames(book);
+  const ageList = (v: unknown) => strList(v, 3, 20).filter((a) => ages.includes(a));
+  const atRaw = o.costAT == null ? null : parseInt(str(o.costAT), 10);
+  const costAT = atRaw == null || !Number.isFinite(atRaw) ? null : Math.max(0, Math.min(5, atRaw));
+  const limit = costAT ? oneOf(o.limit, ["", ...KobRules.LIMITS] as string[], "") : "";
+  const parts = { costAT, limit, freeFor: ageList(o.freeFor), onlyFor: ageList(o.onlyFor), effects: KobRules.cleanEffects(o.effects), text: str(o.text).slice(0, 1000) };
   const data: Record<string, unknown> = {
-    name, book: oneOf(o.book, KOB_BOOKS, "bikes"),
-    cost: str(o.cost).slice(0, 60), description: str(o.description).slice(0, 1000),
-    page: 0, source: "Homebrew",
+    name, book,
+    cost: costAT == null ? str(o.cost).slice(0, 60) : KobRules.costLabel(costAT),
+    description: KobRules.composeStrength(parts).slice(0, 2000),
+    page: 0, source: "Homebrew", text: parts.text,
   };
+  if (costAT != null) data.costAT = costAT;
+  if (limit) data.limit = limit;
+  if (parts.freeFor.length) data.freeFor = parts.freeFor;
+  if (parts.onlyFor.length) data.onlyFor = parts.onlyFor;
+  if (parts.effects.length) data.effects = parts.effects;
   return { name, data };
 }
 function normalizeKobFlaw(input: unknown): { name: string; data: Record<string, unknown> } {
@@ -1529,13 +1819,20 @@ function normalizeD62eSkill(input: unknown): { name: string; data: Record<string
   return { name, data };
 }
 
+// Builder records carry a structured `build` (components/hb/d62e/rules.ts); the
+// book fields are re-composed from it here, so the client can't post a cost or
+// die code that disagrees with its own build. Records without a build keep the
+// legacy free-text path unchanged.
+const d62eHasBuild = (o: Record<string, unknown>) => !!o.build && typeof o.build === "object" && !Array.isArray(o.build);
+
 function normalizeD62eGear(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew gear entry needs a name.");
+  const category = oneOf(o.category, D62E_GEAR_CATEGORIES, "gear");
   const data: Record<string, unknown> = {
     name,
-    category: oneOf(o.category, D62E_GEAR_CATEGORIES, "gear"),
+    category,
     genre: oneOf(o.genre, D62E_GENRES, "core"),
     description: str(o.description).slice(0, 3000),
     page: 0, source: "Homebrew",
@@ -1546,6 +1843,13 @@ function normalizeD62eGear(input: unknown): { name: string; data: Record<string,
   if (str(o.range)) data.range = str(o.range).slice(0, 80);
   if (str(o.skill)) data.skill = str(o.skill).slice(0, 60);
   if (str(o.cost)) data.cost = str(o.cost).slice(0, 40);
+  if (d62eHasBuild(o)) {
+    const build = D62eRules.cleanGearBuild(o.build);
+    // The category's own mechanics come from the build; another category's legacy text is kept as sent.
+    if (category === "weapon") { delete data.damage; delete data.range; }
+    if (category === "armor") delete data.protection;
+    Object.assign(data, D62eRules.composeGear(category, build), { build });
+  }
   return { name, data };
 }
 
@@ -1553,15 +1857,27 @@ function normalizeD62ePower(input: unknown): { name: string; data: Record<string
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew power needs a name.");
+  const kind = oneOf(o.kind, D62E_POWER_KINDS, "magic");
   const data: Record<string, unknown> = {
     name,
-    kind: oneOf(o.kind, D62E_POWER_KINDS, "magic"),
-    genre: oneOf(o.genre, D62E_GENRES, "fantasy"),
+    kind,
+    genre: oneOf(o.genre, D62E_GENRES, kind === "superpower" ? "superhero" : kind === "psionic" ? "scifi" : "fantasy"),
     description: str(o.description).slice(0, 3000),
     page: 0, source: "Homebrew",
   };
+  if (d62eHasBuild(o)) {
+    const build = D62eRules.cleanPowerBuild(o.build);
+    const c = D62eRules.composePower(kind, build);
+    if (c.skill) data.skill = c.skill;
+    if (c.difficulty) data.difficulty = c.difficulty;
+    if (c.cost) data.cost = c.cost;
+    if (c.options.length) data.options = c.options;
+    if (c.limitations) data.limitations = c.limitations;
+    data.build = build;
+    return { name, data };
+  }
   if (str(o.skill)) data.skill = str(o.skill).slice(0, 120);
-  if (str(o.difficulty)) data.difficulty = str(o.difficulty).slice(0, 60);
+  if (str(o.difficulty)) data.difficulty = str(o.difficulty).slice(0, 300);
   if (str(o.cost)) data.cost = str(o.cost).slice(0, 60);
   const opts = strList(o.options, 20, 120); if (opts.length) data.options = opts;
   return { name, data };
@@ -1571,55 +1887,79 @@ function normalizeD62eCreature(input: unknown): { name: string; data: Record<str
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew creature needs a name.");
-  const attributes: Record<string, number> = {};
-  for (const a of D62E_CORE_ATTRS) { const p = d62ePips(o[a]); if (p != null) attributes[a] = p; }
   const data: Record<string, unknown> = {
     name,
     genre: oneOf(o.genre, D62E_GENRES, "core"),
-    attributes,
-    skills: strList(o.skills, 40, 120),
+    attributes: {},
+    skills: [],
     page: 0, source: "Homebrew",
   };
+  if (d62eHasBuild(o)) {
+    const build = D62eRules.cleanCreatureBuild(o.build);
+    Object.assign(data, D62eRules.composeCreature(build), { build });
+  } else {
+    const attributes: Record<string, number> = {};
+    for (const a of D62E_CORE_ATTRS) { const p = d62ePips(o[a]); if (p != null) attributes[a] = p; }
+    data.attributes = attributes;
+    data.skills = strList(o.skills, 40, 120);
+    const special = strList(o.special, 40, 120); if (special.length) data.special = special;
+    if (str(o.move)) data.move = str(o.move).slice(0, 60);
+  }
   if (str(o.kind)) data.kind = str(o.kind).slice(0, 60);
   const talents = strList(o.talents, 40, 120); if (talents.length) data.talents = talents;
   const powers = strList(o.powers, 40, 120); if (powers.length) data.powers = powers;
-  const special = strList(o.special, 40, 120); if (special.length) data.special = special;
-  if (str(o.move)) data.move = str(o.move).slice(0, 60);
   if (str(o.description)) data.description = str(o.description).slice(0, 3000);
   return { name, data };
 }
 
 // Perks / Flaws / Talents / Assets / Troubles share one shape — the reference
-// page groups them by `kind`.
+// page groups them by `kind`; the creation wizard parses `cost`.
 const D62E_TRAIT_KINDS = ["perk", "flaw", "talent", "asset", "trouble"] as const;
 function normalizeD62eTrait(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew trait needs a name.");
+  const kind = oneOf(o.kind, D62E_TRAIT_KINDS, "perk");
   const data: Record<string, unknown> = {
     name,
-    kind: oneOf(o.kind, D62E_TRAIT_KINDS, "perk"),
+    kind,
     genre: oneOf(o.genre, D62E_GENRES, "core"),
     description: str(o.description).slice(0, 3000),
     page: 0, source: "Homebrew",
   };
-  if (str(o.cost)) data.cost = str(o.cost).slice(0, 60);
+  if (d62eHasBuild(o)) {
+    const build = D62eRules.cleanTraitBuild(o.build);
+    const cost = D62eRules.composeTraitCost(kind, build);
+    if (cost) data.cost = cost;
+    data.build = build;
+  } else if (str(o.cost)) data.cost = str(o.cost).slice(0, 60);
   return { name, data };
 }
 
-// Superpower Limitations (the "flaws" for superpowers) — `value` = dice granted back.
+// Superpower Limitations (the "flaws" for superpowers) — `value` = dice cut at
+// rank 1; a builder record also stores every rank's cut (`rankValues`) and the
+// description gets the book's "Cost 3 for one rank, 4 for two." lead-in.
 function normalizeD62eLimitation(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew limitation needs a name.");
-  const v = num(o.value);
   const data: Record<string, unknown> = {
     name,
-    value: v == null ? 1 : Math.max(0, Math.min(9, Math.round(v))),
+    value: 1,
     genre: oneOf(o.genre, D62E_GENRES, "superhero"),
     description: str(o.description).slice(0, 3000),
     page: 0, source: "Homebrew",
   };
+  if (d62eHasBuild(o)) {
+    const build = D62eRules.cleanLimitBuild(o.build);
+    data.value = build.values[0];
+    if (build.values.length > 1) data.rankValues = build.values;
+    data.description = D62eRules.composeLimitDesc(build).slice(0, 3000);
+    data.build = build;
+  } else {
+    const v = num(o.value);
+    data.value = v == null ? 1 : Math.max(0, Math.min(9, Math.round(v)));
+  }
   return { name, data };
 }
 
@@ -1638,8 +1978,21 @@ function normalizeIcrpgType(input: unknown): { name: string; data: Record<string
     desc: str(o.desc).slice(0, 3000),
     source: "Homebrew",
   };
-  if (str(o.statFocus)) data.statFocus = str(o.statFocus).slice(0, 120);
-  const startingLoot = strList(o.startingLoot, 20, 120); if (startingLoot.length) data.startingLoot = startingLoot;
+  // Builder: focus[] composes statFocus; startingLootRows compose startingLoot ("Name: desc").
+  const focus = strList(o.focus, 8, 30);
+  if (Array.isArray(o.focus)) data.focus = focus;
+  const statFocus = Array.isArray(o.focus) ? focus.join(", ") : str(o.statFocus);
+  if (statFocus) data.statFocus = statFocus.slice(0, 120);
+  if (Array.isArray(o.startingLootRows)) {
+    const rows = (o.startingLootRows as unknown[]).slice(0, 12).map((r) => {
+      const x = (r ?? {}) as Record<string, unknown>;
+      return { name: str(x.name).slice(0, 60), desc: str(x.desc).slice(0, 240), benefits: cleanIcrpgBenefits(x.benefits) };
+    }).filter((r) => r.name);
+    data.startingLootRows = rows;
+    if (rows.length) data.startingLoot = rows.map(icrpgStartLoot);
+  } else {
+    const startingLoot = strList(o.startingLoot, 20, 300); if (startingLoot.length) data.startingLoot = startingLoot;
+  }
   const abilities = strList(o.abilities, 20, 120); if (abilities.length) data.abilities = abilities;
   return { name, data };
 }
@@ -1655,7 +2008,29 @@ function normalizeIcrpgAbility(input: unknown): { name: string; data: Record<str
     desc: str(o.desc).slice(0, 3000),
     source: "Homebrew",
   };
+  // Always-on bonuses the ICRPG sheet applies while the ability is on the hero.
+  const benefits = cleanIcrpgBenefits(o.benefits, ICRPG_ABILITY_KINDS); if (benefits.length) data.benefits = benefits;
   return { name, data };
+}
+
+// Loot / gear: with a builder `build`, desc + effects are COMPOSED (desc lead,
+// uses; bonus badges → "+1 DEF" effects, heal, extras). Without one (old
+// clients), desc / effects are stored as given. `benefits` = LootBonus "icrpg".
+function icrpgItemFields(o: Record<string, unknown>, loot: boolean, data: Record<string, unknown>) {
+  const benefits = cleanIcrpgBenefits(o.benefits);
+  if (o.build && typeof o.build === "object") {
+    const build = cleanIcrpgItemBuild(o.build);
+    if (!loot) build.kind = "";
+    data.build = build;
+    data.desc = composeIcrpgItemDesc(build, loot).slice(0, 3000);
+    const effects = composeIcrpgItemEffects(benefits, build).slice(0, 24); if (effects.length) data.effects = effects;
+  } else {
+    data.desc = str(o.desc).slice(0, 3000);
+    const effects = strList(o.effects, 20, 200); if (effects.length) data.effects = effects;
+  }
+  if (benefits.length) data.benefits = benefits;
+  const eff = icrpgEffortOfCode(o.effort);
+  if (eff) { data.effort = `d${eff.die}`; if (o.ranged) data.ranged = true; }
 }
 
 function normalizeIcrpgLoot(input: unknown): { name: string; data: Record<string, unknown> } {
@@ -1665,11 +2040,11 @@ function normalizeIcrpgLoot(input: unknown): { name: string; data: Record<string
   const data: Record<string, unknown> = {
     name,
     table: str(o.table).slice(0, 80) || "Homebrew",
-    desc: str(o.desc).slice(0, 3000),
+    desc: "",
     source: "Homebrew",
   };
   if (str(o.roll)) data.roll = str(o.roll).slice(0, 20);
-  const effects = strList(o.effects, 20, 200); if (effects.length) data.effects = effects;
+  icrpgItemFields(o, true, data);
   return { name, data };
 }
 
@@ -1681,10 +2056,10 @@ function normalizeIcrpgGear(input: unknown): { name: string; data: Record<string
     name,
     world: oneOf(o.world, ICRPG_WORLD_KEYS, "core"),
     category: str(o.category).slice(0, 60) || "Gear",
-    desc: str(o.desc).slice(0, 3000),
+    desc: "",
     source: "Homebrew",
   };
-  const effects = strList(o.effects, 20, 200); if (effects.length) data.effects = effects;
+  icrpgItemFields(o, false, data);
   return { name, data };
 }
 
@@ -1698,8 +2073,19 @@ function normalizeIcrpgSpell(input: unknown): { name: string; data: Record<strin
     desc: str(o.desc).slice(0, 3000),
     source: "Homebrew",
   };
-  if (str(o.target)) data.target = str(o.target).slice(0, 60);
-  if (str(o.effort)) data.effort = str(o.effort).slice(0, 60);
+  // Builder: target composed from build {who, range} unless written out as text.
+  const b = (o.build ?? null) as Record<string, unknown> | null;
+  const who = b && (ICRPG_SPELL_TARGETS as readonly string[]).includes(str(b.who)) ? str(b.who) : "";
+  const range = b && (ICRPG_SPELL_RANGES as readonly string[]).includes(str(b.range)) ? str(b.range) : "";
+  const target = b && !str(b.text) ? composeIcrpgSpellTarget(who, range) : str(o.target);
+  if (target) data.target = target.slice(0, 60);
+  if (b) data.build = { who, range, text: str(b.text).slice(0, 60) };
+  // effort: the die code the sheet rolls ("d10"); legacy free text kept as written.
+  const eff = icrpgEffortOfCode(o.effort);
+  if (eff) data.effort = `d${eff.die}`; else if (str(o.effort)) data.effort = str(o.effort).slice(0, 60);
+  const n = num(o.effortCount); if (eff && n != null && n > 1) data.effortCount = Math.min(10, n);
+  const stat = str(o.stat).toUpperCase(); if (["INT", "WIS", "CHA"].includes(stat)) data.stat = stat;
+  if (o.noRoll === true) data.noRoll = true; else if (o.hard === true) data.hard = true;
   return { name, data };
 }
 
@@ -1709,7 +2095,7 @@ function normalizeIcrpgMonster(input: unknown): { name: string; data: Record<str
   if (!name) throw new Error("A homebrew monster needs a name.");
   const stats: Record<string, number> = {};
   for (const k of ["STR", "DEX", "CON", "INT", "WIS", "CHA"]) {
-    const n = num(o[k]); if (n != null) stats[k] = n;
+    const n = num(o[k]); if (n != null) stats[k] = Math.max(-10, Math.min(10, n));
   }
   const data: Record<string, unknown> = {
     name,
@@ -1719,15 +2105,53 @@ function normalizeIcrpgMonster(input: unknown): { name: string; data: Record<str
     source: "Homebrew",
   };
   if (str(o.tier)) data.tier = str(o.tier).slice(0, 40);
-  const hearts = num(o.hearts); if (hearts != null && hearts >= 0) data.hearts = hearts;
-  const hp = num(o.hp); if (hp != null && hp >= 0) data.hp = hp;
-  const defense = num(o.defense); if (defense != null) data.defense = defense;
-  const attacks = strList(o.attacks, 20, 200); if (attacks.length) data.attacks = attacks;
-  const abilities = strList(o.abilities, 20, 200); if (abilities.length) data.abilities = abilities;
+  const hearts = num(o.hearts); if (hearts != null && hearts >= 0) data.hearts = Math.min(99, hearts);
+  const hp = num(o.hp); if (hp != null && hp >= 0) data.hp = Math.min(9999, hp);
+  const defense = num(o.defense); if (defense != null) data.defense = Math.max(-10, Math.min(30, defense));
+  // Builder: attackRows compose `attacks`; effortBonus / actionsPerTurn compose the
+  // first `abilities` line ("+4 WEAPON EFFORT, 2 actions per turn"), abilityRows the rest.
+  if (Array.isArray(o.attackRows)) {
+    const rows = cleanIcrpgAttackRows(o.attackRows);
+    data.attackRows = rows;
+    const attacks = composeIcrpgAttacks(rows); if (attacks.length) data.attacks = attacks;
+  } else {
+    const attacks = strList(o.attacks, 20, 200); if (attacks.length) data.attacks = attacks;
+  }
+  if (Array.isArray(o.abilityRows)) {
+    const rows = strList(o.abilityRows, 20, 200);
+    const eb = cleanIcrpgEffortBonus(o.effortBonus);
+    const actions = Math.max(1, Math.min(6, num(o.actionsPerTurn) ?? 1));
+    Object.assign(data, { abilityRows: rows, effortBonus: eb, actionsPerTurn: actions });
+    const line = composeIcrpgMonsterLine(eb, actions);
+    const abilities = line ? [line, ...rows] : rows; if (abilities.length) data.abilities = abilities;
+  } else {
+    const abilities = strList(o.abilities, 20, 200); if (abilities.length) data.abilities = abilities;
+  }
   return { name, data };
 }
 
 // ── Candela Obscura (Illuminated Worlds) ─────────────────────────────────────
+// Builders in components/hb/co/. `desc` (what every consumer reads) is composed
+// from uses / cost / actions / effects / text when the record carries `text`;
+// a legacy record (no `text`) keeps its desc as typed.
+function coParts(o: Record<string, unknown>, withCost: boolean) {
+  return {
+    uses: CoRules.cleanUses(o.uses),
+    cost: withCost ? CoRules.cleanCosts(o.cost) : [],
+    actions: CoRules.cleanActions(o.actions),
+    effects: CoRules.cleanEffects(o.effects),
+    text: str(o.text).slice(0, 1500),
+  };
+}
+function coBuild(o: Record<string, unknown>, data: Record<string, unknown>, withCost: boolean) {
+  if (o.text == null) { data.desc = str(o.desc).slice(0, 2000); return; }
+  const p = coParts(o, withCost);
+  if (p.uses) data.uses = p.uses;
+  if (withCost) data.cost = p.cost;
+  Object.assign(data, { actions: p.actions, effects: p.effects, text: p.text });
+  data.desc = CoRules.composeDesc(p, !withCost).slice(0, 2000);
+}
+
 function normalizeCoAbility(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
@@ -1736,9 +2160,10 @@ function normalizeCoAbility(input: unknown): { name: string; data: Record<string
     name,
     source: oneOf(str(o.source) || "Role", ["Role", "Specialty"] as const, "Role"),
     owner: str(o.owner).slice(0, 60),
-    desc: str(o.desc).slice(0, 2000),
+    desc: "",
     hb: true,
   };
+  coBuild(o, data, true);
   return { name, data };
 }
 
@@ -1749,29 +2174,43 @@ function normalizeCoGear(input: unknown): { name: string; data: Record<string, u
   const data: Record<string, unknown> = {
     name,
     type: str(o.type).slice(0, 60) || "Specialty",
-    desc: str(o.desc).slice(0, 2000),
+    desc: "",
     hb: true,
   };
+  const owner = str(o.owner).slice(0, 60); if (owner) data.owner = owner;
+  coBuild(o, data, false);
   return { name, data };
 }
 
 // ── Year Zero Engine (Fria Ligan) ────────────────────────────────────────────
+// ALIEN RPG only (components/hb/yze/rules.ts documents the shapes). The
+// builder composes the book strings; the server re-canonicalises what parses
+// and clips what doesn't, so hand-made/legacy text is never lost.
 function normalizeYzeWeapon(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew weapon needs a name.");
   const damage = Math.max(0, Math.min(10, Math.round(Number(o.damage) || 0)));
+  const cls = str(o.class).slice(0, 24);
+  const bonusN = YzeRules.parseBonus(str(o.bonus));
+  const range = YzeRules.parseRange(str(o.range) || "Engaged");
+  const ammo = YzeRules.parseAmmo(str(o.ammo));
+  const cost = YzeRules.parseCost(str(o.cost));
   const data: Record<string, unknown> = {
     name,
     grip: oneOf(str(o.grip) || "1H", ["—", "1H", "2H"] as const, "1H"),
-    bonus: str(o.bonus).slice(0, 8),
+    bonus: bonusN == null ? str(o.bonus).slice(0, 8) : YzeRules.fmtBonus(Math.max(-5, Math.min(9, bonusN))),
     damage,
-    range: str(o.range).slice(0, 20) || "Engaged",
+    range: range ? YzeRules.composeRange(range) : str(o.range).slice(0, 30),
     weight: str(o.weight).slice(0, 8) || "1",
-    skill: oneOf(str(o.skill) || "Melee", ["Melee", "Marksmanship", "Mobility"] as const, "Melee"),
+    skill: oneOf(str(o.skill) || (cls ? YzeRules.skillForClass(cls) : "Close Combat"), ["Close Combat", "Ranged Combat", "Melee", "Marksmanship", "Mobility"] as const, "Close Combat"),
     desc: str(o.desc).slice(0, 1000),
     hb: true,
   };
+  if (cls) data.class = cls;
+  if (o.ammo != null) data.ammo = ammo ? YzeRules.composeAmmo(ammo) : str(o.ammo).slice(0, 20);
+  if (str(o.special)) data.special = str(o.special).slice(0, 300);
+  if (str(o.cost)) data.cost = cost != null ? YzeRules.fmtCost(Math.min(cost, 99999999)) : str(o.cost).slice(0, 20);
   return { name, data };
 }
 
@@ -1785,25 +2224,54 @@ function normalizeYzeGear(input: unknown): { name: string; data: Record<string, 
     desc: str(o.desc).slice(0, 2000),
     hb: true,
   };
+  if (o.text == null && o.kind == null) return { name, data }; // legacy shape: unchanged
+  const armor = o.kind === "armor";
+  const bonuses = YzeRules.cleanSkillBonus(o.skillBonus);
+  const text = str(o.text).slice(0, 1500);
+  const cost = YzeRules.parseCost(str(o.cost));
+  Object.assign(data, {
+    kind: armor ? "armor" : "gear",
+    category: armor ? "" : str(o.category).slice(0, 40),
+    cost: cost != null ? YzeRules.fmtCost(Math.min(cost, 99999999)) : str(o.cost).slice(0, 20),
+    supply: armor ? "" : YzeRules.fmtSupply(YzeRules.parseSupply(o.supply)),
+    skillBonus: bonuses,
+    text,
+    desc: YzeRules.composeGearDesc(text, bonuses).slice(0, 2000),
+  });
+  if (armor) {
+    data.rating = Math.max(0, Math.min(10, Math.round(Number(o.rating) || 0)));
+    data.air = YzeRules.fmtAir(YzeRules.parseAir(o.air));
+  }
   return { name, data };
 }
 
 // ── The Walking Dead (TWD) ──────────────────────────────────────────────────
+// Builders: components/hb/twd/ (rules.ts documents the shape). Book fields stay
+// as before; ammo / noise / features (weapon) and kind / skillBonus / level /
+// penalty (gear) are new. bonus on gear is composed from skillBonus when set.
 function normalizeTwdWeapon(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew weapon needs a name.");
-  const damage = Math.max(0, Math.min(10, Math.round(Number(o.damage) || 1)));
+  const bn = TwdRules.parseBonus(str(o.bonus));
+  const dm = TwdRules.parseDamage(o.damage);
   const data: Record<string, unknown> = {
     name,
-    kind: oneOf(str(o.kind) || "Close", ["Close", "Ranged"] as const, "Close"),
-    bonus: str(o.bonus).slice(0, 8) || "0",
-    damage,
+    kind: oneOf(str(o.kind) || "Close", TwdRules.WEAPON_KINDS, "Close"),
+    bonus: bn != null ? TwdRules.fmtBonus(Math.max(-3, Math.min(5, bn))) : str(o.bonus).slice(0, 8) || "0",
+    damage: dm ? TwdRules.composeDamage(dm) : Math.max(0, Math.min(10, Math.round(Number(o.damage) || 1))),
     range: str(o.range).slice(0, 20) || "Short",
     slots: str(o.slots).slice(0, 8) || "1",
     desc: str(o.desc).slice(0, 1000),
     hb: true,
   };
+  const am = TwdRules.parseAmmo(str(o.ammo));
+  const ammo = am ? TwdRules.composeAmmo(am) : str(o.ammo).slice(0, 24);
+  if (ammo) data.ammo = ammo;
+  const noise = str(o.noise);
+  if ((TwdRules.NOISES as readonly string[]).includes(noise)) data.noise = noise;
+  const features = strList(o.features, 12, 40);
+  if (features.length) data.features = features;
   return { name, data };
 }
 
@@ -1811,13 +2279,22 @@ function normalizeTwdGear(input: unknown): { name: string; data: Record<string, 
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew gear entry needs a name.");
+  const skillBonus = o.kind === "armor" ? [] : TwdRules.cleanSkillBonus(o.skillBonus); // TWD armor grants no skill bonus
   const data: Record<string, unknown> = {
     name,
     slots: str(o.slots).slice(0, 8) || "1",
-    bonus: str(o.bonus).slice(0, 24),
+    bonus: skillBonus.length ? TwdRules.fmtSkillBonus(skillBonus) : str(o.bonus).slice(0, 24),
     desc: str(o.desc).slice(0, 2000),
     hb: true,
   };
+  if (o.kind != null || skillBonus.length) {
+    data.kind = o.kind === "armor" ? "armor" : "gear";
+    data.skillBonus = skillBonus;
+  }
+  if (data.kind === "armor") {
+    data.level = Math.max(1, Math.min(12, Math.round(Number(o.level) || 1)));
+    data.penalty = TwdRules.fmtPenalty(TwdRules.parsePenalty(o.penalty));
+  }
   return { name, data };
 }
 
@@ -1891,7 +2368,12 @@ const LOTR_VIRTUE_CATEGORIES = ["Common", ...LOTR_CULTURE_NAMES] as const;
 const LOTR_ABILS = ["STR", "DEX", "CON", "INT", "WIS", "CHA"] as const;
 const LOTR_MONSTER_GROUPS = ["Evil Men", "Orcs", "Trolls", "Undead", "Wolves", "Folk of Eriador", "Beasts", "Other"] as const;
 const LOTR_GEAR_CATEGORIES = ["Adventuring Gear", "Artisan's Tools", "Gaming Set", "Musical Instrument", "Other Tools", "Pipe-weed"] as const;
+const LOTR_SKILL_NAMES = LOTR_SKILLS.map((x) => x[0]);
+const LOTR_WEAPON_REWARD_KEYS = LOTR_WEAPON_REWARDS.map((x) => x[0]);
 
+// Builder records (components/hb/lotr) carry structured data next to the
+// legacy fields; every legacy string is re-composed here with the same pure
+// functions the builders' previews use (components/hb/lotr/rules).
 function normalizeLotrVirtue(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 120);
@@ -1907,7 +2389,13 @@ function normalizeLotrVirtue(input: unknown): { name: string; data: Record<strin
     source: "Homebrew",
   };
   if (str(o.flavor)) data.flavor = str(o.flavor).slice(0, 1000);
-  if (str(o.uses)) data.uses = str(o.uses).slice(0, 40);
+  const uses = lotrComposeUses(lotrParseUses(str(o.uses)));
+  if (uses) data.uses = uses;
+  // Effect badges → the mods / grants / companion keys the sheet + wizards read.
+  const fx = lotrVirtueFields(o);
+  if (Object.keys(fx.mods).length) data.mods = fx.mods;
+  if (Object.keys(fx.grants).length) data.grants = fx.grants;
+  if (fx.companion) data.companion = fx.companion;
   return { name, data };
 }
 
@@ -1915,7 +2403,7 @@ function normalizeLotrBackground(input: unknown): { name: string; data: Record<s
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 120);
   if (!name) throw new Error("A homebrew background needs a name.");
-  return { name, data: {
+  const data: Record<string, unknown> = {
     culture: oneOf(o.culture, ["Any", ...LOTR_CULTURE_NAMES] as const, "Any"),
     name,
     skillProficiencies: strList(o.skillProficiencies, 4, 60),
@@ -1923,14 +2411,18 @@ function normalizeLotrBackground(input: unknown): { name: string; data: Record<s
     distinctiveFeatures: strList(o.distinctiveFeatures, 4, 40),
     description: str(o.description).slice(0, 3000),
     source: "Homebrew",
-  } };
+  };
+  const sc = (o.skillChoice ?? null) as Record<string, unknown> | null;
+  const from = sc ? pickList(sc.from, LOTR_SKILL_NAMES as readonly string[]) : [];
+  if (from.length) { data.skillChoice = { count: Math.max(1, Math.min(4, from.length, num(sc!.count) ?? 2)), from }; data.skillProficiencies = []; }
+  return { name, data };
 }
 
 function normalizeLotrWeapon(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 120);
   if (!name) throw new Error("A homebrew weapon needs a name.");
-  return { name, data: {
+  const data: Record<string, unknown> = {
     name,
     category: oneOf(o.category, ["Simple", "Martial"] as const, "Simple"),
     kind: oneOf(o.kind, ["Melee", "Ranged"] as const, "Melee"),
@@ -1942,36 +2434,72 @@ function normalizeLotrWeapon(input: unknown): { name: string; data: Record<strin
     mastery: "",
     description: str(o.description).slice(0, 2000),
     source: "Homebrew",
-  } };
+  };
+  const rewards = pickList(o.rewards, LOTR_WEAPON_REWARD_KEYS);
+  if (rewards.length) data.rewards = rewards;
+  const benefits = cleanLotrBenefits(o.benefits);
+  if (benefits.length) data.benefits = benefits;
+  return { name, data };
 }
 
 function normalizeLotrGear(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 120);
   if (!name) throw new Error("A homebrew gear entry needs a name.");
-  return { name, data: {
+  const data: Record<string, unknown> = {
     name,
     category: oneOf(o.category, LOTR_GEAR_CATEGORIES, "Adventuring Gear"),
     cost: str(o.cost).slice(0, 40) || "—",
     weight: str(o.weight).slice(0, 40) || "—",
     description: str(o.description).slice(0, 3000),
     source: "Homebrew",
-  } };
+  };
+  const benefits = cleanLotrBenefits(o.benefits);
+  if (benefits.length) data.benefits = benefits;
+  return { name, data };
 }
 
 // A D&D-shaped stat block (normalizeDndMonster) re-grouped into the LotR
-// adversary groups, with a free description. The form sends the six ability
-// scores as flat STR…CHA fields; a stored record nests them under `abilities`.
+// adversary groups, with a free description. The legacy form sent the six
+// ability scores as flat STR…CHA fields; a stored record nests them under
+// `abilities`. Builder records (sb / attackRows / fear / *Rows) are composed
+// with the LotR rules first, then the D&D normaliser sanitises the legacy shape
+// (the LotR builder fields are kept out of it, so its D&D composer never runs).
 function normalizeLotrMonster(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const ab: Record<string, unknown> = { ...((o.abilities ?? {}) as Record<string, unknown>) };
   for (const k of LOTR_ABILS) if (o[k] != null && str(o[k]) !== "") ab[k] = o[k];
-  const base = normalizeDndMonster({ ...o, abilities: ab });
+  const { sb: sbIn, attackRows: rowsIn, actionRows: _a, bonusRows: _b, fear: fearIn, traitRows: trIn, reactionRows: rrIn, ...rest } = o;
+  void _a; void _b;
+  const legacy: Record<string, unknown> = { ...rest, abilities: ab };
+  const extra: Record<string, unknown> = {};
+  const abilities: Record<string, number> = {};
+  for (const k of LOTR_ABILS) { const n = num(ab[k]); abilities[k] = n != null && n >= 1 ? Math.min(30, n) : 10; }
+  const cr = CR_XP[str(o.cr)] != null ? str(o.cr) : "0";
+  if (sbIn && typeof sbIn === "object") {
+    const sb = cleanLotrBlock(sbIn);
+    Object.assign(legacy, composeLotrBlock(sb, abilities, cr, oneOf(o.size, ["Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan"] as const, "Medium")));
+    extra.sb = sb;
+  }
+  if (Array.isArray(rowsIn)) {
+    const rows = cleanLotrAttackRows(rowsIn), fear = cleanFear(fearIn), actionRows = cleanLotrUseRows(o.actionRows);
+    legacy.actions = composeLotrActions(rows, fear, actionRows, crToPB(cr), abilities.CHA).slice(0, 30);
+    Object.assign(extra, { attackRows: rows, fear, actionRows });
+  }
+  for (const [rowsKey, outKey, src] of [["traitRows", "traits", trIn], ["bonusRows", "bonusActions", o.bonusRows], ["reactionRows", "reactions", rrIn]] as const) {
+    if (!Array.isArray(src)) continue;
+    const rows = cleanLotrUseRows(src);
+    legacy[outKey] = lotrUseRowsOut(rows);
+    extra[rowsKey] = rows;
+  }
+  const base = normalizeDndMonster(legacy);
   const data: Record<string, unknown> = {
     ...base.data,
     alignment: str(o.alignment).slice(0, 60),
     group: oneOf(o.group, LOTR_MONSTER_GROUPS, "Other"),
+    ...extra,
   };
+  if (!str(legacy.languages)) data.languages = "—";
   if (str(o.description)) data.description = str(o.description).slice(0, 3000);
   return { name: base.name, data };
 }
@@ -1991,13 +2519,13 @@ const DB_SKILL_NAMES = [
 const DB_WEAPON_SKILLS = ["Axes", "Bows", "Brawling", "Crossbows", "Hammers", "Knives", "Slings", "Spears", "Staves", "Swords"] as const;
 const DB_SCHOOLS = ["General", "Animism", "Elementalism", "Mentalism", "Demonology", "Harmonism", "Illusionism", "Necromancy", "Symbolism", "Witchcraft", "Alchemy", "Enchanting", "Dracomancy"] as const;
 const DB_TIMINGS = ["action", "free", "reaction", "passive", "downtime", "roundStart"] as const;
-const DB_CASTING = ["action", "reaction", "stretch", "shift", "round"] as const;
+const DB_CASTING = ["action", "reaction", "stretch", "shift", "round", "stretch/shift", "action/stretch/shift"] as const;
 const DB_REQS = ["word", "gesture", "focus", "ingredient", "melody", "symbol", "tools"] as const;
 const DB_SUPPLIES = ["Common", "Uncommon", "Rare", "Unique"] as const;
 const DB_UNITS = ["gold", "silver", "copper"] as const;
-const DB_FEATURES = ["Subtle", "Long", "Toppling", "Piercing", "Slashing", "Bludgeoning", "Can be thrown", "Requires quiver", "No damage bonus", "Cannot be used for parrying"] as const;
+const DB_FEATURES = DB_FEATURE_LIST;
 const DB_SIZES = ["Small", "Normal", "Large", "Huge", "Swarm"] as const;
-const DB_DMG_TYPES = ["slashing", "piercing", "bludgeoning", "fire", "cold", "magic", "other"] as const;
+const DB_DMG_TYPES = DB_HB_DMG_TYPES;
 const DB_GEAR_CATS = ["Clothes", "Musical Instruments", "Trade Goods", "Studies & Magic", "Light Sources", "Tools", "Containers", "Medicine", "Services", "Hunting & Fishing", "Means of Travel", "Animals", "Alchemy Ingredients", "Alchemical Substances", "Magic Items"] as const;
 const dbSlug = (s: string) => "hb-" + s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
 // Dragonbane dice ("D8", "2D6", "D6 per power level") — uppercase D, free text kept short.
@@ -2028,6 +2556,8 @@ function normalizeDbAbility(input: unknown): { name: string; data: Record<string
     page: 0, text: str(o.text).slice(0, 3000), source: "Homebrew",
   };
   if (truthy(o.repeatable)) data.repeatable = true;
+  const tags = pickList(o.tags, DB_ABILITY_TAGS);
+  if (tags.length) data.tags = tags;
   const hp = dbNum(o.hpMax, 0, 20), wpm = dbNum(o.wpMax, 0, 20);
   if (hp) data.hpMax = hp;
   if (wpm) data.wpMax = wpm;
@@ -2061,6 +2591,16 @@ function normalizeDbSpell(input: unknown): { name: string; data: Record<string, 
   const hb = dbDice(o.healingBase ?? heal.base), hp = dbDice(o.healingPerLevel ?? heal.perLevel);
   if (db) data.damage = { base: db, perLevel: dp };
   if (hb) data.healing = { base: hb, perLevel: hp };
+  const dt = str(o.damageType);
+  if (db && dt) data.damageType = oneOf(dt, DB_DMG_TYPES, "other");
+  if (truthy(o.ignoresArmor)) data.ignoresArmor = true;
+  if (str(o.target)) data.target = str(o.target).slice(0, 120);
+  // Enchanting spells bound to an item (Book of Magic): range "Item", the item kinds it goes on.
+  if (data.school === "Enchanting" && truthy(o.enchantment)) {
+    data.enchantment = true; data.range = "Item";
+    const on = strList(o.castOn, 8, 60);
+    if (on.length) data.castOn = on;
+  }
   return { name, data };
 }
 
@@ -2084,7 +2624,11 @@ function normalizeDbWeapon(input: unknown): { name: string; data: Record<string,
   };
   if (ranged) data.ranged = true; else data.melee = true;
   if (truthy(o.metal)) data.metal = true;
+  // A shield has no skill of its own: it is wielded with any STR-based melee skill.
+  if (!ranged && truthy(o.shield)) { data.shield = true; data.skill = null; data.skillAny = "strMelee"; }
   if (str(o.notes)) data.notes = str(o.notes).slice(0, 1000);
+  const ben = cleanDbBenefits(o.benefits);
+  if (ben.length) data.benefits = ben;
   return { name, data };
 }
 
@@ -2100,7 +2644,12 @@ function normalizeDbArmor(input: unknown): { name: string; data: Record<string, 
     banes: pickList(o.banes, [...DB_SKILL_NAMES, "Ranged attacks"] as const),
     metal: truthy(o.metal), page: 0, source: "Homebrew",
   };
+  const bvIn = (o.bonusVs ?? {}) as Record<string, unknown>, bv: Record<string, number> = {};
+  for (const k of DB_ARMOR_DMG) { const n = dbNum(bvIn[k], 0, 6); if (n) bv[k] = n; }
+  if (Object.keys(bv).length) data.bonusVs = bv;
   if (str(o.notes)) data.notes = str(o.notes).slice(0, 1000);
+  const ben = cleanDbBenefits(o.benefits);
+  if (ben.length) data.benefits = ben;
   return { name, data };
 }
 
@@ -2109,12 +2658,23 @@ function normalizeDbGear(input: unknown): { name: string; data: Record<string, u
   const name = str(o.name).slice(0, 120);
   if (!name) throw new Error("A homebrew gear entry needs a name.");
   const w = str(o.weight);
-  const weight = w === "" ? 1 : w === "tiny" ? 0 : Math.max(0, Math.min(20, Number(w) || 0));
-  return { name, data: {
+  const weight = o.weight === null || w === "none" ? null : w === "" ? 1 : w === "tiny" ? 0 : Math.max(0, Math.min(20, Number(w) || 0));
+  const data: Record<string, unknown> = {
     id: dbSlug(name), category: oneOf(o.category, DB_GEAR_CATS, "Trade Goods"), name,
     cost: dbCost(o), supply: oneOf(o.supply, DB_SUPPLIES, "Common"), weight,
     effect: str(o.effect).slice(0, 2000), source: "Homebrew",
-  } };
+  };
+  const doses = dbNum(o.doses, 1, 50);
+  if (doses) data.doses = doses;
+  if (truthy(o.focus)) data.focus = true;
+  const li = (o.light ?? null) as Record<string, unknown> | null;
+  if (li && typeof li === "object") {
+    const die = str(li.die).toUpperCase().replace(/^(\d)/, "D$1");
+    data.light = { radius: dbNum(li.radius, 1, 50) ?? 10, die: /^D(4|6|8|10|12)$/.test(die) ? die : "D6" };
+  }
+  const ben = cleanDbBenefits(o.benefits);
+  if (ben.length) data.benefits = ben;
+  return { name, data };
 }
 
 function normalizeDbMonster(input: unknown): { name: string; data: Record<string, unknown> } {
@@ -2122,17 +2682,25 @@ function normalizeDbMonster(input: unknown): { name: string; data: Record<string
   const name = str(o.name).slice(0, 120);
   if (!name) throw new Error("A homebrew monster needs a name.");
   const attacksIn = Array.isArray(o.attacks) ? (o.attacks as unknown[]) : [];
+  // Three-attack tables (each entry covers two faces of the D6) carry rolls [lo, hi].
+  const three = Array.isArray(o.attackRolls) && attacksIn.length <= 3;
+  const PAIRS: [number, number][] = [[1, 2], [3, 4], [5, 6]];
   const attacks = attacksIn.slice(0, 6).map((a, i) => {
     const r = (a ?? {}) as Record<string, unknown>;
     const fearRaw = str(r.fear);
-    return {
-      roll: i + 1, name: str(r.name).slice(0, 80) || `Attack ${i + 1}`,
+    const out: Record<string, unknown> = {
+      roll: three ? PAIRS[i][0] : i + 1, name: str(r.name).slice(0, 80) || `Attack ${i + 1}`,
       damage: dbDice(r.damage) || null, type: str(r.type) ? oneOf(r.type, DB_DMG_TYPES, "other") : null,
       targets: str(r.targets).slice(0, 60) || "one", range: dbNum(r.range, 0, 200) ?? 2,
       fear: fearRaw === "bane" ? "bane" : truthy(r.fear), conditions: strList(r.conditions, 6, 20),
-      prone: truthy(r.prone), parry: truthy(r.parry), dodge: r.dodge == null ? true : truthy(r.dodge),
+      prone: truthy(r.prone), parry: truthy(r.parry), dodge: r.dodge == null ? true : str(r.dodge) === "bane" ? "bane" : truthy(r.dodge),
       text: str(r.text).slice(0, 2000),
     };
+    if (truthy(r.ignoresArmor)) out.ignoresArmor = true;
+    const po = (r.poison ?? null) as Record<string, unknown> | null;
+    if (po && typeof po === "object" && str(po.type)) out.poison = { type: oneOf(po.type, DB_POISONS, "lethal"), potency: dbNum(po.potency, 1, 30) ?? 12 };
+    if (three) out.rolls = PAIRS[i];
+    return out;
   }).filter((a) => a.name || a.text);
   const traits = (Array.isArray(o.traits) ? (o.traits as unknown[]) : []).slice(0, 12).map((t) => {
     const r = (t ?? {}) as Record<string, unknown>;
@@ -2147,10 +2715,14 @@ function normalizeDbMonster(input: unknown): { name: string; data: Record<string
     hp: dbNum(o.hp, 1, 999) ?? 10, text: str(o.text).slice(0, 3000), traits, attacks, source: "Homebrew",
   };
   if (truthy(o.flying)) data.flying = true;
+  if (truthy(o.swimming)) data.swimming = true;
   if (truthy(o.persuadable)) data.persuadable = true;
-  const res = strList(o.resistances, 8, 80), imm = strList(o.immunities, 8, 80);
+  if (str(o.category)) data.category = oneOf(o.category, DB_MON_CATEGORIES, "Monsters");
+  if (three) data.attackRolls = PAIRS.slice(0, attacks.length);
+  const res = strList(o.resistances, 8, 80), imm = strList(o.immunities, 8, 80), weak = strList(o.weaknesses, 8, 80);
   if (res.length) data.resistances = res;
   if (imm.length) data.immunities = imm;
+  if (weak.length) data.weaknesses = weak;
   return { name, data };
 }
 
@@ -2166,7 +2738,8 @@ function normalizeDbNpc(input: unknown): { name: string; data: Record<string, un
   }
   const weapons = (Array.isArray(o.weapons) ? (o.weapons as unknown[]) : []).slice(0, 6).map((w) => {
     const r = (w ?? {}) as Record<string, unknown>;
-    return { name: str(r.name).slice(0, 60), skill: dbNum(r.skill, 1, 18) ?? 10, damage: dbDice(r.damage) || "D6" };
+    const qty = dbNum(r.qty, 1, 6);
+    return { name: str(r.name).slice(0, 60), skill: dbNum(r.skill, 1, 18) ?? 10, damage: dbDice(r.damage) || "D6", ...(qty && qty > 1 ? { qty } : {}) };
   }).filter((w) => w.name);
   const dbon: Record<string, string> = {};
   const sB = str(o.strBonus ?? ((o.damageBonus ?? {}) as Record<string, unknown>).STR), aB = str(o.aglBonus ?? ((o.damageBonus ?? {}) as Record<string, unknown>).AGL);
@@ -2185,6 +2758,15 @@ function normalizeDbNpc(input: unknown): { name: string; data: Record<string, un
     source: "Homebrew",
   };
   if (truthy(o.boss)) data.boss = true;
+  // Builder-only extras (the book prints no NPC attributes): attributes + Auto toggles.
+  const atIn = (o.attributes ?? null) as Record<string, unknown> | null;
+  if (atIn && typeof atIn === "object") {
+    const at: Record<string, number> = {};
+    for (const k of DB_ATTRS) { const n = dbNum(atIn[k], 1, 30); if (n != null) at[k] = n; }
+    if (Object.keys(at).length) data.attributes = at;
+  }
+  const au = (o.auto ?? null) as Record<string, unknown> | null;
+  if (au && typeof au === "object") data.auto = { hp: truthy(au.hp), wp: truthy(au.wp), dmg: truthy(au.dmg) };
   return { name, data };
 }
 
@@ -2232,6 +2814,15 @@ function normalizePbWeapon(input: unknown): { name: string; data: Record<string,
   };
   if (truthy(o.thrown)) data.thrown = true;
   if (truthy(o.sword)) data.sword = true;
+  // Builder extras the sheet's mkWeapon reads (book weapons carry the same keys).
+  const tt = pbCleanTest(o.targetTest);
+  if (tt) data.targetTest = tt.ability ? tt : { dr: tt.dr };
+  const close = pbDice(o.closeDamage);
+  if (close && type === "ranged") { data.closeDamage = close; data.closeRange = pbInt(o.closeRange, 5, 100) ?? 10; }
+  if (truthy(o.pistol) && blackPowder && type === "ranged") data.pistol = true;
+  if (truthy(o.damageFromAmmo) && type === "ranged") data.damageFromAmmo = true;
+  const benefits = cleanPbBenefits(o.benefits);
+  if (benefits.length) data.benefits = benefits;
   return { name, data };
 }
 
@@ -2250,6 +2841,8 @@ function normalizePbArmor(input: unknown): { name: string; data: Record<string, 
     if (truthy(o.metal)) data.metal = true;
     if (truthy(o.sacrifice)) data.sacrifice = true;
     if (special) data.special = special;
+    const hb = cleanPbBenefits(o.benefits);
+    if (hb.length) data.benefits = hb;
     return { name, data };
   }
   const tier = pbInt(o.tier, 0, 3) ?? 0;
@@ -2262,6 +2855,8 @@ function normalizePbArmor(input: unknown): { name: string; data: Record<string, 
   };
   if (truthy(o.metal)) data.metal = true;
   if (special) data.special = special;
+  const benefits = cleanPbBenefits(o.benefits);
+  if (benefits.length) data.benefits = benefits;
   return { name, data };
 }
 
@@ -2278,7 +2873,20 @@ function normalizePbGear(input: unknown): { name: string; data: Record<string, u
   if (truthy(o.consumable)) data.consumable = true;
   if (pbDice(o.heal)) data.heal = pbDice(o.heal);
   if (str(o.effect)) data.effect = str(o.effect).slice(0, 2000);
+  if (str(o.duration)) data.duration = str(o.duration).slice(0, 60);
+  if (truthy(o.light)) data.light = true;
+  const benefits = cleanPbBenefits(o.benefits);
+  if (benefits.length) data.benefits = benefits;
   return { name, data };
+}
+
+// A relic's / ritual's mechanics in the book's fields (what the sheet's useRelic /
+// castRitual automate). The builder posts `build` (components/hb/pb/rules
+// PbMagicBuild) and the fields are composed from it; an older client's plain
+// `duration` text is still accepted.
+function pbMagicFields(o: Record<string, unknown>, kind: "relic" | "ritual"): Record<string, unknown> {
+  if (o.build && typeof o.build === "object") return pbComposeMagic(pbCleanMagic(o.build), kind);
+  return str(o.duration) ? { duration: str(o.duration).slice(0, 60) } : {};
 }
 
 function normalizePbRelic(input: unknown): { name: string; data: Record<string, unknown> } {
@@ -2286,8 +2894,7 @@ function normalizePbRelic(input: unknown): { name: string; data: Record<string, 
   const name = str(o.name).slice(0, 120);
   if (!name) throw new Error("A homebrew relic needs a name.");
   const data: Record<string, unknown> = { ...pbHb(name), roll: 0, text: str(o.text).slice(0, 3000), page: 0 };
-  if (str(o.duration)) data.duration = str(o.duration).slice(0, 60);
-  return { name, data };
+  return { name, data: { ...data, ...pbMagicFields(o, "relic") } };
 }
 
 function normalizePbRitual(input: unknown): { name: string; data: Record<string, unknown> } {
@@ -2295,15 +2902,16 @@ function normalizePbRitual(input: unknown): { name: string; data: Record<string,
   const name = str(o.name).slice(0, 120);
   if (!name) throw new Error("A homebrew ritual needs a name.");
   const data: Record<string, unknown> = { ...pbHb(name), roll: 0, numeral: "", text: str(o.text).slice(0, 3000), page: 0 };
-  if (str(o.duration)) data.duration = str(o.duration).slice(0, 60);
-  return { name, data };
+  return { name, data: { ...data, ...pbMagicFields(o, "ritual") } };
 }
 
 function normalizePbMonster(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 120);
   if (!name) throw new Error("A homebrew creature needs a name.");
-  const attacks = (Array.isArray(o.attacks) ? (o.attacks as unknown[]) : []).slice(0, 8).map((a) => {
+  // Builder rows (components/hb/pb/rules) are kept and the book's attacks composed from them.
+  const attackRows = Array.isArray(o.attackRows) ? cleanPbAttackRows(o.attackRows) : null;
+  const attacks = attackRows ? composePbAttacks(attackRows) : (Array.isArray(o.attacks) ? (o.attacks as unknown[]) : []).slice(0, 8).map((a) => {
     const r = (a ?? {}) as Record<string, unknown>;
     const out: { name: string; damage: string | null; notes?: string } = { name: str(r.name).slice(0, 80), damage: pbDice(r.damage) || null };
     if (str(r.notes)) out.notes = str(r.notes).slice(0, 400);
@@ -2331,6 +2939,7 @@ function normalizePbMonster(input: unknown): { name: string; data: Record<string
     armor, attacks, specials, text: str(o.text).slice(0, 3000), page: 0,
   };
   if (Object.keys(dr).length) data.dr = dr;
+  if (attackRows) data.attackRows = attackRows;
   const per = str(o.attacksPerRound).slice(0, 30);
   if (per && per !== "1") data.attacksPerRound = /^\d+$/.test(per) ? Number(per) : per;
   // "pick 1-2" = the Core Rules' "choose 1 or 2" weapon list; any other truthy value
@@ -2343,6 +2952,11 @@ function normalizePbMonster(input: unknown): { name: string; data: Record<string
   if (hpText && hpText !== String(data.hp)) data.hpText = hpText;
   const moraleText = pbDice(o.moraleText).slice(0, 20);
   if (moraleText && moraleText !== String(data.morale ?? "–")) data.moraleText = moraleText;
+  // Rolled stats the GM Screen rolls when the creature joins the tracker ("2d8", "d6+6").
+  const hpDice = pbDice(o.hpDice).replace(/\s+/g, "").slice(0, 20);
+  if (/^\d*d\d+([+-]\d+)?$/.test(hpDice)) { data.hpDice = hpDice; data.hpText = data.hpText ?? hpDice; }
+  const moraleDice = pbDice(o.moraleDice).replace(/\s+/g, "").slice(0, 20);
+  if (/^\d*d\d+([+-]\d+)?$/.test(moraleDice)) { data.moraleDice = moraleDice; data.moraleText = data.moraleText ?? moraleDice; }
   if (str(o.count)) data.count = pbDice(o.count).slice(0, 20);
   // Sellable parts after the block ("Snake skin 5s").
   const loot = (Array.isArray(o.loot) ? (o.loot as unknown[]) : []).slice(0, 8).map((l) => {
@@ -2351,7 +2965,9 @@ function normalizePbMonster(input: unknown): { name: string; data: Record<string
   }).filter((l) => l.name || l.value);
   if (loot.length) data.loot = loot;
   // A sea monster's second block for naval combat (HP / speed / agility / attacks).
-  const nAttacks = (Array.isArray(o.navalAttacks) ? (o.navalAttacks as unknown[]) : []).slice(0, 6).map((a) => {
+  const nRows = Array.isArray(o.navalAttackRows) ? cleanPbAttackRows(o.navalAttackRows, 6) : null;
+  if (nRows) data.navalAttackRows = nRows;
+  const nAttacks = nRows ? composePbAttacks(nRows) : (Array.isArray(o.navalAttacks) ? (o.navalAttacks as unknown[]) : []).slice(0, 6).map((a) => {
     const r = (a ?? {}) as Record<string, unknown>;
     const out: { name: string; damage: string | null; notes?: string } = { name: str(r.name).slice(0, 80) || "Attack", damage: pbDice(r.damage) || null };
     if (str(r.notes)) out.notes = str(r.notes).slice(0, 300);
@@ -2409,6 +3025,12 @@ function normalizePbShip(input: unknown): { name: string; data: Record<string, u
   if (data.skill == null && str(o.skillNote)) data.skillNote = str(o.skillNote).slice(0, 200);
   const cost = pbInt(o.cost, 0, 10000000);
   if (cost) data.cost = cost;
+  // Naval-rule flags the GM Screen's wind / speed helper reads (pb-gm-tables.js),
+  // and the DR to hit the ship when it isn't the standard 12.
+  if (truthy(o.windImmune)) data.windImmune = true;
+  else if (truthy(o.closeToWindFullSpeed)) data.closeToWindFullSpeed = true;
+  const sdr = pbInt(o.drAttack ?? (o.dr as Record<string, unknown> | undefined)?.attack, 2, 20);
+  if (sdr != null && sdr !== 12) data.dr = { attack: sdr };
   return { name, data };
 }
 
@@ -2682,14 +3304,23 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
 // Resolve/validate the requested share targets. An empty list means personal.
 // Campaigns the user doesn't participate in are rejected so nothing can be
 // shared sideways into someone else's party.
-export async function resolveShareTargets(userId: string, campaignIds: unknown): Promise<string[]> {
+// With `type`, campaigns running a different system are refused too — homebrew
+// is only useful to a table playing the system it was built for.
+export async function resolveShareTargets(userId: string, campaignIds: unknown, type?: HbType): Promise<string[]> {
   const raw = Array.isArray(campaignIds) ? campaignIds : campaignIds == null ? [] : [campaignIds];
   const ids = [...new Set(raw.map((v) => str(v)).filter(Boolean))];
   if (!ids.length) return [];
 
-  const mine = new Set((await userCampaigns(userId)).map((c) => c.id));
+  const list = await userCampaigns(userId);
+  const mine = new Set(list.map((c) => c.id));
   const bad = ids.filter((id) => !mine.has(id));
   if (bad.length) throw new Error("You can only share homebrew with campaigns you're part of.");
+  // Campaigns on another system are dropped (an old share made before this rule
+  // simply falls away on the next save instead of blocking it).
+  if (type) {
+    const ok = new Set(campaignsFor(type, list).map((c) => c.id));
+    return ids.filter((id) => ok.has(id));
+  }
   return ids;
 }
 

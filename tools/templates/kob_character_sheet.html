@@ -958,8 +958,17 @@ function stressMods() {
   const v = s <= 4 ? 0 : s <= 7 ? 1 : s <= 9 ? 2 : s <= 11 ? 3 : 5;
   return { boost:v, reduce:-v, power: s >= 12 ? 2 : s >= 10 ? 1 : 0, out: s >= 13 };
 }
+// Homebrew Strength effects (components/hb/kob/rules.ts): "stat" = +N to a
+// Stat's checks while the Strength is on the sheet; "atFail" = AT per failure.
+function strengthEffects(kind) {
+  const out = [];
+  document.querySelectorAll('#strengths-body .st-name').forEach(el => { const s = findStrength(el.value); if(s && Array.isArray(s.effects)) s.effects.forEach(e => { if(e && e.kind === kind) out.push(e); }); });
+  return out;
+}
+function strengthStatBonus(id) { return nsbuOn() ? 0 : strengthEffects('stat').filter(e => e.target === id).reduce((n, e) => n + (num(e.amount) || 0), 0); }
+function atOnFail() { return nsbuOn() ? 1 : strengthEffects('atFail').reduce((n, e) => Math.max(n, num(e.amount) || 1), 1); }
 function bonusOf(id) {
-  let b = ageBonus(id) + num($('mod-' + id).value);
+  let b = ageBonus(id) + num($('mod-' + id).value) + strengthStatBonus(id);
   if(book() === 'bikes') {
     const c = findItem('bike-color', $('f-bike-color').value);
     if(c) { const m = /\+1 to (\w+) checks/i.exec(c.benefit || ''); if(m && m[1].toLowerCase() === id.toLowerCase()) b += 1; }
@@ -1075,9 +1084,10 @@ function doCheck(label, sides, bonus, opts) {
   // shines and nothing auto-fails; AT is earned via the tokens buttons.
   let type = j.type;
   if(r.lucky && type !== 'crit') type = 'crit';
-  if(tn && j.type === 'fumble' && opts.earnAT !== false) { at += 1; renderAT(); scheduleAutosave(); }
+  const gain = atOnFail();
+  if(tn && j.type === 'fumble' && opts.earnAT !== false) { at += gain; renderAT(); scheduleAutosave(); }
   _lastRoll = { label, total, tn, spent:0 };
-  addLog(label, String(total), detail + (nsbuOn() ? j.verdict.replace(' → +1 AT', ' → +1 Turbo') : j.verdict), type, { atBtn: true });
+  addLog(label, String(total), detail + (nsbuOn() ? j.verdict.replace(' → +1 AT', ' → +1 Turbo') : j.verdict.replace(' → +1 AT', opts.earnAT === false ? ' → +1 AT' : ' → +' + gain + ' AT')), type, { atBtn: true });
   return total;
 }
 function spendATOnRoll() {
@@ -1164,7 +1174,7 @@ function rollPower(id) {
 function addStrengthRow(s) {
   s = s || { name:'', note:'' };
   const tr = document.createElement('tr');
-  tr.innerHTML = `<td><input type="text" class="st-name" placeholder="Strength" value="${esc(s.name)}" oninput="refreshStrengthRows()"></td><td class="cost"></td><td><input type="text" class="st-note" placeholder="Skilled at… / notes" value="${esc(s.note)}"><div class="desc"></div></td><td><button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()">✕</button></td>`;
+  tr.innerHTML = `<td><input type="text" class="st-name" placeholder="Strength" value="${esc(s.name)}" oninput="refreshStrengthRows();recalc()"></td><td class="cost"></td><td><input type="text" class="st-note" placeholder="Skilled at… / notes" value="${esc(s.note)}"><div class="desc"></div></td><td><button class="row-x" onclick="this.closest('tr').remove();recalc();scheduleAutosave()">✕</button></td>`;
   $('strengths-body').appendChild(tr);
   refreshStrengthRows();
 }
@@ -1245,7 +1255,7 @@ function renderStrengthPicker() {
 }
 (function wireStrengthPicker() {
   const sb = $('strength-body');
-  if(sb) sb.addEventListener('click', e => { const b = e.target.closest('[data-add-strength]'); if(b) { addStrengthRow({ name: b.dataset.addStrength, note: '' }); scheduleAutosave(); renderStrengthPicker(); } });
+  if(sb) sb.addEventListener('click', e => { const b = e.target.closest('[data-add-strength]'); if(b) { addStrengthRow({ name: b.dataset.addStrength, note: '' }); recalc(); scheduleAutosave(); renderStrengthPicker(); } });
 })();
 
 // ═══ NSBU ABILITY PICKER ══════════════════════════════════════════════════
@@ -1789,7 +1799,7 @@ campaignUpdateBtn();
 fillAgeOptions();
 fillDatalists();
 autoLoad();
-if (window.KOBHB) KOBHB.load(function () { try { fillDatalists(); } catch (e) {} });
+if (window.KOBHB) KOBHB.load(function () { try { fillDatalists(); recalc(); } catch (e) {} });
 </script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js (injects CSS + audio + 2D/3D engine). Extracted from the per-sheet inline copy. -->
 <script src="/tools-data/dice-anim.js"></script>

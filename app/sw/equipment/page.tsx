@@ -26,7 +26,8 @@ function hbToWeapon(data: Record<string, unknown>, name: string): WeaponRow {
     damageText: s("damageText") || undefined,
     range: s("range") || undefined,
     skill: s("skill") || undefined,
-    notes: s("notes") || undefined,
+    // Homebrew weapons may track ammo (shots per pack) — shown with the notes.
+    notes: [s("notes"), typeof data.ammo === "number" && data.ammo > 0 ? `Ammo ${data.ammo} shots` : ""].filter(Boolean).join(" · ") || undefined,
     cost: s("cost") || undefined,
     availability: s("availability") || undefined,
     book: asBook(s("book")),

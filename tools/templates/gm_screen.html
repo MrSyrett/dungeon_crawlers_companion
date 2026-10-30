@@ -7395,6 +7395,12 @@ GMScenes.renderPins();
   if (window.GM_SYSTEM === 'DB') { pull("db-monster", "__DB_HB_MONSTERS"); pull("db-npc", "__DB_HB_NPCS"); }
   // Pirate Borg homebrew creatures and ships → the PB bestiary (tracker picker, generators, naval panel).
   if (window.GM_SYSTEM === 'PB') { pull("pb-monster", "__PB_HB_MONSTERS"); pull("pb-ship", "__PB_HB_SHIPS"); }
+  // The Lord of the Rings homebrew adversaries → the LotR bestiary (tracker picker + adversary panel).
+  if (window.GM_SYSTEM === 'LOTR') pull("lotr-monster", "__LOTR_HB_MONSTERS");
+  // ICRPG homebrew monsters → the ICRPG bestiary (tracker picker + monster generator).
+  if (window.GM_SYSTEM === 'ICRPG') pull("icrpg-monster", "__ICRPG_HB_MONSTERS");
+  // D6 System 2e homebrew creatures → the D62e bestiary (tracker picker + creature generator).
+  if (window.GM_SYSTEM === 'D62E') pull("d62e-creature", "__D62E_HB_CREATURES");
 
   // Shadowdark gear homebrew → the Treasure generator's list (same items the SD
   // character-sheet shop shows). Mapped into the SD_GEAR row shape and scoped to
@@ -14955,8 +14961,8 @@ function xsBestiary(src) {
   if(src === 'nim') return ok(typeof NIMBLE_MONSTERS !== 'undefined' ? NIMBLE_MONSTERS : undefined);
   if(src === 'sw')  return ok(typeof SW_CHARACTERS !== 'undefined' ? SW_CHARACTERS : undefined);
   if(src === 'dnd') return ok(typeof DND_MONSTERS !== 'undefined' ? DND_MONSTERS : undefined);
-  if(src === 'd62e') return ok(typeof D62E_CREATURES !== 'undefined' ? D62E_CREATURES : undefined);
-  if(src === 'icrpg') return ok(typeof ICRPG_MONSTERS !== 'undefined' ? ICRPG_MONSTERS : undefined);
+  if(src === 'd62e') return ok(typeof D62E_CREATURES !== 'undefined' ? D62E_CREATURES : undefined).concat(ok(window.__D62E_HB_CREATURES).filter(m => m && m.name).map(m => Object.assign({ homebrew: true }, m)));
+  if(src === 'icrpg') return ok(typeof ICRPG_MONSTERS !== 'undefined' ? ICRPG_MONSTERS : undefined).concat(ok(window.__ICRPG_HB_MONSTERS).filter(m => m && m.name).map(m => Object.assign({ homebrew: true }, m)));
   if(src === 'mmrpg') return ok(typeof MMRPG_CHARACTERS !== 'undefined' ? MMRPG_CHARACTERS.filter(function(c){ return String(c.rank).toUpperCase() !== 'X'; }) : undefined);
   if(src === 'gb') return ok(typeof GB_BESTIARY !== 'undefined' ? GB_BESTIARY : undefined);
   if(src === 'yze') return ok(typeof ALIEN_BESTIARY !== 'undefined' ? ALIEN_BESTIARY : undefined);
@@ -14964,7 +14970,7 @@ function xsBestiary(src) {
   if(src === 'vae') return (typeof VAE_BESTIARY !== 'undefined' || typeof VAE_NPCS !== 'undefined') ? vaeBestiary() : [];
   if(src === 'myz') return (typeof MYZ_BESTIARY !== 'undefined' || typeof MYZ_FACTIONS !== 'undefined') ? myzBestiary() : [];
   // LotR adversaries (D&D monster shape + group) plus any Nameless Things rolled this session.
-  if(src === 'lotr') return ok(typeof LOTR_MONSTERS !== 'undefined' ? LOTR_MONSTERS : undefined).concat(Array.isArray(window.__lotrNamelessThings) ? window.__lotrNamelessThings : []);
+  if(src === 'lotr') return ok(typeof LOTR_MONSTERS !== 'undefined' ? LOTR_MONSTERS : undefined).concat(ok(window.__LOTR_HB_MONSTERS).filter(m => m && m.name).map(m => Object.assign({ homebrew: true }, m)), Array.isArray(window.__lotrNamelessThings) ? window.__lotrNamelessThings : []);
   if(src === 'jlu') return ok(typeof JLU_BESTIARY !== 'undefined' ? JLU_BESTIARY : undefined);
   if(src === 'db') return dbBestiary();
   if(src === 'pb') return pbBestiary();
@@ -15080,13 +15086,13 @@ function icrpgBonuses(m) {
   let all = null, others = null;
   if(m.stats && typeof m.stats === 'object') Object.keys(m.stats).forEach(k => { st[k.toUpperCase()] = +m.stats[k] || 0; });
   (m.abilities || []).forEach(a => {
-    String(a).replace(/([+-]\d+)\s+(?:to\s+)?(all\s+others|all\s+rolls|all\s+stats|stats|all|STR|DEX|CON|INT|WIS|CHA|weapon\s+effort|magic\s+effort|ultimate\s+effort|effort|weapon|magic|ultimate)\b/gi, (x, n, k) => {
+    String(a).replace(/([+-]\d+)\s+(?:to\s+)?(all\s+others|all\s+rolls|all\s+stats|stats|all|STR|DEX|CON|INT|WIS|CHA|weapon\s+effort|magic\s+effort|ultimate\s+effort|guns?\s+effort|basic\s+effort|effort|weapon|magic|ultimate)\b/gi, (x, n, k) => {
       const v = +n, key = k.toLowerCase().replace(/\s+/g, ' ');
       if(/^(str|dex|con|int|wis|cha)$/.test(key)) { if(st[key.toUpperCase()] == null) st[key.toUpperCase()] = v; }
       else if(key === 'all others') others = v;
       else if(/^(all rolls|all stats|stats|all)$/.test(key)) all = v;
       else if(key === 'effort') eff.all = v;
-      else eff[key.split(' ')[0]] = v;
+      else eff[key.split(' ')[0].replace(/^guns$/, 'gun')] = v;
       return x;
     });
   });
@@ -15111,6 +15117,17 @@ function icrpgAttackRoll(m, text) {
   return { hit: (hb >= 0 ? '+' : '') + hb, dmg: dmg, note: statKey + ' vs ARMOR' };
 }
 
+// A homebrew attack row: dice.d is the EFFORT type (d4 Basic … d12 Ultimate), dice.n how
+// many, dice.m a flat bonus; extra.stat the attack roll (auto: magic INT/WIS, guns or
+// NEAR/FAR DEX, else STR). Rows kept "as printed" (extra.txt) fall back to the text.
+function icrpgRowRoll(m, row) {
+  if(!row || !row.dice || (row.extra && row.extra.txt) || !(row.dice.n > 0)) return null;
+  const B = icrpgBonuses(m), d = +row.dice.d || 6, kind = { 4: 'basic', 6: 'weapon', 8: 'gun', 10: 'magic', 12: 'ultimate' }[d] || '';
+  const st = row.extra && row.extra.stat;
+  const statKey = st || (kind === 'magic' ? (B.stat('INT') >= B.stat('WIS') ? 'INT' : 'WIS') : (kind === 'gun' || (row.range && row.range !== 'CLOSE')) ? 'DEX' : 'STR');
+  const hb = B.stat(statKey), bon = (+row.dice.m || 0) + (kind ? B.eff(kind) : 0);
+  return { hit: (hb >= 0 ? '+' : '') + hb, dmg: row.dice.n + 'd' + d + (bon ? (bon > 0 ? '+' : '') + bon : ''), note: statKey + ' vs ARMOR' };
+}
 // A uniform description of a creature for the tracker card and generator card:
 //   { stats:[{label,val,roll?}], lines:[{label,text,roll?, hit?,dmg?,note?,kind?}], notes:[string], hp:number, tag:string }
 function xsMonSummary(src, m) {
@@ -15255,6 +15272,7 @@ function xsMonSummary(src, m) {
     out.hp = parseInt(m.health, 10) || 1;
   } else if(src === 'nim') {
     out.stats.push({ label: 'LV', val: String(m.level ?? '') }, { label: 'HP', val: m.hp != null ? String(m.hp) : (m.minion ? '1' : '') }, { label: 'Size', val: m.size || '' }, { label: 'Armor', val: m.armor || 'none' }, { label: 'Saves', val: m.saves || '' });
+    if(m.speed != null) out.stats.push({ label: 'Speed', val: String(m.speed) });   // homebrew monsters store it
     if(m.legendary) out.stats.push({ label: 'Legendary', val: '✓' }); if(m.minion) out.stats.push({ label: 'Minion', val: '✓' });
     // Nimble monsters don't roll to hit: they roll damage, a 1 on the primary
     // (first) die is a miss and its top face crits (explodes).
@@ -15266,7 +15284,9 @@ function xsMonSummary(src, m) {
     [['Dexterity','DEX'],['Knowledge','KNO'],['Mechanical','MEC'],['Perception','PER'],['Strength','STR'],['Technical','TEC']].forEach(([k, l]) => { if(A[k] != null) out.stats.push({ label: l, val: swPipsCode(A[k]), roll: swPipsRoll(A[k]) }); });
     // 1st edition has no Move stat; only the Sourcebook creatures print a Speed Code.
     if(m.move) out.stats.push({ label: 'Speed', val: String(m.move).replace(/^Speed Code\s*/i, '') });
-    (m.skills || []).forEach(sk => { const dm = /(\d+D(?:\+\d)?)/.exec(sk); out.lines.push({ label: 'Skill', text: sk, roll: dm ? dm[1].replace(/D/, 'd6') : '' }); });
+    // Homebrew characters may carry Force Points / Dark Side Points; a "Force skills: Control 3D, Sense 2D" line rolls each skill.
+    if(m.forcePoints) out.stats.push({ label: 'FP', val: String(m.forcePoints) }); if(m.darkSidePoints) out.stats.push({ label: 'DSP', val: String(m.darkSidePoints) });
+    (m.skills || []).forEach(sk => { const fm = /^Force skills:\s*(.+)$/.exec(sk); if(fm) { fm[1].split(/,\s*/).forEach(p => { const dm = /(\d+D(?:\+\d)?)/.exec(p); out.lines.push({ label: 'Force', text: p, roll: dm ? dm[1].replace(/D/, 'd6') : '' }); }); return; } const dm = /(\d+D(?:\+\d)?)/.exec(sk); out.lines.push({ label: 'Skill', text: sk, roll: dm ? dm[1].replace(/D/, 'd6') : '' }); });
     // Skill rolls use the Wild Die only with the SW house rule on; weapon damage doesn't (kind 'dmg' = a plain sum).
     (m.equipment || []).forEach(e => { const dm = /damage\s*(\d+D(?:\+\d)?)/i.exec(e); out.lines.push({ label: 'Gear', text: e, roll: dm ? dm[1].replace(/D/, 'd6') : '', kind: dm ? 'dmg' : '' }); });
     if(m.description) out.notes.push(m.description); if(m.notes) out.notes.push(m.notes);
@@ -15304,7 +15324,10 @@ function xsMonSummary(src, m) {
     // D6 System: attributes stored as pips (12 = 4D). No hit points — a wound
     // track lives on the tracker card, like Star Wars.
     const A = m.attributes || {};
-    Object.keys(A).forEach(k => { out.stats.push({ label: k.slice(0, 3).toUpperCase(), val: swPipsCode(A[k]), roll: swPipsRoll(A[k]) }); });
+    // Book order (homebrew rows come back from jsonb with their keys re-sorted).
+    const D62E_ATTR_ORDER = ['Agility','Brawn','Knowledge','Perception','Charm','Mechanical','Technical','Mysticism','Magic'];
+    const aRank = k => { const i = D62E_ATTR_ORDER.indexOf(k); return i < 0 ? 99 : i; };
+    Object.keys(A).sort((x, y) => aRank(x) - aRank(y)).forEach(k => { out.stats.push({ label: k.slice(0, 3).toUpperCase(), val: swPipsCode(A[k]), roll: swPipsRoll(A[k]) }); });
     // Book stat blocks list skills as dice ADDED to the governing attribute ("Brawn
     // Skills 4D · Athletics 2D" = Athletics 6D), so a skill rolls attribute + skill.
     // "Agility Skills 2D" lines are the attribute itself and roll as printed.
@@ -15333,11 +15356,24 @@ function xsMonSummary(src, m) {
       if(md) { out.meta.push([md[1].charAt(0).toUpperCase() + md[1].slice(1).toLowerCase(), md[2].trim()]); return; }
       // "Damage: Talons (Brawn+2D)" → a damage roll of Brawn + 2D. D62e damage is a
       // normal die code with a Wild Die (a damage roll can invoke a Complication, p.33).
-      const dd = /damage:?\s*([^(]*)\((\w+)\s*\+\s*(\d+)D(?:\+(\d))?\)/i.exec(String(sp));
-      if(dd) {
-        const ak = Object.keys(A).find(k => k.toLowerCase() === dd[2].toLowerCase());
-        const pips = (ak ? +A[ak] || 0 : 0) + (+dd[3]) * 3 + (+dd[4] || 0);
-        out.lines.push({ label: (dd[1] || 'Damage').trim() || 'Damage', text: String(sp).replace(/^damage:?\s*/i, ''), roll: swPipsRoll(pips) });
+      // Homebrew attacks may also be a flat code ("Damage: Breath (6D)"), a bare attribute
+      // ("(Brawn)"), and name the attack skill (", rolled with Melee") — that adds a to-hit roll.
+      const dd = /damage:?\s*([^(]*)\((?:([A-Za-z]+)\s*\+\s*)?(\d+)D(?:\+(\d))?\)/i.exec(String(sp)) || /damage:?\s*([^(]*)\(([A-Za-z]+)\)()()/i.exec(String(sp));
+      const dAttr = dd && dd[2] ? Object.keys(A).find(k => k.toLowerCase() === dd[2].toLowerCase()) : null;
+      if(dd && (!dd[2] || dAttr || dd[3])) {
+        const pips = (dAttr ? +A[dAttr] || 0 : 0) + (+dd[3] || 0) * 3 + (+dd[4] || 0);
+        const line = { label: (dd[1] || 'Damage').trim() || 'Damage', text: String(sp).replace(/^damage:?\s*/i, ''), roll: swPipsRoll(pips) };
+        const rw = /, rolled with ([^.]+)/i.exec(String(sp));
+        if(rw) {
+          const sk = rw[1].trim().toLowerCase();
+          const row = (m.skills || []).map(String).find(x => x.toLowerCase().startsWith(sk + ' ') || x.toLowerCase() === sk);
+          const am = row && /(\d+)D(?:\+(\d))?\s*$/.exec(row);
+          const attr = D62E_SKILL_ATTR[sk];
+          const ak2 = attr && Object.keys(A).find(k => k.toLowerCase() === attr.toLowerCase());
+          const hp = (ak2 ? +A[ak2] || 0 : 0) + (am ? (+am[1]) * 3 + (+am[2] || 0) : 0);
+          if(hp) { line.hit = swPipsRoll(hp); line.dmg = line.roll; }
+        }
+        out.lines.push(line);
       } else out.lines.push({ label: 'Special', text: String(sp) });
     });
     if(m.description) out.notes.push(m.description);
@@ -15349,8 +15385,10 @@ function xsMonSummary(src, m) {
     out.stats.push({ label: 'Hearts', val: m.hearts != null ? String(m.hearts) : '' }, { label: 'HP', val: String(m.hp != null ? m.hp : (m.hearts != null ? m.hearts * 10 : '')) });
     if(m.defense != null) out.stats.push({ label: 'DEF', val: (m.defense >= 0 ? '+' : '') + m.defense });
     ['STR','DEX','CON','INT','WIS','CHA'].forEach(k => { if(S[k] != null) out.stats.push({ label: k, val: (S[k] >= 0 ? '+' : '') + S[k], roll: '1d20' + (S[k] >= 0 ? '+' : '') + S[k] }); });
-    (m.attacks || []).forEach(a => {
-      const t = String(a), r = icrpgAttackRoll(m, t);
+    // Homebrew monsters carry structured attackRows (EFFORT die × count + flat, stat) — roll those exactly.
+    const rows = Array.isArray(m.attackRows) && m.attackRows.length === (m.attacks || []).length ? m.attackRows : null;
+    (m.attacks || []).forEach((a, i) => {
+      const t = String(a), r = (rows && icrpgRowRoll(m, rows[i])) || icrpgAttackRoll(m, t);
       const nm = /^([^:,]{2,40})[:,]\s*(.*)$/.exec(t);
       out.lines.push(Object.assign({ label: nm ? nm[1].trim() : 'Attack', text: nm ? nm[2] : t }, r ? { hit: r.hit, dmg: r.dmg, note: r.note, roll: r.dmg } : {}));
     });

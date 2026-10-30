@@ -68,7 +68,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
             <li key={`${a.homebrew ? "hb" : "bk"}-${a.name}-${i}`} className={cardCls} hidden={!show(a)} data-f={facetAttr(facets(a))} data-s={a.owner}>
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <h2 className={nameCls}>{a.name}</h2>
-                {a.homebrew ? <span className={hbBadge}>Homebrew</span> : <span className={badge}>{a.source}{a.owner ? ` · ${a.owner}` : ""}</span>}
+                {a.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
+                <span className={badge}>{a.source}{a.owner ? ` · ${a.owner}` : ""}</span>
               </div>
               <p className="mt-2 text-[13px] leading-relaxed text-[var(--text)]">{a.desc}</p>
             </li>

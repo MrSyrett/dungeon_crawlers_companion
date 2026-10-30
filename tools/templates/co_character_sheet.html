@@ -217,6 +217,16 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .ab-card .ab-desc{width:100%;margin-top:5px;border:1px solid var(--rule);border-radius:5px;background:var(--input-bg);font-family:'Barlow',sans-serif;font-size:12.5px;line-height:1.4;color:var(--ink);outline:none;padding:6px 8px;resize:vertical;}
 .ab-card .ab-desc:focus,.ab-head .ab-name:focus,.ab-head .ab-src:focus{outline:none;}
 .ab-card .ab-name:focus{color:var(--co);}
+/* Homebrew ability rows carry structured uses / cost / actions (components/hb/co). */
+.ab-tools{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px;}
+.ab-roll,.ab-use{background:transparent;border:1px solid var(--co);color:var(--co-dk);border-radius:5px;padding:2px 9px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;}
+.ab-use{background:var(--co);color:#fff;border-color:var(--co-dk);}
+.ab-use:disabled{opacity:.45;cursor:default;}
+.ab-cost{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+.ab-pips{display:inline-flex;gap:3px;align-items:center;}
+.ab-pip{width:12px;height:12px;border-radius:50%;border:2px solid var(--input-border);background:#fff;padding:0;cursor:pointer;}
+.ab-pip.on{background:var(--co);border-color:var(--co-dk);}
+body.dark .ab-pip{background:var(--input-bg);} body.dark .ab-pip.on{background:var(--co);}
 .fld{margin-bottom:8px;}
 .fld label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:2px;}
 .fld input,.fld textarea{width:100%;border:1px solid var(--rule);background:var(--input-bg);font-family:'Barlow',sans-serif;font-size:13px;color:var(--ink);outline:none;padding:6px 8px;resize:vertical;}
@@ -756,7 +766,8 @@ function renderRows(kind){
       card.innerHTML='<div class="ab-head"><input class="ab-name" value="'+esc(d.name||'')+'" oninput="rowEdit(\'abil\','+i+',\'name\',this.value)" placeholder="Name">'
         +'<input class="ab-src" value="'+esc(d.tag||'')+'" oninput="rowEdit(\'abil\','+i+',\'tag\',this.value)" placeholder="Source">'
         +'<button class="row-x" title="remove" onclick="rowDel(\'abil\','+i+')">✕</button></div>'
-        +'<textarea class="ab-desc" rows="2" oninput="rowEdit(\'abil\','+i+',\'note\',this.value)" placeholder="Description">'+esc(d.note||'')+'</textarea>';
+        +'<textarea class="ab-desc" rows="2" oninput="rowEdit(\'abil\','+i+',\'note\',this.value)" placeholder="Description">'+esc(d.note||'')+'</textarea>'
+        +abTools(d,i);
       body.appendChild(card);
     } else {
       var tr=document.createElement('tr');
@@ -770,11 +781,65 @@ function renderRows(kind){
   var emp=$(kind+'-empty'); if(emp) emp.style.display=list.length?'none':'block';
   if(kind==='abil') refreshWizardButtons();
 }
+// Structured homebrew ability: roll buttons for its actions, a Use button that
+// pays its cost (drive points / resistance / marks) and ticks a use, and use pips
+// (click to correct; clear them at a new assignment).
+var AB_TIMES=['','once','twice','three times'];
+function abUsesLabel(u){ if(!u)return ''; if(u.per==='between')return 'between assignments'; return (AB_TIMES[u.n]||u.n+' times')+' per '+u.per; }
+function abCostLabel(c){ var n=c.amount||1,t=c.target||'';
+  if(c.kind==='drive') return t==='any'?'spend '+n+' drive':'spend '+n+' '+t;
+  if(c.kind==='resist') return 'burn '+n+(t==='any'?'':' '+t)+' resistance';
+  if(c.kind==='mark') return n===1?'a '+t+' mark':n+' '+t+' marks';
+  if(c.kind==='scar') return t==='any'?'a scar':'a '+t+' scar';
+  if(c.kind==='circle') return n+' '+t;
+  return ''; }
+function abTools(d,i){
+  var acts=G(d.actions), cost=G(d.cost), u=d.uses||null;
+  if(!acts.length&&!cost.length&&!u) return '';
+  var h='<div class="ab-tools">';
+  acts.forEach(function(a){ if(ACTION_NAMES.indexOf(a)>=0) h+='<button class="ab-roll" title="roll '+a+'" onclick="rollAction(\''+a+'\')">🎲 '+a+'</button>'; });
+  if(cost.length||u){
+    var max=u?(u.per==='between'?1:(u.n||1)):0, used=Math.min(max||99,d.used||0);
+    h+='<button class="ab-use"'+(u&&used>=max?' disabled title="no uses left"':'')+' onclick="useAbility('+i+')">Use</button>';
+    if(cost.length) h+='<span class="ab-cost">'+esc(cost.map(abCostLabel).join(' + '))+'</span>';
+    if(u){ var pips=''; for(var k=1;k<=max;k++) pips+='<button class="ab-pip'+(k<=used?' on':'')+'" title="'+k+' of '+max+' used" onclick="setAbUsed('+i+','+k+')"></button>';
+      h+='<span class="ab-pips">'+pips+'</span><span class="ab-cost">'+esc(abUsesLabel(u))+'</span>'; }
+  }
+  return h+'</div>';
+}
+function setAbUsed(i,k){ var d=S.abilities[i]; if(!d)return; d.used=((d.used||0)===k)?k-1:k; renderRows('abil'); scheduleAutosave(); }
+function useAbility(i){
+  var d=S.abilities[i]; if(!d)return; var u=d.uses||null, max=u?(u.per==='between'?1:(u.n||1)):0;
+  if(u&&(d.used||0)>=max){ addLog(d.name||'Ability','No uses left',abUsesLabel(u),'fumble'); return; }
+  var cost=G(d.cost), paid=[], notes=[];
+  // Check drive / resistance first so a failed use pays nothing.
+  for(var c=0;c<cost.length;c++){ var x=cost[c], n=x.amount||1;
+    if(x.kind==='drive'&&x.target!=='any'&&S.drives[x.target]&&S.drives[x.target].cur<n){ addLog(d.name||'Ability','Not enough '+x.target,'needs '+n+', have '+S.drives[x.target].cur,'fumble'); return; }
+    if(x.kind==='resist'&&x.target!=='any'&&S.drives[x.target]&&resTotal(x.target)-(S.resUsed[x.target]||0)<n){ addLog(d.name||'Ability','No '+x.target+' resistance left','','fumble'); return; } }
+  cost.forEach(function(x){ var n=x.amount||1;
+    if(x.kind==='drive'&&S.drives[x.target]){ S.drives[x.target].cur-=n; paid.push('-'+n+' '+x.target); }
+    else if(x.kind==='resist'&&S.drives[x.target]){ S.resUsed[x.target]=(S.resUsed[x.target]||0)+n; paid.push('burned '+n+' '+x.target+' resistance'); }
+    else if(x.kind==='mark'&&S.marks[x.target]!=null){ var before=S.marks[x.target]; S.marks[x.target]=Math.min(3,before+n); paid.push('+'+n+' '+x.target+' mark'+(n===1?'':'s')); if(before+n>3) notes.push(x.target+' track overflows: take a scar'); }
+    else notes.push(abCostLabel(x)); });
+  if(u) d.used=(d.used||0)+1;
+  renderDriveBlocks(); renderMarks(); renderRows('abil'); scheduleAutosave();
+  var det=paid.concat(notes.length?['pay by hand: '+notes.join(', ')]:[]).join(' · ')||'no cost';
+  if(u) det+=' · '+d.used+'/'+max+' used';
+  addLog(d.name||'Ability','Used',det,'normal');
+}
 function rowEdit(kind,i,f,v){ var list=kind==='abil'?S.abilities:S.gear; if(list[i]){ list[i][f]=v; scheduleAutosave(); } }
 function rowDel(kind,i){ var list=kind==='abil'?S.abilities:S.gear; list.splice(i,1); renderRows(kind); scheduleAutosave(); }
 function addRow(kind,d){ var list=kind==='abil'?S.abilities:S.gear;
   if(kind==='gear' && list.length>=3){ addLog('Gear','3 max','You can carry up to three pieces of gear','fumble'); return false; }
-  list.push({name:(d&&d.name)||'',tag:(d&&d.tag)||'',note:(d&&d.note)||''}); renderRows(kind); return true; }
+  list.push(abRow({name:(d&&d.name)||'',tag:(d&&d.tag)||'',note:(d&&d.note)||''},d)); renderRows(kind); return true; }
+// Copy a homebrew ability's structured uses / cost / actions (+ used count) onto a row.
+function abRow(row,d){ if(!d)return row;
+  if(d.uses&&d.uses.per) row.uses={n:d.uses.n||1,per:d.uses.per};
+  if(Array.isArray(d.cost)&&d.cost.length) row.cost=d.cost.map(function(c){ return {kind:c.kind,target:c.target,amount:c.amount}; });
+  if(Array.isArray(d.actions)&&d.actions.length) row.actions=d.actions.slice();
+  if(d.used) row.used=d.used|0;
+  return row; }
+function hbAbility(name){ var n=String(name||'').toLowerCase(); return G(window.CO_HB_ABILITIES).find(function(x){ return String(x.name||'').toLowerCase()===n; })||null; }
 
 // ── Picker ──
 var _pk=null;
@@ -789,7 +854,7 @@ function pickerPool(kind){
   }
   var g=GEAR.map(function(x){return {name:x.name,tag:x.type||'Standard',note:x.desc||'',facet:x.type||'Standard'};});
   ROLES.forEach(function(r){ r.specialties.forEach(function(s){ (s.gear||[]).forEach(function(nm){ g.push({name:nm,tag:s.name+' gear',note:'',facet:s.name}); }); }); });
-  G(window.CO_HB_GEAR).forEach(function(d){ g.push({name:d.name,tag:'Homebrew',note:d.desc||'',facet:'Homebrew'}); });
+  G(window.CO_HB_GEAR).forEach(function(d){ g.push({name:d.name,tag:'Homebrew'+(d.type?' · '+d.type:''),note:d.desc||'',facet:'Homebrew'}); });
   return g;
 }
 function openPicker(kind){
@@ -817,7 +882,8 @@ function renderPicker(){
       +(x.note?'<div class="brow-desc">'+esc(x.note)+'</div>':'')+'</div>'+addBtn+'</div>';
   }).join('');
 }
-function pickAdd(name,tag,note){ addRow(_pk,{name:name,tag:tag,note:note}); setTab(_pk==='abil'?'abilities':'gear'); scheduleAutosave(); renderPicker(); }
+function pickAdd(name,tag,note){ var hb=(_pk==='abil'&&/^Homebrew/.test(tag))?hbAbility(name):null;
+  addRow(_pk,Object.assign({},hb||{},{name:name,tag:tag,note:note})); setTab(_pk==='abil'?'abilities':'gear'); scheduleAutosave(); renderPicker(); }
 function addCustomFromPicker(){ addRow(_pk,{}); setTab(_pk==='abil'?'abilities':'gear'); closePicker(); scheduleAutosave(); }
 
 // ── Rolling ──
@@ -1009,7 +1075,7 @@ function applySheet(d){
   if(d.resUsed) DRIVE_NAMES.forEach(function(dn){ if(d.resUsed[dn]!=null)S.resUsed[dn]=d.resUsed[dn]; });
   if(d.marks) MARKS.forEach(function(m){ if(d.marks[m.name]!=null)S.marks[m.name]=d.marks[m.name]; });
   if(d.scars) S.scars=Object.assign({Body:'',Brain:'',Bleed:''},d.scars);
-  if(Array.isArray(d.abilities)) S.abilities=d.abilities.map(function(a){ return {name:a.name||'',tag:a.tag||'',note:a.note||''}; });
+  if(Array.isArray(d.abilities)) S.abilities=d.abilities.map(function(a){ return abRow({name:a.name||'',tag:a.tag||'',note:a.note||''},a); });
   if(Array.isArray(d.gear)) S.gear=d.gear.map(function(g){ return {name:g.name||'',tag:g.tag||'',note:g.note||''}; });
   if(Array.isArray(d.illumination)){ S.illumination=d.illumination.slice(0,3); while(S.illumination.length<3)S.illumination.push(''); }
   if(Array.isArray(d.relationships)) S.relationships=d.relationships.map(function(r){ return {name:r.name||'',type:r.type||''}; });

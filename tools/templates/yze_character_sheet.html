@@ -885,6 +885,13 @@ var ATTR_KEYS=ATTRS.map(function(a){return a.key;});
 function skillsByAttr(k){ return SKILLS.filter(function(s){return s.attr===k;}); }
 function skillObj(name){ return SKILLS.find(function(s){return s.name===name;}); }
 function weaponBonus(b){ var m=String(b||'').replace(/[−–]/g,'-').match(/-?\d+/); return m?parseInt(m[0],10):0; }   // catalog writes "−1" with a typographic minus
+// Homebrew gear/armor skill bonuses ({skill, amount}[] from the yze-gear builder):
+// while the inventory row is equipped ("in use") they join that skill's rolls.
+function sbClean(b){ return Array.isArray(b)?b.filter(function(x){ return x&&x.skill&&num(x.amount); }).map(function(x){ return {skill:String(x.skill),amount:num(x.amount)}; }):[]; }
+function sbText(b){ return sbClean(b).map(function(x){ return x.skill+' '+(x.amount>0?'+':'−')+Math.abs(x.amount); }).join(', '); }
+function gearSkillBonus(sk){ var n=0; if(S&&Array.isArray(S.gear)) S.gear.forEach(function(g){ if(g.equipped&&g.skillBonus) sbClean(g.skillBonus).forEach(function(x){ if(x.skill===sk) n+=x.amount; }); }); return n; }
+function gearTag(sk){ var n=gearSkillBonus(sk); return n?' '+(n>0?'+':'−')+Math.abs(n)+' gear':''; }
+var HB_SKILL_MAP={Melee:'Close Combat',Marksmanship:'Ranged Combat',Mobility:'Ranged Combat'};   // legacy homebrew weapon skills → Alien
 function itemWeight(w){ w=String(w||'1'); if(w==='—'||w==='-'||w==='')return 0; if(w==='½'||w==='1/2')return 0.5; if(w==='¼'||w==='1/4')return 0.25; var n=parseFloat(w); return isNaN(n)?1:n; }
 
 // ── State ──
@@ -933,9 +940,9 @@ function renderAttrSkills(){
     var head='<div class="attr-row"><span class="a-name" onclick="rollAttr(\''+a.key+'\')" title="roll '+esc(a.name)+' pool" style="cursor:pointer;">'+a.name+(S.key===a.key?'<span class="key-star" title="key attribute">★</span>':'')+'</span><button class="a-die" onclick="rollAttr(\''+a.key+'\')" title="roll '+esc(a.name)+' pool">'+apool+'d</button></div>';
     var rows='';
     skillsByAttr(a.key).forEach(function(s){
-      var lvl=num(S.skills[s.name]), pool=attrVal(a.key)+lvl-condPenaltyFor(a.key)-critPenalty(s.name);
+      var lvl=num(S.skills[s.name]), pool=attrVal(a.key)+lvl+gearSkillBonus(s.name)-condPenaltyFor(a.key)-critPenalty(s.name);
       var esn=s.name.replace(/'/g,"\\'");
-      rows+='<div class="skill-row"><button class="sk-name" onclick="rollSkill(\''+esn+'\')" title="'+esc(s.desc)+' (level '+lvl+')">'+s.name+'</button><button class="sk-pool sk-roll" onclick="rollSkill(\''+esn+'\')" title="roll pool = attribute + skill − penalties">'+Math.max(0,pool)+'d</button></div>';
+      rows+='<div class="skill-row"><button class="sk-name" onclick="rollSkill(\''+esn+'\')" title="'+esc(s.desc)+' (level '+lvl+')">'+s.name+'</button><button class="sk-pool sk-roll" onclick="rollSkill(\''+esn+'\')" title="roll pool = attribute + skill + gear in use − penalties">'+Math.max(0,pool)+'d</button></div>';
     });
     var block=document.createElement('div'); block.className='as-attr';
     block.innerHTML=head+'<div class="as-skills">'+rows+'</div>';
@@ -1089,7 +1096,7 @@ function armorRating(){ var r=0; S.gear.forEach(function(g){ if(g.kind==='armor'
 function renderArmorVal(){ var el=$('armor-val'); if(el) el.textContent=armorRating(); }
 function gEdit(i,f,v){ var g=S.gear[i]; if(!g)return; g[f]=(f==='damage'||f==='rating')?num(v):v; scheduleAutosave(); if(f==='weight')renderEnc(); if(f==='rating')renderArmorVal(); if((g.kind==='weapon')&&g.equipped)renderAttacks(); }
 function gDel(i){ S.gear.splice(i,1); renderInventory(); renderAttacks(); scheduleAutosave(); }
-function gEquip(i,on){ var g=S.gear[i]; if(!g)return; g.equipped=!!on; renderAttacks(); renderArmorVal(); scheduleAutosave(); }
+function gEquip(i,on){ var g=S.gear[i]; if(!g)return; g.equipped=!!on; renderAttacks(); renderArmorVal(); if(g.skillBonus) renderAttrSkills(); scheduleAutosave(); }
 function invIn(i,f,val,cls,ph,extra){ return '<input'+(cls?' class="'+cls+'"':'')+(extra?' '+extra:'')+' value="'+esc(val==null?'':val)+'" oninput="gEdit('+i+',\''+f+'\',this.value)"'+(ph?' placeholder="'+ph+'"':'')+'>'; }
 function eqBox(i,on){ return '<input type="checkbox" class="eqbox" data-nolock '+(on?'checked':'')+' onchange="gEquip('+i+',this.checked)" title="Equip">'; }
 // One combined inventory list — general gear, weapons and armor together, in
@@ -1100,7 +1107,8 @@ function renderInventory(){
     body.innerHTML='';
     S.gear.forEach(function(g,i){
       var kind=g.kind||'gear';
-      var eq=(kind==='weapon'||kind==='armor')?eqBox(i,g.equipped):'';
+      var sbt=sbText(g.skillBonus), sbm=sbt?'<span class="inv-mini" title="Skill bonus while equipped / in use">'+esc(sbt)+'</span>':'';
+      var eq=(kind==='weapon'||kind==='armor'||sbt)?eqBox(i,g.equipped):'';
       var details;
       if(kind==='weapon'){
         details='<span class="inv-type">Weapon</span>'
@@ -1112,9 +1120,9 @@ function renderInventory(){
         details='<span class="inv-type">Armor</span>'
           +'<span class="inv-mini">rating</span>'+invIn(i,'rating',g.rating,'cx')
           +'<span class="inv-mini">air</span>'+invIn(i,'air',g.air,'cx')
-          +invIn(i,'note',g.note,'inv-note','note');
+          +sbm+invIn(i,'note',g.note,'inv-note','note');
       } else {
-        details=invIn(i,'note',g.note,'inv-note','note');
+        details=sbm+invIn(i,'note',g.note,'inv-note','note');
       }
       var ph=kind==='weapon'?'Weapon':kind==='armor'?'Armor':'Item';
       var tr=document.createElement('tr');
@@ -1167,7 +1175,7 @@ function pickerPool(kind){
     // Unarmed Attack is always available in the Combat tab, so it isn't sold in the store.
     var src=(isAlien()?ALIEN_WP:WEAPONS).filter(function(w){ return !/^unarmed\b/i.test(w.name||''); });
     var out=src.map(function(w){ return {name:w.name,cost:w.damage+' dmg · '+w.range,note:(isAlien()?(w.class+' · '):('Grip '+w.grip+' · '))+'bonus '+w.bonus+' · wt '+w.weight+(w.special?' · '+w.special:''),price:dollars(w.cost),priceStr:w.cost||'',data:w}; });
-    G(window.YZE_HB_WEAPONS).forEach(function(d){ out.push({name:d.name,cost:(d.damage!=null?d.damage+' dmg':'')+(d.range?' · '+d.range:''),note:'Homebrew'+(d.bonus?' · bonus '+d.bonus:''),price:dollars(d.cost),priceStr:d.cost||'',data:d}); });
+    G(window.YZE_HB_WEAPONS).forEach(function(d){ out.push({name:d.name,cost:(d.damage!=null?d.damage+' dmg':'')+(d.range?' · '+d.range:''),note:'Homebrew'+(d['class']?' · '+d['class']:'')+(d.bonus?' · bonus '+d.bonus:'')+(d.ammo&&d.ammo!=='—'?' · ammo '+d.ammo:'')+(d.special?' · '+d.special:''),price:dollars(d.cost),priceStr:d.cost||'',data:d}); });
     return out;
   }
   if(kind==='talent'){
@@ -1176,12 +1184,12 @@ function pickerPool(kind){
   if(kind==='armor'){
     var ar=[], srcA=G(window.YZE_ARMOR).length?G(window.YZE_ARMOR):ALIEN_AR;
     srcA.forEach(function(a){ ar.push({name:a.name,cost:'Armor '+(a.rating!=null?a.rating:''),note:a.note||(((a.air&&a.air!=='—')?'Air '+a.air+' · ':'')+'wt '+(a.weight||'1')+(a.comment?' · '+a.comment:'')),price:dollars(a.cost),priceStr:a.cost||'',data:{name:a.name,rating:a.rating,air:a.air||'',weight:a.weight||'1',note:a.note||a.comment||''}}); });
-    G(window.YZE_HB_ARMOR).forEach(function(d){ ar.push({name:d.name,cost:'Armor '+(d.rating!=null?d.rating:''),note:'Homebrew'+(d.note?' · '+d.note:''),price:dollars(d.cost),priceStr:d.cost||'',data:{name:d.name,rating:d.rating,weight:d.weight||'1',note:d.note||''}}); });
+    G(window.YZE_HB_ARMOR).forEach(function(d){ var nt=d.note||d.desc||''; ar.push({name:d.name,cost:'Armor '+(d.rating!=null?d.rating:''),note:'Homebrew'+((d.air&&d.air!=='—')?' · Air '+d.air:'')+(nt?' · '+nt:''),price:dollars(d.cost),priceStr:d.cost||'',data:{name:d.name,rating:d.rating,air:d.air||'',weight:d.weight||'1',note:nt,skillBonus:sbClean(d.skillBonus)}}); });
     return ar;
   }
   var g=[];
   G(isAlien()?window.ALIEN_GEAR:window.YZE_GEAR).forEach(function(d){ var nt=d.effect||d.note||''; g.push({name:d.name,cost:(d.weight!=null&&d.weight!==''?d.weight+' wt':'')+(d.cost?' · '+d.cost:''),note:nt+(d.supply?' · '+d.supply:''),price:dollars(d.cost),priceStr:d.cost||'',data:{name:d.name,weight:d.weight,note:nt,supply:d.supply||''}}); });
-  G(window.YZE_HB_GEAR).forEach(function(d){ g.push({name:d.name,cost:d.weight?d.weight+' wt':'',note:'Homebrew'+(d.desc?' · '+d.desc:''),price:dollars(d.cost),priceStr:d.cost||'',data:d}); });
+  G(window.YZE_HB_GEAR).forEach(function(d){ g.push({name:d.name,cost:(d.weight?d.weight+' wt':'')+(d.cost?' · '+d.cost:''),note:'Homebrew'+(d.desc?' · '+d.desc:'')+(d.supply?' · '+d.supply:''),price:dollars(d.cost),priceStr:d.cost||'',data:d}); });
   return g;
 }
 function openPicker(kind){
@@ -1221,10 +1229,10 @@ var _pkRows=[];
 // Add an item from the store to the sheet (free). Returns without re-rendering
 // when silent, so pickBuy can control the flow.
 function pickAddRow(x){
-  if(_pk==='weap'){ var w=x.data||{}; S.gear.push({kind:'weapon',equipped:false,name:w.name||x.name,grip:w.grip||'',bonus:w.bonus||'',damage:w.damage!=null?w.damage:1,range:w.range||'',ammo:w.ammo||'—',weight:w.weight||'1',skill:w.skill||(isAlien()?'Ranged Combat':'Melee')}); renderWeapons(); setTab('gear'); }
-  else if(_pk==='armor'){ var a=x.data||{}; S.gear.push({kind:'armor',equipped:false,name:a.name||x.name,rating:num(a.rating),air:a.air||'',weight:a.weight||'1',note:a.note||''}); renderInventory(); setTab('gear'); }
+  if(_pk==='weap'){ var w=x.data||{}; S.gear.push({kind:'weapon',equipped:false,name:w.name||x.name,grip:w.grip||'',bonus:w.bonus||'',damage:w.damage!=null?w.damage:1,range:w.range||'',ammo:w.ammo||'—',weight:w.weight||'1',skill:(isAlien()&&HB_SKILL_MAP[w.skill])||w.skill||(isAlien()?'Ranged Combat':'Melee')}); renderWeapons(); setTab('gear'); }
+  else if(_pk==='armor'){ var a=x.data||{}, ar={kind:'armor',equipped:false,name:a.name||x.name,rating:num(a.rating),air:a.air||'',weight:a.weight||'1',note:a.note||''}; if(sbClean(a.skillBonus).length) ar.skillBonus=sbClean(a.skillBonus); S.gear.push(ar); renderInventory(); setTab('gear'); }
   else if(_pk==='talent'){ var t=x.data||{}; S.talents.push({name:t.name||x.name,note:t.desc||t.note||''}); renderTalents(); setTab('story'); }
-  else { var d=x.data||{}; S.gear.push({kind:'gear',name:d.name||x.name,weight:d.weight||'1',note:d.desc||d.note||''}); renderGear(); setTab('gear'); }
+  else { var d=x.data||{}, gr={kind:'gear',name:d.name||x.name,weight:d.weight||'1',note:d.desc||d.note||''}; if(sbClean(d.skillBonus).length){ gr.skillBonus=sbClean(d.skillBonus); gr.equipped=false; } S.gear.push(gr); renderGear(); setTab('gear'); }
 }
 function pickAdd(idx){ var x=_pkRows[idx]; if(!x)return; pickAddRow(x); scheduleAutosave(); renderPicker(); }
 function pickBuy(idx){
@@ -1295,8 +1303,8 @@ function doPool(label, poolSize, pushable){
 }
 function rollSkill(name){
   var s=skillObj(name); if(!s)return;
-  var pool=attrVal(s.attr)+num(S.skills[name])-condPenaltyFor(s.attr)-critPenalty(name);
-  doPool(name+' ('+s.attr+')', pool, true);
+  var pool=attrVal(s.attr)+num(S.skills[name])+gearSkillBonus(name)-condPenaltyFor(s.attr)-critPenalty(name);
+  doPool(name+' ('+s.attr+')'+gearTag(name), pool, true);
   actSheetRollSpend();
 }
 function rollAttr(k){
@@ -1321,8 +1329,8 @@ function rollUnarmed(){
 }
 function doWeaponAttack(w){
   var skName=w.skill||(isAlien()?'Close Combat':'Melee'), s=skillObj(skName)||{attr:'STR'};
-  var pool=attrVal(s.attr)+num(S.skills[skName])+weaponBonus(w.bonus)-condPenaltyFor(s.attr)-critPenalty(skName);
-  var label=(w.name||'Attack')+' · '+skName;
+  var pool=attrVal(s.attr)+num(S.skills[skName])+weaponBonus(w.bonus)+gearSkillBonus(skName)-condPenaltyFor(s.attr)-critPenalty(skName);
+  var label=(w.name||'Attack')+' · '+skName+gearTag(skName);
   var mod=clamp(num($('tray-mod').value),-6,6); $('tray-mod').value='0';
   var poolSize=pool+mod, floored=false; if(poolSize<1){ poolSize=1; floored=true; } poolSize=Math.min(20,poolSize);
   var r=rollDicePool(poolSize), c=countPool(r.all), hit=c.succ>=1;
@@ -1648,6 +1656,7 @@ function applySheet(d){
     if(kind==='weapon') inv.push({kind:'weapon',equipped:g.equipped!==false,name:g.name||'',grip:g.grip||'',bonus:g.bonus||'',damage:g.damage!=null?num(g.damage):1,range:g.range||'',ammo:g.ammo!=null&&g.ammo!==''?g.ammo:'—',weight:g.weight||'1',skill:g.skill||'Melee'});
     else if(kind==='armor') inv.push({kind:'armor',equipped:g.equipped!==false,name:g.name||'',rating:num(g.rating),air:g.air!=null?g.air:'',weight:g.weight||'1',note:g.note||''});
     else inv.push({kind:'gear',name:g.name||'',weight:g.weight||'1',note:g.note||''});
+    var sb=sbClean(g.skillBonus); if(sb.length){ var last=inv[inv.length-1]; last.skillBonus=sb; if(last.kind==='gear') last.equipped=!!g.equipped; }
   });
   if(Array.isArray(d.weapons)) d.weapons.forEach(function(w){ inv.push({kind:'weapon',equipped:true,name:w.name||'',grip:w.grip||'',bonus:w.bonus||'',damage:w.damage!=null?num(w.damage):1,range:w.range||'',ammo:w.ammo!=null&&w.ammo!==''?w.ammo:'—',weight:w.weight||'1',skill:w.skill||'Melee'}); });
   if(d.armor!=null && num(d.armor)>0 && !inv.some(function(x){return x.kind==='armor';})) inv.push({kind:'armor',equipped:true,name:'Armor',rating:num(d.armor),weight:'1',note:''});
@@ -1703,7 +1712,7 @@ $('f-notes').addEventListener('input',function(){ scheduleAutosave(); });
 var _actOpts=[], _actCollapsed={}, _actFromTab=false;
 function actState(){ if(!S.act||typeof S.act!=='object') S.act={full:false,quick:0,used:0}; return S.act; }
 function actSynth(){ return (typeof isAndroid==='function') && isAndroid(); }
-function actPoolOf(skName, bonus){ var s=skillObj(skName)||{attr:'STR'}; return Math.max(1, attrVal(s.attr)+num(S.skills[skName])+num(bonus)-condPenaltyFor(s.attr)-critPenalty(skName)); }
+function actPoolOf(skName, bonus){ var s=skillObj(skName)||{attr:'STR'}; return Math.max(1, attrVal(s.attr)+num(S.skills[skName])+num(bonus)+gearSkillBonus(skName)-condPenaltyFor(s.attr)-critPenalty(skName)); }
 function actDo(i,j){
   var o=_actOpts[i]; if(!o) return;
   if(o.blocked){ addLog(o.name, o.blocked, '', 'normal'); return; }
@@ -1743,7 +1752,7 @@ function actOutOfAmmo(w){ var a=parseInt(w.ammo,10); return (!isNaN(a) && a<=0) 
 // A weapon's full ammo rating: the one remembered at its first supply roll, else the catalog's.
 function actAmmoMax(w){ var m=parseInt(w.ammoMax,10); if(!isNaN(m)) return m;
   var c=G(window.ALIEN_WEAPONS).find(function(d){ return d.name===w.name; }); m=c?parseInt(c.ammo,10):NaN; return isNaN(m)?0:m; }
-function actSkillRoll(name, label, bonus){ return function(){ var s=skillObj(name); if(!s){ addLog(label||name,'—','No '+name+' skill on this sheet','normal'); return; } var pool=attrVal(s.attr)+num(S.skills[name])+num(bonus)-condPenaltyFor(s.attr)-critPenalty(name); doPool((label?label+' · ':'')+name+' ('+s.attr+')'+(num(bonus)?' +'+num(bonus)+' gear':''), pool, true); }; }
+function actSkillRoll(name, label, bonus){ return function(){ var s=skillObj(name); if(!s){ addLog(label||name,'—','No '+name+' skill on this sheet','normal'); return; } var gb=num(bonus)+gearSkillBonus(name); var pool=attrVal(s.attr)+num(S.skills[name])+gb-condPenaltyFor(s.attr)-critPenalty(name); doPool((label?label+' · ':'')+name+' ('+s.attr+')'+(gb?' '+(gb>0?'+':'−')+Math.abs(gb)+' gear':''), pool, true); }; }
 function actLogOnly(label, result, detail){ return function(){ addLog(label, result, detail||'', 'normal'); }; }
 
 // ALIEN (Evolved, p.60): each round, one FULL action + one QUICK action, or two

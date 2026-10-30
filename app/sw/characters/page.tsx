@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 const BASE = "/sw/characters";
 const SW_BOOKS: SwBook[] = ["core", "sourcebook", "companion"];
 
-type Row = SwCharacter & { homebrew?: boolean };
+type Row = SwCharacter & { homebrew?: boolean; forcePoints?: number; darkSidePoints?: number };
 
 // A homebrew record's data blob → a SwCharacter-shaped display row.
 function hbToCharacter(data: Record<string, unknown>, name: string): Row {
@@ -31,6 +31,8 @@ function hbToCharacter(data: Record<string, unknown>, name: string): Row {
     equipment,
     move: s("move") || undefined,
     notes: s("notes") || undefined,
+    forcePoints: typeof data.forcePoints === "number" ? data.forcePoints : undefined,
+    darkSidePoints: typeof data.darkSidePoints === "number" ? data.darkSidePoints : undefined,
     book: (SW_BOOKS.includes(s("book") as SwBook) ? s("book") : "companion") as SwBook,
     page: 0,
     homebrew: true,
@@ -48,6 +50,7 @@ function StatBlock({ x }: { x: Row }) {
       {x.skills.length ? <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Skills.</span> {x.skills.join(", ")}</p> : null}
       {x.equipment.length ? <p className="mt-1 text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Equipment.</span> {x.equipment.join(", ")}</p> : null}
       {x.move ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Move.</span> {x.move}</p> : null}
+      {x.forcePoints || x.darkSidePoints ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Force Points.</span> {x.forcePoints ?? 0}{x.darkSidePoints ? <> · <span className="font-semibold text-[var(--text)]">Dark Side Points.</span> {x.darkSidePoints}</> : null}</p> : null}
       {x.notes ? <p className="mt-1 text-[12px] leading-relaxed text-[var(--muted)]">{x.notes}</p> : null}
       {x.superseded ? <details className="mt-2"><summary className="cursor-pointer text-[10px] uppercase tracking-[0.12em] text-[var(--sw)]">{BOOK_NAME[x.superseded.book]} version (p.{x.superseded.page})</summary><p className="mt-1 text-[11px] text-[var(--muted)]">{SW_ATTRIBUTES.map((a) => x.superseded?.attributes[a] == null ? null : `${a.slice(0, 3)} ${code(x.superseded.attributes[a])}`).filter(Boolean).join(" · ")}</p>{x.superseded.skills.length ? <p className="mt-1 text-[11px] text-[var(--muted)]">{x.superseded.skills.join(", ")}</p> : null}</details> : null}
     </div>

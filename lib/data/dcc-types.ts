@@ -50,6 +50,8 @@ export interface DccSkill {
   range?: string;         // e.g. "Melee", "Reach (10 ft)", "60 ft"
   cooldown?: string;
   limitations?: string;   // e.g. "Class-only", "Limited Skill", "magic-only"
+  /** Homebrew: the Stat Mod added to damage ("none" = no mod); book skills say it in desc. */
+  damageStat?: DccStat | "none";
   desc: string;
   upgrades: DccUpgrade[];
   page: number;
@@ -65,6 +67,10 @@ export interface DccSpell {
   stat: DccStat;
   passive: boolean;
   aiFavor?: number;
+  /** Homebrew only: base damage (attack) / amount healed (heal) dice, e.g. "2d6"; book spells say it in desc. */
+  damage?: string;
+  damageStat?: DccStat | "none";
+  damageType?: string;
   desc: string;
   upgrades: DccUpgrade[];
   page: number;

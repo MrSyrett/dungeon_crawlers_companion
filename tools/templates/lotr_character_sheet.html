@@ -1766,6 +1766,9 @@ function isCulture(n){ const sp = speciesData(); return !!(sp && norm(sp.name).i
 function isDwarf(){ return isCulture('Dwarves'); }
 function isHobbit(){ return isCulture('Hobbits'); }
 function hasVirtue(n){ return virtues.some(v => norm(v.name) === norm(n)); }
+// Data-driven virtue effects (book + homebrew virtues carry the same mods keys):
+// { n: summed amount, names: [virtue names] } for mods[k] across the hero's virtues.
+function virtueMods(k){ const out = { n:0, names:[] }; virtues.forEach(v => { const vd = virtueData(v.name), x = vd && vd.mods ? vd.mods[k] : null; if(x){ out.n += (x === true ? 1 : num(x)); out.names.push(vd.name); } }); return out; }
 function virtueData(n){ return D.virtues().find(v => norm(v.name) === norm(n)) || null; }
 
 // ═══ BUILD ABILITIES ══════════════════════════════════════════════════════
@@ -2269,7 +2272,7 @@ function atkCalc(tr, opts){
     if(melee && !info.twoHandedProp && !twoH && meleeWeaponRowCount() <= 1 && hasFightingStyle('Duelling')){ dmgStyle += 2; styles.push('Duelling +2 dmg'); }
     if(info.heavy && /small/i.test(heroSize())) dis.push('heavy weapon in Small hands');
   }
-  if(abil === 'STR' && hasVirtue('Dour-Handed') && !unarmed){ dmgStyle += 1; styles.push('Dour-Handed +1'); }
+  if(abil === 'STR' && !unarmed){ const vm = virtueMods('strDamage'); if(vm.n){ dmgStyle += vm.n; styles.push(vm.names.join(' / ') + ' ' + sgn(vm.n)); } }
   if(grievous) styles.push('Grievous +1');
   const gwf = !!info.w && melee && (info.twoHandedProp || twoH) && hasFightingStyle('Great Weapon Fighting');
   if(gwf) styles.push('Great Weapon Fighting: damage dice of 4 or less count as 5');
@@ -2410,6 +2413,12 @@ function addInvRow(it){
   if(Array.isArray(it.rewards) && it.rewards.length) tr.dataset.rewards = it.rewards.join(',');
   if(it.uses != null && it.uses !== '') tr.dataset.charges = num(it.uses);
   if(it.cat) tr.dataset.cat = String(it.cat);
+  // A homebrew weapon / gear built with bonus badges or Rewards, added fresh (shop, picker, wizard):
+  // it carries its badges like a claimed loot item (bv:2 + benefits) so equipping applies them.
+  // Saved rows (rid) keep exactly what they had.
+  if(!it.rid && it.benefits == null){ const hb = hbItem(ref || it.name);
+    if(hb && Array.isArray(hb.benefits) && hb.benefits.length) it = Object.assign({}, it, { bv:2, benefits: hb.benefits });
+    if(hb && Array.isArray(hb.rewards) && hb.rewards.length && !tr.dataset.rewards) tr.dataset.rewards = hb.rewards.join(','); }
   if(it.bv === 2 && it.benefits != null && window.LootBonus){ const bl = LootBonus.normalize(LB_SYS, it.benefits); if(bl.length){ tr.dataset.bv = '2'; tr.dataset.benefits = JSON.stringify(bl); } }
   if(it.equipped && it.applied && it.applied.v === 2) tr.dataset.applied = JSON.stringify(it.applied);
   tr.innerHTML =
@@ -2454,7 +2463,10 @@ function renderInvDetail(tr){
 }
 function onInvNameChange(input){
   const tr = input.closest('tr');
-  if(!tr.dataset.ref){ const ref = resolveItemRef(input.value); if(ref) tr.dataset.ref = ref; }
+  if(!tr.dataset.ref){ const ref = resolveItemRef(input.value); if(ref){ tr.dataset.ref = ref;
+    // Typing a homebrew item's name attaches its badges / Rewards (once, before it was ever equipped).
+    const hb = hbItem(ref); if(hb && tr.dataset.equipped !== '1' && !tr.dataset.bv && window.LootBonus && Array.isArray(hb.benefits)){ const bl = LootBonus.normalize(LB_SYS, hb.benefits); if(bl.length){ tr.dataset.bv = '2'; tr.dataset.benefits = JSON.stringify(bl); } }
+    if(hb && Array.isArray(hb.rewards) && hb.rewards.length && !tr.dataset.rewards) tr.dataset.rewards = hb.rewards.join(','); } }
   if(tr.dataset.charges != null && tr.dataset.charges !== '' && !gearChargesMax(invRowRef(tr))) delete tr.dataset.charges;
   renderInvActions(tr); renderInvDetail(tr); renderInvUses(tr); syncEquippedWeaponName(tr); scheduleAutosave();
 }
@@ -2605,6 +2617,8 @@ function itemKind(name){
   if(a) return /shield/i.test(a.category) ? 'shield' : 'armor';
   return 'gear';
 }
+// A homebrew catalog weapon / gear (lotr-homebrew.js injects them tagged source "Homebrew"), or null.
+function hbItem(ref){ const it = itemData(ref); return it && it.source === 'Homebrew' ? it : null; }
 function itemData(ref){ const n = norm(ref); if(!n) return null; return weaponByName(ref) || D.armor().find(x => norm(x.name) === n) || D.gear().find(x => norm(x.name) === n) || null; }
 function resolveItemRef(name){
   const n = norm(name); if(!n) return '';
@@ -2790,7 +2804,7 @@ function computeAC(){
   else { const u = unarmoredACBase(dex); ac = u.ac; parts.push(u.why || ('10 ' + sgn(dex) + ' DEX')); }
   const sh = shieldAC(); if(sh){ ac += sh; parts.push('shield +' + sh + (sh > 2 ? ' (Reinforced)' : '')); }
   if(armor && hasFightingStyle('Defence')){ ac += 1; parts.push('Defence +1'); }
-  if(hasVirtue('Nimbleness') && !hasShield() && !isIncapacitated()){ ac += 1; parts.push('Nimbleness +1'); }
+  const nimb = virtueMods('acNoShield'); if(nimb.n && !hasShield() && !isIncapacitated()){ ac += nimb.n; parts.push(nimb.names.join(' / ') + ' ' + sgn(nimb.n)); }
   const ib = itemBonus(); if(ib.ac){ ac += ib.ac; parts.push('items: ' + ib.why.ac.join(', ')); }
   const t = acTempBonus(); if(t){ ac += t; parts.push('bonus ' + sgn(t)); }
   return { ac, parts };
@@ -3266,7 +3280,7 @@ function refreshSubclassList(){ const c = classData(); $('dl-subclasses').innerH
 function refreshCultureLists(){
   const sp = speciesData();
   $('dl-subcultures').innerHTML = sp ? (sp.lineages || []).map(l => '<option value="' + esc(l.name) + '">').join('') : '';
-  $('dl-backgrounds').innerHTML = D.backgrounds().filter(b => !sp || norm(b.culture) === norm(sp.name)).map(b => '<option value="' + esc(b.name) + '">').join('');
+  $('dl-backgrounds').innerHTML = D.backgrounds().filter(b => !sp || b.culture === 'Any' || norm(b.culture) === norm(sp.name)).map(b => '<option value="' + esc(b.name) + '">').join('');
 }
 function onClassChange(){ refreshSubclassList(); renderFeatures(); renderResources(); recalc(); scheduleAutosave(); syncDocTitle(); }
 function onLevelChange(){ const el = $('f-level'); if(num(el.value) > MAX_LEVEL) el.value = MAX_LEVEL; renderFeatures(); renderResources(); recalc(); renderFellowship(); scheduleAutosave(); }
@@ -3712,7 +3726,7 @@ function openShortRestModal(){ _srPick = {}; renderShortRestModal(); $('desc-ove
 function srAdjust(d, size){ size = size || hitDieSides(); _srPick[size] = Math.max(0, Math.min(hdLeftOf(size), (_srPick[size] || 0) + d)); const el = $('sr-n-' + size); if(el) el.textContent = _srPick[size]; }
 function shortRestRestoreItems(){
   const items = [];
-  if(hdRemaining() > 0) items.push('Hit Points — roll any Hit Dice you spend' + (hasVirtue('Tough as Old Tree-Roots') ? ' (Tough as Old Tree-Roots: each die counts as its maximum)' : ''));
+  if(hdRemaining() > 0) items.push('Hit Points — roll any Hit Dice you spend' + (virtueMods('maxHitDice').n ? ' (' + virtueMods('maxHitDice').names.join(' / ') + ': each die counts as its maximum)' : ''));
   const sres = allResources().filter(r => r.reset === 'short').map(r => r.name);
   if(sres.length) items.push('Short-rest uses: ' + sres.join(', '));
   if(hasFeature('Hands of a Healer')) items.push('Hands of a Healer: up to ' + (2 * profBonus()) + ' friends who spend Hit Dice regain an extra ' + (totalLevel() >= 9 ? '1d8' : '1d6') + (hasFeature('Wise Leechcraft') ? ' + WIS' : '') + ' per die');
@@ -3736,7 +3750,7 @@ function renderShortRestModal(){
 }
 function completeShortRest(){
   let healed = 0, n = 0; const rolls = [], bits = [];
-  const con = modOf('CON'), maxDie = hasVirtue('Tough as Old Tree-Roots');
+  const con = modOf('CON'), maxDie = virtueMods('maxHitDice').n > 0;
   hdSizes().forEach(d => {
     const k = Math.max(0, Math.min(hdLeftOf(d), _srPick[d] || 0)); if(!k) return;
     const faces = []; for(let i = 0; i < k; i++){ const r = maxDie ? d : dN(d); healed += Math.max(0, r + con); faces.push(r); }
@@ -3746,7 +3760,7 @@ function completeShortRest(){
   let exhNote = '';
   if(hasFeature('Tireless and Swift') && totalLevel() >= 10 && exhaustion > 0){ exhaustion -= 1; exhNote = ' · −1 exhaustion (Tireless and Swift)'; }
   updateHitDiceUI(); resetResources('short'); recalc();
-  const detail = n > 0 ? ('spent ' + bits.join(' + ') + ' (' + rolls.join(' | ') + ')' + (maxDie ? ' — maximum (Tough as Old Tree-Roots)' : '') + ' ' + sgn(con) + ' CON each · ' + hdRemaining() + ' HD left') : 'no Hit Dice spent';
+  const detail = n > 0 ? ('spent ' + bits.join(' + ') + ' (' + rolls.join(' | ') + ')' + (maxDie ? ' — maximum (' + virtueMods('maxHitDice').names.join(' / ') + ')' : '') + ' ' + sgn(con) + ' CON each · ' + hdRemaining() + ' HD left') : 'no Hit Dice spent';
   addLog('Short Rest', n > 0 ? ('+' + healed + ' HP') : '☾', detail + '; short-rest uses restored' + exhNote, 'normal');
   closeDesc(); scheduleAutosave();
 }
@@ -4122,6 +4136,7 @@ campaignUpdateBtn();
 <!-- LotR wizards (the data layer, lotr-data.js, loads in <head>) -->
 <script src="/tools-data/lotr-sheet-builder.js"></script>
 <script src="/tools-data/lotr-levelup.js"></script>
+<script src="/tools-data/lotr-homebrew.js"></script>
 <script>
 // Data is on the page now: build skills, pickers, then load the saved sheet.
 buildSkills();
@@ -4129,6 +4144,17 @@ fillDatalists();
 updateDicePoolDisplay();
 autoLoad();
 ensureUnarmed();
+// Pull the user's saved LotR homebrew (virtues, backgrounds, weapons, gear,
+// adversaries) into the LOTR_* pools, then refresh what's already rendered. The
+// wizards read the pools live, so they see homebrew the next time they open.
+if(window.LOTRHB) LOTRHB.load(function(){
+  try {
+    fillDatalists(); fillCompanionDatalist();
+    invRows().forEach(tr => { if(!tr.dataset.ref){ const ref = resolveItemRef(tr.querySelector('.inv-name').value); if(ref) tr.dataset.ref = ref; } renderInvActions(tr); renderInvDetail(tr); });
+    if($('store-overlay') && $('store-overlay').classList.contains('open')) renderStore();
+    reconcileAC(); refreshAtkActions(); renderFeatures(); renderResources(); renderFellowship(); recalc(); updateCarry();
+  } catch(e){}
+});
 </script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js (injects CSS + audio + 2D/3D engine). -->
 <script src="/tools-data/dice-anim.js"></script>

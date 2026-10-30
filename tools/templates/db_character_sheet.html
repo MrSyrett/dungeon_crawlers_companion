@@ -965,8 +965,10 @@ function aglMove(v){ var r=rangeVal(TB().movementAgl,num(v)); return r?r.mod:0; 
 function movement(){ var k=kinDef(); var m=(k?k.movement:10)+aglMove(attr('AGL'))+num(S.moveMod)+itemBonus().move; if(S.injuries.some(function(i){ return i.name==='Broken leg'; })) m=Math.ceil(m/2); return Math.max(S.moveMod?4:0,m); }
 function countAbility(n){ return S.abilities.filter(function(a){ return a.name===n; }).length; }
 function hasAbility(n){ return countAbility(n)>0; }
-function hpMax(){ return attr('CON')+2*countAbility('Robust')+itemBonus().hp; }
-function wpMax(){ return attr('WIL')+2*countAbility('Focused')+itemBonus().wp; }
+// Max HP / WP: + each heroic ability's hpMax / wpMax per copy (Robust +2 HP, Focused +2 WP — and homebrew abilities built with those effects).
+function abilityMax(k,dflt){ return S.abilities.reduce(function(t,a){ var d=abilityDef(a.name); return t+(d&&d[k]!=null?num(d[k]):num(dflt[a.name])); },0); }
+function hpMax(){ return attr('CON')+abilityMax('hpMax',{Robust:2})+itemBonus().hp; }
+function wpMax(){ return attr('WIL')+abilityMax('wpMax',{Focused:2})+itemBonus().wp; }
 function skRec(n){ return S.skills[n]||(S.skills[n]={}); }
 function isSchool(n){ var d=skillDef(n); return !!(d&&d.type==='secondary'); }
 function knowsSchool(n){ return !!(S.skills[n]&&S.skills[n].trained); }
@@ -1281,21 +1283,28 @@ function toggleEquip(i){ var r=S.inventory[i]; if(!r||!equippable(r)) return; va
     if(num(r.qty,1)>1){ var one=Object.assign({},r,{qty:1,equipped:true}); r.qty=num(r.qty,1)-1; S.inventory.splice(i+1,0,one); changed(); return; } }
   else if(k!=='gear') S.inventory.forEach(function(x){ if(x!==r&&kindOf(x)===k) x.equipped=false; });
   r.equipped=true; if(k!=='weapon'&&k!=='gear'&&inCombat()) addLog(r.name,'Worn','Putting on armor or a helmet takes an action in combat','normal'); changed(); }
-function onInv(i,k,v){ var r=S.inventory[i]; if(!r) return; if(k==='name'&&!r.kind&&equippable(r)) r.kind=kindOf(r); if(k==='qty') v=Math.max(0,num(v,1)); if(k==='uses') v=Math.max(0,num(v)); if(k==='wt'){ v=String(v).trim(); v=v===''?1:(isNaN(Number(v))?1:Number(v)); } r[k]=v; invalidate('inv-body'); changed(); }
+function onInv(i,k,v){ var r=S.inventory[i]; if(!r) return; if(k==='name'&&!r.kind&&equippable(r)) r.kind=kindOf(r);
+  if(k==='name'&&r.bv!==2){ var hd=weaponDef(v)||armorDef(v)||helmetDef(v)||gearDef(v); if(hd) hbBon(hd,r); } if(k==='qty') v=Math.max(0,num(v,1)); if(k==='uses') v=Math.max(0,num(v)); if(k==='wt'){ v=String(v).trim(); v=v===''?1:(isNaN(Number(v))?1:Number(v)); } r[k]=v; invalidate('inv-body'); changed(); }
 function removeInv(i){ S.inventory.splice(i,1); changed(); }
 function addInvRow(r){ S.inventory.push(Object.assign({qty:1,wt:1,note:''},r)); changed(); }
 function onCoins(){ S.coins={gold:Math.max(0,num($('c-gold').value)),silver:Math.max(0,num($('c-silver').value)),copper:Math.max(0,num($('c-copper').value))}; renderGear(); renderAttrs(); scheduleAutosave(); }
 function addAbility(name,kind,note){ var def=abilityDef(name); S.abilities.push({name:name,kind:kind||'heroic',note:note||''});
-  if(name==='Robust'){ S.hp=num(S.hp)+2; } if(name==='Focused'){ S.wp=num(S.wp)+2; } return def; }
+  var hpB=def&&def.hpMax!=null?num(def.hpMax):(name==='Robust'?2:0), wpB=def&&def.wpMax!=null?num(def.wpMax):(name==='Focused'?2:0);
+  if(hpB) S.hp=num(S.hp)+hpB; if(wpB) S.wp=num(S.wp)+wpB; return def; }
 function invItemFromGear(g,qty){ var row={name:g.name,qty:qty||1,wt:(g.weight==null?0:g.weight),note:''}; if(g.doses) row.uses=g.doses; return row; }
+// A homebrew weapon / armor / helmet / gear entry built with bonus badges (the
+// homebrew builder's LootBonus "db" `benefits`) lands as a bv:2 row, exactly like a
+// claimed loot item, so equipping it applies them and unequipping reverses them.
+function hbBenefits(def){ if(!def||def.source!=='Homebrew'||!Array.isArray(def.benefits)||!def.benefits.length||!window.LootBonus) return []; try{ return LootBonus.normalize(LB_SYS,def.benefits); }catch(e){ return []; } }
+function hbBon(def,row){ var l=hbBenefits(def); if(l.length&&row.bv!==2){ row.bv=2; row.benefits=l; } return row; }
 function addGearByName(name,qty,note,fresh){ // used by the builder, the shop and loot claims — everything lands in the inventory; weapons go to hand (≤3), armor / a helmet is worn if you wear none
   var w=weaponDef(name), a=armorDef(name), h=helmetDef(name), g=gearDef(name);
-  if(w&&!w.natural){ for(var i=0;i<(qty||1);i++) S.inventory.push({name:w.name,kind:'weapon',qty:1,wt:1,note:note||'',equipped:handCount()<3}); return 'weapon'; }
-  if(a){ S.inventory.push({name:a.name,kind:'armor',qty:1,wt:1,note:note||'',equipped:!wornRow('armor')}); return 'armor'; }
-  if(h){ S.inventory.push({name:h.name,kind:'helmet',qty:1,wt:1,note:note||'',equipped:!wornRow('helmet')}); return 'helmet'; }
-  var ex=fresh?null:S.inventory.find(function(r){ return r.name===name && r.uses==null && !equippable(r); });
-  if(g&&g.focus){ var fr=invItemFromGear(g,1); fr.kind='focus'; fr.equipped=!focusInHand()&&handCount()<3; if(note) fr.note=note; S.inventory.push(fr); return 'focus'; }
-  if(g){ if(ex&&!g.doses){ ex.qty=num(ex.qty,1)+(qty||1); } else { var r=invItemFromGear(g,qty); if(note) r.note=note; S.inventory.push(r); } return 'gear'; }
+  if(w&&!w.natural){ for(var i=0;i<(qty||1);i++) S.inventory.push(hbBon(w,{name:w.name,kind:'weapon',qty:1,wt:1,note:note||'',equipped:handCount()<3})); return 'weapon'; }
+  if(a){ S.inventory.push(hbBon(a,{name:a.name,kind:'armor',qty:1,wt:1,note:note||'',equipped:!wornRow('armor')})); return 'armor'; }
+  if(h){ S.inventory.push(hbBon(h,{name:h.name,kind:'helmet',qty:1,wt:1,note:note||'',equipped:!wornRow('helmet')})); return 'helmet'; }
+  var ex=(fresh||hbBenefits(g).length)?null:S.inventory.find(function(r){ return r.name===name && r.uses==null && !equippable(r); });
+  if(g&&g.focus){ var fr=hbBon(g,invItemFromGear(g,1)); fr.kind='focus'; fr.equipped=!focusInHand()&&handCount()<3; if(note) fr.note=note; S.inventory.push(fr); return 'focus'; }
+  if(g){ if(ex&&!g.doses){ ex.qty=num(ex.qty,1)+(qty||1); } else { var r=hbBon(g,invItemFromGear(g,qty)); if(note) r.note=note; S.inventory.push(r); } return 'gear'; }
   S.inventory.push({name:name,qty:qty||1,wt:1,note:note||''}); return 'other';
 }
 

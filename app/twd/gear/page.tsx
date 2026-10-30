@@ -7,8 +7,8 @@ import { TwdHeader, ModeRow, SectionH, cardCls, nameCls, hbBadge, one, type RawQ
 
 export const dynamic = "force-dynamic";
 
-type GearRow = { name: string; slots: string; bonus: string; desc: string };
-type WpRow = { name: string; kind: string; bonus: string; damage: string; range: string; slots: string };
+type GearRow = { name: string; slots: string; bonus: string; desc: string; armor: boolean; level: string; penalty: string };
+type WpRow = { name: string; kind: string; bonus: string; damage: string; range: string; slots: string; extra: string };
 
 const panelCls = "rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4";
 const tableWrap = "overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--panel)]";
@@ -34,12 +34,15 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
   const gHb: GearRow[] = gVis.map((h) => {
     const d = h.data as Record<string, unknown>;
     const s = (k: string) => (typeof d[k] === "string" ? (d[k] as string) : "");
-    return { name: h.name, slots: s("slots") || "1", bonus: s("bonus"), desc: s("desc") };
+    return { name: h.name, slots: s("slots") || "1", bonus: s("bonus"), desc: s("desc"), armor: d.kind === "armor", level: d.level != null ? String(d.level) : "", penalty: s("penalty") || "0" };
   });
+  const aHb = gHb.filter((g) => g.armor);
+  const gHbGear = gHb.filter((g) => !g.armor);
   const wHb: WpRow[] = wVis.map((h) => {
     const d = h.data as Record<string, unknown>;
     const s = (k: string) => (typeof d[k] === "string" ? (d[k] as string) : "");
-    return { name: h.name, kind: s("kind") || "Close", bonus: s("bonus") || "0", damage: d.damage != null ? String(d.damage) : "1", range: s("range") || "Short", slots: s("slots") || "1" };
+    const extra = [s("noise"), ...(Array.isArray(d.features) ? d.features.map(String) : []), s("ammo") ? `Ammo: ${s("ammo")}` : ""].filter(Boolean).join(", ");
+    return { name: h.name, kind: s("kind") || "Close", bonus: s("bonus") || "0", damage: d.damage != null ? String(d.damage) : "1", range: s("range") || "Short", slots: s("slots") || "1", extra };
   });
 
   return (
@@ -58,9 +61,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
         <div className={`${panelCls} mb-4`}>
           <h3 className={hbHead}>Your homebrew gear</h3>
           <HomebrewEditor kind="twd-gear" campaigns={campaigns} initial={gOwn} />
-          {gHb.length > 0 && (
+          {gHbGear.length > 0 && (
             <ul className="mt-3 grid grid-cols-1 items-start gap-3 md:grid-cols-2">
-              {gHb.map((g, i) => (
+              {gHbGear.map((g, i) => (
                 <li key={`${g.name}-${i}`} className={cardCls}>
                   <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                     <h4 className={nameCls}>{g.name}</h4>
@@ -107,7 +110,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
             <div className={`${tableWrap} mt-3`}>
               <table className="w-full border-collapse text-[13px]">
                 <thead>
-                  <tr className={thRow}><th className="p-2">Weapon</th><th className="p-2">Type</th><th className="p-2">Damage</th><th className="p-2">Bonus</th><th className="p-2">Range</th><th className="p-2">Slots</th></tr>
+                  <tr className={thRow}><th className="p-2">Weapon</th><th className="p-2">Type</th><th className="p-2">Damage</th><th className="p-2">Bonus</th><th className="p-2">Range</th><th className="p-2">Slots</th><th className="p-2">Features</th></tr>
                 </thead>
                 <tbody>
                   {wHb.map((w, i) => (
@@ -118,6 +121,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
                       <td className="p-2 font-mono">{w.bonus}</td>
                       <td className="p-2">{w.range}</td>
                       <td className="p-2 font-mono text-[var(--muted)]">{w.slots}</td>
+                      <td className="p-2 text-[12px] text-[var(--muted)]">{w.extra || "—"}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -171,8 +175,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
         <SectionH>Armor</SectionH>
         <p className="mb-3 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
           When you&rsquo;re hit, roll a number of dice equal to the Armor Level; each success stops one
-          point of damage. The penalty is subtracted from Mobility rolls while you wear it. (Homebrew armor
-          shares the general-gear editor above.)
+          point of damage. The penalty is subtracted from Mobility rolls while you wear it. (Make homebrew armor
+          in the General gear editor: pick Kind → Armor.)
         </p>
         <div className={tableWrap}>
           <table className="w-full border-collapse text-[13px]">
@@ -180,6 +184,13 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
               <tr className={thRow}><th className="p-2">Armor</th><th className="p-2">Armor Level</th><th className="p-2">Mobility penalty</th></tr>
             </thead>
             <tbody>
+              {aHb.map((a, i) => (
+                <tr key={`hb-${a.name}-${i}`} className="border-t border-[var(--border)]">
+                  <td className="p-2 font-semibold text-[var(--sys-link)]">{a.name} <span className={hbBadge}>Homebrew</span></td>
+                  <td className="p-2 font-mono">{a.level}</td>
+                  <td className="p-2 font-mono text-[var(--muted)]">{a.penalty}</td>
+                </tr>
+              ))}
               {TWD_ARMOR.map((a) => (
                 <tr key={a.name} className="border-t border-[var(--border)]">
                   <td className="p-2 font-semibold text-[var(--sys-link)]">{a.name}</td>

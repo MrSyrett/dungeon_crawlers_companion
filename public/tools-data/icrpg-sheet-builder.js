@@ -14,7 +14,8 @@
   const G = x => (typeof x !== 'undefined' && Array.isArray(x)) ? x : [];
   const worlds = () => G(typeof ICRPG_WORLDS !== 'undefined' ? ICRPG_WORLDS : undefined);
   const lifeforms = () => G(typeof ICRPG_LIFEFORMS !== 'undefined' ? ICRPG_LIFEFORMS : undefined);
-  const types = () => G(typeof ICRPG_TYPES !== 'undefined' ? ICRPG_TYPES : undefined);
+  // Book types plus the viewer's homebrew ones (window.ICRPG_HB_TYPES, filled by icrpg-homebrew.js).
+  const types = () => G(typeof ICRPG_TYPES !== 'undefined' ? ICRPG_TYPES : undefined).concat(G(window.ICRPG_HB_TYPES));
   const inWorld = (x) => !world || x.world === world || x.world === 'core';
   const worldName = (k) => { const w = worlds().find(x => x.key === k); return w ? w.name : k; };
   const typeObj = () => types().find(t => t.name === type) || null;
@@ -123,8 +124,16 @@
     const tyo = typeObj();
     const abils = (tyo && Array.isArray(tyo.abilities)) ? tyo.abilities : [];
     const loots = (tyo && Array.isArray(tyo.startingLoot)) ? tyo.startingLoot : [];
-    const abilities = abils.filter((a, i) => picks.abilities[i] !== false).map(a => ({ name: a, tag: 'Ability' }));
-    const loot = loots.filter((l, i) => picks.loot[i] !== false).map(l => ({ name: l, tag: 'Loot' }));
+    // A homebrew ability with bonuses joins as a bv:2 row (always on); a homebrew Type's
+    // structured starting loot joins as name + note, carrying bv:2 + benefits (applied when EQUIPPED).
+    const hbAb = n => G(window.ICRPG_HB_ABILITIES).find(x => x && x.name === n && Array.isArray(x.benefits) && x.benefits.length);
+    const abilities = abils.filter((a, i) => picks.abilities[i] !== false).map(a => { const h = hbAb(a); return h ? { name: a, tag: h.kind || 'Ability', bv: 2, benefits: h.benefits } : { name: a, tag: 'Ability' }; });
+    const rows = (tyo && Array.isArray(tyo.startingLootRows) && tyo.startingLootRows.length === loots.length) ? tyo.startingLootRows : null;
+    const loot = loots.map((l, i) => [l, i]).filter(([, i]) => picks.loot[i] !== false).map(([l, i]) => {
+      const r = rows && rows[i];
+      if (!r) return { name: l, tag: 'Loot' };
+      return Object.assign({ name: r.name, tag: 'Loot', note: r.desc || '' }, Array.isArray(r.benefits) && r.benefits.length ? { bv: 2, benefits: r.benefits } : {});
+    });
     const prev = (typeof collectSheet === 'function') ? collectSheet() : {};
     applySheet({
       system: 'ICRPG', name: name || '', world: world, lifeForm: lifeForm, type: type,

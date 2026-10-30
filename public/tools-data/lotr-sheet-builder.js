@@ -111,6 +111,11 @@
     if (/^dwarf-friend$/i.test(v.name)) out.expertise.push("Persuasion");
     if (/^friendly and familiar$/i.test(v.name)) out.expertise.push("Insight");
     if (/^art of disappearing$/i.test(v.name)) out.expertise.push("Stealth");
+    // Structured grants (homebrew virtues): fixed skill / expertise / save proficiencies.
+    const g = v.grants || {};
+    (g.skills || []).forEach((s) => { if (out.skills.indexOf(s) < 0) out.skills.push(s); });
+    (g.expertise || []).forEach((s) => { if (out.expertise.indexOf(s) < 0) out.expertise.push(s); });
+    (g.saves || []).forEach((s) => { if (out.saves.indexOf(s) < 0) out.saves.push(s); });
     if (v.companion) out.companion = v.companion;
     return out;
   }
@@ -250,7 +255,7 @@
     let hp = hd + con; for (let i = 2; i <= lv; i++) hp += Math.max(1, Math.floor(hd / 2) + 1 + con);
     const bits = [];
     if (cul() && cul().grants && cul().grants.hpPerLevel) { hp += lv * cul().grants.hpPerLevel; bits.push("Endurance of the Dwarves +" + lv); }
-    if (takenVirtues().some((v) => /^hardiness$/i.test(v))) { hp += lv; bits.push("Hardiness +" + lv); }
+    takenVirtues().forEach((n) => { const v = virtueByName(n), k = v && v.mods ? num(v.mods.hpPerLevel) : 0; if (k) { hp += k * lv; bits.push(v.name + " +" + (k * lv)); } });
     if (norm(st.subclass) === "slayer" && lv >= 3) { hp += 3 + (lv - 3); bits.push("Sterner Than Steel +" + (3 + lv - 3)); }
     return { hp: Math.max(1, hp), bits };
   }
@@ -336,7 +341,7 @@
   function rBackground() {
     const c = cul();
     let h = '<p class="m-hint">Backgrounds of the ' + esc(c ? c.name : "your culture") + ': each grants two skills, a tool (and the tool itself), and two distinctive features.</p><div class="dndb-grid">';
-    D.backgrounds().filter((b) => !c || norm(b.culture) === norm(c.name)).forEach((b) => h += card('data-bg="' + esc(b.name) + '"', st.background === b.name, b.name, (b.skillProficiencies || []).join(", ") || "choose skills"));
+    D.backgrounds().filter((b) => !c || b.culture === "Any" || norm(b.culture) === norm(c.name)).forEach((b) => h += card('data-bg="' + esc(b.name) + '"', st.background === b.name, b.name, (b.skillProficiencies || []).join(", ") || "choose skills"));
     h += "</div>";
     const b = bg(); if (!b) return h;
     h += '<div class="dndb-note">' + esc(b.description || "") + '<br>Skills: <b>' + esc((b.skillProficiencies || []).join(", ") || (b.skillChoice ? "two of " + b.skillChoice.from.join(", ") : "—")) + '</b> · Tool: <b>' + esc((b.toolProficiencies || []).join(", ")) + '</b> · Features: <b>' + esc((b.distinctiveFeatures || []).join(", ")) + '</b></div>';

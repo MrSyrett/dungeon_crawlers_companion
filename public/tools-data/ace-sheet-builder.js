@@ -314,6 +314,8 @@
         // Pre-fill the free Focus on the matching Stat if it's empty.
         r.grantsFocus.forEach((fn) => { const f = D.focuses().find((x) => norm(x.name) === norm(fn)); if (f && !st.focuses[norm(f.stat)]) st.focuses[norm(f.stat)] = f.name; });
       }
+      // Homebrew Roles can suggest starting gear: pre-tick it on the gear step.
+      if (r && Array.isArray(r.startingGear)) r.startingGear.forEach((n) => { if (n && st.gear.indexOf(n) < 0) st.gear.push(n); });
       render();
     }));
     body.querySelectorAll("[data-stat]").forEach((el) => el.addEventListener("click", () => {
@@ -357,7 +359,7 @@
     names.forEach((n) => {
       const g = D.gear().find((x) => norm(x.name) === norm(n) && x.damage);
       if (!g) return;
-      const ranged = /pistol|rifle|bow|gun|blaster|blazer|bazooka|grenade|thrower|laser|rocket|crossbow|sling|machine|revolver|derringer|uzi/i.test(g.name + " " + (g.description || ""));
+      const ranged = (g.attack === "ranged" || g.attack === "melee") ? g.attack === "ranged" : /sword|sabre|saber|blade|knife|dagger|axe|club|mace|hammer|staff|spear|whip|katana/i.test(g.name || "") ? false : /pistol|rifle|bow|gun|blaster|blazer|bazooka|grenade|thrower|laser|rocket|crossbow|sling|machine|revolver|derringer|uzi/i.test(g.name + " " + (g.description || ""));
       rows.push({ name: g.name, kind: ranged ? "ranged" : "melee", damage: g.damage });
     });
     return rows;

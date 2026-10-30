@@ -83,7 +83,7 @@ export default async function KobStrengthsPage({ searchParams }: { searchParams:
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <KobHeader title="Strengths & Flaws" subtitle={`${KOB_STRENGTHS.length} strengths · ${KOB_FLAWS.length} flaws${hbStrengths.length + hbFlaws.length ? ` + ${hbStrengths.length + hbFlaws.length} homebrew` : ""}`} />
-      <div className="mb-6 grid gap-4 md:grid-cols-2">
+      <div className="mb-6 flex flex-col">
         <HomebrewEditor kind="kob-strength" campaigns={campaigns} initial={hbStrOwn} />
         <HomebrewEditor kind="kob-flaw" campaigns={campaigns} initial={hbFlawOwn} />
       </div>

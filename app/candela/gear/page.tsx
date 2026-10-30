@@ -13,7 +13,7 @@ import { facetMatch, facetAttr } from "@/lib/facets";
 export const dynamic = "force-dynamic";
 const BASE = "/candela/gear";
 
-type Row = { name: string; type: string; desc: string; homebrew?: boolean };
+type Row = { name: string; type: string; desc: string; owner?: string; homebrew?: boolean };
 
 export default async function Page({ searchParams }: { searchParams: Promise<RawQuery> }) {
   const user = await getCurrentUser();
@@ -30,7 +30,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
   for (const r of CO_ROLES) for (const sp of r.specialties) for (const g of sp.gear) book.push({ name: g, type: `${sp.name} gear`, desc: "" });
   const hbRows: Row[] = hbVisible.map((h) => {
     const d = h.data as Record<string, unknown>;
-    return { name: h.name, type: typeof d.type === "string" ? d.type : "Gear", desc: typeof d.desc === "string" ? d.desc : "", homebrew: true };
+    return { name: h.name, type: typeof d.type === "string" ? d.type : "Gear", desc: typeof d.desc === "string" ? d.desc : "", owner: typeof d.owner === "string" ? d.owner : "", homebrew: true };
   });
   const ALL = [...hbRows, ...book];
 
@@ -59,7 +59,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
             <li key={`${g.homebrew ? "hb" : "bk"}-${g.name}-${i}`} className={cardCls} hidden={!show(g)} data-f={facetAttr({})} data-s={g.type}>
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <h2 className={nameCls}>{g.name}</h2>
-                {g.homebrew ? <span className={hbBadge}>Homebrew</span> : <span className={badge}>{g.type}</span>}
+                {g.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
+                <span className={badge}>{g.type}{g.owner ? ` · ${g.owner}` : ""}</span>
               </div>
               {g.desc ? <p className="mt-2 text-[13px] leading-relaxed text-[var(--text)]">{g.desc}</p> : null}
             </li>

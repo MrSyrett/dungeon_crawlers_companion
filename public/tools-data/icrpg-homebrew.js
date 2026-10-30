@@ -1,16 +1,19 @@
 // Runtime homebrew loader for the ICRPG sheet. Mirrors yze-homebrew.js: fetches
-// the viewer's icrpg-ability / icrpg-spell / icrpg-loot / icrpg-gear homebrew
+// the viewer's icrpg-type / icrpg-ability / icrpg-spell / icrpg-loot / icrpg-gear homebrew
 // from /api/homebrew and injects it into the sheet's mutable pools
 // (window.ICRPG_HB_*) so the Abilities, Spells and Loot & Gear pickers show it
-// beside the book content. The sheet's pickerPool() concats these pools.
+// beside the book content. The sheet's pickerPool() concats these pools; its
+// Type select and Create wizard read ICRPG_HB_TYPES, and its weapon / spell /
+// item lookups fall back to these pools (homebrew `effort`, `stat`, `benefits`…).
 //
-// icrpg-type (hero types, a creation-time choice) and icrpg-monster (bestiary /
-// GM prep) have no item picker on the sheet, so they are not loaded here. This
+// icrpg-monster (bestiary / GM prep) has no picker on the sheet, so it is not
+// loaded here. This
 // loader creates the pools itself. Idempotent; standalone-safe (no /api, or a
 // signed-out 401 → the pools just stay empty).
 (function () {
   'use strict';
   var TARGETS = {
+    'icrpg-type': 'ICRPG_HB_TYPES',
     'icrpg-ability': 'ICRPG_HB_ABILITIES',
     'icrpg-spell': 'ICRPG_HB_SPELLS',
     'icrpg-loot': 'ICRPG_HB_LOOT',

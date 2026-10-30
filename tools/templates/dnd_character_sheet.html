@@ -1968,7 +1968,7 @@ function rowWeaponInfo(tr){
 // The +N of a magic weapon, read live from its inventory row and gated on attunement.
 function atkMagicPlus(tr){
   const inv = rowInv(tr); if(!inv) return num(tr.dataset.magic || 0);
-  if(rowBenefits(inv)) return rowPlus(inv);   // loot badges win over a parsed +N
+  if(rowBenefits(inv)) return benefitActive(inv) ? rowPlus(inv) : 0;   // loot badges win over a parsed +N
   const ref = invRowRef(inv), plus = num(inv.dataset.plus || 0);
   if(itemKind(ref) === 'magic' && magicNeedsAttune(ref) && !isAttunedRow(inv)) return 0;
   return plus;
@@ -2289,6 +2289,9 @@ function addInvRow(it){
   if(it.scroll) tr.dataset.scroll = it.scroll;       // the spell a Spell Scroll contains
   // Loot bonuses (bv:2 badges from the GM): exactly what equipping applies. `applied` records the
   // state changes equipping made (resistances, spells) so reloads don't re-apply and removal reverses them.
+  // A homebrew item built with bonus badges, added fresh (shop / picker / typed name): it carries
+  // its badges like a claimed loot item (bv:2 + benefits) so equip applies them. Saved rows (rid) keep what they had.
+  if(!it.benefits && !it.rid && ref){ const hb = hbItemBenefits(ref); if(hb) it = Object.assign({}, it, { bv:2, benefits:hb }); }
   if(it.benefits && window.LootBonus){ const bl = LootBonus.normalize('dnd', it.benefits); if(bl.length) tr.dataset.benefits = JSON.stringify(bl); }
   if(it.cat) tr.dataset.cat = it.cat;
   if(it.lnotes) tr.dataset.lnotes = it.lnotes;
@@ -2371,7 +2374,7 @@ function restoreCharges(){
 function addInvFromData(name){ addInvRow({ name, qty:1 }); scheduleAutosave(); }
 function onInvNameChange(input){
   const tr = input.closest('tr');
-  if(!tr.dataset.ref){ const ref = resolveItemRef(input.value); if(ref) tr.dataset.ref = ref; }
+  if(!tr.dataset.ref){ const ref = resolveItemRef(input.value); if(ref){ tr.dataset.ref = ref; const hb = !tr.dataset.benefits && hbItemBenefits(ref); if(hb) tr.dataset.benefits = JSON.stringify(hb); } }
   if((tr.dataset.charges == null || tr.dataset.charges === '') && itemChargesMax(invRowRef(tr))) tr.dataset.charges = itemChargesMax(invRowRef(tr));
   renderInvActions(tr); renderInvDetail(tr); syncEquippedWeaponName(tr); scheduleAutosave();
 }
@@ -2651,7 +2654,7 @@ function equippedShieldRow(){ return invRows().find(r => r.dataset.equipped === 
 function hasShield(){ return !!equippedShieldRow(); }
 function shieldAC(){
   const r = equippedShieldRow(); if(!r) return 0; const ref = invRowRef(r);
-  if(rowBenefits(r)) return 2 + rowPlus(r);   // loot badges: base +2 plus its +N Magic
+  if(rowBenefits(r)) return 2 + (benefitActive(r) ? rowPlus(r) : 0);   // loot badges: base +2 plus its +N Magic
   if(isMagicShield(ref)){ const ok = !magicNeedsAttune(ref) || isAttunedRow(r); return ok ? Math.max(2, magicBonuses(magicData(ref)).ac) : 2; }
   return 2 + num(r.dataset.plus || 0);
 }
@@ -2812,7 +2815,7 @@ function equippedArmorInfo(){
   if(realName){ const a = D.armor().find(x => norm(x.name) === norm(realName)); return { armor:a, plus: equippedRowPlus('armor') }; }
   const mr = equippedMagicArmorRow();
   if(mr){ const ref = invRowRef(mr), a = magicArmorBase(ref); const attunedOk = !magicNeedsAttune(ref) || isAttunedRow(mr);
-    if(rowBenefits(mr)) return { armor:a, plus: rowPlus(mr) };
+    if(rowBenefits(mr)) return { armor:a, plus: benefitActive(mr) ? rowPlus(mr) : 0 };
     return { armor:a, plus: (attunedOk ? (magicBonuses(magicData(ref)).ac || 0) : 0) + num(mr.dataset.plus || 0) }; }
   return { armor:null, plus:0 };
 }
@@ -2941,7 +2944,17 @@ function equippedMagic(){ return invRows().map(r => benefitActive(r) ? benefitBo
 // state, so those are applied once and recorded on the row (data-applied {v:2,…}).
 function rowBenefits(tr){ if(!tr || !tr.dataset || !tr.dataset.benefits) return null; try { const l = JSON.parse(tr.dataset.benefits); return Array.isArray(l) && l.length ? l : null; } catch(e){ return null; } }
 function rowPlus(tr){ const l = rowBenefits(tr); return l ? l.filter(b => b.kind === 'plus').reduce((s, b) => s + num(b.amount), 0) : num(tr.dataset.plus || 0); }
-function benefitActive(tr){ return tr.dataset.equipped === '1' && !!rowBenefits(tr); }
+// Homebrew items that require attunement apply their badges only while attuned (GM loot: equip alone).
+function benefitActive(tr){
+  if(tr.dataset.equipped !== '1' || !rowBenefits(tr)) return false;
+  const m = magicData(invRowRef(tr)); if(m && m.source === 'Homebrew' && m.attunement && !isAttunedRow(tr)) return false;
+  return true;
+}
+// The badges of a homebrew catalog item built in the homebrew builder (LootBonus `benefits`), or null.
+function hbItemBenefits(ref){
+  const it = itemData(ref); if(!it || it.source !== 'Homebrew' || !Array.isArray(it.benefits) || !window.LootBonus) return null;
+  const l = LootBonus.normalize('dnd', it.benefits); return l.length ? l : null;
+}
 function benefitBonuses(tr){
   const b = magicBonuses(null); b.itemAtk = 0; b.itemDmg = 0;
   const slot = invRowSlot(tr);
@@ -2955,6 +2968,9 @@ function benefitBonuses(tr){
     else if(x.kind === 'stat' && k in b) b[k] += n;
     else if(x.kind === 'setstat' && k){ b.set = b.set || {}; b.set[k] = Math.max(b.set[k] || 0, n); }
   });
+  // A homebrew item's sheet-only bonuses (no loot badge for them): HP max, Initiative, spell attack / DC.
+  const m = magicData(invRowRef(tr));
+  if(m && m.source === 'Homebrew' && Array.isArray(m.benefits) && Array.isArray(m.bonuses)) m.bonuses.forEach(x => { if(x && ['hp','init','spellAtk','spellDC'].indexOf(x.target) >= 0) b[x.target] += num(x.amount); });
   return b;
 }
 function itemAtkDmg(){ return equippedMagic().reduce((o, b) => { o.atk += b.itemAtk || 0; o.dmg += b.itemDmg || 0; return o; }, { atk:0, dmg:0 }); }
@@ -2992,8 +3008,8 @@ function renderInvBonus(tr){
   const l = rowBenefits(tr);
   if(!l || !window.LootBonus){ box.innerHTML = ''; return; }
   if(!tr._lbn) tr._lbn = LootBonus.editor(box, { sys:'dnd', benefits:l, readonly:true }); else tr._lbn.set(l);
-  const off = (rowBenefits(tr) || []).some(b => b.kind !== 'note') && tr.dataset.equipped !== '1';
-  box.classList.toggle('off', off); box.title = off ? 'Equip to apply these bonuses' : '';
+  const off = (rowBenefits(tr) || []).some(b => b.kind !== 'note') && !benefitActive(tr);
+  box.classList.toggle('off', off); box.title = off ? (tr.dataset.equipped === '1' ? 'Attune to apply these bonuses' : 'Equip to apply these bonuses') : '';
 }
 
 // Total of one bonus key across every equipped-and-active magic item.

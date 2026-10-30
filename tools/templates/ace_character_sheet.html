@@ -933,12 +933,12 @@ function recalc() {
   const dodging = hasFocus('moves', /^dodg/i);
   let def = statVal('moves') * 3 + (dodging ? 6 : 0);
   if(def < CREATION.minDef) def = CREATION.minDef;
-  def += num($('def-bonus').value);
+  def += num($('def-bonus').value) + hbFocusBonus('defence');
   $('def-val').textContent = def;
 
   // Health: Brawn, +2 with Tough, + bonus (Ogre etc.)
   const tough = hasFocus('brawn', /^tough/i);
-  const max = Math.max(0, statVal('brawn') + (tough ? 2 : 0) + num($('hp-bonus').value));
+  const max = Math.max(0, statVal('brawn') + (tough ? 2 : 0) + num($('hp-bonus').value) + hbFocusBonus('health'));
   if(hpCur === null || hpCur > max) hpCur = max;
   $('hp-max').textContent = max;
   $('hp-cur').textContent = hpCur;
@@ -951,6 +951,21 @@ function recalc() {
   renderKarma();
 }
 
+// Homebrew Focuses can carry flat `health` / `defence` bonuses (the builder's
+// badges, like Tough +2 / Dodging +6); they count while the Focus is on the
+// sheet. Names the book rules above already handle (Tough, Dodging) are skipped.
+function hbFocusBonus(key) {
+  let n = 0;
+  STATS.forEach(s => {
+    if(s.optional && !hasPower()) return;
+    focusesOf(s.id).forEach(f => {
+      if(/^(tough|dodg)/i.test(f)) return;
+      const r = D.focuses().find(x => x && x.source === 'Homebrew' && norm(x.name) === norm(f));
+      if(r && typeof r[key] === 'number') n += r[key];
+    });
+  });
+  return n;
+}
 function renderHpPips(max) {
   const wrap = $('hp-pips');
   wrap.innerHTML = '';
@@ -1133,7 +1148,7 @@ function onWeaponPick(input) {
   }
   recalcAttacks();
 }
-function weaponIsRanged(g) { return /pistol|rifle|bow|gun|blaster|blazer|bazooka|grenade|thrower|laser|rocket|crossbow|sling|machine/i.test(g.name + ' ' + (g.description || '')); }
+function weaponIsRanged(g) { if(g.attack === 'ranged' || g.attack === 'melee') return g.attack === 'ranged'; if(/sword|sabre|saber|blade|knife|dagger|axe|club|mace|hammer|staff|spear|whip|katana/i.test(g.name || '')) return false; return /pistol|rifle|bow|gun|blaster|blazer|bazooka|grenade|thrower|laser|rocket|crossbow|sling|machine/i.test(g.name + ' ' + (g.description || '')); }
 function attackFromGear(g) { return { name: g.name, kind: weaponIsRanged(g) ? 'ranged' : 'melee', damage: g.damage != null ? String(g.damage) : '' }; }
 function recalcAttacks() {
   document.querySelectorAll('#attacks-body tr').forEach(tr => {
@@ -1786,7 +1801,7 @@ campaignUpdateBtn();
 // Data is on the page now: fill the pickers, then load the saved card.
 fillDatalists();
 autoLoad();
-if (window.ACEHB) ACEHB.load(function () { try { fillDatalists(); } catch (e) {} });
+if (window.ACEHB) ACEHB.load(function () { try { fillDatalists(); recalc(); } catch (e) {} });
 </script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js (injects CSS + audio + 2D/3D engine). Extracted from the per-sheet inline copy. -->
 <script src="/tools-data/dice-anim.js"></script>

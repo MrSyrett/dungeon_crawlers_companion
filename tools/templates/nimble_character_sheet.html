@@ -907,7 +907,12 @@ function level() { return Math.max(1, Math.min(20, num($('f-level').value) || 1)
 function statBase(id) { return num($('st-' + id).value); }
 function stat(id) { return statBase(id) + ((itemBonus().stat || {})[id] || 0); }
 function ancestry() { const n = norm($('f-ancestry').value); return n ? D.ancestries().find(a => norm(a.name) === n) || null : null; }
-function ancestryText() { const a = ancestry(); return a ? a.traits.map(t => t.text).join(' ') : ''; }
+// Homebrew ancestries built in the builder carry structured `grants` (skill / allSkills / init / initAdv /
+// armor / speed / wounds / hitDice): those apply directly and the trait text isn't re-read (no double count).
+function ancGrants() { const a = ancestry(); return a && Array.isArray(a.grants) ? a.grants : null; }
+function ancG(kind, target) { const g = ancGrants(); if(!g) return 0; return g.filter(b => b && b.kind === kind && (!target || norm(b.target) === norm(target))).reduce((t, b) => t + num(b.amount), 0); }
+function ancHas(kind) { const g = ancGrants(); return !!g && g.some(b => b && b.kind === kind); }
+function ancestryText() { const a = ancestry(); return a && !ancGrants() ? a.traits.map(t => t.text).join(' ') : ''; }
 function findItem(name, cats) { const n = norm(name); if(!n) return null; return D.items().find(i => norm(i.name) === n && (!cats || cats.includes(i.category))) || null; }
 
 // ═══ BUILD STATIC UI ══════════════════════════════════════════════════════
@@ -948,6 +953,7 @@ function skillTotal(name, statId) {
   const m = new RegExp('\\+(\\d) (?:to )?' + name, 'i').exec(at); if(m) t += num(m[1]);
   const bg = D.backgrounds().find(b => norm(b.name) === norm($('f-background').value));
   if(bg) { const mb = new RegExp('\\+(\\d) ' + name, 'i').exec(bg.description); if(mb) t += num(mb[1]); }
+  t += ancG('allSkills') + ancG('skill', name);
   return Math.min(12, t);
 }
 function armorValue() {
@@ -959,10 +965,10 @@ function armorValue() {
   }
   const sh = findItem($('f-shield').value, ['Shield']); if(sh && sh.armor) a += num(sh.armor);
   if(/\+1 Armor/i.test(ancestryText())) a += 1;
-  return a + num($('armor-bonus').value) + itemBonus().armor;
+  return a + ancG('armor') + num($('armor-bonus').value) + itemBonus().armor;
 }
-function initBonus() { let i = stat('DEX') + num($('init-bonus').value); if(/\+1 to all skills and Initiative/i.test(ancestryText())) i += 1; return i; }
-function speedValue() { let s = 6 + num($('speed-bonus').value); const at = ancestryText(); if(/–1 Speed|-1 Speed/.test(at)) s -= 1; if(/\+1 Speed/.test(at)) s += 1; return s + itemBonus().speed; }
+function initBonus() { let i = stat('DEX') + num($('init-bonus').value); if(/\+1 to all skills and Initiative/i.test(ancestryText())) i += 1; return i + ancG('init'); }
+function speedValue() { let s = 6 + num($('speed-bonus').value); const at = ancestryText(); if(/–1 Speed|-1 Speed/.test(at)) s -= 1; if(/\+1 Speed/.test(at)) s += 1; return s + ancG('speed') + itemBonus().speed; }
 function manaMax() {
   const c = cls(); if(!c || !c.spellcasting) return null;
   const m = /=\s*\(?(INT|WIL)(?:×3|x3)?\)?\s*\+\s*LVL/i.exec(c.spellcasting);
@@ -980,7 +986,7 @@ function recalc() {
   const c = cls();
   $('hd-lbl').textContent = c ? 'd' + c.hitDie : '';
   if(num($('hd-max').value) !== hdMax() && !$('hd-max').dataset.manual) $('hd-max').value = hdMax();
-  const wm = 6 + (/\+1 max Wounds/i.test(ancestryText()) ? 1 : 0) - (/–1 max Wounds|-1 max Wounds/.test(D.backgrounds().find(b => norm(b.name) === norm($('f-background').value))?.description || '') ? 1 : 0);
+  const wm = 6 + ancG('wounds') + (/\+1 max Wounds/i.test(ancestryText()) ? 1 : 0) - (/–1 max Wounds|-1 max Wounds/.test(D.backgrounds().find(b => norm(b.name) === norm($('f-background').value))?.description || '') ? 1 : 0);
   if(!$('wounds-max').dataset.manual) $('wounds-max').value = wm;
   renderWounds(); renderActions();
   const mm = manaMax();
@@ -991,7 +997,7 @@ function recalc() {
   $('ko-flag').innerHTML = hp <= 0 ? '<span class="ko-banner">Dying — 1 action, DC 10 STR save to attack</span>' : '';
   renderFeatures(); refreshAttackRows(); refreshSpellRows();
 }
-function hdMax() { const a = ancestryText(); return level() + (/\+2 max Hit Dice/i.test(a) ? 2 : 0) + (/\+1 max Hit Die/i.test(D.backgrounds().find(b => norm(b.name) === norm($('f-background').value))?.description || '') ? 1 : 0); }
+function hdMax() { const a = ancestryText(); return level() + ancG('hitDice') + (/\+2 max Hit Dice/i.test(a) ? 2 : 0) + (/\+1 max Hit Die/i.test(D.backgrounds().find(b => norm(b.name) === norm($('f-background').value))?.description || '') ? 1 : 0); }
 function slotsUsed() { let n = 0; document.querySelectorAll('#inv-body tr').forEach(tr => { n += (parseFloat(tr.querySelector('.inv-slots').value) || 0) * invQty(tr); }); return Math.round(n * 10) / 10; }
 function renderWounds() {
   const max = num($('wounds-max').value) || 6; const wrap = $('wound-pips'); wrap.innerHTML = '';
@@ -1100,7 +1106,7 @@ function rollSave(s) {
   d20Check(s + ' save', stat(s) + ib.save, { note: [saveNote, sv ? 'items ' + sv : ''].filter(Boolean).join(' · ') });
 }
 function rollInitiative() {
-  if(/Advantage on Initiative/i.test(ancestryText()) && !advState) setAdv(1);
+  if((/Advantage on Initiative/i.test(ancestryText()) || ancHas('initAdv')) && !advState) setAdv(1);
   const t = d20Check('Initiative', initBonus(), { dc: null });
   const nat20 = d20Check.lastNat === 20;   // core p.15: "A result of 20+ (or a natural 20)" = all 3
   actions = (t >= 20 || nat20) ? 3 : t >= 10 ? 2 : 1;
@@ -1269,7 +1275,7 @@ function addInvRow(i) {
   if(i.bv === 2 && i.benefits != null && window.LootBonus) { const bl = LootBonus.normalize(LB_SYS, i.benefits); if(bl.length) { tr.dataset.bv = '2'; tr.dataset.benefits = JSON.stringify(bl); tr.dataset.rid = i.rid || newRid(); } }
   if(i.equipped && i.applied && i.applied.v === 2 && tr.dataset.benefits) tr.dataset.applied = JSON.stringify(i.applied);
   const q = Math.max(1, parseInt(i.qty, 10) || 1);
-  tr.innerHTML = `<td><div class="inv-name-line"><span class="inv-eq-slot"></span><input type="text" class="inv-name" value="${esc(i.name)}" placeholder="Item" oninput="refreshInvEquip(this.closest('tr'))"></div><div class="inv-bon"></div></td><td><input type="number" class="num inv-qty" value="${q}" step="1" min="1" oninput="recalc()"></td><td><input type="number" class="num inv-slots" value="${esc(i.slots)}" step="0.5" min="0" oninput="recalc()"></td><td><input type="text" class="inv-note" value="${esc(i.note)}"></td><td><button class="row-x" onclick="removeInvRow(this)">✕</button></td>`;
+  tr.innerHTML = `<td><div class="inv-name-line"><span class="inv-eq-slot"></span><input type="text" class="inv-name" value="${esc(i.name)}" placeholder="Item" oninput="invAttachHb(this.closest('tr'));refreshInvEquip(this.closest('tr'))"></div><div class="inv-bon"></div></td><td><input type="number" class="num inv-qty" value="${q}" step="1" min="1" oninput="recalc()"></td><td><input type="number" class="num inv-slots" value="${esc(i.slots)}" step="0.5" min="0" oninput="recalc()"></td><td><input type="text" class="inv-note" value="${esc(i.note)}"></td><td><button class="row-x" onclick="removeInvRow(this)">✕</button></td>`;
   $('inv-body').appendChild(tr);
   refreshInvEquip(tr); renderInvBonus(tr);
   if(tr.dataset.benefits && invEquipped(tr) && !tr.dataset.applied) invApplyBonus(tr, true);   // an equipped save with no record: snapshot, don't re-apply HP / spells
@@ -1422,15 +1428,25 @@ function lootBaseItem(it) {
     const xn = norm(x.name); if(xn.length > 2 && new RegExp('(^|[^a-z])' + xn.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^a-z]|$)').test(n) && (!best || xn.length > norm(best.name).length)) best = x; });
   return best;
 }
+function hbItemBenefits(it) { return it && it.source === 'Homebrew' && Array.isArray(it.benefits) && window.LootBonus ? LootBonus.normalize(LB_SYS, it.benefits) : []; }
+// Typing a homebrew item's name into a blank inventory row picks up its bonus badges too.
+function invAttachHb(tr) {
+  if(!tr || tr.dataset.benefits) return;
+  const bl = hbItemBenefits(findItem((tr.querySelector('.inv-name') || {}).value || '')); if(!bl.length) return;
+  tr.dataset.bv = '2'; tr.dataset.benefits = JSON.stringify(bl); tr.dataset.rid = tr.dataset.rid || newRid(); renderInvBonus(tr);
+}
 function addInvFromItem(name) {
   const it = findItem(name); if(!it) return;
   const two = /2-handed/i.test(it.properties || '') || ['Mail','Plate'].includes(it.category) && false;
   const weapon = isWeapon(it);
   const link = weapon ? _nextLink() : '';
   // Stack with an existing row of the same item (one Dagger row × 2, not two rows).
-  const same = [...document.querySelectorAll('#inv-body tr')].find(r => norm(r.querySelector('.inv-name').value) === norm(it.name));
+  // A homebrew item built with bonus badges arrives like a claimed GM loot item: its own row carrying
+  // bv:2 + benefits, so equipping applies them and unequip / delete reverses (never stacked).
+  const hbBon = hbItemBenefits(it);
+  const same = hbBon.length ? null : [...document.querySelectorAll('#inv-body tr')].find(r => norm(r.querySelector('.inv-name').value) === norm(it.name));
   if(same) { same.querySelector('.inv-qty').value = invQty(same) + 1; recalc(); scheduleAutosave(); return; }
-  const tr = addInvRow({ name: it.name, slots: two ? 2 : 1, note: [it.armor && 'Armor ' + it.armor, it.damage, it.properties, it.cost].filter(Boolean).join(' · '), link, equipped: false });
+  const tr = addInvRow(Object.assign({ name: it.name, slots: two ? 2 : 1, note: [it.armor && 'Armor ' + it.armor, it.damage, it.properties, it.cost].filter(Boolean).join(' · '), link, equipped: false }, hbBon.length ? { bv: 2, benefits: hbBon } : {}));
   if(weapon) addAttackRow({ name: it.name, damage: it.damage || '', props: it.properties || '', link });
   if(weapon || ARMOR_CATS.includes(it.category) || it.category === 'Shield') setInvEquipped(tr, true, true);   // bought gear goes on / in hand
   recalc(); scheduleAutosave();

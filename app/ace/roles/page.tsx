@@ -14,7 +14,7 @@ import { facetMatch, facetAttr } from "@/lib/facets";
 export const dynamic = "force-dynamic";
 const BASE = "/ace/roles";
 
-type Row = AceRole & { homebrew?: boolean };
+type Row = AceRole & { homebrew?: boolean; startingGear?: string[] };
 
 // A homebrew record's data blob → an AceRole-shaped display row.
 function hbToRole(data: Record<string, unknown>, name: string): Row {
@@ -30,6 +30,7 @@ function hbToRole(data: Record<string, unknown>, name: string): Row {
     grantsFocus: Array.isArray(data.grantsFocus) ? (data.grantsFocus as string[]) : undefined,
     statMods,
     healthBonus: typeof data.healthBonus === "number" ? data.healthBonus : undefined,
+    startingGear: Array.isArray(data.startingGear) && data.startingGear.length ? (data.startingGear as string[]) : undefined,
     page: 0,
     homebrew: true,
   };
@@ -90,11 +91,12 @@ export default async function AceRolesPage({ searchParams }: { searchParams: Pro
                 {r.homebrew ? <span className={hbBadge}>Homebrew</span> : <span className={bookBadge}>{settingName(r.setting)} · p.{r.page}</span>}
               </div>
               <p className="mt-2 text-[13px] leading-relaxed text-[var(--text)]">{r.ability}</p>
-              {(r.grantsFocus || r.statMods || r.healthBonus) ? (
+              {(r.grantsFocus || r.statMods || r.healthBonus || r.startingGear) ? (
                 <p className="mt-2 text-[12px] text-[var(--muted)]">
                   {r.grantsFocus ? <span>Free Focus: {r.grantsFocus.join(", ")}. </span> : null}
                   {r.statMods ? <span>{Object.entries(r.statMods).map(([k, v]) => `${k} ${v > 0 ? "+" : ""}${v}`).join(", ")}. </span> : null}
-                  {r.healthBonus ? <span>+{r.healthBonus} Health.</span> : null}
+                  {r.healthBonus ? <span>{r.healthBonus > 0 ? "+" : ""}{r.healthBonus} Health. </span> : null}
+                  {r.startingGear ? <span>Gear: {r.startingGear.join(", ")}.</span> : null}
                 </p>
               ) : null}
             </li>

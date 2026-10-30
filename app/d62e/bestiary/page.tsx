@@ -21,7 +21,10 @@ function hbToCreature(data: Record<string, unknown>, name: string): Row {
   const list = (k: string) => (Array.isArray(data[k]) ? (data[k] as unknown[]) : []).filter((x): x is string => typeof x === "string");
   const attrs: Record<string, number> = {};
   if (data.attributes && typeof data.attributes === "object") {
-    for (const [k, v] of Object.entries(data.attributes as Record<string, unknown>)) if (typeof v === "number") attrs[k] = v;
+    // Book attribute order (jsonb hands the keys back re-sorted).
+    const ORDER = ["Agility", "Brawn", "Knowledge", "Perception", "Charm", "Mechanical", "Technical", "Mysticism", "Magic"];
+    const rank = (k: string) => (ORDER.includes(k) ? ORDER.indexOf(k) : 99);
+    for (const [k, v] of Object.entries(data.attributes as Record<string, unknown>).sort(([a], [b]) => rank(a) - rank(b))) if (typeof v === "number") attrs[k] = v;
   }
   const skills = list("skills");
   const talents = list("talents");
