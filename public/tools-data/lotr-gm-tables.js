@@ -149,6 +149,7 @@
     var add = panel.querySelector('.xs-tr-add'), body = panel.querySelector('.xs-tr-body');
     if (!add || !body) return;
     function addRow(name, qty, notes, cat) {
+      if (typeof panel._addItem === 'function') { panel._addItem(name, qty, notes, { category: cat }); return; }
       add.click();
       var tr = body.lastElementChild; if (!tr) return;
       var inp = tr.querySelectorAll('input');

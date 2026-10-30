@@ -14,6 +14,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>LotR Character Sheet</title>
 <script src="/tools-data/lotr-data.js"></script>
+<script src="/tools-data/loot-bonus.js"></script>
+<script src="/tools-data/dnd-loot-bonus.js"></script>
 <style>
 /* ═══ The Lord of the Rings Roleplaying (5E) — Character Sheet ═══
    Cloned from the D&D 2024 sheet's app-wrap / sheet / roll-log skeleton and
@@ -438,6 +440,15 @@ body.dark .dtype-sel{background-image:url("data:image/svg+xml;utf8,<svg xmlns='h
 .inv-name-line .inv-name{flex:1 1 auto;min-width:0;}
 .inv-eq-slot{flex:0 0 14px;width:14px;height:14px;display:inline-flex;}
 .inv-tbl td:first-child > div:not(.inv-name-line){margin-left:20px;}
+/* Item bonuses (GM-built loot badges, read-only) */
+.inv-bon:empty{display:none;}
+.inv-bon .lbn{min-height:0;margin-top:3px;}
+.inv-bon .lbn-b,.fl-bon .lbn-b{--lbn-font:var(--f-ui);}
+.fl-bon .lbn{display:inline-flex;min-height:0;margin-left:4px;vertical-align:middle;}
+.fl-bon .lbn-b{font-size:10px;line-height:15px;}
+.abil-itm{font-family:var(--f-ui);font-size:10px;font-weight:700;color:var(--acc-dk);text-align:center;line-height:1.1;}
+.abil-itm:empty{display:none;}
+.def-chip.lb-src{cursor:help;border-style:dashed;}
 .inv-cost-val{font-family:var(--f-num);font-size:11px;font-weight:600;color:var(--ink);}
 .pick-sel{border:1px solid var(--input-border);background:var(--input-bg);color:var(--ink);font-family:var(--f-ui);font-size:12px;padding:5px 6px;border-radius:3px;outline:none;flex:1 1 160px;min-width:0;}
 .notes-box{padding:8px 10px;}
@@ -1728,7 +1739,8 @@ let options = defaultOptions();
 function levelNow(){ return totalLevel(); }
 function profBonus(){ if(_ov && _ov.prof != null && String(_ov.prof) !== '' && !isNaN(parseInt(_ov.prof,10))) return parseInt(_ov.prof,10); const t = D.tables(); const L = levelNow(); if(t && t.proficiencyByLevel && t.proficiencyByLevel[L-1]) return t.proficiencyByLevel[L-1]; return 2 + Math.floor((L-1)/4); }
 function halfPB(){ return Math.floor(profBonus() / 2); }
-function score(id){ return num($('sc-' + id) ? $('sc-' + id).value : 10); }
+function rawScore(id){ return num($('sc-' + id) ? $('sc-' + id).value : 10); }
+function score(id){ const raw = rawScore(id); if(typeof itemBonus !== 'function') return raw; const ib = itemBonus(); const s = raw + (ib.stat[id] || 0); return Math.max(s, ib.setstat[id] || 0); }
 function modOf(id){ return abilMod(score(id)); }
 // ── Calling model ─────────────────────────────────────────────────────────
 // LotR heroes follow a single calling (multicalling is left to hand entry): the
@@ -1809,7 +1821,7 @@ function skillValue(name, ab){
   const PB = profBonus(), lvl = skillProf[name] || 0;
   return modOf(ab) + lvl * PB + (lvl === 0 ? errandRunner() : 0) + skillRider(name).n;
 }
-function saveValue(id){ return modOf(id) + (saveProf[id] ? profBonus() : valiant()) + saveRider(id).n; }
+function saveValue(id){ return modOf(id) + (saveProf[id] ? profBonus() : valiant()) + saveRider(id).n + itemBonus().save; }
 // Virtues and features that touch a save: advantage or a flat bonus.
 function saveRider(id){
   const out = { n:0, adv:'', note:'' };
@@ -1839,6 +1851,9 @@ function recalc(){
   ABILITIES.forEach(a => {
     const m = modOf(a.id);
     $('mod-' + a.id).textContent = sgn(m);
+    { const sc = $('sc-' + a.id), eff = score(a.id), raw = rawScore(a.id); let ind = sc && sc.parentNode.querySelector('.abil-itm');
+      if(sc && !ind){ ind = document.createElement('div'); ind.className = 'abil-itm'; sc.insertAdjacentElement('afterend', ind); }
+      if(ind){ const w = (itemBonus().why.stat[a.id] || []); ind.textContent = eff !== raw ? '→ ' + eff : ''; ind.title = eff !== raw ? 'From equipped items: ' + w.join(' · ') + ' (base ' + raw + ')' : ''; } }
     $('sv-' + a.id).textContent = sgn(saveValue(a.id));
     const dot = $('svp-' + a.id); if(dot){ dot.classList.toggle('on', !!saveProf[a.id]); dot.title = (saveProf[a.id] ? 'Proficient' : (valiant() ? 'Not proficient — Valiant adds +' + valiant() : 'Not proficient')) + (_locked ? ' — unlock the sheet to edit' : ''); }
   });
@@ -1869,6 +1884,7 @@ function recalc(){
   renderXP();
   renderRewardCount();
   renderConditions();
+  renderDefenses();
 }
 
 // ═══ SHEET LOCK ═══════════════════════════════════════════════════════════
@@ -2263,12 +2279,13 @@ function atkCalc(tr, opts){
   const twf = offhand && hasFightingStyle('Two-Weapon Fighting');
   if(offhand) styles.push(twf ? 'Two-Weapon Fighting: ability mod added to off-hand damage' : 'off-hand: no ability mod to damage');
   const dmgAbil = offhand ? (twf ? am : Math.min(0, am)) : am;
-  const dmgFlat = (dice ? dice.flat : 0) + dmgAbil + bonus + dmgStyle + (grievous ? 1 : 0);
-  const hit = am + (prof ? PB : 0) + bonus + hitStyle;
+  const ib = itemBonus(), wplus = weaponPlus(tr), itemHit = ib.attack + wplus, itemDmg = ib.damage + wplus;   // equipped items' badges
+  const dmgFlat = (dice ? dice.flat : 0) + dmgAbil + bonus + dmgStyle + (grievous ? 1 : 0) + itemDmg;
+  const hit = am + (prof ? PB : 0) + bonus + hitStyle + itemHit;
   const critMin = keen ? 19 : 20;
   const dmgExpr = dice ? (dice.n ? dice.n + 'd' + dice.sides + (dmgFlat ? ' ' + sgn(dmgFlat) : '') : String(dmgFlat)) : '';
-  const hitBreakdown = abil + ' ' + sgn(am) + (prof ? ' · PB +' + PB : ' · not proficient') + (bonus ? ' · ' + sgn(bonus) + ' bonus' : '') + (hitStyle ? ' · ' + sgn(hitStyle) + ' style' : '');
-  const dmgBreakdown = (dice && dice.n ? dice.n + 'd' + dice.sides + ' ' : (dice ? dice.flat + ' ' : '')) + (dmgAbil ? sgn(dmgAbil) + ' ' + abil : (offhand ? 'no ability mod' : '')) + (grievous ? ' +1 Grievous' : '') + (bonus ? ' ' + sgn(bonus) + ' bonus' : '') + (dmgStyle ? ' +' + dmgStyle + ' style' : '');
+  const hitBreakdown = abil + ' ' + sgn(am) + (prof ? ' · PB +' + PB : ' · not proficient') + (bonus ? ' · ' + sgn(bonus) + ' bonus' : '') + (hitStyle ? ' · ' + sgn(hitStyle) + ' style' : '') + (itemHit ? ' · ' + sgn(itemHit) + ' item' : '');
+  const dmgBreakdown = (dice && dice.n ? dice.n + 'd' + dice.sides + ' ' : (dice ? dice.flat + ' ' : '')) + (dmgAbil ? sgn(dmgAbil) + ' ' + abil : (offhand ? 'no ability mod' : '')) + (grievous ? ' +1 Grievous' : '') + (bonus ? ' ' + sgn(bonus) + ' bonus' : '') + (dmgStyle ? ' +' + dmgStyle + ' style' : '') + (itemDmg ? ' ' + sgn(itemDmg) + ' item' : '');
   const dtype = ((tr.querySelector('.atk-dtype') || {}).value || '').trim();
   return { abil, am, prof, PB, bonus, hitStyle, dmgStyle, hit, dice, dmgFlat, dmgExpr, hitBreakdown, dmgBreakdown, notes, dis, styles, gwf, info, twoH, offhand, dtype, keen, fell, grievous, critMin, rewards: rw };
 }
@@ -2392,8 +2409,11 @@ function addInvRow(it){
   if(ref) tr.dataset.ref = ref;
   if(Array.isArray(it.rewards) && it.rewards.length) tr.dataset.rewards = it.rewards.join(',');
   if(it.uses != null && it.uses !== '') tr.dataset.charges = num(it.uses);
+  if(it.cat) tr.dataset.cat = String(it.cat);
+  if(it.bv === 2 && it.benefits != null && window.LootBonus){ const bl = LootBonus.normalize(LB_SYS, it.benefits); if(bl.length){ tr.dataset.bv = '2'; tr.dataset.benefits = JSON.stringify(bl); } }
+  if(it.equipped && it.applied && it.applied.v === 2) tr.dataset.applied = JSON.stringify(it.applied);
   tr.innerHTML =
-    '<td><div class="inv-name-line"><span class="inv-eq-slot"></span><input type="text" class="inv-name" value="' + esc(it.name) + '" placeholder="Item" oninput="onInvNameChange(this)"></div><div class="inv-detail inv-subline"></div><div class="inv-uses"></div><div class="inv-rw"></div></td>' +
+    '<td><div class="inv-name-line"><span class="inv-eq-slot"></span><input type="text" class="inv-name" value="' + esc(it.name) + '" placeholder="Item" oninput="onInvNameChange(this)"></div><div class="inv-detail inv-subline"></div><div class="inv-uses"></div><div class="inv-rw"></div><div class="inv-bon"></div></td>' +
     '<td class="inv-qty-cell"><input type="number" class="inv-qty mono" value="' + (it.qty != null ? num(it.qty) : 1) + '" data-nolock oninput="scheduleAutosave();updateCarry()"></td>' +
     '<td class="inv-val-cell"><div class="inv-val-line"><span class="inv-cost-val"></span><span class="inv-info-slot"></span></div></td>' +
     '<td class="inv-actions"></td>';
@@ -2430,6 +2450,7 @@ function renderInvDetail(tr){
   const sub = tr.querySelector('.inv-subline'); if(sub) sub.textContent = parts.notes;
   const val = tr.querySelector('.inv-cost-val'); if(val) val.textContent = parts.cost;
   const rw = tr.querySelector('.inv-rw'); if(rw){ const list = invRewards(tr); rw.innerHTML = list.map(n => '<span class="rw-chip" title="' + esc(rewardDesc(n)) + '">' + esc(n) + '</span>').join(''); }
+  renderInvBonus(tr);
 }
 function onInvNameChange(input){
   const tr = input.closest('tr');
@@ -2440,19 +2461,21 @@ function onInvNameChange(input){
 function removeInvRow(btn){
   const tr = btn.closest('tr');
   if(tr.dataset.equipped === '1' && invRowSlot(tr) === 'weapon') unequipWeaponRid(tr.dataset.rid, invRowRef(tr));
-  tr.remove(); reconcileAC(); recalc(); scheduleAutosave();
+  tr.remove(); reconcileAC(); recalc(); refreshAtkActions(); scheduleAutosave();
 }
 function renderInvActions(tr){
   const kind = invRowKind(tr);
   const eq = tr.dataset.equipped === '1';
-  const canEquip = (kind === 'weapon' || kind === 'armor' || kind === 'shield');
+  const bonusOnly = !(kind === 'weapon' || kind === 'armor' || kind === 'shield') && invHasBonus(tr);
+  const canEquip = (kind === 'weapon' || kind === 'armor' || kind === 'shield') || bonusOnly;
+  if(!eq && tr.dataset.applied) delete tr.dataset.applied;   // unequipped by another item (armour swap, shield vs two-handed)
   // Equip / unequip is a pip in front of the name (the D&D sheet's Prepared-pip look);
   // rows that can't be equipped keep an empty slot so every name lines up.
   const slotEl = tr.querySelector('.inv-eq-slot');
-  if(slotEl) slotEl.innerHTML = canEquip ? '<span class="sp-prep inv-eq-pip' + (eq?' on':'') + '" onclick="toggleEquip(this)" title="' + (eq ? 'Equipped — click to unequip' : 'Not equipped — click to equip') + '"></span>' : '';
+  if(slotEl) slotEl.innerHTML = canEquip ? '<span class="sp-prep inv-eq-pip' + (eq?' on':'') + '" onclick="toggleEquip(this)" title="' + (eq ? 'Equipped — click to unequip' : 'Not equipped — click to equip') + (invHasBonus(tr) ? (eq ? ' (removes its bonuses)' : ' (applies its bonuses)') : '') + '"></span>' : '';
   const equipBtn = '';
   const rwN = invRewards(tr).length;
-  const rwBtn = canEquip ? '<button class="rw-btn' + (rwN ? ' has' : '') + '" onclick="openRewardPicker(this.closest(\'tr\'))" title="Rewards — fine war gear earned at 3rd, 5th, 7th and 9th level">' + (rwN ? '★ ' + rwN : '+ Reward') + '</button>' : '';
+  const rwBtn = (canEquip && !bonusOnly) ? '<button class="rw-btn' + (rwN ? ' has' : '') + '" onclick="openRewardPicker(this.closest(\'tr\'))" title="Rewards — fine war gear earned at 3rd, 5th, 7th and 9th level">' + (rwN ? '★ ' + rwN : '+ Reward') + '</button>' : '';
   const infoBtn = itemData(invRowRef(tr)) ? '<button class="row-i" onclick="openItemInfo(this.closest(\'tr\'))" title="Item details">&#9432;</button>' : '';
   const infoSlot = tr.querySelector('.inv-info-slot'); if(infoSlot) infoSlot.innerHTML = infoBtn;   // ⓘ sits right after the Value
   tr.querySelector('.inv-actions').innerHTML = rwBtn + equipBtn + '<button class="row-x" onclick="removeInvRow(this)">✕</button>';
@@ -2593,6 +2616,48 @@ function resolveItemRef(name){
   return hit ? hit.name : '';
 }
 function invRows(){ return [...document.querySelectorAll('#inv-body tr')]; }
+// ── Item bonuses: GM-built loot arrives with read-only badges (LootBonus, bv:2) ──
+// Equipping a row snapshots its badges into data-applied ({v:2, slot, benefits});
+// every number below is DERIVED from the equipped rows' snapshots, so unequipping
+// or deleting the row reverses exactly what it gave and a reload never re-applies.
+const LB_SYS = 'lotr';
+function invBenefits(tr){ if(!window.LootBonus || !tr.dataset.benefits) return []; try { return LootBonus.normalize(LB_SYS, JSON.parse(tr.dataset.benefits)); } catch(e){ return []; } }
+function invHasBonus(tr){ return invBenefits(tr).some(b => b.kind !== 'note'); }
+function invApplied(tr){ if(tr.dataset.equipped !== '1' || !tr.dataset.applied) return null; try { const r = JSON.parse(tr.dataset.applied); return r && r.v === 2 && Array.isArray(r.benefits) ? r : null; } catch(e){ return null; } }
+function invBonusSlot(tr){ const s = invRowSlot(tr); if(s) return s; const c = tr.dataset.cat || ''; return c === 'weapon' ? 'weapon' : c === 'armor' ? 'armor' : ''; }
+function invApplyBonus(tr){
+  const list = invBenefits(tr).filter(b => b.kind !== 'note');
+  if(tr.dataset.equipped === '1' && list.length) tr.dataset.applied = JSON.stringify({ v:2, slot: invBonusSlot(tr), benefits: list });
+  else delete tr.dataset.applied;
+}
+// Everything the equipped items add: { ac, attack, damage, save, speed, stat{}, setstat{}, resist{}, why{} }.
+function itemBonus(){
+  const o = { ac:0, attack:0, damage:0, save:0, speed:0, stat:{}, setstat:{}, resist:{}, why:{ ac:[], attack:[], damage:[], save:[], speed:[], stat:{} } };
+  invRows().forEach(tr => { const r = invApplied(tr); if(!r) return; const nm = invRowDisplay(tr).replace(/\s+—\s.*$/, '');
+    r.benefits.forEach(b => { const n = num(b.amount);
+      switch(b.kind){
+        case 'plus': if(r.slot === 'armor' || r.slot === 'shield'){ o.ac += n; o.why.ac.push(nm + ' ' + sgn(n)); } break;   // weapon +N: that weapon's row (atkCalc)
+        case 'ac': o.ac += n; o.why.ac.push(nm + ' ' + sgn(n)); break;
+        case 'attack': o.attack += n; o.why.attack.push(nm + ' ' + sgn(n)); break;
+        case 'damage': o.damage += n; o.why.damage.push(nm + ' ' + sgn(n)); break;
+        case 'save': o.save += n; o.why.save.push(nm + ' ' + sgn(n)); break;
+        case 'speed': o.speed += n; o.why.speed.push(sgn(n) + ' ' + nm); break;
+        case 'stat': { const k = String(b.target).toUpperCase(); o.stat[k] = (o.stat[k] || 0) + n; (o.why.stat[k] = o.why.stat[k] || []).push(nm + ' ' + sgn(n)); break; }
+        case 'setstat': { const k = String(b.target).toUpperCase(); if(n > (o.setstat[k] || 0)){ o.setstat[k] = n; } (o.why.stat[k] = o.why.stat[k] || []).push(nm + ' → ' + n); break; }
+        case 'resist': { const t = norm(b.target); if(t && !o.resist[t]) o.resist[t] = nm; break; }
+      }
+    });
+  });
+  return o;
+}
+// The +N "Magic" bonus a weapon row's own inventory item gives (to hit and damage).
+function weaponPlus(atkTr){ const inv = rowInv(atkTr); const r = inv ? invApplied(inv) : null; if(!r || r.slot !== 'weapon') return 0; return r.benefits.reduce((t, b) => t + (b.kind === 'plus' ? num(b.amount) : 0), 0); }
+function renderInvBonus(tr){
+  const box = tr.querySelector('.inv-bon'); if(!box) return;
+  const list = invBenefits(tr);
+  if(!list.length || !window.LootBonus){ box.innerHTML = ''; box._ed = null; return; }
+  if(box._ed) box._ed.set(list); else box._ed = LootBonus.editor(box, { sys: LB_SYS, benefits: list, readonly: true });
+}
 // ── Encumbrance (LotR variant): > 5×STR encumbered, > 10×STR heavily; Dwarves double. ──
 function parseWeightLb(w){ const m = String(w || '').match(/([\d.]+)/); return m ? parseFloat(m[1]) : 0; }
 function carriedWeight(){ let t = 0; invRows().forEach(tr => { const it = itemData(invRowRef(tr)); if(it && it.weight){ const q = num(tr.querySelector('.inv-qty').value) || 1; let w = parseWeightLb(it.weight); if(invRewards(tr).indexOf('Cunning-make') >= 0) w = w / 2; t += w * q; } }); return Math.round(t * 10) / 10; }
@@ -2650,7 +2715,8 @@ function toggleEquip(btn){
     tr.dataset.equipped = '';
     if(slot === 'weapon') unequipWeaponRid(tr.dataset.rid, invRowRef(tr));
   }
-  renderInvActions(tr); reconcileAC(); recalc(); scheduleAutosave();
+  invApplyBonus(tr);
+  renderInvActions(tr); reconcileAC(); recalc(); refreshAtkActions(); scheduleAutosave();
 }
 function warnArmorEquip(tr, slot){
   const display = invRowDisplay(tr);
@@ -2725,6 +2791,7 @@ function computeAC(){
   const sh = shieldAC(); if(sh){ ac += sh; parts.push('shield +' + sh + (sh > 2 ? ' (Reinforced)' : '')); }
   if(armor && hasFightingStyle('Defence')){ ac += 1; parts.push('Defence +1'); }
   if(hasVirtue('Nimbleness') && !hasShield() && !isIncapacitated()){ ac += 1; parts.push('Nimbleness +1'); }
+  const ib = itemBonus(); if(ib.ac){ ac += ib.ac; parts.push('items: ' + ib.why.ac.join(', ')); }
   const t = acTempBonus(); if(t){ ac += t; parts.push('bonus ' + sgn(t)); }
   return { ac, parts };
 }
@@ -3570,7 +3637,9 @@ function fillDamageTypes(){ const sel = $('f-dmg-type'); if(!sel || sel.options.
 function renderDefenses(){ const box = $('defenses-list'); if(!box) return;
   const chips = Object.keys(defenses).map(t => { const st = defenses[t] || ''; const mk = st ? '<span class="dm">' + DEF_MARK[st] + '</span>' : '';
     return '<span class="def-chip' + (st ? ' ' + st : '') + '" title="' + t + ' — tap to cycle resistance › immunity › vulnerability › remove" onclick="cycleDefense(\'' + t + '\')">' + t + mk + '</span>'; }).join('');
-  box.innerHTML = chips + '<span class="def-chip def-add" title="Add a damage defence" onclick="openDefPicker()">+ Add</span>'; }
+  const ir = itemBonus().resist;
+  const itemChips = Object.keys(ir).filter(t => !defenses[t]).map(t => '<span class="def-chip resist lb-src" title="Resistance to ' + esc(t) + ' from ' + esc(ir[t]) + ' — goes away when it\'s unequipped">' + esc(t) + '<span class="dm">' + DEF_MARK.resist + '</span></span>').join('');
+  box.innerHTML = chips + itemChips + '<span class="def-chip def-add" title="Add a damage defence" onclick="openDefPicker()">+ Add</span>'; }
 function cycleDefense(t){ const next = DEF_NEXT[defenses[t] || '']; if(next) defenses[t] = next; else delete defenses[t]; renderDefenses(); scheduleAutosave(); }
 let _addMode = null;
 function openCondPicker(){ _addMode = 'cond'; $('add-title').textContent = 'Add Condition'; renderAddPicker(); $('add-overlay').classList.add('open'); }
@@ -3590,7 +3659,7 @@ function renderAddPicker(){
 }
 function pickCond(name){ toggleCondition(name); renderAddPicker(); }
 function pickDef(t){ if(defenses[t]) delete defenses[t]; else defenses[t] = 'resist'; renderDefenses(); scheduleAutosave(); renderAddPicker(); }
-function applyDefense(amt, type){ const st = type ? defenses[norm(type)] : null;
+function applyDefense(amt, type){ const st = type ? (defenses[norm(type)] || (itemBonus().resist[norm(type)] ? 'resist' : null)) : null;
   if(st === 'resist') return { dmg: Math.floor(amt / 2), note: 'resistant ½ · ' };
   if(st === 'immune') return { dmg: 0, note: 'immune · ' };
   if(st === 'vuln')   return { dmg: amt * 2, note: 'vulnerable ×2 · ' };
@@ -3617,6 +3686,7 @@ function autoSpeed(){
   const arm = equippedArmorInfo().armor, heavy = arm && /heavy/i.test(arm.category || '');
   if(hasFeature('Tireless and Swift') && !heavy){ const L = totalLevel(), b = L >= 10 ? 15 : L >= 6 ? 10 : 5; s += b; why.push('+' + b + ' Tireless and Swift'); }
   if(hasFeature('Long Stride') && !heavy){ s += 10; why.push('+10 Long Stride'); }
+  const ibs = itemBonus(); if(ibs.speed){ s += ibs.speed; why.push(ibs.why.speed.join(' · ')); }
   const enc = encumbrance(); if(enc.level === 2){ s -= 20; why.push('−20 heavily encumbered'); } else if(enc.level === 1){ s -= 10; why.push('−10 encumbered'); }
   if(exhaustion >= 5){ return { s:0, why: why.concat('exhaustion 5: speed 0').join(' · ') }; }
   if(exhaustion >= 2){ s = Math.floor(s / 2); why.push('halved (exhaustion)'); }
@@ -3747,7 +3817,7 @@ function collectSheet(){
     damage: tr.querySelector('.atk-dmg').value, type: tr.querySelector('.atk-dtype').value,
     unarmed: tr.dataset.unarmed === '1', weapon: tr.dataset.weapon || '', rid: tr.dataset.rid || '', twoHanded: tr.dataset.twoHanded === '1'
   })).filter(a => a.name || a.damage);
-  const inventory = invRows().map(tr => ({ name: tr.querySelector('.inv-name').value, qty: num(tr.querySelector('.inv-qty').value), equipped: tr.dataset.equipped === '1', ref: tr.dataset.ref || '', rid: tr.dataset.rid || '', rewards: invRewards(tr), uses: (tr.dataset.charges != null && tr.dataset.charges !== '') ? num(tr.dataset.charges) : null })).filter(i => i.name);
+  const inventory = invRows().map(tr => ({ name: tr.querySelector('.inv-name').value, qty: num(tr.querySelector('.inv-qty').value), equipped: tr.dataset.equipped === '1', ref: tr.dataset.ref || '', rid: tr.dataset.rid || '', rewards: invRewards(tr), uses: (tr.dataset.charges != null && tr.dataset.charges !== '') ? num(tr.dataset.charges) : null, cat: tr.dataset.cat || undefined, bv: tr.dataset.bv === '2' ? 2 : undefined, benefits: tr.dataset.bv === '2' ? invBenefits(tr) : undefined, applied: invApplied(tr) || undefined })).filter(i => i.name);
   const calling = v('f-class');
   return {
     system:'LOTR', v:1,
@@ -3813,7 +3883,7 @@ function applySheet(d){
   options = Object.assign(defaultOptions(), d.options || {});
   $('attacks-body').innerHTML = ''; (d.attacks || []).forEach(addAttackRow);
   ensureUnarmed();
-  $('inv-body').innerHTML = ''; (d.inventory || []).forEach(addInvRow);
+  $('inv-body').innerHTML = ''; (d.inventory || []).forEach(addInvRow); refreshAtkActions();
   refreshSubclassList(); refreshCultureLists(); fillDatalists();
   _shadowState = '';
   renderDeath(); renderFeatures(); renderResources(); fillDamageTypes(); renderDefenses(); fillCompanionDatalist(); renderCompanions(); recalc(); renderFellowship(); setDefaultTab();
@@ -3951,11 +4021,12 @@ function renderFoundLoot(roll){
   div.className = 'log-entry remote log-foundloot'; div.dataset.dropId = dropId; div.dataset.mode = mode; div._flItems = items;
   const rows = items.map((it, i) => {
     const by = claimed[i];
-    const label = esc(it.item || '?') + (it.qty != null && String(it.qty) !== '1' && String(it.qty) !== '' ? ' ×' + esc(it.qty) : '') + (it.notes ? ' <span class="fl-note">' + esc(it.notes) + '</span>' : '');
+    const label = esc(it.item || '?') + (it.qty != null && String(it.qty) !== '1' && String(it.qty) !== '' ? ' ×' + esc(it.qty) : '') + (it.notes ? ' <span class="fl-note">' + esc(it.notes) + '</span>' : '') + _lootBonHtml(it);
     const btn = by ? '<button class="fl-btn" disabled>' + (me && by.toLowerCase() === me.toLowerCase() ? 'Yours ✓' : 'Claimed by ' + esc(by)) + '</button>' : !mine ? '<button class="fl-btn" disabled>For ' + esc(to || 'someone else') + '</button>' : '<button class="fl-btn fl-claim" data-idx="' + i + '">Claim</button>';
     return '<li class="fl-item" data-idx="' + i + '"><span class="fl-item-name">' + label + '</span>' + btn + '</li>';
   }).join('');
   div.innerHTML = '<div class="fl-head">' + esc(roll.label || 'FOUND LOOT') + '</div>' + (roll.result ? '<div class="fl-name">' + esc(roll.result) + '</div>' : '') + (mode === 'named' ? '<div class="fl-for">For: ' + esc(to || '?') + '</div>' : mode === 'copies' ? '<div class="fl-for">A copy for everyone</div>' : '') + (p.note ? '<div class="fl-desc">' + esc(p.note) + '</div>' : '') + (rows ? '<ul class="fl-items">' + rows + '</ul>' : '');
+  _lootBonFill(div);
   return div;
 }
 function renderSystemEntry(roll){
@@ -3992,7 +4063,10 @@ function _lbOpened(){ return _flRead('lotr_loot_opened'); }
 function _lbClaimed(){ return _flRead('lotr_loot_claimed'); }
 function _lbMarkOpened(id){ const o = _lbOpened(); o[id] = 1; _flWrite('lotr_loot_opened', o); }
 function _lbMarkClaimed(id, by){ const c = _lbClaimed(); c[id] = by; _flWrite('lotr_loot_claimed', c); }
-function _lbItemsHtml(items){ return (Array.isArray(items) ? items : []).map(it => '<li>' + esc(it.item || '?') + (it.qty != null && String(it.qty) !== '1' && String(it.qty) !== '' ? ' ×' + esc(it.qty) : '') + (it.notes ? ' <span class="lb-note">' + esc(it.notes) + '</span>' : '') + '</li>').join(''); }
+function _lbItemsHtml(items){ return (Array.isArray(items) ? items : []).map(it => '<li>' + esc(it.item || '?') + (it.qty != null && String(it.qty) !== '1' && String(it.qty) !== '' ? ' ×' + esc(it.qty) : '') + (it.notes ? ' <span class="lb-note">' + esc(it.notes) + '</span>' : '') + _lootBonHtml(it) + '</li>').join(''); }
+// Read-only bonus badges on a loot card item (bv:2 only).
+function _lootBonHtml(it){ if(!it || it.bv !== 2 || !window.LootBonus) return ''; const l = LootBonus.normalize(LB_SYS, it.benefits); return l.length ? '<span class="fl-bon" data-b="' + esc(JSON.stringify(l)) + '"></span>' : ''; }
+function _lootBonFill(root){ if(!window.LootBonus || !root) return; root.querySelectorAll('.fl-bon[data-b]').forEach(el => { let l = []; try { l = JSON.parse(el.dataset.b); } catch(e){} el.removeAttribute('data-b'); LootBonus.editor(el, { sys: LB_SYS, benefits: l, readonly: true }); }); }
 function renderLootBoxEntry(roll){
   let p = {}; try { p = JSON.parse(roll.detail || '{}'); } catch(e){ p = {}; }
   const items = Array.isArray(p.items) ? p.items : [];
@@ -4006,9 +4080,10 @@ function renderLootBoxEntry(roll){
   else { btn = opened ? '<button class="lb-btn" disabled>Opened ✓</button>' : '<button class="lb-btn lb-open">Open</button>'; }
   const contents = opened ? (items.length ? '<ul class="lb-items">' + _lbItemsHtml(items) + '</ul>' : '') : '<div class="lb-sealed">Contents hidden until ' + (mode === 'claim' ? 'claimed' : 'opened') + '.</div>';
   div.innerHTML = '<div class="lb-head">' + esc(roll.label || 'LOOT BOX') + '</div>' + (roll.result ? '<div class="lb-name">' + esc(roll.result) + '</div>' : '') + forLabel + (p.note ? '<div class="lb-desc">' + esc(p.note) + '</div>' : '') + contents + '<div class="lb-actions">' + btn + '</div>';
+  _lootBonFill(div);
   return div;
 }
-function _lbReveal(card){ const sealed = card.querySelector('.lb-sealed'); if(!sealed) return; const html = _lbItemsHtml(card._lootItems || []); if(html){ const ul = document.createElement('ul'); ul.className = 'lb-items'; ul.innerHTML = html; sealed.replaceWith(ul); } else sealed.remove(); }
+function _lbReveal(card){ const sealed = card.querySelector('.lb-sealed'); if(!sealed) return; const html = _lbItemsHtml(card._lootItems || []); if(html){ const ul = document.createElement('ul'); ul.className = 'lb-items'; ul.innerHTML = html; sealed.replaceWith(ul); _lootBonFill(ul); } else sealed.remove(); }
 function applyLootBoxClaim(p, roll){
   if(!p.boxId) return; _lbMarkClaimed(p.boxId, p.by || roll.source || 'Someone');
   const card = [...document.querySelectorAll('.log-lootbox')].find(c => c.dataset.boxId === p.boxId);
@@ -4027,7 +4102,9 @@ $('log-entries').addEventListener('click', function(e){
 });
 // A claimed drop goes into the equipment table.
 function claimLootItem(it){
-  addInvRow({ name: (it.item || '?') + (it.notes ? ' — ' + it.notes : ''), qty: (it.qty != null && it.qty !== '' ? num(it.qty) : 1) });
+  const row = { name: (it.item || '?') + (it.notes ? ' — ' + it.notes : ''), qty: (it.qty != null && it.qty !== '' ? num(it.qty) : 1), ref: resolveItemRef(it.item || '') || undefined, cat: it.cat || undefined };
+  if(it.bv === 2 && it.benefits != null){ row.bv = 2; row.benefits = it.benefits; }   // GM-built badges — trusted only from the bv:2 builder
+  addInvRow(row);
   addLog('Claimed', 'Loot', it.item || 'Item', 'normal'); return true;
 }
 async function campaignPoll(){

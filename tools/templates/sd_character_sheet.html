@@ -7,6 +7,8 @@
        what made the type pop in a beat late. -->
 <!-- BUILD: SD Character Sheet — 2026-09-04 -->
 <script>window.__BUILD__="SD Character Sheet — 2026-09-04";</script>
+<script src="/tools-data/loot-bonus.js"></script>
+<script src="/tools-data/sd-loot-bonus.js"></script>
 <meta charset="UTF-8">
 <!-- Fixed size on mobile: no pinch zoom, so the sheet behaves like an app rather
      than a zoomable document. iOS Safari honours maximum-scale/user-scalable ONLY in
@@ -378,6 +380,14 @@ body.hd-mode .sd-vital-ac{display:none;}
 .gear-del-btn:hover{border-color:#c8503a;color:#e0776f;}
 .gear-slot-disabled .gear-stow-btn,.gear-slot-disabled .gear-del-btn{visibility:hidden;pointer-events:none;}
 .inv-list{}
+/* Loot bonus badges (GM-built items, read-only): a second line under the item */
+.gear-slot,.inv-row{flex-wrap:wrap;}
+.gear-lb,.inv-lb{flex:0 0 100%;min-width:0;padding:0 0 3px 19px;box-sizing:border-box;color:var(--ink);font-family:Montserrat,sans-serif;}
+.inv-lb{padding-left:0;}
+.gear-lb .lbn,.inv-lb .lbn,.sd-lb-slot .lbn{min-height:0;gap:3px;}
+.gear-lb .lbn-b,.inv-lb .lbn-b,.sd-lb-slot .lbn-b{font-size:9px;line-height:14px;padding:0 6px;}
+.sd-lb-slot{display:block;margin-top:2px;}
+.spell-lb-from{flex:0 1 auto;max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:Montserrat,sans-serif;font-size:8px;font-weight:700;font-style:italic;color:inherit;opacity:.75;padding:1px 4px;border-radius:2px;border:1px solid color-mix(in srgb,currentColor 35%,transparent);}
 .inv-row{display:flex;align-items:center;border-bottom:1px solid var(--rule);padding:1px 6px;gap:3px;overflow:hidden;}
 .inv-name{flex:1 1 auto;min-width:0;border:none;background:transparent;font-family:'Montserrat',sans-serif;font-size:11px;color:var(--ink);outline:none;padding:3px 0;}
 .inv-qty{width:30px;flex:0 0 30px;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:2px 0;}
@@ -1442,6 +1452,15 @@ function equippedItemBonusTotals() {
     if(row.classList.contains('gear-slot-disabled')) return;         // dropped slot
     const cb = row.querySelector('.gear-equip');
     if(!cb || !cb.checked) return;                                   // not equipped
+    // GM-built loot badges ("plus" is per-item: see deriveEquipWeapon / acParseRow).
+    sdLbOf(row).forEach(b => {
+      const n = parseInt(b.amount) || 0;
+      if(b.kind === 'ac') totals.ac += n;
+      else if(b.kind === 'attack') { totals.meleeAtk += n; totals.rangedAtk += n; }
+      else if(b.kind === 'damage') { totals.meleeDmg += n; totals.rangedDmg += n; }
+      else if(b.kind === 'hp') totals.hp += n;
+      else if(b.kind === 'stat' && b.target in totals) totals[b.target] += n;
+    });
     const name = row.querySelector('.gear-name')?.value || '';
     const hb = (typeof findHomebrewItem === 'function') ? findHomebrewItem(name) : null;
     if(!hb || !Array.isArray(hb.bonuses)) return;
@@ -1516,9 +1535,102 @@ function applyItemBonuses() {
     if(typeof refreshGearSlots === 'function') refreshGearSlots();
     if(typeof refreshAutoAC === 'function') refreshAutoAC();
     reapplyEquippedWeaponAttacks();
+    if(sdLbSyncSpells() && typeof saveSheet === 'function') saveSheet(false);
   } finally {
     _applyingItemBonuses = false;
   }
+}
+
+// ── LOOT BONUS BADGES (GM-built items — public/tools-data/loot-bonus.js) ─────
+// A loot item the GM built carries `benefits` (sent with bv:2). They ride on the
+// gear slot (row._lb = {id, name, benefits}) or the inventory item
+// ({benefits, lbId}) and are shown as read-only badges. Shadowdark equips by
+// presence: an item in an Equipment slot is equipped, in Inventory it isn't.
+// Equipped benefits feed the same derived totals as homebrew item bonuses
+// (equippedItemBonusTotals → AC, attack/damage profile, and the max-HP / stat
+// applied-delta record _itemBonusApplied), and a "plus" replaces any "+N" name
+// prefix for THAT weapon or armor. Stowing or deleting the item drops it out of
+// the totals, so exactly what was applied is reversed. Spells become linked
+// spell rows (data-lb) with a "from <item>" badge.
+let _lbSeq = 0;
+function sdLbNewId(){ return 'lb' + Date.now().toString(36) + (++_lbSeq); }
+function sdLbNorm(list){ try { return (window.LootBonus && LootBonus.has('sd')) ? LootBonus.normalize('sd', list) : []; } catch(e) { return []; } }
+// Benefits of an item received as loot (only trusted from the bv:2 payload).
+function sdLbFromLoot(it){ return (it && Number(it.bv) === 2) ? sdLbNorm(it.benefits) : []; }
+// The slot's benefits, if they still belong to the item in it (a slot cleared
+// or overwritten by code that bypasses onGearNameInput drops them).
+function sdLbOf(row){
+  const lb = row && row._lb; if(!lb) return [];
+  const nm = (row.querySelector('.gear-name')?.value || '').trim();
+  if(!nm || nm !== lb.name){ row._lb = null; return []; }
+  return lb.benefits || [];
+}
+function sdLbSet(row, benefits, id){
+  const b = sdLbNorm(benefits);
+  row._lb = b.length ? { id: id || sdLbNewId(), name: (row.querySelector('.gear-name')?.value || '').trim(), benefits: b } : null;
+  sdLbPaintRow(row);
+}
+// Sum of the item's "plus" badges, or null when it has none (→ the name's "+N").
+function sdLbPlus(row){
+  const p = sdLbOf(row).filter(b => b.kind === 'plus');
+  return p.length ? p.reduce((s, b) => s + (parseInt(b.amount) || 0), 0) : null;
+}
+function sdLbPaint(el, benefits){
+  if(!el) return;
+  if(!benefits || !benefits.length || !window.LootBonus){ el.innerHTML = ''; el.style.display = 'none'; return; }
+  el.style.display = ''; el.innerHTML = '<div></div>';
+  LootBonus.editor(el.firstChild, { sys:'sd', benefits, readonly:true });
+}
+function sdLbPaintRow(row){ if(row) sdLbPaint(row.querySelector('.gear-lb'), sdLbOf(row)); }
+function sdLbPaintCard(card, items){
+  if(!card) return;
+  card.querySelectorAll('.sd-lb-slot').forEach(s => sdLbPaint(s, sdLbFromLoot((items || [])[+s.dataset.i])));
+}
+// Equip kind of a slot: the name's own kind, else "magic" when it carries badges.
+function gearRowKind(row){
+  return gearItemKind(row.querySelector('.gear-name')?.value) || (sdLbOf(row).length ? 'magic' : null);
+}
+function sdLbSpellBadge(srow, from){
+  if(!srow) return;
+  srow.querySelectorAll('.spell-lb-from').forEach(b => b.remove());
+  if(from){ srow.dataset.lbFrom = from; } else { delete srow.dataset.lbFrom; return; }
+  const cell = srow.querySelector('.spell-name-cell'); if(!cell) return;
+  const b = document.createElement('span'); b.className = 'spell-lb-from';
+  b.textContent = 'from ' + from; b.title = 'Granted by ' + from + ' — goes away when it leaves your Equipment';
+  cell.appendChild(b);
+}
+// Make the spell list match the spell badges of equipped loot items.
+function sdLbSyncSpells(){
+  const want = {};
+  document.querySelectorAll('#gear-list .gear-slot').forEach(row => {
+    if(row.classList.contains('gear-slot-disabled') || !row.querySelector('.gear-equip')?.checked) return;
+    sdLbOf(row).forEach((b, i) => { if(b.kind === 'spell') want[row._lb.id + ':' + i] = { t: b.target, from: row._lb.name }; });
+  });
+  let changed = false;
+  document.querySelectorAll('#spells-list .spell-row[data-lb]').forEach(sr => {
+    if(want[sr.dataset.lb]){ if(sr.dataset.lbFrom !== want[sr.dataset.lb].from) sdLbSpellBadge(sr, want[sr.dataset.lb].from); delete want[sr.dataset.lb]; return; }
+    sr.remove(); _spellCount = Math.max(0, _spellCount - 1); changed = true;
+  });
+  Object.keys(want).forEach(key => {
+    const w = want[key], name = String(w.t).replace(/\s*\((?:tier|level)\s*(\d+)\)\s*$/i, '').trim();
+    const tm = /\((?:tier|level)\s*(\d+)\)\s*$/i.exec(w.t);
+    const sp = (typeof findSpell === 'function') ? (findSpell(name) || (allSpells().find(x => x.name.toLowerCase() === name.toLowerCase()) || null)) : null;
+    _spellCount++;
+    const srow = addSpellRow(_spellCount); if(!srow) return;
+    srow.dataset.lb = key;
+    const q = cl => srow.querySelector(cl);
+    q('.spell-input').value = sp ? sp.name : name;
+    const lvl = q('.spell-level'); if(lvl) lvl.value = sp ? sp.tier : (tm ? tm[1] : '1');
+    if(sp){
+      const rng=q('.spell-range'); if(rng) rng.value=sp.range;
+      const dur=q('.spell-duration'); if(dur) dur.value=sp.duration;
+      const dmg=q('.spell-damage'); if(dmg && typeof spellRollDice==='function') dmg.value=spellRollDice(sp);
+      const dsc=q('.spell-desc'); if(dsc){ dsc.value=sp.desc; if(typeof autoResizeDesc==='function') autoResizeDesc(dsc); }
+    }
+    sdLbSpellBadge(srow, w.from);
+    changed = true;
+  });
+  return changed;
 }
 
 // ── Caster-aware spell lookup (witch shares 5 names with wizard/priest) ────
@@ -2004,6 +2116,18 @@ function acParseItem(name) {
   return null;
 }
 
+// A gear slot's armor/shield contribution: the name's, with a loot item's
+// "plus" badge standing in for any "+N" name prefix (badges win — no doubling).
+function acParseRow(row) {
+  const name = row.querySelector('.gear-name')?.value;
+  const p = acParseItem(name);
+  const lp = p ? sdLbPlus(row) : null;
+  if(!p || lp == null) return p;
+  const nb = parseInt((/^\s*\+(\d+)\s+/.exec(String(name || '')) || [])[1]) || 0;
+  if(p.kind === 'shield') return Object.assign({}, p, { ac: p.ac - nb + lp, soak: p.soak - nb + lp });
+  return Object.assign({}, p, { bonus: lp });
+}
+
 // Innate AC bonus that isn't gear (homebrew ancestry/class effects, Fighter's
 // armor talent). Stored so it survives reloads and folds into the derived AC.
 let _innateAC = 0;
@@ -2029,7 +2153,7 @@ function computeSoak() {
     if(row.classList.contains('gear-slot-disabled')) return;          // dropped
     const cb = row.querySelector('.gear-equip');
     if(!cb || !cb.checked) return;                                    // not equipped
-    const parsed = acParseItem(row.querySelector('.gear-name')?.value);
+    const parsed = acParseRow(row);
     if(!parsed) return;
     if(parsed.kind === 'shield') {
       shield = Math.max(shield, (parseInt(parsed.soak) || 0));
@@ -2053,7 +2177,7 @@ function computeAC() {
     if(row.classList.contains('gear-slot-disabled')) return;
     const cb = row.querySelector('.gear-equip');
     if(!cb || !cb.checked) return;
-    const parsed = acParseItem(row.querySelector('.gear-name')?.value);
+    const parsed = acParseRow(row);
     if(!parsed) return;
     if(parsed.kind === 'shield') {
       shield = Math.max(shield, parsed.ac);
@@ -2118,7 +2242,14 @@ function onGearNameInput(nameEl) {
   const row = nameEl.closest('.gear-slot');
   if(!row) return;
   const cb = row.querySelector('.gear-equip');
-  const kind = gearItemKind(nameEl.value);
+  // Loot badges follow the player's own renames; an emptied slot drops them.
+  if(row._lb) {
+    const nm = nameEl.value.trim();
+    if(!nm) row._lb = null;
+    else if(window.event && window.event.type === 'input' && window.event.target === nameEl) row._lb.name = nm;
+  }
+  sdLbPaintRow(row);
+  const kind = gearRowKind(row);
   const shouldEquip = !!kind && !row.classList.contains('gear-slot-disabled');
   if(cb) {
     const was = cb.checked;
@@ -2141,7 +2272,7 @@ function onGearNameInput(nameEl) {
 function onGearEquipToggle(cb) {
   const row = cb.closest('.gear-slot');
   if(!row) return;
-  const kind = gearItemKind(row.querySelector('.gear-name')?.value);
+  const kind = gearRowKind(row);
   if(kind === 'weapon') {
     if(cb.checked) addEquipAttack(row);
     else removeEquipAttack(row);
@@ -2605,7 +2736,8 @@ function sheetArmorTalentTypes() {
 function deriveEquipWeapon(row) {
   const raw = (row.querySelector('.gear-name')?.value || '').trim();
   const m = /^\+(\d+)\s+/.exec(raw);
-  const bonus = m ? (parseInt(m[1])||0) : 0;
+  const lbPlus = sdLbPlus(row);   // a loot item's "plus" badge wins over the name's "+N"
+  const bonus = lbPlus != null ? lbPlus : (m ? (parseInt(m[1])||0) : 0);
   const type = raw.replace(/^\+\d+\s+/, '');
   const w = (typeof SD_WEAPONS!=='undefined') ? allWeapons().find(x=>x.name.toLowerCase()===type.toLowerCase()) : null;
   if(!w) return null;
@@ -2967,7 +3099,7 @@ function autoEquipArmorFromGear() {
     const nameEl = row.querySelector('.gear-name');
     const cb = row.querySelector('.gear-equip');
     if(!nameEl || !cb) return;
-    const kind = gearItemKind(nameEl.value);
+    const kind = gearRowKind(row);
     const shouldEquip = !!kind && !row.classList.contains('gear-slot-disabled');
     cb.checked = shouldEquip;
     if(!shouldEquip) return;
@@ -3094,6 +3226,7 @@ function buildGear() {
       <input type="text" class="gear-qty" style="width:30px;flex:0 0 30px;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:2px 0;" placeholder="">
       <button class="gear-stow-btn" onclick="stowGearRow(this)" title="Move to Inventory (unequip)">▽</button>
       <button class="gear-del-btn" onclick="deleteGearRow(this)" title="Delete item">✕</button>
+      <div class="gear-lb" style="display:none"></div>
     `;
     list.appendChild(row);
   }
@@ -3118,7 +3251,10 @@ function stowGearRow(btn){
   const nameEl = row.querySelector('.gear-name'), qtyEl = row.querySelector('.gear-qty');
   const name = (nameEl.value || '').trim(); if(!name) return;
   if(/^↳ /.test(name)) return;   // continuation rows aren't stowable on their own
-  _inventory.push({ name: name, qty: (qtyEl.value || '').trim() });
+  const lbB = sdLbOf(row), inv = { name: name, qty: (qtyEl.value || '').trim() };
+  if(lbB.length) { inv.benefits = lbB; inv.lbId = row._lb.id; }
+  _inventory.push(inv);
+  row._lb = null;
   nameEl.value = ''; qtyEl.value = '';
   _clearGearContinuations(name);
   if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);   // unequip + recompute
@@ -3130,6 +3266,7 @@ function deleteGearRow(btn){
   const row = btn.closest('.gear-slot'); if(!row) return;
   const nameEl = row.querySelector('.gear-name'), qtyEl = row.querySelector('.gear-qty');
   const name = (nameEl.value || '').trim();
+  row._lb = null;   // its badges go with it (unequip below reverses them)
   nameEl.value = ''; qtyEl.value = '';
   _clearGearContinuations(name);
   if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);   // unequip + recompute
@@ -3160,6 +3297,7 @@ function invEquip(idx){
   const target = open[0];
   const nameEl = target.querySelector('.gear-name'), qtyEl = target.querySelector('.gear-qty');
   nameEl.value = item.name; qtyEl.value = item.qty || '';
+  sdLbSet(target, item.benefits || [], item.lbId);   // its loot badges move with it
   if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);   // auto-equip if weapon/armor/magic
   // Reserve the extra slots with continuation rows (↳), matching the shop/builder.
   for(let s = 1; s < cost; s++){
@@ -3196,8 +3334,10 @@ function renderInventory(){
     + '<input type="text" class="inv-qty" value="' + _trkEsc(it.qty || '') + '" oninput="onInvQtyInput(' + i + ',this.value)" placeholder="">'
     + '<button type="button" class="inv-eq-btn" onclick="invEquip(' + i + ')" title="Move to Equipment (equip)">△</button>'
     + '<button type="button" class="inv-del-btn" onclick="invDelete(' + i + ')" title="Delete item">✕</button>'
+    + (it.benefits && it.benefits.length ? '<div class="inv-lb" data-i="' + i + '"></div>' : '')
     + '</div>'
   ).join('');
+  box.querySelectorAll('.inv-lb').forEach(el => sdLbPaint(el, sdLbNorm((_inventory[+el.dataset.i] || {}).benefits)));
 }
 
 // ── ADV/DIS ──
@@ -3896,6 +4036,8 @@ function collectSheet(){
     duration: row.querySelector('.spell-duration')?.value.trim() || '',
     source:   row.dataset.src || '',
     wandspent: row.dataset.wandspent === '1',
+    lb:       row.dataset.lb || '',        // granted by an equipped loot item
+    lbFrom:   row.dataset.lbFrom || '',
   }));
   const spellsList = spellData.filter(s => s.name).map(s => s.name);
   const spellsKnown = spellsList.join(', ');
@@ -4027,9 +4169,10 @@ function collectSheet(){
         name:     row.querySelector('.gear-name')?.value || '',
         qty:      row.querySelector('.gear-qty')?.value || '',
         equipped: !!row.querySelector('.gear-equip')?.checked,
-        disabled: row.classList.contains('gear-slot-disabled')
+        disabled: row.classList.contains('gear-slot-disabled'),
+        ...(sdLbOf(row).length ? { benefits: row._lb.benefits, lbId: row._lb.id } : {})
       })),
-      inventory: (Array.isArray(_inventory) ? _inventory : []).map(it => ({ name: String(it.name||''), qty: String(it.qty||'') })).filter(it => it.name.trim()),
+      inventory: (Array.isArray(_inventory) ? _inventory : []).map(it => Object.assign({ name: String(it.name||''), qty: String(it.qty||'') }, (it.benefits && it.benefits.length) ? { benefits: it.benefits, lbId: it.lbId || '' } : {})).filter(it => it.name.trim()),
       gearQtys: [...document.querySelectorAll('#gear-list .gear-qty')].map(el => el.value || ''),
       gearDisabled: [...document.querySelectorAll('#gear-list > div')].map(row => row.classList.contains('gear-slot-disabled')),
       gearEquipped: [...document.querySelectorAll('#gear-list .gear-slot')].map(row => !!row.querySelector('.gear-equip')?.checked),
@@ -4130,6 +4273,8 @@ function _applySDData(d){
   gearNameInputs.forEach((el, i) => {
     el.value = gearRows ? (gearRows[i]?.name || '')
                         : (gearSlotted[i] ? (gearSlotted[i].name || '') : '');
+    const gRow = el.closest('.gear-slot');
+    if(gRow) sdLbSet(gRow, (gearRows && gearRows[i] && gearRows[i].benefits) || [], gearRows && gearRows[i] && gearRows[i].lbId);
   });
   gearQtyInputs.forEach((el, i) => {
     const qty = gearRows
@@ -4153,7 +4298,11 @@ function _applySDData(d){
   // Inventory (unequipped, unlimited). New saves carry an array; older saves get
   // migrated from the legacy free-carry text / free (slots:0) gear items.
   if(Array.isArray(d._sheet?.inventory)){
-    _inventory = d._sheet.inventory.map(it => ({ name: String(it && it.name || ''), qty: String(it && it.qty || '') })).filter(it => it.name.trim());
+    _inventory = d._sheet.inventory.map(it => {
+      const o = { name: String(it && it.name || ''), qty: String(it && it.qty || '') };
+      const b = sdLbNorm(it && it.benefits); if(b.length) { o.benefits = b; o.lbId = String(it.lbId || '') || sdLbNewId(); }
+      return o;
+    }).filter(it => it.name.trim());
   } else {
     const legacy = (typeof d.freeCary === 'string' ? d.freeCary : '')
                 || (typeof d._sheet?.freeCarry === 'string' ? d._sheet.freeCarry : '')
@@ -4213,6 +4362,8 @@ function _applySDData(d){
       if(rangeEl && sd.range)   rangeEl.value  = sd.range;
       if(durEl && sd.duration)  durEl.value    = sd.duration;
       if(sd.source) setSpellRowSource(row, sd.source);
+      if(sd.lb) { row.dataset.lb = sd.lb; sdLbSpellBadge(row, sd.lbFrom || ''); }
+      else { delete row.dataset.lb; sdLbSpellBadge(row, ''); }
       if(sd.wandspent) {
         row.dataset.wandspent = '1';
         row.classList.add('lost');
@@ -4319,7 +4470,7 @@ function _applySDData(d){
     const nameEl = row.querySelector('.gear-name');
     const cb = row.querySelector('.gear-equip');
     if(!nameEl || !cb) return;
-    const kind = gearItemKind(nameEl.value);
+    const kind = gearRowKind(row);
     const shouldEquip = !!kind && !row.classList.contains('gear-slot-disabled');
     cb.checked = shouldEquip;
     if(!shouldEquip) return;
@@ -6374,7 +6525,7 @@ function _lbOpened(){ return _lbRead('sd_loot_opened'); }
 function _lbClaimed(){ return _lbRead('sd_loot_claimed'); }
 function _lbMarkOpened(id){ const o = _lbOpened(); o[id] = 1; _lbWrite('sd_loot_opened', o); }
 function _lbMarkClaimed(id, by){ const c = _lbClaimed(); c[id] = by; _lbWrite('sd_loot_claimed', c); }
-function _lbItemsHtml(items){ return (Array.isArray(items) ? items : []).map(it => '<li>' + _flEsc(it.item || '?') + (it.qty != null && String(it.qty) !== '1' && String(it.qty) !== '' ? ' ×' + _flEsc(it.qty) : '') + (it.notes ? ' <span class="lb-note">' + _flEsc(it.notes) + '</span>' : '') + '</li>').join(''); }
+function _lbItemsHtml(items){ return (Array.isArray(items) ? items : []).map((it, i) => '<li>' + _flEsc(it.item || '?') + (it.qty != null && String(it.qty) !== '1' && String(it.qty) !== '' ? ' ×' + _flEsc(it.qty) : '') + (it.notes ? ' <span class="lb-note">' + _flEsc(it.notes) + '</span>' : '') + (sdLbFromLoot(it).length ? '<span class="sd-lb-slot" data-i="' + i + '"></span>' : '') + '</li>').join(''); }
 function renderLootBoxEntry(roll){
   let p = {}; try { p = JSON.parse(roll.detail || '{}'); } catch(e) { p = {}; }
   const items = Array.isArray(p.items) ? p.items : [];
@@ -6392,9 +6543,10 @@ function renderLootBoxEntry(roll){
   } else { btn = opened ? '<button class="lb-btn" disabled>Opened ✓</button>' : '<button class="lb-btn lb-open">Open</button>'; }
   const contents = opened ? (items.length ? '<ul class="lb-items">' + _lbItemsHtml(items) + '</ul>' : '') : '<div class="lb-sealed">Contents hidden until ' + (mode === 'claim' ? 'claimed' : 'opened') + '.</div>';
   div.innerHTML = '<div class="lb-head">' + _flEsc(roll.label || 'LOOT BOX') + '</div>' + (roll.result ? '<div class="lb-name">' + _flEsc(roll.result) + '</div>' : '') + forLabel + (p.note ? '<div class="lb-desc">' + _flEsc(p.note) + '</div>' : '') + contents + '<div class="lb-actions">' + btn + '</div>';
+  sdLbPaintCard(div, items);
   return div;
 }
-function _lbReveal(card){ const sealed = card.querySelector('.lb-sealed'); if(!sealed) return; const html = _lbItemsHtml(card._lootItems || []); if(html) { const ul = document.createElement('ul'); ul.className = 'lb-items'; ul.innerHTML = html; sealed.replaceWith(ul); } else sealed.remove(); }
+function _lbReveal(card){ const sealed = card.querySelector('.lb-sealed'); if(!sealed) return; const html = _lbItemsHtml(card._lootItems || []); if(html) { const ul = document.createElement('ul'); ul.className = 'lb-items'; ul.innerHTML = html; sealed.replaceWith(ul); sdLbPaintCard(ul, card._lootItems); } else sealed.remove(); }
 function applyLootBoxClaim(p, roll){
   if(!p.boxId) return; _lbMarkClaimed(p.boxId, p.by || roll.source || 'Someone');
   const card = [...document.querySelectorAll('.log-lootbox')].find(c => c.dataset.boxId === p.boxId);
@@ -6422,11 +6574,12 @@ function _flClaimed(dropId){const all=_flRead('sd_found_claimed');return all[dro
 function _flMarkClaimed(dropId,idx,by){const all=_flRead('sd_found_claimed');(all[dropId]=all[dropId]||{})[idx]=by;_flWrite('sd_found_claimed',all);}
 
 // Find the first empty gear slot and drop a claimed item into it.
-function sdAddGearItem(name, qty){
+function sdAddGearItem(name, qty, benefits){
   const names=[...document.querySelectorAll('#gear-list .gear-name')];
   const empty=names.find(inp=>!inp.value.trim());
   if(!empty){ if(typeof showRollToast==='function') showRollToast('Gear full','—','Free a gear slot to claim more loot.','normal'); return false; }
   empty.value=name||'';
+  { const r0=empty.closest('.gear-slot'); if(r0) sdLbSet(r0, benefits||[]); }   // GM-built bonus badges ride on the slot
   if(typeof onGearNameInput==='function'){ try{onGearNameInput(empty);}catch(e){} }
   const row=empty.closest('.gear-slot'); const q=row&&row.querySelector('.gear-qty');
   if(q && qty!=null && String(qty)!=='' && String(qty)!=='1') q.value=String(qty);
@@ -6460,7 +6613,7 @@ function sdAddGold(amt){
 function sdClaimItem(it){
   const gold = sdItemGold(it);
   if(gold != null){ sdAddGold(gold); return true; }
-  return sdAddGearItem(it.item, it.qty);
+  return sdAddGearItem(it.item, it.qty, sdLbFromLoot(it));
 }
 
 function renderNormalRemote(roll){
@@ -6496,7 +6649,8 @@ function renderFoundLoot(roll){
     const by = claimed[i];
     const label = _flEsc(it.item||'?')
       + (it.qty!=null && String(it.qty)!=='1' && String(it.qty)!==''?' ×'+_flEsc(it.qty):'')
-      + (it.notes?' <span class="fl-note">'+_flEsc(it.notes)+'</span>':'');
+      + (it.notes?' <span class="fl-note">'+_flEsc(it.notes)+'</span>':'')
+      + (sdLbFromLoot(it).length?'<span class="sd-lb-slot" data-i="'+i+'"></span>':'');
     const btn = by
       ? '<button class="fl-btn" disabled>'+(me && by.toLowerCase()===me.toLowerCase()?'Yours ✓':'Claimed by '+_flEsc(by))+'</button>'
       : !mine ? '<button class="fl-btn" disabled>For '+_flEsc(to||'someone else')+'</button>'
@@ -6508,6 +6662,7 @@ function renderFoundLoot(roll){
     + (mode==='named'?'<div class="fl-for">For: '+_flEsc(to||'?')+'</div>':mode==='copies'?'<div class="fl-for">A copy for everyone</div>':'')
     + (p.note?'<div class="fl-desc">'+_flEsc(p.note)+'</div>':'')
     + (rows?'<ul class="fl-items">'+rows+'</ul>':'');
+  sdLbPaintCard(div, items);
   return div;
 }
 // A claim broadcast (from anyone) locks that one item on every log.

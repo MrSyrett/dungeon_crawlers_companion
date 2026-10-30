@@ -471,6 +471,12 @@ body.dark .conc-badge .cb-name{color:#8fc3ec;}
 .inv-detail{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;color:var(--muted);line-height:1.25;letter-spacing:.02em;text-transform:uppercase;white-space:normal;}
 .inv-subline{margin-top:2px;}
 .inv-subline:empty{display:none;}
+.inv-bonus{margin-top:3px;}
+.inv-bonus:empty{display:none;}
+.inv-bonus.off{opacity:.55;}
+.inv-bonus .lbn{min-height:0;}
+.sp-from{display:inline-block;margin-left:6px;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:inherit;border:1px solid color-mix(in srgb,#9a62d8 60%,transparent);background:color-mix(in srgb,#9a62d8 16%,transparent);border-radius:3px;padding:0 5px;white-space:nowrap;vertical-align:1px;}
+.fl-bonus{display:block;margin-top:2px;}
 .inv-val-cell{width:1%;white-space:nowrap;}
 .inv-val-line{display:flex;align-items:center;justify-content:space-between;gap:4px;}
 .inv-info-slot{display:inline-flex;}
@@ -1585,6 +1591,7 @@ function recalc(){
   reconcileSpeed();
   updateCarry();
   applyGrantedSpells();
+  syncItemEffects();   // loot-bonus resistances / spells follow equip state
   applyMartialArts();
   updateHitDiceUI();
   refreshWizardButtons();
@@ -1961,6 +1968,7 @@ function rowWeaponInfo(tr){
 // The +N of a magic weapon, read live from its inventory row and gated on attunement.
 function atkMagicPlus(tr){
   const inv = rowInv(tr); if(!inv) return num(tr.dataset.magic || 0);
+  if(rowBenefits(inv)) return rowPlus(inv);   // loot badges win over a parsed +N
   const ref = invRowRef(inv), plus = num(inv.dataset.plus || 0);
   if(itemKind(ref) === 'magic' && magicNeedsAttune(ref) && !isAttunedRow(inv)) return 0;
   return plus;
@@ -1985,6 +1993,7 @@ function atkCalc(tr, opts){
   if(info.w){ if(info.finesse) abil = modOf('DEX') > modOf('STR') ? 'DEX' : 'STR'; else if(info.ranged) abil = 'DEX'; }
   const am = modOf(abil), prof = tr.dataset.prof !== '0', PB = profBonus();
   const bonus = num((tr.querySelector('.atk-bonus') || {}).value), magic = atkMagicPlus(tr);
+  const itm = tr.dataset.spell ? { atk:0, dmg:0 } : itemAtkDmg();   // +N Attack / +N Damage loot badges
   const twoH = tr.dataset.twoHanded === '1' && !!info.versatile && !hasShield();
   const unarmed = tr.dataset.unarmed === '1', melee = !info.ranged;
   const notes = [], dis = [], styles = [];
@@ -2005,11 +2014,11 @@ function atkCalc(tr, opts){
   const twf = offhand && hasFightingStyle('Two-Weapon Fighting');
   if(offhand) styles.push(twf ? 'Two-Weapon Fighting: ability mod added to off-hand damage' : 'off-hand: no ability mod to damage');
   const dmgAbil = offhand ? ((twf || am < 0) ? am : 0) : am;   // Light: no ability mod to the extra attack's damage unless it's negative
-  const dmgFlat = (dice ? dice.flat : 0) + dmgAbil + bonus + magic + dmgStyle;
-  const hit = am + (prof ? PB : 0) + bonus + magic + hitStyle;
+  const dmgFlat = (dice ? dice.flat : 0) + dmgAbil + bonus + magic + dmgStyle + itm.dmg;
+  const hit = am + (prof ? PB : 0) + bonus + magic + hitStyle + itm.atk;
   const dmgExpr = dice ? (dice.n ? dice.n + 'd' + dice.sides + (dmgFlat ? ' ' + sgn(dmgFlat) : '') : String(dmgFlat)) : '';
-  const hitBreakdown = abil + ' ' + sgn(am) + (prof ? ' · PB +' + PB : ' · not proficient') + (magic ? ' · +' + magic + ' magic' : '') + (bonus ? ' · ' + sgn(bonus) + ' bonus' : '') + (hitStyle ? ' · ' + sgn(hitStyle) + ' style' : '');
-  const dmgBreakdown = (dice && dice.n ? dice.n + 'd' + dice.sides + ' ' : (dice ? dice.flat + ' ' : '')) + (dmgAbil ? sgn(dmgAbil) + ' ' + abil : (offhand ? 'no ability mod' : '')) + (magic ? ' +' + magic + ' magic' : '') + (bonus ? ' ' + sgn(bonus) + ' bonus' : '') + (dmgStyle ? ' +' + dmgStyle + ' style' : '');
+  const hitBreakdown = abil + ' ' + sgn(am) + (prof ? ' · PB +' + PB : ' · not proficient') + (magic ? ' · +' + magic + ' magic' : '') + (bonus ? ' · ' + sgn(bonus) + ' bonus' : '') + (hitStyle ? ' · ' + sgn(hitStyle) + ' style' : '') + (itm.atk ? ' · ' + sgn(itm.atk) + ' item' : '');
+  const dmgBreakdown = (dice && dice.n ? dice.n + 'd' + dice.sides + ' ' : (dice ? dice.flat + ' ' : '')) + (dmgAbil ? sgn(dmgAbil) + ' ' + abil : (offhand ? 'no ability mod' : '')) + (magic ? ' +' + magic + ' magic' : '') + (bonus ? ' ' + sgn(bonus) + ' bonus' : '') + (dmgStyle ? ' +' + dmgStyle + ' style' : '') + (itm.dmg ? ' ' + sgn(itm.dmg) + ' item' : '');
   const dtype = info.dtype || ((tr.querySelector('.atk-dtype') || {}).value || '').trim();
   return { abil, am, prof, PB, bonus, magic, hitStyle, dmgStyle, hit, dice, dmgFlat, dmgExpr, hitBreakdown, dmgBreakdown, notes, dis, styles, gwf, info, twoH, offhand, dtype, mastery: rowMasteryName(tr) };
 }
@@ -2278,10 +2287,16 @@ function addInvRow(it){
   if(num(it.plus)) tr.dataset.plus = num(it.plus);   // a +N base weapon/armor (magic enhancement), or a named magic weapon's parsed +N
   if(it.base) tr.dataset.base = it.base;             // the base weapon chosen for a "Weapon (any sword)"-style magic weapon
   if(it.scroll) tr.dataset.scroll = it.scroll;       // the spell a Spell Scroll contains
+  // Loot bonuses (bv:2 badges from the GM): exactly what equipping applies. `applied` records the
+  // state changes equipping made (resistances, spells) so reloads don't re-apply and removal reverses them.
+  if(it.benefits && window.LootBonus){ const bl = LootBonus.normalize('dnd', it.benefits); if(bl.length) tr.dataset.benefits = JSON.stringify(bl); }
+  if(it.cat) tr.dataset.cat = it.cat;
+  if(it.lnotes) tr.dataset.lnotes = it.lnotes;
+  if(it.applied && it.applied.v === 2) tr.dataset.applied = JSON.stringify(it.applied);
   const cmax = itemChargesMax(ref);
   if(cmax) tr.dataset.charges = (it.charges != null && it.charges !== '') ? Math.max(0, Math.min(cmax, num(it.charges))) : cmax;
   tr.innerHTML =
-    '<td><div class="inv-name-line"><span class="inv-eq-slot"></span><input type="text" class="inv-name" value="' + esc(it.name) + '" placeholder="Item" oninput="onInvNameChange(this)"></div><div class="inv-detail inv-subline"></div><div class="inv-charges"></div></td>' +
+    '<td><div class="inv-name-line"><span class="inv-eq-slot"></span><input type="text" class="inv-name" value="' + esc(it.name) + '" placeholder="Item" oninput="onInvNameChange(this)"></div><div class="inv-detail inv-subline"></div><div class="inv-bonus"></div><div class="inv-charges"></div></td>' +
     '<td class="inv-qty-cell"><input type="number" class="inv-qty mono" value="' + (it.qty != null ? num(it.qty) : 1) + '" oninput="scheduleAutosave();updateCarry()"></td>' +
     '<td class="inv-val-cell"><div class="inv-val-line"><span class="inv-cost-val"></span><span class="inv-info-slot"></span></div></td>' +
     '<td class="inv-actions"></td>';
@@ -2300,7 +2315,7 @@ function invRowParts(tr){
   const it = itemData(invRowRef(tr));
   if(!it) return { cost:'', notes:'' };
   const notes = [];
-  const plus = num(tr.dataset.plus || 0); if(plus) notes.push('+' + plus + ' magic');
+  const plus = rowBenefits(tr) ? 0 : num(tr.dataset.plus || 0); if(plus) notes.push('+' + plus + ' magic');
   if(it.damage){                                   // weapon
     notes.push(it.damage + (it.damageType ? ' ' + it.damageType : ''));
     if(it.properties && it.properties.length) notes.push(it.properties.join(', '));
@@ -2324,7 +2339,8 @@ function invRowParts(tr){
 }
 function renderInvDetail(tr){
   const parts = invRowParts(tr);
-  const sub = tr.querySelector('.inv-subline'); if(sub) sub.textContent = parts.notes;
+  const sub = tr.querySelector('.inv-subline'); if(sub) sub.textContent = [parts.notes, tr.dataset.lnotes || ''].filter(Boolean).join(' · ');
+  renderInvBonus(tr);
   const val = tr.querySelector('.inv-cost-val'); if(val) val.textContent = parts.cost;
   renderInvCharges(tr);
 }
@@ -2363,6 +2379,7 @@ function removeInvRow(btn){
   const tr = btn.closest('tr');
   if(tr.dataset.equipped === '1' && invRowSlot(tr) === 'weapon') unequipWeaponRid(tr.dataset.rid, invRowRef(tr));
   if(isAttunedRow(tr)){ attunedRefs = attunedRefs.filter(r => r !== tr.dataset.rid); renderAttuneCount(); }
+  if(reverseItemEffects(tr)) renderDefenses();
   tr.remove(); reconcileAC(); recalc(); scheduleAutosave();
 }
 // Equip is offered only when equipping does something: weapons, armor, shields, and
@@ -2381,7 +2398,7 @@ function potionHealExpr(name){ const n = norm(name); if(!/potion of .*healing/.t
 function renderInvActions(tr){
   const kind = invRowKind(tr), ref = invRowRef(tr);
   const eq = tr.dataset.equipped === '1';
-  const canEquip = (kind === 'weapon' || kind === 'armor' || kind === 'shield' || (kind === 'magic' && magicEquippable(ref)));
+  const canEquip = (kind === 'weapon' || kind === 'armor' || kind === 'shield' || (kind === 'magic' && magicEquippable(ref)) || (rowBenefits(tr) || []).some(b => b.kind !== 'note'));
   // Equip / unequip is a pip in front of the name (same look as the spell Prepared pip);
   // rows that can't be equipped keep an empty slot so every name lines up.
   const slotEl = tr.querySelector('.inv-eq-slot');
@@ -2397,6 +2414,7 @@ function renderInvActions(tr){
   // Order: Attune · Use · Remove (ⓘ sits in the Value cell; equip is the pip before the name)
   const infoSlot = tr.querySelector('.inv-info-slot'); if(infoSlot) infoSlot.innerHTML = infoBtn;   // ⓘ sits right after the Value
   tr.querySelector('.inv-actions').innerHTML = attuneBtn + equipBtn + useBtn + '<button class="row-x" onclick="removeInvRow(this)">✕</button>';
+  renderInvBonus(tr);
 }
 // ── Consumables: Spell Scroll (Cast), Potion of Healing (Drink), other potions/scrolls (Use) ──
 // 2024 Spell Scroll table: the scroll's own attack bonus / save DC by spell level.
@@ -2404,7 +2422,7 @@ const SCROLL_TABLE = [[1,5,13],[3,7,15],[5,9,17],[7,10,18],[8,11,19],[9,12,20]];
 function scrollStats(lvl){ for(const row of SCROLL_TABLE){ if(lvl <= row[0]) return { atk: row[1], dc: row[2] }; } return { atk:12, dc:20 }; }
 function consumeRow(tr){
   const q = tr.querySelector('.inv-qty'); const left = num(q.value) - 1;
-  if(left <= 0){ if(isAttunedRow(tr)){ attunedRefs = attunedRefs.filter(r => r !== tr.dataset.rid); renderAttuneCount(); } tr.remove(); }
+  if(left <= 0){ if(isAttunedRow(tr)){ attunedRefs = attunedRefs.filter(r => r !== tr.dataset.rid); renderAttuneCount(); } if(reverseItemEffects(tr)){ renderDefenses(); recalc(); } tr.remove(); }
   else q.value = left;
   updateCarry(); scheduleAutosave();
   return left;
@@ -2633,6 +2651,7 @@ function equippedShieldRow(){ return invRows().find(r => r.dataset.equipped === 
 function hasShield(){ return !!equippedShieldRow(); }
 function shieldAC(){
   const r = equippedShieldRow(); if(!r) return 0; const ref = invRowRef(r);
+  if(rowBenefits(r)) return 2 + rowPlus(r);   // loot badges: base +2 plus its +N Magic
   if(isMagicShield(ref)){ const ok = !magicNeedsAttune(ref) || isAttunedRow(r); return ok ? Math.max(2, magicBonuses(magicData(ref)).ac) : 2; }
   return 2 + num(r.dataset.plus || 0);
 }
@@ -2742,7 +2761,7 @@ function equipWeaponRow(tr){
   addAttackRow({ name: display, abil, prof: isProficientWithWeapon(w), bonus: 0, magic: num(tr.dataset.plus || 0), damage: w.damage, type: w.damageType, mastery: w.mastery || '', weapon: w.name, rid: tr.dataset.rid });
 }
 // The +N on an equipped base armor row (from a "+2 Armor" purchase).
-function equippedRowPlus(kind){ const tr = invRows().find(r => r.dataset.equipped === '1' && invRowKind(r) === kind); return tr ? num(tr.dataset.plus || 0) : 0; }
+function equippedRowPlus(kind){ const tr = invRows().find(r => r.dataset.equipped === '1' && invRowKind(r) === kind); return tr ? rowPlus(tr) : 0; }
 // Remove the attack row(s) of one inventory row — by rid; legacy rows without a rid match by weapon name.
 function unequipWeaponRid(rid, ref){ [...document.querySelectorAll('#attacks-body tr')].forEach(tr => { if((rid && tr.dataset.rid === rid) || (!tr.dataset.rid && ref && norm(tr.dataset.weapon || '') === norm(ref))) tr.remove(); }); }
 // Keep an equipped weapon's attack-row name in sync when its inventory item is renamed.
@@ -2793,6 +2812,7 @@ function equippedArmorInfo(){
   if(realName){ const a = D.armor().find(x => norm(x.name) === norm(realName)); return { armor:a, plus: equippedRowPlus('armor') }; }
   const mr = equippedMagicArmorRow();
   if(mr){ const ref = invRowRef(mr), a = magicArmorBase(ref); const attunedOk = !magicNeedsAttune(ref) || isAttunedRow(mr);
+    if(rowBenefits(mr)) return { armor:a, plus: rowPlus(mr) };
     return { armor:a, plus: (attunedOk ? (magicBonuses(magicData(ref)).ac || 0) : 0) + num(mr.dataset.plus || 0) }; }
   return { armor:null, plus:0 };
 }
@@ -2913,7 +2933,69 @@ function magicActive(tr){
   if(magicArmorBase(ref) || isMagicShield(ref)) return false;   // worn as armor / shield (AC handled in computeAC), not a flat bonus
   return magicNeedsAttune(ref) ? isAttunedRow(tr) : true;
 }
-function equippedMagic(){ return invRows().filter(magicActive).map(r => magicBonuses(magicData(invRowRef(r)))); }
+function equippedMagic(){ return invRows().map(r => benefitActive(r) ? benefitBonuses(r) : magicActive(r) ? magicBonuses(magicData(invRowRef(r))) : null).filter(Boolean); }
+// ── Loot bonuses (bv:2 badges from the GM Screen) ─────────────────────────────
+// A row's badges are the item: while it's equipped they feed the same derived totals the
+// magic-item parser does (AC, saves, ability scores, speed) plus the attack rows; +N Magic
+// rides on the row's own weapon / armor / shield. Resistances and spells change sheet
+// state, so those are applied once and recorded on the row (data-applied {v:2,…}).
+function rowBenefits(tr){ if(!tr || !tr.dataset || !tr.dataset.benefits) return null; try { const l = JSON.parse(tr.dataset.benefits); return Array.isArray(l) && l.length ? l : null; } catch(e){ return null; } }
+function rowPlus(tr){ const l = rowBenefits(tr); return l ? l.filter(b => b.kind === 'plus').reduce((s, b) => s + num(b.amount), 0) : num(tr.dataset.plus || 0); }
+function benefitActive(tr){ return tr.dataset.equipped === '1' && !!rowBenefits(tr); }
+function benefitBonuses(tr){
+  const b = magicBonuses(null); b.itemAtk = 0; b.itemDmg = 0;
+  const slot = invRowSlot(tr);
+  (rowBenefits(tr) || []).forEach(x => { const n = num(x.amount), k = x.target;
+    if(x.kind === 'plus'){ if(!slot && tr.dataset.cat !== 'weapon') b.ac += n; }   // weapon/armor/shield rows apply +N themselves
+    else if(x.kind === 'ac') b.ac += n;
+    else if(x.kind === 'attack') b.itemAtk += n;
+    else if(x.kind === 'damage') b.itemDmg += n;
+    else if(x.kind === 'save') b.save += n;
+    else if(x.kind === 'speed') b.speed += n;
+    else if(x.kind === 'stat' && k in b) b[k] += n;
+    else if(x.kind === 'setstat' && k){ b.set = b.set || {}; b.set[k] = Math.max(b.set[k] || 0, n); }
+  });
+  return b;
+}
+function itemAtkDmg(){ return equippedMagic().reduce((o, b) => { o.atk += b.itemAtk || 0; o.dmg += b.itemDmg || 0; return o; }, { atk:0, dmg:0 }); }
+function rowApplied(tr){ try { const a = JSON.parse(tr.dataset.applied || 'null'); return a && a.v === 2 ? a : null; } catch(e){ return null; } }
+// Undo exactly what this row applied (resistances it added, spells it added). Returns whether anything changed.
+function reverseItemEffects(tr){
+  const a = rowApplied(tr); if(!a) return false;
+  const rid = tr.dataset.rid;
+  (a.resist || []).forEach(t => { if(defenses[t] === 'resist') delete defenses[t]; });
+  const gone = spellsKnown.filter(sk => sk.item && sk.item === rid).map(sk => sk.name);
+  spellsKnown = spellsKnown.filter(sk => !(sk.item && sk.item === rid));
+  gone.forEach(n => { if(!spellsKnown.some(s => norm(s.name) === norm(n))) [...document.querySelectorAll('#attacks-body tr')].forEach(r => { if(norm(r.dataset.spell || '') === norm(n)) r.remove(); }); });
+  delete tr.dataset.applied; return true;
+}
+// Top up what an equipped row grants (idempotent: a resistance/spell already on the sheet isn't re-added or claimed).
+function applyItemEffects(tr){
+  const a = rowApplied(tr) || { v:2, resist:[], spells:[] }; let ch = !tr.dataset.applied;
+  (rowBenefits(tr) || []).forEach(b => {
+    if(b.kind === 'resist'){ const t = norm(b.target); if(t && !defenses[t]){ defenses[t] = 'resist'; if(a.resist.indexOf(t) < 0) a.resist.push(t); ch = true; } }
+    else if(b.kind === 'spell'){ const sp = spellByName(b.target), nm = sp ? sp.name : b.target;
+      if(nm && !spellsKnown.some(s => norm(s.name) === norm(nm))){ spellsKnown.push({ name:nm, prepared:true, item:tr.dataset.rid, itemName:invRowDisplay(tr) }); if(a.spells.indexOf(nm) < 0) a.spells.push(nm); addSpellAttackRow(nm); ch = true; } }
+  });
+  tr.dataset.applied = JSON.stringify(a); return ch;
+}
+function syncItemEffects(){
+  let ch = false; const rows = invRows();
+  rows.forEach(tr => { if(rowApplied(tr) && !benefitActive(tr)) ch = reverseItemEffects(tr) || ch; });
+  rows.forEach(tr => { if(benefitActive(tr)) ch = applyItemEffects(tr) || ch; });
+  if(ch){ renderDefenses(); scheduleAutosave(); }
+  return ch;
+}
+// Read-only badges under the item name (no "+ Bonus": bonuses are fixed once the item is in inventory).
+function renderInvBonus(tr){
+  const box = tr.querySelector('.inv-bonus'); if(!box) return;
+  const l = rowBenefits(tr);
+  if(!l || !window.LootBonus){ box.innerHTML = ''; return; }
+  if(!tr._lbn) tr._lbn = LootBonus.editor(box, { sys:'dnd', benefits:l, readonly:true }); else tr._lbn.set(l);
+  const off = (rowBenefits(tr) || []).some(b => b.kind !== 'note') && tr.dataset.equipped !== '1';
+  box.classList.toggle('off', off); box.title = off ? 'Equip to apply these bonuses' : '';
+}
+
 // Total of one bonus key across every equipped-and-active magic item.
 function magicSum(key){ return equippedMagic().reduce((s, b) => s + (b[key] || 0), 0); }
 function magicACBonus(){ return magicSum('ac'); }
@@ -3613,7 +3695,7 @@ function abilityForSpell(sp){ const sk = sp && spellsKnown.find(s => norm(s.name
 function spellDC(ab){ if(_ov.spDC != null && String(_ov.spDC) !== '') return ovNum('spDC', 8); return 8 + profBonus() + modOf(ab || spellAbilityId()) + magicSum('spellDC') + exhPenalty(); }   // 2024: Exhaustion lowers spell save DCs too
 function spellAtkBonus(ab){ if(_ov.spAtk != null && String(_ov.spAtk) !== '') return ovNum('spAtk', 0); return profBonus() + modOf(ab || spellAbilityId()) + magicSum('spellAtk'); }
 // A racial/feature-granted spell (e.g. High Elf's cantrip on a Fighter) also opens the Spells tab.
-function isCaster(){ return _forceSpells || spellcastingClasses().length > 0 || spellsKnown.some(s => s.granted); }
+function isCaster(){ return _forceSpells || spellcastingClasses().length > 0 || spellsKnown.some(s => s.granted || s.item); }
 // Prepared-spell budget (A5): sum each non-pact caster class's Prepared Spells (or Spells Known) at its level.
 // Which caster class a known spell belongs to: its stored `cls` if that class still casts,
 // else the first caster class whose list has it at a level it can cast.
@@ -3628,7 +3710,7 @@ function tableCount(cl, c, col){ const row = (c.table||[]).find(r => Number(r.le
   const n = row.columns ? parseInt(row.columns['Prepared Spells'] != null ? row.columns['Prepared Spells'] : row.columns['Spells Known'], 10) : NaN; return isNaN(n) ? 0 : n; }
 function preparedMaxFor(entry){ return entry ? tableCount(entry.cl, entry.c, 'Prepared') : 0; }
 function cantripMaxFor(entry){ if(!entry) return 0; let n = tableCount(entry.cl, entry.c, 'Cantrips'); const cn = norm(entry.c.name); if(cn === 'cleric' || cn === 'druid'){ const st = (choices || {})['class:' + entry.c.name] || {}; if(norm(st.order) === (cn === 'cleric' ? 'thaumaturge' : 'magician') || customFeatures.some(f => norm(f.name).indexOf(cn === 'cleric' ? 'thaumaturge' : 'magician') >= 0)) n++; } return n; }
-function preparedNowFor(entry, cantrips){ return spellsKnown.filter(sk => { const sp = spellByName(sk.name); if(!sp || sk.granted || !sk.prepared) return false; if(cantrips ? sp.level !== 0 : sp.level === 0) return false; const o = spellOwner(sk); return o && entry && norm(o.c.name) === norm(entry.c.name); }).length; }
+function preparedNowFor(entry, cantrips){ return spellsKnown.filter(sk => { const sp = spellByName(sk.name); if(!sp || sk.granted || sk.item || !sk.prepared) return false; if(cantrips ? sp.level !== 0 : sp.level === 0) return false; const o = spellOwner(sk); return o && entry && norm(o.c.name) === norm(entry.c.name); }).length; }
 // Room to prepare this spell under its own class's limit (single casters: the one shared limit).
 function prepRoomFor(sk){
   const sp = spellByName(sk.name); if(!sp) return true;
@@ -3650,7 +3732,7 @@ function preparedMax(){
   return total;
 }
 // Granted always-prepared spells don't count against the prepared limit.
-function preparedNow(){ return spellsKnown.filter(sk => { const sp = spellByName(sk.name); return sp && sp.level > 0 && sk.prepared && !sk.granted; }).length; }
+function preparedNow(){ return spellsKnown.filter(sk => { const sp = spellByName(sk.name); return sp && sp.level > 0 && sk.prepared && !sk.granted && !sk.item; }).length; }
 // Cantrips known/prepared: max from each caster class's "Cantrips" table column
 // (Warlock/pact casters know cantrips too, so unlike preparedMax we don't skip pact).
 // Divine Order: Thaumaturge (Cleric) / Primal Order: Magician (Druid) know one extra cantrip.
@@ -3670,7 +3752,7 @@ function cantripMax(){
   });
   return total;
 }
-function preparedCantripNow(){ return spellsKnown.filter(sk => { const sp = spellByName(sk.name); return sp && sp.level === 0 && sk.prepared && !sk.granted; }).length; }
+function preparedCantripNow(){ return spellsKnown.filter(sk => { const sp = spellByName(sk.name); return sp && sp.level === 0 && sk.prepared && !sk.granted && !sk.item; }).length; }
 function renderSpellHeader(){
   const on = isCaster();
   $('spell-block').style.display = on ? '' : 'none';
@@ -3757,7 +3839,7 @@ function spellRowHTML(sk, sp, opts){
             ? '<span class="sp-granted' + (freeCastUsed[norm(sk.name)] ? ' used' : '') + '" title="Granted by ' + esc(sk.source || 'a feature or trait') + ' — always prepared; one free cast per Long Rest' + (freeCastUsed[norm(sk.name)] ? ' (used — needs a slot now)' : '') + (sk.ability ? ' · uses ' + esc(sk.ability) : '') + '">' + (freeCastUsed[norm(sk.name)] ? 'free used' : 'free 1/LR') + '</span>'
             : '<span class="sp-granted" title="Always prepared from a class feature — still uses a spell slot">granted</span>') : '') +
       '</div>' +
-      '<div class="sp-info">' + esc(spellInfoLine(sp)) + '</div>' +
+      '<div class="sp-info">' + esc(spellInfoLine(sp)) + (sk.item ? '<span class="sp-from" title="Granted while this item is equipped">from ' + esc((invRows().find(r => r.dataset.rid === sk.item) && invRowDisplay(invRows().find(r => r.dataset.rid === sk.item))) || sk.itemName || 'item') + '</span>' : '') + '</div>' +
     '</div>' +
     '<div class="sp-ctrls">' +
       '<button class="row-i" onclick="openSpell(\'' + q + '\')" title="Spell details">&#9432;</button>' +
@@ -3771,7 +3853,7 @@ function spellRowHTML(sk, sp, opts){
 // Upcast (⇧): leveled spells with higher-level scaling that are ready to cast.
 function canUpcast(sk, sp){ return !!(sp && (sp.higherLevels || sp.upcast) && sp.level > 0 && castReady(sk, sp)); }
 // Leveled spells must be prepared (or granted) to cast; cantrips always can.
-function castReady(sk, sp){ return !sp || sp.level === 0 || !!sk.prepared || !!sk.granted; }
+function castReady(sk, sp){ return !sp || sp.level === 0 || !!sk.prepared || !!sk.granted || !!sk.item; }
 // Rituals: castable as a Ritual when prepared — a Wizard can ritual-cast straight from the spellbook.
 function canRitual(sk, sp){ return !!(sp && sp.ritual && sp.level > 0 && (castReady(sk, sp) || classList().some(c => norm(c.cls) === 'wizard'))); }
 function renderSpells(){
@@ -4815,7 +4897,7 @@ function collectSheet(){
     spell: tr.dataset.spell || '', unarmed: tr.dataset.unarmed === '1', mastery: tr.dataset.mastery || '', weapon: tr.dataset.weapon || '',
     rid: tr.dataset.rid || '', twoHanded: tr.dataset.twoHanded === '1', magic: num(tr.dataset.magic || 0)
   })).filter(a => a.name || a.damage);
-  const inventory = [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, qty: num(tr.querySelector('.inv-qty').value), equipped: tr.dataset.equipped === '1', ref: tr.dataset.ref || '', plus: num(tr.dataset.plus || 0), scroll: tr.dataset.scroll || '', rid: tr.dataset.rid || '', base: tr.dataset.base || '', charges: (tr.dataset.charges != null && tr.dataset.charges !== '') ? num(tr.dataset.charges) : null })).filter(i => i.name);
+  const inventory = [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, qty: num(tr.querySelector('.inv-qty').value), equipped: tr.dataset.equipped === '1', ref: tr.dataset.ref || '', plus: num(tr.dataset.plus || 0), scroll: tr.dataset.scroll || '', rid: tr.dataset.rid || '', base: tr.dataset.base || '', charges: (tr.dataset.charges != null && tr.dataset.charges !== '') ? num(tr.dataset.charges) : null, benefits: rowBenefits(tr) || undefined, cat: tr.dataset.cat || undefined, lnotes: tr.dataset.lnotes || undefined, applied: rowApplied(tr) || undefined })).filter(i => i.name);
   return {
     system:'DND', v:1,
     name: v('f-name'),
@@ -5007,11 +5089,12 @@ function renderFoundLoot(roll){
   div.className = 'log-entry remote log-foundloot'; div.dataset.dropId = dropId; div.dataset.mode = mode; div._flItems = items;
   const rows = items.map((it, i) => {
     const by = claimed[i];
-    const label = esc(it.item || '?') + (it.qty != null && String(it.qty) !== '1' && String(it.qty) !== '' ? ' ×' + esc(it.qty) : '') + (it.notes ? ' <span class="fl-note">' + esc(it.notes) + '</span>' : '');
+    const label = esc(it.item || '?') + (it.qty != null && String(it.qty) !== '1' && String(it.qty) !== '' ? ' ×' + esc(it.qty) : '') + (it.notes ? ' <span class="fl-note">' + esc(it.notes) + '</span>' : '') + (it.bv === 2 && it.benefits && window.LootBonus && LootBonus.normalize('dnd', it.benefits).length ? '<span class="fl-bonus" data-i="' + i + '"></span>' : '');
     const btn = by ? '<button class="fl-btn" disabled>' + (me && by.toLowerCase() === me.toLowerCase() ? 'Yours ✓' : 'Claimed by ' + esc(by)) + '</button>' : !mine ? '<button class="fl-btn" disabled>For ' + esc(to || 'someone else') + '</button>' : '<button class="fl-btn fl-claim" data-idx="' + i + '">Claim</button>';
     return '<li class="fl-item" data-idx="' + i + '"><span class="fl-item-name">' + label + '</span>' + btn + '</li>';
   }).join('');
   div.innerHTML = '<div class="fl-head">' + esc(roll.label || 'FOUND LOOT') + '</div>' + (roll.result ? '<div class="fl-name">' + esc(roll.result) + '</div>' : '') + (mode === 'named' ? '<div class="fl-for">For: ' + esc(to || '?') + '</div>' : mode === 'copies' ? '<div class="fl-for">A copy for everyone</div>' : '') + (p.note ? '<div class="fl-desc">' + esc(p.note) + '</div>' : '') + (rows ? '<ul class="fl-items">' + rows + '</ul>' : '');
+  div.querySelectorAll('.fl-bonus').forEach(el => { const it = items[+el.dataset.i]; LootBonus.editor(el, { sys:'dnd', benefits: it.benefits, readonly:true }); });
   return div;
 }
 function renderSystemEntry(roll){
@@ -5083,7 +5166,14 @@ $('log-entries').addEventListener('click', function(e){
 });
 // A claimed drop goes into the equipment table.
 function claimLootItem(it){
-  addInvRow({ name: (it.item || '?') + (it.notes ? ' — ' + it.notes : ''), qty: (it.qty != null && it.qty !== '' ? num(it.qty) : 1) });
+  const qty = (it.qty != null && it.qty !== '' ? num(it.qty) : 1);
+  if(it.bv === 2 && it.benefits != null && window.LootBonus){
+    // GM-built item: its badges are the bonuses. Keep the name clean so it links to the catalog
+    // ("Longsword +1" → Longsword) and carry the notes on the detail line.
+    const name = String(it.item || '?'), ref = resolveItemRef(name) || resolveItemRef(name.replace(/\s*\+\d+\s*/g, ' ').trim());
+    const tr = addInvRow({ name, qty, ref, benefits: LootBonus.normalize('dnd', it.benefits), cat: it.cat || '', lnotes: it.notes || '' });
+    recalc();
+  } else addInvRow({ name: (it.item || '?') + (it.notes ? ' — ' + it.notes : ''), qty });
   addLog('Claimed', 'Loot', it.item || 'Item', 'normal'); return true;
 }
 async function campaignPoll(){
@@ -5108,6 +5198,8 @@ campaignUpdateBtn();
 <script src="/tools-data/dnd-armor.js"></script>
 <script src="/tools-data/dnd-gear.js"></script>
 <script src="/tools-data/dnd-magic-items.js"></script>
+<script src="/tools-data/loot-bonus.js"></script>
+<script src="/tools-data/dnd-loot-bonus.js"></script>
 <script src="/tools-data/dnd-rules.js"></script>
 <script src="/tools-data/dnd-conditions.js"></script>
 <script src="/tools-data/dnd-tables.js"></script>
