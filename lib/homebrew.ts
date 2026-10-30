@@ -105,7 +105,8 @@ export const DCC_ITEM_SLOTS = [
   "Head", "Torso", "Arms", "Legs", "Feet", "Hands/Holding", "Accessory",
 ] as const;
 // Structured, auto-applied item benefits (equip engine: dcc-sheet-equip.js).
-export const DCC_BENEFIT_KINDS = ["stat", "skill", "dr", "evade", "move", "step"] as const;
+// Mirrors public/tools-data/dcc-bonus.js (the badges on an item).
+export const DCC_BENEFIT_KINDS = ["stat", "allstats", "skill", "spell", "buff", "dr", "evade", "move", "step", "note"] as const;
 export const DCC_BENEFIT_STATS = ["str", "int", "con", "dex", "cha"] as const;
 
 // ── Dungeon Crawler Carl vocabularies (shared with the homebrew editors) ─────
@@ -542,24 +543,36 @@ function normalizeDccItem(input: unknown): { name: string; data: Record<string, 
 }
 
 // Validate the structured, auto-applied benefits list (kind/target/amount).
-function normalizeDccBenefits(v: unknown): { kind: string; target?: string; amount: number }[] {
+type DccBenefitOut = { kind: string; target?: string; amount?: number; floor?: boolean };
+function normalizeDccBenefits(v: unknown): DccBenefitOut[] {
   if (!Array.isArray(v)) return [];
-  const out: { kind: string; target?: string; amount: number }[] = [];
+  const out: DccBenefitOut[] = [];
   for (const raw of v as unknown[]) {
     const o = (raw ?? {}) as Record<string, unknown>;
-    const kind = str(o.kind).toLowerCase();
+    let kind = str(o.kind).toLowerCase();
+    if (kind === "statpct") kind = "stat";   // no stat percentages — a "+5%" is a flat +5
+    if (kind === "speed") kind = "move";
     if (!(DCC_BENEFIT_KINDS as readonly string[]).includes(kind)) continue;
     const amount = num(o.amount);
-    if (amount == null || amount === 0) continue;
-    const b: { kind: string; target?: string; amount: number } = { kind, amount };
+    const b: DccBenefitOut = { kind };
     if (kind === "stat") {
       const t = str(o.target).toLowerCase();
-      if (!(DCC_BENEFIT_STATS as readonly string[]).includes(t)) continue;
-      b.target = t;
+      if (!(DCC_BENEFIT_STATS as readonly string[]).includes(t) || !amount) continue;
+      b.target = t; b.amount = amount;
     } else if (kind === "skill") {
       const t = str(o.target).slice(0, 60);
       if (!t) continue;
       b.target = t;
+      if (o.floor === true) b.floor = true;
+      else { if (!amount) continue; b.amount = amount; }
+    } else if (kind === "spell" || kind === "buff" || kind === "note") {
+      const t = str(o.target).slice(0, kind === "note" ? 160 : 60);
+      if (!t) continue;
+      b.target = t;
+      if (kind === "spell" && amount && amount > 0) b.amount = amount;
+    } else {
+      if (!amount) continue;
+      b.amount = amount;
     }
     out.push(b);
     if (out.length >= 20) break;

@@ -211,15 +211,23 @@ export type DccItemCategory =
 export type DccLootTier =
   | "Mundane" | "Bronze" | "Silver" | "Gold" | "Platinum" | "Legendary" | "Celestial";
 
-/** A structured, auto-applied mechanical benefit an item grants when equipped.
- *  `kind` picks the target; `target` names the stat (str/int/con/dex/cha) or skill;
- *  `amount` is the (possibly negative) integer bonus. Consumed by the DCC character
- *  sheet's equip engine (dcc-sheet-equip.js). */
-export type DccBenefitKind = "stat" | "skill" | "dr" | "evade" | "move" | "step";
+/** A structured, auto-applied bonus an item grants when equipped — the badges on
+ *  an item (shared model: public/tools-data/dcc-bonus.js). Consumed by the DCC
+ *  character sheet's equip engine (dcc-sheet-equip.js).
+ *    stat      +amount to a Stat (target: str/int/con/dex/cha)
+ *    allstats  +amount to every Stat
+ *    skill     +amount ranks in a Skill (target: name), or Rank = Floor (floor: true)
+ *    spell     an Inherent Spell (target: name; amount = optional Rank)
+ *    buff      a Buff while worn (target: name)
+ *    dr | evade | move | step   +amount
+ *    note      text shown on the item, not automated (target: the text) */
+export type DccBenefitKind =
+  | "stat" | "allstats" | "skill" | "spell" | "buff" | "dr" | "evade" | "move" | "step" | "note";
 export interface DccBenefit {
   kind: DccBenefitKind;
-  target?: string;   // stat id for kind "stat"; skill name for kind "skill"
-  amount: number;
+  target?: string;
+  amount?: number;
+  floor?: boolean;
 }
 
 export interface DccItem {

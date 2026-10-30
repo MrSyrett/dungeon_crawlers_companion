@@ -1,109 +1,88 @@
-// Dungeon Crawler Carl — Equip Armor & Accessories from the Inventory radial
+// Dungeon Crawler Carl — equip gear from the Inventory, and everything it grants.
 // Loaded by tools/templates/dcc_character_sheet.html as <script src>, after the
-// item catalog (DCC_ITEMS) and the sheet's own scripts, alongside the Hotlist.
+// catalog (DCC_ITEMS / DCC_SKILLS / DCC_SPELLS / DCC_BUFFS), dcc-bonus.js and the
+// sheet's own scripts, alongside the Hotlist.
 //
-// The radial (○) on an Inventory row normally toggles the Hotlist. For rows whose
-// item is ARMOR or an ACCESSORY, it instead EQUIPS the item — dropping its name
-// into the matching Gear slot (or the Accessories list) and applying its bonuses
-// (Damage Resistance and Stat bonuses parsed from the effect text). Clicking again
-// UN-equips: the slot is cleared and the bonuses are reversed. All other item
-// types (consumables, weapons, tools…) keep the Hotlist behaviour.
+// An item's bonuses are ONE structured list (window.DCCBonus — see dcc-bonus.js),
+// shown as badges on its Inventory row. Those badges are exactly what equipping
+// applies:
+//   stat / allstats           → that Stat's Enhanced score (plain numbers — the
+//                               book's "+N% Stat" is a flat +N here)
+//   dr / evade / move / step  → DR·Armor, Evade buffs, Move, Step
+//   skill                     → ranks on the Skill's row (the row is created if the
+//                               crawler doesn't have it); Rank = Floor uses the Floor
+//   spell                     → a Spell row (an Inherent Spell: no Mana)
+//   buff                      → the Buffs tracker
+//   note                      → shown on the item only
+// Every granted Skill / Spell row wears a badge naming the item behind it, and
+// un-equipping reverses exactly what was applied (recorded on the row, saved with
+// the sheet, so it survives a reload — equipping is never re-run on load).
 //
-// The exact bonus deltas an equip applied are recorded on the row so an un-equip
-// reverses precisely, and are saved with the sheet so the ● state and reversibility
-// survive a reload (the Gear/DR/Stat fields are saved with the bonuses already in,
-// so equipping is NOT re-run on load).
+// The radial (○) on an Inventory row equips armor, accessories, weapons and any
+// item that grants something; other items keep the Hotlist behaviour.
 
 (function () {
   "use strict";
 
   var GEAR_LABELS = ["Head", "Torso", "Arms", "Hands / Holding", "Legs", "Feet"];
-  var STAT_ID = {
-    strength: "str", str: "str", intelligence: "int", int: "int", constitution: "con",
-    con: "con", dexterity: "dex", dex: "dex", charisma: "cha", cha: "cha",
-  };
+  var STAT_IDS = ["str", "int", "con", "dex", "cha"];
+  var B = function () { return window.DCCBonus; };
 
   function norm(s) { return String(s == null ? "" : s).trim(); }
   function num(v) { var n = parseInt(String(v == null ? "" : v).replace(/[^0-9-]/g, ""), 10); return isNaN(n) ? 0 : n; }
+  function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
   function fire(el) {
     if (!el) return;
     try { var Ev = (el.ownerDocument && el.ownerDocument.defaultView && el.ownerDocument.defaultView.Event) || Event; el.dispatchEvent(new Ev("input", { bubbles: true })); } catch (e) {}
   }
+  function save() { try { if (typeof scheduleAutosave === "function") scheduleAutosave(); } catch (e) {} }
 
   function lookup(name) {
     var t = norm(name).toLowerCase();
     if (!t || typeof DCC_ITEMS === "undefined") return null;
+    var hb = Array.isArray(window.__DCC_HB_ITEMS) ? window.__DCC_HB_ITEMS : [];
+    var all = DCC_ITEMS.concat(hb);
     var strip = function (s) { return String(s).toLowerCase().replace(/[^a-z0-9]/g, ""); };
-    return DCC_ITEMS.find(function (x) { return x.name.toLowerCase() === t; }) ||
-      DCC_ITEMS.find(function (x) { return strip(x.name) === strip(t); }) || null;
-  }
-  function skillLookup(name) {
-    if (typeof DCC_SKILLS === "undefined") return null;
-    var t = norm(name).toLowerCase();
-    if (!t) return null;
-    var strip = function (s) { return String(s).toLowerCase().replace(/[^a-z0-9]/g, ""); };
-    return DCC_SKILLS.find(function (x) { return x.name.toLowerCase() === t; }) ||
-      DCC_SKILLS.find(function (x) { return strip(x.name) === strip(t); }) || null;
+    return all.find(function (x) { return x && x.name && x.name.toLowerCase() === t; }) ||
+      all.find(function (x) { return x && x.name && strip(x.name) === strip(t); }) || null;
   }
   function rowName(tr) { var i = tr.querySelector('input[type="text"]'); return i ? i.value : ""; }
-  // Category/slot/effect come from the row's stamped dataset (set when added from the
-  // picker) or a catalog lookup by name (covers loot + hand-typed catalog items).
-  function rowMeta(tr) {
-    var cat = tr.dataset.cat, slot = tr.dataset.slot, effect = tr.dataset.effect, benefits = null;
-    if (tr.dataset.benefits) { try { benefits = JSON.parse(tr.dataset.benefits); } catch (e) {} }
-    if (cat == null || cat === "" || !(benefits && benefits.length)) {
-      var it = lookup(rowName(tr));
-      if (it) {
-        if (cat == null || cat === "") { cat = it.category; slot = it.slot || ""; effect = it.effect || ""; }
-        if (!(benefits && benefits.length) && Array.isArray(it.benefits) && it.benefits.length) benefits = it.benefits;
-      }
+  function rowNotes(tr) { var i = tr.querySelectorAll('input[type="text"]')[2]; return i ? i.value : ""; }
+
+  // ── an item's bonuses ───────────────────────────────────────────────────────
+  // New rows (bv=2) carry the authoritative list in data-benefits. Older rows are
+  // migrated once: a catalog/homebrew item's own structured benefits, else the
+  // bonuses read from its effect text (the perks a loot box arrived with — "+5%
+  // CON" reads as +5 CON, "Inherent Spell: …" as a Spell). An old hidden JSON copy that could
+  // disagree with the text the GM actually edited is NOT trusted.
+  function benefitsOf(tr) {
+    var Bn = B(); if (!Bn) return [];
+    if (tr.dataset.bv === "2") return Bn.normalize(tr.dataset.benefits || "[]");
+    var it = lookup(rowName(tr)), list = [];
+    if (it && Array.isArray(it.benefits) && it.benefits.length) list = Bn.normalize(it.benefits);
+    else {
+      var text = tr.dataset.effect || (it && it.effect) || rowNotes(tr).replace(/^[^—]{1,30}\s—\s/, "");
+      list = Bn.fromText(text);
+      // Free text that isn't a recognisable bonus stays in Notes, not as a badge.
+      if (!list.some(function (b) { return b.kind !== "note"; })) list = [];
     }
-    return { cat: cat || "", slot: slot || "", effect: effect || "", benefits: (benefits && benefits.length) ? benefits : null };
+    setBenefits(tr, list);
+    return list;
   }
-  // Structured benefits authored on an item (homebrew / generated) — the exact,
-  // author-controlled version of what parseBonuses() scrapes from effect text.
-  // Shape: [{ kind:'stat'|'skill'|'dr'|'evade'|'move'|'step', target?, amount }].
-  function benefitsToBonus(benefits) {
-    var out = { dr: 0, evade: 0, move: 0, step: 0, stats: {}, skills: [] };
-    (benefits || []).forEach(function (bn) {
-      if (!bn) return;
-      var amt = num(bn.amount);
-      var kind = norm(bn.kind).toLowerCase();
-      if (kind === "dr") out.dr += amt;
-      else if (kind === "evade") out.evade += amt;
-      else if (kind === "move" || kind === "speed") out.move += amt;
-      else if (kind === "step") out.step += amt;
-      else if (kind === "stat") { var id = STAT_ID[norm(bn.target).toLowerCase()]; if (id) out.stats[id] = (out.stats[id] || 0) + amt; }
-      else if (kind === "skill") {
-        var nm = norm(bn.target); if (!nm) return;
-        var sd = skillLookup(nm);
-        out.skills.push({ name: sd ? sd.name : nm, rank: amt, stat: sd && sd.stat ? String(sd.stat).toLowerCase() : "", passive: !!(sd && sd.passive), src: sd ? sd.name : "" });
-      }
-    });
-    return out;
+  function setBenefits(tr, list) {
+    tr.dataset.bv = "2";
+    try { tr.dataset.benefits = JSON.stringify(B() ? B().normalize(list) : list || []); } catch (e) { tr.dataset.benefits = "[]"; }
+    if (B() && list && list.length) tr.dataset.effect = B().summary(list);
   }
-  // Does an effect/name carry a bonus the sheet can actually apply on equip
-  // (Damage Resistance, a Stat bonus, or a named Skill rank)? Mirrors the regexes
-  // in parseBonuses so weapons/mundane items only count as equippable when they'd
-  // do something — an enchanted "+3 STR" baseball bat equips; a plain club doesn't.
-  function hasBonus(effect, name) {
-    var e = norm(effect) + " " + norm(name);
-    if (/\+(\d+)\s*(?:DR\b|Damage Resistance)/i.test(e)) return true;
-    if (/\+(\d+)\s*(strength|intelligence|constitution|dexterity|charisma|str|int|con|dex|cha)\b/i.test(e)) return true;
-    if (/\+(\d+)\s*(?:to\s+)?(?:a\s+)?(?:chosen\s+)?stat\b/i.test(e)) return true;
-    if (/\+(\d+)%\s*(strength|intelligence|constitution|dexterity|charisma|str|int|con|dex|cha)\b/i.test(e)) return true;
-    if (/\+(\d+)\s*to\s+all\s+stats\b/i.test(e)) return true;
-    if (/\+(\d+)\s+[A-Za-z][A-Za-z'/\- ]*?\s+skills?\b/i.test(e)) return true;
-    return false;
+  function rowMeta(tr) {
+    var cat = tr.dataset.cat, slot = tr.dataset.slot;
+    if (cat == null || cat === "") { var it = lookup(rowName(tr)); if (it) { cat = it.category; slot = it.slot || ""; } }
+    return { cat: cat || "", slot: slot || "", benefits: benefitsOf(tr) };
   }
   function isEquipType(tr) {
     var m = rowMeta(tr);
-    if (m.cat === "armor" || m.cat === "accessory") return true;
-    // Weapons equip into the Hands / Holding slot (any bonus in the effect still applies).
-    if (m.cat === "weapon") return true;
-    // Other mundane items are equippable only when they carry a real bonus.
-    if (m.cat === "mundane") return (m.benefits && m.benefits.length > 0) || hasBonus(m.effect, rowName(tr));
-    return false;
+    if (m.cat === "armor" || m.cat === "accessory" || m.cat === "weapon") return true;
+    return m.benefits.some(function (b) { return b.kind !== "note"; });
   }
 
   // ── gear slots ───────────────────────────────────────────────────────────────
@@ -122,175 +101,217 @@
     return null;
   }
   function accInputs() { return [].slice.call(document.querySelectorAll(".gear-acc-row input")); }
-
-  // Add/remove one name in a possibly-shared text field (gear slot), comma-joined.
-  function addName(el, name) {
-    if (!el) return;
-    var cur = norm(el.value);
-    el.value = cur ? cur + ", " + name : name;
-    fire(el);
-  }
+  function addName(el, name) { if (!el) return; var cur = norm(el.value); el.value = cur ? cur + ", " + name : name; fire(el); }
   function removeName(el, name) {
     if (!el) return;
-    var parts = norm(el.value).split(",").map(norm).filter(Boolean);
     var lc = name.toLowerCase();
-    el.value = parts.filter(function (p) { return p.toLowerCase() !== lc; }).join(", ");
+    el.value = norm(el.value).split(",").map(norm).filter(Boolean).filter(function (p) { return p.toLowerCase() !== lc; }).join(", ");
     fire(el);
   }
 
-  // ── bonus parsing ──────────────────────────────────────────────────────────
-  function parseBonuses(effect, name) {
-    var e = norm(effect) + " " + norm(name); // the name often carries "(+1 DR)"
-    var out = { dr: 0, stats: {}, skills: [] };
-    var dr = e.match(/\+(\d+)\s*(?:DR\b|Damage Resistance)/i);
-    if (dr) out.dr += parseInt(dr[1], 10);
-    var re = /\+(\d+)\s*(strength|intelligence|constitution|dexterity|charisma|str|int|con|dex|cha)\b/gi, m;
-    while ((m = re.exec(e))) { var id = STAT_ID[m[2].toLowerCase()]; if (id) out.stats[id] = (out.stats[id] || 0) + parseInt(m[1], 10); }
-    // "+N to all Stats" (e.g. The Sassy Stiletto).
-    var allm = e.match(/\+(\d+)\s*to\s+all\s+stats\b/i);
-    if (allm) ["str", "int", "con", "dex", "cha"].forEach(function (sid) { out.stats[sid] = (out.stats[sid] || 0) + parseInt(allm[1], 10); });
-    // "+N% <Stat>": the book (Randomized Magic Items) sets the percentage's value when you get the item,
-    // rounding down, and records the number — so take N% of the Stat's current value at equip time.
-    var pre = /\+(\d+)%\s*(strength|intelligence|constitution|dexterity|charisma|str|int|con|dex|cha)\b/gi, pm;
-    while ((pm = pre.exec(e))) {
-      var pid = STAT_ID[pm[2].toLowerCase()]; if (!pid) continue;
-      var cur = document.getElementById(pid + "-enh"); var base = cur ? num(cur.value) : 0;
-      var val = Math.floor(base * parseInt(pm[1], 10) / 100);
-      if (val > 0) out.stats[pid] = (out.stats[pid] || 0) + val;
-    }
-    // "+N to a chosen Stat" — ask which one (rings of +N to a Stat).
-    var chosen = e.match(/\+(\d+)\s*(?:to\s+)?(?:a\s+)?(?:chosen\s+)?stat\b/i);
-    if (chosen && !Object.keys(out.stats).length) {
-      var pick = "";
-      try { pick = window.prompt("This grants +" + chosen[1] + " to a Stat. Which one? (STR / INT / CON / DEX / CHA)", ""); } catch (e2) {}
-      var id2 = pick ? STAT_ID[norm(pick).toLowerCase()] : "";
-      if (id2) out.stats[id2] = (out.stats[id2] || 0) + parseInt(chosen[1], 10);
-    }
-    // Skill bonuses: "+N <Skill> Skill(s)". Apply a concrete, named skill only —
-    // skip vague grants ("+2 in a Weapon Skill of your choice"), which stay in the
-    // item's effect text for the player to resolve.
-    var sre = /\+(\d+)\s+([A-Za-z][A-Za-z'/\- ]*?)\s+skills?\b/gi, sm;
-    while ((sm = sre.exec(e))) {
-      var nm = norm(sm[2]);
-      var sd = skillLookup(nm);
-      var looksNamed = /^[A-Z]/.test(nm) && !/\b(a|an|in|of|your|the|chosen|any|all)\b/i.test(nm);
-      if (sd || looksNamed) {
-        out.skills.push({
-          name: sd ? sd.name : nm, rank: parseInt(sm[1], 10),
-          stat: sd && sd.stat ? String(sd.stat).toLowerCase() : "",
-          passive: !!(sd && sd.passive), src: sd ? sd.name : "",
-        });
-      }
-    }
-    return out;
+  // ── numbers: stats, DR, Evade, Move, Step ────────────────────────────────────
+  function addTo(id, delta) { var el = document.getElementById(id); if (el && delta) { el.value = String(num(el.value) + delta); fire(el); } }
+  function applyNumbers(rec, sign) {
+    addTo("dr-armor", sign * (rec.dr || 0));
+    addTo("evade-buffs", sign * (rec.evade || 0));
+    addTo("evade-move", sign * (rec.move || 0));
+    addTo("evade-step", sign * (rec.step || 0));
+    Object.keys(rec.stats || {}).forEach(function (id) { addTo(id + "-enh", sign * rec.stats[id]); });
   }
-  function applyBonus(b, sign) {
-    if (b.dr) { var drEl = document.getElementById("dr-armor"); if (drEl) { drEl.value = String(num(drEl.value) + sign * b.dr); fire(drEl); } }
-    if (b.evade) { var evEl = document.getElementById("evade-buffs"); if (evEl) { evEl.value = String(num(evEl.value) + sign * b.evade); fire(evEl); } }
-    if (b.move) { var mvEl = document.getElementById("evade-move"); if (mvEl) { mvEl.value = String(num(mvEl.value) + sign * b.move); fire(mvEl); } }
-    if (b.step) { var stEl = document.getElementById("evade-step"); if (stEl) { stEl.value = String(num(stEl.value) + sign * b.step); fire(stEl); } }
-    Object.keys(b.stats || {}).forEach(function (id) {
-      var el = document.getElementById(id + "-enh");
-      if (el) { el.value = String(num(el.value) + sign * b.stats[id]); fire(el); }
-    });
-  }
+  function floorNow() { try { if (typeof getFloor === "function") return getFloor(); } catch (e) {} return 1; }
 
-  // ── skill bonuses (gear that grants Skill ranks) ─────────────────────────────
+  // ── Skills / Spells granted by gear ──────────────────────────────────────────
+  function skillRows() { return [].slice.call(document.querySelectorAll("#skills-body tr")); }
   function skillRowByName(name) {
-    var lc = norm(name).toLowerCase();
-    return [].slice.call(document.querySelectorAll("#skills-body tr")).find(function (tr) {
+    var lc = norm(name).toLowerCase(); if (!lc) return null;
+    return skillRows().find(function (tr) {
       var inp = tr.querySelector('input[type="text"]');
       var nm = inp ? norm(inp.value).toLowerCase() : "";
       var src = (tr.dataset && tr.dataset.src ? tr.dataset.src : "").toLowerCase();
       return (nm && nm === lc) || (src && src === lc);
     }) || null;
   }
-  function addRankToRow(tr, delta) {
+  function grantsOf(tr) { try { var g = JSON.parse(tr.dataset.grants || "[]"); return Array.isArray(g) ? g : []; } catch (e) { return []; } }
+  function setGrants(tr, g) { if (g.length) tr.dataset.grants = JSON.stringify(g); else delete tr.dataset.grants; renderGrantBadges(tr); }
+  function renderGrantBadges(tr) {
+    var sub = tr.querySelector(".dl-sub"); if (!sub) return;
+    var box = sub.querySelector(".gr-badges");
+    var g = grantsOf(tr);
+    if (!g.length) { if (box) box.remove(); return; }
+    if (!box) { box = document.createElement("span"); box.className = "gr-badges"; sub.insertBefore(box, sub.firstChild); }
+    box.innerHTML = g.map(function (x) {
+      var what = x.kind === "spell" ? "Granted by " + x.item : (x.rank ? "+" + x.rank + " rank" + (x.rank === 1 ? "" : "s") + " from " + x.item : "Granted by " + x.item);
+      return '<span class="gr-badge" title="' + esc(what) + ' — goes away when it\'s unequipped">' + esc(x.item) + (x.kind !== "spell" && x.rank ? " +" + x.rank : "") + "</span>";
+    }).join("");
+  }
+  function renderAllGrantBadges() { skillRows().forEach(renderGrantBadges); }
+  // Create a Skill/Spell row the way the + Skills picker would (stat, check type,
+  // src so the (i) info works), without stealing focus.
+  function createSkillRow(name, kind, rank) {
+    if (typeof addSkillRow !== "function") return null;
+    addSkillRow();
+    var body = document.getElementById("skills-body"); var tr = body ? body.lastElementChild : null;
+    if (!tr) return null;
     var ins = tr.querySelectorAll('input[type="text"]'); // [name, rank, checkType, notes]
-    if (!ins[1]) return;
+    var sel = tr.querySelector("select");
+    var Bn = B();
+    var d = kind === "spell" ? (Bn && Bn.findSpell(name)) : (Bn && Bn.findSkill(name));
+    if (ins[0]) ins[0].value = d ? d.name : name;
+    if (ins[1]) ins[1].value = String(rank);
+    if (d) tr.dataset.src = d.name;
+    if (sel && d && d.stat) sel.value = String(d.stat).toLowerCase();
+    if (kind === "spell") {
+      if (ins[2]) ins[2].value = "Spell";
+      if (ins[3]) ins[3].value = "Inherent · no Mana" + (d && d.type ? " · " + d.type : "");
+    } else {
+      if (ins[2]) ins[2].value = d && d.passive ? "Passive" : "Active";
+      if (ins[3]) ins[3].value = d && d.group ? d.group : "";
+    }
+    tr.dataset.grantCreated = "1";
+    fire(ins[0]);
+    return tr;
+  }
+  function addRank(tr, delta) {
+    var ins = tr.querySelectorAll('input[type="text"]');
+    if (!ins[1] || !delta) return;
     ins[1].value = String(Math.max(0, num(ins[1].value) + delta));
     fire(ins[1]);
   }
-  // Equip granted skills: bump an existing row's rank, or create the skill row (with
-  // stat/checkType/src so its (i) info works). Returns records for a clean unequip.
-  function equipSkills(skills) {
-    var rec = [];
-    (skills || []).forEach(function (s) {
-      var row = skillRowByName(s.name);
-      if (row) { addRankToRow(row, s.rank); rec.push({ name: s.name, rank: s.rank, created: false }); return; }
-      if (typeof addSkillRow !== "function") return;
-      addSkillRow();
-      var body = document.getElementById("skills-body");
-      var tr = body ? body.lastElementChild : null;
-      if (!tr) return;
-      var ins = tr.querySelectorAll('input[type="text"]');
-      var sel = tr.querySelector("select");
-      if (ins[0]) ins[0].value = s.name;
-      if (ins[1]) ins[1].value = String(s.rank);
-      if (sel && s.stat) sel.value = s.stat;
-      if (ins[2]) ins[2].value = s.passive ? "Passive" : "Active";
-      if (ins[3]) ins[3].value = "From gear";
-      if (s.src) tr.dataset.src = s.src;
-      fire(ins[0]);
-      rec.push({ name: s.name, rank: s.rank, created: true });
-    });
-    return rec;
+  function grant(iid, item, b) {
+    var kind = b.kind, name = b.target;
+    var rank = kind === "spell" ? (b.amount || 0) : (b.floor ? floorNow() : (b.amount || 0));
+    var tr = skillRowByName(name), created = false;
+    if (!tr) { tr = createSkillRow(name, kind, kind === "spell" ? (rank || 1) : rank); created = true; if (!tr) return null; }
+    else if (kind === "skill") addRank(tr, rank);
+    var g = grantsOf(tr); g.push({ iid: iid, item: item, kind: kind, rank: kind === "skill" ? rank : 0 });
+    setGrants(tr, g);
+    return { name: tr.dataset.src || name, kind: kind, rank: kind === "skill" ? rank : 0, created: created };
   }
-  function unequipSkills(recs) {
-    (recs || []).forEach(function (s) {
-      var row = skillRowByName(s.name);
-      if (!row) return;
-      if (s.created) row.remove();          // we added it → take it back out
-      else addRankToRow(row, -s.rank);      // it was already there → subtract what we added
-    });
+  function ungrant(iid, rec) {
+    var tr = skillRowByName(rec.name); if (!tr) return;
+    var g = grantsOf(tr).filter(function (x) { return x.iid !== iid; });
+    if (rec.kind === "skill" && rec.rank) addRank(tr, -rec.rank);
+    if (!g.length && tr.dataset.grantCreated === "1") {
+      tr.remove();   // the row only existed because of the gear → take it back out
+      try { if (window.DCCHotlist) window.DCCHotlist.refresh(); } catch (e) {}
+      try { if (typeof syncLinkedAttacks === "function") syncLinkedAttacks(); } catch (e) {}
+      return;
+    }
+    setGrants(tr, g);
   }
+
+  // ── Buffs granted by gear ────────────────────────────────────────────────────
+  function buffField() { return document.getElementById("buffs"); }
+  function buffNames() { var f = buffField(); return f ? f.value.split(",").map(norm).filter(Boolean) : []; }
+  function writeBuffs(list) { var f = buffField(); if (!f) return; f.value = list.join(", "); fire(f); try { if (window.DCCBuffs) window.DCCBuffs.refresh(); } catch (e) {} }
 
   // ── equip / unequip ──────────────────────────────────────────────────────────
   function equip(tr) {
     var meta = rowMeta(tr);
     var name = norm(rowName(tr));
     if (!name) return;
-    var placed = ""; // gear-slot label or "acc" for accessories
+    var placed = "";
     if (meta.cat === "accessory") {
       var slot = accInputs().find(function (i) { return !norm(i.value); });
       if (!slot) { try { alert("All 10 Accessory slots are full. Clear one first."); } catch (e) {} return; }
       slot.value = name; fire(slot); placed = "acc";
-    } else { // armor or weapon
+    } else if (meta.cat === "armor" || meta.cat === "weapon") {
       var label = normSlotLabel(meta.slot);
-      if (!label && meta.cat === "weapon") label = "Hands / Holding"; // weapons default to the Hands slot
+      if (!label && meta.cat === "weapon") label = "Hands / Holding";
       if (label) { addName(gearInput(label), name); placed = label; }
     }
-    // Prefer author-controlled structured benefits; fall back to scraping the effect text.
-    var bonus = (meta.benefits && meta.benefits.length) ? benefitsToBonus(meta.benefits) : parseBonuses(meta.effect, name);
-    applyBonus(bonus, +1);
-    // Skill bonuses add ranks to an existing skill row, or create the skill row.
-    // Record what actually happened (created vs bumped) so unequip reverses it.
-    bonus.skills = equipSkills(bonus.skills);
+    // A book ring "of +N to a Stat" asks which Stat once, and becomes a real Stat bonus.
+    var chosen = meta.benefits.findIndex(function (b) { return b.kind === "note" && /^\+\s*\d+\s*(?:to\s+)?(?:a\s+)?(?:chosen\s+)?stat\b/i.test(b.target); });
+    if (chosen >= 0 && !meta.benefits.some(function (b) { return b.kind === "stat"; })) {
+      var n = parseInt(meta.benefits[chosen].target.replace(/[^0-9]/g, ""), 10) || 1, pick = "";
+      try { pick = window.prompt("This grants +" + n + " to a Stat. Which one? (STR / INT / CON / DEX / CHA)", ""); } catch (e) {}
+      var sid = { str: "str", strength: "str", int: "int", intelligence: "int", con: "con", constitution: "con", dex: "dex", dexterity: "dex", cha: "cha", charisma: "cha" }[norm(pick).toLowerCase()];
+      if (sid) { meta.benefits[chosen] = { kind: "stat", target: sid, amount: n }; setBenefits(tr, meta.benefits); }
+    }
+    var iid = tr.dataset.iid || ("it" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
+    tr.dataset.iid = iid;
+    var rec = { v: 2, dr: 0, evade: 0, move: 0, step: 0, stats: {}, grants: [], buffs: [] };
+    meta.benefits.forEach(function (b) {
+      switch (b.kind) {
+        case "stat": rec.stats[b.target] = (rec.stats[b.target] || 0) + b.amount; break;
+        case "allstats": STAT_IDS.forEach(function (id) { rec.stats[id] = (rec.stats[id] || 0) + b.amount; }); break;
+        case "dr": rec.dr += b.amount; break;
+        case "evade": rec.evade += b.amount; break;
+        case "move": rec.move += b.amount; break;
+        case "step": rec.step += b.amount; break;
+      }
+    });
+    applyNumbers(rec, +1);
+    meta.benefits.forEach(function (b) {
+      if (b.kind === "skill" || b.kind === "spell") { var g = grant(iid, name, b); if (g) rec.grants.push(g); }
+      else if (b.kind === "buff") {
+        var have = buffNames();
+        if (!have.some(function (n) { return n.toLowerCase() === b.target.toLowerCase(); })) { have.push(b.target); writeBuffs(have); rec.buffs.push(b.target); }
+      }
+    });
+    try { if (typeof floatHealToTop === "function") floatHealToTop(); } catch (e) {}
+    try { if (typeof syncLinkedAttacks === "function") syncLinkedAttacks(); } catch (e) {}
     tr.dataset.equipped = "1";
     tr.dataset.equipPlaced = placed;
-    tr.dataset.equipBonus = JSON.stringify(bonus);
-    // keep the resolved category/slot/benefits on the row so refresh/save don't need a re-lookup
-    tr.dataset.cat = meta.cat; if (meta.slot) tr.dataset.slot = meta.slot; if (meta.effect) tr.dataset.effect = meta.effect;
-    if (meta.benefits && meta.benefits.length) { try { tr.dataset.benefits = JSON.stringify(meta.benefits); } catch (e) {} }
+    tr.dataset.equipBonus = JSON.stringify(rec);
+    tr.dataset.cat = meta.cat; if (meta.slot) tr.dataset.slot = meta.slot;
     refreshRowEl(tr);
+    save();
   }
   function unequip(tr) {
     var name = norm(rowName(tr));
     var placed = tr.dataset.equipPlaced || "";
     if (placed === "acc") { accInputs().forEach(function (i) { if (norm(i.value).toLowerCase() === name.toLowerCase()) { i.value = ""; fire(i); } }); }
     else if (placed) { removeName(gearInput(placed), name); }
-    var bonus = {}; try { bonus = JSON.parse(tr.dataset.equipBonus || "{}"); } catch (e) {}
-    applyBonus({ dr: bonus.dr || 0, evade: bonus.evade || 0, move: bonus.move || 0, step: bonus.step || 0, stats: bonus.stats || {} }, -1);
-    unequipSkills(bonus.skills || []);
+    var rec = {}; try { rec = JSON.parse(tr.dataset.equipBonus || "{}"); } catch (e) {}
+    applyNumbers({ dr: rec.dr, evade: rec.evade, move: rec.move, step: rec.step, stats: rec.stats || {} }, -1);
+    if (rec.v === 2) {
+      (rec.grants || []).forEach(function (g) { ungrant(tr.dataset.iid, g); });
+      if ((rec.buffs || []).length) {
+        var drop = rec.buffs.map(function (n) { return n.toLowerCase(); });
+        writeBuffs(buffNames().filter(function (n) { return drop.indexOf(n.toLowerCase()) < 0; }));
+      }
+    } else {
+      // Equipped before the rebuild: { skills:[{name,rank,created}] }.
+      (rec.skills || []).forEach(function (s) {
+        var row = skillRowByName(s.name); if (!row) return;
+        if (s.created) row.remove(); else addRank(row, -s.rank);
+      });
+    }
     delete tr.dataset.equipped; delete tr.dataset.equipPlaced; delete tr.dataset.equipBonus;
     refreshRowEl(tr);
+    save();
   }
 
+  // ── the Inventory row: radial + bonus badges ────────────────────────────────
   function radial(tr) { return tr ? tr.querySelector(".hot-pin") : null; }
+  function renderBonus(tr) {
+    var main = tr.querySelector(".dl-row"); if (!main || !B()) return;
+    var list = benefitsOf(tr);
+    var cat = tr.dataset.cat || ((lookup(rowName(tr)) || {}).category) || "";
+    var show = list.length || /^(armor|accessory|weapon)$/.test(cat);
+    var box = main.querySelector(".dl-bon");
+    if (!show) { if (box) box.remove(); return; }
+    if (!box) { box = document.createElement("div"); box.className = "dl-bon"; main.appendChild(box); }
+    if (box._ed) { box._ed.set(list); return; }
+    box._ed = B().editor(box, {
+      benefits: list,
+      onChange: function (next) {
+        var worn = tr.dataset.equipped === "1";
+        if (worn) unequip(tr);
+        setBenefits(tr, next);
+        if (worn) equip(tr);
+        refreshRowEl(tr);
+        save();
+      },
+    });
+  }
   function refreshRowEl(tr) {
     var btn = radial(tr); if (!btn) return;
     var name = norm(rowName(tr));
     if (!name) { btn.style.visibility = "hidden"; return; }
+    renderBonus(tr);
+    if (!isEquipType(tr)) return;   // Hotlist owns the radial for everything else
     var on = tr.dataset.equipped === "1";
     btn.style.visibility = "visible";
     btn.classList.toggle("on", on);
@@ -299,15 +320,45 @@
     btn.title = on ? "Unequip" : (c === "accessory" ? "Equip accessory" : (c === "armor" ? "Equip armor" : "Equip"));
   }
   function refreshRow(btn) { var tr = btn && btn.closest ? btn.closest("tr") : null; if (tr) refreshRowEl(tr); }
+  function refreshAll() {
+    [].slice.call(document.querySelectorAll("#inv-body tr")).forEach(function (tr) { if (norm(rowName(tr))) renderBonus(tr); });
+    renderAllGrantBadges();
+  }
 
-  // Called by the row radial. Equip-type rows equip/unequip; everything else falls
-  // back to the Hotlist toggle so consumables/weapons still pin as before.
   function click(btn) {
     var tr = btn && btn.closest ? btn.closest("tr") : null;
     if (!tr) return;
     if (isEquipType(tr)) { if (tr.dataset.equipped === "1") unequip(tr); else equip(tr); return; }
     if (window.DCCHotlist) window.DCCHotlist.toggleRow(btn);
   }
+  // Deleting a worn item takes its bonuses off first.
+  function removeRow(btn) {
+    var tr = btn && btn.closest ? btn.closest("tr") : null; if (!tr) return;
+    if (tr.dataset.equipped === "1") unequip(tr);
+    tr.remove(); save();
+  }
 
-  window.DCCEquip = { click: click, isEquipType: isEquipType, refreshRow: refreshRow };
+  function injectCss() {
+    if (document.getElementById("dcc-equip-css")) return;
+    var st = document.createElement("style"); st.id = "dcc-equip-css";
+    st.textContent =
+      ".iv-grid{grid-template-areas:'pin name num ctrl' 'pin sub num ctrl' 'pin bon bon bon'!important}" +
+      ".dl-row .dl-bon{grid-area:bon;padding:2px 0 1px}" +
+      ".dl-row .dl-bon .dcbn{--dcbn-font:'Barlow Condensed',sans-serif}" +
+      ".dl-row .dl-bon .dcbn-b{font-size:12px}" +
+      ".gr-badges{display:inline-flex;gap:3px;flex:0 0 auto;max-width:60%;overflow:hidden}" +
+      ".gr-badge{display:inline-block;max-width:100%;padding:0 7px;border-radius:999px;font:700 10.5px/17px 'Barlow Condensed',sans-serif;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" +
+        "color:var(--gold-ink,#8a6c0c);background:color-mix(in srgb,var(--gold,#c8a020) 16%,transparent);border:1px solid color-mix(in srgb,var(--gold,#c8a020) 55%,transparent)}" +
+      ".gr-badge::before{content:'\\2726 ';opacity:.8}";
+    (document.head || document.documentElement).appendChild(st);
+  }
+  injectCss();
+
+  window.DCCEquip = {
+    click: click, isEquipType: isEquipType, refreshRow: refreshRow, refreshAll: refreshAll,
+    removeRow: removeRow, equip: equip, unequip: unequip, setBenefits: setBenefits, benefitsOf: benefitsOf,
+    renderGrantBadges: renderGrantBadges,
+  };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { setTimeout(refreshAll, 0); });
+  else setTimeout(refreshAll, 0);
 })();

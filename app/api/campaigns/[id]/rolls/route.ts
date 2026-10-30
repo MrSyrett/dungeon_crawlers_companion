@@ -42,7 +42,7 @@ export async function POST(req: NextRequest, ctx: Ctx) {
       source: clip(body.source, 60, "Player") || "Player",
       label: clip(body.label, 200, "Roll") || "Roll",
       result: clip(body.result, 40),
-      detail: clip(body.detail, 2000),
+      detail: clip(body.detail, 8000),   // room for a full loot box with structured item bonuses
       type: ROLL_TYPES.includes(body.type as string) ? (body.type as string) : "normal",
     },
     select: { id: true },

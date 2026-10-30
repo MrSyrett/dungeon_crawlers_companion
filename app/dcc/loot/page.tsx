@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { benefitLabel, BADGE_TONE } from "@/lib/dcc-bonus";
 import PageHeader from "@/components/PageHeader";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
@@ -244,7 +245,17 @@ export default async function DccLootPage({ searchParams }: { searchParams: Prom
                 {typeof it.price === "number" ? <span className={badge}>{it.price.toLocaleString("en")} g</span> : null}
                 {it.theme ? <span className={badge}>{it.theme}</span> : null}
               </div>
-              <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">{it.effect}</p>
+              {it.effect ? <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">{it.effect}</p> : null}
+              {it.benefits && it.benefits.length ? (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {it.benefits.map((b, bi) => (
+                    <span key={bi} className="rounded-full border px-2.5 py-0.5 text-[12px] font-semibold text-[var(--text)]"
+                      style={{ borderColor: `color-mix(in srgb, ${BADGE_TONE[b.kind] || "currentColor"} 55%, transparent)`, background: `color-mix(in srgb, ${BADGE_TONE[b.kind] || "currentColor"} 16%, transparent)` }}>
+                      {benefitLabel(b)}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
             </li>
           );
         })}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { benefitLabel, BADGE_TONE, type DccBonus } from "@/lib/dcc-bonus";
 import { useRouter } from "next/navigation";
 
 // Mirror of lib/homebrew's public shapes (kept local so this client component
@@ -25,15 +26,36 @@ const CATEGORIES: [string, string][] = [
 const TIERS = ["Mundane", "Bronze", "Silver", "Gold", "Platinum", "Legendary", "Celestial"];
 const SLOTS = ["Head", "Torso", "Arms", "Legs", "Feet", "Hands/Holding", "Accessory"];
 
-// Structured, auto-applied benefits (mirror DCC_BENEFIT_KINDS / DCC_BENEFIT_STATS in lib/homebrew.ts).
+// An item's bonuses, shown as badges — the same model as the GM Screen loot box
+// and the character sheet (public/tools-data/dcc-bonus.js; DCC_BENEFIT_KINDS in
+// lib/homebrew.ts). What's on the badges is exactly what equipping applies.
 const BENEFIT_KINDS: [string, string][] = [
-  ["stat", "Stat"], ["skill", "Skill (rank)"], ["dr", "DR"],
-  ["evade", "Evade"], ["move", "Move"], ["step", "Step"],
+  ["stat", "Stat"], ["allstats", "All Stats"], ["skill", "Skill"], ["spell", "Spell"], ["buff", "Buff"],
+  ["dr", "DR"], ["evade", "Evade"], ["move", "Move"], ["step", "Step"], ["note", "Note"],
 ];
 const BENEFIT_STATS: [string, string][] = [
   ["str", "STR"], ["int", "INT"], ["con", "CON"], ["dex", "DEX"], ["cha", "CHA"],
 ];
-type Benefit = { kind: string; target: string; amount: string };
+const AMOUNT_KINDS = new Set(["stat", "allstats", "skill", "dr", "evade", "move", "step"]);
+type Benefit = DccBonus;
+type Draft = { kind: string; target: string; amount: string; floor: boolean };
+const blankDraft = (kind = "stat"): Draft => ({ kind, target: kind === "stat" ? "str" : "", amount: "", floor: false });
+
+// Draft → a benefit, or an error message.
+function benefitFromDraft(d: Draft): Benefit | string {
+  const amount = parseInt(d.amount.trim(), 10);
+  const t = d.target.trim();
+  const b: Benefit = { kind: d.kind };
+  if (d.kind === "stat") { if (!BENEFIT_STATS.some(([v]) => v === t)) return "Pick a stat."; b.target = t; }
+  if (d.kind === "skill" || d.kind === "spell" || d.kind === "buff" || d.kind === "note") {
+    if (!t) return d.kind === "note" ? "Write the note." : `Name the ${d.kind}.`;
+    b.target = t.slice(0, d.kind === "note" ? 160 : 60);
+  }
+  if (d.kind === "skill" && d.floor) b.floor = true;
+  else if (AMOUNT_KINDS.has(d.kind)) { if (!Number.isFinite(amount) || amount === 0) return "Enter an amount."; b.amount = amount; }
+  if (d.kind === "spell" && Number.isFinite(amount) && amount > 0) b.amount = amount;
+  return b;
+}
 
 type Form = {
   id: string | null;
@@ -61,13 +83,16 @@ function blank(): Form {
 
 function benefitsFromData(v: unknown): Benefit[] {
   if (!Array.isArray(v)) return [];
-  return (v as unknown[]).map((raw) => {
+  return (v as unknown[]).flatMap((raw) => {
     const o = (raw ?? {}) as Record<string, unknown>;
-    return {
-      kind: typeof o.kind === "string" ? o.kind : "stat",
-      target: o.target == null ? "" : String(o.target),
-      amount: o.amount == null ? "" : String(o.amount),
-    };
+    let kind = typeof o.kind === "string" ? o.kind : "";
+    if (kind === "statpct") kind = "stat";
+    if (!BENEFIT_KINDS.some(([k]) => k === kind)) return [];
+    const b: Benefit = { kind };
+    if (o.target != null) b.target = String(o.target);
+    if (o.amount != null && Number.isFinite(Number(o.amount))) b.amount = Number(o.amount);
+    if (o.floor === true) b.floor = true;
+    return [b];
   });
 }
 
@@ -88,17 +113,7 @@ function formFromRecord(rec: HomebrewRecord): Form {
 }
 
 function payloadFromForm(f: Form): Record<string, unknown> {
-  const benefits = f.benefits
-    .map((b) => {
-      const amount = parseInt(String(b.amount).trim(), 10);
-      if (!Number.isFinite(amount) || amount === 0) return null;
-      const kind = b.kind;
-      const out: { kind: string; target?: string; amount: number } = { kind, amount };
-      if (kind === "stat") { if (!BENEFIT_STATS.some(([v]) => v === b.target)) return null; out.target = b.target; }
-      else if (kind === "skill") { if (!b.target.trim()) return null; out.target = b.target.trim().slice(0, 60); }
-      return out;
-    })
-    .filter((b): b is { kind: string; target?: string; amount: number } => b != null);
+  const benefits = f.benefits;
   return {
     name: f.name.trim(),
     category: f.category,
@@ -131,22 +146,17 @@ export default function DccHomebrew({
         ? { ...f, campaignIds: f.campaignIds.includes(id) ? f.campaignIds.filter((x) => x !== id) : [...f.campaignIds, id] }
         : f,
     );
-  const addBenefit = () =>
-    setForm((f) => (f ? { ...f, benefits: [...f.benefits, { kind: "stat", target: "str", amount: "" }] } : f));
+  const [draft, setDraft] = useState<Draft | null>(null);
+  const [draftErr, setDraftErr] = useState("");
   const removeBenefit = (i: number) =>
     setForm((f) => (f ? { ...f, benefits: f.benefits.filter((_, j) => j !== i) } : f));
-  const setBenefit = (i: number, patch: Partial<Benefit>) =>
-    setForm((f) => {
-      if (!f) return f;
-      const benefits = f.benefits.map((b, j) => {
-        if (j !== i) return b;
-        const nb = { ...b, ...patch };
-        // Default the target sensibly when the kind changes.
-        if (patch.kind && patch.kind !== b.kind) nb.target = patch.kind === "stat" ? "str" : "";
-        return nb;
-      });
-      return { ...f, benefits };
-    });
+  const commitDraft = () => {
+    if (!draft) return;
+    const r = benefitFromDraft(draft);
+    if (typeof r === "string") { setDraftErr(r); return; }
+    setForm((f) => (f ? { ...f, benefits: [...f.benefits, r] } : f));
+    setDraft(null); setDraftErr("");
+  };
 
   async function submit() {
     if (!form) return;
@@ -298,34 +308,61 @@ export default function DccHomebrew({
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className={label}>Mechanical Benefits</label>
+                  <label className={label}>Bonuses</label>
                   <p className="mb-2 text-[11px] text-[var(--muted)]">
-                    Auto-applied when the item is equipped on a character sheet (adds to the sheet’s stat, skill,
-                    DR, Evade, or Speed). Leave empty for flavor-only items.
+                    Applied when the item is equipped on a character sheet: stats, skill ranks, spells, buffs, DR,
+                    Evade, Move or Step. Notes show on the item but aren’t automated. Leave empty for flavor-only items.
                   </p>
-                  {form.benefits.length ? (
-                    <div className="mb-2 flex flex-col gap-2">
-                      {form.benefits.map((b, i) => (
-                        <div key={i} className="flex flex-wrap items-center gap-2">
-                          <input className={`${fieldBase} w-20`} value={b.amount} inputMode="numeric"
-                            onChange={(e) => setBenefit(i, { amount: e.target.value.replace(/[^\d-]/g, "") })} placeholder="+N" />
-                          <select className={fieldBase} value={b.kind} onChange={(e) => setBenefit(i, { kind: e.target.value })}>
-                            {BENEFIT_KINDS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                  <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                    {form.benefits.map((b, i) => (
+                      <span key={i} className="inline-flex items-center gap-1 rounded-full border py-0.5 pl-2.5 pr-1 text-[12px] font-semibold"
+                        style={{ borderColor: `color-mix(in srgb, ${BADGE_TONE[b.kind] || "#888"} 55%, transparent)`, background: `color-mix(in srgb, ${BADGE_TONE[b.kind] || "#888"} 16%, transparent)` }}>
+                        {benefitLabel(b)}
+                        <button type="button" aria-label="Remove bonus" title="Remove this bonus" onClick={() => removeBenefit(i)}
+                          className="h-4 w-4 rounded-full text-center text-[12px] leading-4 opacity-70 hover:opacity-100">×</button>
+                      </span>
+                    ))}
+                    {!form.benefits.length && !draft ? <span className="text-[11px] italic text-[var(--muted)]">No bonuses</span> : null}
+                    {!draft ? (
+                      <button type="button" onClick={() => { setDraft(blankDraft()); setDraftErr(""); }}
+                        className="rounded-full border border-dashed border-[var(--border)] px-2.5 py-0.5 text-[11px] font-bold text-[var(--muted)] hover:text-[var(--text)]">+ Bonus</button>
+                    ) : null}
+                  </div>
+                  {draft ? (
+                    <div className="flex flex-col gap-2 rounded border border-[var(--border)] p-2">
+                      <div className="flex flex-wrap gap-1">
+                        {BENEFIT_KINDS.map(([v, l]) => (
+                          <button key={v} type="button" onClick={() => { setDraft(blankDraft(v)); setDraftErr(""); }}
+                            className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${draft.kind === v ? "border-[var(--text)] text-[var(--text)]" : "border-[var(--border)] text-[var(--muted)]"}`}>{l}</button>
+                        ))}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {AMOUNT_KINDS.has(draft.kind) || draft.kind === "spell" ? (
+                          <input className={`${fieldBase} w-24`} value={draft.amount} inputMode="numeric" disabled={draft.kind === "skill" && draft.floor}
+                            onChange={(e) => setDraft({ ...draft, amount: e.target.value.replace(/[^\d-]/g, "") })}
+                            placeholder={draft.kind === "spell" ? "Rank (opt.)" : draft.kind === "skill" ? "ranks" : "+N"} />
+                        ) : null}
+                        {draft.kind === "stat" ? (
+                          <select className={fieldBase} value={draft.target} onChange={(e) => setDraft({ ...draft, target: e.target.value })}>
+                            {BENEFIT_STATS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                           </select>
-                          {b.kind === "stat" ? (
-                            <select className={fieldBase} value={b.target} onChange={(e) => setBenefit(i, { target: e.target.value })}>
-                              {BENEFIT_STATS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                            </select>
-                          ) : b.kind === "skill" ? (
-                            <input className={`${fieldBase} w-40`} value={b.target} maxLength={60}
-                              onChange={(e) => setBenefit(i, { target: e.target.value })} placeholder="Skill name…" />
-                          ) : null}
-                          <button className={btn} type="button" onClick={() => removeBenefit(i)}>Remove</button>
-                        </div>
-                      ))}
+                        ) : draft.kind === "skill" || draft.kind === "spell" || draft.kind === "buff" || draft.kind === "note" ? (
+                          <input className={`${fieldBase} min-w-0 flex-1`} value={draft.target} maxLength={draft.kind === "note" ? 160 : 60}
+                            onChange={(e) => setDraft({ ...draft, target: e.target.value })}
+                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commitDraft(); } }}
+                            placeholder={draft.kind === "note" ? "e.g. Resist Fire damage" : `${draft.kind[0].toUpperCase()}${draft.kind.slice(1)} name…`} />
+                        ) : null}
+                        {draft.kind === "skill" ? (
+                          <label className="flex items-center gap-1 text-[12px] text-[var(--muted)]">
+                            <input type="checkbox" checked={draft.floor} onChange={(e) => setDraft({ ...draft, floor: e.target.checked })} /> Rank = Floor
+                          </label>
+                        ) : null}
+                        <button className={btnRed} type="button" onClick={commitDraft}>Add</button>
+                        <button className={btn} type="button" onClick={() => { setDraft(null); setDraftErr(""); }}>Cancel</button>
+                      </div>
+                      {draftErr ? <p className="text-[11px] text-[var(--bad)]">{draftErr}</p> : null}
                     </div>
                   ) : null}
-                  <button className={btn} type="button" onClick={addBenefit}>Add Bonus</button>
                 </div>
 
                 {campaigns.length ? (

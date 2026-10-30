@@ -1311,15 +1311,16 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 .ai-items .ai-input { font-size: 12px; padding: 5px 7px; }
 .ai-items .ai-it-del { background: transparent; border: 1px solid var(--border); color: var(--mid); cursor: pointer; border-radius: 3px; padding: 4px 7px; font-size: 12px; line-height: 1; }
 .ai-items .ai-it-del:hover { color: var(--red-light); border-color: var(--red-light); }
-.ai-bonus-builder { border: 1px dashed var(--border); border-radius: 6px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
-.ai-bonus-head { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--mid); }
-.ai-bonus-line { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-.ai-bonus-line .ai-bonus-amt { width: 54px; flex: 0 0 auto; }
-.ai-bonus-line .ai-bonus-kind { flex: 0 0 auto; }
-.ai-bonus-line .ai-bonus-tgt-wrap { flex: 1; min-width: 90px; display: flex; }
-.ai-bonus-line .ai-bonus-tgt { flex: 1; min-width: 0; }
-.ai-bonus-del { background: transparent; border: 1px solid var(--border); color: var(--mid); cursor: pointer; border-radius: 3px; padding: 4px 7px; font-size: 12px; line-height: 1; }
-.ai-bonus-del:hover { color: var(--red-light); border-color: var(--red-light); }
+.dlb-items { display: flex; flex-direction: column; gap: 6px; margin: 4px 0; }
+.dlb-item { border: 1px solid var(--border); border-radius: 6px; padding: 6px; display: flex; flex-direction: column; gap: 5px; background: color-mix(in srgb, var(--text) 3%, transparent); }
+.dlb-top { display: flex; gap: 5px; align-items: center; }
+.dlb-top .dlb-name { flex: 1; min-width: 0; font-weight: 600; }
+.dlb-top .dlb-qty { flex: 0 0 54px; width: 54px; text-align: center; }
+.dlb-top .dlb-cat { flex: 0 0 auto; max-width: 104px; }
+.dlb-del { background: transparent; border: 1px solid var(--border); color: var(--mid); cursor: pointer; border-radius: 3px; padding: 4px 7px; font-size: 12px; line-height: 1; }
+.dlb-del:hover { color: var(--red-light); border-color: var(--red-light); }
+.dlb-bon { padding: 0 1px; }
+.dlb-notes { font-size: 12px; }
 .ai-status { font-size: 11px; min-height: 14px; color: var(--mid); }
 .ai-status.ok { color: var(--green-light); } .ai-status.err { color: var(--red-light); }
 .pane.narrow .ai-scroll { padding: 10px 11px; }
@@ -3147,10 +3148,9 @@ html:not([data-gm-sys="PB"]) .pb-init-banner { display: none; }
 :root[data-mode="light"] .ai-cat-empty&{color:var(--dim)}
 :root[data-mode="light"] .ai-items .ai-it-del&{background:transparent;border:1px solid var(--border);color:var(--mid)}
 :root[data-mode="light"] .ai-items .ai-it-del:hover&{color:var(--red-light);border-color:var(--red-light)}
-:root[data-mode="light"] .ai-bonus-builder&{border:1px dashed var(--border)}
-:root[data-mode="light"] .ai-bonus-head&{color:var(--mid)}
-:root[data-mode="light"] .ai-bonus-del&{background:transparent;border:1px solid var(--border);color:var(--mid)}
-:root[data-mode="light"] .ai-bonus-del:hover&{color:var(--red-light);border-color:var(--red-light)}
+:root[data-mode="light"] .dlb-item&{border:1px solid var(--border);background:color-mix(in srgb, var(--text) 3%, transparent)}
+:root[data-mode="light"] .dlb-del&{background:transparent;border:1px solid var(--border);color:var(--mid)}
+:root[data-mode="light"] .dlb-del:hover&{color:var(--red-light);border-color:var(--red-light)}
 :root[data-mode="light"] .ai-status&{color:var(--mid)}
 :root[data-mode="light"] .ai-status.ok&{color:var(--green-light)}
 :root[data-mode="light"] .ai-status.err&{color:var(--red-light)}
@@ -5312,25 +5312,8 @@ GMScenes.renderPins();
             <div class="ai-cat-filters"></div>
             <input type="text" class="ai-input ai-cat-search" placeholder="Search Loot &amp; Gear to add…">
             <div class="ai-cat-results"></div>
-            <table class="ai-items"><tbody class="ai-items-body"></tbody></table>
-            <button class="btn small ghost ai-add-row" type="button">+ Add custom item</button>
-            <div class="ai-bonus-builder">
-              <div class="ai-bonus-head">Custom bonused item — auto-applies on the player&rsquo;s sheet when equipped</div>
-              <div class="ai-row">
-                <input type="text" class="ai-input ai-bonus-name" placeholder="Item name (e.g. Ring of Might)">
-                <select class="ai-select ai-bonus-cat" title="Equip type">
-                  <option value="accessory">Accessory</option>
-                  <option value="weapon">Weapon</option>
-                  <option value="armor">Armor</option>
-                  <option value="mundane">Other</option>
-                </select>
-              </div>
-              <div class="ai-bonus-lines"></div>
-              <div class="ai-row ai-bonus-actions">
-                <button class="btn small ghost ai-bonus-add-line" type="button">Add Bonus</button>
-                <button class="btn small primary ai-bonus-add-item" type="button">Add Item to Box</button>
-              </div>
-            </div>
+            <div class="dlb-items ai-items-body"></div>
+            <div class="ai-row"><button class="btn small ghost ai-add-row" type="button" title="A blank item — name it, pick its type, add bonuses">+ Blank item</button></div>
             <button class="btn small primary ai-send-box" type="button">Send Loot Box</button>
             <div class="ai-status ai-box-status"></div>
           </div>
@@ -7419,6 +7402,7 @@ GMScenes.renderPins();
 <script src="/tools-data/dcc-spells.js"></script>
 <script src="/tools-data/dcc-skills.js"></script>
 <script src="/tools-data/dcc-buffs.js"></script>
+<script src="/tools-data/dcc-bonus.js"></script>
 <script src="/tools-data/dcc-debuffs.js"></script>
 <script src="/tools-data/dcc-prep-tables.js"></script>
 <script src="/tools-data/dcc-grinding-tables.js"></script>
@@ -14634,7 +14618,7 @@ function dccRollX(spec) {
   let s = String(spec).replace(/[–—]/g, '-').trim();
   const sign = /^\+/.test(s) ? '+' : '';
   s = s.replace(/^\+/, '');
-  if(/%/.test(s)) return sign + s;                       // percentage — fixed
+  if(/%/.test(s)) return sign + s.replace(/%/g, '');     // house rule: no stat percentages — "+5%" is a flat +5
   const r = s.match(/^(\d+)-(\d+)$/);
   if(r) { const a = +r[1], b = +r[2]; return sign + (a + Math.floor(Math.random() * (b - a + 1))); }
   return sign + s;
@@ -14805,6 +14789,9 @@ function dccEnchantPerk(raw, tierKey) {
 // (buffs, spells, resistances, "Rank = Floor" passives) return null — they stay in
 // the effect text for the player to resolve by hand, exactly as before.
 function dccPerkToBenefit(perk) {
+  // Every perk is structured now (DCCBonus): stats, skills (incl. Rank = Floor),
+  // spells, buffs, DR — and anything else becomes a visible Note badge.
+  if(window.DCCBonus) { const l = window.DCCBonus.fromText(perk); return l.length ? l[0] : null; }
   const p = String(perk || '').trim();
   const STAT = { strength:'str', str:'str', intelligence:'int', int:'int', constitution:'con', con:'con', dexterity:'dex', dex:'dex', charisma:'cha', cha:'cha' };
   let m;
@@ -14813,17 +14800,11 @@ function dccPerkToBenefit(perk) {
   if((m = p.match(/^\+(\d+)\s+([A-Za-z][A-Za-z'\/\- ]*?)\s+skills?\b/i))) return { kind:'skill', target:m[2].trim(), amount:+m[1] };
   return null;
 }
-window.dccEnchantItem = function(tierKey, category) {
+// Roll one item's enchantments at a tier (Tables 39/40/41 by its type, the tier's
+// gear-roll count, no exact duplicates, a Unique result ends it) → perk strings.
+window.dccRollPerks = function(tierKey, cat) {
   const CAT_TABLE = { armor: '40', accessory: '41', weapon: '39', mundane: '39' };
-  let cats = category ? [category] : dccPick([['weapon'], ['armor'], ['accessory']]);
-  let pool = dccBasePool(cats);
-  if(!pool.length) pool = dccBasePool(['weapon', 'armor', 'accessory', 'mundane']);
-  const baseItem = pool.length ? dccPick(pool) : null;
-  const base = baseItem ? baseItem.name : 'Trinket';
-  const cat = baseItem ? baseItem.category : 'weapon';
-  const slot = baseItem ? (baseItem.slot || '') : '';
-  const tableNum = CAT_TABLE[cat] || '39';
-  const typeTable = dccLootTable(tableNum);
+  const typeTable = dccLootTable(CAT_TABLE[cat] || '39');
   const t = dccLootTier(tierKey);
   const nRolls = Math.max(1, (t && typeof t.gearRolls === 'number') ? t.gearRolls : 1);
   const perks = []; const seen = new Set();
@@ -14835,6 +14816,17 @@ window.dccEnchantItem = function(tierKey, category) {
     seen.add(perk); perks.push(perk);
     if(/unique/i.test(perk)) break;
   }
+  return perks;
+};
+window.dccEnchantItem = function(tierKey, category) {
+  let cats = category ? [category] : dccPick([['weapon'], ['armor'], ['accessory']]);
+  let pool = dccBasePool(cats);
+  if(!pool.length) pool = dccBasePool(['weapon', 'armor', 'accessory', 'mundane']);
+  const baseItem = pool.length ? dccPick(pool) : null;
+  const base = baseItem ? baseItem.name : 'Trinket';
+  const cat = baseItem ? baseItem.category : 'weapon';
+  const slot = baseItem ? (baseItem.slot || '') : '';
+  const perks = window.dccRollPerks(tierKey, cat);
   const name = 'Enchanted ' + base + ' ' + dccPick(DCC_ENCHANT_EPITHETS);
   const effect = perks.join(', ');   // description = perks only (tier lives on the item's tier field / card tag)
   const benefits = perks.map(dccPerkToBenefit).filter(Boolean);   // structured, auto-applied on equip
@@ -22913,115 +22905,112 @@ function wireAiConsole(root) {
   ];
   const boxName=root.querySelector('.ai-box-name'), boxTier=root.querySelector('.ai-box-tier'), rollTier=root.querySelector('.ai-roll-tier');
   const enchCat=root.querySelector('.ai-ench-cat'), enchRoll=root.querySelector('.ai-ench-roll');
-  const itemsBody=root.querySelector('.ai-items-body'), addRow=root.querySelector('.ai-add-row');
+  const itemsBody=root.querySelector('.dlb-items'), addRow=root.querySelector('.ai-add-row');
   const sendBox=root.querySelector('.ai-send-box'), boxStatus=root.querySelector('.ai-box-status');
   const boxSend=mountSendMode(sendBox, boxStatus);
-  addRow.addEventListener('click', () => makeRow(itemsBody, '', '', ''));
+  const DCCB = () => window.DCCBonus;
+  // ── Item cards ── one per item: name · qty · type, its bonuses as badges (× to
+  // remove, + Bonus to add from a menu, 🎲 to re-roll them at the box's tier), and
+  // an optional description. The badges ARE what the player's sheet applies on
+  // equip — there's no separate notes copy to fall out of step.
+  const TYPES = [['weapon','Weapon'],['armor','Armor'],['accessory','Accessory'],['mundane','Item'],['consumable','Consumable']];
+  const GEAR = { weapon:1, armor:1, accessory:1, mundane:1 };
+  function addCard(o){
+    o = o || {};
+    const card=document.createElement('div'); card.className='dlb-item';
+    const cat = o.category || '';
+    card.innerHTML =
+      '<div class="dlb-top"><input type="text" class="ai-input dlb-name" placeholder="Item name" maxlength="80">'
+      + '<input type="text" class="ai-input dlb-qty" placeholder="Qty" inputmode="numeric" title="Quantity">'
+      + '<select class="ai-select dlb-cat" title="Type — gear can be equipped on the sheet">'+(cat && !TYPES.some(t=>t[0]===cat)?'<option value="'+esc(cat)+'">'+esc(cat)+'</option>':'')+'<option value="">—</option>'+TYPES.map(([v,l])=>'<option value="'+v+'">'+l+'</option>').join('')+'</select>'
+      + '<button type="button" class="dlb-del" title="Remove item" aria-label="Remove item">✕</button></div>'
+      + '<div class="dlb-bon"></div>'
+      + '<input type="text" class="ai-input dlb-notes" placeholder="Description (optional)" maxlength="160">';
+    const nm=card.querySelector('.dlb-name'), qty=card.querySelector('.dlb-qty'), sel=card.querySelector('.dlb-cat'), bon=card.querySelector('.dlb-bon'), notes=card.querySelector('.dlb-notes');
+    nm.value=o.name||''; qty.value=(o.qty==null?'1':String(o.qty)); sel.value=cat; notes.value=o.notes||'';
+    if(o.slot) card.dataset.slot=o.slot;
+    if(o.tier) card.dataset.tier=o.tier;
+    const ed = DCCB() ? DCCB().editor(bon, { benefits: o.benefits || [], empty: 'No bonuses', extra: [{ label:'🎲', title:'Re-roll this item’s bonuses at the box tier', onClick(){
+      if(typeof window.dccRollPerks!=='function'){ setStatus(boxStatus,'Loot tables didn’t load — open from the app.','err'); return; }
+      const t = boxTier.value || card.dataset.tier || 'Gold';
+      const perks = window.dccRollPerks(t, sel.value && GEAR[sel.value] ? sel.value : 'accessory');
+      ed.set(perks.map(pk => DCCB().fromText(pk)[0]).filter(Boolean)); card.dataset.tier=t;
+    } }] }) : null;
+    card._ed = ed;
+    const syncBon = () => { bon.style.display = (GEAR[sel.value] || (ed && ed.get().length)) ? '' : 'none'; };
+    sel.addEventListener('change', syncBon); syncBon();
+    qty.addEventListener('input', e => { e.target.value = e.target.value.replace(/[^\d]/g,''); });
+    card.querySelector('.dlb-del').addEventListener('click', () => card.remove());
+    itemsBody.appendChild(card);
+    return card;
+  }
+  function readCards(){
+    const out=[];
+    itemsBody.querySelectorAll('.dlb-item').forEach(card=>{
+      const item=(card.querySelector('.dlb-name').value||'').trim(); if(!item) return;
+      const row={ item:item.slice(0,80), qty:(card.querySelector('.dlb-qty').value||'').trim()||1, notes:(card.querySelector('.dlb-notes').value||'').trim().slice(0,160), bv:2 };
+      const cat=card.querySelector('.dlb-cat').value; if(cat) row.cat=cat;
+      if(card.dataset.slot) row.slot=card.dataset.slot;
+      row.benefits = card._ed ? card._ed.get() : [];
+      out.push(row);
+    });
+    return out;
+  }
+  addRow.addEventListener('click', () => { const c=addCard({ category:'accessory' }); c.querySelector('.dlb-name').focus(); });
+  const allItems = () => (typeof DCC_ITEMS!=='undefined'?DCC_ITEMS:[]).concat(Array.isArray(window.__DCC_HB_ITEMS)?window.__DCC_HB_ITEMS:[]);
+  // A catalog item's bonuses: its structured benefits, else the ones in its effect text.
+  function catalogBenefits(it){
+    if(!it) return [];
+    if(Array.isArray(it.benefits) && it.benefits.length) return DCCB() ? DCCB().normalize(it.benefits) : it.benefits;
+    return DCCB() ? DCCB().fromText(it.effect||'').filter(b=>b.kind!=='note') : [];
+  }
   buildPicker({ filters:root.querySelector('.ai-cat-filters'), search:root.querySelector('.ai-cat-search'), results:root.querySelector('.ai-cat-results'), groups:DCC_GROUPS,
-    catalog: () => ((typeof DCC_ITEMS!=='undefined'?DCC_ITEMS:[]).concat(Array.isArray(window.__DCC_HB_ITEMS)?window.__DCC_HB_ITEMS:[])),
+    catalog: allItems,
     onAdd: (name, notes) => {
-      const cat = (typeof DCC_ITEMS!=='undefined'?DCC_ITEMS:[]).concat(Array.isArray(window.__DCC_HB_ITEMS)?window.__DCC_HB_ITEMS:[]);
-      const it = cat.find(x => x && x.name === name);
-      makeRow(itemsBody, name, 1, notes, it ? { category: it.category, slot: it.slot, benefits: it.benefits } : null);
+      const it = allItems().find(x => x && x.name === name);
+      const bens = catalogBenefits(it);
+      addCard({ name, qty:1, category: it ? it.category : '', slot: it ? it.slot : '', benefits: bens,
+        notes: it ? ((bens.length && DCCB() && DCCB().fromText(it.effect||'').every(b=>b.kind!=='note')) ? '' : (it.effect||'')) : '' });
       setStatus(boxStatus, 'Added “'+name+'”.', 'ok'); } });
   function lootTier(t){ if(typeof DCC_LOOT==='undefined')return null; const tiers=DCC_LOOT.tiers||[]; return tiers.find(x=>x.tier===t)||tiers[0]||null; }
   function itemsOfTier(t,cats){ if(typeof DCC_ITEMS==='undefined')return []; return DCC_ITEMS.filter(it=>it.tier===t&&cats.indexOf(it.category)>=0); }
   function rollGold(formula){ const f=String(formula||''); if(/none|nuthin/i.test(f))return 0; const m=f.match(/(\d+)\s*d\s*(\d+)/i); if(!m)return 0; let total=0; const num=+m[1],sides=+m[2]; for(let i=0;i<num;i++) total+=1+Math.floor(Math.random()*sides); const mult=f.match(/[x×]\s*([\d,]+)/i); if(mult) total*=(parseInt(mult[1].replace(/,/g,''),10)||1); return total; }
+  function enchantCard(key, cat){
+    const e = window.dccEnchantItem(key, cat||'');
+    return addCard({ name:e.name, qty:1, category:e.category, slot:e.slot, tier:key, benefits:e.benefits });
+  }
   rollTier.addEventListener('click', () => {
     const key=boxTier.value, td=lootTier(key);
     if(!td){ setStatus(boxStatus,'DCC loot data didn’t load — open from the app.','err'); return; }
     itemsBody.innerHTML='';
     const gold=rollGold(td.gold);
-    if(gold) makeRow(itemsBody, 'Gold', gold, key+' loot box');   // amount goes in the Qty column
+    if(gold) addCard({ name:'Gold', qty:gold, category:'', notes:key+' loot box' });
     const consumables=itemsOfTier(td.tier,['consumable','scroll','tome','material','mundane']);
-    pickN(consumables,1+(Math.random()<0.5?1:0)).forEach(it=>makeRow(itemsBody,it.name,1,it.effect||''));
-    // The tier's gear rolls come in as ENCHANTED one-off items (equippable on the
-    // sheet, bonuses auto-apply), drawn from the base library — so a box always
-    // yields real, usable magic gear instead of plain catalog rows.
+    pickN(consumables,1+(Math.random()<0.5?1:0)).forEach(it=>addCard({ name:it.name, qty:1, category:it.category, notes:it.effect||'', benefits:catalogBenefits(it) }));
+    // The tier's gear rolls come in as enchanted one-off items (equippable on the
+    // sheet), each with its rolled bonuses as badges.
     const nGear=Math.max(1, td.gearRolls||1);
-    if(typeof window.dccEnchantItem==='function'){
-      for(let i=0;i<nGear;i++){ const e=window.dccEnchantItem(key,''); makeRow(itemsBody,e.name,1,e.effect,{category:e.category,slot:e.slot,benefits:e.benefits}); }
-    } else {
-      const gear=itemsOfTier(td.tier,['weapon','armor','accessory']);
-      pickN(gear,nGear).forEach(it=>makeRow(itemsBody,it.name,1,(it.slot?it.slot+' — ':'')+(it.effect||'')));
-    }
+    if(typeof window.dccEnchantItem==='function'){ for(let i=0;i<nGear;i++) enchantCard(key,''); }
+    else pickN(itemsOfTier(td.tier,['weapon','armor','accessory']),nGear).forEach(it=>addCard({ name:it.name, qty:1, category:it.category, slot:it.slot, benefits:catalogBenefits(it) }));
     if(!boxName.value.trim()) boxName.value=key+' Loot Box';
-    setStatus(boxStatus,'Rolled a '+key+' box — tweak it, then send.','ok');
+    setStatus(boxStatus,'Rolled a '+key+' box — fix any item with ×, + Bonus or 🎲, then send.','ok');
   });
-  // Enchant a base item at the chosen tier and drop it in the box, carrying its
-  // category/slot so it's equippable on the sheet (bonuses auto-apply).
   if(enchRoll) enchRoll.addEventListener('click', () => {
     if(typeof window.dccEnchantItem !== 'function'){ setStatus(boxStatus,'Loot tables didn’t load — open from the app.','err'); return; }
-    const e = window.dccEnchantItem(boxTier.value, enchCat && enchCat.value ? enchCat.value : '');
-    makeRow(itemsBody, e.name, 1, e.effect, { category: e.category, slot: e.slot, benefits: e.benefits });
-    setStatus(boxStatus, 'Enchanted a '+e.base+' — edit the name/perks, then send.', 'ok');
+    const c = enchantCard(boxTier.value, enchCat && enchCat.value ? enchCat.value : '');
+    setStatus(boxStatus, 'Enchanted “'+c.querySelector('.dlb-name').value+'” — rename it, adjust its bonuses, then send.', 'ok');
   });
-  // ── Custom bonused item composer ──
-  // Attach structured bonuses (stat / skill rank / DR / Evade / Move / Step, +N)
-  // to a made-up item and drop it in the box — same equippable format the enchanter
-  // produces, so the player's sheet auto-applies it on equip. No trip to Homebrew.
-  const BONUS_KINDS = [['stat','Stat'],['skill','Skill (rank)'],['dr','DR'],['evade','Evade'],['move','Move'],['step','Step']];
-  const BONUS_STATS = [['str','STR'],['int','INT'],['con','CON'],['dex','DEX'],['cha','CHA']];
-  const bonusName = root.querySelector('.ai-bonus-name'), bonusCat = root.querySelector('.ai-bonus-cat');
-  const bonusLines = root.querySelector('.ai-bonus-lines');
-  const bonusAddLine = root.querySelector('.ai-bonus-add-line'), bonusAddItem = root.querySelector('.ai-bonus-add-item');
-  function bonusTargetCtrl(kind){
-    if(kind==='stat') return '<select class="ai-select ai-bonus-tgt">'+BONUS_STATS.map(([v,l])=>'<option value="'+v+'">'+l+'</option>').join('')+'</select>';
-    if(kind==='skill') return '<input type="text" class="ai-input ai-bonus-tgt" placeholder="Skill name…" maxlength="60">';
-    return '';   // dr/evade/move/step take no target
-  }
-  function bonusLabel(b){
-    const n=(b.amount>=0?'+':'')+b.amount;
-    if(b.kind==='stat')  return n+' '+String(b.target||'').toUpperCase();
-    if(b.kind==='skill') return n+' '+b.target;
-    return n+' '+({dr:'DR',evade:'Evade',move:'Move',step:'Step'}[b.kind]||b.kind);
-  }
-  function addBonusLine(){
-    if(!bonusLines) return null;
-    const row=document.createElement('div'); row.className='ai-bonus-line';
-    row.innerHTML =
-      '<input type="text" class="ai-input ai-bonus-amt" inputmode="numeric" placeholder="+N">' +
-      '<select class="ai-select ai-bonus-kind">'+BONUS_KINDS.map(([v,l])=>'<option value="'+v+'">'+l+'</option>').join('')+'</select>' +
-      '<span class="ai-bonus-tgt-wrap">'+bonusTargetCtrl('stat')+'</span>' +
-      '<button type="button" class="ai-bonus-del" title="Remove">✕</button>';
-    const kindSel=row.querySelector('.ai-bonus-kind'), wrap=row.querySelector('.ai-bonus-tgt-wrap');
-    kindSel.addEventListener('change',()=>{ wrap.innerHTML=bonusTargetCtrl(kindSel.value); });
-    row.querySelector('.ai-bonus-amt').addEventListener('input',e=>{ e.target.value=e.target.value.replace(/[^\d-]/g,''); });
-    row.querySelector('.ai-bonus-del').addEventListener('click',()=>row.remove());
-    bonusLines.appendChild(row);
-    return row;
-  }
-  if(bonusAddLine) bonusAddLine.addEventListener('click', addBonusLine);
-  if(bonusAddItem) bonusAddItem.addEventListener('click', ()=>{
-    const nm=(bonusName.value||'').trim();
-    if(!nm){ setStatus(boxStatus,'Name the bonused item first.','err'); return; }
-    const benefits=[];
-    bonusLines.querySelectorAll('.ai-bonus-line').forEach(row=>{
-      const amt=parseInt((row.querySelector('.ai-bonus-amt').value||'').trim(),10);
-      if(!Number.isFinite(amt)||amt===0) return;
-      const kind=row.querySelector('.ai-bonus-kind').value, tgtEl=row.querySelector('.ai-bonus-tgt');
-      const b={kind,amount:amt};
-      if(kind==='stat'){ if(!tgtEl) return; b.target=tgtEl.value; }
-      else if(kind==='skill'){ const t=tgtEl?(tgtEl.value||'').trim():''; if(!t) return; b.target=t.slice(0,60); }
-      benefits.push(b);
-    });
-    if(!benefits.length){ setStatus(boxStatus,'Add at least one bonus with an amount.','err'); return; }
-    makeRow(itemsBody, nm, 1, benefits.map(bonusLabel).join(', '), { category: bonusCat?bonusCat.value:'accessory', benefits });
-    bonusName.value=''; bonusLines.innerHTML=''; addBonusLine();
-    setStatus(boxStatus,'Added “'+nm+'” with '+benefits.length+' bonus'+(benefits.length===1?'':'es')+' — send when ready.','ok');
-  });
-  addBonusLine();   // start with one empty bonus line
 
   sendBox.addEventListener('click', () => {
     if(!canSend()){ setStatus(boxStatus,'Link a campaign first (top bar) to send loot.','err'); return; }
-    const items=readRows(itemsBody).slice(0,12);
+    const items=readCards().slice(0,12);
     if(!items.length){ setStatus(boxStatus,'Add at least one item to the box.','err'); return; }
     const mode=boxSend.mode(), to=boxSend.to();
     if(mode==='named'&&!to){ setStatus(boxStatus,'Choose the player who can open it.','err'); return; }
     const name=boxName.value.trim()||'Loot Box';
     const boxId='lb-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
     const detail=JSON.stringify({boxId,mode,to,items});
-    if(detail.length>2000){ setStatus(boxStatus,'Too many items — remove a few and resend.','err'); return; }
+    if(detail.length>8000){ setStatus(boxStatus,'Too many items — remove a few and resend.','err'); return; }
     GMCamp.send({type:'lootbox',label:'LOOT BOX',result:name,detail});
     setStatus(boxStatus,'Sent “'+name+'” '+modeWho(mode,to)+'.','ok');
     itemsBody.innerHTML=''; boxName.value=''; boxSend.reset();

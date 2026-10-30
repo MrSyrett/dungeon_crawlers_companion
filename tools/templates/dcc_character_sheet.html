@@ -1888,7 +1888,7 @@ function addInvRow() {
     </div>
     <div class="dl-ctrls">
       <button class="skill-info-btn dl-i" onclick="if(window.DCCItems)DCCItems.infoRow(this)" title="What does this item do?" aria-label="Item info">i</button>
-      <button class="inv-del-btn dl-x" onclick="this.closest('tr').remove();if(typeof scheduleAutosave==='function')scheduleAutosave();" title="Remove item" aria-label="Remove item">✕</button>
+      <button class="inv-del-btn dl-x" onclick="if(window.DCCEquip&&DCCEquip.removeRow)DCCEquip.removeRow(this);else{this.closest('tr').remove();if(typeof scheduleAutosave==='function')scheduleAutosave();}" title="Remove item" aria-label="Remove item">✕</button>
     </div>
   </div></td>`;
   tbody.appendChild(tr);
@@ -2690,6 +2690,8 @@ function collectSheet() {
       notes: inputs[3]?.value||'',
       checked: chk?.checked||false,
       src: tr.dataset.src||'',   // original rulebook name behind a reskinned/renamed skill
+      grants: tr.dataset.grants||'',             // gear granting this skill/spell: [{iid,item,kind,rank}]
+      grantCreated: tr.dataset.grantCreated==='1',  // the row exists only because of that gear
     };
   });
 
@@ -2724,6 +2726,8 @@ function collectSheet() {
     if(tr.dataset.slot) rec.slot = tr.dataset.slot;
     if(tr.dataset.effect) rec.effect = tr.dataset.effect;
     if(tr.dataset.benefits) rec.benefits = tr.dataset.benefits;
+    if(tr.dataset.bv) rec.bv = tr.dataset.bv;
+    if(tr.dataset.iid) rec.iid = tr.dataset.iid;
     if(tr.dataset.equipped === '1') { rec.equipped = true; rec.equipPlaced = tr.dataset.equipPlaced||''; rec.equipBonus = tr.dataset.equipBonus||''; }
     return rec;
   });
@@ -2862,6 +2866,8 @@ function applySheet(data) {
       inputs[2].value = sk.checkType; inputs[3].value = sk.notes;
       if(chk) chk.checked = sk.checked;
       if(sk.src) tr.dataset.src = sk.src; else delete tr.dataset.src;
+      if(sk.grants) tr.dataset.grants = sk.grants;
+      if(sk.grantCreated) tr.dataset.grantCreated = '1';
     });
   }
   // Older saves (and the creation wizard) carry a separate Attacks list. Fold each
@@ -2899,9 +2905,13 @@ function applySheet(data) {
       if(inv.slot) tr.dataset.slot = inv.slot;
       if(inv.effect) tr.dataset.effect = inv.effect;
       if(inv.benefits) tr.dataset.benefits = inv.benefits;
+      if(inv.bv) tr.dataset.bv = inv.bv;
+      if(inv.iid) tr.dataset.iid = inv.iid;
       if(inv.equipped) { tr.dataset.equipped = '1'; tr.dataset.equipPlaced = inv.equipPlaced||''; tr.dataset.equipBonus = inv.equipBonus||''; }
     });
   }
+  // Bonus badges on items, and the "granted by <item>" badges on Skills / Spells.
+  try { if(window.DCCEquip && DCCEquip.refreshAll) DCCEquip.refreshAll(); } catch(e){}
 
   // Background — original 5 boxes (scoped to .bg-notes-grid so extra sections don't shift them)
   if(data.background) {
@@ -4181,15 +4191,20 @@ function lootAddItems(items){
     if(inp[0]) inp[0].value = it.item || '';
     if(inp[1]) inp[1].value = (it.qty!=null ? String(it.qty) : '');
     if(inp[2]) inp[2].value = it.notes || '';
-    // An enchanted loot item carries its category + slot so the row can be equipped
-    // and its bonuses (parsed from the Notes text) applied — just like a catalog item.
+    // A loot item carries its category + slot so the row can be equipped, and its
+    // bonuses as one structured list (the badges the GM built) — exactly what
+    // equipping applies. A box from before the rebuild carries its bonuses as text
+    // in Notes; those are read once (DCCEquip migrates the row).
     if(it.cat) tr.dataset.cat = it.cat;
     if(it.slot) tr.dataset.slot = it.slot;
-    if(it.notes) tr.dataset.effect = it.notes;
-    if(it.benefits) tr.dataset.benefits = (typeof it.benefits === 'string' ? it.benefits : JSON.stringify(it.benefits));
+    if(it.bv === 2 && it.benefits != null && window.DCCEquip && DCCEquip.setBenefits) {
+      let list = it.benefits; if(typeof list === 'string') { try { list = JSON.parse(list); } catch(e){ list = []; } }
+      DCCEquip.setBenefits(tr, Array.isArray(list) ? list : []);
+    } else if(it.notes) tr.dataset.effect = it.notes;
   });
-  // Refresh the row radials so equippable loot shows its equip control.
+  // Refresh the row radials so equippable loot shows its equip control + badges.
   try { if(window.DCCHotlist) window.DCCHotlist.refresh(); } catch(e){}
+  try { if(window.DCCEquip && DCCEquip.refreshAll) DCCEquip.refreshAll(); } catch(e){}
   if(typeof scheduleAutosave === 'function') scheduleAutosave();
 }
 
@@ -4457,6 +4472,7 @@ autoLoad();
   <script src="/tools-data/dcc-sheet-buffs.js"></script>
   <script src="/tools-data/dcc-sheet-skills.js"></script>
   <script src="/tools-data/dcc-sheet-hotlist.js"></script>
+  <script src="/tools-data/dcc-bonus.js"></script>
   <script src="/tools-data/dcc-sheet-equip.js"></script>
   <script src="/tools-data/dcc-sheet-skillbuff.js"></script>
   <script src="/tools-data/dcc-sheet-inv-picker.js"></script>
