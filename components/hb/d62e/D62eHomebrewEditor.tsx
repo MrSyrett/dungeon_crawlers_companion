@@ -79,7 +79,7 @@ const fieldBase = "rounded border border-[var(--border)] bg-[var(--panel-2)] px-
 const labelCls = "mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]";
 const btn = "rounded border border-[var(--border)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--hb-accent)] hover:text-[var(--text)] disabled:opacity-50";
 const btnAccent = "rounded border border-[var(--hb-accent)] bg-[var(--panel-2)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--hb-accent)] hover:bg-[var(--hb-accent)] hover:text-white disabled:opacity-50";
-const ACCENT = { "--hb-accent": "var(--sys-link, var(--d62e-ink))" } as CSSProperties; // D62e ink: #f0a050 dark / #9a4d18 light
+const ACCENT = { "--hb-accent": "var(--sys-link, var(--d62e-ink))" } as CSSProperties; // D62e ink (deepened on light panels)
 
 export default function D62eHomebrewEditor({ kind, campaigns: allCampaigns, initial }: { kind: string; campaigns: CampaignRef[]; initial: HomebrewRecord[] }) {
   // Share only with campaigns running this system (the API enforces it too).

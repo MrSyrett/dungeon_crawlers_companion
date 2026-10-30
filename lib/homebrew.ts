@@ -28,6 +28,7 @@ import * as D62eRules from "@/components/hb/d62e/rules";
 import * as CoRules from "@/components/hb/co/rules";
 import * as YzeRules from "@/components/hb/yze/rules";
 import * as TwdRules from "@/components/hb/twd/rules";
+import * as MyzRules from "@/components/hb/myz/rules";
 import {
   cleanFear, cleanLotrAttackRows, cleanLotrBenefits, cleanLotrBlock, cleanUseRows as cleanLotrUseRows, cleanVirtueFields as lotrVirtueFields,
   composeLotrActions, composeLotrBlock, composeUses as lotrComposeUses, parseUses as lotrParseUses, composeUseRows as lotrUseRowsOut,
@@ -2299,6 +2300,8 @@ function normalizeTwdGear(input: unknown): { name: string; data: Record<string, 
 }
 
 // ── Mutant: Year Zero (MYZ) ─────────────────────────────────────────────────
+// components/hb/myz/rules.ts documents the shapes. The legacy fields keep their
+// old meaning and bounds; the new optional ones are only written when set.
 function normalizeMyzWeapon(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
@@ -2313,6 +2316,13 @@ function normalizeMyzWeapon(input: unknown): { name: string; data: Record<string
     desc: str(o.desc).slice(0, 1000),
     hb: true,
   };
+  const blast = Math.round(Number(o.blast) || 0);
+  if (blast > 0) data.blast = Math.min(20, blast);
+  const ammo = MyzRules.AMMO.find((a) => a.toLowerCase() === str(o.ammo).toLowerCase());
+  if (ammo) data.ammo = ammo;
+  const features = strList(o.features, 12, 30);
+  if (features.length) data.features = features;
+  MyzRules.cleanArtifactValue(o, data);
   return { name, data };
 }
 function normalizeMyzGear(input: unknown): { name: string; data: Record<string, unknown> } {
@@ -2325,6 +2335,14 @@ function normalizeMyzGear(input: unknown): { name: string; data: Record<string, 
     desc: str(o.desc).slice(0, 2000),
     hb: true,
   };
+  if (o.kind != null) {
+    const armor = o.kind === "armor";
+    data.kind = armor ? "armor" : "gear";
+    // Only armor carries `rating` — the sheet sends any record with one to its Armor tab.
+    if (armor) data.rating = Math.max(1, Math.min(12, Math.round(Number(o.rating) || 1)));
+    else data.skillBonus = MyzRules.cleanSkillBonus(o.skillBonus);
+  }
+  MyzRules.cleanArtifactValue(o, data);
   return { name, data };
 }
 

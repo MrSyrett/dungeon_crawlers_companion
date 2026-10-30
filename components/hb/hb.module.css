@@ -37,10 +37,13 @@
 
 /* ── Bonus badges (≙ .lbn-*) ─────────────────────────────────────────────── */
 .badges { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; min-height: 22px; }
+/* theme-literal-ok: badge category colours mirror the GM Screen loot badges (public/tools-data/loot-bonus.js) so homebrew and loot badges read the same; each is mixed into a translucent tint, not used as theme text */
 .badge { --c: #7f8a99; display: inline-flex; align-items: center; gap: 3px; max-width: 100%; padding: 1px 3px 1px 7px; border-radius: 999px; font-weight: 600; font-size: 11px; line-height: 18px; letter-spacing: .01em; color: var(--text); background: color-mix(in srgb, var(--c) 16%, transparent); border: 1px solid color-mix(in srgb, var(--c) 55%, transparent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .badge.ro { padding-right: 7px; }
 .badge > span { overflow: hidden; text-overflow: ellipsis; }
+/* theme-literal-ok: badge category palette, see .badge */
 .c-blue { --c: #4a8fd8; } .c-green { --c: #3aa86b; } .c-purple { --c: #9a62d8; } .c-teal { --c: #22a6a6; }
+/* theme-literal-ok: badge category palette, see .badge */
 .c-gold { --c: #c08a2a; } .c-red { --c: #d0574b; } .c-grey { --c: #8a8f98; font-weight: 500; }
 .badgeX { all: unset; cursor: pointer; width: 16px; height: 16px; border-radius: 50%; text-align: center; font: 700 12px/16px system-ui, sans-serif; opacity: .65; }
 .badgeX:hover { opacity: 1; background: color-mix(in srgb, #d33 30%, transparent); }
@@ -66,7 +69,7 @@
 .acts { display: flex; justify-content: flex-end; gap: 6px; margin-top: 4px; }
 .popBtn { all: unset; cursor: pointer; padding: 4px 12px; border-radius: 5px; font-weight: 700; font-size: 12px; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); }
 .popBtn.go { background: var(--hb-accent, var(--gold)); color: var(--on-accent, #111); border-color: transparent; }
-.err { color: #e0574b; font-size: 11px; min-height: 14px; }
+.err { color: var(--bad); font-size: 11px; min-height: 14px; }
 
 /* ── Chips (multi-pick lists) ────────────────────────────────────────────── */
 .chips { display: flex; flex-wrap: wrap; gap: 4px; }

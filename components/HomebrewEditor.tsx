@@ -21,6 +21,7 @@ import D62eHomebrewEditor from "@/components/hb/d62e/D62eHomebrewEditor";
 import CoHomebrewEditor from "@/components/hb/co/CoHomebrewEditor";
 import YzeHomebrewEditor from "@/components/hb/yze/YzeHomebrewEditor";
 import TwdHomebrewEditor from "@/components/hb/twd/TwdHomebrewEditor";
+import MyzHomebrewEditor from "@/components/hb/myz/MyzHomebrewEditor";
 
 // One option in a "Browse & pick" modal: the stored value plus a group heading and
 // a description to show in the popup.
@@ -162,32 +163,6 @@ const sv = (d: Data, k: string): string => { const v = d[k]; return typeof v ===
 // ── the 16 schemas (kind → form). Keys match the lib/homebrew normalisers. ────
 
 const SCHEMAS: Record<string, Schema> = {
-  // ── Mutant: Year Zero (Free League) ──
-  "myz-weapon": {
-    title: "Homebrew Weapons", noun: "Weapon",
-    fields: [
-      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
-      { key: "skill", label: "Skill", type: "select", options: [["Fight", "Fight (melee)"], ["Shoot", "Shoot (ranged)"]] },
-      { key: "bonus", label: "Gear bonus", type: "number", placeholder: "1" },
-      { key: "damage", label: "Damage", type: "number", placeholder: "1" },
-      { key: "range", label: "Range", type: "select", options: [["Arm's Length", "Arm's Length"], ["Near", "Near"], ["Short", "Short"], ["Long", "Long"], ["Distant", "Distant"]] },
-      { key: "weight", label: "Slots", type: "text", placeholder: "1, ½" },
-      { key: "desc", label: "Notes", type: "textarea", full: true },
-    ],
-    blank: () => ({ skill: "Fight", range: "Arm's Length", weight: "1", damage: 1, bonus: 0 }), toForm: (d) => ({ ...d }),
-    summary: (d) => `${sv(d, "damage") || "1"} dmg · ${sv(d, "skill") || "Fight"}`,
-  },
-  "myz-gear": {
-    title: "Homebrew Gear", noun: "Gear",
-    fields: [
-      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
-      { key: "weight", label: "Slots", type: "text", placeholder: "1, ½" },
-      { key: "desc", label: "Description", type: "textarea", full: true },
-    ],
-    blank: () => ({ weight: "1" }), toForm: (d) => ({ ...d }),
-    summary: (d) => `${sv(d, "weight") || "1"} slots`,
-  },
-
   // ── Vaesen (Free League) ──
   "vae-weapon": {
     title: "Homebrew Weapons", noun: "Weapon",
@@ -333,8 +308,8 @@ function accentFor(kind: string): string {
 
 type EditorProps = { kind: string; campaigns: CampaignRef[]; initial: HomebrewRecord[] };
 
-// Nimble's four kinds, LotR's five, Pirate Borg's seven, ICRPG's six, Dragonbane's seven, Star Wars' four, ACE!'s five, Kids on Bikes' three, D6 System 2e's six, Candela Obscura's two, ALIEN RPG's two and The Walking Dead's two have their own builders
-// (components/hb/nimble/, components/hb/lotr/, components/hb/pb/, components/hb/icrpg/, components/hb/db/, components/hb/sw/, components/hb/ace/, components/hb/kob/, components/hb/d62e/, components/hb/co/, components/hb/yze/, components/hb/twd/); every
+// Nimble's four kinds, LotR's five, Pirate Borg's seven, ICRPG's six, Dragonbane's seven, Star Wars' four, ACE!'s five, Kids on Bikes' three, D6 System 2e's six, Candela Obscura's two, ALIEN RPG's two, The Walking Dead's two and Mutant: Year Zero's two have their own builders
+// (components/hb/nimble/, components/hb/lotr/, components/hb/pb/, components/hb/icrpg/, components/hb/db/, components/hb/sw/, components/hb/ace/, components/hb/kob/, components/hb/d62e/, components/hb/co/, components/hb/yze/, components/hb/twd/, components/hb/myz/); every
 // other kind keeps the schema-driven form below.
 export default function HomebrewEditor(props: EditorProps) {
   if (props.kind.startsWith("nimble-")) return <NimbleHomebrewEditor {...props} />;
@@ -349,6 +324,7 @@ export default function HomebrewEditor(props: EditorProps) {
   if (props.kind.startsWith("co-")) return <CoHomebrewEditor {...props} />;
   if (props.kind.startsWith("yze-")) return <YzeHomebrewEditor {...props} />;
   if (props.kind.startsWith("twd-")) return <TwdHomebrewEditor {...props} />;
+  if (props.kind.startsWith("myz-")) return <MyzHomebrewEditor {...props} />;
   return <SchemaHomebrewEditor {...props} />;
 }
 

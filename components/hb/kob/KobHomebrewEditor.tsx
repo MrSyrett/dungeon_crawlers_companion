@@ -4,7 +4,7 @@
 // /kob/strengths and /kob/homebrew): an accordion listing the user's entries
 // with Edit/Delete, a builder + live preview, and per-campaign share
 // checkboxes (KOB campaigns only). Same look and flow as the other systems'
-// shells (accent: KOB's --sys-link lilac, deepened to #5c3596 on light panels);
+// shells (accent: KOB's --sys-link lilac, deepened on light panels);
 // the builders live beside this file and each documents its storage shape.
 // lib/homebrew.ts normalizeKob* is the real validator.
 import { campaignsFor } from "@/lib/homebrew-systems";
@@ -63,7 +63,7 @@ const fieldBase = "rounded border border-[var(--border)] bg-[var(--panel-2)] px-
 const labelCls = "mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]";
 const btn = "rounded border border-[var(--border)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--hb-accent)] hover:text-[var(--text)] disabled:opacity-50";
 const btnAccent = "rounded border border-[var(--hb-accent)] bg-[var(--panel-2)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--hb-accent)] hover:bg-[var(--hb-accent)] hover:text-white disabled:opacity-50";
-const ACCENT = { "--hb-accent": "var(--sys-link, var(--kob-ink))" } as CSSProperties; // KOB lilac; light mode deepens --kob-ink to #5c3596
+const ACCENT = { "--hb-accent": "var(--sys-link, var(--kob-ink))" } as CSSProperties; // KOB lilac; light mode deepens --kob-ink
 
 export default function KobHomebrewEditor({ kind, campaigns: allCampaigns, initial }: { kind: string; campaigns: CampaignRef[]; initial: HomebrewRecord[] }) {
   // Share only with campaigns running this system (the API enforces it too).

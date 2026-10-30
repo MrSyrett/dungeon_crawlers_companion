@@ -72,7 +72,7 @@ const fieldBase = "rounded border border-[var(--border)] bg-[var(--panel-2)] px-
 const labelCls = "mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]";
 const btn = "rounded border border-[var(--border)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--hb-accent)] hover:text-[var(--text)] disabled:opacity-50";
 const btnAccent = "rounded border border-[var(--hb-accent)] bg-[var(--panel-2)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--hb-accent)] hover:bg-[var(--hb-accent)] hover:text-white disabled:opacity-50";
-const ACCENT = { "--hb-accent": "var(--sys-link, var(--ace))" } as CSSProperties; // ACE blue; light mode deepens --sys-link to #1d6f9a
+const ACCENT = { "--hb-accent": "var(--sys-link, var(--ace))" } as CSSProperties; // ACE blue; light mode deepens --sys-link
 
 export default function AceHomebrewEditor({ kind, campaigns: allCampaigns, initial }: { kind: string; campaigns: CampaignRef[]; initial: HomebrewRecord[] }) {
   // Share only with campaigns running this system (the API enforces it too).

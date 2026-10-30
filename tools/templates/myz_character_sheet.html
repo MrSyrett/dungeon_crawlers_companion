@@ -931,13 +931,13 @@ function renderAttrSkills(){
     // The role's specialist skill is a 13th skill tied to the role's key attribute.
     if(S.specialist && a.key===S.key && !skillObj(S.specialist)) skRows.push({name:S.specialist,desc:'Your role’s specialist skill'});
     skRows.forEach(function(s){
-      var lvl=num(S.skills[s.name]), spool=Math.max(0,cur+lvl-critModFor(s.name)), esn=s.name.replace(/'/g,"\\'");
+      var lvl=num(S.skills[s.name]), gb=gearSkillBonus(s.name), spool=Math.max(0,cur+lvl-critModFor(s.name))+gb.n, esn=s.name.replace(/'/g,"\\'");
       var spips='';
       for(var j=1;j<=3;j++){ spips+='<button class="pip sk'+(j<=lvl?' on':'')+'" title="level '+j+'" onclick="setSkill(\''+esn+'\','+j+')"></button>'; }
       var spec=(S.specialist===s.name)?' ◆':'';
       rows+='<div class="skill-row"><button class="sk-name" onclick="rollSkill(\''+esn+'\')" title="'+esc(s.desc)+' (level '+lvl+')">'+s.name+spec+'</button>'
         +'<span class="pips edit-only" style="flex:0 0 auto;">'+spips+'</span>'
-        +'<button class="sk-pool sk-roll" onclick="rollSkill(\''+esn+'\')" title="pool = current attribute + skill − crits">'+spool+'d</button></div>';
+        +'<button class="sk-pool sk-roll" onclick="rollSkill(\''+esn+'\')" title="pool = current attribute + skill − crits'+(gb.n?' + '+gb.n+' gear ('+esc(gb.name)+')':'')+'">'+spool+'d</button></div>';
     });
     var block=document.createElement('div'); block.className='as-attr';
     block.innerHTML=head+'<div class="as-skills">'+rows+'</div>';
@@ -1119,7 +1119,15 @@ function armorRating(){ var r=0; S.gear.forEach(function(g){ if(g.kind==='armor'
 function renderArmorVal(){ var el=$('armor-val'); if(el) el.textContent=armorRating(); }
 function gEdit(i,f,v){ var g=S.gear[i]; if(!g)return; g[f]=(f==='damage'||f==='rating'||f==='bonus')?num(v):v; scheduleAutosave(); if(f==='weight')renderEnc(); if(f==='rating')renderArmorVal(); if((g.kind==='weapon')&&g.equipped)renderAttacks(); }
 function gDel(i){ S.gear.splice(i,1); renderInventory(); renderAttacks(); scheduleAutosave(); }
-function gEquip(i,on){ var g=S.gear[i]; if(!g)return; g.equipped=!!on; renderAttacks(); renderArmorVal(); scheduleAutosave(); }
+function gEquip(i,on){ var g=S.gear[i]; if(!g)return; g.equipped=!!on; renderAttacks(); renderArmorVal(); if(g.kind==='gear'){ renderInventory(); renderAttrSkills(); } scheduleAutosave(); }
+// Gear bonus on skills (homebrew myz-gear skillBonus [{skill,amount}]): only gear
+// rows ticked "in use" count, and only ONE item's bonus applies to a roll (the
+// best). Returns {n, idx, name} — idx lets a push break that item's bonus.
+function gearSkillBonus(skill){ var best={n:0,idx:null,name:''};
+  S.gear.forEach(function(g,i){ if((g.kind||'gear')!=='gear'||!g.equipped||!Array.isArray(g.skillBonus)) return;
+    g.skillBonus.forEach(function(b){ if(b&&b.skill===skill&&num(b.amount)>best.n) best={n:num(b.amount),idx:i,name:g.name||'gear'}; }); });
+  return best; }
+function fmtSkillBonusRow(g){ return (Array.isArray(g.skillBonus)?g.skillBonus:[]).filter(function(b){ return b&&b.skill; }).map(function(b){ return b.skill+' +'+num(b.amount); }).join(', '); }
 function invIn(i,f,val,cls,ph){ return '<input'+(cls?' class="'+cls+'"':'')+' value="'+esc(val==null?'':val)+'" oninput="gEdit('+i+',\''+f+'\',this.value)"'+(ph?' placeholder="'+ph+'"':'')+'>'; }
 function eqBox(i,on){ return '<input type="checkbox" class="eqbox" data-nolock '+(on?'checked':'')+' onchange="gEquip('+i+',this.checked)" title="Equip">'; }
 function renderInventory(){
@@ -1128,19 +1136,21 @@ function renderInventory(){
     body.innerHTML='';
     S.gear.forEach(function(g,i){
       var kind=g.kind||'gear';
-      var eq=(kind==='weapon'||kind==='armor')?eqBox(i,g.equipped):'';
+      var hasSB=kind==='gear'&&Array.isArray(g.skillBonus)&&g.skillBonus.length;
+      var eq=(kind==='weapon'||kind==='armor')?eqBox(i,g.equipped):hasSB?eqBox(i,g.equipped).replace('title="Equip"','title="In use — its gear bonus joins the skill roll"'):'';
       var details;
       if(kind==='weapon'){
         details='<span class="inv-type">'+esc(g.skill==='Shoot'?'Ranged':'Melee')+'</span>'
           +'<span class="inv-mini">bonus</span>'+invIn(i,'bonus',g.bonus,'cx')
           +'<span class="inv-mini">dmg</span>'+invIn(i,'damage',g.damage,'cx')
-          +'<span class="inv-mini">rng</span>'+invIn(i,'range',g.range,'inv-rng');
+          +'<span class="inv-mini">rng</span>'+invIn(i,'range',g.range,'inv-rng')
+          +((g.ammo||(g.features&&g.features.length)||g.artifact)?'<span class="inv-mini" title="'+esc([g.artifact?'Artifact':'',g.ammo?'Ammo: '+g.ammo:'',(g.features||[]).join(', ')].filter(Boolean).join(' · '))+'">'+esc([g.artifact?'Artifact':'',g.ammo||'',(g.features||[]).join(', ')].filter(Boolean).join(' · '))+'</span>':'');
       } else if(kind==='armor'){
         details='<span class="inv-type">Armor</span>'
           +'<span class="inv-mini">rating</span>'+invIn(i,'rating',g.rating,'cx')
           +invIn(i,'note',g.note,'inv-note','note');
       } else {
-        details=(g.artifact?'<span class="inv-type">Artifact</span>':'')+invIn(i,'note',g.note,'inv-note','note');
+        details=(g.artifact?'<span class="inv-type">Artifact</span>':'')+(hasSB?'<span class="inv-type" title="Gear bonus — tick the box to put it in use">'+esc(fmtSkillBonusRow(g))+'</span>':'')+invIn(i,'note',g.note,'inv-note','note');
       }
       var ph=kind==='weapon'?'Weapon':kind==='armor'?'Armor':'Item';
       var tr=document.createElement('tr');
@@ -1189,6 +1199,10 @@ function GEAR_FAM(k){ return k==='gear'||k==='weap'||k==='armor'||k==='artifact'
 // Bullet value for the Item Shop. Prefer the baked MYZ_VALUES table; fall back to
 // the community formula for homebrew/custom items with no listed value.
 function itemValue(kind,d){ d=d||{};
+  // Homebrew: its own value, else the builder's suggestion (components/hb/myz/rules.ts suggestValue).
+  if(d.hb){ if(num(d.value)>0) return num(d.value);
+    var sb=0; (Array.isArray(d.skillBonus)?d.skillBonus:[]).forEach(function(b){ sb=Math.max(sb,num(b.amount)); });
+    return (d.artifact?15:2)+2*Math.max(0,num(d.bonus))+2*(kind==='weap'?Math.max(0,num(d.damage!=null?d.damage:1)):0)+2*Math.max(0,num(d.rating))+2*sb; }
   if(d.name && MYZ_VAL && MYZ_VAL[d.name]!=null) return num(MYZ_VAL[d.name]);
   if(kind==='weap') return 2+2*num(d.bonus)+2*num(d.damage!=null?d.damage:1);
   if(kind==='armor') return 2+2*(typeof d.rating==='number'?d.rating:num(d.rating));
@@ -1201,26 +1215,34 @@ function pickerPool(kind){
     // Unarmed is the always-available attack in the Combat tab, so it isn't sold in the store.
     MELEE.filter(function(w){ return !/^unarmed\b/i.test(w.name||''); }).forEach(function(w){ out.push({name:w.name,cost:w.damage+' dmg · '+w.range,note:'Melee (Fight) · bonus '+w.bonus+(w.comment?' · '+w.comment:''),price:itemValue('weap',w),data:w,skill:'Fight'}); });
     RANGED.forEach(function(w){ out.push({name:w.name,cost:w.damage+' dmg · '+w.range,note:'Ranged (Shoot) · bonus '+w.bonus+(w.comment?' · '+w.comment:''),price:itemValue('weap',w),data:w,skill:'Shoot'}); });
-    G(window.MYZ_HB_WEAPONS).forEach(function(d){ out.push({name:d.name,cost:(d.damage!=null?d.damage+' dmg':'')+(d.range?' · '+d.range:''),note:'Homebrew'+(d.bonus!=null?' · bonus '+d.bonus:''),price:itemValue('weap',d),data:d,skill:(d.skill==='Shoot'?'Shoot':'Fight')}); });
+    G(window.MYZ_HB_WEAPONS).forEach(function(d){ out.push({name:d.name,cost:(d.damage!=null?d.damage+' dmg':'')+(d.range?' · '+d.range:''),note:['Homebrew'+(d.artifact?' artifact':''),(d.skill==='Shoot'?'Ranged (Shoot)':'Melee (Fight)'),(d.bonus!=null?'bonus '+d.bonus:''),(d.blast?'Blast Power '+d.blast:''),(d.ammo?'ammo: '+d.ammo:''),(d.features||[]).join(', '),d.desc||''].filter(Boolean).join(' · '),price:itemValue('weap',d),data:d,skill:(d.skill==='Shoot'?'Shoot':'Fight')}); });
     return out;
   }
   if(kind==='armor'){
     var ar=[];
     ARMORS.forEach(function(a){ ar.push({name:a.name,cost:'Armor '+(a.rating!=null?a.rating:''),note:a.comment||'',price:itemValue('armor',a),data:{name:a.name,rating:(typeof a.rating==='number'?a.rating:0),weight:'1',note:a.comment||''}}); });
-    G(window.MYZ_HB_GEAR).filter(function(d){return d.rating!=null;}).forEach(function(d){ ar.push({name:d.name,cost:'Armor '+d.rating,note:'Homebrew',price:itemValue('armor',d),data:{name:d.name,rating:num(d.rating),weight:d.weight||'1',note:d.note||''}}); });
+    G(window.MYZ_HB_GEAR).filter(function(d){return d.rating!=null;}).forEach(function(d){ var nt=hbNote(d); ar.push({name:d.name,cost:'Armor '+d.rating,note:'Homebrew'+(nt?' · '+nt:''),price:itemValue('armor',d),data:{name:d.name,rating:num(d.rating),weight:d.weight||'1',note:nt}}); });
     return ar;
   }
   if(kind==='artifact'){
-    return ARTIFACTS.map(function(d){ return {name:d.name,cost:'D666 '+d.roll,note:d.desc,price:itemValue('artifact',d),data:{name:d.name,weight:'1',note:d.desc||'',artifact:true}}; });
+    var af=ARTIFACTS.map(function(d){ return {name:d.name,cost:'D666 '+d.roll,note:d.desc,price:itemValue('artifact',d),data:{name:d.name,weight:'1',note:d.desc||'',artifact:true}}; });
+    // Homebrew artifact gear (myz-gear, artifact:true, no rating) is stocked here, not under Gear.
+    G(window.MYZ_HB_GEAR).filter(function(d){return d.rating==null&&d.artifact;}).forEach(function(d){ af.push({name:d.name,cost:hbSbTxt(d)||'Homebrew',note:'Homebrew artifact'+(hbNote(d)?' · '+hbNote(d):''),price:itemValue('artifact',d),data:d}); });
+    return af;
   }
   if(kind==='talent'){ return TALENTS.map(function(t){ return {name:t.name,cost:t.role,note:t.desc,data:t}; }); }
   if(kind==='mutation'){ return MUTATIONS.map(function(m){ return {name:m.name,cost:'D66 '+m.roll,note:m.desc,data:m}; }); }
   // general gear: scrap/consumables + homebrew (artifacts have their own tab)
   var g=[];
   GEARS.forEach(function(d){ g.push({name:d.name,cost:'',note:d.comment||'',price:itemValue('gear',d),data:{name:d.name,weight:'1',note:d.comment||''}}); });
-  G(window.MYZ_HB_GEAR).filter(function(d){return d.rating==null;}).forEach(function(d){ g.push({name:d.name,cost:d.weight?d.weight+' slots':'',note:'Homebrew'+(d.desc?' · '+d.desc:''),price:itemValue('gear',d),data:d}); });
+  G(window.MYZ_HB_GEAR).filter(function(d){return d.rating==null&&!d.artifact;}).forEach(function(d){ g.push({name:d.name,cost:hbSbTxt(d)||(d.weight?d.weight+' slots':''),note:'Homebrew'+(hbNote(d)?' · '+hbNote(d):''),price:itemValue('gear',d),data:d}); });
   return g;
 }
+// Homebrew helpers (shapes: components/hb/myz/rules.ts).
+function hbSbTxt(d){ return (Array.isArray(d.skillBonus)?d.skillBonus:[]).map(function(b){ return b.skill+' +'+num(b.amount); }).join(', '); }
+function hbDevTxt(d){ if(!d||!d.artifact) return ''; var r=d.devReq, b=Array.isArray(d.devBonus)?d.devBonus:[];
+  return [r&&r.area?'DEV Req: '+r.area+' '+num(r.level)+'.':'', b.length?'DEV Bonus: '+b.map(function(x){ return x.area+' '+x.amount; }).join(', ')+'.':''].filter(Boolean).join(' '); }
+function hbNote(d){ return [d.desc||d.note||'', hbDevTxt(d)].filter(Boolean).join(' '); }
 function bulletsOnHand(){ return num((S.supplies||{}).bullets); }
 function updatePickerCap(){ var c=$('picker-cap'); if(!c)return; var fam=GEAR_FAM(_pk); c.style.display=fam?'block':'none';
   if(fam) c.innerHTML='Bullets on hand: <b style="color:var(--yz-dk);">'+bulletsOnHand()+'</b> ⦾ · buy gear by spending Bullets (the Ark’s currency).'; }
@@ -1254,11 +1276,15 @@ function pickAdd(idx){
   var x=_pkRows[idx]; if(!x)return;
   var fam=GEAR_FAM(_pk), p=fam?num(x.price):0;
   if(p>0){ if(bulletsOnHand()<p){ addLog('Item Shop','Not enough Bullets','“'+(x.name||'Item')+'” costs '+p+' · you have '+bulletsOnHand(),'fumble'); return; } bumpSupply('bullets',-p); }
-  if(_pk==='weap'){ var w=x.data||{}; S.gear.push({kind:'weapon',equipped:false,name:w.name||x.name,bonus:w.bonus!=null?w.bonus:0,damage:w.damage!=null?w.damage:1,range:w.range||'',weight:w.slots!=null?w.slots:(w.weight||'1'),skill:x.skill||'Fight'}); renderWeapons(); setTab('gear'); }
+  if(_pk==='weap'){ var w=x.data||{}; var wr={kind:'weapon',equipped:false,name:w.name||x.name,bonus:w.bonus!=null?w.bonus:0,damage:w.damage!=null?w.damage:1,range:w.range||'',weight:w.slots!=null?w.slots:(w.weight||'1'),skill:x.skill||'Fight'};
+    if(w.ammo) wr.ammo=w.ammo; if(Array.isArray(w.features)&&w.features.length) wr.features=w.features.slice(); if(w.blast) wr.blast=num(w.blast); if(w.artifact) wr.artifact=true;
+    S.gear.push(wr); renderWeapons(); setTab('gear'); }
   else if(_pk==='armor'){ var a=x.data||{}; S.gear.push({kind:'armor',equipped:false,name:a.name||x.name,rating:num(a.rating),weight:a.weight||'1',note:a.note||''}); renderInventory(); setTab('gear'); }
   else if(_pk==='talent'){ var t=x.data||{}; S.talents.push({name:t.name||x.name,note:t.desc||t.note||''}); renderTalents(); setTab('story'); }
   else if(_pk==='mutation'){ var mu=x.data||{}; if((S.mutations||[]).length>=4){ addLog('Mutations','Max 4','You can never have more than four mutations.','fumble'); } else { S.mutations.push({name:mu.name||x.name,note:mu.desc||'',spend:1}); if(!num(S.mp))S.mp=S.mutations.length; renderMutations(); renderMP(); setTab('mut'); } }
-  else { var d=x.data||{}; S.gear.push({kind:'gear',name:d.name||x.name,weight:d.weight||'1',note:d.note||d.desc||'',artifact:!!d.artifact}); renderGear(); setTab('gear'); }
+  else { var d=x.data||{}; var gr={kind:'gear',name:d.name||x.name,weight:d.weight||'1',note:d.hb?hbNote(d):(d.note||d.desc||''),artifact:!!d.artifact};
+    if(Array.isArray(d.skillBonus)&&d.skillBonus.length){ gr.skillBonus=d.skillBonus.map(function(b){ return {skill:b.skill,amount:num(b.amount)}; }); gr.equipped=false; }
+    S.gear.push(gr); renderGear(); setTab('gear'); }
   if(p>0) addLog('Item Shop','Bought '+x.name,'−'+p+' Bullets → '+bulletsOnHand()+' left','crit');
   scheduleAutosave(); updatePickerCap(); renderPicker();
 }
@@ -1320,14 +1346,15 @@ function doMyzRoll(label, baseN, skillN, gearN, attrKey, ctx){
   _lastRoll={label:label, base:base, skill:skill, gear:gear, pen:pen, attr:attrKey, ctx:ctx||null};
   showPushOption();
 }
-function rollSkill(name){ var s=skillObj(name); var attr=s?s.attr:(name===S.specialist?S.key:null); if(!attr)return; doMyzRoll(name+' ('+attr+')', attrCur(attr), num(S.skills[name])-critModFor(name), 0, attr, null); actMainRoll(); }
+function rollSkill(name){ var s=skillObj(name); var attr=s?s.attr:(name===S.specialist?S.key:null); if(!attr)return; var gb=gearSkillBonus(name);
+  doMyzRoll(name+' ('+attr+')'+(gb.n?' · '+gb.name+' +'+gb.n+' gear':''), attrCur(attr), num(S.skills[name])-critModFor(name), gb.n, attr, gb.n?{gearIdx:gb.idx,gearSkill:name}:null); actMainRoll(); }
 function rollAttr(k){ doMyzRoll(attrName(k)+' ('+k+')', attrCur(k), -critModFor(null), 0, k, null); actMainRoll(); }
 function rollAttack(i){
   var w=S.gear[i]; if(!w||w.kind!=='weapon')return;
   var isShoot=(w.skill==='Shoot');
   // Only firearms use bullets (core p.86-87): bows/crossbows use arrows, slingshots stones, thrown
   // weapons nothing, the flamethrower a dose of booze, the scrap cannon an explosive charge.
-  var isGun=isShoot && /pistol|derringer|rifle|revolver|shotgun|musket|\bgun\b|carbine|smg/i.test(w.name||'') && !/flare gun|flamethrower|cannon|bow|sling/i.test(w.name||'');
+  var isGun=w.ammo ? w.ammo==='Bullets' : isShoot && /pistol|derringer|rifle|revolver|shotgun|musket|\bgun\b|carbine|smg/i.test(w.name||'') && !/flare gun|flamethrower|cannon|bow|sling/i.test(w.name||'');
   if(isGun){ var blt=num((S.supplies||{}).bullets);
     if(blt<1){ addLog((w.name||'Gun')+' · Shoot','No bullets','Out of ammo — you need at least 1 Bullet to fire.','fumble'); return; }
     bumpSupply('bullets',-1);
@@ -1369,6 +1396,8 @@ function doPush(){
   // Apply the cost of pushing.
   var notes=[];
   if(trauma>0 && pr.attr){ S.trauma[pr.attr]=clamp(attrTrauma(pr.attr)+trauma,0,attrBase(pr.attr)); S.mp=clamp(num(S.mp)+trauma,0,MP_MAX); notes.push(trauma+' '+(TRAUMA_NAME[pr.attr]||'trauma').toLowerCase()+' → '+attrName(pr.attr)+' · +'+trauma+' MP'); }
+  if(breaks>0 && pr.ctx && pr.ctx.gearIdx!=null){ var gi=S.gear[pr.ctx.gearIdx]; var sb=gi&&Array.isArray(gi.skillBonus)?gi.skillBonus.find(function(b){ return b.skill===pr.ctx.gearSkill; }):null;
+    if(sb){ sb.amount=Math.max(0,num(sb.amount)-breaks); notes.push(breaks+' gear break → '+(gi.name||'gear')+' '+sb.skill+' +'+sb.amount); } }
   if(breaks>0 && pr.ctx && pr.ctx.weaponIdx!=null){ var w=S.gear[pr.ctx.weaponIdx]; if(w){ w.bonus=Math.max(0,weaponBonus(w.bonus)-breaks); notes.push(breaks+' gear break → '+(w.name||'weapon')+' bonus '+w.bonus); } }
   var detail=poolStr(base)+(skill.length?' + '+skill.length+'sk('+skill.join(',')+')':'')+(gear.length?' + '+gear.length+'gr('+gear.join(',')+')':'')+' · '+succ+' succ · PUSHED'+(notes.length?' — '+notes.join(' · '):'');
   animDice(base, skill, gear, succ>=2?'crit':(trauma>0?'fumble':'normal'));
@@ -1410,7 +1439,9 @@ function actEndTurn(){
 function actToggleSec(k){ _actCollapsed[k]=!_actCollapsed[k]; renderAction(); }
 function actAim(){ var t=$('tray-mod'); if(t){ t.value=String(clamp(num(t.value)+1,-6,6)); } _act.aimed=true; addLog('Aim','+1 die','Your Shoot roll this turn gets +1 (already added to ± Dice). Aiming from solid cover gives +2 — add one more.','normal'); return true; }
 function actNote(name, text){ addLog(name, '—', text, 'normal'); return true; }
-function actSkill(label, sk, extra, ctx){ var s=skillObj(sk)||{attr:'STR'}; doMyzRoll(label+' · '+sk+' ('+s.attr+')', attrCur(s.attr), num(S.skills[sk])-critModFor(sk)+(extra||0), 0, s.attr, ctx||null); }
+function actSkill(label, sk, extra, ctx){ var s=skillObj(sk)||{attr:'STR'}; var gb=gearSkillBonus(sk);
+  if(gb.n&&!ctx) ctx={gearIdx:gb.idx,gearSkill:sk};
+  doMyzRoll(label+' · '+sk+' ('+s.attr+')'+(gb.n?' · '+gb.name+' +'+gb.n+' gear':''), attrCur(s.attr), num(S.skills[sk])-critModFor(sk)+(extra||0), gb.n, s.attr, ctx||null); }
 function actDefend(){
   if(_act.defended){ addLog('Defend','Already defended','You can only defend against one attack per turn.','normal'); return false; }
   actSkill('Defend','Fight');
@@ -1725,9 +1756,12 @@ function applySheet(d){
   var inv=[];
   if(Array.isArray(d.gear)) d.gear.forEach(function(g){
     var kind=g.kind || (g.rating!=null?'armor':(g.damage!=null?'weapon':'gear'));
-    if(kind==='weapon') inv.push({kind:'weapon',equipped:g.equipped!==false,name:g.name||'',bonus:g.bonus!=null?g.bonus:0,damage:g.damage!=null?num(g.damage):1,range:g.range||'',weight:g.weight||'1',skill:(g.skill==='Shoot'?'Shoot':'Fight')});
+    if(kind==='weapon'){ var wr={kind:'weapon',equipped:g.equipped!==false,name:g.name||'',bonus:g.bonus!=null?g.bonus:0,damage:g.damage!=null?num(g.damage):1,range:g.range||'',weight:g.weight||'1',skill:(g.skill==='Shoot'?'Shoot':'Fight')};
+      if(g.ammo) wr.ammo=String(g.ammo); if(Array.isArray(g.features)&&g.features.length) wr.features=g.features.map(String); if(g.blast) wr.blast=num(g.blast); if(g.artifact) wr.artifact=true; inv.push(wr); }
     else if(kind==='armor') inv.push({kind:'armor',equipped:g.equipped!==false,name:g.name||'',rating:num(g.rating),weight:g.weight||'1',note:g.note||''});
-    else inv.push({kind:'gear',name:g.name||'',weight:g.weight||'1',note:g.note||'',artifact:!!g.artifact});
+    else { var gr={kind:'gear',name:g.name||'',weight:g.weight||'1',note:g.note||'',artifact:!!g.artifact};
+      if(Array.isArray(g.skillBonus)&&g.skillBonus.length){ gr.skillBonus=g.skillBonus.filter(function(b){ return b&&b.skill; }).map(function(b){ return {skill:String(b.skill),amount:num(b.amount)}; }); gr.equipped=!!g.equipped; }
+      inv.push(gr); }
   });
   S.gear=inv;
   S.crits = Array.isArray(d.crits) ? d.crits.map(function(c){ return {name:c.name||'',effect:c.effect||'',mod:num(c.mod)}; }) : [];

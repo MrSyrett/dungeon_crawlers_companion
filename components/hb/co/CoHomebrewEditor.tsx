@@ -4,8 +4,8 @@
 // (/candela/abilities, /candela/gear and /candela/homebrew): an accordion
 // listing the user's entries with Edit/Delete, a builder + live preview, and
 // per-campaign share checkboxes (Candela campaigns only). Same look and flow as
-// the other systems' shells (accent: Candela's --sys-link teal, deepened to
-// #1c6b60 on light panels); the builders live beside this file and document
+// the other systems' shells (accent: Candela's --sys-link teal, deepened
+// on light panels); the builders live beside this file and document
 // their storage shape. lib/homebrew.ts normalizeCo* is the real validator.
 import { campaignsFor } from "@/lib/homebrew-systems";
 import { useState, type CSSProperties, type ReactElement } from "react";
@@ -49,7 +49,7 @@ const fieldBase = "rounded border border-[var(--border)] bg-[var(--panel-2)] px-
 const labelCls = "mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]";
 const btn = "rounded border border-[var(--border)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--hb-accent)] hover:text-[var(--text)] disabled:opacity-50";
 const btnAccent = "rounded border border-[var(--hb-accent)] bg-[var(--panel-2)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--hb-accent)] hover:bg-[var(--hb-accent)] hover:text-white disabled:opacity-50";
-const ACCENT = { "--hb-accent": "var(--sys-link, var(--candela))" } as CSSProperties; // Candela teal; light panels set --sys-link to #1c6b60
+const ACCENT = { "--hb-accent": "var(--sys-link, var(--candela))" } as CSSProperties; // Candela teal; light panels deepen --sys-link
 
 export default function CoHomebrewEditor({ kind, campaigns: allCampaigns, initial }: { kind: string; campaigns: CampaignRef[]; initial: HomebrewRecord[] }) {
   // Share only with campaigns running this system (the API enforces it too).
