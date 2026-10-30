@@ -14,6 +14,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Dragonbane Character Sheet</title>
 <script src="/tools-data/db-data.js"></script>
+<script src="/tools-data/loot-bonus.js"></script>
+<script src="/tools-data/db-loot-bonus.js"></script>
 <style>
 /* ═══ Dragonbane (Free League) — Character Sheet ═══
    Shared site skeleton (app-wrap / sheet / roll log / lock / campaign / dice tray)
@@ -341,6 +343,8 @@ body.dark .prep-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 .inv-name-line .tag{flex:0 0 auto;}
 .inv-eq-slot{flex:0 0 17px;width:17px;display:inline-flex;align-items:center;}
 .inv-sub{margin:1px 0 3px 23px;font-size:12.5px;line-height:1.35;}
+.inv-bon{margin:2px 0 3px 23px;}.inv-bon .lbn{min-height:0;}
+.fl-bon .lbn{display:inline-flex;min-height:0;margin-left:4px;vertical-align:middle;}.fl-bon .lbn-b{font-size:10px;line-height:15px;}
 .hint-line{font-size:12.5px;color:var(--muted);padding:6px 10px;line-height:1.4;}
 
 /* picker / modals */
@@ -539,7 +543,7 @@ body.dark .prep-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
   .cond-chip{padding:6px 2px;font-size:12px;}
   .eq-pip{width:22px;height:22px;}
   .inv-eq-slot{flex-basis:22px;width:22px;}
-  .inv-sub{margin-left:28px;}
+  .inv-sub,.inv-bon{margin-left:28px;}
 }
 @media (max-width:600px){
   .tabs-bar{display:grid;grid-template-columns:repeat(3,1fr);}
@@ -958,11 +962,11 @@ function attr(a){ return num(S.attrs[a],10); }
 function baseChance(v){ var r=rangeVal(TB().baseChance,num(v)); return r?r.value:(v>=16?7:v>=13?6:v>=9?5:v>=6?4:3); }
 function dmgBonus(v){ var r=rangeVal(TB().damageBonus,num(v)); return r?r.value:(v>=17?'D6':v>=13?'D4':null); }
 function aglMove(v){ var r=rangeVal(TB().movementAgl,num(v)); return r?r.mod:0; }
-function movement(){ var k=kinDef(); var m=(k?k.movement:10)+aglMove(attr('AGL'))+num(S.moveMod); if(S.injuries.some(function(i){ return i.name==='Broken leg'; })) m=Math.ceil(m/2); return Math.max(S.moveMod?4:0,m); }
+function movement(){ var k=kinDef(); var m=(k?k.movement:10)+aglMove(attr('AGL'))+num(S.moveMod)+itemBonus().move; if(S.injuries.some(function(i){ return i.name==='Broken leg'; })) m=Math.ceil(m/2); return Math.max(S.moveMod?4:0,m); }
 function countAbility(n){ return S.abilities.filter(function(a){ return a.name===n; }).length; }
 function hasAbility(n){ return countAbility(n)>0; }
-function hpMax(){ return attr('CON')+2*countAbility('Robust'); }
-function wpMax(){ return attr('WIL')+2*countAbility('Focused'); }
+function hpMax(){ return attr('CON')+2*countAbility('Robust')+itemBonus().hp; }
+function wpMax(){ return attr('WIL')+2*countAbility('Focused')+itemBonus().wp; }
 function skRec(n){ return S.skills[n]||(S.skills[n]={}); }
 function isSchool(n){ var d=skillDef(n); return !!(d&&d.type==='secondary'); }
 function knowsSchool(n){ return !!(S.skills[n]&&S.skills[n].trained); }
@@ -992,19 +996,19 @@ function reqText(h){ if(!h||!h.requirement) return 'No requirement'; var rq=h.re
 // ONE inventory list. Weapons (shields included), armor and helmets carry an equip pip:
 // equipped weapons are "at hand" (three at most) and are your attacks and parries; the worn
 // armor and helmet (one of each) give your armor rating and their banes.
-function kindOf(r){ if(!r) return 'gear'; if(r.kind) return r.kind; var w=weaponDef(r.name); if(w&&!w.natural) return 'weapon'; if(armorDef(r.name)) return 'armor'; if(helmetDef(r.name)) return 'helmet'; var g=gearDef(r.name); if(g&&g.focus) return 'focus'; return 'gear'; }
-function equippable(r){ var k=kindOf(r); return k==='weapon'||k==='armor'||k==='helmet'||k==='focus'; }
+function kindOf(r){ if(!r) return 'gear'; if(r.kind) return r.kind; var w=weaponDef(r.base||r.name); if(w&&!w.natural) return 'weapon'; if(armorDef(r.name)) return 'armor'; if(helmetDef(r.name)) return 'helmet'; var g=gearDef(r.name); if(g&&g.focus) return 'focus'; return 'gear'; }
+function equippable(r){ var k=kindOf(r); return k==='weapon'||k==='armor'||k==='helmet'||k==='focus'||hasBonus(r); }
 // A focus (wand, amulet, orbuculum…) held in hand: it takes one of the three at-hand places like a
 // weapon. Spells whose requirements list "focus" can only be cast with one in hand.
 function focusInHand(){ var r=S.inventory.find(function(x){ return kindOf(x)==='focus'&&x.equipped; }); return r?r.name:null; }
 function handCount(){ return S.inventory.filter(function(r){ var k=kindOf(r); return (k==='weapon'||k==='focus')&&r.equipped; }).length; }
 function needsFocus(def){ return A(def&&def.requirements).indexOf('focus')>=0; }
 function isEq(r){ return !!(r&&r.equipped&&equippable(r)); }
-function wDef(w){ if(!w) return null; var d=weaponDef(w.name)||{}; var o=Object.assign({},d,{name:w.name,broken:!!w.broken}); ['damage','skill','melee','ranged','grip','str','durability','range'].forEach(function(k){ if(w[k]!=null&&w[k]!=='') o[k]=w[k]; }); o.features=A(w.features).length?w.features:(d.features||[]); return o; }
+function wDef(w){ if(!w) return null; var d=weaponDef(w.base||w.name)||{}; var o=Object.assign({},d,{name:w.name,broken:!!w.broken,itemDmg:itemDamage(w)}); ['damage','skill','melee','ranged','grip','str','durability','range'].forEach(function(k){ if(w[k]!=null&&w[k]!=='') o[k]=w[k]; }); o.features=A(w.features).length?w.features:(d.features||[]); return o; }
 function atHand(){ var out=[]; S.inventory.forEach(function(r,i){ if(kindOf(r)==='weapon'&&r.equipped) out.push({i:i,r:r,d:wDef(r)}); }); return out; }
 function wornRow(kind){ return S.inventory.find(function(r){ return kindOf(r)===kind&&r.equipped; })||null; }
-function wornArmor(){ var r=wornRow('armor'); return r?armorDef(r.name):null; }
-function wornHelmet(){ var r=wornRow('helmet'); return r?helmetDef(r.name):null; }
+function wornArmor(){ var r=wornRow('armor'); return r?armorDef(r.base||r.name):null; }
+function wornHelmet(){ var r=wornRow('helmet'); return r?helmetDef(r.base||r.name):null; }
 function unarmed(){ return Object.assign({},weaponDef('Unarmed')||{name:'Unarmed',damage:'D6',skill:'Brawling',melee:true,features:['Bludgeoning']},{name:'Unarmed',_unarmed:true}); }
 function weaponSkill(d){ if(!d) return 'Brawling'; if(d.skill) return d.skill; if(d.shield) return bestSkill((D('DB_SKILL_GROUPS')||{}).strMelee||['Axes','Brawling','Hammers','Spears','Swords']); return 'Brawling'; }
 function weaponBonus(d){ if(!d||d.noDamageBonus||A(d.features).indexOf('No damage bonus')>=0) return null; var sk=skillDef(weaponSkill(d)); return dmgBonus(attr(sk?sk.attribute:'STR')); }
@@ -1014,7 +1018,7 @@ function isMetalAtHand(){ var a=wornArmor(), h=wornHelmet(); if(a&&a.metal) retu
 function invFind(re){ return S.inventory.find(function(r){ return re.test(r.name||'') && num(r.qty,1)>0; })||null; }
 function hasBackpack(){ return !!invFind(/^backpack$/i); }
 function carryLimit(){ return Math.ceil(attr('STR')/2)+(hasBackpack()?num((TB().encumbrance||{}).backpack,2):0); }
-function invLoad(){ var t=0; S.inventory.forEach(function(r){ if(isEq(r)) return; /* at hand / worn: free */ var w=(r.wt===''||r.wt==null)?1:Number(r.wt); if(isNaN(w)) w=1; t+=w*Math.max(0,num(r.qty,1)); });
+function invLoad(){ var t=0; S.inventory.forEach(function(r){ if(isEq(r)&&kindOf(r)!=='gear') return; /* at hand / worn: free */ var w=(r.wt===''||r.wt==null)?1:Number(r.wt); if(isNaN(w)) w=1; t+=w*Math.max(0,num(r.qty,1)); });
   var coins=num(S.coins.gold)+num(S.coins.silver)+num(S.coins.copper); t+=Math.floor(coins/100); return Math.ceil(t-1e-9); }
 function overEnc(){ return invLoad()>carryLimit(); }
 function costText(c){ if(!c) return ''; return c.amount+' '+(c.unit==='gold'?'gold':c.unit==='silver'?'silver':'copper')+(c.note?' ('+c.note+')':''); }
@@ -1028,6 +1032,42 @@ function pay(cp){ var t=purseCopper(); if(cp>t) return false; t-=cp;
   var useG=Math.ceil(Math.max(0,need)/100); g-=useG; need-=useG*100;
   var change=-need; s+=Math.floor(change/10); c+=change%10; if(c<0){ s-=1; c+=10; }
   S.coins={gold:g,silver:s,copper:c}; return true; }
+
+// ── Item bonuses: GM-built loot arrives with read-only badges (LootBonus, bv:2) ──
+// A row keeps its raw badges (r.benefits, shown as-is). Equipping it — weapon in hand, armor
+// worn, other gear worn / in use (Dragonbane: an enchanted item only works when used as
+// intended) — snapshots LootBonus.effective() into r.applied {v:2, benefits}. Every number
+// below is DERIVED from the equipped rows' snapshots, so unequipping or removing a row
+// reverses exactly what it gave and a reload never applies it twice.
+var LB_SYS='db';
+function invBenefits(r){ if(!window.LootBonus||!r||r.bv!==2||!r.benefits) return []; try{ return LootBonus.normalize(LB_SYS,r.benefits); }catch(e){ return []; } }
+function invEffective(r){ if(!window.LootBonus) return []; return LootBonus.effective(LB_SYS,invBenefits(r)).filter(function(b){ return b.kind!=='note'&&b.kind!=='enchant'; }); }
+function hasBonus(r){ return invEffective(r).length>0; }
+function invApplied(r){ if(!r||!r.equipped||!r.applied||r.applied.v!==2||!Array.isArray(r.applied.benefits)) return null; return r.applied; }
+// Snapshot newly equipped rows (current HP / WP rise with a new max), drop the record on unequipped ones.
+function syncApplied(){ S.inventory.forEach(function(r){ if(!r) return;
+  if(!r.equipped){ delete r.applied; return; } if(invApplied(r)) return;
+  var l=invEffective(r); if(!l.length){ delete r.applied; return; } r.applied={v:2,benefits:l};
+  l.forEach(function(b){ if(b.kind==='hp') S.hp=num(S.hp)+num(b.amount); if(b.kind==='wp') S.wp=num(S.wp)+num(b.amount); }); }); }
+function itemBonus(){ var o={armor:0,move:0,hp:0,wp:0,boon:{},resist:{},why:{armor:[],move:[],hp:[],wp:[]}};
+  S.inventory.forEach(function(r){ var ap=invApplied(r); if(!ap) return; var nm=r.name||'Item';
+    ap.benefits.forEach(function(b){ var n=num(b.amount);
+      if(b.kind==='armor'||b.kind==='move'||b.kind==='hp'||b.kind==='wp'){ o[b.kind]+=n; o.why[b.kind].push(nm+' +'+n); }
+      else if(b.kind==='boon'&&b.target){ (o.boon[b.target]=o.boon[b.target]||[]).push(nm); }
+      else if(b.kind==='resist'&&b.target){ var t=String(b.target).toLowerCase(); o.resist[t]=(o.resist[t]||0)+n; } }); });
+  return o; }
+// +N damage a weapon row's own badges give (only while it is in hand).
+function itemDamage(r){ var ap=invApplied(r); if(!ap) return 0; return ap.benefits.reduce(function(t,b){ return t+(b.kind==='damage'?num(b.amount):0); },0); }
+function bonusHtml(r){ var l=invBenefits(r); return l.length?'<div class="inv-bon" data-b="'+esc(JSON.stringify(l))+'"></div>':''; }
+function fillBonus(root){ if(!window.LootBonus||!root) return; root.querySelectorAll('.inv-bon[data-b],.fl-bon[data-b]').forEach(function(el){ var l=[]; try{ l=JSON.parse(el.getAttribute('data-b')); }catch(e){} el.removeAttribute('data-b'); LootBonus.editor(el,{sys:LB_SYS,benefits:l,readonly:true}); }); }
+function lootBonHtml(it){ if(!it||it.bv!==2||!window.LootBonus) return ''; var l=LootBonus.normalize(LB_SYS,it.benefits); return l.length?'<span class="fl-bon" data-b="'+esc(JSON.stringify(l))+'"></span>':''; }
+// A GM-named item ("Flaming Longsword") that is a catalog weapon / armor / helmet underneath.
+function baseItemFor(name,cat){ var n=' '+String(name||'').toLowerCase().replace(/[^a-z0-9]+/g,' ')+' ', best=null;
+  [['weapon',D('DB_WEAPONS')],['armor',D('DB_ARMOR')],['helmet',D('DB_HELMETS')]].forEach(function(p){
+    if(cat==='weapon'&&p[0]!=='weapon') return; if(cat==='armor'&&p[0]==='weapon') return;
+    A(p[1]).forEach(function(x){ if(!x||!x.name||x.natural) return; var k=' '+String(x.name).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()+' ';
+      if(k.trim()&&n.indexOf(k)>=0&&(!best||k.length>best.k.length)) best={kind:p[0],name:x.name,k:k}; }); });
+  return best; }
 
 // ── dice ──
 function d(n){ return 1+Math.floor(Math.random()*n); }
@@ -1122,8 +1162,9 @@ function renderStatus(){
   if(wa) at.push(wa.name+' '+wa.rating); if(wh) at.push(wh.name+' '+wh.rating);
   var atip=at.length?at.join(' + '):'No armor or helmet worn';
   if(S.opts.damageTypes&&wa&&wa.bonusVs) Object.keys(wa.bonusVs).forEach(function(t){ atip+=' · +'+wa.bonusVs[t]+' vs '+t; });
+  var ib=itemBonus(); if(ib.why.armor.length) atip=(at.length?atip+' + ':'')+ib.why.armor.join(' + '); Object.keys(ib.resist).forEach(function(t){ atip+=' · +'+ib.resist[t]+' vs '+t; });
   morphHTML($('derived'),'<div class="dv" id="dv-armor" title="'+esc(atip)+'"><span class="dl">Armor</span><span class="dval">'+(ar||'—')+'</span></div>'+
-    '<div class="dv" title="Kin '+((kinDef()||{}).movement||10)+' + AGL '+attr('AGL')+'"><span class="dl">Movement</span><span class="dval">'+movement()+'</span></div>'+
+    '<div class="dv" title="Kin '+((kinDef()||{}).movement||10)+' + AGL '+attr('AGL')+(ib.why.move.length?' + '+esc(ib.why.move.join(' + ')):'')+'"><span class="dl">Movement</span><span class="dval">'+movement()+'</span></div>'+
     '<div class="dv" title="STR '+attr('STR')+'"><span class="dl">Damage Bonus STR</span><span class="dval">'+(sb?'+'+sb:'—')+'</span></div>'+
     '<div class="dv" title="AGL '+attr('AGL')+'"><span class="dl">Damage Bonus AGL</span><span class="dval">'+(ab?'+'+ab:'—')+'</span></div>');
   var ij=''; S.injuries.forEach(function(x,i){ ij+='<button type="button" class="inj-badge" onclick="showInjury('+i+')" title="Details">'+esc(x.name)+'</button>'; });
@@ -1160,22 +1201,22 @@ function renderSpells(){
   setHTML($('trick-body'),t);
 }
 function wSummary(dd){ var sk=weaponSkill(dd), b=weaponBonus(dd), strBad=dd.str&&attr('STR')<dd.str;
-  var p=[esc(sk)+' <b>'+skillLevel(sk)+'</b>', esc(dd.damage||'—')+(b?' + '+b:'')];
+  var p=[esc(sk)+' <b>'+skillLevel(sk)+'</b>', esc(dd.damage||'—')+(b?' + '+b:'')+(dd.itemDmg?' + '+dd.itemDmg:'')];
   if(dd.grip) p.push(esc(dd.grip)); if(dd.str) p.push('<span'+(strBad?' style="color:var(--red);font-weight:700;" title="Below the STR requirement: bane"':'')+'>STR '+dd.str+'</span>');
   if(dd.durability) p.push('durability '+dd.durability); if(dd.ranged&&dd.range) p.push('range '+esc(dd.range)+' m');
   return p.join(' · ')+(A(dd.features).length?' '+A(dd.features).map(function(f){ return '<span class="tag">'+esc(f)+'</span>'; }).join(''):''); }
 function aSummary(a,kind){ if(!a) return kind==='helmet'?'helmet':'armor'; return (kind==='helmet'?'helmet':'armor')+' · rating '+a.rating+(A(a.banes).length?' · bane on '+a.banes.map(esc).join(', '):'')+(a.metal?' · metal':''); }
 function renderGear(){
   var inv=''; S.inventory.forEach(function(r,i){ var k=kindOf(r), pip='', st='', sub='', acts='';
-    if(equippable(r)){ var worn=k==='armor'||k==='helmet'; pip='<button class="eq-pip'+(r.equipped?' on':'')+'" data-nolock onclick="toggleEquip('+i+')" title="'+(r.equipped?(worn?'Worn':'At hand'):(worn?'Wear':'Take in hand'))+'"></button>'; }
+    if(equippable(r)){ var worn=k==='armor'||k==='helmet'; pip='<button class="eq-pip'+(r.equipped?' on':'')+'" data-nolock onclick="toggleEquip('+i+')" title="'+(k==='gear'?(r.equipped?'Worn / in use — its bonuses apply':'Wear / use it to get its bonuses'):r.equipped?(worn?'Worn':'At hand'):(worn?'Wear':'Take in hand'))+'"></button>'; }
     if(k==='weapon'){ var dd=wDef(r); sub=wSummary(dd); if(dd.shield) st+='<span class="tag">shield</span>'; if(r.broken) st+='<span class="tag warn" title="Damaged — bane on every use until repaired">damaged</span>';
       acts+='<button class="row-x" title="'+(r.broken?'Repaired':'Mark damaged')+'" onclick="toggleBroken('+i+')">'+(r.broken?'⚒':'⚠')+'</button>'; }
-    else if(k==='armor') sub=aSummary(armorDef(r.name),'armor'); else if(k==='helmet') sub=aSummary(helmetDef(r.name),'helmet'); else if(k==='focus') sub='focus';
-    inv+='<tr class="inv-row'+(isEq(r)?' is-eq':'')+'"><td><div class="inv-name-line"><span class="inv-eq-slot">'+pip+'</span><input class="inv-name" value="'+esc(r.name)+'" onchange="onInv('+i+',\'name\',this.value)">'+st+'</div>'+(sub?'<div class="inv-sub desc">'+sub+'</div>':'')+'</td>'+
-      '<td><input class="num no-spin" type="number" value="'+num(r.qty,1)+'" data-nolock onchange="onInv('+i+',\'qty\',this.value)"></td><td><input class="num" value="'+esc(r.wt==null?1:r.wt)+'" onchange="onInv('+i+',\'wt\',this.value)" title="'+(isEq(r)?'At hand / worn: doesn\'t count toward your load':'Weight per item (0 = tiny)')+'"></td>'+
+    else if(k==='armor') sub=aSummary(armorDef(r.base||r.name),'armor'); else if(k==='helmet') sub=aSummary(helmetDef(r.base||r.name),'helmet'); else if(k==='focus') sub='focus';
+    inv+='<tr class="inv-row'+(isEq(r)?' is-eq':'')+'"><td><div class="inv-name-line"><span class="inv-eq-slot">'+pip+'</span><input class="inv-name" value="'+esc(r.name)+'" onchange="onInv('+i+',\'name\',this.value)">'+st+'</div>'+(sub?'<div class="inv-sub desc">'+sub+'</div>':'')+bonusHtml(r)+'</td>'+
+      '<td><input class="num no-spin" type="number" value="'+num(r.qty,1)+'" data-nolock onchange="onInv('+i+',\'qty\',this.value)"></td><td><input class="num" value="'+esc(r.wt==null?1:r.wt)+'" onchange="onInv('+i+',\'wt\',this.value)" title="'+(isEq(r)&&k!=='gear'?'At hand / worn: doesn\'t count toward your load':'Weight per item (0 = tiny)')+'"></td>'+
       '<td>'+(r.uses!=null?'<span class="desc">uses</span> <input class="num no-spin" type="number" style="width:44px;" value="'+num(r.uses)+'" data-nolock onchange="onInv('+i+',\'uses\',this.value)"> ':'')+'<input value="'+esc(r.note||'')+'" style="width:'+(r.uses!=null?'60%':'100%')+';font-weight:400;font-size:13px;" onchange="onInv('+i+',\'note\',this.value)"></td>'+
       '<td style="white-space:nowrap;text-align:right;">'+acts+'<button class="row-x" onclick="removeInv('+i+')" title="Remove">✕</button></td></tr>'; });
-  setHTML($('inv-body'),inv);
+  if(setHTML($('inv-body'),inv)) fillBonus($('inv-body'));
   var n=handCount(); setHTML($('wpn-count'),'At hand <b>'+n+'/3</b>');
   var load=invLoad(), lim=carryLimit(); var e=$('enc'); e.className='sb-note enc-note'+(load>lim?' over':''); e.title=load>lim?'Over-encumbered':'Load / carrying capacity';
   setHTML(e,'Carry Capacity <b>'+load+'/'+lim+'</b>');
@@ -1198,6 +1239,7 @@ function refreshWizardButtons(){ var built=!!(S.built||(S.kin&&S.profession)); v
 // Re-render every region from S. Each one goes through setHTML, so only a region whose markup
 // changed is rebuilt (see setHTML); the lock is re-applied to whatever fields were rebuilt.
 function renderAll(){
+  syncApplied();
   renderHeader(); renderAttrs(); renderSkills(); renderStatus(); renderAbilities(); renderSpells(); renderGear(); renderBackground(); renderTray(); refreshWizardButtons();
   if(typeof renderTurn==='function') renderTurn();
   if(window.applySheetLock && window.__lockReady) try{ window.applySheetLock(); }catch(e){}
@@ -1237,8 +1279,8 @@ function toggleEquip(i){ var r=S.inventory[i]; if(!r||!equippable(r)) return; va
   if(r.equipped){ r.equipped=false; changed(); return; }
   if(k==='weapon'||k==='focus'){ if(handCount()>=3){ addLog('At hand','Full','At most three items at hand — stow one first','normal'); return; }
     if(num(r.qty,1)>1){ var one=Object.assign({},r,{qty:1,equipped:true}); r.qty=num(r.qty,1)-1; S.inventory.splice(i+1,0,one); changed(); return; } }
-  else S.inventory.forEach(function(x){ if(x!==r&&kindOf(x)===k) x.equipped=false; });
-  r.equipped=true; if(k!=='weapon'&&inCombat()) addLog(r.name,'Worn','Putting on armor or a helmet takes an action in combat','normal'); changed(); }
+  else if(k!=='gear') S.inventory.forEach(function(x){ if(x!==r&&kindOf(x)===k) x.equipped=false; });
+  r.equipped=true; if(k!=='weapon'&&k!=='gear'&&inCombat()) addLog(r.name,'Worn','Putting on armor or a helmet takes an action in combat','normal'); changed(); }
 function onInv(i,k,v){ var r=S.inventory[i]; if(!r) return; if(k==='name'&&!r.kind&&equippable(r)) r.kind=kindOf(r); if(k==='qty') v=Math.max(0,num(v,1)); if(k==='uses') v=Math.max(0,num(v)); if(k==='wt'){ v=String(v).trim(); v=v===''?1:(isNaN(Number(v))?1:Number(v)); } r[k]=v; invalidate('inv-body'); changed(); }
 function removeInv(i){ S.inventory.splice(i,1); changed(); }
 function addInvRow(r){ S.inventory.push(Object.assign({qty:1,wt:1,note:''},r)); changed(); }
@@ -1246,12 +1288,12 @@ function onCoins(){ S.coins={gold:Math.max(0,num($('c-gold').value)),silver:Math
 function addAbility(name,kind,note){ var def=abilityDef(name); S.abilities.push({name:name,kind:kind||'heroic',note:note||''});
   if(name==='Robust'){ S.hp=num(S.hp)+2; } if(name==='Focused'){ S.wp=num(S.wp)+2; } return def; }
 function invItemFromGear(g,qty){ var row={name:g.name,qty:qty||1,wt:(g.weight==null?0:g.weight),note:''}; if(g.doses) row.uses=g.doses; return row; }
-function addGearByName(name,qty,note){ // used by the builder, the shop and loot claims — everything lands in the inventory; weapons go to hand (≤3), armor / a helmet is worn if you wear none
+function addGearByName(name,qty,note,fresh){ // used by the builder, the shop and loot claims — everything lands in the inventory; weapons go to hand (≤3), armor / a helmet is worn if you wear none
   var w=weaponDef(name), a=armorDef(name), h=helmetDef(name), g=gearDef(name);
   if(w&&!w.natural){ for(var i=0;i<(qty||1);i++) S.inventory.push({name:w.name,kind:'weapon',qty:1,wt:1,note:note||'',equipped:handCount()<3}); return 'weapon'; }
   if(a){ S.inventory.push({name:a.name,kind:'armor',qty:1,wt:1,note:note||'',equipped:!wornRow('armor')}); return 'armor'; }
   if(h){ S.inventory.push({name:h.name,kind:'helmet',qty:1,wt:1,note:note||'',equipped:!wornRow('helmet')}); return 'helmet'; }
-  var ex=S.inventory.find(function(r){ return r.name===name && r.uses==null && !equippable(r); });
+  var ex=fresh?null:S.inventory.find(function(r){ return r.name===name && r.uses==null && !equippable(r); });
   if(g&&g.focus){ var fr=invItemFromGear(g,1); fr.kind='focus'; fr.equipped=!focusInHand()&&handCount()<3; if(note) fr.note=note; S.inventory.push(fr); return 'focus'; }
   if(g){ if(ex&&!g.doses){ ex.qty=num(ex.qty,1)+(qty||1); } else { var r=invItemFromGear(g,qty); if(note) r.note=note; S.inventory.push(r); } return 'gear'; }
   S.inventory.push({name:name,qty:qty||1,wt:1,note:note||''}); return 'other';
@@ -1268,7 +1310,8 @@ function autoMods(o){
   var ar=wornArmor(), he=wornHelmet();
   if(o.skill){ if(ar&&A(ar.banes).indexOf(o.skill)>=0) banes.push(ar.name); if(he&&A(he.banes).indexOf(o.skill)>=0) banes.push(he.name);
     if(o.skill==='Swimming'&&ar&&ar.swimBane) banes.push(ar.name+' (swimming)');
-    if(o.skill==='Swimming'&&hasAbility('Webbed Feet')) boons.push('Webbed Feet'); }
+    if(o.skill==='Swimming'&&hasAbility('Webbed Feet')) boons.push('Webbed Feet');
+    var ibn=itemBonus().boon[o.skill]; if(ibn) ibn.forEach(function(n){ boons.push(n); }); }
   if(o.ranged&&he&&A(he.banes).indexOf('Ranged attacks')>=0) banes.push(he.name+' (ranged)');
   if(o.weapon){ if(o.weapon.str&&attr('STR')<o.weapon.str) banes.push('STR '+o.weapon.str+' required'); if(o.weapon.broken) banes.push('Damaged weapon'); }
   S.injuries.forEach(function(x){ if(o.skill&&A(x.banes).indexOf(o.skill)>=0) banes.push(x.name); else if(at&&o.skill&&A(x.banesAttr).indexOf(at)>=0) banes.push(x.name); });
@@ -1356,7 +1399,8 @@ function rollSkill(n,extra){ var d0=skillDef(n); if(d0&&d0.type==='secondary'&&!
 function spendWp(n,why){ n=num(n); if(n<=0) return true; if(S.wp<n){ addLog(why||'Willpower','Not enough WP','Needs '+n+' WP, you have '+S.wp,'fumble'); return false; } S.wp-=n; return true; }
 
 // ═══ DAMAGE, HEALING, DEATH ═════════════════════════════════════════════════
-function armorRating(type){ var a=wornArmor(), h=wornHelmet(); var r=(a?a.rating:0)+(h?h.rating:0);
+function armorRating(type){ var a=wornArmor(), h=wornHelmet(), ib=itemBonus(); var r=(a?a.rating:0)+(h?h.rating:0)+ib.armor;
+  if(type&&ib.resist[String(type).toLowerCase()]) r+=ib.resist[String(type).toLowerCase()];
   if(S.opts.damageTypes&&a&&a.bonusVs&&type&&a.bonusVs[type]) r+=a.bonusVs[type]; return r; }
 function takeDamage(n,opt){ opt=opt||{}; n=Math.max(0,num(n)); var soak=opt.ignoreArmor?0:armorRating(opt.type); var dmg=Math.max(0,n-soak);
   var before=S.hp; var mx=hpMax();
@@ -1528,6 +1572,7 @@ function baseDamage(i,o,ch){ ch=ch||{};
   if(ch.double) expr=diceTimes(expr,2);
   var parts=[], total=0; var w=rollExpr(expr); total+=w.total; parts.push(w.text);
   var b=(ch.nobonus)?null:weaponBonus(dd); if(b){ var bb=rollExpr(b); total+=bb.total; parts.push(bb.text+' bonus'); }
+  if(dd.itemDmg){ total+=dd.itemDmg; parts.push(String(dd.itemDmg)); }
   if(o.prone){ var p=rollExpr('D6'); total+=p.total; parts.push(p.text+' prone'); }
   return {total:total,parts:parts,text:parts.join(' + '),expr:expr}; }
 function rollDamage(i,o,ch,notes,label,pre){
@@ -1806,7 +1851,7 @@ function renderActions(act,atk,react){
   var a=''; var list=atHand().concat([{i:-1,d:unarmed()}]);
   list.forEach(function(x){ var dd=x.d, sk=weaponSkill(dd), b=weaponBonus(dd); var m=autoMods({skill:sk,weapon:dd,ranged:!!dd.ranged}); var nb=m.banes.length-m.boons.length;
     var melee=!dd.ranged, subtle=hasFeat(dd,'Subtle');
-    var sub=esc(sk)+' <b>'+skillLevel(sk)+'</b> · '+esc(dd.damage||'D6')+(b?' + '+b:'')+(dd.ranged?' · range '+esc(dd.range)+' m':'')+(hasFeat(dd,'Long')?' · reach 4 m':'')+(nb>0?' · <span style="color:var(--red);">'+nb+' bane'+(nb>1?'s':'')+'</span>':'');
+    var sub=esc(sk)+' <b>'+skillLevel(sk)+'</b> · '+esc(dd.damage||'D6')+(b?' + '+b:'')+(dd.itemDmg?' + '+dd.itemDmg:'')+(dd.ranged?' · range '+esc(dd.range)+' m':'')+(hasFeat(dd,'Long')?' · reach 4 m':'')+(nb>0?' · <span style="color:var(--red);">'+nb+' bane'+(nb>1?'s':'')+'</span>':'');
     // right to left: Attack, Sneak Attack, Backstab, then the ability attacks
     var bt='';
     // (greyed, not removed, once it's active: the tapped button stays where it was)
@@ -2122,7 +2167,7 @@ function campaignAddRemote(roll){
   if(roll.type === 'foundloot' || roll.type === 'lootbox' || roll.type === 'system' || roll.type === 'achievement'){
     var entries0=$('log-entries'); var hint0=entries0.querySelector('.log-hint'); if(hint0) hint0.remove();
     var card = roll.type === 'foundloot' ? renderFoundLoot(roll) : roll.type === 'lootbox' ? renderLootBoxEntry(roll) : renderSystemEntry(roll);
-    entries0.insertBefore(card, entries0.firstChild); while(entries0.children.length>60) entries0.removeChild(entries0.lastChild); entries0.scrollTop=0; return;
+    fillBonus(card); entries0.insertBefore(card, entries0.firstChild); while(entries0.children.length>60) entries0.removeChild(entries0.lastChild); entries0.scrollTop=0; return;
   }
   var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint) hint.remove();
   var div=document.createElement('div'); div.className='log-entry remote'+(roll.type==='crit'?' crit':roll.type==='fumble'?' fumble':'');
@@ -2180,7 +2225,7 @@ function renderFoundLoot(roll){
   div.className = 'log-entry remote log-foundloot'; div.dataset.dropId = dropId; div.dataset.mode = mode; div._flItems = items;
   var rows = items.map(function(it, i){
     var by = claimed[i];
-    var label = esc(it.item || '?') + _flQty(it) + (it.notes ? ' <span class="fl-note">' + esc(it.notes) + '</span>' : '');
+    var label = esc(it.item || '?') + _flQty(it) + (it.notes ? ' <span class="fl-note">' + esc(it.notes) + '</span>' : '') + lootBonHtml(it);
     var btn = by ? _flDoneBtn(by, me) : !mine ? '<button class="fl-btn" disabled>For ' + esc(to || 'someone else') + '</button>' : '<button class="fl-btn fl-claim" data-idx="' + i + '">Claim</button>';
     return '<li class="fl-item" data-idx="' + i + '"><span class="fl-item-name">' + label + '</span>' + btn + '</li>';
   }).join('');
@@ -2223,7 +2268,7 @@ function _lbOpened(){ return _flRead('db_loot_opened'); }
 function _lbClaimed(){ return _flRead('db_loot_claimed'); }
 function _lbMarkOpened(id){ var o = _lbOpened(); o[id] = 1; _flWrite('db_loot_opened', o); }
 function _lbMarkClaimed(id, by){ var c = _lbClaimed(); c[id] = by; _flWrite('db_loot_claimed', c); }
-function _lbItemsHtml(items){ return (Array.isArray(items) ? items : []).map(function(it){ return '<li>' + esc(it.item || '?') + _flQty(it) + (it.notes ? ' <span class="lb-note">' + esc(it.notes) + '</span>' : '') + '</li>'; }).join(''); }
+function _lbItemsHtml(items){ return (Array.isArray(items) ? items : []).map(function(it){ return '<li>' + esc(it.item || '?') + _flQty(it) + (it.notes ? ' <span class="lb-note">' + esc(it.notes) + '</span>' : '') + lootBonHtml(it) + '</li>'; }).join(''); }
 function renderLootBoxEntry(roll){
   var p = {}; try { p = JSON.parse(roll.detail || '{}'); } catch(e){ p = {}; }
   var items = Array.isArray(p.items) ? p.items : [];
@@ -2239,7 +2284,7 @@ function renderLootBoxEntry(roll){
   div.innerHTML = '<div class="lb-head">' + esc(roll.label || 'LOOT BOX') + '</div>' + (roll.result ? '<div class="lb-name">' + esc(roll.result) + '</div>' : '') + forLabel + (p.note ? '<div class="lb-desc">' + esc(p.note) + '</div>' : '') + contents + '<div class="lb-actions">' + btn + '</div>';
   return div;
 }
-function _lbReveal(card){ var sealed = card.querySelector('.lb-sealed'); if(!sealed) return; var html = _lbItemsHtml(card._lootItems || []); if(html){ var ul = document.createElement('ul'); ul.className = 'lb-items'; ul.innerHTML = html; sealed.replaceWith(ul); } else sealed.remove(); }
+function _lbReveal(card){ var sealed = card.querySelector('.lb-sealed'); if(!sealed) return; var html = _lbItemsHtml(card._lootItems || []); if(html){ var ul = document.createElement('ul'); ul.className = 'lb-items'; ul.innerHTML = html; sealed.replaceWith(ul); fillBonus(ul); } else sealed.remove(); }
 function applyLootBoxClaim(p, roll){
   if(!p.boxId) return; _lbMarkClaimed(p.boxId, p.by || roll.source || 'Someone');
   var card = _lbCard(p.boxId);
@@ -2261,7 +2306,12 @@ $('log-entries').addEventListener('click', function(e){
 // sheet's gear rows have no count of their own.
 function claimLootItem(it){
   var name=String(it.item||'?').trim(); var qty=num(it.qty,1)||1;
-  var where=addGearByName(name,qty,it.notes||'');
+  var bl=(it.bv===2&&window.LootBonus)?LootBonus.normalize(LB_SYS,it.benefits):[];
+  var n0=S.inventory.length;
+  var where=addGearByName(name,qty,it.notes||'',bl.length>0);
+  if(bl.length){ var base=where==='other'?baseItemFor(name,it.cat):null;
+    S.inventory.slice(n0).forEach(function(r){ r.bv=2; r.benefits=bl.slice();
+      if(base){ r.kind=base.kind; r.base=base.name; r.equipped=base.kind==='weapon'?handCount()<3:!wornRow(base.kind); } }); }
   addLog('Claimed', 'Loot', name+(qty>1?' ×'+qty:'')+' · inventory', 'normal'); changed(); return true;
 }
 async function campaignPoll(){ if(!_campaign) return; try{ var r=await fetch('/api/campaigns/'+_campaign.id+'/rolls'+(_campaignLastId?'?since='+_campaignLastId:''), { credentials:'same-origin' }); if(!r.ok) return; var data=await r.json(); (data.rolls||[]).forEach(function(roll){ if(roll.clientKey!==_campaignClientKey) campaignAddRemote(roll); }); if(data.last) _campaignLastId=data.last; }catch(e){} }

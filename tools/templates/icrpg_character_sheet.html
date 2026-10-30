@@ -54,7 +54,16 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .fl-item{display:flex;flex-direction:column;align-items:flex-start;gap:4px;font-size:11px;color:#d0cabc;}
 .fl-item-name{flex:1;min-width:0;}
 .fl-note,.lb-note{color:#8f8a7e;font-style:italic;}
-.fl-btn,.lb-btn{flex:0 0 auto;background:var(--icrpg);color:ON--icrpg;border:none;border-radius:6px;padding:5px 11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
+/* GM-built loot bonuses (LootBonus badges, read-only) + the EQUIPPED / CARRIED toggle */
+.fl-bon{display:block;margin-top:3px;}
+.it-bon-line{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:1px 0 3px;}
+.it-eq{flex:0 0 auto;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.06em;text-transform:uppercase;border:1.5px solid var(--rule);color:var(--muted);background:transparent;border-radius:10px;padding:1px 9px;cursor:pointer;}
+.it-eq.on{border-color:var(--icrpg);background:var(--icrpg);color:#fff;}
+.it-bon{flex:1 1 auto;min-width:0;color:var(--ink);}
+.it-from{display:inline-block;margin-left:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--icrpg-dk);border:1px solid currentColor;border-radius:9px;padding:0 7px;white-space:nowrap;vertical-align:middle;}
+.it-note-wrap{display:flex;align-items:center;}
+.ef-item{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--icrpg-dk);margin-left:3px;}
+.fl-btn,.lb-btn{flex:0 0 auto;background:var(--icrpg);color:var(--on-accent,#fff);border:none;border-radius:6px;padding:5px 11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
 .fl-btn:hover:not(:disabled),.lb-btn:hover:not(:disabled){filter:brightness(1.12);}
 .fl-btn:disabled,.lb-btn:disabled{background:transparent;color:#8f8a7e;border:1px solid #55514a;cursor:default;}
 .lb-items{margin:5px 0 0;padding-left:16px;font-size:11px;color:#d0cabc;}
@@ -885,7 +894,9 @@ var SPELLS = G(typeof ICRPG_SPELLS!=='undefined'?ICRPG_SPELLS:undefined);
 
 // ── Render: stats, effort, hearts ───────────────────────────────────────────
 function statName(ab){ var s=STATS.find(function(x){return x.abbr===ab;}); return s?s.abbr:ab; }
-function statTotal(ab){ return Math.min(10, num($('st-b-'+ab).value)+num($('st-x-'+ab).value)); }
+function statTotal(ab){ return Math.min(10, num($('st-b-'+ab).value)+num($('st-x-'+ab).value)+icItemStat(ab)); }
+// DEFENSE = CON + Armor (+ equipped LOOT), max +10.
+function icDefense(){ return Math.min(10, statTotal('CON')+num($('f-armor').value)+_icIB.def); }
 function buildStats(){
   // Base is fixed at creation (kept in a hidden input); the player edits Bonus,
   // which sits under the rollable total button. Total = base + bonus (cap +10).
@@ -906,7 +917,7 @@ function buildEffort(){
     var nm=esc(ef.name).replace(/&#39;/g,"\\'");
     var tr=document.createElement('tr');
     tr.innerHTML='<td class="ef-name">'+esc(ef.name)+'</td>'+
-      '<td style="text-align:right;">bonus <input id="ef-'+key+'" data-nolock class="no-spin" type="number" value="0" oninput="scheduleAutosave()"></td>'+
+      '<td style="text-align:right;">bonus <input id="ef-'+key+'" data-nolock class="no-spin" type="number" value="0" oninput="scheduleAutosave()"><span class="ef-item" id="efi-'+key+'"></span></td>'+
       '<td style="text-align:right;width:60px;"><button class="ef-roll" title="Roll '+esc(ef.die)+' Effort" onclick="rollEffort(\''+key+'\',\''+esc(ef.die)+'\',\''+nm+'\')">'+esc(ef.die)+'</button></td>';
     b.appendChild(tr);
   });
@@ -926,9 +937,12 @@ function onHp(){ renderHearts(); scheduleAutosave(); }
 
 // ── Recalc (Defense) ────────────────────────────────────────────────────────
 function recalc(){
-  STAT_ABBR.forEach(function(ab){ var t=statTotal(ab); var el=$('st-t-'+ab); if(el) el.textContent=(t>=0?'+':'')+t; });
-  var def=Math.min(10, statTotal('CON')+num($('f-armor').value));
+  _icIB=icItemBonus();
+  STAT_ABBR.forEach(function(ab){ var t=statTotal(ab); var el=$('st-t-'+ab); if(el){ el.textContent=(t>=0?'+':'')+t; var w=_icIB.why.stat[ab].concat(_icIB.why.all); el.title=w.length?'Includes equipped LOOT: '+w.join(', '):''; } });
+  EFFORT_LIST.forEach(function(ef){ var k=ef.name.replace(/[^A-Za-z]/g,''), el=$('efi-'+k); if(!el) return; var n=(_icIB.effort[k]||0)+(_icIB.effort.All||0); el.textContent=n?icSgn(n):''; el.title=n?'From equipped LOOT: '+(_icIB.why.effort[k]||[]).concat(_icIB.why.effort.All||[]).join(', '):''; });
+  var def=icDefense();
   $('def-val').textContent=(def>=0?'+':'')+def;
+  $('def-val').title='Roll d20 + Defense to resist danger; enemies must meet or beat 10 + your Defense'+(_icIB.why.def.length?' · Equipped LOOT: '+_icIB.why.def.join(', '):'');
   if(typeof refreshWizardButtons==='function') refreshWizardButtons();
   scheduleAutosave();
 }
@@ -950,7 +964,7 @@ function icInitiative(){
   addLog('Initiative', String(d), 'd20('+d+') · highest goes first', d===20?'crit':d===1?'fumble':'normal');
 }
 function rollEffort(key,dieCode,name){
-  var n=dieVal(dieCode), r=die(n), bon=num(($('ef-'+key)||{}).value), total=r+bon;
+  var n=dieVal(dieCode), r=die(n), bon=num(($('ef-'+key)||{}).value)+icItemEffort(key), total=r+bon;
   addLog(name+' Effort', String(total), dieCode+'('+r+')'+(bon?(bon>0?' +':' ')+bon:''), n>=12&&r===n?'crit':'normal');
 }
 function rollFree(dieCode,label){
@@ -990,17 +1004,84 @@ function addRow(kind, d){
   var typeCell='<td><input class="it-tag" value="'+esc(d.tag||'')+'" oninput="scheduleAutosave()" placeholder="'+(kind==='abil'?'Ability':kind==='spell'?'School':'Type')+'"></td>';
   var noteCell='<td><input class="it-note" value="'+esc(d.note||'')+'" oninput="scheduleAutosave()" placeholder="note"></td>';
   var masteryCell = kind==='abil' ? '<td>'+masteryHtml(num(d.mastery))+'</td>' : '';
-  var del='<td style="text-align:right;"><button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave();">✕</button></td>';
+  var del='<td style="text-align:right;"><button class="row-x" onclick="'+(kind==='loot'?'icLootRemove(this.closest(\'tr\'))':'this.closest(\'tr\').remove()')+';scheduleAutosave();">✕</button></td>';
+  // A spell an equipped LOOT item grants: rebuilt from the item (never saved), badge after its info.
+  if(kind==='spell' && d.from){ tr.dataset.from=d.from; noteCell='<td><div class="it-note-wrap"><input class="it-note" value="'+esc(d.note||'')+'" placeholder="" data-nolock readonly><span class="it-from" title="Granted while '+esc(d.from)+' is EQUIPPED">from '+esc(d.from)+'</span></div></td>'; del='<td></td>'; }
+  // GM-built LOOT (bv:2): read-only bonus badges + EQUIPPED / CARRIED toggle under the name.
+  if(kind==='loot' && d.bv===2 && window.LootBonus){ var bl=LootBonus.normalize(LB_SYS, d.benefits); if(bl.length){ tr.dataset.bv='2'; tr.dataset.benefits=JSON.stringify(bl);
+    if(d.equipped && d.applied && d.applied.v===2) { tr.dataset.equipped='1'; tr.dataset.applied=JSON.stringify(d.applied); }
+    nameCell='<td><input class="it-name" value="'+esc(d.name||'')+'" oninput="scheduleAutosave()" placeholder="Name"><div class="it-bon-line">'+(icLbHasBonus(bl)?'<button type="button" class="it-eq" onclick="icToggleEquip(this.closest(\'tr\'))"></button>':'')+'<span class="it-bon"></span></div></td>'; } }
   tr.innerHTML=nameCell+typeCell+noteCell+masteryCell+del;
   body.appendChild(tr);
+  if(tr.dataset.bv==='2'){ LootBonus.editor(tr.querySelector('.it-bon'), { sys:LB_SYS, benefits:JSON.parse(tr.dataset.benefits), readonly:true }); icPaintEquip(tr); }
+  return tr;
 }
 function collectRows(kind){
-  return [].map.call(document.querySelectorAll('#'+kind+'-body tr'), function(tr){
+  return [].filter.call(document.querySelectorAll('#'+kind+'-body tr'), function(tr){ return !tr.dataset.from; }).map(function(tr){
     var o={ name:tr.querySelector('.it-name').value.trim(), tag:tr.querySelector('.it-tag').value.trim(), note:tr.querySelector('.it-note').value.trim() };
     var m=tr.querySelector('.mast'); if(m) o.mastery=num(m.dataset.m);
+    if(tr.dataset.bv==='2'){ o.bv=2; try{ o.benefits=JSON.parse(tr.dataset.benefits); }catch(e){ o.benefits=[]; } var ap=icApplied(tr); if(ap){ o.equipped=true; o.applied=ap; } }
     return o;
   }).filter(function(o){ return o.name; });
 }
+
+// ── LOOT bonuses (GM-built items, LootBonus bv:2) ───────────────────────────
+// ICRPG LOOT is EQUIPPED or CARRIED (p.29) — only EQUIPPED items give their bonuses.
+// Equipping snapshots LootBonus.effective() into data-applied {v:2, benefits, hp}.
+// STATS / DEFENSE / EFFORT are DERIVED from the equipped snapshots (statTotal,
+// icDefense, icEffBonus); HEARTS move Max HP by the recorded delta; spells appear on
+// the Spells tab while equipped. Unequip / delete reverses exactly what was applied.
+var LB_SYS='icrpg';
+var _icIB={ stat:{}, all:0, def:0, effort:{}, why:{ stat:{STR:[],DEX:[],CON:[],INT:[],WIS:[],CHA:[]}, all:[], def:[], effort:{} } };
+function icLbHasBonus(list){ return (list||[]).some(function(b){ return b.kind!=='note'; }); }
+function icApplied(tr){ if(tr.dataset.equipped!=='1' || !tr.dataset.applied) return null; try{ var r=JSON.parse(tr.dataset.applied); return r && r.v===2 && Array.isArray(r.benefits) ? r : null; }catch(e){ return null; } }
+function icLootName(tr){ var n=tr.querySelector('.it-name'); return (n&&n.value.trim())||'LOOT'; }
+function icItemBonus(){
+  var o={ stat:{}, all:0, def:0, effort:{}, why:{ stat:{}, all:[], def:[], effort:{} } };
+  STAT_ABBR.forEach(function(a){ o.stat[a]=0; o.why.stat[a]=[]; });
+  [].forEach.call(document.querySelectorAll('#loot-body tr'), function(tr){ var r=icApplied(tr); if(!r) return; var nm=icLootName(tr);
+    r.benefits.forEach(function(b){ var n=num(b.amount);
+      if(b.kind==='stat'){ var k=String(b.target).toUpperCase(); if(k in o.stat){ o.stat[k]+=n; o.why.stat[k].push(nm+' '+icSgn(n)); } }
+      else if(b.kind==='allstats'){ o.all+=n; o.why.all.push(nm+' '+icSgn(n)+' all'); }
+      else if(b.kind==='def'){ o.def+=n; o.why.def.push(nm+' '+icSgn(n)); }
+      else if(b.kind==='effort'){ var e=String(b.target||'All').replace(/[^A-Za-z]/g,'')||'All'; o.effort[e]=(o.effort[e]||0)+n; (o.why.effort[e]=o.why.effort[e]||[]).push(nm+' '+icSgn(n)); }
+    });
+  });
+  return o;
+}
+function icItemStat(ab){ return (_icIB.stat[ab]||0)+_icIB.all; }
+function icItemEffort(key, noAll){ return (_icIB.effort[key]||0)+(noAll?0:(_icIB.effort.All||0)); }
+function icPaintEquip(tr){ var b=tr.querySelector('.it-eq'); if(!b) return; var on=tr.dataset.equipped==='1'; b.classList.toggle('on', on); b.textContent=on?'Equipped':'Carried'; b.title=on?'EQUIPPED — its bonuses apply. Click to carry it instead.':'CARRIED — bonuses only apply when EQUIPPED. Click to equip.'; }
+function icToggleEquip(tr){
+  var nm=icLootName(tr);
+  if(tr.dataset.equipped==='1'){ icUnapply(tr); addLog('Unequipped', nm, 'Bonuses removed', 'normal'); }
+  else {
+    var list; try{ list=LootBonus.effective(LB_SYS, JSON.parse(tr.dataset.benefits)).filter(function(b){ return b.kind!=='note'; }); }catch(e){ list=[]; }
+    var hp=10*list.reduce(function(t,b){ return t+(b.kind==='heart'?num(b.amount):0); },0);
+    if(hp){ $('f-hpmax').value=Math.max(0, num($('f-hpmax').value)+hp); if(num($('f-hp').value)>num($('f-hpmax').value)) $('f-hp').value=$('f-hpmax').value; }
+    tr.dataset.equipped='1'; tr.dataset.applied=JSON.stringify({ v:2, benefits:list, hp:hp });
+    addLog('Equipped', nm, LootBonus.summary(LB_SYS, list)||'—', 'normal');
+  }
+  icPaintEquip(tr); icItemsChanged();
+}
+// Reverse exactly what the row applied (Max HP delta; derived bonuses drop with the record).
+function icUnapply(tr){
+  var r=icApplied(tr);
+  if(r && r.hp){ var mx=Math.max(0, num($('f-hpmax').value)-r.hp); $('f-hpmax').value=mx; if(num($('f-hp').value)>mx) $('f-hp').value=mx; }
+  delete tr.dataset.applied; tr.dataset.equipped='';
+}
+function icLootRemove(tr){ if(!tr) return; var had=!!icApplied(tr); icUnapply(tr); tr.remove(); if(had) icItemsChanged(); }
+// Spells granted by EQUIPPED LOOT: rebuilt on the Spells tab (skips one you already know).
+function icSyncItemSpells(){
+  var body=$('spell-body'); if(!body) return;
+  [].forEach.call(body.querySelectorAll('tr[data-from]'), function(tr){ tr.remove(); });
+  var own={}; icRows('spell').forEach(function(r){ own[icNorm(r.name)]=1; });
+  [].forEach.call(document.querySelectorAll('#loot-body tr'), function(tr){ var r=icApplied(tr); if(!r) return;
+    r.benefits.forEach(function(b){ if(b.kind!=='spell' || own[icNorm(b.target)]) return; own[icNorm(b.target)]=1;
+      var s=icFind(SPELLS, b.target); addRow('spell', { name:b.target, tag:(s&&s.school)||'Magic', note:'', from:icLootName(tr) }); });
+  });
+}
+function icItemsChanged(){ icSyncItemSpells(); recalc(); renderHearts(); icMaybeRender(); }
 
 // ── Picker (abilities / spells / loot) ──────────────────────────────────────
 var _pk=null;
@@ -1087,10 +1168,10 @@ function icFind(list, name){ var k=icNorm(name); return list.find(function(x){ r
 function icRows(kind){
   return [].map.call(document.querySelectorAll('#'+kind+'-body tr'), function(tr){
     var g=function(c){ var el=tr.querySelector(c); return el?el.value.trim():''; };
-    return { name:g('.it-name'), tag:g('.it-tag'), note:g('.it-note') };
+    return { name:g('.it-name'), tag:g('.it-tag'), note:g('.it-note'), bv:tr.dataset.bv==='2' };
   }).filter(function(r){ return r.name; });
 }
-function icEffBonus(dieCode){ var el=$('ef-'+(IC_EFF[dieCode]||'')); return el?num(el.value):0; }
+function icEffBonus(dieCode, noAll){ var k=IC_EFF[dieCode]||'', el=$('ef-'+k); return (el?num(el.value):0)+(k?icItemEffort(k, noAll):0); }
 function icTarget(){ var t=target(); return _icTurn.mode==='hard'?t+3:_icTurn.mode==='easy'?t-3:t; }
 function icModeTag(){ return _icTurn.mode==='hard'?' (HARD)':_icTurn.mode==='easy'?' (EASY)':''; }
 function icSgn(n){ return (n>=0?'+':'')+n; }
@@ -1100,7 +1181,7 @@ function icSgn(n){ return (n>=0?'+':'')+n; }
 // (stacks with the Easy toggle to Normal; already-Hard stays +3).
 function icCheck(ab, critOn, opt){
   opt=opt||{};
-  var d=die(20), t=((ab==='DEF') ? Math.min(10, statTotal('CON')+num($('f-armor').value)) : statTotal(ab))+(opt.bonus||0), total=d+t, tgt=icTarget()+((opt.hard && _icTurn.mode!=='hard')?3:0);
+  var d=die(20), t=((ab==='DEF') ? icDefense() : statTotal(ab))+(opt.bonus||0), total=d+t, tgt=icTarget()+((opt.hard && _icTurn.mode!=='hard')?3:0);
   var crit = d>=(critOn||20), fumble = d===1;
   return { d:d, t:t, total:total, tgt:tgt, crit:crit, fumble:fumble, hit: crit || (!fumble && total>=tgt), hardCard: !!opt.hard };
 }
@@ -1120,7 +1201,7 @@ function icEffort(dieCode, crit, extra, alwaysUlt, opt){
   var n=dieVal(dieCode), cnt=Math.max(1,opt.count||1), rs=[], r=0;
   for(var k=0;k<cnt;k++){ var x=die(n); rs.push(x); r+=x; }
   var bon=icEffBonus(opt.bonusDie||dieCode)+(extra||0), tot=r+bon, parts=(cnt>1?cnt:'')+dieCode+'('+rs.join('+')+')'+(bon?' '+icSgn(bon):'');
-  if(crit || alwaysUlt){ var ud=(crit&&opt.ultDice)||1, ub=icEffBonus('d12'); for(var j=0;j<ud;j++){ var u=die(12); tot+=u; parts+=' + ULTIMATE d12('+u+')'; } tot+=ub; if(ub) parts+=' '+icSgn(ub); }
+  if(crit || alwaysUlt){ var ud=(crit&&opt.ultDice)||1, ub=icEffBonus('d12', true); for(var j=0;j<ud;j++){ var u=die(12); tot+=u; parts+=' + ULTIMATE d12('+u+')'; } tot+=ub; if(ub) parts+=' '+icSgn(ub); }
   return { total:tot, detail:parts };
 }
 
@@ -1138,7 +1219,8 @@ function icWeapon(r){
   var energy = /\benergy\b|magic(al)? damage/i.test(txt) || /\bMAGIC\b/.test(txt);
   var dieCode = gun ? 'd8' : energy ? 'd10' : 'd6';
   // LOOT bonuses written on the item: "+2 Attempts / Effort", "-2 to Attempts", "+1 Effort", "+6 WEAPON EFFORT".
-  var att=txt.match(/([+-]\d+)\s*(?:to\s+)?Attempts?\b(?!\s+when)/i), eff2=txt.match(/([+-]\d+)\s*(?:Attempts?\s*\/\s*)?(?:WEAPON\s+)?Effort\b/i);
+  // GM-built LOOT (bv:2) carries its bonuses as badges (applied when EQUIPPED) — don't also read them from the text.
+  var att=r.bv?null:txt.match(/([+-]\d+)\s*(?:to\s+)?Attempts?\b(?!\s+when)/i), eff2=r.bv?null:txt.match(/([+-]\d+)\s*(?:Attempts?\s*\/\s*)?(?:WEAPON\s+)?Effort\b/i);
   return { name:r.name, stat: ranged?'DEX':'STR', die:dieCode,
     critOn: /natural 19 or 20|nat(ural)? 19/i.test(txt) ? 19 : 20,
     alwaysUlt: /always (inflicts |does )?ULTIMATE(?! (when|against|vs|in|on|to)\b)/i.test(txt) || /ULTIMATE effort every time/i.test(txt) || /ULTIMATE damage/.test(eff),
@@ -1262,7 +1344,7 @@ function icLootRow(name){ return [].find.call(document.querySelectorAll('#loot-b
 function icSpendUse(it){
   var tr=icLootRow(it.name); if(!tr) return 'gone';
   var left=it.uses-1;
-  if(left<=0){ tr.remove(); return 'used up'; }
+  if(left<=0){ icLootRemove(tr); return 'used up'; }
   var n=tr.querySelector('.it-note'), cur=n.value.replace(/\s*\b\d+\s*(?:uses?|count|sips?|charges?)\s*left\b\s*/i,' ').trim();
   n.value=(cur?cur+' · ':'')+left+(left===1?' use left':' uses left');
   return left+' left';
@@ -1278,7 +1360,7 @@ function icUseItem(it){
     _icTurn.mode=md0;
     ok=c.hit; res.push(icVerdict(c)); det.push(icCheckDetail(c, it.check.stat)+(it.check.easy?' (EASY)':''));
     type=c.crit?'crit':c.fumble?'fumble':'normal';
-    if(it.emptyOnNat1 && c.d===1){ var tr=icLootRow(it.name); if(tr) tr.remove(); det.push('natural 1 — the kit is empty'); }
+    if(it.emptyOnNat1 && c.d===1){ var tr=icLootRow(it.name); if(tr) icLootRemove(tr); det.push('natural 1 — the kit is empty'); }
   }
   if(ok){
     if(it.heal){
@@ -1365,7 +1447,7 @@ function icBuildOpts(){
     add('checks', { name:ab+' Check', kind:'action', btn:'Roll', sub:'d20'+icSgn(statTotal(ab))+' vs '+icTarget()+icModeTag(),
       run:function(){ var c=icCheck(ab); addLog(ab+' Check', c.total+'  '+icVerdict(c), icCheckDetail(c,ab), c.crit?'crit':c.fumble?'fumble':'normal'); } });
   });
-  var def=Math.min(10, statTotal('CON')+num($('f-armor').value));
+  var def=icDefense();
   add('checks', { name:'Defense (resist)', kind:'free', resist:true, btn:'Roll', sub:'d20'+icSgn(def)+' to resist danger · no Action',
     run:function(){ var c=icCheck('DEF'); addLog('Defense', c.total+'  '+icVerdict(c), icCheckDetail(c,'DEF'), c.crit?'crit':c.fumble?'fumble':'normal'); } });
   return O;
@@ -1578,6 +1660,7 @@ function applySheet(d){
   $('abil-body').innerHTML=''; (d.abilities||[]).forEach(function(x){ addRow('abil', x); });
   $('spell-body').innerHTML=''; (d.spells||[]).forEach(function(x){ addRow('spell', x); });
   $('loot-body').innerHTML=''; (d.loot||[]).forEach(function(x){ addRow('loot', x); });
+  icSyncItemSpells();
   if(typeof campaignRestore==='function') campaignRestore(d.campaign);
   if(d.turn && typeof d.turn==='object'){ _icTurn.move=!!d.turn.move; _icTurn.action=!!d.turn.action; _icTurn.far=!!d.turn.far; _icTurn.mode=(['easy','hard'].indexOf(d.turn.mode)>=0)?d.turn.mode:'normal'; }
   recalc(); renderHearts(); setDefaultTab();
@@ -1678,11 +1761,12 @@ function renderFoundLoot(roll){
   div.className = 'log-entry remote log-foundloot'; div.dataset.dropId = dropId; div.dataset.mode = mode; div._flItems = items;
   var rows = items.map(function(it, i){
     var by = claimed[i];
-    var label = esc(it.item || '?') + _flQty(it) + (it.notes ? ' <span class="fl-note">' + esc(it.notes) + '</span>' : '');
+    var label = esc(it.item || '?') + _flQty(it) + (it.notes ? ' <span class="fl-note">' + esc(it.notes) + '</span>' : '') + _lootBonHtml(it);
     var btn = by ? _flDoneBtn(by, me) : !mine ? '<button class="fl-btn" disabled>For ' + esc(to || 'someone else') + '</button>' : '<button class="fl-btn fl-claim" data-idx="' + i + '">Claim</button>';
     return '<li class="fl-item" data-idx="' + i + '"><span class="fl-item-name">' + label + '</span>' + btn + '</li>';
   }).join('');
   div.innerHTML = '<div class="fl-head">' + esc(roll.label || 'FOUND LOOT') + '</div>' + (roll.result ? '<div class="fl-name">' + esc(roll.result) + '</div>' : '') + (mode === 'named' ? '<div class="fl-for">For: ' + esc(to || '?') + '</div>' : mode === 'copies' ? '<div class="fl-for">A copy for everyone</div>' : '') + (p.note ? '<div class="fl-desc">' + esc(p.note) + '</div>' : '') + (rows ? '<ul class="fl-items">' + rows + '</ul>' : '');
+  _lootBonFill(div);
   return div;
 }
 function renderSystemEntry(roll){
@@ -1721,7 +1805,10 @@ function _lbOpened(){ return _flRead('icrpg_loot_opened'); }
 function _lbClaimed(){ return _flRead('icrpg_loot_claimed'); }
 function _lbMarkOpened(id){ var o = _lbOpened(); o[id] = 1; _flWrite('icrpg_loot_opened', o); }
 function _lbMarkClaimed(id, by){ var c = _lbClaimed(); c[id] = by; _flWrite('icrpg_loot_claimed', c); }
-function _lbItemsHtml(items){ return (Array.isArray(items) ? items : []).map(function(it){ return '<li>' + esc(it.item || '?') + _flQty(it) + (it.notes ? ' <span class="lb-note">' + esc(it.notes) + '</span>' : '') + '</li>'; }).join(''); }
+function _lbItemsHtml(items){ return (Array.isArray(items) ? items : []).map(function(it){ return '<li>' + esc(it.item || '?') + _flQty(it) + (it.notes ? ' <span class="lb-note">' + esc(it.notes) + '</span>' : '') + _lootBonHtml(it) + '</li>'; }).join(''); }
+// Read-only bonus badges on a loot card item (bv:2 only).
+function _lootBonHtml(it){ if(!it || it.bv !== 2 || !window.LootBonus) return ''; var l = LootBonus.normalize(LB_SYS, it.benefits); return l.length ? '<span class="fl-bon" data-b="' + esc(JSON.stringify(l)) + '"></span>' : ''; }
+function _lootBonFill(root){ if(!window.LootBonus || !root) return; root.querySelectorAll('.fl-bon[data-b]').forEach(function(el){ var l = []; try { l = JSON.parse(el.dataset.b); } catch(e){} el.removeAttribute('data-b'); LootBonus.editor(el, { sys: LB_SYS, benefits: l, readonly: true }); }); }
 function renderLootBoxEntry(roll){
   var p = {}; try { p = JSON.parse(roll.detail || '{}'); } catch(e){ p = {}; }
   var items = Array.isArray(p.items) ? p.items : [];
@@ -1735,9 +1822,10 @@ function renderLootBoxEntry(roll){
   else { btn = opened ? '<button class="lb-btn" disabled>Opened ✓</button>' : '<button class="lb-btn lb-open">Open</button>'; }
   var contents = opened ? (items.length ? '<ul class="lb-items">' + _lbItemsHtml(items) + '</ul>' : '') : '<div class="lb-sealed">Contents hidden until ' + (mode === 'claim' ? 'claimed' : 'opened') + '.</div>';
   div.innerHTML = '<div class="lb-head">' + esc(roll.label || 'LOOT BOX') + '</div>' + (roll.result ? '<div class="lb-name">' + esc(roll.result) + '</div>' : '') + forLabel + (p.note ? '<div class="lb-desc">' + esc(p.note) + '</div>' : '') + contents + '<div class="lb-actions">' + btn + '</div>';
+  _lootBonFill(div);
   return div;
 }
-function _lbReveal(card){ var sealed = card.querySelector('.lb-sealed'); if(!sealed) return; var html = _lbItemsHtml(card._lootItems || []); if(html){ var ul = document.createElement('ul'); ul.className = 'lb-items'; ul.innerHTML = html; sealed.replaceWith(ul); } else sealed.remove(); }
+function _lbReveal(card){ var sealed = card.querySelector('.lb-sealed'); if(!sealed) return; var html = _lbItemsHtml(card._lootItems || []); if(html){ var ul = document.createElement('ul'); ul.className = 'lb-items'; ul.innerHTML = html; sealed.replaceWith(ul); _lootBonFill(ul); } else sealed.remove(); }
 function applyLootBoxClaim(p, roll){
   if(!p.boxId) return; _lbMarkClaimed(p.boxId, p.by || roll.source || 'Someone');
   var card = _lbCard(p.boxId);
@@ -1759,7 +1847,7 @@ $('log-entries').addEventListener('click', function(e){
 // sheet's gear rows have no count of their own.
 function claimLootItem(it){
   var name = (it.item || '?') + (it.qty != null && String(it.qty) !== '1' && String(it.qty) !== '' ? ' ×' + it.qty : '');
-  addRow('loot', { name: name, tag: 'Loot', note: it.notes || '' });
+  addRow('loot', { name: name, tag: it.cat === 'weapon' ? 'Weapon' : it.cat === 'armor' ? 'Armor' : 'Loot', note: it.notes || '', bv: it.bv, benefits: it.bv === 2 ? it.benefits : null });
   addLog('Claimed', 'Loot', it.item || 'Item', 'normal'); return true;
 }
 async function campaignPoll(){ if(!_campaign) return; try{ var r=await fetch('/api/campaigns/'+_campaign.id+'/rolls'+(_campaignLastId?'?since='+_campaignLastId:''), { credentials:'same-origin' }); if(!r.ok) return; var data=await r.json(); (data.rolls||[]).forEach(function(roll){ if(roll.clientKey!==_campaignClientKey) campaignAddRemote(roll); }); if(data.last) _campaignLastId=data.last; }catch(e){} }
@@ -1780,6 +1868,8 @@ window.openCampaign=openCampaign; window.closeCampaign=closeCampaign; window.cam
 <script src="/tools-data/icrpg-loot.js"></script>
 <script src="/tools-data/icrpg-gear.js"></script>
 <script src="/tools-data/icrpg-spells.js"></script>
+<script src="/tools-data/loot-bonus.js"></script>
+<script src="/tools-data/icrpg-loot-bonus.js"></script>
 <script src="/tools-data/icrpg-sheet-builder.js"></script>
 <script src="/tools-data/icrpg-homebrew.js"></script>
 

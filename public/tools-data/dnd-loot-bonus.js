@@ -36,7 +36,7 @@
     if (plus) out.push({ kind: "plus", amount: +plus[1] });
     var acm = t.match(/\+(\d)\s+bonus to (?:your )?(?:AC|Armor Class)\b/i) || t.match(/\+(\d)\s+AC\b/i);
     if (acm && !(plus && /armor|armour|shield/i.test(t.slice(0, 40)))) out.push({ kind: "ac", amount: +acm[1] });
-    if ((m = t.match(/\+(\d)\s+bonus to (?:(?:your )?(?:AC|Armor Class) and )?(?:to )?(?:all )?(?:your )?saving throws/i))) out.push({ kind: "save", amount: +m[1] });
+    if ((m = t.match(/\+(\d)\s+bonus to (?:(?:your )?(?:AC|Armor Class) and )?(?:to )?(?:all )?(?:your )?saving throws/i)) || (m = t.match(/\+(\d)\s+to (?:all )?saving throws/i))) out.push({ kind: "save", amount: +m[1] });
     var re = /(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma) score (?:is|becomes|changes to|of)\s+(\d+)/gi;
     while ((m = re.exec(t))) out.push({ kind: "setstat", target: STAT_FULL[m[1].toLowerCase()], amount: +m[2] });
     var re2 = /\+(\d)\s+(?:bonus to (?:your )?)?(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma|STR|DEX|CON|INT|WIS|CHA)\b(?! saving)/gi;

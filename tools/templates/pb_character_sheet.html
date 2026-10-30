@@ -15,6 +15,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Pirate Borg Character Sheet</title>
 <script src="/tools-data/pb-data.js"></script>
+<script src="/tools-data/loot-bonus.js"></script>
+<script src="/tools-data/pb-loot-bonus.js"></script>
 <style>
 /* ═══ Pirate Borg (Limithron) — Character Sheet ═══
    Shared site skeleton (app-wrap / sheet / roll log / lock / campaign / dice tray)
@@ -265,6 +267,8 @@ body.dark .eq-pip.on{box-shadow:inset 0 0 0 2px var(--box);}
 .inv-name-line .tag{flex:0 0 auto;}
 .inv-eq-slot{flex:0 0 17px;width:17px;display:inline-flex;align-items:center;}
 .inv-sub{margin:1px 0 3px 23px;font-size:12.5px;line-height:1.35;}
+.inv-bon{display:block;margin:2px 0 3px 23px;}.inv-bon:empty{display:none;}
+.fl-bon{display:block;margin:2px 0 0;}.fl-bon .lbn{min-height:0;}
 /* ▽ stow in a container / △ take it out — Shadowdark's Gear Slots ⇄ Free to Carry buttons */
 .mv-btn{width:22px;height:22px;padding:0;background:transparent;border:1px solid var(--rule);border-radius:4px;color:var(--muted);cursor:pointer;font-size:11px;line-height:1;vertical-align:middle;margin-right:2px;}
 .mv-btn:hover{border-color:var(--acc);color:var(--acc-dk);}
@@ -948,7 +952,39 @@ function tempAbil(a){ var t=[];
   if(a==='PRESENCE'&&num(S.cond.brain)>0) t.push({v:-3,l:'brain injury'});
   if(a==='TOUGHNESS'&&hasAilment('vampirism')&&S.cond.sunlight) t.push({v:-2,l:'sunlight'});
   timedFx('abil').forEach(function(x){ var v=num(x.fx.abil[a]); if(v) t.push({v:v,l:x.name}); });
+  itemFx('stat').forEach(function(y){ if(LB_STAT[y.b.target]===a&&y.v) t.push({v:y.v,l:y.l}); });
   return t; }
+
+// ── Item bonuses: GM-built loot arrives with read-only badges (LootBonus, bv:2) ──
+// x.benefits = the badges. While the item is equipped / worn, x.applied = {v:2, weapon, benefits}
+// (LootBonus.effective of the badges, notes left out) and every number below is DERIVED from those
+// records, so unequipping or deleting the item reverses exactly what it gave and a reload never
+// re-applies. Relics / rituals it carries are added to the Magic lists tagged from:<item uid>
+// and taken off again by syncItemBonuses().
+var LB_SYS='pb', LB_STAT={str:'STRENGTH',agi:'AGILITY',pre:'PRESENCE',tou:'TOUGHNESS',spi:'SPIRIT'};
+function itemBens(x){ return (x&&window.LootBonus&&Array.isArray(x.benefits)&&x.benefits.length)?LootBonus.normalize(LB_SYS,x.benefits):[]; }
+function hasBonus(x){ return itemBens(x).some(function(b){ return b.kind!=='note'; }); }
+function itemApplied(x){ var r=x&&x.equipped&&x.applied; return r&&r.v===2&&Array.isArray(r.benefits)?r:null; }
+// Everything of one kind the equipped items give: [{v, l (item name), b, x}]. A weapon's attack /
+// damage bonus counts only for that weapon (wuid); any other item's applies to every attack.
+function itemFx(kind,wuid){ var out=[]; A(S.items).forEach(function(x){ var r=itemApplied(x); if(!r) return;
+  r.benefits.forEach(function(b){ if(b.kind!==kind) return; if((kind==='attack'||kind==='damage')&&r.weapon&&x.uid!==wuid) return; out.push({v:num(b.amount),l:x.name,b:b,x:x}); }); }); return out; }
+function itemSum(kind,wuid){ return itemFx(kind,wuid).reduce(function(t,y){ return t+y.v; },0); }
+function syncItemBonuses(){
+  var want={relic:{},ritual:{}};
+  S.items.forEach(function(x){
+    if(x.equipped&&equippable(x)&&hasBonus(x)){ if(!itemApplied(x)) x.applied={v:2,weapon:x.kind==='weapon',benefits:LootBonus.effective(LB_SYS,x.benefits).filter(function(b){ return b.kind!=='note'; })}; }
+    else delete x.applied;
+    var r=itemApplied(x); if(r) r.benefits.forEach(function(b){ if(b.kind==='relic'||b.kind==='ritual') (want[b.kind][x.uid]=want[b.kind][x.uid]||[]).push(b.target); });
+  });
+  S.relics=S.relics.filter(function(r){ return !r.from||(want.relic[r.from]||[]).some(function(n){ var d=relicDef(n); return d&&d.id===r.id; }); });
+  S.rituals=S.rituals.filter(function(r){ return !r.from||(want.ritual[r.from]||[]).some(function(n){ var d=ritualDef(n); return d&&d.id===r.id; }); });
+  Object.keys(want.relic).forEach(function(u){ want.relic[u].forEach(function(n){ var d=relicDef(n); if(d&&!S.relics.some(function(r){ return r.from===u&&r.id===d.id; })) S.relics.push({uid:uid(),id:d.id,locked:false,destroyed:false,from:u}); }); });
+  Object.keys(want.ritual).forEach(function(u){ want.ritual[u].forEach(function(n){ var d=ritualDef(n); if(d&&!S.rituals.some(function(r){ return r.id===d.id; })) S.rituals.push({id:d.id,locked:false,from:u}); }); });
+}
+function fromTag(r){ var x=r&&r.from?itemBy(r.from):null; return x?' <span class="tag" title="Granted while this item is equipped">from '+esc(x.name)+'</span>':''; }
+function fillBadges(root){ if(!window.LootBonus||!root) return; root.querySelectorAll('[data-lbn]').forEach(function(el){ var l=[]; try{ l=JSON.parse(el.getAttribute('data-lbn')); }catch(e){} el.removeAttribute('data-lbn'); LootBonus.editor(el,{sys:LB_SYS,benefits:l,readonly:true}); }); }
+function badgeSlot(list,cls){ return list.length?'<span class="'+cls+'" data-lbn="'+esc(JSON.stringify(list))+'"></span>':''; }
 function abil(a){ var v=baseAbil(a); tempAbil(a).forEach(function(t){ v+=t.v; }); return clamp(v,-3,6); }
 
 // ── gear helpers ──
@@ -956,7 +992,7 @@ function items(kind){ return S.items.filter(function(x){ return !kind||x.kind===
 function itemBy(u){ return S.items.find(function(x){ return x.uid===u; })||null; }
 function wornClothing(){ return S.items.find(function(x){ return x.kind==='clothing'&&x.equipped&&!x.ruined; })||null; }
 function wornHat(){ return S.items.find(function(x){ return x.kind==='hat'&&x.equipped&&!x.broken; })||null; }
-function armorTier(){ var c=wornClothing(); var t=c?num(c.tier):0; if(has('thick-skinned')) t=Math.max(t,1); timedFx('armorTier').forEach(function(x){ t=Math.max(t,num(x.fx.armorTier)); }); return clamp(t,0,3); }
+function armorTier(){ var c=wornClothing(); var t=(c?num(c.tier):0)+itemSum('armor'); if(has('thick-skinned')) t=Math.max(t,1); timedFx('armorTier').forEach(function(x){ t=Math.max(t,num(x.fx.armorTier)); }); return clamp(t,0,3); }
 function armorDie(){ return DIE_BY_TIER[armorTier()]; }
 function agilityPenalty(){ var c=wornClothing(); return c?num(c.agilityDR):0; }
 function defensePenalty(){ var c=wornClothing(); return c?num(c.defenseDR):0; }
@@ -969,7 +1005,7 @@ function metalAtHand(){ var w=equippedWeapons().find(function(x){ return isMetal
 function stackItem(x){ return !!x.stack||x.kind==='ammo'; }
 function carriedChain(x){ var seen=0; while(x&&x.in&&seen<8){ var c=itemBy(x.in); if(!c) return true; if(c.carried===false) return false; x=c; seen++; } return true; }
 function itemLoad(x){ if(((x.kind==='clothing'||x.kind==='hat')&&x.equipped)||x.natural) return 0; if(x.container&&x.carried===false) return 0; if(!carriedChain(x)) return 0; var sl=(x.slots==null||x.slots==='')?1:Number(x.slots); if(isNaN(sl)) sl=1; return stackItem(x)?sl:sl*Math.max(0,num(x.qty,1)); }
-function relicLoad(){ return S.relics.filter(function(r){ return !r.destroyed; }).length; }
+function relicLoad(){ return S.relics.filter(function(r){ return !r.destroyed&&!r.from; }).length; }   // an item's relic: the item already takes the slot
 function carryCap(){ return Math.max(1,8+abil('STRENGTH')); }
 function carryLoad(){ var t=0; S.items.forEach(function(x){ t+=itemLoad(x); }); return Math.ceil(t+relicLoad()-1e-9); }
 function overEnc(){ return carryLoad()>carryCap(); }
@@ -1002,18 +1038,19 @@ function addRelic(id){ var d=relicDef(id); if(!d) return null; var r={uid:uid(),
 function addRitual(id){ var d=ritualDef(id); if(!d) return null; if(!S.rituals.some(function(r){ return r.id===d.id; })) S.rituals.push({id:d.id,locked:false}); return d; }
 // A weapon / clothing / hat / bomb / ammo / gear row by (any) name: the creation wizard,
 // background items and loot claims all land here.
-function addByName(name,qty,note){ qty=qty||1; var n=String(name||'').trim(); if(!n) return 'none';
+// solo: never fold into an existing row (an item that carries its own bonuses).
+function addByName(name,qty,note,solo){ qty=qty||1; var n=String(name||'').trim(); if(!n) return 'none';
   if(/\bASH\b/.test(n)){ addAsh(qty); return 'ash'; }   // "ASH", "2 doses of ASH" (the capitalised word — not "ashes")
   if(/\bpotion\b/i.test(n)&&!gearDef(n)){ for(var pi=0;pi<qty;pi++) S.items.push(potionByName(n,note)); return 'potion'; }
   var w=weaponDef(n); if(w){ for(var i=0;i<qty;i++) S.items.push(mkWeapon(w,{equipped:equippedWeapons().length<3,note:note||''})); if(w.blackPowder&&!ammoCount('shot')) addShot(Math.max(1,10+abil('PRESENCE'))); return 'weapon'; }
   var c=clothingDef(n); if(c){ var wear=!wornClothing(); S.items.push(mkClothing(c,{equipped:wear})); return 'clothing'; }
   var h=hatDef(n); if(h&&!h.none){ var wh=!wornHat(); S.items.push(mkHat(h,{equipped:wh})); return 'hat'; }
-  var b=bombDef(n); if(b){ var eb=S.items.find(function(x){ return x.kind==='bomb'&&x.ref===b.id; }); if(eb) eb.qty=num(eb.qty)+qty; else S.items.push(mkBomb(b,qty)); return 'bomb'; }
+  var b=bombDef(n); if(b){ var eb=S.items.find(function(x){ return x.kind==='bomb'&&x.ref===b.id; }); if(eb&&!solo) eb.qty=num(eb.qty)+qty; else S.items.push(mkBomb(b,qty)); return 'bomb'; }
   var am=byName(D('PB_AMMO'),n)||(/shot/i.test(n)?{id:'shot'}:null); if(am){ if(am.id==='shot') addShot(qty>1?qty:20); else S.items.push(mkAmmo(am.id,(am.qty||10)*qty)); return 'ammo'; }
   var r=byName(D('PB_RELICS'),n); if(r){ addRelic(r.id); return 'relic'; }
   var g=gearDef(n)||byName(D('PB_HOSPITALITY'),n);
   if(g){ var ex=S.items.find(function(x){ return x.kind==='gear'&&x.ref===(g.id||g.name)&&x.uses==null&&!x.container; });
-    if(ex&&!g.capacity){ ex.qty=num(ex.qty,1)+qty; } else { var row=g.id?mkGear(g,qty):{uid:uid(),kind:'gear',ref:g.name,name:g.name,qty:qty,slots:1,drink:!!g.drink,note:''}; if(note) row.note=note; S.items.push(row); } return 'gear'; }
+    if(ex&&!g.capacity&&!solo){ ex.qty=num(ex.qty,1)+qty; } else { var row=g.id?mkGear(g,qty):{uid:uid(),kind:'gear',ref:g.name,name:g.name,qty:qty,slots:1,drink:!!g.drink,note:''}; if(note) row.note=note; S.items.push(row); } return 'gear'; }
   var drink=/\b(grog|rum|wine)\b/i.test(n);
   S.items.push({uid:uid(),kind:'gear',ref:'',name:n,qty:qty,slots:1,note:note||'',drink:drink||undefined}); return 'other'; }
 
@@ -1065,7 +1102,7 @@ function renderLuck(){
   var n=num(S.luck);
   setHTML($('luck-box'),'<span class="luck-n">'+n+'</span><span class="counter"><button class="small-btn ghost" data-nolock onclick="adjLuck(-1)"'+(n>0?'':' disabled')+' aria-label="Spend one Devil\'s Luck">−</button><button class="small-btn ghost" data-nolock onclick="adjLuck(1)" aria-label="Gain one Devil\'s Luck">＋</button></span>');
 }
-function hpMax(){ return Math.max(1,num(S.hpMax,1)); }
+function hpMax(){ return Math.max(1,num(S.hpMax,1)+itemSum('hp')); }   // S.hpMax is the pirate's own; equipped items add theirs
 function renderStatus(){
   var hm=hpMax(); S.hp=Math.min(num(S.hp),hm);
   setVal($('f-hp'),S.hp); setVal($('f-hpmax'),hm); 
@@ -1140,10 +1177,10 @@ function renderMagic(){
   h+='<div class="section-bar" style="margin-top:6px;"><span>Arcane Rituals</span><span class="hdr-right"><span class="sb-note">today <b>'+num(rc.left)+'/'+num(rc.max)+'</b></span><button class="hdr-btn" data-nolock onclick="rollDaily(\'rituals\')">Roll casts</button><button class="hdr-btn lk-hide" onclick="openPicker(\'ritual\')">＋ Ritual</button></span></div>';
   if(!r.rituals) h+='<div class="hint-line" style="color:var(--red);">'+esc(mc?mc.name:'You')+'s can\'t use arcane rituals.</div>';
   else if(block) h+='<div class="hint-line" style="color:var(--red);">'+esc(block)+'</div>';
-  h+='<table class="tbl"><tbody>'+(S.rituals.map(function(x,i){ var p=ritualDef(x.id)||{name:x.id,text:''}; return '<tr><td style="width:34%;"><b>'+esc(p.numeral||'')+' '+esc(p.name)+'</b>'+(x.locked?'<br><span class="tag warn">failed — until dawn</span>':'')+'</td><td class="desc">'+esc(p.text)+'</td><td style="width:92px;white-space:nowrap;"><button class="small-btn" onclick="openRitual(\''+jsq(x.id)+'\')"'+(x.locked||!r.rituals?' disabled':'')+'>Cast</button><button class="row-x lk-hide" onclick="removeRitual('+i+')">✕</button></td></tr>'; }).join('')||'<tr><td class="desc">No rituals.</td></tr>')+'</tbody></table>';
+  h+='<table class="tbl"><tbody>'+(S.rituals.map(function(x,i){ var p=ritualDef(x.id)||{name:x.id,text:''}; return '<tr><td style="width:34%;"><b>'+esc(p.numeral||'')+' '+esc(p.name)+'</b>'+(x.locked?'<br><span class="tag warn">failed — until dawn</span>':'')+'</td><td class="desc">'+esc(p.text)+fromTag(x)+'</td><td style="width:92px;white-space:nowrap;"><button class="small-btn" onclick="openRitual(\''+jsq(x.id)+'\')"'+(x.locked||!r.rituals?' disabled':'')+'>Cast</button>'+(x.from?'':'<button class="row-x lk-hide" onclick="removeRitual('+i+')">✕</button>')+'</td></tr>'; }).join('')||'<tr><td class="desc">No rituals.</td></tr>')+'</tbody></table>';
   h+='<div class="section-bar" style="margin-top:6px;"><span>Ancient Relics</span><span class="hdr-right"><button class="hdr-btn lk-hide" onclick="openPicker(\'relic\')">＋ Relic</button></span></div>';
   var rb=relicBlock(); if(rb) h+='<div class="hint-line" style="color:var(--red);">'+esc(rb)+'</div>';
-  h+='<table class="tbl"><tbody>'+(S.relics.map(function(x,i){ var p=relicDef(x.id)||{name:x.id,text:''}; return '<tr><td style="width:34%;"><b>'+esc(p.name)+'</b>'+(x.destroyed?'<br><span class="tag warn">destroyed</span>':x.locked?'<br><span class="tag warn">spent — until dawn</span>':'')+'</td><td class="desc">'+esc(p.text)+'</td><td style="width:92px;white-space:nowrap;"><button class="small-btn" onclick="useRelic(\''+x.uid+'\')"'+(x.locked||x.destroyed?' disabled':'')+'>Use</button><button class="row-x lk-hide" onclick="removeRelic('+i+')">✕</button></td></tr>'; }).join('')||'<tr><td class="desc">No relics.</td></tr>')+'</tbody></table>';
+  h+='<table class="tbl"><tbody>'+(S.relics.map(function(x,i){ var p=relicDef(x.id)||{name:x.id,text:''}; return '<tr><td style="width:34%;"><b>'+esc(p.name)+'</b>'+(x.destroyed?'<br><span class="tag warn">destroyed</span>':x.locked?'<br><span class="tag warn">spent — until dawn</span>':'')+'</td><td class="desc">'+esc(p.text)+fromTag(x)+'</td><td style="width:92px;white-space:nowrap;"><button class="small-btn" onclick="useRelic(\''+x.uid+'\')"'+(x.locked||x.destroyed?' disabled':'')+'>Use</button>'+(x.from?'':'<button class="row-x lk-hide" onclick="removeRelic('+i+')">✕</button>')+'</td></tr>'; }).join('')||'<tr><td class="desc">No relics.</td></tr>')+'</tbody></table>';
   if(S.mishaps.length) h+='<div class="hint-line">Mystical mishaps: '+S.mishaps.map(function(n){ return '<b style="font-family:var(--f-num);">'+n+'</b>'; }).join(', ')+'</div>';
   return h; }
 function rankName(r){ return ['I','II','III'][clamp(num(r,1),1,3)-1]; }
@@ -1168,7 +1205,7 @@ function clothSummary(x){ var info=(x.ruined?'<span class="tag warn">ruined</spa
   var rep=repairCost(x); if(rep) info+=' <button class="small-btn ghost" onclick="repairArmor(\''+x.uid+'\')" title="Armor repair: tier '+x.tier+' → '+(x.tier+1)+'">Repair '+rep+'s</button>';
   return info; }
 function hatSummary(x){ return 'hat'+(x.dr?' · −'+x.dr+' damage':'')+(x.sacrifice?' · breakable':'')+(x.metal?' · metal':'')+(x.broken?' <span class="tag warn">broken</span>':''); }
-function equippable(x){ return (x.kind==='weapon'&&!x.natural)||x.kind==='clothing'||x.kind==='hat'; }
+function equippable(x){ return (x.kind==='weapon'&&!x.natural)||x.kind==='clothing'||x.kind==='hat'||(!x.natural&&!x.container&&hasBonus(x)); }   // a gear item with bonuses gets an equip pip too
 // The Gear tab: the Inventory list is what you carry on you (weapons, clothing and hats
 // included); every container (backpack, sea chest, boat) gets its own section listing what's
 // stowed in it. ▽ stows a row in a container, △ takes it back out — Shadowdark's Gear Slots ⇄
@@ -1204,7 +1241,7 @@ function invRow(x,where){
   if(where) mv='<button class="mv-btn" data-nolock onclick="unstowItem(\''+x.uid+'\')" title="Take it out — back to Inventory">△</button>';
   else { var t=stowTargets(x); if(t.length) mv='<button class="mv-btn" data-nolock onclick="stowItem(\''+x.uid+'\')" title="'+esc(t.length===1?'Stow in '+t[0].name:'Stow in a container')+(equippable(x)&&x.equipped?' (puts it away)':'')+'">▽</button>'; }
   var slotsTitle=(x.kind==='clothing'||x.kind==='hat')?'Slots when carried, not worn':stackItem(x)?'Slots for the whole stack':'Slots per item';
-  return '<tr class="inv-row'+(x.equipped&&equippable(x)?' is-eq':'')+'" data-uid="'+x.uid+'"><td><div class="inv-name-line"><span class="inv-eq-slot">'+pip+'</span><input class="inv-name" value="'+esc(x.name)+'" onchange="onItem(\''+x.uid+'\',\'name\',this.value)">'+st.join('')+'</div>'+(sub?'<div class="inv-sub desc">'+sub+'</div>':'')+'</td>'+
+  return '<tr class="inv-row'+(x.equipped&&equippable(x)?' is-eq':'')+'" data-uid="'+x.uid+'"><td><div class="inv-name-line"><span class="inv-eq-slot">'+pip+'</span><input class="inv-name" value="'+esc(x.name)+'" onchange="onItem(\''+x.uid+'\',\'name\',this.value)">'+st.join('')+'</div>'+(sub?'<div class="inv-sub desc">'+sub+'</div>':'')+badgeSlot(itemBens(x),'inv-bon')+'</td>'+
     '<td><input class="num no-spin" type="number" value="'+num(x.qty,1)+'" data-nolock onchange="onItem(\''+x.uid+'\',\'qty\',this.value)"></td><td><input class="num" value="'+esc(x.slots==null?1:x.slots)+'" onchange="onItem(\''+x.uid+'\',\'slots\',this.value)" title="'+slotsTitle+'"></td>'+
     '<td>'+extra+'<input class="inv-note" value="'+esc(x.note||'')+'" style="width:auto;min-width:80px;font-weight:400;font-size:13px;" onchange="onItem(\''+x.uid+'\',\'note\',this.value)"></td><td class="inv-acts">'+mv+acts+(x.natural?'':'<button class="row-x" onclick="removeItem(\''+x.uid+'\')" title="Remove">✕</button>')+'</td></tr>'; }
 function renderGear(){
@@ -1218,7 +1255,7 @@ function renderGear(){
     cs+='<div class="cont-sec" data-cont="'+c.uid+'"><div class="section-bar cont-bar"><span>'+esc(c.name)+' <span class="cont-fill'+(over?' over':'')+'"'+(over?' title="Over capacity"':'')+'>('+(c.capacity!=null?f+'/'+c.capacity:f+(f===1?' slot':' slots'))+')</span></span><span class="hdr-right">'+right+'</span></div>'+
       (rows?'<table class="tbl inv-tbl"><thead><tr><th style="width:50%;">Item</th><th style="width:50px;">Qty</th><th style="width:50px;">Slots</th><th>Note / uses</th><th style="width:60px;"></th></tr></thead><tbody>'+rows+'</tbody></table>'
         :'<div class="cont-empty">Empty</div>')+'</div>'; });
-  setHTML($('cont-secs'),cs);
+  setHTML($('cont-secs'),cs); fillBadges($('inv-body')); fillBadges($('cont-secs'));
   var load=carryLoad(), cap=carryCap(); var e=$('enc'); e.className='sb-note enc-note'+(load>cap?' over':'');
   e.title=load>2*cap?'Too much to carry':load>cap?'Over-encumbered: STRENGTH and AGILITY tests +2 DR':'Slots carried / carrying capacity (8 + STRENGTH)';
   setHTML(e,'Carry Capacity <b>'+load+'/'+cap+'</b>');
@@ -1395,7 +1432,7 @@ function refreshWizardButtons(){ var built=!!(S.built||S.classId); var bb=$('bui
 // renderPlay redraws only what play changes (abilities' temporary modifiers, Luck, Status,
 // Class & Magic, Gear, the Action tab). Both skip regions whose markup didn't change.
 function renderPlay(){
-  refreshWizardButtons(); renderAbilities(); renderLuck(); renderStatus(); renderShip(); renderClass(); renderGear();
+  syncItemBonuses(); refreshWizardButtons(); renderAbilities(); renderLuck(); renderStatus(); renderShip(); renderClass(); renderGear();
   if(typeof renderTurn==='function') renderTurn();
   if(window.applySheetLock) try{ window.applySheetLock(); }catch(e){}   // freshly drawn fields follow the lock
 }
@@ -1419,7 +1456,7 @@ function onHpCommit(){ var f=$('f-hp'); if(isNaN(parseInt(f.value,10))||num(f.va
   addLog('Hit Points',(S.hp<was?'−'+(was-S.hp):'+'+(S.hp-was))+' HP','→ '+S.hp+'/'+hpMax(),S.hp<=0?'fumble':'normal');
   if(S.hp<0) dying({}); else if(S.hp===0) brokenRoll();
   changed(); }
-function onHpMax(v){ S.hpMax=Math.max(1,num(v,1)); changed(); }
+function onHpMax(v){ S.hpMax=Math.max(1,num(v,1)-itemSum('hp')); changed(); }
 // − spends a point (a Rapscallion's Lucky Devil draws a card for it); ＋ gains one.
 function adjLuck(n){ if(n<0){ if(num(S.luck)<=0) return; spendLuck(''); changed(); return; } S.luck=num(S.luck)+n; changed(); }
 function onSilver(){ S.silver=Math.max(0,num($('c-silver').value)); scheduleAutosave(); }
@@ -1457,7 +1494,10 @@ function removeRelic(i){ if(needUnlock()) return; S.relics.splice(i,1); changed(
 // and only when the die itself didn't already decide it.
 var _last=null;
 function critOn(o){ if((o.kind==='attack'||o.kind==='defense')&&has('calculating-cutthroat')) return 19; return 20; }
-function rollBonuses(o){ var b=[]; if(o.kind==='defense'&&has('dazzling-acrobatics')) b.push({v:2,l:'Dazzling Acrobatics'}); return b; }
+function rollBonuses(o){ var b=[]; if(o.kind==='defense'&&has('dazzling-acrobatics')) b.push({v:2,l:'Dazzling Acrobatics'});
+  if(o.kind==='defense') itemFx('defense').forEach(function(y){ if(y.v) b.push({v:y.v,l:y.l}); });
+  if(o.kind==='attack') itemFx('attack',o.wuid).forEach(function(y){ if(y.v) b.push({v:y.v,l:y.l}); });
+  return b; }
 // o: {label, ability|null, kind, bonus?, twice?, onRes(res), note(res)}
 function test(o){ o.bonuses=rollBonuses(o); return resolve(o,null); }
 function resolve(o,prev){
@@ -1723,6 +1763,7 @@ function attackSituations(w){ var opts=[], dmgAuto=[];
   var bs=featRec('back-stabber'); if(bs&&bs.card){ var o=opts.find(function(z){ return z.id==='back-stabber'; }); if(o) o.dmg=dieStep(['d2','d4','d6','d8'],'d2',num(bs.card.step)); }
   if(w.ref==='blunderbuss'||/boomstick/i.test(w.name)) opts.push({id:'close',l:/boomstick/i.test(w.name)?'In melee range':'Within 10\'',why:'d10 damage',close:true});
   if(w.thrown&&w.thrown.ability&&!isRanged(w)) opts.push({id:'thrown',l:'Throw it',why:'Test '+w.thrown.ability,thrown:true});
+  itemFx('damage',w.uid).forEach(function(y){ if(y.v) dmgAuto.push({v:sgn(y.v),l:y.l}); });   // item bonuses (this weapon's own, or a worn item's)
   return {opts:opts,dmgAuto:dmgAuto}; }
 function addOpt(opts,x,add,when){ var ex=opts.find(function(o){ return o.id===x.id&&o.when===when; }); if(ex){ if(add.dmg) ex.dmg=(ex.dmg?ex.dmg+'+':'')+add.dmg; return; }
   opts.push(Object.assign({id:x.id,l:x.src.replace(/ \(again\)$/,''),why:when,when:when},add)); }
@@ -1745,7 +1786,7 @@ function doAttack(u,opt){ opt=opt||{}; var w=weaponByUid(u); if(!w) return; var 
   if(S.cond.invisible&&!opt.second){ S.cond.invisible=false; addLog('Invisible','Ends','You attacked','normal'); }
   var dart=null; if(w.damageFromAmmo){ dart=S.items.find(function(x){ return x.kind==='ammo'&&x.dart&&num(x.qty)>0; }); if(dart) dart.qty=num(dart.qty)-1; }
   var ab=attackAbility(w,{thrown:thrown}); var knave=isKnave(w)&&!opt.second;
-  var o={label:'Attack · '+w.name+(how?' ('+how+')':'')+(chosen.length?' — '+chosen.map(function(c){ return c.l; }).join(', '):''),ability:ab,kind:'attack',ask:'The GM sets the target\'s DR: did you hit?'};
+  var o={label:'Attack · '+w.name+(how?' ('+how+')':'')+(chosen.length?' — '+chosen.map(function(c){ return c.l; }).join(', '):''),ability:ab,kind:'attack',wuid:w.uid,ask:'The GM sets the target\'s DR: did you hit?'};
   o.note=function(res){ return (res.crit?'Critical: double damage, and the target\'s armor drops one tier.'+(/broken mast/i.test(w.name)?' Broken mast: +d6.':''):res.fumble?(w.blackPowder?'Misfire! Roll on the misfire table.':w.trusted?'Your trusted weapon never breaks — but you drop it.':w.noFumble?'Tavern Boxer: your fists ignore fumbles.':'Your weapon breaks or is lost.'):'')+(knave?' Knife Knave: if it hits, your second knife hits automatically; if not, attack again with it.':''); };
   var knaveNext=function(hit){ if(!knave) return; if(hit){ addLog('Knife Knave','Second knife hits','The first knife hit, so the second hits automatically','crit'); attackDamage(w,{dmgAuto:sit.dmgAuto}); } else setTimeout(function(){ doAttack(u,{second:true,chosen:chosen}); },30); };
   var dmgArgs=function(r,max){ return {crit:r.crit,chosen:chosen,close:close,dmgAuto:sit.dmgAuto,dart:dart,max:max}; };
@@ -2174,7 +2215,8 @@ function renderActionTab(act){ var h='';
   // a throw) is its own button on the row, left of Attack, which is always rightmost.
   var a=''; var list=attackList();
   list.forEach(function(w){ var g=attackGate(w); var sit=attackSituations(w); var ab=attackAbility(w);
-    var sub='d20 '+sgn(abil(ab))+' '+esc(ab)+' · <b>'+esc(weaponDamage(w))+'</b>'+(sit.dmgAuto.length?' '+sit.dmgAuto.map(function(x){ return x.v; }).join(' '):'')+(w.reach?' · '+w.reach+'\' reach':'')+(w.range?' · '+w.range+'\'':'')+(w.blackPowder?' · shot '+ammoCount('shot'):'')+(w.trusted?' · trusted':'')+(w.poisoned?' · grog-poisoned':'')+(g&&g!==NO_ACT?' · <span style="color:var(--red);">'+esc(g)+'</span>':'');
+    var ib=rollBonuses({kind:'attack',wuid:w.uid}).reduce(function(t,x){ return t+num(x.v); },0);
+    var sub='d20 '+sgn(abil(ab))+' '+esc(ab)+(ib?' '+sgn(ib):'')+' · <b>'+esc(weaponDamage(w))+'</b>'+(sit.dmgAuto.length?' '+sit.dmgAuto.map(function(x){ return x.v; }).join(' '):'')+(w.reach?' · '+w.reach+'\' reach':'')+(w.range?' · '+w.range+'\'':'')+(w.blackPowder?' · shot '+ammoCount('shot'):'')+(w.trusted?' · trusted':'')+(w.poisoned?' · grog-poisoned':'')+(g&&g!==NO_ACT?' · <span style="color:var(--red);">'+esc(g)+'</span>':'');
     var btns='';
     if(has('sneaky-bastard')) btns+=tbtn('Sneaky Bastard','sneakyBastard(\''+w.uid+'\')','ghost','Test AGILITY: automatic critical',!!g);
     if(has('skylarker')) btns+=tbtn('Skylarker','skylark(\''+w.uid+'\')','ghost','Test AGILITY: automatic hit, +'+(2+(picks('skylarker')>=2?1:0))+' damage',!!g);
@@ -2202,9 +2244,9 @@ function renderActionTab(act){ var h='';
   if(S.prayers.length){ mg+='<div class="pb-note">Prayers today <b>'+num(S.prayerUses.left)+'/'+num(S.prayerUses.max)+'</b></div>'; S.prayers.forEach(function(id){ var p=prayerDef(id); if(!p) return; mg+=tcard(esc(p.name)+' <span class="tag">prayer'+(p.noAction?' · no action':'')+'</span>',esc(p.text),tbtn('Pray','pray(\''+jsq(id)+'\')'),num(S.prayerUses.left)<=0||(!p.noAction&&!act)); }); }
   if(S.spells.length){ mg+='<div class="pb-note">Spells today <b>'+num(S.spellCasts.left)+'/'+num(S.spellCasts.max)+'</b></div>'; S.spells.forEach(function(s){ var p=spellDef(s.id); if(!p) return; mg+=tcard(esc(p.name)+' <span class="tag">rank '+rankName(s.rank)+'</span>',esc(rankText((p.ranks||{})[rankName(s.rank)]))+(p.test?' · test '+esc(p.test.ability||'SPIRIT'):''),tbtn('Cast','castSpell(\''+jsq(s.id)+'\')'),num(S.spellCasts.left)<=0||!act); }); }
   if(S.rituals.length&&restrictions().rituals){ var rb=ritualBlock(); mg+='<div class="pb-note">Rituals today <b>'+num(S.ritualCasts.left)+'/'+num(S.ritualCasts.max)+'</b>'+(rb?' · <span style="color:var(--red);">'+esc(rb)+'</span>':'')+'</div>';
-    S.rituals.forEach(function(x){ var p=ritualDef(x.id); if(!p) return; var sp=hasAilment('conduit')&&S.conduit.id===x.id&&!S.conduit.used; mg+=tcard(esc(p.name)+' <span class="tag">ritual</span>'+(x.locked?' <span class="tag warn">until dawn</span>':'')+(sp?' <span class="tag ok">spirits</span>':''),esc(p.text),tbtn('Cast','openRitual(\''+jsq(x.id)+'\')'),x.locked||(!sp&&num(S.ritualCasts.left)<=0)); }); }
+    S.rituals.forEach(function(x){ var p=ritualDef(x.id); if(!p) return; var sp=hasAilment('conduit')&&S.conduit.id===x.id&&!S.conduit.used; mg+=tcard(esc(p.name)+' <span class="tag">ritual</span>'+(x.locked?' <span class="tag warn">until dawn</span>':'')+(sp?' <span class="tag ok">spirits</span>':''),esc(p.text)+fromTag(x),tbtn('Cast','openRitual(\''+jsq(x.id)+'\')'),x.locked||(!sp&&num(S.ritualCasts.left)<=0)); }); }
   if(hasAilment('conduit')&&S.conduit.id&&!S.rituals.some(function(r){ return r.id===S.conduit.id; })){ var cr=ritualDef(S.conduit.id); if(cr) mg+=tcard(esc(cr.name)+' <span class="tag ok">spirits</span>','Conduit'+(S.conduit.used?' · <b>used</b>':''),tbtn('Cast','conduitCast()'),S.conduit.used||!act); }
-  var relics=S.relics.filter(function(r){ return !r.destroyed; }); if(relics.length){ var rlb=relicBlock(); if(rlb) mg+='<div class="pb-note" style="color:var(--red);">'+esc(rlb)+'</div>'; relics.forEach(function(x){ var p=relicDef(x.id); if(!p) return; mg+=tcard(esc(p.name)+' <span class="tag">relic</span>'+(x.locked?' <span class="tag warn">until dawn</span>':''),esc(p.text),tbtn(p.cheatDeath?'Passive':'Use','useRelic(\''+x.uid+'\')',p.cheatDeath?'ghost':''),x.locked||(!act&&!p.cheatDeath)); }); }
+  var relics=S.relics.filter(function(r){ return !r.destroyed; }); if(relics.length){ var rlb=relicBlock(); if(rlb) mg+='<div class="pb-note" style="color:var(--red);">'+esc(rlb)+'</div>'; relics.forEach(function(x){ var p=relicDef(x.id); if(!p) return; mg+=tcard(esc(p.name)+' <span class="tag">relic</span>'+(x.locked?' <span class="tag warn">until dawn</span>':''),esc(p.text)+fromTag(x),tbtn(p.cheatDeath?'Passive':'Use','useRelic(\''+x.uid+'\')',p.cheatDeath?'ghost':''),x.locked||(!act&&!p.cheatDeath)); }); }
   if(mg) h+=tsec('magic','Prayers, Spells, Rituals & Relics',mg);
   // equipment: consumables with a set effect, used up when used
   var eq='';
@@ -2324,7 +2366,7 @@ function gainFeature(tbl,id,opt){ opt=opt||{}; var df=featDef(tbl,id); if(!df) r
   var again=rec.picks>=2; var effs=again?A(df.again&&df.again.effects):A(df.effects);
   effs.forEach(function(e){
     if(e.type==='ability'&&!e.when){ S.abilities[e.ability]=clamp(num(S.abilities[e.ability])+num(e.value),-3,6); notes.push(e.ability+' '+sgn(e.value)); }
-    if(e.type==='hpMax'){ var r=rollExpr(e.dice||'d4'); S.hpMax=hpMax()+r.total; notes.push('max HP +'+r.total+' ('+r.text+')'); }
+    if(e.type==='hpMax'){ var r=rollExpr(e.dice||'d4'); S.hpMax=Math.max(1,num(S.hpMax,1))+r.total; notes.push('max HP +'+r.total+' ('+r.text+')'); }
     if(e.type==='item'&&!again){ if(e.table==='bombs'){ var rr=rollExpr(e.rolls||'d4'); var got=[]; for(var i=0;i<rr.total;i++){ var n=d(6); var b=rowFor(D('PB_BOMBS'),n); if(b){ addByName(b.name,1); got.push(b.name+' (d6: '+n+')'); } } notes.push(rr.total+' bombs ('+rr.text+'): '+got.join(', ')); }
       else if(/smoked meat/i.test(e.item)){ var q=rollExpr(e.qty||'d8'); S.items.push({uid:uid(),kind:'gear',ref:'smoked-meat',name:'Smoked meat ration',qty:q.total,stack:true,slots:1,note:''}); notes.push(q.total+' smoked meat rations ('+q.text+')'); }
       else if(/blunderbuss/i.test(e.item)){ var bb=weaponDef('blunderbuss'); S.items.push(mkWeapon(bb,{name:'"Boomstick" Blunderbuss',special:'DR8 and d10 in melee range, otherwise DR12 and d4'})); if(!ammoCount('shot')) addShot(Math.max(1,10+abil('PRESENCE'))); notes.push('"Boomstick" blunderbuss'); }
@@ -2511,7 +2553,7 @@ function campaignAddRemote(roll){
   if(roll.type === 'foundloot' || roll.type === 'lootbox' || roll.type === 'system' || roll.type === 'achievement'){
     var entries0=$('log-entries'); var hint0=entries0.querySelector('.log-hint'); if(hint0) hint0.remove();
     var card = roll.type === 'foundloot' ? renderFoundLoot(roll) : roll.type === 'lootbox' ? renderLootBoxEntry(roll) : renderSystemEntry(roll);
-    entries0.insertBefore(card, entries0.firstChild); while(entries0.children.length>60) entries0.removeChild(entries0.lastChild); entries0.scrollTop=0; return;
+    entries0.insertBefore(card, entries0.firstChild); fillBadges(card); while(entries0.children.length>60) entries0.removeChild(entries0.lastChild); entries0.scrollTop=0; return;
   }
   var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint) hint.remove();
   var div=document.createElement('div'); div.className='log-entry remote'+(roll.type==='crit'?' crit':roll.type==='fumble'?' fumble':'');
@@ -2550,7 +2592,7 @@ function renderFoundLoot(roll){
   div.className = 'log-entry remote log-foundloot'; div.dataset.dropId = dropId; div.dataset.mode = mode; div._flItems = items;
   var rows = items.map(function(it, i){
     var by = claimed[i];
-    var label = esc(it.item || '?') + _flQty(it) + (it.notes ? ' <span class="fl-note">' + esc(it.notes) + '</span>' : '');
+    var label = esc(it.item || '?') + _flQty(it) + (it.notes ? ' <span class="fl-note">' + esc(it.notes) + '</span>' : '') + _lootBon(it);
     var btn = by ? _flDoneBtn(by, me) : !mine ? '<button class="fl-btn" disabled>For ' + esc(to || 'someone else') + '</button>' : '<button class="fl-btn fl-claim" data-idx="' + i + '">Claim</button>';
     return '<li class="fl-item" data-idx="' + i + '"><span class="fl-item-name">' + label + '</span>' + btn + '</li>';
   }).join('');
@@ -2593,7 +2635,7 @@ function _lbOpened(){ return _flRead('pb_loot_opened'); }
 function _lbClaimed(){ return _flRead('pb_loot_claimed'); }
 function _lbMarkOpened(id){ var o = _lbOpened(); o[id] = 1; _flWrite('pb_loot_opened', o); }
 function _lbMarkClaimed(id, by){ var c = _lbClaimed(); c[id] = by; _flWrite('pb_loot_claimed', c); }
-function _lbItemsHtml(items){ return (Array.isArray(items) ? items : []).map(function(it){ return '<li>' + esc(it.item || '?') + _flQty(it) + (it.notes ? ' <span class="lb-note">' + esc(it.notes) + '</span>' : '') + '</li>'; }).join(''); }
+function _lbItemsHtml(items){ return (Array.isArray(items) ? items : []).map(function(it){ return '<li>' + esc(it.item || '?') + _flQty(it) + (it.notes ? ' <span class="lb-note">' + esc(it.notes) + '</span>' : '') + _lootBon(it) + '</li>'; }).join(''); }
 function renderLootBoxEntry(roll){
   var p = {}; try { p = JSON.parse(roll.detail || '{}'); } catch(e){ p = {}; }
   var items = Array.isArray(p.items) ? p.items : [];
@@ -2609,7 +2651,7 @@ function renderLootBoxEntry(roll){
   div.innerHTML = '<div class="lb-head">' + esc(roll.label || 'LOOT BOX') + '</div>' + (roll.result ? '<div class="lb-name">' + esc(roll.result) + '</div>' : '') + forLabel + (p.note ? '<div class="lb-desc">' + esc(p.note) + '</div>' : '') + contents + '<div class="lb-actions">' + btn + '</div>';
   return div;
 }
-function _lbReveal(card){ var sealed = card.querySelector('.lb-sealed'); if(!sealed) return; var html = _lbItemsHtml(card._lootItems || []); if(html){ var ul = document.createElement('ul'); ul.className = 'lb-items'; ul.innerHTML = html; sealed.replaceWith(ul); } else sealed.remove(); }
+function _lbReveal(card){ var sealed = card.querySelector('.lb-sealed'); if(!sealed) return; var html = _lbItemsHtml(card._lootItems || []); if(html){ var ul = document.createElement('ul'); ul.className = 'lb-items'; ul.innerHTML = html; sealed.replaceWith(ul); fillBadges(ul); } else sealed.remove(); }
 function applyLootBoxClaim(p, roll){
   if(!p.boxId) return; _lbMarkClaimed(p.boxId, p.by || roll.source || 'Someone');
   var card = _lbCard(p.boxId);
@@ -2632,9 +2674,19 @@ $('log-entries').addEventListener('click', function(e){
 function claimLootItem(it){
   var name=String(it.item||'?').trim(); var qty=num(it.qty,1)||1;
   var silver=name.match(/^(\d+)\s*s(ilver)?$/i); if(silver){ S.silver=num(S.silver)+num(silver[1]); addLog('Claimed','Loot',silver[1]+' silver','normal'); changed(); return true; }
-  var where=addByName(name,qty,it.notes||'');
-  addLog('Claimed', 'Loot', name+(qty>1?' ×'+qty:'')+(where==='relic'?' · relics':' · inventory'), 'normal'); changed(); return true;
+  // GM-built loot (bv:2) carries its bonuses: they ride on the new row(s), read-only, and apply
+  // while it's equipped. A renamed catalogue item ("Cutlass of the Drowned") files as its base.
+  var bl=(it.bv===2&&window.LootBonus)?LootBonus.normalize(LB_SYS,it.benefits):[];
+  if(!bl.length){ var where=addByName(name,qty,it.notes||'');
+    addLog('Claimed', 'Loot', name+(qty>1?' ×'+qty:'')+(where==='relic'?' · relics':' · inventory'), 'normal'); changed(); return true; }
+  var base=name; if(!weaponDef(name)&&!clothingDef(name)&&!hatDef(name)&&!gearDef(name)){ var c=String(it.cat||''), pools=c==='weapon'?['PB_WEAPONS']:c==='armor'?['PB_CLOTHING','PB_HATS']:[], best=null, ln=low(name);
+    pools.forEach(function(k){ A(D(k)).forEach(function(d){ var dn=low(d.name); if(dn&&!d.none&&new RegExp('\\b'+dn.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b').test(ln)&&(!best||dn.length>low(best.name).length)) best=d; }); });
+    if(best) base=best.name; }
+  var n0=S.items.length, where2=addByName(base,qty,it.notes||'',true);
+  S.items.slice(n0).forEach(function(x){ if(x.kind==='ammo'&&where2!=='ammo') return; x.benefits=bl; x.bv=2; if(base!==name) x.name=name; });
+  addLog('Claimed', 'Loot', name+(qty>1?' ×'+qty:'')+(where2==='relic'?' · relics':' · inventory')+' · '+LootBonus.summary(LB_SYS,bl), 'normal'); changed(); return true;
 }
+function _lootBon(it){ return (it&&it.bv===2&&window.LootBonus)?badgeSlot(LootBonus.normalize(LB_SYS,it.benefits),'fl-bon'):''; }
 async function campaignPoll(){ if(!_campaign) return; try{ var r=await fetch('/api/campaigns/'+_campaign.id+'/rolls'+(_campaignLastId?'?since='+_campaignLastId:''), { credentials:'same-origin' }); if(!r.ok) return; var data=await r.json(); (data.rolls||[]).forEach(function(roll){ if(roll.clientKey!==_campaignClientKey) campaignAddRemote(roll); }); if(data.last) _campaignLastId=data.last; }catch(e){} }
 function campaignPollDelay(){ return document.hidden?20000:4000; }
 function campaignStartPolling(){ if(_campaignTimer) clearInterval(_campaignTimer); campaignPoll(); _campaignTimer=setInterval(campaignPoll, campaignPollDelay()); }

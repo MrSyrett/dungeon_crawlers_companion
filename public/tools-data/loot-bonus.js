@@ -80,6 +80,17 @@
     var r = cfg.roll(tier, cat); if (!r) return null;
     return { benefits: normalize(sys, r.benefits || []), name: r.name || "", notes: r.notes || "" };
   }
+  // What the sheet should actually apply: badges a system defines as shorthand
+  // (e.g. a Dragonbane enchantment spell) expand via cfg.expand(b) into the plain
+  // kinds; everything else passes through. Sheets automate from this list.
+  function effective(sys, l) {
+    var cfg = cfgOf(sys), out = [];
+    normalize(sys, l).forEach(function (b) {
+      var x = cfg && typeof cfg.expand === "function" ? cfg.expand(b) : null;
+      if (Array.isArray(x)) x.forEach(function (y) { var o = one(cfg, y); if (o) out.push(o); }); else out.push(b);
+    });
+    return out;
+  }
   // Fresh bonuses for an item the GM already has on a card (keeps its name).
   function enchant(sys, tier, cat) {
     var cfg = cfgOf(sys); if (!cfg) return [];
@@ -222,7 +233,7 @@
   window.LootBonus = {
     register: function (sys, cfg) { SYS[String(sys).toLowerCase()] = cfg; },
     has: function (sys) { return !!cfgOf(sys); },
-    cfg: cfgOf, normalize: normalize, label: label, summary: summary, fromText: fromText, roll: roll, enchant: enchant,
+    cfg: cfgOf, normalize: normalize, label: label, summary: summary, fromText: fromText, roll: roll, enchant: enchant, effective: effective,
     editor: editor, openPicker: openPop, closePicker: closePop, injectCss: injectCss,
   };
 })();

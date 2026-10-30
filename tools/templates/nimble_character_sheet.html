@@ -200,6 +200,13 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .inv-eq-slot{flex:0 0 14px;width:14px;height:14px;display:inline-flex;}
 .inv-eq-pip{width:14px;height:14px;border:2px solid var(--nim-dk);border-radius:3px;background:transparent;cursor:pointer;flex-shrink:0;box-sizing:border-box;}
 .inv-eq-pip.on{background:var(--nim);}
+/* GM-built loot bonuses (read-only badges, LootBonus) */
+.inv-bon:empty{display:none;}
+.inv-bon{margin:3px 0 0 20px;}
+.stat-cell small.st-item{color:var(--nim-dk);font-weight:700;}
+.stat-cell small.st-item:empty{display:none;}
+.sp-from{display:inline-block;margin-left:6px;padding:0 6px;border-radius:999px;font-size:10px;font-weight:700;line-height:16px;font-style:normal;white-space:nowrap;border:1px solid color-mix(in srgb,currentColor 40%,transparent);background:color-mix(in srgb,#9a62d8 16%,transparent);}
+.fl-bon{display:block;margin-top:2px;}
 .tbl input.num.inv-qty{width:36px;}
 .tbl .mono{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);white-space:nowrap;}
 .tbl .desc{font-family:'Barlow',sans-serif;font-size:11px;color:var(--muted);line-height:1.35;}
@@ -897,7 +904,8 @@ let conditions = [];
 function cls() { return D.classes().find(c => c.name === $('f-class').value) || null; }
 function subcls() { const c = cls(); return c ? c.subclasses.find(s => s.name === $('f-subclass').value) || null : null; }
 function level() { return Math.max(1, Math.min(20, num($('f-level').value) || 1)); }
-function stat(id) { return num($('st-' + id).value); }
+function statBase(id) { return num($('st-' + id).value); }
+function stat(id) { return statBase(id) + ((itemBonus().stat || {})[id] || 0); }
 function ancestry() { const n = norm($('f-ancestry').value); return n ? D.ancestries().find(a => norm(a.name) === n) || null : null; }
 function ancestryText() { const a = ancestry(); return a ? a.traits.map(t => t.text).join(' ') : ''; }
 function findItem(name, cats) { const n = norm(name); if(!n) return null; return D.items().find(i => norm(i.name) === n && (!cats || cats.includes(i.category))) || null; }
@@ -905,7 +913,7 @@ function findItem(name, cats) { const n = norm(name); if(!n) return null; return
 // ═══ BUILD STATIC UI ══════════════════════════════════════════════════════
 function buildStats() {
   $('stats-grid').innerHTML = STATS.map(s =>
-    `<div class="stat-cell"><div class="sn" onclick="rollSave('${s}'); nimSheetCheckSpend()" title="Roll a ${s} save (uses 1 action on the Action tab)">${s}</div><input type="number" id="st-${s}" value="0" min="-5" max="10" oninput="recalc()">` +
+    `<div class="stat-cell"><div class="sn" onclick="rollSave('${s}'); nimSheetCheckSpend()" title="Roll a ${s} save (uses 1 action on the Action tab)">${s}</div><input type="number" id="st-${s}" value="0" min="-5" max="10" oninput="recalc()"><small class="st-item" id="sti-${s}"></small>` +
     `<div class="save-toggle"><button id="adv-${s}" onclick="toggleSave('${s}','adv')" title="Advantaged save">▲</button><button id="dis-${s}" onclick="toggleSave('${s}','dis')" title="Disadvantaged save">▼</button></div></div>`).join('');
   $('skills-body').innerHTML = SKILLS.map(([n, s]) =>
     `<tr><td class="sk-name" onclick="rollSkill('${n}')">${n}<small>${s}</small></td><td style="width:44px;"><input type="number" id="skp-${n}" data-nolock class="no-spin" value="0" min="0" oninput="recalc()" title="Extra skill points"></td><td class="sk-total" id="skt-${n}">+0</td></tr>`).join('');
@@ -951,10 +959,10 @@ function armorValue() {
   }
   const sh = findItem($('f-shield').value, ['Shield']); if(sh && sh.armor) a += num(sh.armor);
   if(/\+1 Armor/i.test(ancestryText())) a += 1;
-  return a + num($('armor-bonus').value);
+  return a + num($('armor-bonus').value) + itemBonus().armor;
 }
 function initBonus() { let i = stat('DEX') + num($('init-bonus').value); if(/\+1 to all skills and Initiative/i.test(ancestryText())) i += 1; return i; }
-function speedValue() { let s = 6 + num($('speed-bonus').value); const at = ancestryText(); if(/–1 Speed|-1 Speed/.test(at)) s -= 1; if(/\+1 Speed/.test(at)) s += 1; return s; }
+function speedValue() { let s = 6 + num($('speed-bonus').value); const at = ancestryText(); if(/–1 Speed|-1 Speed/.test(at)) s -= 1; if(/\+1 Speed/.test(at)) s += 1; return s + itemBonus().speed; }
 function manaMax() {
   const c = cls(); if(!c || !c.spellcasting) return null;
   const m = /=\s*\(?(INT|WIL)(?:×3|x3)?\)?\s*\+\s*LVL/i.exec(c.spellcasting);
@@ -966,6 +974,8 @@ function recalc() {
   { const has = !!cls(); const bb = $('build-btn'), lb = $('level-btn'); if(bb && lb) { bb.style.display = has ? 'none' : ''; lb.style.display = has ? '' : 'none'; } }
   STATS.forEach(s => { $('adv-' + s).classList.toggle('adv', saveAdv === s); $('dis-' + s).classList.toggle('dis', saveDis === s); });
   let used = 0; SKILLS.forEach(([n, s]) => { used += num($('skp-' + n).value); $('skt-' + n).textContent = (skillTotal(n, s) >= 0 ? '+' : '') + skillTotal(n, s); });
+  { const ib = itemBonus(); STATS.forEach(s => { const el = $('sti-' + s); if(!el) return; const n = ib.stat[s] || 0; el.textContent = n ? (n > 0 ? '+' : '') + n + ' item' : ''; el.title = (ib.why.stat[s] || []).join(', '); });
+    $('armor-val').title = ib.why.armor.length ? 'Items: ' + ib.why.armor.join(', ') : ''; $('speed-val').title = ib.why.speed.length ? 'Items: ' + ib.why.speed.join(', ') : ''; }
   $('armor-val').textContent = armorValue(); $('init-val').textContent = (initBonus() >= 0 ? '+' : '') + initBonus(); $('speed-val').textContent = speedValue();
   const c = cls();
   $('hd-lbl').textContent = c ? 'd' + c.hitDie : '';
@@ -1086,7 +1096,8 @@ function rollSave(s) {
   $('adv-btn').classList.toggle('on-adv', advState === 1); $('dis-btn').classList.toggle('on-dis', advState === -1);
   const saveNote = saveAdv === s ? (advState === 1 ? 'advantaged save' : 'advantaged save cancels disadvantage → normal')
                  : saveDis === s ? (advState === -1 ? 'disadvantaged save' : 'disadvantaged save cancels advantage → normal') : '';
-  d20Check(s + ' save', stat(s), { note: saveNote });
+  const ib = itemBonus(), sv = ib.save ? ib.why.save.join(', ') : '';
+  d20Check(s + ' save', stat(s) + ib.save, { note: [saveNote, sv ? 'items ' + sv : ''].filter(Boolean).join(' · ') });
 }
 function rollInitiative() {
   if(/Advantage on Initiative/i.test(ancestryText()) && !advState) setAdv(1);
@@ -1131,6 +1142,9 @@ function rollAttack(name, expr, opts) {
   let bonus = 0; (p.onHit || p.mods).forEach(m => { bonus += m.sign * modValue(m.what); });
   total += bonus;
   if(bonus) detail += (bonus > 0 ? ' +' : ' ') + bonus;
+  const ib = opts.item;   // the linked inventory weapon's equipped bonuses (atkItemBonus)
+  if(ib && ib.dice) ib.dice.forEach(d => { const v = dN(num(d.slice(1))); total += v; detail += ' +' + v + ' (' + d + ' item)'; });
+  if(ib && ib.dmg) { total += ib.dmg; detail += (ib.dmg > 0 ? ' +' : ' ') + ib.dmg + ' item'; }
   if(n) detail += ' ' + (advState === 1 ? 'adv' : 'dis') + (n > 1 ? n : '') + ' [' + pool.join(',') + ']';
   addLog(name, String(total), detail + (crits ? ' — CRIT×' + crits + ' (ignores armor)' : '') + ' damage', crits ? 'crit' : 'normal');
   clearAdv(); spendAction();
@@ -1157,7 +1171,7 @@ function addAttackRow(a) {
   // weapon; the fixed Unarmed strike has no ✕ either. Only legacy/unlinked rows
   // from old saves keep a per-row ✕.
   const removeBtn = (a.link || a.fixed) ? '' : `<button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()">✕</button>`;
-  tr.innerHTML = `<td><input type="text" class="atk-name" value="${esc(a.name)}" placeholder="Longsword"></td><td><input type="text" class="atk-dmg" value="${esc(a.damage)}" placeholder="1d8+STR" oninput="refreshAttackRows()"></td><td><input type="text" class="atk-props" value="${esc(a.props)}" placeholder="2-handed, Reach 2"></td><td style="white-space:nowrap;"><button class="small-btn" onclick="rollAttack(this.closest('tr').querySelector('.atk-name').value||'Attack', this.closest('tr').querySelector('.atk-dmg').value, { vicious: /vicious/i.test(this.closest('tr').querySelector('.atk-props').value) })">🎲 Attack</button>${removeBtn}</td>`;
+  tr.innerHTML = `<td><input type="text" class="atk-name" value="${esc(a.name)}" placeholder="Longsword"></td><td><input type="text" class="atk-dmg" value="${esc(a.damage)}" placeholder="1d8+STR" oninput="refreshAttackRows()"></td><td><input type="text" class="atk-props" value="${esc(a.props)}" placeholder="2-handed, Reach 2"></td><td style="white-space:nowrap;"><button class="small-btn" onclick="rollAttack(this.closest('tr').querySelector('.atk-name').value||'Attack', this.closest('tr').querySelector('.atk-dmg').value, { vicious: /vicious/i.test(this.closest('tr').querySelector('.atk-props').value), item: atkItemBonus(this.closest('tr')) })">🎲 Attack</button>${removeBtn}</td>`;
   $('attacks-body').appendChild(tr); refreshAttackRows();
 }
 function refreshAttackRows() {}
@@ -1175,7 +1189,8 @@ function addSpellRow(s) {
   s = s || { name:'', tier:0 };
   const sp = D.spells().find(x => norm(x.name) === norm(s.name));
   const tr = document.createElement('tr');
-  tr.innerHTML = `<td><input type="text" class="sp-name" value="${esc(s.name)}" oninput="refreshSpellRows()"></td><td><input type="number" class="num sp-tier" value="${esc(s.tier)}" min="0" max="9"></td><td class="desc sp-desc"></td><td style="white-space:nowrap;"><button class="small-btn" onclick="castSpell(this)">Cast</button><button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()">✕</button></td>`;
+  if(s.fromRid) { tr.dataset.fromRid = s.fromRid; tr.dataset.from = s.from || 'item'; }
+  tr.innerHTML = `<td><input type="text" class="sp-name" value="${esc(s.name)}" oninput="refreshSpellRows()"></td><td><input type="number" class="num sp-tier" value="${esc(s.tier)}" min="0" max="9"></td><td class="desc sp-desc"></td><td style="white-space:nowrap;"><button class="small-btn" onclick="castSpell(this)">Cast</button>${s.fromRid ? '' : `<button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()">✕</button>`}</td>`;
   $('spells-body').appendChild(tr);
   if(sp) { tr.querySelector('.sp-tier').value = sp.tier; }
   refreshSpellRows();
@@ -1183,7 +1198,9 @@ function addSpellRow(s) {
 function refreshSpellRows() {
   document.querySelectorAll('#spells-body tr').forEach(tr => {
     const sp = D.spells().find(x => norm(x.name) === norm(tr.querySelector('.sp-name').value));
-    tr.querySelector('.sp-desc').textContent = sp ? sp.school + (sp.utility ? ' utility' : '') + ' · ' + sp.actions + (sp.targeting ? ' · ' + sp.targeting : '') + ' — ' + sp.text : '';
+    const dEl = tr.querySelector('.sp-desc');
+    dEl.textContent = sp ? sp.school + (sp.utility ? ' utility' : '') + ' · ' + sp.actions + (sp.targeting ? ' · ' + sp.targeting : '') + ' — ' + sp.text : '';
+    if(tr.dataset.fromRid) { const b = document.createElement('span'); b.className = 'sp-from'; b.textContent = 'from ' + tr.dataset.from; b.title = 'Granted by an equipped item — goes away when it is unequipped'; dEl.appendChild(b); }
   });
 }
 function castSpell(btn) {
@@ -1247,10 +1264,16 @@ function addInvRow(i) {
   const tr = document.createElement('tr');
   if(i.link) tr.dataset.link = i.link;
   if(i.equipped != null) tr.dataset.equipped = i.equipped ? '1' : '0';
+  if(i.base) tr.dataset.base = i.base;
+  if(i.cat) tr.dataset.cat = String(i.cat);
+  if(i.bv === 2 && i.benefits != null && window.LootBonus) { const bl = LootBonus.normalize(LB_SYS, i.benefits); if(bl.length) { tr.dataset.bv = '2'; tr.dataset.benefits = JSON.stringify(bl); tr.dataset.rid = i.rid || newRid(); } }
+  if(i.equipped && i.applied && i.applied.v === 2 && tr.dataset.benefits) tr.dataset.applied = JSON.stringify(i.applied);
   const q = Math.max(1, parseInt(i.qty, 10) || 1);
-  tr.innerHTML = `<td><div class="inv-name-line"><span class="inv-eq-slot"></span><input type="text" class="inv-name" value="${esc(i.name)}" placeholder="Item" oninput="refreshInvEquip(this.closest('tr'))"></div></td><td><input type="number" class="num inv-qty" value="${q}" step="1" min="1" oninput="recalc()"></td><td><input type="number" class="num inv-slots" value="${esc(i.slots)}" step="0.5" min="0" oninput="recalc()"></td><td><input type="text" class="inv-note" value="${esc(i.note)}"></td><td><button class="row-x" onclick="removeInvRow(this)">✕</button></td>`;
+  tr.innerHTML = `<td><div class="inv-name-line"><span class="inv-eq-slot"></span><input type="text" class="inv-name" value="${esc(i.name)}" placeholder="Item" oninput="refreshInvEquip(this.closest('tr'))"></div><div class="inv-bon"></div></td><td><input type="number" class="num inv-qty" value="${q}" step="1" min="1" oninput="recalc()"></td><td><input type="number" class="num inv-slots" value="${esc(i.slots)}" step="0.5" min="0" oninput="recalc()"></td><td><input type="text" class="inv-note" value="${esc(i.note)}"></td><td><button class="row-x" onclick="removeInvRow(this)">✕</button></td>`;
   $('inv-body').appendChild(tr);
-  refreshInvEquip(tr);
+  refreshInvEquip(tr); renderInvBonus(tr);
+  if(tr.dataset.benefits && invEquipped(tr) && !tr.dataset.applied) invApplyBonus(tr, true);   // an equipped save with no record: snapshot, don't re-apply HP / spells
+  _ibCache = null;
   return tr;
 }
 function invQty(tr) { const el = tr.querySelector('.inv-qty'); return Math.max(1, parseInt(el && el.value, 10) || 1); }
@@ -1258,27 +1281,36 @@ function invQty(tr) { const el = tr.querySelector('.inv-qty'); return Math.max(1
 //    worn armor takes 1 inventory slot, unworn armor 2 — p.21). Equipped weapons are the ones offered as
 //    attacks on the Action tab; the equipped armor / shield fill the Armor fields.
 const ARMOR_CATS = ['Cloth','Leather','Mail','Plate'];
-function invItemOf(tr) { const n = (tr.querySelector('.inv-name') || {}).value || ''; return findItem(n) || findItem(n.replace(/\s*\(.*\)\s*$/, '')) || null; }
+function invItemOf(tr) { if(tr.dataset.base) { const b = findItem(tr.dataset.base); if(b) return b; } const n = (tr.querySelector('.inv-name') || {}).value || ''; return findItem(n) || findItem(n.replace(/\s*\(.*\)\s*$/, '')) || null; }
 function invEquipKind(tr) { const it = invItemOf(tr); if(!it) return ''; if(ARMOR_CATS.includes(it.category)) return 'armor'; if(it.category === 'Shield') return 'shield'; return isWeapon(it) ? 'weapon' : ''; }
 function invEquipped(tr) { return tr.dataset.equipped === '1'; }
+// Anything that can be equipped: weapons / armor / shields, plus any item carrying GM-built bonuses.
+function invCanEquip(tr) { return invEquipKind(tr) || (invHasBonus(tr) ? 'item' : ''); }
 function refreshInvEquip(tr) {
   if(!tr) return; const slot = tr.querySelector('.inv-eq-slot'); if(!slot) return;
-  const k = invEquipKind(tr), on = invEquipped(tr);
+  const k = invCanEquip(tr), on = invEquipped(tr);
   slot.innerHTML = k ? '<span class="inv-eq-pip' + (on ? ' on' : '') + '" data-nolock onclick="toggleInvEquip(this)" title="' + (on ? 'Equipped — click to unequip' : 'Not equipped — click to equip') + '"></span>' : '';
 }
 function toggleInvEquip(el) { const tr = el.closest('tr'); if(tr) setInvEquipped(tr, !invEquipped(tr)); }
 function setInvEquipped(tr, on, quiet) {
-  const k = invEquipKind(tr), it = invItemOf(tr); if(!k || !it) return;
+  const k = invEquipKind(tr), it = invItemOf(tr);
+  if(!k || !it) {   // a bonus-carrying item that isn't a weapon / armor / shield: a plain worn / carried toggle
+    if(!invHasBonus(tr)) return;
+    tr.dataset.equipped = on ? '1' : '0'; invApplyBonus(tr); refreshInvEquip(tr);
+    if(!quiet) { addLog(on ? 'Equip' : 'Unequip', invDisplay(tr), LootBonus.summary(LB_SYS, invBenefits(tr)), 'normal'); recalc(); scheduleAutosave(); if(typeof renderNimTurn === 'function') renderNimTurn(); }
+    return;
+  }
   const field = k === 'armor' ? 'f-armor' : k === 'shield' ? 'f-shield' : '';
   if(on && field) {   // one suit of armor / one shield at a time
-    document.querySelectorAll('#inv-body tr').forEach(o => { if(o !== tr && invEquipKind(o) === k && invEquipped(o)) { o.dataset.equipped = '0'; if(k === 'armor') o.querySelector('.inv-slots').value = 2; refreshInvEquip(o); } });
+    document.querySelectorAll('#inv-body tr').forEach(o => { if(o !== tr && invEquipKind(o) === k && invEquipped(o)) { o.dataset.equipped = '0'; invApplyBonus(o); if(k === 'armor') o.querySelector('.inv-slots').value = 2; refreshInvEquip(o); } });
     $(field).value = it.name;
   }
   if(!on && field && norm($(field).value) === norm(it.name)) $(field).value = '';
   tr.dataset.equipped = on ? '1' : '0';
+  invApplyBonus(tr);
   if(k === 'armor') tr.querySelector('.inv-slots').value = on ? 1 : 2;   // worn 1 slot, unworn 2
   refreshInvEquip(tr);
-  if(!quiet) { addLog(on ? 'Equip' : 'Unequip', it.name, k === 'weapon' ? (on ? 'Ready to attack' : 'Stowed — not offered as an attack') : 'Armor ' + armorValue(), 'normal'); recalc(); scheduleAutosave(); if(typeof renderNimTurn === 'function') renderNimTurn(); }
+  if(!quiet) { addLog(on ? 'Equip' : 'Unequip', invDisplay(tr), k === 'weapon' ? (on ? 'Ready to attack' : 'Stowed — not offered as an attack') : 'Armor ' + armorValue(), 'normal'); recalc(); scheduleAutosave(); if(typeof renderNimTurn === 'function') renderNimTurn(); }
 }
 // An attack row is offered when it isn't tied to an Inventory weapon, or that weapon is equipped.
 function atkRowReady(tr) {
@@ -1310,9 +1342,85 @@ function migrateInvRows() {
 function removeInvRow(btn) {
   const tr = btn.closest('tr'); if(!tr) return;
   if(invEquipped(tr) && invEquipKind(tr) !== 'weapon') setInvEquipped(tr, false, true);   // taking off armor / shield clears the Armor field
+  if(tr.dataset.applied) { tr.dataset.equipped = '0'; invApplyBonus(tr); }   // reverse the item's bonuses (HP, spells)
   const link = tr.dataset.link;
   if(link) document.querySelectorAll('#attacks-body tr').forEach(a => { if(a.dataset.link === link) a.remove(); });
-  tr.remove(); recalc(); scheduleAutosave();
+  tr.remove(); _ibCache = null; recalc(); scheduleAutosave();
+}
+// ── Item bonuses: GM-built loot arrives with read-only badges (LootBonus "nim", bv:2) ──
+// Equipping a row snapshots LootBonus.effective(badges) into data-applied ({v:2, benefits, hp, spells});
+// Armor / saves / speed / stats / weapon damage are DERIVED from the equipped rows' snapshots, so
+// unequipping or deleting reverses exactly and a reload never re-applies. Max HP and granted
+// spells are real sheet changes: the record keeps what was added and that is what comes off.
+const LB_SYS = 'nim';
+let _ridSeq = 0;
+function newRid() { return 'r' + Date.now().toString(36) + (++_ridSeq).toString(36) + Math.random().toString(36).slice(2, 5); }
+let _ibCache = null;
+function invDisplay(tr) { return ((tr.querySelector('.inv-name') || {}).value || '').trim() || 'Item'; }
+function invBenefits(tr) { if(!window.LootBonus || !tr.dataset.benefits) return []; try { return LootBonus.normalize(LB_SYS, JSON.parse(tr.dataset.benefits)); } catch(e) { return []; } }
+function invHasBonus(tr) { return invBenefits(tr).some(b => b.kind !== 'note'); }
+function invApplied(tr) { if(!invEquipped(tr) || !tr.dataset.applied) return null; try { const r = JSON.parse(tr.dataset.applied); return r && r.v === 2 && Array.isArray(r.benefits) ? r : null; } catch(e) { return null; } }
+function invApplyBonus(tr, snapshotOnly) {
+  _ibCache = null;
+  let prev = null; try { prev = tr.dataset.applied ? JSON.parse(tr.dataset.applied) : null; } catch(e) {}
+  const list = window.LootBonus ? LootBonus.effective(LB_SYS, invBenefits(tr)).filter(b => b.kind !== 'note') : [];
+  if(invEquipped(tr) && list.length) {
+    if(prev && prev.v === 2) return;   // already applied
+    const rec = { v:2, benefits: list, hp: 0, spells: [] };
+    if(!snapshotOnly) {
+      const hp = list.reduce((t, b) => t + (b.kind === 'hp' ? num(b.amount) : 0), 0);
+      if(hp) { $('hp-max').value = num($('hp-max').value) + hp; rec.hp = hp; }
+      const known = spellsKnownNames(), nm = invDisplay(tr);
+      list.forEach(b => { if(b.kind !== 'spell' || known.has(norm(b.target))) return; const sp = D.spells().find(x => norm(x.name) === norm(b.target));
+        addSpellRow({ name: sp ? sp.name : b.target, tier: sp ? sp.tier : 0, fromRid: tr.dataset.rid, from: nm }); known.add(norm(b.target)); rec.spells.push(b.target); });
+    }
+    tr.dataset.applied = JSON.stringify(rec);
+  } else {
+    if(prev && prev.v === 2) {
+      if(prev.hp) { const mx = num($('hp-max').value) - num(prev.hp); $('hp-max').value = mx; if(num($('hp-cur').value) > mx) $('hp-cur').value = mx; }
+      if(tr.dataset.rid) document.querySelectorAll('#spells-body tr').forEach(r => { if(r.dataset.fromRid === tr.dataset.rid) r.remove(); });
+    }
+    delete tr.dataset.applied;
+  }
+}
+// What the equipped items add: { armor, save, speed, stat{STR..}, why{} } (weapon damage: atkItemBonus).
+function itemBonus() {
+  if(_ibCache) return _ibCache;
+  const o = { armor:0, save:0, speed:0, stat:{}, why:{ armor:[], save:[], speed:[], stat:{} } };
+  const sg = n => (n >= 0 ? '+' : '') + n;
+  document.querySelectorAll('#inv-body tr').forEach(tr => { const r = invApplied(tr); if(!r) return; const nm = invDisplay(tr);
+    r.benefits.forEach(b => { const n = num(b.amount);
+      if(b.kind === 'armor') { o.armor += n; o.why.armor.push(nm + ' ' + sg(n)); }
+      else if(b.kind === 'save') { o.save += n; o.why.save.push(nm + ' ' + sg(n)); }
+      else if(b.kind === 'speed') { o.speed += n; o.why.speed.push(nm + ' ' + sg(n)); }
+      else if(b.kind === 'stat') { const k = String(b.target).toUpperCase(); o.stat[k] = (o.stat[k] || 0) + n; (o.why.stat[k] = o.why.stat[k] || []).push(nm + ' ' + sg(n)); }
+    }); });
+  _ibCache = o; Promise.resolve().then(() => { _ibCache = null; });
+  return o;
+}
+// An attack row's own inventory weapon bonuses (+N damage, extra dice) — only while that weapon is equipped.
+function atkItemBonus(atkTr) {
+  const link = atkTr && atkTr.dataset.link; if(!link) return null;
+  const inv = [...document.querySelectorAll('#inv-body tr')].find(r => r.dataset.link === link); const r = inv ? invApplied(inv) : null; if(!r) return null;
+  const o = { dmg: 0, dice: [] };
+  r.benefits.forEach(b => { if(b.kind === 'damage') o.dmg += num(b.amount); else if(b.kind === 'die') o.dice.push(b.target); });
+  return (o.dmg || o.dice.length) ? o : null;
+}
+function atkItemLabel(ib) { return ib ? [ib.dmg ? (ib.dmg > 0 ? '+' : '') + ib.dmg + ' dmg' : '', ib.dice.map(d => '+1' + d).join(' ')].filter(Boolean).join(' ') + ' (item)' : ''; }
+function renderInvBonus(tr) {
+  const box = tr.querySelector('.inv-bon'); if(!box) return;
+  const list = invBenefits(tr);
+  if(!list.length || !window.LootBonus) { box.innerHTML = ''; box._ed = null; return; }
+  if(box._ed) box._ed.set(list); else box._ed = LootBonus.editor(box, { sys: LB_SYS, benefits: list, readonly: true });
+}
+// A GM-built weapon / armor whose name isn't in the catalog ("Flaming Longsword"): the catalog item it's made from.
+function lootBaseItem(it) {
+  const n = norm(it.item), c = String(it.cat || '');
+  if(c !== 'weapon' && c !== 'armor') return null;
+  let best = null;
+  D.items().forEach(x => { const k = isWeapon(x) ? 'weapon' : (ARMOR_CATS.includes(x.category) || x.category === 'Shield') ? 'armor' : ''; if(!k || (c && c !== k) || x.category === 'Unarmed') return;
+    const xn = norm(x.name); if(xn.length > 2 && new RegExp('(^|[^a-z])' + xn.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^a-z]|$)').test(n) && (!best || xn.length > norm(best.name).length)) best = x; });
+  return best;
 }
 function addInvFromItem(name) {
   const it = findItem(name); if(!it) return;
@@ -1525,7 +1633,7 @@ function collectSheet() {
   const v = id => $(id).value; const stats = {}, skillPts = {}, skillTotals = {};
   // skillTotals = the effective per-skill value the player sees (stat + points +
   // ancestry/background bonuses, capped at 12) — what the GM Party tool should show.
-  STATS.forEach(s => stats[s] = stat(s)); SKILLS.forEach(([n, st]) => { skillPts[n] = num($('skp-' + n).value); skillTotals[n] = skillTotal(n, st); });
+  STATS.forEach(s => stats[s] = statBase(s)); SKILLS.forEach(([n, st]) => { skillPts[n] = num($('skp-' + n).value); skillTotals[n] = skillTotal(n, st); });
   return {
     system:'NIM', v:1,
     name: v('f-name'), ancestry: v('f-ancestry'), cls: v('f-class'), subclass: v('f-subclass'), level: level(), background: v('f-background'), motivation: v('f-motivation'),
@@ -1535,8 +1643,11 @@ function collectSheet() {
     armor: v('f-armor'), shield: v('f-shield'), armorBonus: num(v('armor-bonus')), armorScore: armorValue(), initBonus: num(v('init-bonus')), speedBonus: num(v('speed-bonus')), size: v('f-size'), actions,
     attacks: [...document.querySelectorAll('#attacks-body tr')].map(tr => ({ name: tr.querySelector('.atk-name').value, damage: tr.querySelector('.atk-dmg').value, props: tr.querySelector('.atk-props').value, link: tr.dataset.link || '', fixed: tr.dataset.fixed ? true : undefined })).filter(a => a.name || a.damage),
     picks: [...document.querySelectorAll('#picks-body tr')].map(tr => tr.dataset.pick),
-    spells: [...document.querySelectorAll('#spells-body tr')].map(tr => ({ name: tr.querySelector('.sp-name').value, tier: num(tr.querySelector('.sp-tier').value) })).filter(s => s.name),
-    inventory: [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, qty: invQty(tr), slots: parseFloat(tr.querySelector('.inv-slots').value) || 0, note: tr.querySelector('.inv-note').value, link: tr.dataset.link || '', equipped: invEquipKind(tr) ? invEquipped(tr) : undefined })).filter(i => i.name),
+    spells: [...document.querySelectorAll('#spells-body tr')].map(tr => ({ name: tr.querySelector('.sp-name').value, tier: num(tr.querySelector('.sp-tier').value), fromRid: tr.dataset.fromRid || undefined, from: tr.dataset.fromRid ? tr.dataset.from : undefined })).filter(s => s.name),
+    inventory: [...document.querySelectorAll('#inv-body tr')].map(tr => { const o = { name: tr.querySelector('.inv-name').value, qty: invQty(tr), slots: parseFloat(tr.querySelector('.inv-slots').value) || 0, note: tr.querySelector('.inv-note').value, link: tr.dataset.link || '', equipped: invCanEquip(tr) ? invEquipped(tr) : undefined };
+      if(tr.dataset.base) o.base = tr.dataset.base; if(tr.dataset.cat) o.cat = tr.dataset.cat;
+      if(tr.dataset.benefits) { o.bv = 2; try { o.benefits = JSON.parse(tr.dataset.benefits); } catch(e) {} o.rid = tr.dataset.rid; const ap = invApplied(tr); if(ap) o.applied = ap; }
+      return o; }).filter(i => i.name),
     gold: num(v('f-gold')), silver: num(v('f-silver')), traits: v('f-traits'), languages: v('f-languages'), body: v('f-body'), notes: v('f-notes'), conditions: conditions.slice(), tab: _tab, turn: (typeof _nturn !== 'undefined' ? Object.assign({}, _nturn) : undefined),
     campaign: (typeof _campaign !== 'undefined' && _campaign) ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
   };
@@ -1554,7 +1665,7 @@ function applySheet(d) {
   $('attacks-body').innerHTML = ''; (d.attacks || []).forEach(addAttackRow); ensureUnarmed();
   fillPoolPick(); $('picks-body').innerHTML = ''; (d.picks || []).forEach(p => addPick(p));
   $('spells-body').innerHTML = ''; (d.spells || []).forEach(addSpellRow);
-  $('inv-body').innerHTML = ''; (d.inventory || []).forEach(addInvRow);
+  $('inv-body').innerHTML = ''; _ibCache = null; (d.inventory || []).forEach(addInvRow);
   _restoreLinkSeq(); migrateInvRows();
   set('f-gold', d.gold ?? 50); set('f-silver', d.silver || 0); set('f-traits', d.traits); set('f-languages', d.languages || 'Common'); set('f-body', d.body); set('f-notes', d.notes);
   conditions = Array.isArray(d.conditions) ? d.conditions.slice() : []; renderConditions();
@@ -1663,11 +1774,12 @@ function renderFoundLoot(roll){
   div.className = 'log-entry remote log-foundloot'; div.dataset.dropId = dropId; div.dataset.mode = mode; div._flItems = items;
   const rows = items.map((it, i) => {
     const by = claimed[i];
-    const label = esc(it.item || '?') + (it.qty != null && String(it.qty) !== '1' && String(it.qty) !== '' ? ' ×' + esc(it.qty) : '') + (it.notes ? ' <span class="fl-note">' + esc(it.notes) + '</span>' : '');
+    const label = esc(it.item || '?') + (it.qty != null && String(it.qty) !== '1' && String(it.qty) !== '' ? ' ×' + esc(it.qty) : '') + (it.notes ? ' <span class="fl-note">' + esc(it.notes) + '</span>' : '') + _lootBonHtml(it);
     const btn = by ? '<button class="fl-btn" disabled>' + (me && by.toLowerCase() === me.toLowerCase() ? 'Yours ✓' : 'Claimed by ' + esc(by)) + '</button>' : !mine ? '<button class="fl-btn" disabled>For ' + esc(to || 'someone else') + '</button>' : '<button class="fl-btn fl-claim" data-idx="' + i + '">Claim</button>';
     return '<li class="fl-item" data-idx="' + i + '"><span class="fl-item-name">' + label + '</span>' + btn + '</li>';
   }).join('');
   div.innerHTML = '<div class="fl-head">' + esc(roll.label || 'FOUND LOOT') + '</div>' + (roll.result ? '<div class="fl-name">' + esc(roll.result) + '</div>' : '') + (mode === 'named' ? '<div class="fl-for">For: ' + esc(to || '?') + '</div>' : mode === 'copies' ? '<div class="fl-for">A copy for everyone</div>' : '') + (p.note ? '<div class="fl-desc">' + esc(p.note) + '</div>' : '') + (rows ? '<ul class="fl-items">' + rows + '</ul>' : '');
+  _lootBonFill(div);
   return div;
 }
 function renderSystemEntry(roll){
@@ -1707,7 +1819,9 @@ function _lbOpened(){ return _lbRead('nimble_loot_opened'); }
 function _lbClaimed(){ return _lbRead('nimble_loot_claimed'); }
 function _lbMarkOpened(id){ const o = _lbOpened(); o[id] = 1; _lbWrite('nimble_loot_opened', o); }
 function _lbMarkClaimed(id, by){ const c = _lbClaimed(); c[id] = by; _lbWrite('nimble_loot_claimed', c); }
-function _lbItemsHtml(items){ return (Array.isArray(items) ? items : []).map(it => '<li>' + esc(it.item || '?') + (it.qty != null && String(it.qty) !== '1' && String(it.qty) !== '' ? ' ×' + esc(it.qty) : '') + (it.notes ? ' <span class="lb-note">' + esc(it.notes) + '</span>' : '') + '</li>').join(''); }
+function _lbItemsHtml(items){ return (Array.isArray(items) ? items : []).map(it => '<li>' + esc(it.item || '?') + (it.qty != null && String(it.qty) !== '1' && String(it.qty) !== '' ? ' ×' + esc(it.qty) : '') + (it.notes ? ' <span class="lb-note">' + esc(it.notes) + '</span>' : '') + _lootBonHtml(it) + '</li>').join(''); }
+function _lootBonHtml(it) { if(!it || it.bv !== 2 || !window.LootBonus) return ''; const l = LootBonus.normalize(LB_SYS, it.benefits); return l.length ? '<span class="fl-bon" data-b="' + esc(JSON.stringify(l)) + '"></span>' : ''; }
+function _lootBonFill(root) { if(!window.LootBonus || !root) return; root.querySelectorAll('.fl-bon[data-b]').forEach(el => { let l = []; try { l = JSON.parse(el.dataset.b); } catch(e) {} el.removeAttribute('data-b'); LootBonus.editor(el, { sys: LB_SYS, benefits: l, readonly: true }); }); }
 function renderLootBoxEntry(roll){
   let p = {}; try { p = JSON.parse(roll.detail || '{}'); } catch(e) { p = {}; }
   const items = Array.isArray(p.items) ? p.items : [];
@@ -1725,9 +1839,10 @@ function renderLootBoxEntry(roll){
   } else { btn = opened ? '<button class="lb-btn" disabled>Opened ✓</button>' : '<button class="lb-btn lb-open">Open</button>'; }
   const contents = opened ? (items.length ? '<ul class="lb-items">' + _lbItemsHtml(items) + '</ul>' : '') : '<div class="lb-sealed">Contents hidden until ' + (mode === 'claim' ? 'claimed' : 'opened') + '.</div>';
   div.innerHTML = '<div class="lb-head">' + esc(roll.label || 'LOOT BOX') + '</div>' + (roll.result ? '<div class="lb-name">' + esc(roll.result) + '</div>' : '') + forLabel + (p.note ? '<div class="lb-desc">' + esc(p.note) + '</div>' : '') + contents + '<div class="lb-actions">' + btn + '</div>';
+  _lootBonFill(div);
   return div;
 }
-function _lbReveal(card){ const sealed = card.querySelector('.lb-sealed'); if(!sealed) return; const html = _lbItemsHtml(card._lootItems || []); if(html) { const ul = document.createElement('ul'); ul.className = 'lb-items'; ul.innerHTML = html; sealed.replaceWith(ul); } else sealed.remove(); }
+function _lbReveal(card){ const sealed = card.querySelector('.lb-sealed'); if(!sealed) return; const html = _lbItemsHtml(card._lootItems || []); if(html) { const ul = document.createElement('ul'); ul.className = 'lb-items'; ul.innerHTML = html; sealed.replaceWith(ul); _lootBonFill(ul); } else sealed.remove(); }
 function applyLootBoxClaim(p, roll){
   if(!p.boxId) return; _lbMarkClaimed(p.boxId, p.by || roll.source || 'Someone');
   const card = [...document.querySelectorAll('.log-lootbox')].find(c => c.dataset.boxId === p.boxId);
@@ -1748,6 +1863,13 @@ document.getElementById('log-entries').addEventListener('click', function(e) {
 // A claimed drop lands like an equipment-list add; gold goes to the gp box.
 function claimLootItem(it){
   if(it.cat === 'gold' || /^gold$/i.test(it.item || '')) { $('f-gold').value = num($('f-gold').value) + (parseInt(it.qty, 10) || 0); addLog('Claimed', 'Gold', (it.qty || 0) + ' gp', 'normal'); recalc(); return true; }
+  const bl = (it.bv === 2 && it.benefits != null && window.LootBonus) ? LootBonus.normalize(LB_SYS, it.benefits) : [];
+  if(bl.length) {   // GM-built item: its own row (never stacked), badges kept; equip it to apply them
+    const base = findItem(it.item) || lootBaseItem(it), weapon = !!base && isWeapon(base), link = weapon ? _nextLink() : '';
+    addInvRow({ name: it.item, qty: it.qty, slots: base && /2-handed/i.test(base.properties || '') ? 2 : 1, note: it.notes || (base ? [base.armor && 'Armor ' + base.armor, base.damage, base.properties].filter(Boolean).join(' · ') : ''), link, equipped: false, base: base && norm(base.name) !== norm(it.item) ? base.name : '', cat: it.cat, bv: 2, benefits: bl });
+    if(weapon) addAttackRow({ name: it.item, damage: base.damage || '', props: base.properties || '', link });
+    addLog('Claimed', 'Loot', it.item + ' — ' + LootBonus.summary(LB_SYS, bl) + ' (equip to apply)', 'normal'); recalc(); return true;
+  }
   const known = findItem(it.item);
   if(known) addInvFromItem(known.name); else addInvRow({ name: it.item, slots: 1, note: it.notes || '' });
   addLog('Claimed', 'Loot', it.item, 'normal'); recalc(); return true;
@@ -1771,6 +1893,8 @@ campaignUpdateBtn();
 <script src="/tools-data/nimble-conditions.js"></script>
 <script src="/tools-data/nimble-sheet-builder.js"></script>
 <script src="/tools-data/nimble-homebrew.js"></script>
+<script src="/tools-data/loot-bonus.js"></script>
+<script src="/tools-data/nim-loot-bonus.js"></script>
 <script>
 buildStats();
 fillDatalists();
@@ -1886,10 +2010,11 @@ function nimBuild(){
     const name = (tr.querySelector('.atk-name') || {}).value || ''; const dmg = (tr.querySelector('.atk-dmg') || {}).value || '';
     if(!name.trim() || !atkRowReady(tr)) return;   // only equipped weapons
     const props = (tr.querySelector('.atk-props') || {}).value || '';
-    add('attacks', { name: name, cost: 1, sub: [dmg, props, rushed ? 'Rushed: disadvantage ×' + rushed : ''].filter(Boolean).join(' · '),
+    const ib = atkItemBonus(tr);
+    add('attacks', { name: name, cost: 1, sub: [dmg, atkItemLabel(ib), props, rushed ? 'Rushed: disadvantage ×' + rushed : ''].filter(Boolean).join(' · '),
       btn: 'Attack', run: () => {
         nimNetDis(rushed);
-        rollAttack(name, dmg, { vicious: /vicious/i.test(props) });   // spends 1 action
+        rollAttack(name, dmg, { vicious: /vicious/i.test(props), item: atkItemBonus(tr) });   // spends 1 action
         _nturn.attacks += 1; nimDyingSave(); return true; } });
   });
   // Spells (rows from the Spells tab)
@@ -1919,7 +2044,7 @@ function nimBuild(){
   nimEquipOpts(add, rushed);
   // Heroic Reactions — 1 action each, off-turn, each 1/round
   const armor = (typeof armorValue === 'function') ? armorValue() : 0;
-  const melee = [...document.querySelectorAll('#attacks-body tr')].filter(atkRowReady).map(tr => ({ name: (tr.querySelector('.atk-name') || {}).value || '', dmg: (tr.querySelector('.atk-dmg') || {}).value || '', props: (tr.querySelector('.atk-props') || {}).value || '' }))
+  const melee = [...document.querySelectorAll('#attacks-body tr')].filter(atkRowReady).map(tr => ({ item: atkItemBonus(tr), name: (tr.querySelector('.atk-name') || {}).value || '', dmg: (tr.querySelector('.atk-dmg') || {}).value || '', props: (tr.querySelector('.atk-props') || {}).value || '' }))
     .filter(a => a.name.trim() && !/\brange|ranged|bow|crossbow|sling|ballista/i.test(a.props + ' ' + a.name));   // Thrown melee weapons (Dagger, Hand Axe) still count as melee
   const oaw = melee.find(a => !/unarmed/i.test(a.name)) || melee[0];   // prefer a real melee weapon
   const R = (key, name, sub, run, extra) => add('reactions', Object.assign({ name: name, cost: 1, react: key, sub: sub, btn: 'Use', blocked: _nturn.reacted[key] ? 'Used this round' : '', run: () => { const ok = run(); if(ok !== false) { nimSpend(1); _nturn.reacted[key] = true; } return ok !== false; } }, extra || {}));
@@ -1928,7 +2053,7 @@ function nimBuild(){
   R('oa', 'Opportunity Attack', oaw ? oaw.name + ' · ' + oaw.dmg + ' · melee, with disadvantage' : 'Needs a melee weapon on the Attacks tab', () => {
     if(!oaw) return false;
     nimNetDis(1);
-    const before = actions; rollAttack(oaw.name + ' (opportunity)', oaw.dmg, { vicious: /vicious/i.test(oaw.props) }); if(actions < before) actions = before;   // the reaction pays its own action
+    const before = actions; rollAttack(oaw.name + ' (opportunity)', oaw.dmg, { vicious: /vicious/i.test(oaw.props), item: oaw.item }); if(actions < before) actions = before;   // the reaction pays its own action
     nimDyingSave();
   }, { btn: 'Attack', blocked: _nturn.reacted.oa ? 'Used this round' : (oaw ? '' : 'No melee weapon') });
   R('help', 'Help', 'Give an ally advantage on a roll (explain how; one Help per roll)', () => { addLog('Help', 'Advantage', 'Reaction · an ally gains advantage on their roll', 'normal'); });
