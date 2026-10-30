@@ -4573,6 +4573,8 @@ GMScenes.renderPins();
 .pcard-chip.bad { border-color:var(--red-light); background:rgba(122,45,45,.18); }
 .pcard-chip.bad .v { color:#ff8a6a; }
 .pty-card.pcard .pty-x { position:relative; align-self:center; }
+.pty-edit { flex-shrink:0; align-self:center; border:1px solid var(--border); border-radius:6px; color:var(--muted, var(--text)); font-size:11px; line-height:1; padding:3px 7px; text-decoration:none; white-space:nowrap; }
+.pty-edit:hover { color:var(--text); border-color:var(--accent, var(--text)); }
 .pty-card.pcard .pty-card-bd { padding:11px 12px 12px; }
 /* Read-only vital bar */
 .pcard-hp { margin-bottom:10px; }
@@ -21618,8 +21620,11 @@ function init_party(root) {
     if(!c) return false;
     // Re-syncing or re-importing the same character replaces the old copy
     const i = chars.findIndex(x => x.sheet.name.toLowerCase() === c.name.toLowerCase());
-    if(i >= 0) chars[i] = { ...chars[i], source, sheet:c };
-    else chars.push({ id: nextId++, source, sheet: c });
+    // A synced sheet carries its document (docId + tool) and whether we may edit it
+    // — the campaign's GM may open any linked sheet, a player only their own.
+    const doc = (raw && raw.docId && raw.tool && raw.canEdit) ? { docId: String(raw.docId), tool: String(raw.tool) } : { docId: null, tool: null };
+    if(i >= 0) chars[i] = { ...chars[i], ...doc, source, sheet:c };
+    else chars.push({ id: nextId++, ...doc, source, sheet: c });
     return true;
   }
 
@@ -21632,6 +21637,13 @@ function init_party(root) {
   // Every system builds its own parts; pcShell wraps them in the accent-band card.
   // Viewed two ways: the compact monitor bubble, and this card self-contained in a
   // popup (charPop) — so it carries full detail.
+  // "✎ Sheet" — opens the character's own sheet in a new tab, where the campaign's
+  // GM may edit it (a player sees it only on their own character). Only for synced
+  // sheets the server said we may edit; an imported JSON file has no document.
+  function pcEditLink(entry) {
+    if(!entry || !entry.docId || !/^[\w-]+$/.test(entry.tool || '') || !/^[\w-]+$/.test(entry.docId)) return '';
+    return '<a class="pty-edit" href="/tools/' + entry.tool + '/' + entry.docId + '" target="_blank" rel="noopener" title="Open this character\'s sheet in a new tab to view or edit it">✎ Sheet</a>';
+  }
   function pcShell(entry, o) {
     const open = openIds.has(entry.id);
     const chips = (o.chips || []).filter(Boolean).map(c =>
@@ -21644,7 +21656,8 @@ function init_party(root) {
     return '<div class="pty-card pcard' + (open ? ' open' : '') + '" data-id="' + entry.id + '"' + bub + '>'
       + '<div class="pty-card-hd pcard-band"><div class="pcard-title"><div class="pty-name">' + esc(o.name || '—') + '</div>'
       + '<div class="pcard-subrow"><span class="pcard-type">' + esc(o.sub || '') + '</span></div></div>'
-      + chips + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button></div>'
+      + chips + pcEditLink(entry)
+      + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button></div>'
       + '<div class="pty-card-bd">' + (o.body || '') + '</div></div>';
   }
   // A read-only vital bar (HP, Resolve, Vitality…). cur/max are shown as cur/max.
@@ -21937,6 +21950,7 @@ function init_party(root) {
        + '<div class="pcard-subrow"><span class="pcard-type">' + esc(sub) + '</span></div></div>'
        + '<span class="pcard-chip"><span class="l">AC</span><span class="v">' + esc(c.ac || '—') + '</span></span>'
        + '<span class="pcard-chip"><span class="l">HP</span><span class="v">' + hpText + '</span></span>'
+       + pcEditLink(entry)
        + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
        + '</div>';
     h += '<div class="pty-card-bd">';
@@ -22267,6 +22281,7 @@ function init_party(root) {
         return '<div class="pty-card pcard" data-id="' + (entry && entry.id) + '">'
           + '<div class="pty-card-hd pcard-band"><div class="pcard-title"><div class="pty-name">' + esc(nm) + '</div>'
           + '<div class="pcard-subrow"><span class="pcard-type">' + esc(sys) + '</span></div></div>'
+          + pcEditLink(entry)
           + '<button class="pty-x" data-remove="' + (entry && entry.id) + '" title="Remove">✕</button></div>'
           + '<div class="pty-card-bd"><div class="pty-line dim">Couldn’t render this sheet.</div></div></div>';
       }

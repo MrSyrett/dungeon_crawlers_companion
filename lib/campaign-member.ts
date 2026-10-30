@@ -68,3 +68,26 @@ export async function isCampaignMember(userId: string, campaignId: string): Prom
   }
   return ok;
 }
+
+// "May this user open and edit this document?"
+//
+// The owner always may. Beyond that, ONE extra case: a character sheet linked to
+// a campaign may also be opened and edited by that campaign's GM (its owner) —
+// to fix a mistake, hand out loot, or run the sheet for a player who isn't at
+// the table. Never a session prep or a GM board, never another player, and never
+// delete (the DELETE route stays owner-only).
+//
+// The link is the indexed linkedCampaignId column, which the save route keeps in
+// step with the sheet's own JSON — so a player who unlinks their sheet takes it
+// back out of the GM's reach on their next save.
+export type DocAccess = "owner" | "gm" | null;
+export async function docAccess(
+  userId: string,
+  doc: { userId: string; tool: string; linkedCampaignId: string | null },
+): Promise<DocAccess> {
+  if (!userId) return null;
+  if (doc.userId === userId) return "owner";
+  if (!doc.linkedCampaignId || !(CHARACTER_TOOL_IDS as readonly string[]).includes(doc.tool)) return null;
+  const owns = await prisma.campaign.count({ where: { id: doc.linkedCampaignId, ownerId: userId } });
+  return owns > 0 ? "gm" : null;
+}

@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { getPlayUser } from "@/lib/vtt";
+import { docAccess } from "@/lib/campaign-member";
 import { CHARACTER_TOOL_IDS, TOOLS, isToolId, campaignIdInSheet } from "@/lib/tools";
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -19,11 +20,13 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   if (!user) return new Response("Unauthorized", { status: 401 });
 
   const { id } = await ctx.params;
+  // Own docs — plus a linked player sheet for the campaign's GM (docAccess), so
+  // the save shim's conflict probe works when the GM is editing it.
   const doc = await prisma.document.findFirst({
-    where: { id, userId: user.id },
-    select: { id: true, title: true, tool: true, updatedAt: true, data: true },
+    where: { id },
+    select: { id: true, title: true, tool: true, updatedAt: true, data: true, userId: true, linkedCampaignId: true },
   });
-  if (!doc) return new Response("Not found", { status: 404 });
+  if (!doc || !(await docAccess(user.id, doc))) return new Response("Not found", { status: 404 });
 
   const def = isToolId(doc.tool) ? TOOLS[doc.tool] : null;
   return Response.json({
@@ -54,11 +57,12 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
   // document's entire `data` blob (potentially MBs) out of the DB on every
   // autosave just to verify ownership. updatedAt is the optimistic-concurrency
   // stamp used to refuse a stale overwrite (see below).
+  // The owner, or the GM of the campaign a character sheet is linked to.
   const existing = await prisma.document.findFirst({
-    where: { id, userId: user.id },
-    select: { id: true, tool: true, title: true, updatedAt: true },
+    where: { id },
+    select: { id: true, tool: true, title: true, updatedAt: true, userId: true, linkedCampaignId: true },
   });
-  if (!existing) return new Response("Not found", { status: 404 });
+  if (!existing || !(await docAccess(user.id, existing))) return new Response("Not found", { status: 404 });
 
   // Optimistic concurrency: a write carries the version it was based on
   // (baseRev = the updatedAt it loaded). If the stored version has moved on,

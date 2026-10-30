@@ -29,7 +29,7 @@ export const dynamic = "force-dynamic";
 
 // {id, name, class, level} for one linked character sheet (readCharMeta lives in
 // lib/char-meta.ts — shared with the home-screen roster).
-type PartyMember = { id: string; name: string; cls: string; level: number | null };
+type PartyMember = { id: string; tool: string; name: string; cls: string; level: number | null };
 
 export default async function CampaignsPage() {
   const user = await getCurrentUser();
@@ -65,7 +65,7 @@ export default async function CampaignsPage() {
     }),
     prisma.document.findMany({
       where: { tool: { in: CHARACTER_TOOL_IDS }, linkedCampaignId: { in: ids } },
-      select: { id: true, title: true, data: true, linkedCampaignId: true },
+      select: { id: true, title: true, tool: true, data: true, linkedCampaignId: true },
       orderBy: { updatedAt: "desc" },
     }),
     prisma.document.findMany({
@@ -92,7 +92,7 @@ export default async function CampaignsPage() {
     if (typeof cid !== "string" || !partyFor.has(cid)) continue;
     const meta = readCharMeta(doc.data, doc.title || "");
     if (!meta) continue; // no readable character sheet — skip
-    partyFor.get(cid)!.push({ id: doc.id, name: meta.name, cls: meta.cls, level: meta.level });
+    partyFor.get(cid)!.push({ id: doc.id, tool: doc.tool, name: meta.name, cls: meta.cls, level: meta.level });
   }
 
   // ── Campaigns the player has JOINED (a character is linked) but does not own ──

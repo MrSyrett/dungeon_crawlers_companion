@@ -379,6 +379,9 @@ export function renderToolPage(
     /** Systems an admin has hidden, so the bar's system dropdown matches the
      *  one the Next pages show. */
     hiddenKeys?: SystemKey[];
+    /** The GM is editing a player's sheet (a character linked to a campaign they
+     *  run): a strip under the navbar says so, so nobody mistakes it for their own. */
+    gmEdit?: { character: string; campaign: string };
   },
 ): string {
   const cfg = {
@@ -463,7 +466,26 @@ export function renderToolPage(
       // Adventure Prep doc on Adventures. It used to always say Characters.
       onSystemSwitch: opts.def.kind === "session" ? "adventures" : "characters",
     });
-    out = out.replace(/<body[^>]*>/i, (m) => `${m}\n${bar}`);
+    const strip = opts.gmEdit ? `\n${gmEditStrip(opts.gmEdit)}` : "";
+    out = out.replace(/<body[^>]*>/i, (m) => `${m}\n${bar}${strip}`);
+  } else if (opts.gmEdit) {
+    out = out.replace(/<body[^>]*>/i, (m) => `${m}\n${gmEditStrip(opts.gmEdit!)}`);
   }
   return out;
+}
+
+// The "you're editing a player's sheet" strip. Inline styles on token variables,
+// so it reads right in every system's skin and in light and dark mode without a
+// stylesheet of its own. It sits in the flow (not fixed), right under the navbar.
+function escHtml(v: string): string {
+  return String(v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+}
+function gmEditStrip(g: { character: string; campaign: string }): string {
+  return (
+    `<div id="dd-gm-edit" role="status" style="position:relative;z-index:50;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;justify-content:center;` +
+    `padding:7px 14px;font:600 13px/1.35 system-ui,sans-serif;color:var(--text,#e8e8ee);` +
+    `background:color-mix(in srgb,var(--sys-hilite,#c8a020) 22%,var(--panel,#1a1a22));border-bottom:1px solid color-mix(in srgb,var(--sys-hilite,#c8a020) 55%,transparent)">` +
+    `<span>GM edit: <b>${escHtml(g.character || "Untitled")}</b> is a player's character in <b>${escHtml(g.campaign || "your campaign")}</b>.</span>` +
+    `<span style="font-weight:400;opacity:.85">Your changes save to their sheet.</span></div>`
+  );
 }

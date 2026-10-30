@@ -33,7 +33,9 @@ import OpenGmScreenButton from "./OpenGmScreenButton";
 // A campaign's system is set once, at creation, from whichever system you are in
 // and is never editable afterwards. The per-campaign system dropdown is gone.
 
-export type PartyMember = { id: string; name: string; cls: string; level: number | null };
+/** `tool` + `id` open the sheet: these are campaigns you run, and the GM may open
+ *  and edit any character linked to one (docAccess in lib/campaign-member.ts). */
+export type PartyMember = { id: string; tool: string; name: string; cls: string; level: number | null };
 
 // Compact rows the server hands us — no Prisma objects. Dates arrive as epoch ms
 // because a Date does not survive the server/client boundary intact.
@@ -186,9 +188,13 @@ export default function CampaignsList({
                       {links > 0 ? (
                         <div className="mt-1.5 flex flex-wrap gap-1">
                           {c.party.map((m) => (
-                            <span
+                            <a
                               key={m.id}
-                              className="rounded border border-[var(--border)] bg-[var(--panel-2)] px-1.5 py-0.5 text-[11px] text-[var(--text)]"
+                              href={`/tools/${m.tool}/${m.id}`}
+                              target="_blank"
+                              rel="noopener"
+                              title={`Open ${m.name}'s sheet to view or edit it`}
+                              className="rounded border border-[var(--border)] bg-[var(--panel-2)] px-1.5 py-0.5 text-[11px] text-[var(--text)] no-underline hover:border-[var(--sys-hilite)]"
                             >
                               {m.name}
                               {m.level !== null || m.cls ? (
@@ -199,7 +205,7 @@ export default function CampaignsList({
                                     .join(" ")}
                                 </span>
                               ) : null}
-                            </span>
+                            </a>
                           ))}
                         </div>
                       ) : null}

@@ -5,6 +5,7 @@ import { isAdminEmail } from "@/lib/admin";
 import { isToolId, TOOLS, loadToolTemplate } from "@/lib/tools";
 import { renderToolPage } from "@/lib/inject";
 import { getHiddenSystemKeys } from "@/lib/systems";
+import { docAccess } from "@/lib/campaign-member";
 
 type Ctx = { params: Promise<{ tool: string; id: string }> };
 
@@ -16,8 +17,15 @@ export async function GET(req: Request, ctx: Ctx) {
   if (!isToolId(tool)) return new Response("Unknown tool", { status: 404 });
   const def = TOOLS[tool];
 
-  const doc = await prisma.document.findFirst({ where: { id, userId: user.id, tool } });
-  if (!doc) return new Response("Document not found", { status: 404 });
+  // Your own document — or, for a character sheet linked to a campaign you run,
+  // the player's sheet (the GM may open and edit it; see docAccess).
+  const doc = await prisma.document.findFirst({ where: { id, tool } });
+  const access = doc ? await docAccess(user.id, doc) : null;
+  if (!doc || !access) return new Response("Document not found", { status: 404 });
+  const gmEdit =
+    access === "gm" && doc.linkedCampaignId
+      ? await prisma.campaign.findUnique({ where: { id: doc.linkedCampaignId }, select: { name: true } })
+      : null;
 
   // ?view=preview serves a read-only, preview-only rendering: the editing
   // sidebar and floating chrome are hidden, leaving just the rendered pages.
@@ -44,6 +52,7 @@ export async function GET(req: Request, ctx: Ctx) {
     email: user.email,
     isAdmin: isAdminEmail(user.email),
     hiddenKeys: await getHiddenSystemKeys(),
+    ...(gmEdit ? { gmEdit: { character: doc.title, campaign: gmEdit.name } } : {}),
   });
 
   return new Response(html, {

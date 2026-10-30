@@ -37,7 +37,7 @@ export async function GET(req: NextRequest, ctx: Ctx) {
 
   const campaign = await prisma.campaign.findUnique({
     where: { id },
-    select: { id: true },
+    select: { id: true, ownerId: true },
   });
   if (!campaign) return new Response("Not found", { status: 404 });
 
@@ -114,9 +114,12 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   // caller wants, but membership is decided by the column, not a full scan.
   const docs = await prisma.document.findMany({
     where: memberWhere,
-    select: { id: true, title: true, updatedAt: true, data: true, tool: true },
+    select: { id: true, title: true, updatedAt: true, data: true, tool: true, userId: true },
     orderBy: { updatedAt: "desc" },
   });
+  // The GM (campaign owner) may open and edit every linked sheet; a player only
+  // their own. Mirrors docAccess() in lib/campaign-member.ts, without a query per row.
+  const isGm = campaign.ownerId === user.id;
 
   const characters = [];
   const unreadable: Unreadable[] = [];
@@ -157,6 +160,8 @@ export async function GET(req: NextRequest, ctx: Ctx) {
       title: doc.title,
       updatedAt: doc.updatedAt,
       system: TOOLS[doc.tool as keyof typeof TOOLS]?.system ?? "SD",
+      tool: doc.tool,
+      canEdit: isGm || doc.userId === user.id,
       sheet,
     });
   }
