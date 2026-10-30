@@ -14,6 +14,8 @@
 //   spell                     → a Spell row (an Inherent Spell: no Mana)
 //   buff                      → the Buffs tracker
 //   note                      → shown on the item only
+// The badges on an Inventory row are read-only: bonuses are set where the item is
+// built (GM Screen loot box / Homebrew), never added once it's in the inventory.
 // Every granted Skill / Spell row wears a badge naming the item behind it, and
 // un-equipping reverses exactly what was applied (recorded on the row, saved with
 // the sheet, so it survives a reload — equipping is never re-run on load).
@@ -82,6 +84,7 @@
   function isEquipType(tr) {
     var m = rowMeta(tr);
     if (m.cat === "armor" || m.cat === "accessory" || m.cat === "weapon") return true;
+    if (m.cat === "scroll" || m.cat === "tome") return false;   // a scroll/tome's spell is read, not worn
     return m.benefits.some(function (b) { return b.kind !== "note"; });
   }
 
@@ -138,7 +141,8 @@
     var box = sub.querySelector(".gr-badges");
     var g = grantsOf(tr);
     if (!g.length) { if (box) box.remove(); return; }
-    if (!box) { box = document.createElement("span"); box.className = "gr-badges"; sub.insertBefore(box, sub.firstChild); }
+    if (!box) { box = document.createElement("span"); box.className = "gr-badges"; }
+    if (box.parentNode !== sub || box !== sub.lastElementChild) sub.appendChild(box);   // after the row's other info
     box.innerHTML = g.map(function (x) {
       var what = x.kind === "spell" ? "Granted by " + x.item : (x.rank ? "+" + x.rank + " rank" + (x.rank === 1 ? "" : "s") + " from " + x.item : "Granted by " + x.item);
       return '<span class="gr-badge" title="' + esc(what) + ' — goes away when it\'s unequipped">' + esc(x.item) + (x.kind !== "spell" && x.rank ? " +" + x.rank : "") + "</span>";
@@ -289,22 +293,14 @@
     var main = tr.querySelector(".dl-row"); if (!main || !B()) return;
     var list = benefitsOf(tr);
     var cat = tr.dataset.cat || ((lookup(rowName(tr)) || {}).category) || "";
-    var show = list.length || /^(armor|accessory|weapon)$/.test(cat);
+    var show = list.length > 0;
     var box = main.querySelector(".dl-bon");
     if (!show) { if (box) box.remove(); return; }
     if (!box) { box = document.createElement("div"); box.className = "dl-bon"; main.appendChild(box); }
+    // Read-only: an item's bonuses are set when it's built (GM Screen / Homebrew),
+    // not once it's in a crawler's inventory.
     if (box._ed) { box._ed.set(list); return; }
-    box._ed = B().editor(box, {
-      benefits: list,
-      onChange: function (next) {
-        var worn = tr.dataset.equipped === "1";
-        if (worn) unequip(tr);
-        setBenefits(tr, next);
-        if (worn) equip(tr);
-        refreshRowEl(tr);
-        save();
-      },
-    });
+    box._ed = B().editor(box, { benefits: list, readonly: true });
   }
   function refreshRowEl(tr) {
     var btn = radial(tr); if (!btn) return;
@@ -346,7 +342,7 @@
       ".dl-row .dl-bon{grid-area:bon;padding:2px 0 1px}" +
       ".dl-row .dl-bon .dcbn{--dcbn-font:'Barlow Condensed',sans-serif}" +
       ".dl-row .dl-bon .dcbn-b{font-size:12px}" +
-      ".gr-badges{display:inline-flex;gap:3px;flex:0 0 auto;max-width:60%;overflow:hidden}" +
+      ".gr-badges{display:inline-flex;gap:3px;flex:0 1 auto;min-width:0;max-width:60%;overflow:hidden;margin-left:4px}" +
       ".gr-badge{display:inline-block;max-width:100%;padding:0 7px;border-radius:999px;font:700 10.5px/17px 'Barlow Condensed',sans-serif;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" +
         "color:var(--gold-ink,#8a6c0c);background:color-mix(in srgb,var(--gold,#c8a020) 16%,transparent);border:1px solid color-mix(in srgb,var(--gold,#c8a020) 55%,transparent)}" +
       ".gr-badge::before{content:'\\2726 ';opacity:.8}";

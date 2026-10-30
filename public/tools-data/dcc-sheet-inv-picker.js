@@ -8,6 +8,9 @@
 // An (i) button on each item expands its full effect / tier / price inline, so
 // players can look an item up without leaving the sheet. A footer lets you add a
 // custom item by name or a blank row — same shape as the "Add Skill" picker.
+// The Enchanted tab builds a one-off magic item — a base item plus bonus badges,
+// rolled from the loot tables at a tier or added by hand — or a Spell Scroll /
+// Magic Tome / Spellbook holding a spell (Spell badges only).
 //
 // This only fills the existing inventory row inputs and fires an input event so
 // autosave picks it up; the sheet's addInvRow()/collectSheet() are unchanged.
@@ -29,6 +32,9 @@
     { key: "gear", label: "Gear", cats: ["accessory", "mundane", "tool", "material"] },
     { key: "scroll", label: "Scrolls & Tomes", cats: ["scroll", "tome"] },
   ];
+  // The filter chips: the Scrolls & Tomes bucket is replaced by the Enchanted
+  // builder (which makes spell scrolls / tomes too). "All" still lists them.
+  var CHIPS = GROUPS.filter(function (g) { return g.key !== "scroll"; }).concat([{ key: "ench", label: "Enchanted" }]);
   function groupOf(cat) {
     for (var i = 1; i < GROUPS.length; i++) { if (GROUPS[i].cats.indexOf(cat) >= 0) return GROUPS[i]; }
     return null;
@@ -85,22 +91,6 @@
   // Spell Scroll, Magic Tome, Spellbook (and homebrew whose name carries those
   // words) hold a specific spell — after you pick the item you pick the spell.
   function carriesSpell(it) { return !!it && /\b(spell scroll|magic tome|spellbook|grimoire)\b/i.test(it.name); }
-  function spellsAZ() {
-    return (typeof DCC_SPELLS !== "undefined" ? DCC_SPELLS : []).slice().sort(function (a, b) {
-      return String(a.name).localeCompare(String(b.name), "en");
-    });
-  }
-  function spellMeta(sp) {
-    var bits = ["Spell"];
-    if (sp.type) bits.push(sp.type);
-    if (sp.mana != null) bits.push(sp.mana + " Mana");
-    if (sp.stat) bits.push(String(sp.stat).toUpperCase());
-    return bits.join(" · ");
-  }
-  // The finished inventory row for a spell item, once the spell is chosen.
-  function spellItemName(it, spellName) { return it.name + ": " + spellName; }
-  function spellItemNotes(it, spellName) { return (it.effect ? it.effect + " — " : "") + "Spell: " + spellName; }
-
   // ── CSS (mirrors the skill picker's dccs- styling with a dcci- prefix) ───────
   function injectCss() {
     if (document.getElementById("dcci-css")) return;
@@ -142,6 +132,21 @@
       ".dcci-info-body .mt{color:#8a8a93;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}",
       ".dcci-info-body .ef{color:#d8d5cc;font-size:13px;line-height:1.55;}",
       ".dcci-info-body .grp{color:#8a8a93;font-size:12px;line-height:1.5;}",
+      ".dcci-ench{display:flex;flex-direction:column;gap:10px;padding:12px 18px 14px;}",
+      ".dcci-ench label{display:flex;flex-direction:column;gap:4px;color:#8a8a93;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}",
+      ".dcci-ench select,.dcci-ench input[type=text]{background:#0e0e10;border:1px solid #2a2a2e;border-radius:6px;color:#ece9e1;padding:8px 10px;font-size:13px;font-family:inherit;text-transform:none;letter-spacing:0;font-weight:400;}",
+      ".dcci-ench select:focus,.dcci-ench input:focus{outline:none;border-color:#c8892a;}",
+      ".dcci-ench select option,.dcci-ench select optgroup{background:#141416;color:#ece9e1;}",
+      ".dcci-ench-row{display:flex;gap:8px;align-items:flex-end;}",
+      ".dcci-ench-row label{flex:0 0 160px;}",
+      ".dcci-ench-row .dcci-btn{height:35px;}",
+      ".dcci-ench-ef{color:#a8a59c;font-size:12px;line-height:1.45;margin-top:-4px;}",
+      ".dcci-ench-lbl{color:#8a8a93;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:-4px;}",
+      "#dcci-ench-bon{color:#ece9e1;--dcbn-font:'Barlow',sans-serif;--dcbn-pop-bg:#141416;--dcbn-pop-fg:#ece9e1;--dcbn-pop-bd:#2a2a2e;--dcbn-acc:#c8892a}",
+      "#dcci-ench-bon .dcbn-b{font-size:12.5px}",
+      ".dcci-foot .dcci-ench-note{flex:1;color:#8a8a93;font-size:12px;align-self:center;}",
+      ".dcci-btn[disabled]{opacity:.45;cursor:default;}",
+      ".dcci-foot .dcci-btn{min-height:32px;}",
     ].join("\n");
     document.head.appendChild(st);
   }
@@ -222,16 +227,13 @@
   var query = "";
   var filterKey = "all";
   var expanded = {};
-  var view = "items";        // 'items' | 'spell'
-  var spellFor = null;       // the item we're choosing a spell for
-  var spellQuery = "";
-  var spellExpanded = {};
+  var view = "items";        // 'items' | 'ench'
 
   function openPicker() {
     if (!haveData()) { alert("The item catalog didn't load. Open this sheet from the app so /tools-data/dcc-items.js is available."); return; }
     injectCss();
     expanded = {};
-    view = "items"; spellFor = null; spellQuery = ""; spellExpanded = {};
+    view = "items"; ench = null; if (filterKey === "ench") filterKey = "all";
     overlay("dcci-overlay");
     renderPicker();
     var s = document.getElementById("dcci-search-input");
@@ -239,7 +241,8 @@
   }
   function closePicker() {
     var ov = document.getElementById("dcci-overlay"); if (ov) ov.style.display = "none";
-    query = ""; expanded = {}; view = "items"; spellFor = null; spellQuery = ""; spellExpanded = {};
+    query = ""; expanded = {}; view = "items"; ench = null;
+    if (window.DCCBonus) { try { window.DCCBonus.closePicker(); } catch (e) {} }
   }
 
   function itemHtml(it) {
@@ -258,7 +261,7 @@
     '</div>';
   }
   function renderPicker() {
-    if (view === "spell") return renderSpellPicker();
+    if (view === "ench") return renderEnchant();
     var ov = document.getElementById("dcci-overlay");
     if (!ov) return;
     var q = query.trim().toLowerCase();
@@ -277,7 +280,7 @@
       if (inGrp.length) rows += '<div class="dcci-grp">' + esc(grp.label) + '</div>' + inGrp.map(itemHtml).join("");
     });
     if (!rows) rows = '<div class="dcci-grp">No item matches' + (query ? ' “' + esc(query) + '”' : "") + '.</div>';
-    var chips = GROUPS.map(function (f) {
+    var chips = CHIPS.map(function (f) {
       return '<button class="dcci-chip' + (filterKey === f.key ? " on" : "") + '" onclick="DCCItems.filter(\'' + f.key + '\')">' + esc(f.label) + '</button>';
     }).join("");
     ov.innerHTML =
@@ -291,51 +294,76 @@
     if (s) { s.focus(); try { s.setSelectionRange(s.value.length, s.value.length); } catch (e) {} }
   }
 
-  // ── spell chooser (shown after picking a spell-bearing item) ────────────────
-  function spellHtml(sp) {
-    var open = !!spellExpanded[sp.name];
-    var detail = open ? '<div class="detail"><div class="ef">' + esc(sp.desc || "No description on file.") + '</div></div>' : "";
-    return '<div class="dcci-item' + (open ? " open" : "") + '">' +
-      '<div class="row">' +
-        '<div class="body" onclick="DCCItems.chooseSpell(\'' + jsq(sp.name) + '\')" title="Write this spell on the item">' +
-          '<div class="nm">' + esc(sp.name) + '</div>' +
-          '<div class="mt">' + esc(spellMeta(sp)) + '</div>' +
-        '</div>' +
-        '<button class="dcci-i' + (open ? " on" : "") + '" title="' + (open ? "Hide details" : "What does it do?") + '" onclick="DCCItems.toggleSpell(\'' + jsq(sp.name) + '\')">i</button>' +
-      '</div>' + detail +
-    '</div>';
+  // ── Enchanted builder (the "Enchanted" tab) ────────────────────────────────
+  // Build a one-off magic item: pick a base item (weapon / armor / accessory /
+  // item, or a Spell Scroll / Magic Tome / Spellbook), name it, and give it
+  // bonuses — rolled from the book's tables at a tier, or added one by one. A
+  // spell-bearing base takes Spells only. The bonuses are the same badges the GM
+  // Screen loot box uses, and are what equipping applies on this sheet.
+  var ench = null;   // { base, name, nameTouched, tier, benefits }
+  var BASE_GROUPS = [["weapon", "Weapons"], ["armor", "Armor"], ["accessory", "Accessories"], ["mundane", "Items"], ["spell", "Spell Scrolls & Tomes"]];
+  function baseKind(it) { return carriesSpell(it) ? "spell" : (it && BASE_GROUPS.some(function (g) { return g[0] === it.category; }) ? it.category : ""); }
+  function bases() { return itemsAZ().filter(function (it) { return !!baseKind(it); }); }
+  function defaultName(e) {
+    var it = lookup(e.base); if (!it) return e.name;
+    if (carriesSpell(it)) { var sp = (e.benefits || []).find(function (b) { return b.kind === "spell"; }); return it.name + (sp ? ": " + sp.target : ""); }
+    return "Enchanted " + it.name;
   }
-  function renderSpellPicker() {
-    var ov = document.getElementById("dcci-overlay");
-    if (!ov || !spellFor) return;
-    var q = spellQuery.trim().toLowerCase();
-    var list = spellsAZ().filter(function (sp) {
-      if (!q) return true;
-      return sp.name.toLowerCase().indexOf(q) >= 0 || (sp.desc && sp.desc.toLowerCase().indexOf(q) >= 0) || (sp.type && sp.type.toLowerCase().indexOf(q) >= 0);
-    });
-    var rows = list.length ? list.map(spellHtml).join("")
-      : '<div class="dcci-grp">No spell matches' + (spellQuery ? ' “' + esc(spellQuery) + '”' : "") + '.</div>';
+  function openEnchant(baseName) {
+    var it = baseName ? lookup(baseName) : null;
+    ench = { base: it ? it.name : "", name: "", nameTouched: false, tier: "Gold", benefits: [] };
+    if (it) ench.name = defaultName(ench);
+    view = "ench"; filterKey = "ench";
+    renderEnchant();
+  }
+  function renderEnchant() {
+    var ov = document.getElementById("dcci-overlay"); if (!ov || !ench) return;
+    var it = lookup(ench.base), spell = carriesSpell(it);
+    var chips = CHIPS.map(function (f) { return '<button class="dcci-chip' + (f.key === "ench" ? " on" : "") + '" onclick="DCCItems.filter(\'' + f.key + '\')">' + esc(f.label) + "</button>"; }).join("");
+    var opts = '<option value="">— choose a base item —</option>' + BASE_GROUPS.map(function (g) {
+      var list = bases().filter(function (b) { return baseKind(b) === g[0]; });
+      return list.length ? '<optgroup label="' + attr(g[1]) + '">' + list.map(function (b) { return '<option value="' + attr(b.name) + '"' + (b.name === ench.base ? " selected" : "") + ">" + esc(b.name) + (b.slot && g[0] !== "spell" ? " — " + esc(b.slot) : "") + "</option>"; }).join("") + "</optgroup>" : "";
+    }).join("");
+    var tiers = (window.DCCBonus ? window.DCCBonus.TIERS : ["Silver", "Gold", "Platinum", "Legendary", "Celestial"]).map(function (t) { return '<option' + (t === ench.tier ? " selected" : "") + ">" + t + "</option>"; }).join("");
     ov.innerHTML =
-      '<div class="dcci-modal" role="dialog" aria-label="Choose the spell">' +
-        '<div class="dcci-head"><h3>Spell on the ' + esc(spellFor.name) + '</h3><button class="dcci-x" onclick="DCCItems.closePicker()" aria-label="Close">✕</button></div>' +
-        '<div class="dcci-search"><input id="dcci-spell-search" type="search" placeholder="Search spells…" value="' + attr(spellQuery) + '" oninput="DCCItems.searchSpell(this.value)"></div>' +
-        '<div class="dcci-list">' + rows + '</div>' +
-        '<div class="dcci-foot"><input id="dcci-spell-custom" type="text" placeholder="…or type a custom spell name" onkeydown="if(event.key===\'Enter\')DCCItems.chooseSpellCustom()">' +
-          '<button class="dcci-btn" onclick="DCCItems.chooseSpellCustom()">Add</button>' +
-          '<button class="dcci-btn plain" onclick="DCCItems.skipSpell()">No spell yet</button>' +
-          '<button class="dcci-btn plain" onclick="DCCItems.backToItems()">← Items</button></div>' +
-      '</div>';
-    var s = document.getElementById("dcci-spell-search");
-    if (s) { s.focus(); try { s.setSelectionRange(s.value.length, s.value.length); } catch (e) {} }
+      '<div class="dcci-modal" role="dialog" aria-label="Build an enchanted item">' +
+        '<div class="dcci-head"><h3>Enchanted Item</h3><button class="dcci-x" onclick="DCCItems.closePicker()" aria-label="Close">✕</button></div>' +
+        '<div class="dcci-filters">' + chips + "</div>" +
+        '<div class="dcci-ench">' +
+          '<label>Base item<select id="dcci-ench-base" onchange="DCCItems.enchBase(this.value)">' + opts + "</select></label>" +
+          (it ? '<div class="dcci-ench-ef">' + esc((it.slot ? it.slot + " — " : "") + (it.effect || "")) + "</div>" : "") +
+          '<label>Name<input id="dcci-ench-name" type="text" maxlength="80" placeholder="Name your item" value="' + attr(ench.name) + '" oninput="DCCItems.enchName(this.value)"></label>' +
+          (it && !spell ? '<div class="dcci-ench-row"><label>Tier<select onchange="DCCItems.enchTier(this.value)">' + tiers + "</select></label>" +
+            '<button class="dcci-btn" type="button" onclick="DCCItems.enchRoll()" title="Roll this tier\'s enchantments from the loot tables">🎲 Roll bonuses</button></div>' : "") +
+          (it ? '<div class="dcci-ench-lbl">' + (spell ? "Spell" : "Bonuses") + '</div><div id="dcci-ench-bon"></div>' : '<div class="dcci-grp">Pick a base item to enchant — gear gets bonuses, a Spell Scroll / Tome / Spellbook gets a spell.</div>') +
+        "</div>" +
+        '<div class="dcci-foot"><span class="dcci-ench-note">' + (it ? (spell ? "A scroll or tome holds its spell; it isn\'t worn." : "Equip it from your Inventory to apply its bonuses.") : "") + "</span>" +
+          '<button class="dcci-btn" type="button" onclick="DCCItems.enchAdd()"' + (it ? "" : " disabled") + ">Add to Inventory</button></div>" +
+      "</div>";
+    var host = document.getElementById("dcci-ench-bon");
+    if (host && window.DCCBonus) {
+      ench.ed = window.DCCBonus.editor(host, spell
+        ? { benefits: ench.benefits, empty: "No spell yet", kinds: ["spell"], addLabel: "+ Spell", onChange: enchChanged,
+            extra: [{ label: "🎲", title: "A random spell", onClick: function () { var r = window.DCCBonus.randomSpell(); if (r) { ench.benefits = [r]; ench.ed.set(ench.benefits); enchChanged(ench.benefits); } } }] }
+        : { benefits: ench.benefits, empty: "No bonuses yet — roll them or add them", onChange: enchChanged });
+    }
   }
-  function finalizeSpell(spellName) {
-    var it = spellFor;
-    if (!it) return;
-    if (spellName) fillRow(newInvRow(), spellItemName(it, spellName), spellItemNotes(it, spellName));
-    else fillRow(newInvRow(), it.name, notesOf(it));   // "No spell yet" → plain item row
+  function enchChanged(list) {
+    ench.benefits = list;
+    if (!ench.nameTouched) { ench.name = defaultName(ench); var n = document.getElementById("dcci-ench-name"); if (n) n.value = ench.name; }
+  }
+  function enchAdd() {
+    var it = lookup(ench && ench.base); if (!it) return;
+    var name = String(ench.name || "").trim() || defaultName(ench);
+    var tr = newInvRow();
+    fillRow(tr, name, "");
+    if (tr) {
+      tr.dataset.cat = it.category || "";
+      if (it.slot) tr.dataset.slot = it.slot;
+      if (window.DCCEquip && window.DCCEquip.setBenefits) { window.DCCEquip.setBenefits(tr, ench.benefits || []); try { window.DCCEquip.refreshRow(tr.querySelector(".hot-pin")); } catch (e) {} }
+    }
     try { if (window.DCCHotlist) window.DCCHotlist.refresh(); } catch (e) {}
-    view = "items"; spellFor = null; spellQuery = ""; spellExpanded = {};
-    renderPicker();
+    closePicker();
   }
 
   // ── info panel (per-row (i) button on the Inventory table) ──────────────────
@@ -377,12 +405,12 @@
     closeInfo: closeInfo,
     infoRow: infoRow,
     search: function (v) { query = v; renderPicker(); },
-    filter: function (key) { filterKey = key; renderPicker(); },
+    filter: function (key) { if (key === "ench") { openEnchant(""); return; } filterKey = key; view = "items"; ench = null; renderPicker(); },
     toggle: function (name) { expanded[name] = !expanded[name]; renderPicker(); },
     add: function (name) {
       var it = lookup(name);
-      // A spell-bearing item opens the spell chooser instead of adding straight away.
-      if (it && carriesSpell(it)) { view = "spell"; spellFor = it; spellQuery = ""; spellExpanded = {}; renderPicker(); return; }
+      // A spell-bearing item opens the Enchanted builder to write its spell.
+      if (it && carriesSpell(it)) { openEnchant(it.name); return; }
       addToSheet(it, it ? it.name : name);
     },
     addCustom: function () {
@@ -390,24 +418,28 @@
       var name = inp ? String(inp.value || "").trim() : "";
       if (!name) return;
       var it = lookup(name);
-      if (it && carriesSpell(it)) { view = "spell"; spellFor = it; spellQuery = ""; spellExpanded = {}; renderPicker(); if (inp) inp.value = ""; return; }
+      if (it && carriesSpell(it)) { openEnchant(it.name); if (inp) inp.value = ""; return; }
       addToSheet(it, it ? it.name : name);
       if (inp) inp.value = "";
       closePicker();
     },
     addBlank: function () { newInvRow(); closePicker(); },
-    // spell chooser
-    searchSpell: function (v) { spellQuery = v; renderSpellPicker(); },
-    toggleSpell: function (name) { spellExpanded[name] = !spellExpanded[name]; renderSpellPicker(); },
-    chooseSpell: function (name) { finalizeSpell(name); },
-    chooseSpellCustom: function () {
-      var inp = document.getElementById("dcci-spell-custom");
-      var name = inp ? String(inp.value || "").trim() : "";
-      if (!name) return;
-      finalizeSpell(name);
+    // Enchanted builder
+    openEnchant: openEnchant,
+    enchBase: function (v) {
+      var was = carriesSpell(lookup(ench.base)), now = carriesSpell(lookup(v));
+      ench.base = v; if (was !== now) ench.benefits = [];
+      if (!ench.nameTouched) ench.name = defaultName(ench);
+      renderEnchant();
     },
-    skipSpell: function () { finalizeSpell(""); },
-    backToItems: function () { view = "items"; spellFor = null; spellQuery = ""; spellExpanded = {}; renderPicker(); },
+    enchName: function (v) { ench.name = v; ench.nameTouched = !!String(v).trim(); },
+    enchTier: function (v) { ench.tier = v; },
+    enchRoll: function () {
+      var it = lookup(ench.base); if (!it || !window.DCCBonus) return;
+      ench.benefits = window.DCCBonus.rollBonuses(ench.tier, it.category);
+      if (ench.ed) ench.ed.set(ench.benefits);
+    },
+    enchAdd: enchAdd,
     refreshHomebrew: fetchHomebrew,
   };
 

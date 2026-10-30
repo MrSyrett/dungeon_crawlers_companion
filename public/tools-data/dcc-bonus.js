@@ -27,7 +27,7 @@
     { k: "stat", label: "Stat", tip: "+N to a Stat" },
     { k: "allstats", label: "All Stats", tip: "+N to every Stat" },
     { k: "skill", label: "Skill", tip: "+N ranks in a Skill (added if the crawler doesn't have it)" },
-    { k: "spell", label: "Spell", tip: "An Inherent Spell — known while the item is worn, no Mana" },
+    { k: "spell", label: "Spell", tip: "A Spell — gear grants it while worn (an Inherent Spell, no Mana); a scroll or tome holds it" },
     { k: "buff", label: "Buff", tip: "A Buff while the item is worn" },
     { k: "dr", label: "DR", tip: "+N Damage Resistance" },
     { k: "evade", label: "Evade", tip: "+N Evade" },
@@ -120,6 +120,7 @@
     if ((m = p.match(/^Passive\s+(.+?)\s*\(\s*Rank\s*=\s*Floor(?:\s*Number)?\s*\)$/i))) return { kind: "skill", target: (findSkill(m[1]) || { name: m[1] }).name, floor: true, amount: 0 };
     if ((m = p.match(/^(?:Inherent\s+)?Spell\s*:\s*(.+?)(?:\s*\((?:Rank|no Mana)[^)]*\))*$/i))) { var rk = p.match(/\(Rank\s*(\d+)\)/i); return { kind: "spell", target: (findSpell(m[1]) || { name: norm(m[1]) }).name, amount: rk ? +rk[1] : 0 }; }
     if ((m = p.match(/^(?:Grants\s+(?:the\s+)?)?Buff\s*:\s*(.+)$/i))) return { kind: "buff", target: (findBuff(m[1]) || { name: norm(m[1]) }).name };
+    if ((m = p.match(/^Resist(?:ance)?(?:\s+to)?\s+([A-Za-z]+)(?:\s+damage)?$/i))) return { kind: "buff", target: "Resistance: " + m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase() };
     // "+2 Warhammer Skill", "+2 to Athletics", "+1 Shield Block Skill Rank"
     if ((m = p.match(/^\+\s*(\d+)\s+(?:to\s+|in\s+)?([A-Za-z][A-Za-z'/\- ]*?)(?:\s+skill(?:\s+ranks?)?s?)?(?:\s*\(Skill Rank\))?$/i))) {
       var nm = norm(m[2]), sd = findSkill(nm);
@@ -187,14 +188,17 @@
   // ── the popover: pick a kind, fill it in, Add ───────────────────────────────
   var pop = null, popClose = null;
   function closePop() { if (pop) { pop.remove(); pop = null; } if (popClose) { document.removeEventListener("mousedown", popClose, true); document.removeEventListener("keydown", popClose, true); popClose = null; } }
-  function openPop(anchor, onAdd, startKind) {
+  function openPop(anchor, onAdd, startKind, only) {
     closePop(); injectCss();
     pop = document.createElement("div"); pop.className = "dcbn-pop";
-    var kind = startKind || "stat";
-    pop.innerHTML = '<div class="dcbn-kinds">' + KINDS.map(function (x) { return '<button type="button" class="dcbn-kind" data-k="' + x.k + '" title="' + esc(x.tip) + '">' + esc(x.label) + "</button>"; }).join("") + "</div>" +
+    var kinds = (only && only.length) ? KINDS.filter(function (x) { return only.indexOf(x.k) >= 0; }) : KINDS;
+    var kind = startKind || kinds[0].k;
+    pop.innerHTML = '<div class="dcbn-kinds"' + (kinds.length < 2 ? ' style="display:none"' : "") + ">" + kinds.map(function (x) { return '<button type="button" class="dcbn-kind" data-k="' + x.k + '" title="' + esc(x.tip) + '">' + esc(x.label) + "</button>"; }).join("") + "</div>" +
       '<div class="dcbn-tip"></div><div class="dcbn-form"></div><div class="dcbn-err"></div>' +
       '<div class="dcbn-acts"><button type="button" class="dcbn-btn dcbn-cancel">Cancel</button><button type="button" class="dcbn-btn go dcbn-ok">Add</button></div>';
     document.body.appendChild(pop);
+    // Theme hooks set on the strip (e.g. a dark modal on a light page) follow it into the popover.
+    try { var cs = getComputedStyle(anchor); ["--dcbn-pop-bg", "--dcbn-pop-fg", "--dcbn-pop-bd", "--dcbn-acc", "--dcbn-on-acc", "--dcbn-font"].forEach(function (v) { var x = cs.getPropertyValue(v); if (x && x.trim()) pop.style.setProperty(v, x.trim()); }); } catch (e) {}
     var form = pop.querySelector(".dcbn-form"), tip = pop.querySelector(".dcbn-tip"), err = pop.querySelector(".dcbn-err");
     function statSel() { return '<select class="dcbn-stat">' + STATS.map(function (s) { return '<option value="' + s[0] + '">' + s[1] + "</option>"; }).join("") + "</select>"; }
     function amt(ph) { return '<input type="number" class="dcbn-amt" step="1" placeholder="' + (ph || "+N") + '">'; }
@@ -264,7 +268,7 @@
   }
 
   // ── the badge strip (editable or read-only) ─────────────────────────────────
-  // editor(el, { benefits, onChange(list), readonly, empty, extra: [{label,title,onClick}] })
+  // editor(el, { benefits, onChange(list), readonly, empty, kinds: ['spell'], addLabel, extra: [{label,title,onClick}] })
   // Returns { get(), set(list) }.
   function editor(el, opts) {
     injectCss(); opts = opts || {};
@@ -275,21 +279,67 @@
           (opts.readonly ? "" : '<button type="button" class="dcbn-x" data-i="' + i + '" title="Remove this bonus" aria-label="Remove">×</button>') + "</span>";
       }).join("");
       if (!list.length && opts.empty) h += '<span class="dcbn-empty">' + esc(opts.empty) + "</span>";
-      if (!opts.readonly) h += '<button type="button" class="dcbn-add" title="Add a bonus">+ Bonus</button>';
+      if (!opts.readonly) h += '<button type="button" class="dcbn-add" title="Add a bonus">' + esc(opts.addLabel || "+ Bonus") + "</button>";
       (opts.extra || []).forEach(function (x, i) { h += '<button type="button" class="dcbn-add dcbn-extra" data-x="' + i + '" title="' + esc(x.title || "") + '">' + esc(x.label) + "</button>"; });
       el.innerHTML = '<div class="dcbn">' + h + "</div>";
     }
     function changed() { paint(); if (opts.onChange) opts.onChange(list.slice()); }
     el.addEventListener("click", function (e) {
       var x = e.target.closest(".dcbn-x"); if (x) { list.splice(+x.dataset.i, 1); changed(); return; }
-      var a = e.target.closest(".dcbn-add:not(.dcbn-extra)"); if (a) { openPop(a, function (b) { list.push(b); changed(); }); return; }
+      var a = e.target.closest(".dcbn-add:not(.dcbn-extra)"); if (a) { openPop(a, function (b) { list.push(b); changed(); }, null, opts.kinds); return; }
       var ex = e.target.closest(".dcbn-extra"); if (ex) { var f = (opts.extra || [])[+ex.dataset.x]; if (f && f.onClick) f.onClick(); }
     });
     paint();
-    return { get: function () { return list.slice(); }, set: function (v) { list = normalize(v); paint(); } };
+    return { get: function () { return list.slice(); }, set: function (v) { list = normalize(v); paint(); }, opts: opts, repaint: paint };
   }
 
+  // ── rolling bonuses from the book's loot tables (Tables 39/40/41) ──────────
+  // tier: Silver…Celestial (the X value + number of rolls); cat picks the table
+  // (armor → 40 Clothing, accessory → 41, anything else → 39 Mundane/Weapon).
+  // "Something Unique" (Table 42) is never rolled — a sheet can't apply it.
+  var DMG_UNCOMMON = ["Acid", "Cold", "Fire", "Lightning", "Poison", "Necrotic", "Psychic", "Radiant", "Force", "Sonic"];
+  function pick(a) { return a && a.length ? a[Math.floor(Math.random() * a.length)] : null; }
+  function lootTable(n) { var L = g("DCC_LOOT"); return L ? (L.tables || []).find(function (t) { return new RegExp("Table " + n + "\\b").test(t.name || ""); }) || null : null; }
+  function lootTier(t) { var L = g("DCC_LOOT"); var ts = L ? L.tiers || [] : []; return ts.find(function (x) { return x.tier === t; }) || null; }
+  function rollRow(table) {
+    if (!table || !table.rows || !table.rows.length) return null;
+    var sides = parseInt(String(table.die || "d6").replace(/\D/g, ""), 10) || table.rows.length, r = 1 + Math.floor(Math.random() * sides);
+    return table.rows.find(function (x) { var s = String(x.roll).replace(/[–—]/g, "-"), m = s.match(/^(\d+)\s*-\s*(\d+)$/); return m ? r >= +m[1] && r <= +m[2] : parseInt(s, 10) === r; }) || table.rows[table.rows.length - 1];
+  }
+  function rollX(tier, which) {   // which: 'skill' | 'stat' → a number from the tier's X guidance
+    var t = lootTier(tier), x = String(t ? t.xValue : "").replace(/[–—]/g, "-");
+    var m = x.match(/\+?(\d+)(?:-(\d+))?%?\s*Skill Rank\s*or\s*\+?(\d+)(?:-(\d+))?%?\s*Stat/i);
+    if (!m) return 1;
+    var a = which === "skill" ? +m[1] : +m[3], b = which === "skill" ? +(m[2] || m[1]) : +(m[4] || m[3]);
+    return a + Math.floor(Math.random() * (b - a + 1));
+  }
+  function rollOne(tier, cat) {
+    var table = lootTable(cat === "armor" ? 40 : cat === "accessory" ? 41 : 39), row, n = 0;
+    do { row = rollRow(table); n++; } while (row && /something unique|table 42/i.test(row.result) && n < 12);
+    var p = row ? String(row.result) : "+X Stat";
+    if (/\bX\b/.test(p) && /skill/i.test(p)) { var sk = pick(skillList()); return { kind: "skill", target: sk ? sk.name : "Athletics", amount: rollX(tier, "skill") }; }
+    if (/\bX\b/.test(p)) return { kind: "stat", target: pick(STATS)[0], amount: rollX(tier, "stat") };
+    if (/damage resistance/i.test(p)) { var d = p.match(/(\d+)/); return { kind: "dr", amount: d ? +d[1] : 1 }; }
+    if (/resistance to an uncommon/i.test(p)) return { kind: "buff", target: "Resistance: " + pick(DMG_UNCOMMON) };
+    if (/external buff/i.test(p)) return { kind: "buff", target: Math.random() < 0.5 ? "Recovery" : "Restore" };
+    if (/buff/i.test(p)) { var bf = pick(buffList()); return bf ? { kind: "buff", target: bf.name } : null; }
+    if (/passive skill/i.test(p)) { var ps = pick(skillList().filter(function (x) { return x.passive; })) || pick(skillList()); return ps ? { kind: "skill", target: ps.name, floor: true, amount: 0 } : null; }
+    if (/inherent spell/i.test(p)) { var sp = pick(spellList()); return sp ? { kind: "spell", target: sp.name } : null; }
+    return null;
+  }
+  function rollBonuses(tier, cat) {
+    var t = lootTier(tier), n = Math.max(1, t && typeof t.gearRolls === "number" ? t.gearRolls : 1), out = [], seen = {};
+    for (var i = 0; i < n; i++) {
+      var b = null, tries = 0;
+      do { b = one(rollOne(tier, cat)); tries++; } while ((!b || seen[label(b)]) && tries < 8);
+      if (b && !seen[label(b)]) { seen[label(b)] = 1; out.push(b); }
+    }
+    return out;
+  }
+  function randomSpell() { var sp = pick(spellList()); return sp ? { kind: "spell", target: sp.name } : null; }
+
   window.DCCBonus = {
+    rollBonuses: rollBonuses, randomSpell: randomSpell, TIERS: ["Silver", "Gold", "Platinum", "Legendary", "Celestial"],
     KINDS: KINDS, STATS: STATS, normalize: normalize, label: label, summary: summary, fromText: fromText,
     editor: editor, openPicker: openPop, closePicker: closePop, injectCss: injectCss,
     findSkill: findSkill, findSpell: findSpell, findBuff: findBuff, statLabel: statLabel,

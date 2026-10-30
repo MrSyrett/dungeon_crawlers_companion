@@ -5302,18 +5302,10 @@ GMScenes.renderPins();
               </select>
               <button class="btn small ghost ai-roll-tier" type="button" title="Fill the box from the DCC loot generator — gold, gear, and a couple of enchanted items">🎲 Roll tier</button>
             </div>
-            <div class="ai-row">
-              <select class="ai-select ai-ench-cat" title="Base item type to enchant">
-                <option value="">Any type</option><option value="weapon">Weapon</option>
-                <option value="armor">Armor</option><option value="accessory">Accessory</option>
-              </select>
-              <button class="btn small ghost ai-ench-roll" type="button" title="Enchant a random base item at the chosen tier — bonuses auto-apply when the player equips it">✨ Enchant an item</button>
-            </div>
             <div class="ai-cat-filters"></div>
             <input type="text" class="ai-input ai-cat-search" placeholder="Search Loot &amp; Gear to add…">
             <div class="ai-cat-results"></div>
             <div class="dlb-items ai-items-body"></div>
-            <div class="ai-row"><button class="btn small ghost ai-add-row" type="button" title="A blank item — name it, pick its type, add bonuses">+ Blank item</button></div>
             <button class="btn small primary ai-send-box" type="button">Send Loot Box</button>
             <div class="ai-status ai-box-status"></div>
           </div>
@@ -14676,7 +14668,7 @@ function dccResolveProperty(propText, tierKey, typeTableNum) {
     return 'Inherent Spell: <b>' + (sp ? esc(sp.name) : 'a Spell') + '</b> <span style="opacity:.7">(no Mana; GM-set cooldown)</span>';
   }
   if(/resistance to an uncommon damage type/i.test(p)) {
-    return 'Resistance to <b>' + esc(dccPick(DCC_DMG_UNCOMMON)) + '</b> damage';
+    return 'Grants the <b>Resistance: ' + esc(dccPick(DCC_DMG_UNCOMMON)) + '</b> buff';
   }
   if(/external buff of recovery/i.test(p)) {
     return Math.random() < 0.5
@@ -14709,7 +14701,8 @@ function genDccMagicItem(tierKey, forcedType) {
   const lines = [];       // { label, html }
   let usedX = false, isUnique = false, forfeited = 0;
   for(let i = 0; i < nRolls; i++) {
-    let prop = dccRollRow(typeTable);
+    let prop = dccRollRow(typeTable), guard = 0;
+    while(prop && /Something Unique|Table 42/i.test(prop.result) && guard++ < 12) prop = dccRollRow(typeTable);   // Unique isn't sheet-applicable
     const raw = prop ? prop.result : '';
     // "Something Unique" (Table 42) — roll once and stop; the forfeited rolls
     // concentrate its power (unique on roll 1 of 3 ≈ ×3).
@@ -14779,7 +14772,7 @@ function dccEnchantPerk(raw, tierKey) {
   if(/^a buff/i.test(p)) { const b = dccRandomBuff(); return b ? ('Buff: ' + b.name) : 'a Buff'; }
   if(/passive skill/i.test(p)) { const sk = dccRandomSkillName(true) || 'a Skill'; return 'Passive ' + sk + ' (Rank = Floor)'; }
   if(/inherent spell/i.test(p)) { const sp = dccRandomSpell(); return 'Inherent Spell: ' + (sp ? sp.name : 'a Spell'); }
-  if(/resistance to an uncommon/i.test(p)) { return 'Resist ' + dccPick(DCC_DMG_UNCOMMON) + ' damage'; }
+  if(/resistance to an uncommon/i.test(p)) { return 'Buff: Resistance: ' + dccPick(DCC_DMG_UNCOMMON); }
   if(/external buff/i.test(p)) { return Math.random() < 0.5 ? 'Recovery (full Health) 1/Floor' : 'Restore (full Mana) 1/Floor'; }
   if(/something unique|table 42/i.test(p)) { const u = dccRollRow(dccLootTable('42')); return 'Unique: ' + (u ? u.result : 'GM’s choice'); }
   return p;
@@ -14808,13 +14801,13 @@ window.dccRollPerks = function(tierKey, cat) {
   const t = dccLootTier(tierKey);
   const nRolls = Math.max(1, (t && typeof t.gearRolls === 'number') ? t.gearRolls : 1);
   const perks = []; const seen = new Set();
+  // "Something Unique" (Table 42) isn't something a sheet can apply, so it's
+  // never rolled here — the d6 is re-rolled instead.
+  const rollOne = () => { let r, n = 0; do { r = typeTable ? dccRollRow(typeTable) : null; n++; } while(r && /something unique|table 42/i.test(r.result) && n < 12); return dccEnchantPerk(r ? r.result : '+X Stat', tierKey); };
   for(let i = 0; i < nRolls; i++) {
-    const row = typeTable ? dccRollRow(typeTable) : null;
-    let perk = dccEnchantPerk(row ? row.result : '+X Stat', tierKey);
-    let tries = 0;
-    while(seen.has(perk) && tries < 6) { const r2 = typeTable ? dccRollRow(typeTable) : null; perk = dccEnchantPerk(r2 ? r2.result : '+X Stat', tierKey); tries++; }
+    let perk = rollOne(), tries = 0;
+    while(seen.has(perk) && tries < 6) { perk = rollOne(); tries++; }
     seen.add(perk); perks.push(perk);
-    if(/unique/i.test(perk)) break;
   }
   return perks;
 };
@@ -22904,8 +22897,7 @@ function wireAiConsole(root) {
     { key:'gear',label:'Gear',cats:['accessory','mundane','tool','material'] },{ key:'scroll',label:'Scrolls & Tomes',cats:['scroll','tome'] },
   ];
   const boxName=root.querySelector('.ai-box-name'), boxTier=root.querySelector('.ai-box-tier'), rollTier=root.querySelector('.ai-roll-tier');
-  const enchCat=root.querySelector('.ai-ench-cat'), enchRoll=root.querySelector('.ai-ench-roll');
-  const itemsBody=root.querySelector('.dlb-items'), addRow=root.querySelector('.ai-add-row');
+  const itemsBody=root.querySelector('.dlb-items');
   const sendBox=root.querySelector('.ai-send-box'), boxStatus=root.querySelector('.ai-box-status');
   const boxSend=mountSendMode(sendBox, boxStatus);
   const DCCB = () => window.DCCBonus;
@@ -22930,14 +22922,19 @@ function wireAiConsole(root) {
     nm.value=o.name||''; qty.value=(o.qty==null?'1':String(o.qty)); sel.value=cat; notes.value=o.notes||'';
     if(o.slot) card.dataset.slot=o.slot;
     if(o.tier) card.dataset.tier=o.tier;
-    const ed = DCCB() ? DCCB().editor(bon, { benefits: o.benefits || [], empty: 'No bonuses', extra: [{ label:'🎲', title:'Re-roll this item’s bonuses at the box tier', onClick(){
+    const spellItem = /^(scroll|tome)$/.test(cat) && !/upgrade/i.test(o.name || '');
+    if(spellItem) card.dataset.spell = '1';
+    const ed = DCCB() ? DCCB().editor(bon, spellItem ? { benefits: o.benefits || [], empty: 'No spell yet', kinds: ['spell'], addLabel: '+ Spell', extra: [{ label:'🎲', title:'Roll a random spell', onClick(){
+      const pool = (typeof DCC_SPELLS!=='undefined'?DCC_SPELLS:[]).concat(Array.isArray(window.__DCC_HB_SPELLS)?window.__DCC_HB_SPELLS:[]).filter(x=>x&&x.name);
+      if(pool.length) ed.set([{ kind:'spell', target: pool[Math.floor(Math.random()*pool.length)].name }]);
+    } }] } : { benefits: o.benefits || [], empty: 'No bonuses', extra: [{ label:'🎲', title:'Re-roll this item’s bonuses at the box tier', onClick(){
       if(typeof window.dccRollPerks!=='function'){ setStatus(boxStatus,'Loot tables didn’t load — open from the app.','err'); return; }
       const t = boxTier.value || card.dataset.tier || 'Gold';
       const perks = window.dccRollPerks(t, sel.value && GEAR[sel.value] ? sel.value : 'accessory');
       ed.set(perks.map(pk => DCCB().fromText(pk)[0]).filter(Boolean)); card.dataset.tier=t;
     } }] }) : null;
     card._ed = ed;
-    const syncBon = () => { bon.style.display = (GEAR[sel.value] || (ed && ed.get().length)) ? '' : 'none'; };
+    const syncBon = () => { bon.style.display = (GEAR[sel.value] || spellItem || (ed && ed.get().length)) ? '' : 'none'; };
     sel.addEventListener('change', syncBon); syncBon();
     qty.addEventListener('input', e => { e.target.value = e.target.value.replace(/[^\d]/g,''); });
     card.querySelector('.dlb-del').addEventListener('click', () => card.remove());
@@ -22956,7 +22953,6 @@ function wireAiConsole(root) {
     });
     return out;
   }
-  addRow.addEventListener('click', () => { const c=addCard({ category:'accessory' }); c.querySelector('.dlb-name').focus(); });
   const allItems = () => (typeof DCC_ITEMS!=='undefined'?DCC_ITEMS:[]).concat(Array.isArray(window.__DCC_HB_ITEMS)?window.__DCC_HB_ITEMS:[]);
   // A catalog item's bonuses: its structured benefits, else the ones in its effect text.
   function catalogBenefits(it){
@@ -22994,11 +22990,6 @@ function wireAiConsole(root) {
     else pickN(itemsOfTier(td.tier,['weapon','armor','accessory']),nGear).forEach(it=>addCard({ name:it.name, qty:1, category:it.category, slot:it.slot, benefits:catalogBenefits(it) }));
     if(!boxName.value.trim()) boxName.value=key+' Loot Box';
     setStatus(boxStatus,'Rolled a '+key+' box — fix any item with ×, + Bonus or 🎲, then send.','ok');
-  });
-  if(enchRoll) enchRoll.addEventListener('click', () => {
-    if(typeof window.dccEnchantItem !== 'function'){ setStatus(boxStatus,'Loot tables didn’t load — open from the app.','err'); return; }
-    const c = enchantCard(boxTier.value, enchCat && enchCat.value ? enchCat.value : '');
-    setStatus(boxStatus, 'Enchanted “'+c.querySelector('.dlb-name').value+'” — rename it, adjust its bonuses, then send.', 'ok');
   });
 
   sendBox.addEventListener('click', () => {
