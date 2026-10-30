@@ -54,8 +54,7 @@ body.dark{
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:var(--f-ui);font-variant-numeric:lining-nums;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;}
 input,select,textarea,button{font-family:var(--f-ui);font-variant-numeric:lining-nums;}
-/* Light mode on the themed page: the warm parchment ground instead of the dark one. */
-:root[data-themed][data-system="DB"] body:not(.dark){background-color:#d6d3cd;background-image:radial-gradient(130% 98% at 50% 42%,rgba(0,0,0,0) 50%,rgba(0,0,0,.18) 100%),url("/themes/db-parchment-light.webp");}
+/* No light-mode ground override: the themed page keeps the dark parchment ground in both modes (2026-10-30). */
 /* Only the "Dragonbane" logo word keeps the logo treatment (red fill, gold stroke); every other
    Hideout heading is plain accent green (--acc-dk), no stroke, so it stays readable. */
 .hdr-logo .lg-word{color:var(--hd-fill);-webkit-text-stroke:1.6px var(--hd-stroke);paint-order:stroke fill;text-shadow:none;}

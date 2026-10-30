@@ -1425,16 +1425,9 @@ body {
   background-repeat: no-repeat;
   background-size: cover;
 }
-/* Light mode (the sheet's own toggle — body without .dark): bone ground with
-   blood-red spatter (public/themes/pb-splatter-light.webp). Dragonbane keeps
-   its equivalent line in the sheet template; it is here so the PB sheet gets it
-   without carrying it. Character sheet only: the prep builder has no .dark. */
-:root[data-themed][data-system="PB"][data-tool="character"] body:not(.dark) {
-  background-color: #e8e0cc;
-  background-image:
-    radial-gradient(120% 90% at 50% 45%, rgba(232, 224, 204, 0.22) 30%, rgba(232, 224, 204, 0) 70%, rgba(60, 10, 10, 0.14) 100%),
-    url("/themes/pb-splatter-light.webp");
-}
+/* No light-mode ground override: the sheet keeps the dark splatter in both
+   modes (2026-10-30, the user retired the lightened grounds), like the DCC and
+   D&D sheets; only the sheet's own paper turns light. */
 
 /* --- Justice League Unlimited ---------------------------------------------- */
 :root[data-themed][data-system="JLU"] {

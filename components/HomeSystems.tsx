@@ -59,7 +59,10 @@ const MAX_PX = 34;
 //
 // scrollWidth is no use for either: on an inline-block it reports the content
 // width and misses horizontal overflow entirely.
-function fitTileNames(root: HTMLElement) {
+//
+// Exported for the navbar's Games menu (components/SiteNav.tsx), which shows the
+// same tiles at a smaller size and passes its own floor and ceiling.
+export function fitTileNames(root: HTMLElement, minPx = MIN_PX, maxPx = MAX_PX) {
   const range = document.createRange();
   for (const name of Array.from(root.querySelectorAll<HTMLElement>(".home-tile-name"))) {
     const tile = name.parentElement;
@@ -69,13 +72,13 @@ function fitTileNames(root: HTMLElement) {
     const roomH = tile.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
     if (!(roomW > 0 && roomH > 0)) continue;
 
-    let lo = MIN_PX;
+    let lo = minPx;
     // A tile may cap its own fitted size via --tile-fit-max (e.g. TWD's Dead Kansas
     // display face renders visually larger than the others at the same box, so it
     // is reined in). Clamp to MAX_PX; ignore junk values.
     const capRaw = parseFloat(cs.getPropertyValue("--tile-fit-max"));
-    let hi = capRaw > 0 ? Math.min(MAX_PX, capRaw) : MAX_PX;
-    let best = MIN_PX;
+    let hi = capRaw > 0 ? Math.min(maxPx, capRaw) : maxPx;
+    let best = minPx;
     // Eight halvings of a 22px range settles to under a tenth of a pixel, which is
     // finer than anything that can be seen; more passes would only cost layouts.
     for (let i = 0; i < 8; i++) {
@@ -103,7 +106,7 @@ function fitTileNames(root: HTMLElement) {
 // Carl", which is how the cover reads. The parts are joined by a space when
 // rendered, so they must spell the system's own name exactly; a system that is
 // not listed here just renders SYSTEMS[].name in one colour.
-const NAME_PARTS: Partial<Record<SystemKey, [string, string]>> = {
+export const NAME_PARTS: Partial<Record<SystemKey, [string, string]>> = {
   DCC: ["Dungeon", "Crawler Carl"],
   // Marvel's logo puts only the word MARVEL in the red plate; the rest of the
   // title sits plain beneath it. Splitting here is what lets the stylesheet plate

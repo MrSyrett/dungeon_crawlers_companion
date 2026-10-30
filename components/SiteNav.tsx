@@ -30,6 +30,7 @@ import {
   ACCOUNT_LINKS,
   LIBRARY_LINK,
 } from "./navConfig";
+import { fitTileNames } from "./HomeSystems";
 
 // The single site-wide top navbar.
 //
@@ -97,6 +98,75 @@ function Caret() {
     <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true" className="shrink-0">
       <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
+  );
+}
+
+// The Games menu: the home page's game tiles in miniature, three across. Each
+// tile IS a .home-tile (app/globals.css), so it wears its system's face, colour
+// and cover art from the same tokens as the home page; .home-tile-mini only
+// shrinks the box. The names are fitted to the smaller tiles with the home
+// page's own fitter, with a lower floor and ceiling, and stay hidden until then
+// (.nav-games:not([data-fitted]) in globals.css) so they don't visibly jump.
+function GamesMenu({
+  list,
+  current,
+  onChoose,
+}: {
+  list: { key: SystemKey; name: string }[];
+  current: SystemKey;
+  onChoose: (k: SystemKey) => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useIsoLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let alive = true;
+    const fit = () => { if (alive && ref.current) fitTileNames(ref.current, 8, 16); };
+    fit();
+    el.setAttribute("data-fitted", "");
+    // A brand face arriving after the menu opens still gets a refit.
+    const fonts = typeof document !== "undefined" ? document.fonts : undefined;
+    try { fonts?.ready.then(fit); } catch { /* no font loading API */ }
+    const families = new Set(
+      Array.from(el.querySelectorAll<HTMLElement>(".home-tile-name")).map((n) => getComputedStyle(n).fontFamily),
+    );
+    try {
+      Promise.all(Array.from(families).map((f) => fonts?.load(`700 16px ${f}`).catch(() => []))).then(fit, fit);
+    } catch { /* ignore */ }
+    return () => { alive = false; };
+  }, [list.length]);
+
+  return (
+    <div
+      ref={ref}
+      className="nav-games absolute left-0 top-full mt-1 w-[34rem] overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--panel)] p-1.5 shadow-xl"
+      style={{ "--rows": Math.ceil(list.length / 3) } as React.CSSProperties}
+    >
+      <div className="grid grid-cols-3 gap-1.5">
+        {list.map((s) => (
+          <button
+            key={s.key}
+            type="button"
+            data-sys={s.key}
+            onClick={() => onChoose(s.key)}
+            aria-current={s.key === current ? "true" : undefined}
+            title={s.name}
+            className="home-tile home-tile-mini w-full"
+          >
+            <span className="home-tile-name">
+              {NAME_PARTS[s.key] ? (
+                <>
+                  <span className="tn-1">{NAME_PARTS[s.key]![0]}</span>{" "}
+                  <span className="tn-2">{NAME_PARTS[s.key]![1]}</span>
+                </>
+              ) : (
+                s.name
+              )}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -291,19 +361,7 @@ export default function SiteNav({
               Games <Caret />
             </button>
             {menu === "system" ? (
-              <div className="absolute left-0 top-full mt-1 max-h-[70vh] w-56 overflow-auto rounded-lg border border-[var(--border)] bg-[var(--panel)] p-1 shadow-xl">
-                {list.map((s) => (
-                  <button
-                    key={s.key}
-                    onClick={() => chooseSystem(s.key)}
-                    aria-current={s.key === effective ? "true" : undefined}
-                    className={`block w-full rounded px-3 py-2 text-left text-[13px] font-semibold uppercase tracking-[0.08em] transition-colors hover:bg-[var(--panel-2)] ${s.key === effective ? "bg-[var(--panel-2)]" : "text-[var(--muted)]"}`}
-                    style={s.key === effective ? { color: s.accent } : undefined}
-                  >
-                    {s.name}
-                  </button>
-                ))}
-              </div>
+              <GamesMenu list={list} current={effective} onChoose={chooseSystem} />
             ) : null}
           </div>
 
