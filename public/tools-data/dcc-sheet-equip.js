@@ -144,14 +144,23 @@
     if (!box) { box = document.createElement("span"); box.className = "gr-badges"; }
     if (box.parentNode !== sub || box !== sub.lastElementChild) sub.appendChild(box);   // after the row's other info
     box.innerHTML = g.map(function (x) {
+      if (x.kind === "spell" && x.uses) {
+        var left = Math.max(0, num(x.left));
+        var tip = "Inherent Spell from " + x.item + " — no Mana while worn. " + left + " of " + x.uses + " charge" + (x.uses === 1 ? "" : "s") + " left; recharges on a " + RESET_TXT[x.reset || "long"] +
+          (tr.dataset.grantCreated === "1" ? ". Lost when the item is unequipped." : ". You know this spell too, so once the charges are spent it costs Mana.");
+        return '<span class="gr-badge gr-spell' + (left ? "" : " spent") + '" title="' + esc(tip) + '">' + esc(x.item) + " " + left + "/" + x.uses + " · " + esc(RESET_SHORT[x.reset || "long"]) + "</span>";
+      }
       var what = x.kind === "spell" ? "Granted by " + x.item : (x.rank ? "+" + x.rank + " rank" + (x.rank === 1 ? "" : "s") + " from " + x.item : "Granted by " + x.item);
       return '<span class="gr-badge" title="' + esc(what) + ' — goes away when it\'s unequipped">' + esc(x.item) + (x.kind !== "spell" && x.rank ? " +" + x.rank : "") + "</span>";
     }).join("");
   }
+  var RESET_TXT = { short: "short rest", long: "long rest", floor: "Floor change" };
+  var RESET_SHORT = { short: "short rest", long: "long rest", floor: "Floor" };
+  function chargeNote(uses, reset) { return "Item spell · no Mana · " + uses + "/" + RESET_SHORT[reset || "long"]; }
   function renderAllGrantBadges() { skillRows().forEach(renderGrantBadges); }
   // Create a Skill/Spell row the way the + Skills picker would (stat, check type,
   // src so the (i) info works), without stealing focus.
-  function createSkillRow(name, kind, rank) {
+  function createSkillRow(name, kind, rank, opts) {
     if (typeof addSkillRow !== "function") return null;
     addSkillRow();
     var body = document.getElementById("skills-body"); var tr = body ? body.lastElementChild : null;
@@ -166,8 +175,8 @@
     if (sel && d && d.stat) sel.value = String(d.stat).toLowerCase();
     if (kind === "spell") {
       if (ins[2]) ins[2].value = "Spell";
-      // Gear grants ACCESS to the spell; casting it costs its Mana like any other.
-      if (ins[3]) ins[3].value = [d && d.mana != null ? d.mana + " Mana" : "", d && d.type ? d.type : "", "from gear"].filter(Boolean).join(" · ");
+      // An Inherent Spell (Core, tables 39–41): no Mana, a few charges per rest/Floor.
+      if (ins[3]) ins[3].value = chargeNote(opts && opts.uses || 1, opts && opts.reset) + (d && d.type ? " · " + d.type : "");
     } else {
       if (ins[2]) ins[2].value = d && d.passive ? "Passive" : "Active";
       if (ins[3]) ins[3].value = d && d.group ? d.group : "";
@@ -182,27 +191,110 @@
     ins[1].value = String(Math.max(0, num(ins[1].value) + delta));
     fire(ins[1]);
   }
+  // SKILLS: GEAR TEACHES; IT DOESN'T LEND. A Skill from an item is LEARNED (the
+  // crawler keeps it), and the item's Ranks are a BONUS on top. Taking the item off
+  // removes only those bonus Ranks — the Skill stays on the list (at Rank 0 if the item
+  // was the only source). The rulebook has no ruling on removal ("Gain new Skills via
+  // gear with Skill bonuses"; "You must be holding or wearing it to gain any Skill
+  // bonuses it grants"), so this follows the novels, by the user's call.
+  //
+  // SPELLS ARE THE EXCEPTION — an Inherent Spell (Core, tables 39–41 footnote): it has
+  // a fixed Rank, costs NO Mana, and is limited instead — here as charges (X uses per
+  // short rest / long rest / Floor; 1 per long rest if the item doesn't say). It's the
+  // ITEM's spell, so it goes when the item comes off, unless the crawler knows it
+  // anyway (a tome, the + Skills picker) — then it stays theirs and the item only adds
+  // its free charges. Spells learned from tomes / spellbooks are normal Mana spells.
   function grant(iid, item, b) {
     var kind = b.kind, name = b.target;
-    var rank = kind === "spell" ? (b.amount || 0) : (b.floor ? floorNow() : (b.amount || 0));
     var tr = skillRowByName(name), created = false;
-    if (!tr) { tr = createSkillRow(name, kind, kind === "spell" ? (rank || 1) : rank); created = true; if (!tr) return null; }
-    else if (kind === "skill") addRank(tr, rank);
-    var g = grantsOf(tr); g.push({ iid: iid, item: item, kind: kind, rank: kind === "skill" ? rank : 0 });
+    if (kind === "spell") {
+      var uses = Math.max(1, Math.min(20, num(b.uses) || 1)), reset = RESET_TXT[b.reset] ? b.reset : "long";
+      var srank = Math.max(1, b.amount || 0);
+      if (!tr) { tr = createSkillRow(name, kind, srank, { uses: uses, reset: reset }); created = true; if (!tr) return null; }
+      var gs = grantsOf(tr); gs.push({ iid: iid, item: item, kind: kind, rank: 0, uses: uses, reset: reset, left: uses });
+      setGrants(tr, gs);
+      try { if (typeof refreshSpellManaState === "function") refreshSpellManaState(); } catch (e) {}
+      return { name: tr.dataset.src || name, kind: kind, rank: 0, uses: uses, reset: reset, created: created };
+    }
+    var rank = b.floor ? floorNow() : (b.amount || 0);
+    if (!tr) { tr = createSkillRow(name, kind, rank); created = true; if (!tr) return null; }
+    else addRank(tr, rank);
+    var g = grantsOf(tr); g.push({ iid: iid, item: item, kind: kind, rank: rank });
     setGrants(tr, g);
-    return { name: tr.dataset.src || name, kind: kind, rank: kind === "skill" ? rank : 0, created: created, floor: !!(kind === "skill" && b.floor) };
+    return { name: tr.dataset.src || name, kind: kind, rank: rank, created: created, floor: !!(kind === "skill" && b.floor) };
+  }
+  function dropSkillRow(tr) {
+    // The Skills module's removal also clears its Hotlist pin and re-syncs attacks.
+    if (window.DCCSkills && window.DCCSkills.removeRow) { window.DCCSkills.removeRow(tr); return; }
+    tr.remove(); save();
+    try { if (typeof syncLinkedAttacks === "function") syncLinkedAttacks(); } catch (e) {}
+    try { if (typeof renderTurn === "function") renderTurn(); } catch (e) {}
   }
   function ungrant(iid, rec) {
     var tr = skillRowByName(rec.name); if (!tr) return;
-    var g = grantsOf(tr).filter(function (x) { return x.iid !== iid; });
-    if (rec.kind === "skill" && rec.rank) addRank(tr, -rec.rank);
-    if (!g.length && tr.dataset.grantCreated === "1") {
-      tr.remove();   // the row only existed because of the gear → take it back out
-      try { if (window.DCCHotlist) window.DCCHotlist.refresh(); } catch (e) {}
-      try { if (typeof syncLinkedAttacks === "function") syncLinkedAttacks(); } catch (e) {}
+    var all = grantsOf(tr);
+    var mine = all.filter(function (x) { return x.iid === iid; });
+    var g = all.filter(function (x) { return x.iid !== iid; });
+    if (rec.kind === "spell" && (rec.uses || mine.some(function (x) { return x.uses; }))) {
+      // An item's spell. Gear-only (no other item still grants it) → it's gone.
+      var still = g.some(function (x) { return x.kind === "spell"; });
+      if (tr.dataset.grantCreated === "1" && !still) { dropSkillRow(tr); return; }
+      // Older records added Rank to a spell the crawler already had; take that back.
+      var lr = mine.reduce(function (a, x) { return a + (num(x.rank) || 0); }, 0);
+      if (lr && tr.dataset.grantCreated !== "1") addRank(tr, -lr);
+      setGrants(tr, g);
+      try { if (typeof refreshSpellManaState === "function") refreshSpellManaState(); } catch (e) {}
       return;
     }
+    // Skills: only the bonus comes off.
+    var r = rec.rank || (rec.kind === "spell" && rec.created ? 1 : 0);
+    if (r) addRank(tr, -r);
+    delete tr.dataset.grantCreated;   // learned now — no longer "only here because of gear"
     setGrants(tr, g);
+    try { if (typeof syncLinkedAttacks === "function") syncLinkedAttacks(); } catch (e) {}
+  }
+
+  // ── Item-spell charges ───────────────────────────────────────────────────────
+  // The first gear grant on a spell row that still has a charge (null if none).
+  function chargeOf(tr) {
+    var g = grantsOf(tr).filter(function (x) { return x.kind === "spell" && x.uses; });
+    if (!g.length) return null;
+    var live = g.find(function (x) { return num(x.left) > 0; });
+    var soonest = g.slice().sort(function (a, b) { return ORDER[a.reset || "long"] - ORDER[b.reset || "long"]; })[0];
+    return { has: !!live, grant: live || null, gearOnly: tr.dataset.grantCreated === "1",
+      left: g.reduce(function (a, x) { return a + Math.max(0, num(x.left)); }, 0),
+      uses: g.reduce(function (a, x) { return a + num(x.uses); }, 0),
+      reset: soonest.reset || "long", resetText: RESET_TXT[soonest.reset || "long"] };
+  }
+  var ORDER = { short: 0, floor: 1, long: 2 };
+  // Spend one charge of a spell row; returns the charge state after, or null if none.
+  function spendCharge(tr) {
+    var c = chargeOf(tr); if (!c || !c.has) return null;
+    var g = grantsOf(tr), hit = false;
+    g.forEach(function (x) { if (!hit && x.kind === "spell" && x.uses && num(x.left) > 0 && x.iid === c.grant.iid) { x.left = num(x.left) - 1; hit = true; } });
+    setGrants(tr, g); save();
+    return chargeOf(tr);
+  }
+  // Recharge item spells whose reset is one of `kinds` ("short" | "long" | "floor").
+  function recharge(kinds) {
+    var n = 0;
+    skillRows().forEach(function (tr) {
+      var g = grantsOf(tr), ch = false;
+      g.forEach(function (x) { if (x.kind === "spell" && x.uses && kinds.indexOf(x.reset || "long") >= 0 && num(x.left) < x.uses) { x.left = x.uses; ch = true; n++; } });
+      if (ch) setGrants(tr, g);
+    });
+    if (n) { save(); try { if (typeof refreshSpellManaState === "function") refreshSpellManaState(); } catch (e) {} }
+    return n;
+  }
+  // The crawler now KNOWS a spell they had only through gear (a tome, the picker):
+  // it becomes a normal Mana spell and stays when the item comes off.
+  function adopt(tr) {
+    if (!tr) return;
+    delete tr.dataset.grantCreated;
+    var ins = tr.querySelectorAll('input[type="text"]');
+    var d = B() ? B().findSpell(tr.dataset.src || (ins[0] ? ins[0].value : "")) : null;
+    if (ins[3]) { ins[3].value = [d && d.mana != null ? d.mana + " Mana" : "", d && d.type ? d.type : ""].filter(Boolean).join(" · "); fire(ins[3]); }
+    renderGrantBadges(tr); save();
   }
 
   // ── Buffs granted by gear ────────────────────────────────────────────────────
@@ -351,7 +443,7 @@
       // Equipped before the rebuild: { skills:[{name,rank,created}] }.
       (rec.skills || []).forEach(function (s) {
         var row = skillRowByName(s.name); if (!row) return;
-        if (s.created) row.remove(); else addRank(row, -s.rank);
+        addRank(row, -s.rank);   // the Skill stays learned; only the bonus goes
       });
     }
     delete tr.dataset.equipped; delete tr.dataset.equipPlaced; delete tr.dataset.equipBonus;
@@ -390,13 +482,18 @@
   function refreshRow(btn) { var tr = btn && btn.closest ? btn.closest("tr") : null; if (tr) refreshRowEl(tr); }
   function refreshAll() {
     [].slice.call(document.querySelectorAll("#inv-body tr")).forEach(function (tr) { if (norm(rowName(tr))) renderBonus(tr); });
-    // Gear spells used to be written "Inherent · no Mana". They cost Mana like any
-    // spell (the gear grants access), so an old note is rewritten with the real cost.
+    // Older gear spells had no charges (and for a while cost Mana). Give each one the
+    // default — 1 per long rest — and, on a gear-only row, the Inherent Spell note.
     skillRows().forEach(function (tr) {
+      var g = grantsOf(tr), ch = false;
+      g.forEach(function (x) { if (x.kind === "spell" && !x.uses) { x.uses = 1; x.reset = "long"; x.left = 1; ch = true; } });
+      if (ch) tr.dataset.grants = JSON.stringify(g);
+      if (tr.dataset.grantCreated !== "1" || !g.some(function (x) { return x.kind === "spell"; })) return;
       var ins = tr.querySelectorAll('input[type="text"]');
-      if (!ins[3] || !/^Inherent · no Mana/.test(ins[3].value)) return;
+      if (!ins[3] || /^Item spell/.test(ins[3].value)) return;
       var d = B() ? B().findSpell(tr.dataset.src || (ins[0] ? ins[0].value : "")) : null;
-      ins[3].value = [d && d.mana != null ? d.mana + " Mana" : "", d && d.type ? d.type : "", "from gear"].filter(Boolean).join(" · ");
+      var first = g.find(function (x) { return x.kind === "spell"; });
+      ins[3].value = chargeNote(first.uses, first.reset) + (d && d.type ? " · " + d.type : "");
       fire(ins[3]);
     });
     renderAllGrantBadges();
@@ -426,7 +523,8 @@
       ".gr-badges{display:inline-flex;gap:3px;flex:0 1 auto;min-width:0;max-width:60%;overflow:hidden;margin-left:4px}" +
       ".gr-badge{display:inline-block;max-width:100%;padding:0 7px;border-radius:999px;font:700 10.5px/17px 'Barlow Condensed',sans-serif;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" +
         "color:var(--gold-ink,#8a6c0c);background:color-mix(in srgb,var(--gold,#c8a020) 16%,transparent);border:1px solid color-mix(in srgb,var(--gold,#c8a020) 55%,transparent)}" +
-      ".gr-badge::before{content:'\\2726 ';opacity:.8}";
+      ".gr-badge::before{content:'\\2726 ';opacity:.8}" +
+      ".gr-badge.spent{opacity:.5;text-decoration:line-through}";
     (document.head || document.documentElement).appendChild(st);
   }
   injectCss();
@@ -463,6 +561,7 @@
   }
   window.DCCEquip = {
     handsOf: handsOf, wielding: wielding, refloor: refloor,
+    chargeOf: chargeOf, spendCharge: spendCharge, recharge: recharge, adopt: adopt,
     // Would this row fit in the free hands right now (no prompt)?
     fits: function (tr) { var need = handsOf(tr); if (!need) return true; return holders(tr).reduce(function (a, r) { return a + handsOf(r); }, 0) + need <= 2; },
     click: click, isEquipType: isEquipType, refreshRow: refreshRow, refreshAll: refreshAll,

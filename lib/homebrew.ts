@@ -621,7 +621,7 @@ function normalizeDccItem(input: unknown): { name: string; data: Record<string, 
 }
 
 // Validate the structured, auto-applied benefits list (kind/target/amount).
-type DccBenefitOut = { kind: string; target?: string; amount?: number; floor?: boolean };
+type DccBenefitOut = { kind: string; target?: string; amount?: number; floor?: boolean; uses?: number; reset?: string };
 function normalizeDccBenefits(v: unknown): DccBenefitOut[] {
   if (!Array.isArray(v)) return [];
   const out: DccBenefitOut[] = [];
@@ -648,6 +648,9 @@ function normalizeDccBenefits(v: unknown): DccBenefitOut[] {
       if (!t) continue;
       b.target = t;
       if (kind === "spell" && amount && amount > 0) b.amount = amount;
+      // Inherent Spell charges (no Mana): N uses per short rest / long rest / Floor.
+      const uses = num(o.uses);
+      if (kind === "spell" && uses && uses > 0) { b.uses = Math.min(20, Math.round(uses)); b.reset = ["short", "long", "floor"].includes(str(o.reset)) ? str(o.reset) : "long"; }
     } else {
       if (!amount) continue;
       b.amount = amount;

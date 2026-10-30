@@ -494,10 +494,14 @@
   window.DCCSkills = {
     learn: function (kind, name) {
       var e = entries().find(function (x) { return x.kind === kind && x.name === name; }) || lookup(name);
-      if (!e || findSkillRow(e.name)) { renderPicker(); return; }
+      var had = e ? findSkillRow(e.name) : null;
+      // A spell held only through gear (an Inherent Spell) — learning it makes it yours.
+      if (had && had.dataset.grantCreated === "1" && e.kind === "spell" && window.DCCEquip && window.DCCEquip.adopt) { window.DCCEquip.adopt(had); renderPicker(); return; }
+      if (!e || had) { renderPicker(); return; }
       addToSheet(e.name, e);
       renderPicker();
     },
+    removeRow: removeRow,
     unlearn: function (name) {
       var k = String(name || "").trim().toLowerCase();
       [].slice.call(document.querySelectorAll("#skills-body tr")).filter(function (tr) {

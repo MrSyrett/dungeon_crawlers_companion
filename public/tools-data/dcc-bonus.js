@@ -9,7 +9,8 @@
 //   allstats +N to every Stat            amount
 //   skill    +N ranks in a Skill (added to the sheet if missing)       target: skill name, amount
 //            floor:true → Rank = Floor Number (Passive Skill at Rank = Floor)
-//   spell    knows a Spell while worn (casting still costs its Mana)  target: spell name
+//   spell    an Inherent Spell while worn: no Mana, `uses` charges per `reset`
+//            (short | long | floor); a scroll/tome's spell has no charges
 //   buff     a Buff while worn (added to the sheet's Buffs tracker)    target: buff name
 //   dr | evade | move | step                                           amount
 //   note     anything the sheet can't automate (Unique, resistances…)  target: the text
@@ -27,7 +28,7 @@
     { k: "stat", label: "Stat", tip: "+N to a Stat" },
     { k: "allstats", label: "All Stats", tip: "+N to every Stat" },
     { k: "skill", label: "Skill", tip: "+N ranks in a Skill (added if the crawler doesn't have it)" },
-    { k: "spell", label: "Spell", tip: "A Spell — gear grants access while worn (casting costs Mana as normal); a scroll or tome holds it (a scroll casts it once, free)" },
+    { k: "spell", label: "Spell", tip: "A Spell — gear lets you cast it while worn with no Mana, using charges (N uses per short rest / long rest / Floor); a scroll casts it once free, a tome teaches it" },
     { k: "buff", label: "Buff", tip: "A Buff while the item is worn" },
     { k: "dr", label: "DR", tip: "+N Damage Resistance" },
     { k: "evade", label: "Evade", tip: "+N Evade" },
@@ -75,6 +76,10 @@
     } else if (kind === "spell" || kind === "buff" || kind === "note") {
       o.target = norm(b.target || b.text).slice(0, kind === "note" ? 160 : 60); if (!o.target) return null;
       if (kind === "spell" && int(b.amount) > 0) o.amount = int(b.amount);   // optional spell Rank
+      // An item's Inherent Spell (Tables 39/41): no Mana — CHARGES instead, `uses`
+      // casts that come back on a short rest, long rest or Floor change. Unset = the
+      // sheet's default (1 per long rest). A scroll/tome's spell has none.
+      if (kind === "spell" && int(b.uses) > 0) { o.uses = Math.min(20, int(b.uses)); o.reset = RESETS[b.reset] ? b.reset : "long"; }
     } else {
       o.amount = int(b.amount); if (!o.amount) return null;
     }
@@ -85,6 +90,8 @@
     return arr(v).map(one).filter(Boolean).slice(0, 24);
   }
 
+  var RESETS = { short: "short rest", long: "long rest", floor: "Floor" };
+  function chargeText(b) { return b && b.uses ? b.uses + "/" + RESETS[b.reset || "long"] : ""; }
   function signed(n) { return (n >= 0 ? "+" : "") + n; }
   function statLabel(id) { var s = STATS.find(function (x) { return x[0] === id; }); return s ? s[1] : String(id || "").toUpperCase(); }
   function label(b) {
@@ -93,7 +100,7 @@
       case "stat": return signed(b.amount) + " " + statLabel(b.target);
       case "allstats": return signed(b.amount) + " All Stats";
       case "skill": return b.floor ? b.target + " (Rank = Floor)" : signed(b.amount) + " " + b.target;
-      case "spell": return "Spell: " + b.target + (b.amount ? " (Rank " + b.amount + ")" : "");
+      case "spell": { var x = [b.amount ? "Rank " + b.amount : "", chargeText(b)].filter(Boolean).join(" · "); return "Spell: " + b.target + (x ? " (" + x + ")" : ""); }
       case "buff": return "Buff: " + b.target;
       case "dr": return signed(b.amount) + " DR";
       case "evade": return signed(b.amount) + " Evade";
@@ -123,7 +130,12 @@
     if ((m = p.match(/^\+\s*(\d+)\s*(?:ft\.?\s*)?(?:Move|Speed)\b/i))) return { kind: "move", amount: +m[1] };
     if ((m = p.match(/^\+\s*(\d+)\s*(?:ft\.?\s*)?Step\b/i))) return { kind: "step", amount: +m[1] };
     if ((m = p.match(/^Passive\s+(.+?)\s*\(\s*Rank\s*=\s*Floor(?:\s*Number)?\s*\)$/i))) return { kind: "skill", target: (findSkill(m[1]) || { name: m[1] }).name, floor: true, amount: 0 };
-    if ((m = p.match(/^(?:Inherent\s+)?Spell\s*:\s*(.+?)(?:\s*\((?:Rank|no Mana)[^)]*\))*$/i))) { var rk = p.match(/\(Rank\s*(\d+)\)/i); return { kind: "spell", target: (findSpell(m[1]) || { name: norm(m[1]) }).name, amount: rk ? +rk[1] : 0 }; }
+    if ((m = p.match(/^(?:Inherent\s+)?Spell\s*:\s*(.+?)(?:\s*\((?:Rank|no Mana|\d+\s*\/)[^)]*\))*$/i))) {
+      var rk = p.match(/\bRank\s*(\d+)/i), ch = p.match(/(\d+)\s*\/\s*(short rest|long rest|floor)/i);
+      var sb = { kind: "spell", target: (findSpell(m[1]) || { name: norm(m[1]) }).name, amount: rk ? +rk[1] : 0 };
+      if (ch) { sb.uses = +ch[1]; sb.reset = /short/i.test(ch[2]) ? "short" : /floor/i.test(ch[2]) ? "floor" : "long"; }
+      return sb;
+    }
     if ((m = p.match(/^(?:Grants\s+(?:the\s+)?)?Buff\s*:\s*(.+)$/i))) return { kind: "buff", target: (findBuff(m[1]) || { name: norm(m[1]) }).name };
     if ((m = p.match(/^Resist(?:ance)?(?:\s+to)?\s+([A-Za-z]+)(?:\s+damage)?$/i))) return { kind: "buff", target: "Resistance: " + m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase() };
     // "+2 Warhammer Skill", "+2 to Athletics", "+1 Shield Block Skill Rank"
@@ -193,7 +205,7 @@
   // ── the popover: pick a kind, fill it in, Add ───────────────────────────────
   var pop = null, popClose = null, popMove = null;
   function closePop() { if (pop) { pop.remove(); pop = null; } if (popMove) { window.removeEventListener("scroll", popMove, true); window.removeEventListener("resize", popMove); popMove = null; } if (popClose) { document.removeEventListener("mousedown", popClose, true); document.removeEventListener("keydown", popClose, true); popClose = null; } }
-  function openPop(anchor, onAdd, startKind, only) {
+  function openPop(anchor, onAdd, startKind, only, noCharges) {
     closePop(); injectCss();
     pop = document.createElement("div"); pop.className = "dcbn-pop";
     var kinds = (only && only.length) ? KINDS.filter(function (x) { return only.indexOf(x.k) >= 0; }) : KINDS;
@@ -221,7 +233,8 @@
       var h = "";
       if (kind === "stat") h = '<div class="dcbn-row">' + amt("+N") + statSel() + "</div>";
       else if (kind === "skill") h = search("Search skills…") + '<div class="dcbn-row">' + amt("ranks") + '<label class="dcbn-chk"><input type="checkbox" class="dcbn-floor"> Rank = Floor</label></div>';
-      else if (kind === "spell") h = search("Search spells, or type any name…") + '<div class="dcbn-row">' + amt("Rank (optional)") + "</div>";
+      else if (kind === "spell") h = search("Search spells, or type any name…") + '<div class="dcbn-row">' + amt("Rank (optional)") + "</div>" +
+        (noCharges ? "" : '<div class="dcbn-row"><input type="number" class="dcbn-uses" min="1" max="20" step="1" value="1" title="Casts before it needs to recharge" style="max-width:64px"> <span style="align-self:center">uses per</span> <select class="dcbn-reset"><option value="short">short rest</option><option value="long" selected>long rest</option><option value="floor">Floor</option></select></div>');
       else if (kind === "buff") h = search("Search buffs, or type any name…");
       else if (kind === "note") h = '<div class="dcbn-row"><input type="text" class="dcbn-q" placeholder="e.g. Resist Fire damage · Summons minions" maxlength="160"></div>';
       else h = '<div class="dcbn-row">' + amt() + "</div>";
@@ -246,7 +259,11 @@
       if (s) b.target = s.value;
       if (q) b.target = norm(q.value);
       if (kind === "skill") { var sd = findSkill(b.target); if (sd) b.target = sd.name; if (fl && fl.checked) b.floor = true; }
-      if (kind === "spell") { var sp = findSpell(b.target); if (sp) b.target = sp.name; }
+      if (kind === "spell") {
+        var sp = findSpell(b.target); if (sp) b.target = sp.name;
+        var us = form.querySelector(".dcbn-uses"), rs = form.querySelector(".dcbn-reset");
+        if (us && int(us.value) > 0) { b.uses = int(us.value); b.reset = rs ? rs.value : "long"; }
+      }
       if (kind === "buff") { var bf = findBuff(b.target); if (bf) b.target = bf.name; }
       var o = one(b);
       if (!o) { err.textContent = AMT_KINDS[kind] && !(fl && fl.checked) && !(b.amount) ? "Enter an amount." : "Fill it in first."; return null; }
@@ -301,7 +318,7 @@
     function changed() { paint(); if (opts.onChange) opts.onChange(list.slice()); }
     el.addEventListener("click", function (e) {
       var x = e.target.closest(".dcbn-x"); if (x) { list.splice(+x.dataset.i, 1); changed(); return; }
-      var a = e.target.closest(".dcbn-add:not(.dcbn-extra)"); if (a) { openPop(a, function (b) { list.push(b); changed(); }, null, opts.kinds); return; }
+      var a = e.target.closest(".dcbn-add:not(.dcbn-extra)"); if (a) { openPop(a, function (b) { list.push(b); changed(); }, null, opts.kinds, opts.noCharges); return; }
       var ex = e.target.closest(".dcbn-extra"); if (ex) { var f = (opts.extra || [])[+ex.dataset.x]; if (f && f.onClick) f.onClick(); }
     });
     paint();
@@ -339,7 +356,7 @@
     if (/external buff/i.test(p)) return { kind: "buff", target: Math.random() < 0.5 ? "Recovery" : "Restore" };
     if (/buff/i.test(p)) { var bf = pick(buffList()); return bf ? { kind: "buff", target: bf.name } : null; }
     if (/passive skill/i.test(p)) { var ps = pick(skillList().filter(function (x) { return x.passive; })) || pick(skillList()); return ps ? { kind: "skill", target: ps.name, floor: true, amount: 0 } : null; }
-    if (/inherent spell/i.test(p)) { var sp = pick(spellList()); return sp ? { kind: "spell", target: sp.name } : null; }
+    if (/inherent spell/i.test(p)) { var sp = pick(spellList()); return sp ? { kind: "spell", target: sp.name, uses: 1, reset: "long" } : null; }
     return null;
   }
   function rollBonuses(tier, cat) {

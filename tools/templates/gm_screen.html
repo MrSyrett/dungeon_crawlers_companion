@@ -14679,7 +14679,7 @@ function dccResolveProperty(propText, tierKey, typeTableNum) {
   }
   if(/inherent spell/i.test(p)) {
     const sp = dccRandomSpell();
-    return 'Inherent Spell: <b>' + (sp ? esc(sp.name) : 'a Spell') + '</b> <span style="opacity:.7">(grants access while worn; casting costs Mana)</span>';
+    return 'Inherent Spell: <b>' + (sp ? esc(sp.name) : 'a Spell') + '</b> <span style="opacity:.7">(no Mana while worn — 1 use per long rest)</span>';
   }
   if(/resistance to an uncommon damage type/i.test(p)) {
     return 'Grants the <b>Resistance: ' + esc(dccPick(DCC_DMG_UNCOMMON)) + '</b> buff';
@@ -14785,7 +14785,7 @@ function dccEnchantPerk(raw, tierKey) {
   if(/damage resistance/i.test(p)) { const m = p.match(/(\d+)/); return '+' + (m ? m[1] : '1') + ' DR'; }
   if(/^a buff/i.test(p)) { const b = dccRandomBuff(); return b ? ('Buff: ' + b.name) : 'a Buff'; }
   if(/passive skill/i.test(p)) { const sk = dccRandomSkillName(true) || 'a Skill'; return 'Passive ' + sk + ' (Rank = Floor)'; }
-  if(/inherent spell/i.test(p)) { const sp = dccRandomSpell(); return 'Inherent Spell: ' + (sp ? sp.name : 'a Spell'); }
+  if(/inherent spell/i.test(p)) { const sp = dccRandomSpell(); return 'Inherent Spell: ' + (sp ? sp.name : 'a Spell') + ' (1/long rest)'; }   // no Mana — charges (the GM can edit the badge)
   if(/resistance to an uncommon/i.test(p)) { return 'Buff: Resistance: ' + dccPick(DCC_DMG_UNCOMMON); }
   if(/external buff/i.test(p)) { return Math.random() < 0.5 ? 'Recovery (full Health) 1/Floor' : 'Restore (full Mana) 1/Floor'; }
   if(/something unique|table 42/i.test(p)) { const u = dccRollRow(dccLootTable('42')); return 'Unique: ' + (u ? u.result : 'GM’s choice'); }
@@ -22991,7 +22991,7 @@ function wireAiConsole(root) {
     if(o.tier) card.dataset.tier=o.tier;
     const spellItem = /^(scroll|tome)$/.test(cat) && !/upgrade/i.test(o.name || '');
     if(spellItem) card.dataset.spell = '1';
-    const ed = DCCB() ? DCCB().editor(bon, spellItem ? { benefits: o.benefits || [], empty: 'No spell yet', kinds: ['spell'], addLabel: '+ Spell', extra: [{ label:'🎲', title:'Roll a random spell', onClick(){
+    const ed = DCCB() ? DCCB().editor(bon, spellItem ? { benefits: o.benefits || [], empty: 'No spell yet', kinds: ['spell'], noCharges: true, addLabel: '+ Spell', extra: [{ label:'🎲', title:'Roll a random spell', onClick(){
       const pool = (typeof DCC_SPELLS!=='undefined'?DCC_SPELLS:[]).concat(Array.isArray(window.__DCC_HB_SPELLS)?window.__DCC_HB_SPELLS:[]).filter(x=>x&&x.name);
       if(pool.length) ed.set([{ kind:'spell', target: pool[Math.floor(Math.random()*pool.length)].name }]);
     } }] } : { benefits: o.benefits || [], empty: 'No bonuses', extra: [{ label:'🎲', title:'Re-roll this item’s bonuses at the box tier', onClick(){

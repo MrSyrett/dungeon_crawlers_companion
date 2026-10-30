@@ -1352,6 +1352,9 @@ function rest(kind) {
       .slice(0, 5)
       .forEach(p => { p.dataset.active = 'true'; p.classList.remove('dimmed'); });
   }
+  // Item spells recharge: a short rest refills "per short rest", a long rest both.
+  let recharged = 0;
+  try { if(window.DCCEquip && DCCEquip.recharge) recharged = DCCEquip.recharge(long ? ['short', 'long'] : ['short']); } catch(e) {}
   const el = document.getElementById('mana-current');
   const max = parseInt(document.getElementById('mana-max')?.value, 10) || 0;
   if(el) {
@@ -1376,8 +1379,9 @@ function rest(kind) {
   checkDying();   // a rest heals the Health Bar → clear Dying if now above 0%
   if(typeof scheduleAutosave === 'function') scheduleAutosave();
   if(typeof addLog === 'function') {
-    if(long) addLog('Long Rest', 'Full HP & Mana', 'Full Health Bar, full Mana' + (clearedFat ? ', Fatigued cleared' : ''), 'normal');
-    else addLog('Short Rest', '+5 HB · +½ Mana', 'Healed 5 Health Bar slots, regained half Mana', 'normal');
+    const rc = recharged ? ', ' + recharged + ' item spell' + (recharged === 1 ? '' : 's') + ' recharged' : '';
+    if(long) addLog('Long Rest', 'Full HP & Mana', 'Full Health Bar, full Mana' + (clearedFat ? ', Fatigued cleared' : '') + rc, 'normal');
+    else addLog('Short Rest', '+5 HB · +½ Mana', 'Healed 5 Health Bar slots, regained half Mana' + rc, 'normal');
   }
 }
 
@@ -1880,11 +1884,12 @@ function refreshSpellManaState() {
     const btn = tr.querySelector('.skill-roll-btn');
     if(!btn) return;
     const cost = spellManaOf(tr);
-    const short = cost > 0 && cur < cost;
+    const noCh = spellChargeBlock(tr);
+    const short = !!noCh || (cost > 0 && cur < cost);
     const atk = !!skillDmgOf(tr);
     const noAct = !(atk ? canAtk : canOther);
     const title = noAct ? (atk && canOther ? 'No actions left — the +1 Action can\'t be an Attack' : 'No actions left')
-                : short ? 'Not enough Mana — costs ' + cost + ', you have ' + cur : 'Roll skill';
+                : noCh ? noCh : short ? 'Not enough Mana — costs ' + cost + ', you have ' + cur : 'Roll skill';
     if(btn.disabled !== (noAct || short)) btn.disabled = noAct || short;
     btn.classList.toggle('no-mana', short);
     btn.classList.toggle('no-action', noAct);
@@ -2067,8 +2072,14 @@ function turnSkillRows(){
     const notes = String(t[3] ? t[3].value : '');
     return { tr, name, rank: parseMod(t[1] ? t[1].value : ''), stat: sel ? sel.value : '', check, notes,
       dice: skillDmgOf(tr), passive: /passive/i.test(check),
-      spell: /spell/i.test(check) || /\bmana\b/i.test(notes), mana: spellManaOf(tr) };
+      spell: /spell/i.test(check) || /\bmana\b/i.test(notes), mana: spellManaOf(tr), charge: spellChargeOf(tr) };
   }).filter(Boolean);
+}
+// "· 2/3 charges" for an item spell with charges, "· 4 Mana" otherwise.
+function turnCostStr(r, sep){
+  const c = r.charge;
+  if(c && (c.has || c.gearOnly)) return sep + c.left + '/' + c.uses + ' charge' + (c.uses === 1 ? '' : 's');
+  return r.mana ? sep + r.mana + ' Mana' : '';
 }
 function turnFindSkill(rx){ return turnSkillRows().find(r => rx.test(r.name) || rx.test(r.tr.dataset.src || '')) || null; }
 function turnRollRow(r, fxName){ const b = r.tr.querySelector('.skill-roll-btn'); return b ? rollSkill(b, fxName) : null; }
@@ -2114,10 +2125,10 @@ function turnBuildOpts(){
       // Spell cards read like the others: effect · Mana (no Rank / Interrupt notes).
       const summ = window.DCCFx && DCCFx.spellSummary ? DCCFx.spellSummary(r.name, r.rank, r.tr.dataset.src) : (heal ? 'Heal 2 Bars' : '');
       add('hotlist', { name: r.name, kind: r.dice ? 'attack' : 'other', slot: si, spell: r.spell,
-        sub: r.dice ? turnHitStr(r) + ' to hit · ' + turnDmgStr(r) + (r.mana ? ' · ' + r.mana + ' Mana' : '')
-                    : [summ, r.mana ? r.mana + ' Mana' : ''].filter(Boolean).join(' · '),
+        sub: r.dice ? turnHitStr(r) + ' to hit · ' + turnDmgStr(r) + turnCostStr(r, ' · ')
+                    : [summ, turnCostStr(r, '')].filter(Boolean).join(' · '),
         // Spells can't be cast untrained (Core p.58); scrolls are the exception.
-        blocked: r.spell && r.rank < 1 ? 'No Ranks — can\'t cast untrained' : r.mana && r.mana > curMana ? 'Not enough Mana' : '',
+        blocked: r.spell && r.rank < 1 ? 'No Ranks — can\'t cast untrained' : spellChargeBlock(r.tr) ? 'No charges left' : r.mana && r.mana > curMana ? 'Not enough Mana' : '',
         btn: 'Cast', run: () => turnRollRow(r) });
       return;
     }
@@ -2151,7 +2162,8 @@ function turnBuildOpts(){
       name: r.name, kind: 'attack',
       sub: turnHitStr(r) + ' to hit · ' + turnDmgStr(r) + (r.rank > 0 ? '' : ' · untrained (Disadvantage)') + (dccNotWielded(r.tr) ? ' · not in hand' : ''),
       btn: 'Attack', run: () => turnRollRow(r),
-      btns: fx.length ? [['Attack', () => turnRollRow(r)]].concat(fx.map(o => [o.fx.name, () => turnRollRow(r, o.fx.name)])) : undefined,
+      // Special attacks sit to the LEFT of the plain Attack button.
+      btns: fx.length ? fx.map(o => [o.fx.name, () => turnRollRow(r, o.fx.name)]).concat([['Attack', () => turnRollRow(r)]]) : undefined,
     });
   });
   // Use a Skill — the other active skills.
@@ -2455,8 +2467,11 @@ function atkStatOf(a) {
 function spellManaOf(row) {
   const texts = row.querySelectorAll('input[type="text"]');
   const note = texts[3] ? texts[3].value : '';
-  // Every cast costs Mana — a spell granted by gear included (the gear grants
-  // access, not free casting). Only a Spell Scroll casts free (castFromScroll).
+  // A spell cast from worn gear (an Inherent Spell, Core tables 39–41) costs no Mana
+  // while it has a charge; a gear-only spell never costs Mana (out of charges it just
+  // can't be cast — see spellChargeOf). A Spell Scroll casts free (castFromScroll).
+  const ch = spellChargeOf(row);
+  if(ch && (ch.has || ch.gearOnly)) return 0;
   const m = String(note).match(/(\d+)\s*mana/i);
   if(m) return parseInt(m[1], 10) || 0;
   const src = row.dataset.src || (texts[0] ? texts[0].value : '');
@@ -2472,7 +2487,26 @@ function spellManaOf(row) {
 // Returns true if the cast may proceed. For a spell, spends its Mana; if there isn't
 // enough, logs "Out of Mana" and returns false so the roll is aborted. Non-spells
 // always return true.
+function spellChargeOf(row) {
+  try { return window.DCCEquip && DCCEquip.chargeOf ? DCCEquip.chargeOf(row) : null; } catch(e) { return null; }
+}
+// Why an item spell can't be cast right now ('' if it can).
+function spellChargeBlock(row) {
+  const ch = spellChargeOf(row);
+  return ch && ch.gearOnly && !ch.has ? 'No charges left — recharges on a ' + ch.resetText : '';
+}
 function consumeSpellMana(row) {
+  const nm0 = (row.querySelector('input[type="text"]') || {}).value || 'Spell';
+  const ch = spellChargeOf(row);
+  if(ch && ch.has) {
+    const after = DCCEquip.spendCharge(row);
+    if(typeof addLog === 'function') addLog(nm0 + ' — cast', 'charge used', (after ? after.left + '/' + after.uses : '0') + ' charges left · no Mana (item spell)', 'normal');
+    return true;
+  }
+  if(ch && ch.gearOnly) {
+    if(typeof addLog === 'function') addLog(nm0 + ' — No charges', '✗', 'No charges left — recharges on a ' + ch.resetText, 'fumble');
+    return false;
+  }
   const cost = spellManaOf(row);
   if(cost <= 0) return true;
   const el = document.getElementById('mana-current');
@@ -3720,6 +3754,18 @@ if(typeof renderTurn === 'function') setTimeout(() => switchTab('turn'), 0);
   if(bf) bf.addEventListener('input', recalc);
   const fl = document.getElementById('f-floor');
   // The Floor also moves "Passive Skill at Rank = Floor" gear grants.
+  // Changing the Floor recharges "per Floor" item spells. The value is read on focus
+  // (the sheet fills it in after load), and compared once the edit is committed.
+  let lastFloor = 0;
+  if(fl) fl.addEventListener('focus', () => { lastFloor = parseInt(fl.value, 10) || 0; });
+  if(fl) fl.addEventListener('change', () => {
+    const f = parseInt(fl.value, 10) || 0;
+    if(f && f !== lastFloor) {
+      lastFloor = f;
+      let n = 0; try { if(window.DCCEquip && DCCEquip.recharge) n = DCCEquip.recharge(['floor']); } catch(e) {}
+      if(n && typeof addLog === 'function') addLog('Floor ' + f, 'recharged', n + ' item spell' + (n === 1 ? '' : 's') + ' recharged (per Floor)', 'normal');
+    }
+  });
   if(fl) fl.addEventListener('input', () => { recalc(); try { if(window.DCCEquip && DCCEquip.refloor) DCCEquip.refloor(); } catch(e) {} });
 })();
 
@@ -4682,7 +4728,7 @@ autoLoad();
 .sk-grid{display:grid;grid-template-columns:22px minmax(0,1fr) 44px 118px;grid-template-areas:"pin name num ctrl" "pin sub num ctrl";column-gap:8px;}
 /* Damage Effect buttons (dccRenderFx): their own line under an attack's Notes. */
 .dl-row.sk-grid{grid-template-areas:"pin name num ctrl" "pin sub num ctrl" "pin fx fx fx";}
-.dl-row .dl-fx{grid-area:fx;display:flex;flex-wrap:wrap;gap:4px;margin-top:3px;}
+.dl-row .dl-fx{grid-area:fx;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px;margin-top:3px;}
 .dl-fxbtn{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--dcc-dk);background:transparent;border:1px solid var(--dcc-dk);border-radius:10px;padding:1px 8px;line-height:1.5;cursor:pointer;}
 .dl-fxbtn::before{content:"⚔ ";}
 .dl-fxbtn:hover{background:var(--dcc-dk);color:var(--paper,#fff);}

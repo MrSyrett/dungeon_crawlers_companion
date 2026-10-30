@@ -2,7 +2,11 @@
 // item builder and the Loot reference page. The same model as the GM Screen loot
 // box and the character sheet: public/tools-data/dcc-bonus.js.
 
-export type DccBonus = { kind: string; target?: string; amount?: number; floor?: boolean };
+/** A spell bonus may carry charges — an Inherent Spell (no Mana) cast `uses` times
+ *  per `reset` ("short" rest, "long" rest, "floor" change). */
+export type DccBonus = { kind: string; target?: string; amount?: number; floor?: boolean; uses?: number; reset?: string };
+export const DCC_RESETS: [string, string][] = [["short", "short rest"], ["long", "long rest"], ["floor", "Floor"]];
+const resetLabel = (r?: string) => (DCC_RESETS.find(([k]) => k === r) ?? DCC_RESETS[1])[1];
 
 export function benefitLabel(b: DccBonus): string {
   const n = (v?: number) => ((v ?? 0) >= 0 ? "+" : "") + (v ?? 0);
@@ -10,7 +14,10 @@ export function benefitLabel(b: DccBonus): string {
     case "stat": return `${n(b.amount)} ${String(b.target || "").toUpperCase()}`;
     case "allstats": return `${n(b.amount)} All Stats`;
     case "skill": return b.floor ? `${b.target} (Rank = Floor)` : `${n(b.amount)} ${b.target}`;
-    case "spell": return `Spell: ${b.target}${b.amount ? ` (Rank ${b.amount})` : ""}`;
+    case "spell": {
+      const x = [b.amount ? `Rank ${b.amount}` : "", b.uses ? `${b.uses}/${resetLabel(b.reset)}` : ""].filter(Boolean).join(" · ");
+      return `Spell: ${b.target}${x ? ` (${x})` : ""}`;
+    }
     case "buff": return `Buff: ${b.target}`;
     case "dr": return `${n(b.amount)} DR`;
     case "evade": return `${n(b.amount)} Evade`;

@@ -285,6 +285,16 @@
       var sp = isTome && badge ? badge.sp : spellBy(m[1]);
       if (isTome && badge && badge.rank) notes = (notes ? notes + " " : "") + "Rank " + badge.rank;
       var rowOf = function () { return [].slice.call(document.querySelectorAll("#skills-body tr")).find(function (tr) { var t = tr.querySelector('input[type="text"]'); return t && norm(t.value) === norm(sp.name); }); };
+      var gearRow = rowOf();
+      // Known only through gear (an item's Inherent Spell)? Reading the tome teaches it for real.
+      if (gearRow && gearRow.dataset.grantCreated === "1" && window.DCCEquip && DCCEquip.adopt) {
+        var noted0 = String(notes || "").match(/\brank\s*(\d+)/i);
+        var rk0 = noted0 ? Math.max(1, Math.min(10, parseInt(noted0[1], 10))) : Math.max(1, roll(1, 6).total - 1);
+        DCCEquip.adopt(gearRow);
+        var ins0 = gearRow.querySelectorAll('input[type="text"]'); if (ins0[1]) { ins0[1].value = String(rk0); fire(ins0[1]); }
+        log("Read " + nm, sp.name + " · Rank " + rk0, "Learned the spell — it's yours now, not just the item's (costs Mana; the item's free charges still apply)", "crit");
+        return after(true);
+      }
       if (rowOf()) { log("Read " + nm, "Already known", "You already know " + sp.name + " — the tome is kept", "normal"); return after(false); }
       var noted = String(notes || "").match(/\brank\s*(\d+)/i);
       var rk = noted ? Math.max(1, Math.min(10, parseInt(noted[1], 10))) : Math.max(1, roll(1, 6).total - 1);
