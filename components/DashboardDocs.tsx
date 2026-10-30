@@ -28,6 +28,8 @@ export type DocRow = {
   updatedAt: number;
   vttHref: string | null;
   vttKind: "owlbear" | "tabletop" | null;
+  /** Adventure preps: how many chapters it has (null when it couldn't be counted). */
+  chapters?: number | null;
 };
 /** `cards` (characters only): the shared Character cards, the same ones My
  *  Characters shows — see components/CharacterCard.tsx. */
@@ -109,7 +111,7 @@ function DocList({
                   <a href={`/tools/${toolId}/${doc.id}`} className="roster-card-name roster-card-link" title={`Open ${doc.title}`}>
                     {doc.title}
                   </a>
-                  <span className="roster-card-meta">Adventure Prep</span>
+                  {doc.chapters ? <span className="roster-card-meta">Chapters: {doc.chapters}</span> : null}
                   <span className="roster-card-camp">Updated {formatDate(doc.updatedAt)}</span>
                   <div className="roster-actions">
                     <a href={`/tools/${toolId}/${doc.id}`} className="roster-btn roster-btn-go">

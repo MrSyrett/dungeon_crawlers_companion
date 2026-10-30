@@ -183,3 +183,40 @@ export async function loadCampaignCards(userId: string): Promise<CampCardData[]>
     (c): c is CampCardData => c !== null,
   );
 }
+
+// How many chapters each of the user's adventure preps has, by document id —
+// for the Adventure cards' "Chapters: N".
+//
+// Counted IN THE DATABASE. A prep's blob is a JSON string under its tool's key
+// (data.dcc_session = "{…}") and can be megabytes of embedded maps, so pulling
+// every prep's data into Node just to count an array would ship all of that on
+// every dashboard load. Postgres parses the string and returns one integer.
+//
+// A multi-chapter prep is { chapters: [...] }; anything else — an older
+// single-chapter prep, or a brand-new one with nothing saved yet — is 1.
+// A blob that isn't valid JSON is skipped (pg_input_is_valid, Postgres 16+),
+// and if the whole query fails for any reason the cards simply show no count.
+export async function loadChapterCounts(userId: string): Promise<Map<string, number>> {
+  const out = new Map<string, number>();
+  const sessionTools = (Object.keys(TOOLS) as (keyof typeof TOOLS)[]).filter((t) => TOOLS[t].kind === "session");
+  for (const tool of sessionTools) {
+    const key = TOOLS[tool].keys[0];
+    if (!key) continue;
+    try {
+      const rows = await prisma.$queryRaw<{ id: string; n: number }[]>`
+        SELECT id,
+          CASE
+            WHEN data ? ${key} AND pg_input_is_valid(data->>${key}, 'json')
+             AND json_typeof((data->>${key})::json->'chapters') = 'array'
+            THEN GREATEST(json_array_length((data->>${key})::json->'chapters'), 1)
+            ELSE 1
+          END::int AS n
+        FROM "Document"
+        WHERE "userId" = ${userId} AND tool = ${tool}`;
+      for (const r of rows) out.set(r.id, Number(r.n) || 1);
+    } catch {
+      /* no counts for this tool — the card just leaves the line out */
+    }
+  }
+  return out;
+}

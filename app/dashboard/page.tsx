@@ -6,7 +6,7 @@ import { SYSTEMS, type SystemKey } from "@/components/systemStore";
 import { getHiddenSystemKeys } from "@/lib/systems";
 import DashboardDocs, { type SystemPanels, type DocRow } from "@/components/DashboardDocs";
 import { readSystemCookie, readViewCookie } from "@/lib/system-cookie";
-import { loadCharacterCards, type CharCardData } from "@/lib/rosters";
+import { loadCharacterCards, loadChapterCounts, type CharCardData } from "@/lib/rosters";
 
 // The homepage. The top navbar (SiteNav, in the root layout) owns system
 // selection, the Characters/Adventures tabs, Compendium and Tools; this page
@@ -30,6 +30,7 @@ export default async function DashboardPage() {
     orderBy: { updatedAt: "desc" },
     select: { id: true, title: true, updatedAt: true, tool: true, linkedCampaignId: true },
   }), loadCharacterCards(user.id)]);
+  const chapters = await loadChapterCounts(user.id);
   const cardsBySystem = new Map<SystemKey, CharCardData[]>();
   for (const c of charCards) {
     const l = cardsBySystem.get(c.system);
@@ -72,6 +73,7 @@ export default async function DashboardPage() {
       updatedAt: doc.updatedAt.getTime(),
       vttHref,
       vttKind: !cid ? null : owlbear ? "owlbear" : "tabletop",
+      chapters: chapters.get(doc.id) ?? null,
     });
   }
 
