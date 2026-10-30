@@ -68,7 +68,7 @@ export default function CampaignsList({
   }, [system]);
 
   return (
-    <div className="home-roster mx-auto w-full max-w-3xl px-4 py-8 sm:px-5">
+    <div className="home-roster mx-auto w-full max-w-5xl px-4 py-8 sm:px-5">
       {/* key={system}: remounting on a system switch replays the fade-in, so
           changing systems reads as "switching worlds" rather than rows swapping
           in place. */}
@@ -93,9 +93,7 @@ export default function CampaignsList({
 
           {campaigns.length === 0 ? (
             <p className="px-4 py-5 text-base text-[var(--muted)] sm:text-sm">
-              {`No ${name} campaigns yet.`} Hit + New to start one — you&apos;ll be its GM, with an invite
-              link to send your players. Playing in someone else&apos;s game? Ask your GM for their
-              invite link, or use Link campaign on your character.
+              {`No ${name} campaigns yet. Hit + New to start one — you'll be its GM, with an invite link to send your players. Playing in someone else's game? Ask your GM for their invite link, or use Link on your character card.`}
             </p>
           ) : (
             <div className="roster-panel-cards" data-sys={system}>

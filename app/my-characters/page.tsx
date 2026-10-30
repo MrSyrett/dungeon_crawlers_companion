@@ -14,7 +14,7 @@ import CharacterCard from "@/components/CharacterCard";
 //
 // The cards are the SAME component a system's Characters page shows
 // (components/CharacterCard.tsx, data from lib/rosters.ts): name, details,
-// campaign, and VTT / Campaign (or Link campaign) / Delete. This page only
+// campaign, and Sheet / VTT / Campaign (or Link) / Delete. This page only
 // decides the grouping.
 //
 // Like the home page it wears NO single system's skin: it is in CHROME_PREFIXES

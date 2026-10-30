@@ -96,59 +96,37 @@ function DocList({
           </ul>
         </div>
       ) : (
-        <ul className="divide-y divide-[var(--border)]">
-          {docs.map((doc) => (
-            <li key={doc.id} className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                {/* Plain <a>, NOT next/link: /tools/… is a route handler that
-                    builds a full standalone HTML document. <Link> would prefetch
-                    it (auth + DB + a 60–520 KB render) for every row on screen,
-                    then fetch it a second time on click. */}
-                <a
-                  href={`/tools/${toolId}/${doc.id}`}
-                  className="block truncate py-1 text-lg font-semibold transition-colors hover:text-[var(--sys-hilite)] sm:py-0 sm:text-base"
-                >
-                  {doc.title}
-                </a>
-                <span className="text-[13px] text-[var(--muted)] sm:text-[11px]">
-                  Updated {formatDate(doc.updatedAt)}
-                </span>
-              </div>
-              <div className="flex shrink-0 items-center gap-2">
-                {doc.vttHref ? (
-                  // Our own VTT opens in this tab (it's part of the app);
-                  // an external OBR room opens in a new one. Same words and
-                  // same behavior as the Campaigns page.
-                  <a
-                    href={doc.vttHref}
-                    {...(doc.vttKind === "owlbear" ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                    title={
-                      doc.vttKind === "owlbear"
-                        ? "Open this campaign's OBR room in a new tab"
-                        : "Open this campaign's VTT"
-                    }
-                    className="min-h-11 shrink-0 rounded border border-[var(--sys-action)] px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] text-[var(--sys-action)] hover:bg-[var(--panel-2)] sm:min-h-0 sm:px-2 sm:py-1 sm:text-[11px]"
-                  >
-                    {/* "VTT", matching the Campaigns rows. The arrow is what
-                        says the Owlbear room leaves the site; naming the vendor
-                        as well made this the longest button in a row that has to
-                        fit a phone. */}
-                    {doc.vttKind === "owlbear" ? "VTT ↗" : "VTT"}
+        // Adventures: the same tile cards, title + when it was last touched,
+        // with Open and Delete — so all three lists read as one family.
+        <div className="roster-panel-cards home-roster" data-sys={system}>
+          <ul className="roster-cards">
+            {docs.map((doc) => (
+              <li key={doc.id} className="min-w-0">
+                <div className="roster-card" id={`adv-${doc.id}`}>
+                  {/* Plain <a>, NOT next/link: /tools/… is a route handler that
+                      builds a full standalone HTML document; <Link> would
+                      prefetch it for every card on screen. */}
+                  <a href={`/tools/${toolId}/${doc.id}`} className="roster-card-name roster-card-link" title={`Open ${doc.title}`}>
+                    {doc.title}
                   </a>
-                ) : null}
-                <form action={deleteDocument}>
-                  <input type="hidden" name="id" value={doc.id} />
-                  <ConfirmButton
-                    message={`Delete "${doc.title}"? This cannot be undone.`}
-                    className="min-h-11 shrink-0 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--bad)] sm:min-h-0 sm:px-2 sm:py-1 sm:text-[11px]"
-                  >
-                    Delete
-                  </ConfirmButton>
-                </form>
-              </div>
-            </li>
-          ))}
-        </ul>
+                  <span className="roster-card-meta">Adventure Prep</span>
+                  <span className="roster-card-camp">Updated {formatDate(doc.updatedAt)}</span>
+                  <div className="roster-actions">
+                    <a href={`/tools/${toolId}/${doc.id}`} className="roster-btn roster-btn-go">
+                      Open
+                    </a>
+                    <form action={deleteDocument} className="contents">
+                      <input type="hidden" name="id" value={doc.id} />
+                      <ConfirmButton message={`Delete "${doc.title}"? This cannot be undone.`} className="roster-btn roster-btn-danger">
+                        Delete
+                      </ConfirmButton>
+                    </form>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );
@@ -183,7 +161,7 @@ export default function DashboardDocs({
 
   const panel = panels[system];
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-5">
+    <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-5">
       {/* key={system}: remounting the body on a system switch replays the
           fade-in, so changing systems reads as "switching worlds" rather than
           text swapping in place. No system title here — the navbar's system

@@ -11,13 +11,13 @@ import type { CharCardData } from "@/lib/rosters";
 // a system's Characters page. Data comes from loadCharacterCards (lib/rosters.ts).
 //
 //   Name (opens the sheet) · its details (LV 3 · Fighter · Dwarf) · its campaign
-//   [VTT]  [Campaign | Link campaign]  [Delete]
+//   [Sheet]  [VTT]  [Campaign | Link]  [Delete]
 //
 // It wears the system's identity (the .roster-card tile look in globals.css), so
 // the caller must put it inside an element carrying data-sys.
 //
 // "Campaign" switches to the campaign's system and opens the Campaigns page at
-// that campaign's card (#camp-<id>). "Link campaign" asks for the join code and
+// that campaign's card (#camp-<id>). "Link" asks for the join code and
 // opens the sheet with ?join=<code> — the sheet's own Link flow does the joining
 // (lib/inject.ts), exactly as the invite page does. One join path, not two.
 //
@@ -67,6 +67,9 @@ export default function CharacterCard({ c }: { c: CharCardData }) {
         </form>
       ) : (
         <div className="roster-actions">
+          <a href={sheet} className="roster-btn" title={`Open ${c.name}'s sheet`}>
+            Sheet
+          </a>
           {c.vtt ? (
             <a
               href={c.vtt.href}
@@ -88,7 +91,7 @@ export default function CharacterCard({ c }: { c: CharCardData }) {
               onClick={() => setLinking(true)}
               title="Join a campaign with the code your GM gave you"
             >
-              Link campaign
+              Link
             </button>
           )}
           <form action={deleteDocument} className="contents">

@@ -17,8 +17,8 @@ import {
 // ONE CAMPAIGN CARD for both campaign lists — My Campaigns (every system) and a
 // system's Campaigns page. Data comes from loadCampaignCards (lib/rosters.ts).
 //
-// Everyone sees:   the name · the party (each character's details) · VTT · Sheet
-//                  (your own character in it, when you have one)
+// Everyone sees:   the name · the party (each character's details) · Sheet (your
+//                  own character in it, when you have one) · VTT
 // The GM also sees: the join code + Copy + Invite · each character as a link
 //                  to open that player's sheet · GM Screen · Edit
 //
@@ -88,6 +88,11 @@ export default function CampaignCard({ c }: { c: CampCardData }) {
       )}
 
       <div className="roster-actions">
+        {c.mySheet ? (
+          <a href={`/tools/${c.mySheet.tool}/${c.mySheet.id}`} className="roster-btn" title="Open your character's sheet">
+            Sheet
+          </a>
+        ) : null}
         <a
           href={c.vtt.href}
           {...(c.vtt.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
@@ -96,11 +101,6 @@ export default function CampaignCard({ c }: { c: CampCardData }) {
         >
           {c.vtt.external ? "VTT ↗" : "VTT"}
         </a>
-        {c.mySheet ? (
-          <a href={`/tools/${c.mySheet.tool}/${c.mySheet.id}`} className="roster-btn" title="Open your character's sheet">
-            Sheet
-          </a>
-        ) : null}
         {gm ? (
           <>
             <OpenGmScreenButton

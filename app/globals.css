@@ -2218,11 +2218,13 @@ a.roster-card-link:hover { text-decoration: underline; text-underline-offset: 3p
 .roster-card { scroll-margin-top: 5rem; }
 /* "Campaign" on a character card lands on #camp-<id>: ring the card it points at. */
 .roster-card:target, .roster-card.roster-hit { border-color: var(--tile-accent); box-shadow: 0 0 0 2px var(--tile-accent); }
-.roster-card .roster-actions { margin-top: auto; padding-top: 0.55rem; }
+.roster-card .roster-actions { margin-top: auto; padding-top: 0.55rem; gap: 0.3rem; }
+/* Four buttons have to share one row on a third-width card. */
+.roster-card .roster-btn { padding: 0.3rem 0.5rem; letter-spacing: 0.06em; }
 .roster-btn-go { border-color: color-mix(in srgb, var(--tile-accent, #fff) 70%, transparent); color: var(--tile-accent, #fff); }
 .roster-btn-danger:hover { border-color: #ff6b5e; color: #ff6b5e; }
 .roster-btn:disabled:hover { border-color: rgba(255, 255, 255, 0.28); color: rgba(255, 255, 255, 0.9); }
-/* Link campaign: the join-code field, in place of the buttons. */
+/* Link: the join-code field, in place of the buttons. */
 .roster-link-form { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.55rem; }
 .roster-input {
   flex: 1 1 7rem;
@@ -2255,12 +2257,14 @@ a.roster-card-link:hover { text-decoration: underline; text-underline-offset: 3p
 .roster-code-row button:hover { border-color: var(--tile-accent, #fff); color: var(--tile-accent, #fff); }
 /* A note line that may need two lines (the empty-party hint) wraps rather than clipping. */
 .roster-card-camp.roster-wrap { white-space: normal; }
-/* The party: one row per character — name, then its details. */
+/* The party: a mini character card per character — name on top, its details
+   below, like the Character cards themselves. */
 .roster-party { list-style: none; margin: 0.45rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.25rem; }
 .roster-party-row {
+  position: relative;
   display: flex;
-  align-items: baseline;
-  gap: 0.45rem;
+  flex-direction: column;
+  gap: 0.05rem;
   min-width: 0;
   padding: 0.25rem 0.5rem;
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -2269,17 +2273,16 @@ a.roster-card-link:hover { text-decoration: underline; text-underline-offset: 3p
   text-decoration: none;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
 }
-.roster-party-name { flex: 0 0 auto; max-width: 62%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.82rem; font-weight: 700; color: rgba(255, 255, 255, 0.92); }
+.roster-party-name { min-width: 0; padding-right: 1.1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.82rem; font-weight: 700; color: rgba(255, 255, 255, 0.92); }
 .roster-party-you { font-weight: 400; color: rgba(255, 255, 255, 0.6); }
-.roster-party-meta { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.74rem; color: var(--tile-sub, rgba(255, 255, 255, 0.75)); }
-.roster-party-open { flex: 0 0 auto; margin-left: auto; font-size: 0.75rem; color: rgba(255, 255, 255, 0.55); }
+.roster-party-meta { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.74rem; color: var(--tile-sub, rgba(255, 255, 255, 0.75)); }
+.roster-party-open { position: absolute; top: 0.3rem; right: 0.5rem; font-size: 0.75rem; color: rgba(255, 255, 255, 0.55); }
 a.roster-party-link:hover { border-color: var(--tile-accent, #fff); }
 a.roster-party-link:hover .roster-party-open { color: var(--tile-accent, #fff); }
-/* A list page that shows ONE system (Characters, Campaigns): the cards sit in
-   the page's panel, two across from a tablet up. */
+/* A list page that shows ONE system (Characters, Adventures, Campaigns): the
+   cards sit in the page's panel, in the same 1 / 2 / 3-column grid as My
+   Characters and My Campaigns. */
 .roster-panel-cards { padding: 0.85rem; }
-@media (min-width: 640px) { .roster-panel-cards .roster-cards { grid-template-columns: 1fr 1fr; } }
-@media (min-width: 1024px) { .roster-panel-cards .roster-cards { grid-template-columns: 1fr 1fr; } }
 
 /* The one roster surface with no system — the empty state — stays theme-neutral. */
 .roster-empty {
