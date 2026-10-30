@@ -286,7 +286,7 @@ export default function DccHomebrewEditor({
                   <button className={btn} disabled={busy} onClick={close}>Cancel</button>
                 </div>
               </div>
-              <div className="lg:sticky lg:top-4 lg:self-start">
+              <div className="lg:sticky lg:top-20 lg:self-start">
                 <P name={name} value={draft} />
               </div>
             </div>

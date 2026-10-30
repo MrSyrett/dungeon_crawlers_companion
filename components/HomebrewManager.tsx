@@ -934,7 +934,7 @@ export default function HomebrewManager({
                 </button>
               </div>
               </div>
-              <div className="lg:sticky lg:top-4 lg:self-start">{preview}</div>
+              <div className="lg:sticky lg:top-20 lg:self-start">{preview}</div>
             </div>
           ) : (
             <button className={btnGold} onClick={() => setForm(blankForm())} disabled={busy}>

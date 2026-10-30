@@ -216,7 +216,7 @@ export default function DccHomebrew({
                 </button>
               </div>
               </div>
-              <div className="lg:sticky lg:top-4 lg:self-start">
+              <div className="lg:sticky lg:top-20 lg:self-start">
                 <ItemPreview name={form.name} it={form.item} names={names} />
               </div>
             </div>

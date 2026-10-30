@@ -145,7 +145,8 @@
   }
   function wpItem(it) { return { kind: 'weapon', equipped: true, name: it.name, bonus: (String(it.bonus).match(/-?\d+/) || [0])[0], damage: it.damage != null ? it.damage : 1, range: it.range != null ? String(it.range) : '0', weight: it.cost != null ? it.cost : '', skill: it.skill || (it._ranged ? 'Ranged Combat' : 'Close Combat') }; }
   function arItem(it) { return { kind: 'armor', equipped: true, name: it.name, rating: it.protection != null ? it.protection : 0, weight: '', note: it.comment || '' }; }
-  function grItem(it) { return { kind: 'gear', name: it.name, weight: it.cost != null ? it.cost : '', note: (it.comment || '') + (it.bonus && it.bonus !== '—' ? ' (' + it.bonus + ')' : '') }; }
+  // skillBonus (via the sheet's bookSB) lets the sheet's "in use" box apply the item's +N dice.
+  function grItem(it) { var o = { kind: 'gear', name: it.name, weight: it.cost != null ? it.cost : '', note: (it.comment || '') + (it.bonus && it.bonus !== '—' ? ' (' + it.bonus + ')' : '') }; var sb = typeof W.bookSB === 'function' ? W.bookSB(it.bonus, it.comment) : []; if (sb.length) { o.skillBonus = sb; o.equipped = true; } return o; }
   function stepGear() {
     var a = archObj(archetype);
     if (!a) return '<p class="m-hint">Go back and pick an archetype first — your starting equipment and resources come from it.</p>';

@@ -29,6 +29,9 @@ import * as CoRules from "@/components/hb/co/rules";
 import * as YzeRules from "@/components/hb/yze/rules";
 import * as TwdRules from "@/components/hb/twd/rules";
 import * as MyzRules from "@/components/hb/myz/rules";
+import * as VaeRules from "@/components/hb/vae/rules";
+import * as MmrpgRules from "@/components/hb/mmrpg/rules";
+import { MMRPG_POWERS } from "@/lib/data/mmrpg-powers";
 import {
   cleanFear, cleanLotrAttackRows, cleanLotrBenefits, cleanLotrBlock, cleanUseRows as cleanLotrUseRows, cleanVirtueFields as lotrVirtueFields,
   composeLotrActions, composeLotrBlock, composeUses as lotrComposeUses, parseUses as lotrParseUses, composeUseRows as lotrUseRowsOut,
@@ -2347,13 +2350,15 @@ function normalizeMyzGear(input: unknown): { name: string; data: Record<string, 
 }
 
 // ── Vaesen (VAE) ────────────────────────────────────────────────────────────
+// components/hb/vae/rules.ts documents the shapes. The legacy fields keep their
+// old meaning and bounds; the new optional ones are only written when set.
 function normalizeVaeWeapon(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew weapon needs a name.");
   const data: Record<string, unknown> = {
     name,
-    skill: oneOf(str(o.skill) || "Close Combat", ["Close Combat", "Ranged Combat", "Force"] as const, "Close Combat"),
+    skill: oneOf(str(o.skill) || "Close Combat", VaeRules.WEAPON_SKILLS, "Close Combat"),
     bonus: str(o.bonus).slice(0, 8) || "0",
     damage: Math.max(0, Math.min(10, Math.round(Number(o.damage) || 1))),
     range: str(o.range).slice(0, 20) || "0",
@@ -2361,6 +2366,8 @@ function normalizeVaeWeapon(input: unknown): { name: string; data: Record<string
     desc: str(o.desc).slice(0, 1000),
     hb: true,
   };
+  const features = strList(o.features, 8, 30);
+  if (features.length) data.features = features;
   return { name, data };
 }
 function normalizeVaeGear(input: unknown): { name: string; data: Record<string, unknown> } {
@@ -2374,6 +2381,33 @@ function normalizeVaeGear(input: unknown): { name: string; data: Record<string, 
     desc: str(o.desc).slice(0, 2000),
     hb: true,
   };
+  if (o.kind != null) {
+    const kind = oneOf(str(o.kind), VaeRules.GEAR_KINDS, "gear");
+    data.kind = kind;
+    const sb = kind === "armor" ? [] : VaeRules.cleanSkillBonus(o.skillBonus);
+    data.skillBonus = sb;
+    // The bonus text is composed from the badges; with none, typed legacy text stays.
+    data.bonus = sb.length ? VaeRules.fmtSkillBonus(sb).slice(0, 80) : kind === "armor" ? "" : str(o.bonus).slice(0, 8);
+    // Only armor carries `rating` — the sheet sends any record with one to its Armor tab.
+    if (kind === "armor") {
+      data.rating = Math.max(1, Math.min(10, Math.round(Number(o.rating) || 1)));
+      data.penalty = Math.max(0, Math.min(3, Math.round(Number(o.penalty) || 0)));
+    }
+    if (kind === "power" || kind === "magic") {
+      data.cost = ""; // found, not bought
+      data.effect = str(o.effect).slice(0, 300);
+      const resist = VaeRules.cleanResist(o.resist);
+      if (resist.length) {
+        data.resist = resist;
+        const from = str(o.resistFrom).slice(0, 40);
+        if (from) data.resistFrom = from;
+      }
+    }
+    if (kind === "magic") {
+      data.risk = str(o.risk).slice(0, 300);
+      if (o.consumable === true) data.consumable = true;
+    }
+  }
   return { name, data };
 }
 
@@ -3057,22 +3091,34 @@ function normalizeMmrpgPower(input: unknown): { name: string; data: Record<strin
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew power needs a name.");
+  // Effect badges (components/hb/mmrpg PowerBuilder) compose book-worded
+  // sentences onto the prose the sheet's automation reads; plain records keep
+  // their effect text exactly as typed.
+  const fx = MmrpgRules.cleanPowerFx(o.effects);
+  const effect = fx.length ? MmrpgRules.composeEffect(str(o.text).slice(0, 2400), fx) : str(o.effect);
   const data: Record<string, unknown> = {
     name,
     genre: "core",
     powerSet: str(o.powerSet).slice(0, 60) || "None",
-    effect: str(o.effect).slice(0, 3000),
+    effect: effect.slice(0, 3000),
     source: "Homebrew",
   };
   if (str(o.prerequisites)) data.prerequisites = str(o.prerequisites).slice(0, 200);
-  if (str(o.action)) data.action = str(o.action).slice(0, 60);
+  if (str(o.action)) data.action = str(o.action).slice(0, 80);
   if (str(o.duration)) data.duration = str(o.duration).slice(0, 60);
   if (str(o.range)) data.range = str(o.range).slice(0, 60);
   if (str(o.cost)) data.cost = str(o.cost).slice(0, 60);
   if (str(o.trigger)) data.trigger = str(o.trigger).slice(0, 200);
   if (str(o.fantastic)) data.fantastic = str(o.fantastic).slice(0, 400);
+  if (fx.length) { data.effects = fx; data.text = str(o.text).slice(0, 2400); }
   return { name, data };
 }
+// Prerequisite text of every book power, for the iconic Power Value math.
+let mmrpgPrereqs: Map<string, string> | null = null;
+const mmrpgPrereqOf = (n: string): string | undefined => {
+  if (!mmrpgPrereqs) mmrpgPrereqs = new Map(MMRPG_POWERS.map((p) => [p.name.toLowerCase(), String(p.prerequisites ?? "")]));
+  return mmrpgPrereqs.get(n.toLowerCase());
+};
 // Homebrew iconic item / battle suit, built with the Avengers Expansion rules
 // (Origin / Powers / Restrictions / Power Value). Stored equipment-shaped so it
 // drops straight into the Equipment page's Iconic tier.
@@ -3086,9 +3132,12 @@ function normalizeMmrpgIconic(input: unknown): { name: string; data: Record<stri
   const powers = [...new Set(strList(o.powers, 60, 60))];
   const restrictions = [...new Set(strList(o.restrictions, 40, 80))];
   const origin = str(o.origin).slice(0, 80);
-  // Power Value = number of powers (+1 for the weapon itself) − number of
-  // restrictions, minimum 1 (Avengers Expansion, p102).
-  const powerValue = Math.max(1, powers.length + (typ === "Weapon" ? 1 : 0) - restrictions.length);
+  // Power Value = granted powers + the prerequisite powers they bring (Mighty 3
+  // counts Mighty 1–3), +1 for a weapon, −1 per restriction, minimum 1
+  // (Avengers Expansion, p102). `pvAuto:false` keeps the builder's override.
+  const pvAuto = o.pvAuto !== false;
+  const auto = MmrpgRules.iconicPv(typ, powers, restrictions.length, mmrpgPrereqOf).pv;
+  const powerValue = pvAuto ? auto : Math.max(1, Math.min(40, num(o.powerValue) || auto));
   const data: Record<string, unknown> = {
     name,
     tier: "Iconic",
@@ -3104,15 +3153,20 @@ function normalizeMmrpgIconic(input: unknown): { name: string; data: Record<stri
     source: "Homebrew",
   };
   if (origin) data.grantsOrigin = origin;
+  if (!pvAuto) data.pvAuto = false;
   if (typ === "Weapon") {
-    data.weaponClass = str(o.range).match(/^\d/) ? "ranged" : "melee";
+    data.weaponClass = /^(\d|Unlimited)/.test(str(o.range)) ? "ranged" : "melee";
     data.ability = ["melee", "agility", "ego", "logic"].includes(str(o.ability).toLowerCase())
       ? str(o.ability).toLowerCase() : "melee";
     data.range = str(o.range).slice(0, 40) || "Reach";
     const b = str(o.damageBonus).replace(/[^\d+×x-]/g, "");
     if (b) data.damageBonus = b;
-    const mb = parseInt(str(o.damageBonus).replace(/[^\d]/g, ""), 10);
-    if (mb) data.multBonus = mb;
+    const mb = parseInt((/\d+/.exec(str(o.damageBonus)) ?? [""])[0], 10);
+    if (mb) data.multBonus = Math.min(6, mb);
+    // Abilities the multiplier bonus applies to (thrown weapons: Melee + Agility).
+    const multi = [...new Set(strList(o.multAbilities, 4, 12).map((x) => x.toLowerCase()))].filter((x) => ["melee", "agility", "ego", "logic"].includes(x));
+    if (multi.length > 1) { data.multAbilities = multi; data.ability = multi[0]; }
+    if (truthy(o.noDamage)) { data.noDamage = true; delete data.damageBonus; delete data.multBonus; }
   }
   return { name, data };
 }
@@ -3218,9 +3272,10 @@ function normalizeMmrpgStarship(input: unknown): { name: string; data: Record<st
     name,
     data: {
       name, teamRank: rank, traits, tags,
-      health: size.health, size: finalSize, passengers: size.passengers, flightSpeed: has("Star Drive") ? 36 : 24, damageReduction: "—",
+      // Health and passengers follow the final size (Milano: rank 5, Cozy → Gigantic, 400).
+      health: MmrpgRules.SIZE_STATS[finalSize].health, size: finalSize, passengers: MmrpgRules.SIZE_STATS[finalSize].passengers, flightSpeed: has("Star Drive") ? 36 : 24, damageReduction: "—",
       traitBudget, traitsUsed, warnings,
-      blurb: str(o.notes).slice(0, 800), source: "Homebrew",
+      blurb: str(o.notes ?? o.blurb).slice(0, 800), source: "Homebrew",
     },
   };
 }
@@ -3229,7 +3284,13 @@ function normalizeMmrpgLabel(input: unknown, noun: string): { name: string; data
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error(`A homebrew ${noun} needs a name.`);
-  return { name, data: { name, genre: "core", description: str(o.description).slice(0, 3000), source: "Homebrew" } };
+  // Traits/tags built with effects store the structured parts and compose the
+  // description in book wording; plain ones keep only their description.
+  const situ = MmrpgRules.cleanSitu(o.situational), fx = MmrpgRules.cleanLabelFx(o.effects), repeatable = truthy(o.repeatable);
+  if (!situ.length && !fx.length && !repeatable) return { name, data: { name, genre: "core", description: str(o.description).slice(0, 3000), source: "Homebrew" } };
+  const text = str(o.text).slice(0, 2400);
+  const description = MmrpgRules.composeLabel(noun === "tag" ? "tag" : "trait", text, situ, fx, repeatable).slice(0, 3000);
+  return { name, data: { name, genre: "core", description, text, situational: situ, effects: fx, repeatable, source: "Homebrew" } };
 }
 
 export function normalize(type: HbType, data: unknown): { name: string; data: Record<string, unknown> } {

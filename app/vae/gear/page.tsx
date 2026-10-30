@@ -4,11 +4,12 @@ import { VAE_MELEE_WEAPONS, VAE_RANGED_WEAPONS, VAE_ARMOR, VAE_GEAR, VAE_MAGIC, 
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import { VaesenHeader, ModeRow, cardCls, nameCls, hbBadge, one, type RawQuery } from "@/components/VaesenRef";
+import { gearRuleText, cleanResist, cleanSkillBonus, type GearKind } from "@/components/hb/vae/rules";
 
 export const dynamic = "force-dynamic";
 
-type GearRow = { name: string; bonus: string; cost: string; desc: string };
-type WpRow = { name: string; skill: string; bonus: string; damage: string; range: string; cost: string; desc: string };
+type GearRow = { name: string; kind: GearKind; bonus: string; cost: string; desc: string; rule: string; rating: string };
+type WpRow = { name: string; skill: string; bonus: string; damage: string; range: string; cost: string; desc: string; features: string };
 
 const panelCls = "rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4";
 const tableWrap = "overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--panel)]";
@@ -35,15 +36,20 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
   const gHb: GearRow[] = gVis.map((h) => {
     const d = h.data as Record<string, unknown>;
     const s = (k: string) => (typeof d[k] === "string" ? (d[k] as string) : "");
-    return { name: h.name, bonus: s("bonus"), cost: s("cost"), desc: s("desc") };
+    // Builder records carry `kind`; a legacy record is armor only if it has a rating.
+    const kind: GearKind = d.kind === "armor" || d.kind === "power" || d.kind === "magic" || d.kind === "gear" ? d.kind : d.rating != null ? "armor" : "gear";
+    const rule = gearRuleText({ kind, skillBonus: cleanSkillBonus(d.skillBonus), effect: s("effect"), resist: cleanResist(d.resist), resistFrom: s("resistFrom"), risk: s("risk"), penalty: Number(d.penalty) || 0 });
+    return { name: h.name, kind, bonus: s("bonus"), cost: s("cost"), desc: s("desc"), rule: rule + (d.consumable === true ? " Used up when used." : ""), rating: d.rating != null ? String(d.rating) : "" };
   });
+  const gHbBy = (k: GearKind) => gHb.filter((g) => g.kind === k);
   const wHb: WpRow[] = wVis.map((h) => {
     const d = h.data as Record<string, unknown>;
     const s = (k: string) => (typeof d[k] === "string" ? (d[k] as string) : "");
-    return { name: h.name, skill: s("skill") || "Close Combat", bonus: s("bonus") || "0", damage: d.damage != null ? String(d.damage) : "1", range: s("range") || "0", cost: s("cost"), desc: s("desc") };
+    return { name: h.name, skill: s("skill") || "Close Combat", bonus: s("bonus") || "0", damage: d.damage != null ? String(d.damage) : "1", range: s("range") || "0", cost: s("cost"), desc: s("desc"), features: Array.isArray(d.features) ? d.features.map(String).join(", ") : "" };
   });
-  const wHbMelee = wHb.filter((w) => w.skill !== "Ranged Combat");
-  const wHbRanged = wHb.filter((w) => w.skill === "Ranged Combat");
+  // Thrown weapons ("Close Combat / Ranged Combat", like the book's spear) sit with the ranged table.
+  const wHbRanged = wHb.filter((w) => /ranged combat/i.test(w.skill));
+  const wHbMelee = wHb.filter((w) => !/ranged combat/i.test(w.skill));
 
   const modeOpts = [
     { key: "gear", label: "Gear" },
@@ -65,9 +71,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
           <div className={`${panelCls} mb-4`}>
             <h3 className={hbHead}>Your homebrew gear</h3>
             <HomebrewEditor kind="vae-gear" campaigns={campaigns} initial={gOwn} />
-            {gHb.length > 0 && (
+            {gHbBy("gear").length > 0 && (
               <ul className="mt-3 grid grid-cols-1 items-start gap-3 md:grid-cols-2">
-                {gHb.map((g, i) => (
+                {gHbBy("gear").map((g, i) => (
                   <li key={`${g.name}-${i}`} className={cardCls}>
                     <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                       <h4 className={nameCls}>{g.name}</h4>
@@ -136,7 +142,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
               <div className={`${tableWrap} mt-3`}>
                 <table className="w-full border-collapse text-[13px]">
                   <thead>
-                    <tr className={thRow}><th className="p-2">Weapon</th><th className="p-2">Dmg</th><th className="p-2">Bonus</th><th className="p-2">Cost</th><th className="p-2">Skill</th></tr>
+                    <tr className={thRow}><th className="p-2">Weapon</th><th className="p-2">Dmg</th><th className="p-2">Bonus</th><th className="p-2">Cost</th><th className="p-2">Skill</th><th className="p-2">Features</th></tr>
                   </thead>
                   <tbody>
                     {wHbMelee.map((w, i) => (
@@ -146,6 +152,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
                         <td className="p-2 font-mono">{w.bonus}</td>
                         <td className="p-2 font-mono text-[var(--muted)]">{w.cost}</td>
                         <td className="p-2 text-[var(--muted)]">{w.skill}</td>
+                        <td className="p-2 text-[var(--muted)]">{[w.features, w.desc].filter(Boolean).join(" · ")}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -184,7 +191,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
               <div className={`${tableWrap} mt-3`}>
                 <table className="w-full border-collapse text-[13px]">
                   <thead>
-                    <tr className={thRow}><th className="p-2">Weapon</th><th className="p-2">Dmg</th><th className="p-2">Range</th><th className="p-2">Bonus</th><th className="p-2">Cost</th></tr>
+                    <tr className={thRow}><th className="p-2">Weapon</th><th className="p-2">Dmg</th><th className="p-2">Range</th><th className="p-2">Bonus</th><th className="p-2">Cost</th><th className="p-2">Features</th></tr>
                   </thead>
                   <tbody>
                     {wHbRanged.map((w, i) => (
@@ -194,6 +201,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
                         <td className="p-2">{w.range}</td>
                         <td className="p-2 font-mono">{w.bonus}</td>
                         <td className="p-2 font-mono text-[var(--muted)]">{w.cost}</td>
+                        <td className="p-2 text-[var(--muted)]">{[w.features, w.desc].filter(Boolean).join(" · ")}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -225,6 +233,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {/* Armor */}
       {mode === "armor" && (
         <section>
+          <HbGearPanel title="Your homebrew armor" rows={gHbBy("armor")} campaigns={campaigns} own={gOwn} />
           <div className={tableWrap}>
             <table className="w-full border-collapse text-[13px]">
               <thead>
@@ -247,6 +256,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {/* Items of Power */}
       {mode === "power" && (
         <section>
+          <HbGearPanel title="Your homebrew Items of Power" rows={gHbBy("power")} campaigns={campaigns} own={gOwn} />
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
             {VAE_MAGIC.itemsOfPower.map((i) => (
               <div key={i.name} className={cardCls}>
@@ -261,6 +271,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {/* Magic Items */}
       {mode === "magic" && (
         <section>
+          <HbGearPanel title="Your homebrew magic items" rows={gHbBy("magic")} campaigns={campaigns} own={gOwn} />
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             {VAE_MAGIC.magicItems.map((i) => (
               <div key={i.name} className={cardCls}>
@@ -271,6 +282,33 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
             ))}
           </div>
         </section>
+      )}
+    </div>
+  );
+}
+
+// Homebrew vae-gear of one kind (armor / Item of Power / magic item) with the editor —
+// the builder's Kind chips decide which tab a new entry lands on.
+function HbGearPanel({ title, rows, campaigns, own }: { title: string; rows: GearRow[]; campaigns: Parameters<typeof HomebrewEditor>[0]["campaigns"]; own: Parameters<typeof HomebrewEditor>[0]["initial"] }) {
+  return (
+    <div className={`${panelCls} mb-4`}>
+      <h3 className={hbHead}>{title}</h3>
+      <HomebrewEditor kind="vae-gear" campaigns={campaigns} initial={own} />
+      {rows.length > 0 && (
+        <ul className="mt-3 grid grid-cols-1 items-start gap-3 md:grid-cols-2">
+          {rows.map((g, i) => (
+            <li key={`${g.name}-${i}`} className={cardCls}>
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <h4 className={nameCls}>{g.name}</h4>
+                {g.rating ? <span className={hbBadge}>Protection {g.rating}</span> : null}
+                {g.bonus ? <span className={hbBadge}>{g.bonus}</span> : null}
+                {g.cost ? <span className="text-[12px] text-[var(--muted)]">cost {g.cost}</span> : null}
+              </div>
+              {g.rule ? <p className="mt-2 text-[13px] leading-relaxed text-[var(--text)]">{g.rule}</p> : null}
+              {g.desc ? <p className="mt-1 text-[13px] leading-relaxed text-[var(--muted)]">{g.desc}</p> : null}
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

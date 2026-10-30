@@ -128,16 +128,21 @@
   function tagByName(n) { var k = String(n || '').toLowerCase(); return TAGS().filter(function (t) { return t.name.toLowerCase() === k; })[0]; }
   function powerByName(n) { var k = String(n || '').toLowerCase(); return POWERS().filter(function (p) { return p.name.toLowerCase() === k; })[0]; }
 
-  // power prerequisites: "Accuracy 1, Rank 2" → { rank:2, powers:['Accuracy 1'] }
+  // power prerequisites: "Accuracy 1, Rank 2" → { rank:2, powers:['Accuracy 1'] }.
+  // "Grow 2 or Shrink 2" → anyOf; "Logic 3" (homebrew builder) → an ability minimum.
+  var ABIL_RE = /^(Melee|Agility|Resilience|Vigilance|Ego|Logic)\s+(\d)$/i;
   function parsePrereq(p) {
-    var out = { rank:1, powers:[] };
+    var out = { rank:1, powers:[], anyOf:[], abil:[] };
     var s = p.prerequisites;
     if (!s || s === 'None') return out;
     s.split(',').forEach(function (tok) {
       tok = tok.trim(); if (!tok) return;
       var m = /^Rank\s+(\d)/i.exec(tok);
       if (m) { out.rank = parseInt(m[1], 10); return; }
+      var a = ABIL_RE.exec(tok);
+      if (a) { out.abil.push({ key:a[1].toLowerCase(), min:parseInt(a[2], 10) }); return; }
       if (/^(Action|Trigger|Duration|Range|Cost|Effect)\s*:/i.test(tok) || tok.length > 40) return; // parse junk
+      if (/\s+or\s+/.test(tok)) { out.anyOf.push(tok.split(/\s+or\s+/)); return; }
       out.powers.push(tok);
     });
     return out;
@@ -147,6 +152,8 @@
     var pr = parsePrereq(p);
     if (B.rank < pr.rank) return false;
     for (var i = 0; i < pr.powers.length; i++) { if (!hasPower(pr.powers[i])) return false; }
+    for (var j = 0; j < pr.anyOf.length; j++) { if (!pr.anyOf[j].some(hasPower)) return false; }
+    for (var k = 0; k < pr.abil.length; k++) { if ((B.scores[pr.abil[k].key] || 0) < pr.abil[k].min) return false; }
     return true;
   }
 
@@ -464,7 +471,7 @@
       + '</div>';
     return h;
   }
-  function shortPrereq(p) { var pr = parsePrereq(p); var bits = []; if (pr.powers.length) bits.push(pr.powers.join(', ')); if (pr.rank > B.rank) bits.push('Rank ' + pr.rank); return bits.join(' · ') || 'locked'; }
+  function shortPrereq(p) { var pr = parsePrereq(p); var bits = []; if (pr.powers.length) bits.push(pr.powers.join(', ')); pr.anyOf.forEach(function (o) { bits.push(o.join(' or ')); }); pr.abil.forEach(function (a) { bits.push(a.key.charAt(0).toUpperCase() + a.key.slice(1) + ' ' + a.min); }); if (pr.rank > B.rank) bits.push('Rank ' + pr.rank); return bits.join(' · ') || 'locked'; }
   function itemDetail(kind, o) {
     var canAdd = true, why = '';
     if (kind === 'trait') { if (B.traits.length >= traitLimit()) { canAdd = false; why = 'At trait limit'; } }

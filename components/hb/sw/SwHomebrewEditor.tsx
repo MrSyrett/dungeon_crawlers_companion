@@ -177,7 +177,7 @@ export default function SwHomebrewEditor({ kind, campaigns: allCampaigns, initia
                   <button className={btn} disabled={busy} onClick={close}>Cancel</button>
                 </div>
               </div>
-              <div className="lg:sticky lg:top-4 lg:self-start"><P name={name} value={draft} /></div>
+              <div className="lg:sticky lg:top-20 lg:self-start"><P name={name} value={draft} /></div>
             </div>
           ) : (
             <button className={btnAccent} onClick={openNew}>+ New Homebrew {sc.noun}</button>

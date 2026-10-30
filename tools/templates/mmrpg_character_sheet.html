@@ -862,10 +862,21 @@ function blankState(){
 }
 function rank(){ return clamp(num(S.rank)||1,1,6); }
 function ab(k){ return num((S.abilities||{})[k]); }
-function healthMax(){ return Math.max(10, ab('resilience')*30); }
-function focusMax(){ return Math.max(10, ab('vigilance')*30); }
+// Homebrew traits/tags built with flat effects (components/hb/mmrpg LabelBuilder
+// → `effects` [{kind:'health'|'focus'|'defense'|'speed', target?, amount}]).
+// Looked up by name in the merged TRAITS/TAGS pools; book entries carry none.
+function labelFx(kind,key){ var t=0;
+  [[S.traits,TRAITS],[S.tags,TAGS]].forEach(function(pr){ (pr[0]||[]).forEach(function(r){
+    var k=String(r&&r.name||'').toLowerCase(); if(!k)return;
+    var d=(pr[1]||[]).find(function(x){ return String(x&&x.name||'').toLowerCase()===k; });
+    if(!d||!Array.isArray(d.effects))return;
+    d.effects.forEach(function(f){ if(f&&f.kind===kind&&(!key||f.target===key)) t+=Number(f.amount)||0; });
+  }); });
+  return t; }
+function healthMax(){ return Math.max(10, ab('resilience')*30+labelFx('health')); }
+function focusMax(){ return Math.max(10, ab('vigilance')*30+labelFx('focus')); }
 function karmaMax(){ return rank(); }
-function runSpeed(){ var s=5+Math.max(0,Math.floor(ab('agility')/5)); if(/Big|Huge|Gigantic/.test(S.size))s+=1; if(/Tiny|Little|Small/.test(S.size))s-=1; return s; }
+function runSpeed(){ var s=5+Math.max(0,Math.floor(ab('agility')/5))+labelFx('speed'); if(/Big|Huge|Gigantic/.test(S.size))s+=1; if(/Tiny|Little|Small/.test(S.size))s-=1; return s; }
 function dmgMult(){ return rank(); }
 // ── Power bonuses: read flat, unconditional numeric bonuses out of the
 // character's powers and apply them automatically. Handles the common
@@ -893,7 +904,7 @@ function powerBonuses(){
 function ncBonus(k){ return powerBonuses().noncombat[k]||0; }
 function defBonus(k){ return powerBonuses().defense[k]||0; }
 function pDmgBonus(k){ return powerBonuses().dmgMult[k]||0; }
-function defense(k){ return 10+ab(k)+defBonus(k); }
+function defense(k){ return 10+ab(k)+defBonus(k)+labelFx('defense',k); }
 
 // ── Render: abilities ──
 function renderAbilities(){
@@ -960,11 +971,11 @@ function grantedMovement(){
     if(/Levitation/i.test(nm)) add('Flight', run);
     if(/Wall\s*-?crawl/i.test(nm)) add('Climb', run);
     // generic "gains the X movement mode, with a speed equal to <mult> their Run Speed"
-    var g=/gains the (\w+) movement mode,?\s*with a speed equal to ([\w\- ]+?) their run speed/i.exec(e);
+    var g=/gains the (\w+) movement mode,?\s*with a speed equal to ([\w\- ]*?) ?their run speed/i.exec(e);
     if(g) add(g[1], wordMult(g[2])*run);
     // "<Mode> Speed equal to double their Run Speed"
     var gs=/(\w+) speed equal to ([\w\- ]+?) their run speed/i.exec(e);
-    if(gs && !/^run$/i.test(gs[1])) add(gs[1], wordMult(gs[2])*run);
+    if(gs && !/^(run|a)$/i.test(gs[1])) add(gs[1], wordMult(gs[2])*run); // "with a speed equal to…" is not a mode named "A"
     // "swingline ... triple their Run Speed" fallback
     if(/swingline/i.test(e)){ var sw=/([\w\-]+)\s+their run speed/i.exec(e); if(sw) add('Swingline', wordMult(sw[1])*run); }
   });
@@ -1243,6 +1254,8 @@ function renderTraitsTags(){
     });
     $(kind+'-empty').style.display=S[kind].length?'none':'block';
   });
+  // Trait/tag effects (Health, Focus, defense, Run Speed) feed these panels.
+  try{ renderAbilities(); renderVitals(); renderDerived(); }catch(e){}
 }
 function delItem(kind,i){ S[kind].splice(i,1);
   if(kind==='powers'){ renderPowers(); renderAbilities(); renderDerived(); renderDamage(); }
@@ -1370,7 +1383,7 @@ function renderPicker(){
       if(fset.indexOf('type:')===0 && (x.type||x.category||'Weapon')!==fset.slice(5)) return false;
     }
     if(!q)return true; return ((x.name||'')+' '+(x.description||'')+' '+(x.desc||'')+' '+(x.effect||'')+' '+(x.notes||'')+' '+(x.special||'')+' '+(x.owner||'')+' '+(x.powerSet||'')+' '+(x.tier||'')+' '+(x.type||x.category||'')).toLowerCase().indexOf(q)>=0;
-  }).slice(0,400);
+  }).slice(0,1000);
   _pkRows=rows; var el=$('picker-body');
   if(!rows.length){ var arm=(_pk==='equip'&&(fset==='type:Armor'||fset==='type:Item'||fset==='tier:Narrative')); el.innerHTML='<div class="brow-empty">'+(arm?'More arrive with the expansions.':'No matches.')+'</div>'; return; }
   el.innerHTML=rows.map(function(x,idx){
@@ -2139,6 +2152,8 @@ async function syncMmrpgHomebrew(){
   _mmrpgRebuild(window.MMRPG_POWERS,    _mmrpgBook.powers, hb.power);
   _mmrpgRebuild(window.MMRPG_TRAITS,    _mmrpgBook.traits, hb.trait);
   _mmrpgRebuild(window.MMRPG_TAGS,      _mmrpgBook.tags,   hb.tag);
+  // Homebrew trait/tag effects only resolve once the pools hold them.
+  if(hb.trait.concat(hb.tag).some(function(x){ return Array.isArray(x.effects)&&x.effects.length; })){ try{ renderTraitsTags(); }catch(e){} }
   // Refresh an open equipment/power picker so new entries appear immediately.
   try{ var po=document.getElementById('pick-overlay'); if(po && po.style.display!=='none' && typeof renderPicker==='function') renderPicker(); }catch(e){}
 }

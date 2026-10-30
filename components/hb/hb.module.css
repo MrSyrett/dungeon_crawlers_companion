@@ -6,6 +6,11 @@
    loot-bonus.js, `.lbn-*`) so homebrew and loot badges look identical. */
 
 /* ── Stepper ─────────────────────────────────────────────────────────────── */
+.numSelect { height: 34px; min-width: 4.2em; padding: 0 22px 0 9px; border: 1px solid var(--border); border-radius: 4px; background-color: var(--panel-2); color: var(--text); font-family: inherit; font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; cursor: pointer; }
+.numSelect:focus { outline: 0; border-color: var(--hb-accent, var(--gold)); }
+.numSelect option { color: var(--text); background: var(--panel); }
+.numField { height: 34px; width: 5.5em; padding: 0 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--panel-2); color: var(--text); font-family: inherit; font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.numField:focus { outline: 0; border-color: var(--hb-accent, var(--gold)); }
 .stepper { display: inline-flex; align-items: stretch; border: 1px solid var(--border); border-radius: 4px; background: var(--panel-2); overflow: hidden; height: 34px; }
 .stepper:focus-within { border-color: var(--hb-accent, var(--gold)); }
 .stepBtn { all: unset; cursor: pointer; width: 24px; text-align: center; font: 700 14px/34px system-ui, sans-serif; color: var(--muted); user-select: none; }

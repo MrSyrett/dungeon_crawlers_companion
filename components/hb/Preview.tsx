@@ -5,7 +5,7 @@
 //   <Preview title={name || "Unnamed"} subtitle="Level 3 Beast">…</Preview>
 //
 // Props: title, subtitle (italic line under it), label (small caps tag above,
-// default "Preview"), children, className (for e.g. `lg:sticky lg:top-4`).
+// default "Preview"), children, className (for e.g. `lg:sticky lg:top-20`).
 // Themed by --hb-accent (top rule + title). Server- and client-safe.
 import type { ReactNode } from "react";
 import styles from "./hb.module.css";

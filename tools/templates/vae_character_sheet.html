@@ -877,7 +877,16 @@ function parseCritMod(eff){ var m=String(eff||'').match(/[-−–]\s*(\d+)/); re
 // reduced automatically; the GM applies the −N with the dice-tray modifier when it hits.
 function critModFor(sk){ return 0; }
 // Armor makes you clumsy: −1/−2/−3 to AGILITY for light/medium/heavy (core p.73).
-function armorAgiPenalty(){ var n=0; S.gear.forEach(function(g){ if(g.kind==='armor'&&g.equipped){ var m=String((g.note||'')+' '+(g.name||'')).match(/agility\s*[-−–]\s*(\d+)/i); if(m) n+=parseInt(m[1],10); else if(/heavy armor/i.test(g.name||'')) n+=3; else if(/medium armor/i.test(g.name||'')) n+=2; else if(/light armor/i.test(g.name||'')) n+=1; } }); return n; }
+function armorAgiPenalty(){ var n=0; S.gear.forEach(function(g){ if(g.kind==='armor'&&g.equipped&&g.penalty!=null&&g.penalty!==''){ n+=Math.max(0,num(g.penalty)); return; } if(g.kind==='armor'&&g.equipped){ var m=String((g.note||'')+' '+(g.name||'')).match(/agility\s*[-−–]\s*(\d+)/i); if(m) n+=parseInt(m[1],10); else if(/heavy armor/i.test(g.name||'')) n+=3; else if(/medium armor/i.test(g.name||'')) n+=2; else if(/light armor/i.test(g.name||'')) n+=1; } }); return n; }
+// GEAR BONUSES (core p.70): an item helps one or two named skills by +N dice while in
+// use. Rows carry skillBonus [{skill,amount}] (homebrew vae-gear, or parsed from a book
+// item's "+N" + the skills its use names). Only ONE item's bonus counts per roll: the best.
+function cleanSB(v){ var out=[]; (Array.isArray(v)?v:[]).forEach(function(b){ if(!b) return; var sk=String(b.skill||''), n=num(b.amount); if(skillObj(sk)&&n>0&&!out.some(function(x){return x.skill===sk;})) out.push({skill:sk,amount:Math.min(5,n)}); }); return out; }
+function bookSB(bonus,text){ var m=String(bonus||'').trim().match(/^\+(\d)$/); if(!m) return []; return cleanSB(SKILLS.filter(function(s){ return new RegExp('\\b'+s.name+'\\b','i').test(String(text||'')); }).map(function(s){ return {skill:s.name,amount:m[1]}; })); }
+function effectSB(text){ var out=[], re=/\b([A-Z][a-z]+(?: [A-Z][a-z]+)?)\s*\+\s*(\d)/g, m; while((m=re.exec(String(text||'')))) out.push({skill:m[1],amount:m[2]}); return cleanSB(out); }
+function sbText(sb){ return cleanSB(sb).map(function(b){ return b.skill+' +'+b.amount; }).join(', '); }
+function gearSkillBonus(name){ var best={n:0,from:''}; S.gear.forEach(function(g){ if((g.kind||'gear')!=='gear'||!g.equipped) return; cleanSB(g.skillBonus).forEach(function(b){ if(b.skill===name&&b.amount>best.n) best={n:b.amount,from:g.name||'gear'}; }); }); return best; }
+function gbLabel(b){ return b&&b.n?' +'+b.n+' gear ('+b.from+')':''; }
 function skillPen(name){ var s=skillObj(name); return (s?condPenaltyFor(s.attr):0)+critModFor(name)+(name==='Agility'?armorAgiPenalty():0); }
 
 // ── Attributes + skills ──
@@ -895,13 +904,13 @@ function renderAttrSkills(){
       +'<button class="a-die" onclick="rollAttr(\''+a.key+'\')" title="attribute − conditions">'+cur+'d</button></div>';
     var rows='';
     skillsByAttr(a.key).forEach(function(s){
-      var lvl=num(S.skills[s.name]), spool=Math.max(0,attrBase(a.key)+lvl-skillPen(s.name)), esn=s.name.replace(/'/g,"\\'");
+      var lvl=num(S.skills[s.name]), gbn=gearSkillBonus(s.name), spool=Math.max(0,attrBase(a.key)+lvl-skillPen(s.name))+gbn.n, esn=s.name.replace(/'/g,"\\'");
       var key=(S.keySkill===s.name)?' ◆':'';
       var spips='';
       for(var j=1;j<=5;j++){ spips+='<button class="pip sk'+(j<=lvl?' on':'')+'" title="level '+j+'" onclick="setSkill(\''+esn+'\','+j+')"></button>'; }
       rows+='<div class="skill-row"><button class="sk-name" onclick="rollSkill(\''+esn+'\')" title="'+esc(s.desc)+' (level '+lvl+')">'+s.name+key+'</button>'
         +'<span class="pips edit-only" style="flex:0 0 auto;">'+spips+'</span>'
-        +'<button class="sk-pool sk-roll" onclick="rollSkill(\''+esn+'\')" title="attribute + skill − conditions">'+spool+'d</button></div>';
+        +'<button class="sk-pool sk-roll" onclick="rollSkill(\''+esn+'\')" title="attribute + skill − conditions'+(gbn.n?' + '+gbn.n+' gear ('+esc(gbn.from)+')':'')+'">'+spool+'d</button></div>';
     });
     var block=document.createElement('div'); block.className='as-attr';
     block.innerHTML=head+'<div class="as-skills">'+rows+'</div>';
@@ -996,23 +1005,26 @@ function armorRating(){ var r=0; S.gear.forEach(function(g){ if(g.kind==='armor'
 function renderArmorVal(){ var el=$('armor-val'); if(el) el.textContent=armorRating(); }
 function gEdit(i,f,v){ var g=S.gear[i]; if(!g)return; g[f]=(f==='damage'||f==='rating'||f==='bonus')?num(v):v; scheduleAutosave(); if(f==='rating')renderArmorVal(); if((g.kind==='weapon')&&g.equipped)renderAttacks(); }
 function gDel(i){ S.gear.splice(i,1); renderInventory(); renderAttacks(); scheduleAutosave(); }
-function gEquip(i,on){ var g=S.gear[i]; if(!g)return; g.equipped=!!on; renderAttacks(); renderArmorVal(); if(g.kind==='armor') renderAttrSkills(); scheduleAutosave(); }
+function gEquip(i,on){ var g=S.gear[i]; if(!g)return; g.equipped=!!on; renderAttacks(); renderArmorVal(); if(g.kind==='armor'||(g.kind||'gear')==='gear') renderAttrSkills(); scheduleAutosave(); }
 function invIn(i,f,val,cls,ph){ return '<input'+(cls?' class="'+cls+'"':'')+' value="'+esc(val==null?'':val)+'" oninput="gEdit('+i+',\''+f+'\',this.value)"'+(ph?' placeholder="'+ph+'"':'')+'>'; }
-function eqBox(i,on){ return '<input type="checkbox" class="eqbox" data-nolock '+(on?'checked':'')+' onchange="gEquip('+i+',this.checked)" title="Equip">'; }
+function eqBox(i,on,tip){ return '<input type="checkbox" class="eqbox" data-nolock '+(on?'checked':'')+' onchange="gEquip('+i+',this.checked)" title="'+(tip||'Equip')+'">'; }
+function gearUsable(g){ return (g.kind||'gear')==='gear' && (cleanSB(g.skillBonus).length>0 || (Array.isArray(g.resist)&&g.resist.length>0)); }
+function resText(g){ var r=Array.isArray(g.resist)?g.resist:[]; return r.map(function(x){ return x.against==='Fear'?'+'+num(x.amount)+' Fear tests':'+'+num(x.amount)+' vs '+x.against; }).join(', ')+(r.length&&g.resistFrom?' ('+g.resistFrom+')':''); }
 function renderInventory(){
   var body=$('inv-body');
   if(body){
     body.innerHTML='';
     S.gear.forEach(function(g,i){
-      var kind=g.kind||'gear', eq=(kind==='weapon'||kind==='armor')?eqBox(i,g.equipped):'', details;
+      var kind=g.kind||'gear', eq=(kind==='weapon'||kind==='armor')?eqBox(i,g.equipped):(gearUsable(g)?eqBox(i,g.equipped,'In use — its bonus joins that skill’s rolls'):''), details;
       if(kind==='weapon'){
         details='<span class="inv-type">'+esc(g.skill||'Weapon')+'</span>'
           +'<span class="inv-mini">bonus</span>'+invIn(i,'bonus',g.bonus,'cx')
           +'<span class="inv-mini">dmg</span>'+invIn(i,'damage',g.damage,'cx')
-          +'<span class="inv-mini">rng</span>'+invIn(i,'range',g.range,'inv-rng');
+          +'<span class="inv-mini">rng</span>'+invIn(i,'range',g.range,'inv-rng')
+          +(Array.isArray(g.features)&&g.features.length?'<span class="inv-mini">'+esc(g.features.join(', '))+'</span>':'');
       } else if(kind==='armor'){
-        details='<span class="inv-type">Armor</span><span class="inv-mini">prot</span>'+invIn(i,'rating',g.rating,'cx')+invIn(i,'note',g.note,'inv-note','note');
-      } else { details=invIn(i,'note',g.note,'inv-note','note'); }
+        details='<span class="inv-type">Armor</span><span class="inv-mini">prot</span>'+invIn(i,'rating',g.rating,'cx')+(num(g.penalty)>0&&!/agility\s*[-−–]/i.test(g.note||'')?'<span class="inv-mini">Agility −'+num(g.penalty)+'</span>':'')+invIn(i,'note',g.note,'inv-note','note');
+      } else { var sbt=sbText(g.skillBonus), rt=resText(g); details=(sbt?'<span class="inv-type">'+esc(sbt)+'</span>':'')+(rt?'<span class="inv-type">'+esc(rt)+'</span>':'')+(g.consumable?'<span class="inv-mini">used up</span>':'')+invIn(i,'note',g.note,'inv-note','note'); }
       var ph=kind==='weapon'?'Weapon':kind==='armor'?'Armor':'Item';
       var tr=document.createElement('tr');
       tr.innerHTML='<td class="eq-cell">'+eq+'</td><td>'+invIn(i,'name',g.name,'',ph)+'</td><td class="inv-details">'+details+'</td><td>'+invIn(i,'weight',g.weight,'cx')+'</td><td style="text-align:right;"><button class="row-x" onclick="gDel('+i+')">✕</button></td>';
@@ -1054,21 +1066,31 @@ function pickerPool(kind){
     // Kick or Punch is the always-available attack in the Combat tab, so it isn't sold in the store.
     MELEE.filter(function(w){ return !/^kick or punch/i.test(w.name||''); }).forEach(function(w){ out.push({name:w.name,cost:w.damage+' dmg',note:'Melee · bonus '+w.bonus+' · '+(w.skill||'Close Combat'),price:num(w.cost),data:w}); });
     RANGED.forEach(function(w){ out.push({name:w.name,cost:w.damage+' dmg · '+w.range,note:'Ranged · bonus '+w.bonus+' · '+(w.skill||'Ranged Combat'),price:num(w.cost),data:w}); });
-    G(window.VAE_HB_WEAPONS).forEach(function(d){ out.push({name:d.name,cost:(d.damage!=null?d.damage+' dmg':''),note:'Homebrew'+(d.bonus!=null?' · bonus '+d.bonus:''),price:num(d.cost),data:d}); });
+    G(window.VAE_HB_WEAPONS).forEach(function(d){ out.push({name:d.name,cost:(d.damage!=null?d.damage+' dmg':'')+(d.range!=null&&String(d.range)!=='0'?' · '+d.range:''),note:'Homebrew · '+(d.skill||'Close Combat')+(d.bonus!=null?' · bonus '+d.bonus:'')+(Array.isArray(d.features)&&d.features.length?' · '+d.features.join(', '):'')+(d.desc?' · '+d.desc:''),price:num(d.cost),data:d}); });
     return out;
   }
   if(kind==='armor'){
     var ar=ARMORS.map(function(a){ return {name:a.name,cost:'Protection '+a.protection,note:a.comment||'',price:armorCost(a),data:{name:a.name,rating:a.protection,weight:'',note:a.comment||''}}; });
-    G(window.VAE_HB_GEAR).filter(function(d){return d.rating!=null;}).forEach(function(d){ ar.push({name:d.name,cost:'Protection '+d.rating,note:'Homebrew',price:num(d.cost),data:{name:d.name,rating:num(d.rating),weight:'',note:d.note||''}}); });
+    G(window.VAE_HB_GEAR).filter(function(d){return hbKind(d)==='armor';}).forEach(function(d){ var pen=num(d.penalty), nt=[d.desc||'', pen?'Agility -'+pen:''].filter(Boolean).join(' · '); ar.push({name:d.name,cost:'Protection '+d.rating,note:'Homebrew'+(nt?' · '+nt:''),price:num(d.cost),data:{name:d.name,rating:num(d.rating),weight:'',note:nt,penalty:d.penalty!=null?pen:null}}); });
     return ar;
   }
   if(kind==='talent'){ return TALENTS.map(function(t){ return {name:t.name,cost:t.archetype,note:t.desc,data:t}; }); }
-  if(kind==='power'){ return G(window.VAE_ITEMS_OF_POWER).map(function(p){ return {name:p.name,cost:'Item of Power',note:p.effect||'',price:0,data:{name:p.name,weight:'',note:p.effect||''}}; }); }
-  if(kind==='magic'){ return G(window.VAE_MAGIC_ITEMS).map(function(p){ return {name:p.name,cost:'Magic Item',note:(p.effect||'')+(p.risk?(' · Risk: '+p.risk):''),price:0,data:{name:p.name,weight:'',note:(p.effect||'')+(p.risk?(' — Risk: '+p.risk):'')}}; }); }
-  var g=GEARS.map(function(d){ return {name:d.name,cost:(d.bonus&&d.bonus!=='—'?d.bonus+' · ':'')+'cost '+d.cost,note:d.comment||'',price:num(d.cost),data:{name:d.name,weight:d.cost,note:(d.comment||'')+(d.bonus&&d.bonus!=='—'?' ('+d.bonus+')':'')}}; });
-  G(window.VAE_HB_GEAR).filter(function(d){return d.rating==null;}).forEach(function(d){ g.push({name:d.name,cost:'',note:'Homebrew'+(d.desc?' · '+d.desc:''),price:num(d.cost),data:d}); });
+  if(kind==='power'){ return G(window.VAE_ITEMS_OF_POWER).map(function(p){ return {name:p.name,cost:'Item of Power',note:p.effect||'',price:0,data:{name:p.name,weight:'',note:p.effect||''}}; })
+    .concat(G(window.VAE_HB_GEAR).filter(function(d){return hbKind(d)==='power';}).map(hbGearRow)); }
+  if(kind==='magic'){ return G(window.VAE_MAGIC_ITEMS).map(function(p){ var sb=/porridge/i.test(p.name||'')?[]:effectSB(p.effect); return {name:p.name,cost:'Magic Item'+(sb.length?' · '+sbText(sb):''),note:(p.effect||'')+(p.risk?(' · Risk: '+p.risk):''),price:0,data:{name:p.name,weight:'',note:(p.effect||'')+(p.risk?(' — Risk: '+p.risk):''),skillBonus:sb}}; })
+    .concat(G(window.VAE_HB_GEAR).filter(function(d){return hbKind(d)==='magic';}).map(hbGearRow)); }
+  var g=GEARS.map(function(d){ return {name:d.name,cost:(d.bonus&&d.bonus!=='—'?d.bonus+' · ':'')+'cost '+d.cost,note:d.comment||'',price:num(d.cost),data:{name:d.name,weight:d.cost,note:(d.comment||'')+(d.bonus&&d.bonus!=='—'?' ('+d.bonus+')':''),skillBonus:bookSB(d.bonus,d.comment)}}; });
+  G(window.VAE_HB_GEAR).filter(function(d){return hbKind(d)==='gear';}).forEach(function(d){ g.push(hbGearRow(d)); });
   return g;
 }
+// Homebrew vae-gear: kind gear | armor | power | magic (legacy rows: armor if rated).
+function hbKind(d){ var k=d&&d.kind; return (k==='armor'||k==='power'||k==='magic'||k==='gear')?k:(d&&d.rating!=null?'armor':'gear'); }
+function hbGearRow(d){ var k=hbKind(d), sb=cleanSB(d.skillBonus); if(!sb.length&&d.kind==null) sb=bookSB(d.bonus,d.desc);
+  var r=Array.isArray(d.resist)?d.resist:[], tmp={resist:r,resistFrom:d.resistFrom||''}, rt=resText(tmp);
+  var note=[d.effect||'', d.desc||'', d.risk?'Risk: '+d.risk:''].filter(Boolean).join(' — ');
+  var tag=[k==='power'?'Item of Power':k==='magic'?'Magic Item':'', sbText(sb) || (d.kind==null&&d.bonus&&d.bonus!=='—'?d.bonus:''), rt].filter(Boolean).join(' · ');
+  return {name:d.name,cost:tag,note:'Homebrew'+(note?' · '+note:''),price:k==='gear'?num(d.cost):0,
+    data:{name:d.name,weight:'',note:note,skillBonus:sb,resist:r,resistFrom:d.resistFrom||'',consumable:d.consumable===true,risk:d.risk||'',hb:true}}; }
 function buyPower(){ return num(S.purchase)+num(S.capital); }
 function updatePickerCap(){ var c=$('picker-cap'); if(!c)return; var fam=GEAR_FAM(_pk); c.style.display=fam?'block':'none'; if(fam) c.innerHTML='Resources successes: <b style="color:var(--yz-dk);">'+num(S.purchase)+'</b> · Capital: <b style="color:var(--yz-dk);">'+num(S.capital)+'</b> · an item of cost N takes N (successes first, then Capital); items with no price are found, not bought.'; }
 function openPicker(kind){ _pk=kind; var gearFam=GEAR_FAM(kind); var tabs=$('picker-tabs'); if(tabs) tabs.style.display=gearFam?'flex':'none';
@@ -1105,14 +1127,19 @@ function pickAdd(idx,mode){
   var paidS=0, paidC=0;
   if(buying){ if(buyPower()<p){ addLog('Item Shop','Not enough','“'+(x.name||'Item')+'” costs '+p+' · you have '+num(S.purchase)+' successes + '+num(S.capital)+' Capital','fumble'); return; }
     paidS=Math.min(num(S.purchase),p); paidC=p-paidS; S.purchase=num(S.purchase)-paidS; S.capital=num(S.capital)-paidC; renderRes(); }
-  if(_pk==='weap'){ var w=x.data||{}; S.gear.push({kind:'weapon',equipped:false,name:w.name||x.name,bonus:weaponBonus(w.bonus),damage:w.damage!=null?w.damage:1,range:(w.range!=null&&w.range!==0?String(w.range):'0'),weight:w.cost!=null?w.cost:'',skill:w.skill||'Close Combat'}); renderWeapons(); setTab('gear'); }
-  else if(_pk==='armor'){ var a=x.data||{}; S.gear.push({kind:'armor',equipped:false,name:a.name||x.name,rating:num(a.rating),weight:a.weight||'',note:a.note||''}); renderInventory(); setTab('gear'); }
+  if(_pk==='weap'){ var w=x.data||{}; S.gear.push({kind:'weapon',equipped:false,name:w.name||x.name,bonus:weaponBonus(w.bonus),damage:w.damage!=null?w.damage:1,range:(w.range!=null&&w.range!==0?String(w.range):'0'),weight:w.cost!=null?w.cost:'',skill:w.skill||'Close Combat',features:Array.isArray(w.features)?w.features.slice():[]}); renderWeapons(); setTab('gear'); }
+  else if(_pk==='armor'){ var a=x.data||{}, ar={kind:'armor',equipped:false,name:a.name||x.name,rating:num(a.rating),weight:a.weight||'',note:a.note||''}; if(a.penalty!=null) ar.penalty=num(a.penalty); S.gear.push(ar); renderInventory(); setTab('gear'); }
   else if(_pk==='talent'){ var t=x.data||{}; S.talents.push({name:t.name||x.name,note:t.desc||t.note||''}); renderTalents(); setTab('story'); }
-  else { var d=x.data||{}; S.gear.push({kind:'gear',name:d.name||x.name,weight:d.weight||'',note:d.note||d.desc||''}); renderGear(); setTab('gear'); }
+  else { var d=x.data||{}; S.gear.push(gearRowOf(d,x.name,false)); renderGear(); renderAttrSkills(); setTab('gear'); }
   if(buying) addLog('Item Shop','Bought '+x.name,'Cost '+p+': '+(paidS?paidS+' success'+(paidS===1?'':'es'):'')+(paidS&&paidC?' + ':'')+(paidC?paidC+' Capital':'')+' → '+num(S.purchase)+' successes, '+num(S.capital)+' Capital left','crit');
   else if(fam&&p>0) addLog('Item Shop','Added '+x.name,'Found/granted — nothing spent','normal');
   scheduleAutosave(); updatePickerCap(); renderPicker();
 }
+// A gear-family inventory row with its mechanics (skill bonus, wards, consumable, risk).
+function gearRowOf(d,nm,eq){ var o={kind:'gear',name:d.name||nm||'',weight:d.weight||'',note:d.note||d.desc||''}, sb=cleanSB(d.skillBonus);
+  if(sb.length) o.skillBonus=sb; if(Array.isArray(d.resist)&&d.resist.length){ o.resist=d.resist.map(function(r){ return {against:String(r.against||''),amount:num(r.amount)}; }); if(d.resistFrom) o.resistFrom=String(d.resistFrom); }
+  if(d.consumable===true){ o.consumable=true; if(d.risk) o.risk=String(d.risk); }
+  if(sb.length||o.resist) o.equipped=!!eq; if(d.hb) o.hb=true; return o; }
 function addCustomFromPicker(){
   if(_pk==='weap'){ S.gear.push({kind:'weapon',equipped:false,name:'',bonus:0,damage:1,range:'0',weight:'',skill:'Close Combat'}); renderWeapons(); setTab('gear'); }
   else if(_pk==='armor'){ S.gear.push({kind:'armor',equipped:false,name:'',rating:0,weight:'',note:''}); renderInventory(); setTab('gear'); }
@@ -1148,13 +1175,14 @@ function doRoll(label, baseN, skillN, gearN, attrKey, ctx){
   showPushOption();
 }
 // Pools subtract conditions + crit penalty from the Base dice (min 1 die enforced in doRoll).
-function rollSkill(name){ var s=skillObj(name); if(!s)return; var pen=skillPen(name); doRoll(name+' ('+s.attr+')', attrBase(s.attr)-pen, num(S.skills[name]), 0, s.attr, {ctype:attrType(s.attr)}); actMainRoll(); }
+function rollSkill(name){ var s=skillObj(name); if(!s)return; var pen=skillPen(name), gb=gearSkillBonus(name); doRoll(name+' ('+s.attr+')'+gbLabel(gb), attrBase(s.attr)-pen, num(S.skills[name]), gb.n, s.attr, {ctype:attrType(s.attr)}); actMainRoll(); }
 function rollAttr(k){ var pen=condPenaltyFor(k)+critModFor(null); doRoll(attrName(k)+' ('+k+')', attrBase(k)-pen, 0, 0, k, {ctype:attrType(k)}); actMainRoll(); }
 function rollAttack(i){
   var w=S.gear[i]; if(!w||w.kind!=='weapon')return;
   var skName=String(w.skill||'Close Combat').split('/')[0].trim(), s=skillObj(skName)||{attr:'PHY'};
   var pen=skillObj(skName)?skillPen(skName):condPenaltyFor(s.attr)+critModFor(null);
-  doRoll((w.name||'Attack')+' · '+skName, attrBase(s.attr)-pen, num(S.skills[skName]), weaponBonus(w.bonus), s.attr, {kind:'attack',wdmg:num(w.damage),ctype:attrType(s.attr)});
+  var wb=weaponBonus(w.bonus), gb=gearSkillBonus(skName), gn=Math.max(wb,gb.n,0);
+  doRoll((w.name||'Attack')+' · '+skName+(gb.n>wb&&gb.n>0?gbLabel(gb):''), attrBase(s.attr)-pen+(wb<0&&gb.n<=0?wb:0), num(S.skills[skName]), gn, s.attr, {kind:'attack',wdmg:num(w.damage),ctype:attrType(s.attr)});
 }
 function rollQuick(){ var n=Math.max(1,Math.min(12,trayTake('tray-mod'))); var a=rollSet(n), succ=count6(a); animDice(a,[],[],glowFor(succ)); addLog(n+'d6 free pool', succ+'  '+tierOf(succ).t, poolStr(a)+' · '+succ+' succ', tierOf(succ).type); _lastRoll=null; }
 function rollArmor(){ var r=armorRating(); if(r<1){ addLog('Armor','—','No armor equipped — equip armor on the Gear tab.','fumble'); return; } var a=rollSet(Math.min(12,r)), blk=count6(a); animDice(a,[],[],blk?'crit':'normal'); addLog('Armor ('+r+')', blk+' blocked', poolStr(a)+' · each 6 cancels 1 damage', blk?'crit':'fumble'); }
@@ -1214,7 +1242,7 @@ function actSpend(kind){
 function actEndTurn(){ _act=actFresh(); renderAction(); scheduleAutosave(); }
 function actToggleSec(k){ _actCollapsed[k]=!_actCollapsed[k]; renderAction(); }
 function actNote(name, text){ addLog(name, '—', text, 'normal'); return true; }
-function actRoll(label, sk){ var s=skillObj(sk); if(!s)return; doRoll(label+' · '+sk+' ('+s.attr+')', attrBase(s.attr)-skillPen(sk), num(S.skills[sk]), 0, s.attr, {ctype:attrType(s.attr)}); }
+function actRoll(label, sk){ var s=skillObj(sk); if(!s)return; var gb=gearSkillBonus(sk); doRoll(label+' · '+sk+' ('+s.attr+')'+gbLabel(gb), attrBase(s.attr)-skillPen(sk), num(S.skills[sk]), gb.n, s.attr, {ctype:attrType(s.attr)}); }
 // Parry with CLOSE COMBAT if you hold a melee weapon, FORCE if unarmed (p.61).
 function actParrySkill(){ return gearOf('weapon').some(function(o){ return o.g.equipped && /close combat/i.test(o.g.skill||''); })?'Close Combat':'Force'; }
 function actDo(i){
@@ -1252,6 +1280,15 @@ function eqBuild(add){
         if(g.charges==null||g.charges==='') g.charges=start; g.charges=Math.max(0,num(g.charges)-1); var rem=g.charges;
         addLog(nm,'Poison given','One dose used'+(tox?' — toxicity '+tox+': the victim resists, and the GM applies the effect':'')+'. '+rem+' dose'+(rem===1?'':'s')+' left.','normal');
         if(rem<=0) eqConsume(i); else renderInventory(); } });
+      return;
+    }
+    // Homebrew "used up" magic items: one use — roll its best bonus (if any), log the risk.
+    if(g.consumable && !(mg && /porridge/i.test(nm))){
+      var cb=cleanSB(g.skillBonus).sort(function(a,b){ return b.amount-a.amount; })[0];
+      add('equip',{ name:nm+qs, kind:'slow', sub:(cb?cb.skill+' +'+cb.amount+' · ':'')+(g.note||'')+' · used up', btn:cb?'Roll':'Use', run:function(){
+        if(cb) eqRoll(nm, cb.skill, cb.amount);
+        addLog(nm,'Magic item used',(g.risk?'Risk: '+g.risk:'No listed risk')+' — the item is used up.','fumble');
+        eqConsume(i); renderAttrSkills(); } });
       return;
     }
     // Nisse's porridge: the one magic item that is eaten — a set Force +3 test, with its risk.
@@ -1460,9 +1497,9 @@ function applySheet(d){
   var inv=[];
   if(Array.isArray(d.gear)) d.gear.forEach(function(g){
     var kind=g.kind || (g.rating!=null?'armor':(g.damage!=null?'weapon':'gear'));
-    if(kind==='weapon') inv.push({kind:'weapon',equipped:g.equipped!==false,name:g.name||'',bonus:weaponBonus(g.bonus),damage:g.damage!=null?num(g.damage):1,range:g.range!=null?String(g.range):'0',weight:g.weight||'',skill:g.skill||'Close Combat'});
-    else if(kind==='armor') inv.push({kind:'armor',equipped:g.equipped!==false,name:g.name||'',rating:num(g.rating),weight:g.weight||'',note:g.note||''});
-    else inv.push({kind:'gear',name:g.name||'',weight:g.weight||'',note:g.note||''});
+    if(kind==='weapon') inv.push({kind:'weapon',equipped:g.equipped!==false,name:g.name||'',bonus:weaponBonus(g.bonus),damage:g.damage!=null?num(g.damage):1,range:g.range!=null?String(g.range):'0',weight:g.weight||'',skill:g.skill||'Close Combat',features:Array.isArray(g.features)?g.features.map(String):[]});
+    else if(kind==='armor'){ var ar={kind:'armor',equipped:g.equipped!==false,name:g.name||'',rating:num(g.rating),weight:g.weight||'',note:g.note||''}; if(g.penalty!=null&&g.penalty!=='') ar.penalty=num(g.penalty); inv.push(ar); }
+    else { var gr=gearRowOf(g,g.name,g.equipped===true); if(g.charges!=null) gr.charges=g.charges; inv.push(gr); }
   });
   S.gear=inv;
   S.crits=Array.isArray(d.crits)?d.crits.map(function(c){ return {name:c.name||'',effect:c.effect||'',mod:num(c.mod)}; }):[];
