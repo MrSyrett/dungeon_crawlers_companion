@@ -75,8 +75,8 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
     --font-display: "Hideout", "EB Garamond", Georgia, serif;
     --font-label: "Minion Pro", "EB Garamond", Georgia, serif;
     --font-body: "EB Garamond", Georgia, serif;
-    /* Masthead banner — green-black into the book's green, with the title as the logo (red, gold outline) */
-    --banner-a: #0b1f18; --banner-b: #236855; --title-color: #e42a32; --title-weight: 400; --sub-color: #e3d2ad;
+    /* Masthead banner — green-black into the book's green; the adventure title in parchment cream (the red-in-gold is the wordmark's alone) */
+    --banner-a: #0b1f18; --banner-b: #236855; --title-color: #f3e9d2; --title-weight: 400; --sub-color: #e3d2ad;
     /* UI (sidebar) — neutral near-black (only the preview ground is green parchment) */
     --ui-bg: #1a1918; --ui-panel: #232120; --ui-border: #3f3a35;
     --ui-text: #eee3cc; --ui-muted: #b5a68c; --ui-accent: #5cb894; --ui-highlight: #236855;
@@ -715,10 +715,10 @@ body.flow-mode .page + .page {
 .sl { font-family: var(--font-display); font-weight: 400; font-size: 14px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--section-hdr); border-bottom: 1.5px solid var(--gold); padding-bottom: 1px; }
 .entry-name, .loc-name { font-family: var(--font-label) !important; text-transform: none !important; letter-spacing: 0.03em !important; font-weight: 400 !important; }
 .sb-name { font-family: var(--font-display); text-transform: uppercase; font-weight: 400; letter-spacing: .05em; font-size: 15px; }
-/* The adventure title is the logo: red Hideout inside a gold outline. The stroke
-   is painted first (paint-order), so only its outer half shows. Every other
-   header is plain Hideout in the book's green — no stroke. */
-.adventure-title { color: var(--db-logo); -webkit-text-stroke: .09em var(--gold); paint-order: stroke fill; }
+/* No strokes: the red-in-gold belongs to the "Dragonbane" wordmark alone. The
+   adventure title sits on the green banner in parchment cream; every other
+   header is plain Hideout in the book's green. */
+.adventure-title { color: var(--title-color); -webkit-text-stroke: 0; }
 .sl, .sb-name { color: var(--db); -webkit-text-stroke: 0; }
 /* The deep green is too dim as text on the dark page and the dark panel; the
    lifted green (--db-ink / --ui-accent) is the same hue at 6.6:1. */

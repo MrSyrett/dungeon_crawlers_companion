@@ -1,5 +1,7 @@
 import json,re
-T=json.load(open('gmtheme/tokens.json'))
+import os
+_H=os.path.dirname(os.path.abspath(__file__))
+T=json.load(open(os.path.join(_H,'tokens.json')))
 TITLE={'SD':'"JSL Blackletter"','ICRPG':'"Permanent Marker"','NIM':'"Fraunces"','DND':'"DnDC","Cinzel"','LOTR':'"Ringbearer","EB Garamond"','DB':'"Hideout","EB Garamond"','PB':'"JSL Blackletter","EB Garamond"','DCC':'"Anton"','KOB':'"Dreadful"','CO':'"Cormorant Garamond"','MMRPG':'"Marvel","Oswald"','JLU':'"Russo One"','GB':'"Ghostbusters","Anton"','SW':'"Star Jedi","Archivo Black"','ACE':'"Lilita One"','D62E':'"Saira Condensed"','YZE':'"Archivo Narrow"','TWD':'"Dead Kansas","Oswald"','MYZ':'"Anton"','VAE':'"Fraunces"'}
 LABEL={'SD':'"Old Newspaper"','DND':'"Cinzel"','PB':'"1651 Alchemy"'}
 UI={'SD':'"Old Newspaper"','DND':'"Cinzel"','DCC':'"Barlow Condensed"','SW':'"Libre Franklin"','MMRPG':'"Oswald"','ACE':'"Nunito"','KOB':'"Mulish"','D62E':'"Saira Condensed"','GB':'"Asap"','CO':'"Lora"','NIM':'"Figtree"','ICRPG':'"Archivo"','YZE':'"Archivo Narrow"','TWD':'"Oswald"','MYZ':'"Barlow Condensed"','VAE':'"Cormorant Garamond"','LOTR':'"EB Garamond"','DB':'"EB Garamond"','PB':'"1651 Alchemy"','JLU':'"Rubik"'}
@@ -8,7 +10,7 @@ def lum(h):
     c=[x/12.92 if x<=.03928 else ((x+.055)/1.055)**2.4 for x in c]
     return .2126*c[0]+.7152*c[1]+.0722*c[2]
 SEC={'ACE':'#f4d84a','CO':'#d8b24a','DB':'#c9a14a','DND':'#e2b23a','JLU':'#e2b23a','KOB':'#3cc4c4','MMRPG':'#7fc0f5','MYZ':'#d9d3c6','NIM':'#8ab4f8','SW':'#30d5e8','TWD':'#d8cfbf','VAE':'#e7dec9','LOTR':'#9cc59a'}
-TCOL={'DND':'#e2b23a','SW':'#f6d21e','CO':'#d8b24a','D62E':'#f0a050','DCC':'#f2c230','LOTR':'#e2c36b','NIM':'#7fd39a','DB':'#e42a32'}
+TCOL={'DND':'#e2b23a','SW':'#f6d21e','CO':'#d8b24a','D62E':'#f0a050','DCC':'#f2c230','LOTR':'#e2c36b','NIM':'#7fd39a','DB':'#f3e9d2'}
 def hx(c): return '#%02x%02x%02x'%tuple(round(x) for x in c)
 def rgb(h): h=h.lstrip('#'); return [int(h[i:i+2],16) for i in (0,2,4)]
 def ink(h, bg='#1a1d22', need=4.5):
@@ -35,7 +37,7 @@ for k,v in T.items():
     # User picks (2026-10-29): which colour letters the fonts and which marks the highlights.
     #   SW: yellow lettering, cyan highlights. DB: green/white lettering, gold highlights. MMRPG: white lettering.
     OVR={'SW':dict(acc='#30d5e8',title='#f6d21e',acci='#f0c020',sec='#f0c020',hl='#30d5e8'),
-         'DB':dict(acc='#c9a14a',title='#ffffff',acci='#5cb894',sec='#5cb894',hl='#c9a14a'),
+         'DB':dict(acc='#c9a14a',title='#f3e9d2',acci='#5cb894',sec='#5cb894',hl='#c9a14a'),
          'MMRPG':dict(title='#ffffff',acci='#ffffff',sec='#ffffff',hl='#7fc0f5'),
          # (29 Oct) White lettering: Shadowdark, Pirate Borg, Ghostbusters, TWD. DCC: magenta
          # highlights, gold lettering. ACE!: blue bars, yellow lettering, sky-blue highlights.
@@ -112,5 +114,5 @@ for k,L in LIGHT.items():
     # values; the party / tracker cards sitting on the top bar are light cards again.
     out.append(f':root[data-mode="light"][data-gm-theme="{k}"] :is(.topbar,.bottom-bar,.advh-sheet){{--accent:{L["acc"]};--accent-2:color-mix(in srgb,{L["acc"]} 70%,#000);--accent-dim:color-mix(in srgb,{L["acc"]} 55%,#000);--glow:color-mix(in srgb,{L["acc"]} 45%,transparent);--glow-2:color-mix(in srgb,{L["acc"]} 34%,transparent);--gt-title:{L["title"]};--gt-2:{L["sec"]};--gt-hl:{L["hl"]};--gt-acc:{L["acci"]}}}')
     out.append(f':root[data-mode="light"][data-gm-theme="{k}"] .topbar :is(.bubble,.timer,.ticktrk){{--accent:{al};--accent-2:color-mix(in srgb,{al} 75%,#000);--accent-dim:color-mix(in srgb,{al} 55%,#fff);--glow:color-mix(in srgb,{al} 30%,transparent);--glow-2:color-mix(in srgb,{al} 22%,transparent);--gt-title:{t};--gt-2:{s2};--gt-hl:{hl};--gt-acc:{ac}}}')
-open('gmtheme/theme.css','w').write('\n'.join(out)+'\n')
+open(os.path.join(_H,'theme.css'),'w').write('\n'.join(out)+'\n')
 print(len(out))

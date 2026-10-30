@@ -14,8 +14,8 @@
     --font-display: "Hideout", "EB Garamond", Georgia, serif;
     --font-label: "Minion Pro", "EB Garamond", Georgia, serif;
     --font-body: "EB Garamond", Georgia, serif;
-    /* Masthead banner — green-black into the book's green, with the title as the logo (red, gold outline) */
-    --banner-a: #0b1f18; --banner-b: #236855; --title-color: #e42a32; --title-weight: 400; --sub-color: #e3d2ad;
+    /* Masthead banner — green-black into the book's green; the adventure title in parchment cream (the red-in-gold is the wordmark's alone) */
+    --banner-a: #0b1f18; --banner-b: #236855; --title-color: #f3e9d2; --title-weight: 400; --sub-color: #e3d2ad;
     /* UI (sidebar) — neutral near-black (only the preview ground is green parchment) */
     --ui-bg: #1a1918; --ui-panel: #232120; --ui-border: #3f3a35;
     --ui-text: #eee3cc; --ui-muted: #b5a68c; --ui-accent: #5cb894; --ui-highlight: #236855;

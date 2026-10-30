@@ -187,6 +187,11 @@ export function miniBar(opts: MiniBarOpts): string {
    var(--dd-bar-h, 0px) is 0 on a surface with no bar. The GM Screen declares the
    same token for the same reason. */
 body:has(#dd-bar){--dd-bar-h:36px}
+/* The bar is the app's chrome and stays dark in light mode, like the site's
+   navbar: a page in light mode re-points --panel / --text on :root, and the bar
+   would inherit them. Pinned only for light, so dark-mode surfaces that tint the
+   bar with their own theme keep doing so. */
+:root[data-mode="light"] :is(#dd-bar,#dd-menu,#dd-acct-menu){color-scheme:dark;--panel:#14161a;--panel-2:#1c1f24;--border:#2b3038;--text:#e9edf2;--muted:#8d96a3;--accent:#d0d5dc;--signal:#ff8419;--red:#b82018}
 #dd-bar{position:sticky;top:0;z-index:2147483000;flex:0 0 auto;display:flex;align-items:center;gap:10px;height:36px;padding:0 10px;box-sizing:border-box;background:var(--panel,#14161a);border-bottom:1px solid var(--border,#2b3038);color:var(--text,#e9edf2);font:500 11px/1 "Geist",system-ui,-apple-system,sans-serif;letter-spacing:.08em;text-transform:uppercase;-webkit-user-select:none;user-select:none}
 #dd-bar a{color:inherit;text-decoration:none}
 #dd-bar .dd-logo{display:flex;align-items:center;flex:0 0 auto}
