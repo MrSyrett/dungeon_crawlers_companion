@@ -47,3 +47,192 @@ input[type="text"] { background: var(--panel-2); color: var(--text); border: 1px
 }
 .vtt-readout b { color: var(--text); font-weight: 700; }
 .vtt-hint { color: var(--muted); font-size: 11px; }
+
+/* ── Light mode ────────────────────────────────────────────────────────────
+   The account-wide choice is localStorage.dd_theme; the page's head script
+   (app/play/[campaignId]/route.ts) stamps it on <html data-mode> before first
+   paint and follows changes live. Dark is the unmarked default, so nothing
+   below applies to it.
+
+   Scope: the tabletop's CHROME — tool rail, flyouts, the Table panel, setup
+   bar, menus, dialogs, the sheet popup frame, the audio popover and the grid
+   aligner. The map, tokens, fog and grid on the canvas are artwork and keep
+   their colours; board.js only lightens the empty surround outside the map.
+
+   Most of the board's styles are injected at runtime by session.js,
+   audio-sync.js and grid-align.js (with literal dark colours), AFTER this
+   sheet. Every rule here is prefixed with :root[data-mode="light"], which out-
+   specifies the injected rule it overrides, so load order doesn't matter.
+
+   Gold: #c8a24a stays as a FILL (with dark ink on it, as in dark mode). As
+   TEXT on a light panel it is ~2.3:1, so gold text/lines use #85661a (5:1). */
+:root[data-mode="light"] {
+  color-scheme: light;
+  --bg: #e6e9ee;
+  --panel: #f7f8fa;
+  --panel-2: #eceff3;
+  --border: #cdd3da;
+  --text: #1c2128;
+  --muted: #59626f;
+  --gold: #85661a;
+  --blue: #1f6fd1;
+}
+:root[data-mode="light"] #vtt-root { color: #1c2128; }
+:root[data-mode="light"] .vtt-stage.drop::after { border-color: #b08a2e; color: #85661a; background: rgba(200,162,74,.10); }
+
+/* tool rail, zoom stack, top-right buttons */
+:root[data-mode="light"] .vtt-tbtn { background: rgba(250,251,252,.95); color: #3d4652; border-color: #cdd3da; box-shadow: 0 1px 4px rgba(20,30,45,.12); }
+:root[data-mode="light"] .vtt-tbtn:hover { color: #0f1318; border-color: #9aa3ae; }
+:root[data-mode="light"] .vtt-tbtn.on,
+:root[data-mode="light"] .vtt-groupbtn.on { background: #c8a24a; color: #14181e; border-color: #b08a2e; }
+:root[data-mode="light"] .vtt-rail-sep { background: #c3c9d1; }
+:root[data-mode="light"] .vtt-flyout { background: rgba(250,251,252,.98); border-color: #cdd3da; box-shadow: 0 10px 30px rgba(20,30,45,.18); }
+:root[data-mode="light"] .vtt-sub { color: #3d4652; }
+:root[data-mode="light"] .vtt-sub:hover { background: #e6e9ee; color: #0f1318; }
+:root[data-mode="light"] .vtt-sub.on { background: #f3ead2; color: #6e5410; }
+:root[data-mode="light"] .vtt-sub .vtt-key { border-color: #c3c9d1; color: #59626f; }
+:root[data-mode="light"] .vtt-title,
+:root[data-mode="light"] .vtt-scene-badge { background: rgba(250,251,252,.92); border-color: #cdd3da; }
+:root[data-mode="light"] .vtt-scene-badge { color: #85661a; }
+:root[data-mode="light"] .vtt-readout { background: rgba(250,251,252,.95); border-color: #cdd3da; color: #59626f; }
+:root[data-mode="light"] .vtt-readout b { color: #1c2128; }
+
+/* Table panel */
+:root[data-mode="light"] .vtt-side { background: rgba(247,248,250,.98); border-left-color: #cdd3da; }
+:root[data-mode="light"] .vtt-side-head { border-bottom-color: #cdd3da; color: #85661a; }
+:root[data-mode="light"] .vtt-tabs { border-bottom-color: #cdd3da; }
+:root[data-mode="light"] .vtt-side-x { background: #fff; color: #3d4652; border-color: #cdd3da; }
+:root[data-mode="light"] .vtt-tab { color: #59626f; }
+:root[data-mode="light"] .vtt-tab:hover { color: #1c2128; }
+:root[data-mode="light"] .vtt-tab.on { color: #85661a; border-bottom-color: #b08a2e; }
+:root[data-mode="light"] .vtt-sec-h { color: #59626f; }
+:root[data-mode="light"] .vtt-sec-h.sub { color: #636c79; }
+:root[data-mode="light"] .vtt-cur { color: #85661a; }
+:root[data-mode="light"] .vtt-row.small { color: #59626f; }
+:root[data-mode="light"] .vtt-color { border-color: #cdd3da; background: #fff; }
+:root[data-mode="light"] .vtt-row input[type=number],
+:root[data-mode="light"] .vtt-search,
+:root[data-mode="light"] .vtt-field input,
+:root[data-mode="light"] .vtt-field select,
+:root[data-mode="light"] .vtt-te-checks select { background: #fff; border-color: #c3c9d1; color: #1c2128; }
+:root[data-mode="light"] .vtt-search::placeholder,
+:root[data-mode="light"] .vtt-field input::placeholder { color: #7a828e; }
+:root[data-mode="light"] .vtt-btn { background: #fff; color: #1c2128; border-color: #c3c9d1; }
+:root[data-mode="light"] .vtt-btn:hover { border-color: #9aa3ae; }
+:root[data-mode="light"] .vtt-btn.ghost { background: transparent; }
+:root[data-mode="light"] .vtt-btn.primary { background: #c8a24a; color: #14181e; border-color: #b08a2e; }
+:root[data-mode="light"] .vtt-btn.primary:hover { background: #d8b25a; }
+:root[data-mode="light"] .vtt-btn.danger { background: transparent; color: #a8352a; border-color: #e0b4ae; }
+:root[data-mode="light"] .vtt-btn.danger:hover { background: rgba(200,80,58,.10); }
+:root[data-mode="light"] .vtt-mini { color: #59626f; }
+:root[data-mode="light"] .vtt-mini:hover { color: #0f1318; background: #e6e9ee; }
+:root[data-mode="light"] .vtt-mini.hide.on { color: #85661a; }
+:root[data-mode="light"] .vtt-frow { background: #fff; color: #1c2128; border-color: #cdd3da; }
+:root[data-mode="light"] .vtt-frow:hover { border-color: #9aa3ae; }
+:root[data-mode="light"] .vtt-frow-i { color: #59626f; }
+:root[data-mode="light"] .vtt-frow.on { border-color: #b08a2e; }
+:root[data-mode="light"] .vtt-frow.on .vtt-frow-i { color: #85661a; }
+:root[data-mode="light"] .vtt-switch { background: #c3c9d1; }
+:root[data-mode="light"] .vtt-switch::after { background: #fff; box-shadow: 0 1px 2px rgba(20,30,45,.25); }
+:root[data-mode="light"] .vtt-frow.on .vtt-switch { background: #c8a24a; }
+:root[data-mode="light"] .vtt-frow.on .vtt-switch::after { background: #fff; }
+:root[data-mode="light"] .vtt-scene,
+:root[data-mode="light"] .vtt-trow { background: #fff; border-color: #cdd3da; }
+:root[data-mode="light"] .vtt-scene:hover,
+:root[data-mode="light"] .vtt-trow:hover { border-color: #9aa3ae; }
+:root[data-mode="light"] .vtt-scene.active,
+:root[data-mode="light"] .vtt-trow.active,
+:root[data-mode="light"] .vtt-scene.viewing { border-color: #b08a2e; background: #f8f1df; }
+:root[data-mode="light"] .vtt-scene.live { border-color: #3f9a50; background: rgba(90,194,106,.12); }
+:root[data-mode="light"] .vtt-thumb,
+:root[data-mode="light"] .vtt-tav,
+:root[data-mode="light"] .vtt-te-av { background: #dde1e6; color: #8a929d; }
+:root[data-mode="light"] .vtt-tsub { color: #59626f; }
+:root[data-mode="light"] .vtt-pconn { background: #c3c9d1; border-color: #b0b7c0; }
+:root[data-mode="light"] .vtt-pconn.on { background: #5ac26a; border-color: #3f9a50; }
+:root[data-mode="light"] .vtt-empty,
+:root[data-mode="light"] .vtt-hint2 { color: #59626f; }
+:root[data-mode="light"] .vtt-stock-head { background: #fff; border-color: #cdd3da; color: #3d4652; }
+:root[data-mode="light"] .vtt-stock-head:hover { border-color: #9aa3ae; }
+:root[data-mode="light"] .vtt-stock-head b,
+:root[data-mode="light"] .vtt-stock-chev { color: #59626f; }
+:root[data-mode="light"] .vtt-stok,
+:root[data-mode="light"] .vtt-ltile { background: #fff; border-color: #cdd3da; color: #3d4652; }
+:root[data-mode="light"] .vtt-stok:hover,
+:root[data-mode="light"] .vtt-ltile:hover { border-color: #b08a2e; }
+:root[data-mode="light"] .vtt-stok-edit { background: rgba(255,255,255,.92); border-color: #cdd3da; color: #3d4652; }
+:root[data-mode="light"] .vtt-stok-edit:hover { border-color: #b08a2e; color: #85661a; }
+:root[data-mode="light"] .vtt-party { background: linear-gradient(180deg,#fbf6e8,#f1e7cc); border-color: #d9c48c; color: #2a2410; }
+:root[data-mode="light"] .vtt-party:hover { border-color: #b08a2e; }
+:root[data-mode="light"] .vtt-party b { color: #745710; }
+
+/* setup (edit-mode) bar */
+:root[data-mode="light"] .vtt-setupbar { background: rgba(250,251,252,.97); border-color: #cdd3da; box-shadow: 0 8px 30px rgba(20,30,45,.18); }
+:root[data-mode="light"] .vtt-sub-t { background: #fff; color: #3d4652; border-color: #cdd3da; }
+:root[data-mode="light"] .vtt-sub-t:hover { color: #0f1318; border-color: #9aa3ae; }
+:root[data-mode="light"] .vtt-sub-t.on { background: #c8a24a; color: #14181e; border-color: #b08a2e; }
+
+/* context menu */
+:root[data-mode="light"] .vtt-ctx { background: #fff; border-color: #cdd3da; box-shadow: 0 12px 40px rgba(20,30,45,.2); }
+:root[data-mode="light"] .vtt-ctx-item { color: #1c2128; }
+:root[data-mode="light"] .vtt-ctx-item:hover { background: #eceff3; }
+:root[data-mode="light"] .vtt-ctx-item.danger { color: #b23a26; }
+:root[data-mode="light"] .vtt-ctx-sep { background: #dde1e6; }
+:root[data-mode="light"] .vtt-ctx-ck { color: #23864a; }
+
+/* character-sheet popup frame (the sheet inside keeps its own theme) */
+:root[data-mode="light"] .vtt-sheetpop { background: #f7f8fa; border-color: #cdd3da; box-shadow: 0 16px 50px rgba(20,30,45,.25); }
+:root[data-mode="light"] .vtt-sheet-head { background: #eceff3; color: #1c2128; }
+:root[data-mode="light"] .vtt-sheet-resize::after { border-color: #9aa3ae; }
+
+/* dialogs (scene editor, token editor, confirm) */
+:root[data-mode="light"] .vtt-modal { background: rgba(24,28,34,.4); }
+:root[data-mode="light"] .vtt-modal-box { background: #f7f8fa; border-color: #cdd3da; box-shadow: 0 20px 60px rgba(20,30,45,.3); }
+:root[data-mode="light"] .vtt-modal-head { border-bottom-color: #cdd3da; color: #85661a; }
+:root[data-mode="light"] .vtt-modal-foot { border-top-color: #cdd3da; }
+:root[data-mode="light"] .vtt-field,
+:root[data-mode="light"] .vtt-field-l { color: #59626f; }
+:root[data-mode="light"] .vtt-te-checks { color: #1c2128; }
+:root[data-mode="light"] .vtt-preview { background: #dde1e6; border-color: #cdd3da; }
+:root[data-mode="light"] .vtt-preview-empty { color: #59626f; }
+
+/* table-sound popover (audio-sync.js) */
+:root[data-mode="light"] .vtt-aud-btn.live { color: #85661a; border-color: #b08a2e; }
+:root[data-mode="light"] .vtt-aud-btn.muted,
+:root[data-mode="light"] .vtt-aud-mute.on { color: #b23a26; border-color: #b23a26; }
+:root[data-mode="light"] .vtt-aud-pop { background: rgba(250,251,252,.98); border-color: #cdd3da; box-shadow: 0 10px 30px rgba(20,30,45,.18); }
+:root[data-mode="light"] .vtt-aud-h { color: #85661a; }
+:root[data-mode="light"] .vtt-aud-n { color: #59626f !important; } /* inline style in audio-sync.js */
+:root[data-mode="light"] .vtt-aud-pct,
+:root[data-mode="light"] .vtt-aud-status b { color: #1c2128; }
+:root[data-mode="light"] .vtt-aud-mute { background: #fff; color: #3d4652; border-color: #cdd3da; }
+:root[data-mode="light"] .vtt-aud-status { color: #59626f; }
+
+/* grid aligner overlay (grid-align.js) */
+:root[data-mode="light"] .vtt-ga { background: rgba(226,230,235,.97); color: #1c2128; }
+:root[data-mode="light"] .vtt-ga-head,
+:root[data-mode="light"] .vtt-ga-foot { background: rgba(247,248,250,.98); border-color: #cdd3da; }
+:root[data-mode="light"] .vtt-ga-title,
+:root[data-mode="light"] .vtt-ga-read { color: #85661a; }
+:root[data-mode="light"] .vtt-ga-hint,
+:root[data-mode="light"] .vtt-ga-foot label { color: #59626f; }
+:root[data-mode="light"] .vtt-ga-hint b { color: #1c2128; }
+:root[data-mode="light"] .vtt-ga-warn { color: #8a5a00; }
+:root[data-mode="light"] .vtt-ga-foot input[type=number],
+:root[data-mode="light"] .vtt-ga-foot select,
+:root[data-mode="light"] .vtt-ga-btn { background: #fff; color: #1c2128; border-color: #c3c9d1; }
+:root[data-mode="light"] .vtt-ga-btn:hover { border-color: #9aa3ae; }
+:root[data-mode="light"] .vtt-ga-btn.primary { background: #c8a24a; color: #14181e; border-color: #b08a2e; }
+:root[data-mode="light"] .vtt-ga-tb { background: rgba(250,251,252,.95); color: #3d4652; border-color: #cdd3da; }
+
+/* inline-styled readouts (session.js markup) */
+:root[data-mode="light"] #m-galpha-v { color: #1c2128 !important; }
+
+/* The site mini-bar (lib/minibar.ts) reads the same --panel/--text/... names
+   this sheet re-points above. Hand it back the shared dark chrome palette so it
+   stays exactly as it was until the bar itself grows a light treatment — a rule
+   it declares there (later in the document, same specificity) wins over this. */
+:root[data-mode="light"] #dd-bar { --panel: #14161a; --panel-2: #1c1f24; --border: #2b3038; --text: #e9edf2; --muted: #8d96a3; --accent: #d0d5dc; color-scheme: dark; }
+
+/* board.css's own (legacy) toolbar */
+:root[data-mode="light"] .vtt-toolbar .vtt-btn[aria-pressed="true"] { background: #c8a24a; color: #14181e; border-color: #b08a2e; }

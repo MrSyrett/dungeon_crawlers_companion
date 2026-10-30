@@ -73,7 +73,7 @@ export default async function AccountPage() {
       <div className="flex flex-col gap-5">
         <section className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6">
           <h2 className="mb-4 text-[13px] font-bold uppercase tracking-[0.18em] text-[var(--muted)]">Appearance</h2>
-          <ThemePreference />
+          <ThemePreference initial={user.theme} />
         </section>
 
         <section className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6">

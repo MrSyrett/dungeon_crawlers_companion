@@ -1,0 +1,50 @@
+/* How light mode works here: <html data-mode="light"> (see #gm-mode-boot) switches on
+   (1) the light tokens below — the screen is mostly written against these vars;
+   (2) per-system light tokens in #gm-sys-theme (campaign colours darkened to read on light);
+   (3) the generated "light twins" further down: every rule of this page that sets a colour,
+       re-stated under :root[data-mode="light"] with its literal colours mapped to light ones.
+   Twins are generated (by the light-mode builder, next to the campaign-theme generator), so
+   edit the ordinary dark CSS and re-run it rather than editing the twins by hand.
+   Left exactly as in dark mode: the campaign's coloured top and bottom bars (their party /
+   tracker cards do go light) and the Adventure prep sheet, which draws its own light page. */
+:root[data-mode="light"],
+:root[data-mode="light"][data-gm-theme] .topbar :is(.bubble, .timer, .ticktrk) {
+  color-scheme: light;
+  --black: #e6e8ec;      /* page / canvas */
+  --dark: #eef0f3;
+  --panel: #f8f9fa;      /* windows, cards */
+  --panel-2: #eceef2;    /* inset rows, inputs */
+  --border: #cfd4db;
+  --dim: #59616c;        /* labels / hints (>= 4.5:1 on --panel) */
+  --mid: #4a525d;
+  --light: #262b33;
+  --white: #12151a;      /* body ink */
+  --red: #b82018;
+  --red-light: #b8261d;
+  --npc-blue: #5a4fb3;
+  --green: #2d7a2d;
+  --green-light: #2c8a31;
+  --signal: #b85300;
+  /* Unthemed accent: the app's grey, a dark shade on light so it reads as ink and as a fill. */
+  --accent: #3b424b;
+  --accent-2: #6a727d;
+  --accent-dim: color-mix(in srgb, var(--accent) 55%, #fff);
+  --glow: color-mix(in srgb, var(--accent) 28%, transparent);
+  --glow-2: color-mix(in srgb, var(--accent) 20%, transparent);
+}
+/* The campaign's bars keep the dark screen's furniture (their text tokens are set by #gm-sys-theme). */
+:root[data-mode="light"][data-gm-theme] :is(.topbar, .bottom-bar) {
+  color-scheme: dark;
+  --black: #0b0c0e; --dark: #101217; --panel: #14161a; --panel-2: #1c1f24;
+  --red: #b82018; --red-light: #d63a30; --npc-blue: #8f85cc; --green: #2d7a2d; --green-light: #4caf50; --signal: #ff8419;
+}
+/* The prep sheet decides its own light page; inside it the screen's tokens stay as authored. */
+:root[data-mode="light"] .advh-sheet {
+  --black: #0b0c0e; --dark: #101217; --panel: #14161a; --panel-2: #1c1f24; --border: #2b3038;
+  --dim: #4b535e; --mid: #8d96a3; --light: #c3cad4; --white: #e9edf2;
+  --red: #b82018; --red-light: #d63a30; --npc-blue: #8f85cc; --green: #2d7a2d; --green-light: #4caf50; --signal: #ff8419;
+  --accent: #d0d5dc; --accent-2: #9aa1ab; --accent-dim: color-mix(in srgb, var(--accent) 55%, #000);
+  --glow: color-mix(in srgb, var(--accent) 45%, transparent); --glow-2: color-mix(in srgb, var(--accent) 34%, transparent);
+}
+/* Read-aloud boxes: pale blue paper instead of the dark slate. */
+:root[data-mode="light"] :is(.advh-readaloud, .cc-readaloud) { --ra-bg: #e8f0f8; --ra-border: #b6c9dc; --ra-bar: #3d6f9e; --ra-text: #1c2a38; }

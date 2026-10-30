@@ -39,7 +39,7 @@ export function ForgotPasswordForm({ action }: Props) {
             </p>
             <Link
               href="/login"
-              className="mt-1 rounded bg-[var(--gold)] px-4 py-2.5 text-center text-sm font-bold uppercase tracking-[0.15em] text-black transition hover:brightness-110"
+              className="mt-1 rounded bg-[var(--gold)] px-4 py-2.5 text-center text-sm font-bold uppercase tracking-[0.15em] text-[var(--on-accent)] transition hover:brightness-110"
             >
               Back to sign in
             </Link>
@@ -74,7 +74,7 @@ export function ForgotPasswordForm({ action }: Props) {
             <button
               type="submit"
               disabled={pending}
-              className="mt-1 rounded bg-[var(--gold)] px-4 py-2.5 text-sm font-bold uppercase tracking-[0.15em] text-black transition hover:brightness-110 disabled:opacity-60"
+              className="mt-1 rounded bg-[var(--gold)] px-4 py-2.5 text-sm font-bold uppercase tracking-[0.15em] text-[var(--on-accent)] transition hover:brightness-110 disabled:opacity-60"
             >
               {pending ? "Sending…" : "Send reset link"}
             </button>

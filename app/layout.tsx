@@ -40,6 +40,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { isAdminEmail } from "@/lib/admin";
 import { getHiddenSystemKeys } from "@/lib/systems";
 import type { SystemKey } from "@/components/systemStore";
+import { cookies } from "next/headers";
+import { modeSyncScript, normMode, type Mode } from "@/lib/theme";
 
 // ---------------------------------------------------------------------------
 // The site's own pair. Geist and Geist Mono carry every surface that is about
@@ -462,9 +464,12 @@ export default async function RootLayout({
   let email: string | null = null;
   let isAdmin = false;
   let hiddenKeys: SystemKey[] = [];
+  // Light / dark: the account's choice when signed in, else the dd_theme cookie.
+  let mode: Mode = normMode((await cookies()).get("dd_theme")?.value);
   try {
     const user = await getCurrentUser();
     if (user) {
+      mode = normMode((user as { theme?: string }).theme);
       email = user.email;
       isAdmin = isAdminEmail(user.email);
       hiddenKeys = await getHiddenSystemKeys();
@@ -495,10 +500,12 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
+      data-mode={mode}
+      style={{ colorScheme: mode }}
       className={`${geist.variable} ${geistMono.variable} ${cinzel.variable} ${barlow.variable} ${montserrat.variable} ${ebGaramond.variable} ${anton.variable} ${shareTech.variable} ${archivoBlack.variable} ${libreFranklin.variable} ${oswald.variable} ${sourceSans.variable} ${lilitaOne.variable} ${nunito.variable} ${mulish.variable} ${sairaCond.variable} ${saira.variable} ${asap.variable} ${cormorant.variable} ${lora.variable} ${fraunces.variable} ${figtree.variable} ${permanentMarker.variable} ${archivo.variable} ${archivoNarrow.variable} ${plexSans.variable} ${russoOne.variable} ${rubik.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: modeSyncScript(mode) + themeScript }} />
         <PullToRefresh />
         {email ? (
           <SiteNav email={email} isAdmin={isAdmin} hiddenKeys={hiddenKeys} initialSystem={initialSystem} initialView={initialView} />

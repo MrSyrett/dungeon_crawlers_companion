@@ -85,7 +85,7 @@ export function AuthForm({ mode, action, next }: Props) {
           <button
             type="submit"
             disabled={pending}
-            className="mt-1 rounded bg-[var(--gold)] px-4 py-2.5 text-sm font-bold uppercase tracking-[0.15em] text-black transition hover:brightness-110 disabled:opacity-60"
+            className="mt-1 rounded bg-[var(--gold)] px-4 py-2.5 text-sm font-bold uppercase tracking-[0.15em] text-[var(--on-accent)] transition hover:brightness-110 disabled:opacity-60"
           >
             {pending ? "Please wait…" : isSignup ? "Create account" : "Sign in"}
           </button>

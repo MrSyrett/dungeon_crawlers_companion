@@ -582,6 +582,37 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .log-action-btn.campaign{padding:5px 6px;}
 .tray-note:empty{display:none;}
 </style>
+<style id="utr-css">
+/* Dice tray: the GM Screen's pool tray, identical on every d20 sheet.
+   Pool readout / dice d2–d100 / ADV · DIS (Dragonbane: boons · banes) / × · Roll.
+   Labels use the sheet's UI font role, dice and the pool readout its number role. */
+.dice-tray.utr{display:flex;flex-direction:column;gap:6px;padding:10px;--utr-bg:rgba(255,255,255,.05);--utr-bd:rgba(255,255,255,.16);--utr-fg:#e4e0d8;--utr-mut:#8d8983;--utr-ui:var(--f-ui);--utr-num:var(--f-num);--utr-acc:var(--acc);--utr-on:#fff;}
+.utr-pool{font-family:var(--utr-num);font-size:13px;font-weight:700;color:var(--utr-acc);min-height:18px;line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums;}
+.utr-pool .utr-empty{color:var(--utr-mut);font-family:var(--utr-ui);font-weight:400;letter-spacing:.04em;}
+.utr-dice{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:3px;}
+.utr-die{position:relative;min-width:0;padding:8px 0;background:var(--utr-bg);color:var(--utr-fg);border:1px solid var(--utr-bd);border-radius:5px;cursor:pointer;font-family:var(--utr-num);font-size:11px;font-weight:700;letter-spacing:-.02em;text-transform:none;line-height:1.1;overflow:visible;font-variant-numeric:tabular-nums;}
+.utr-die:hover{border-color:var(--utr-acc);}
+.utr-die:active{transform:scale(.94);}
+.utr-die.has{border-color:var(--utr-acc);color:var(--utr-acc);}
+.utr-cnt{position:absolute;top:-6px;right:-5px;min-width:15px;height:15px;line-height:15px;padding:0 3px;box-sizing:border-box;border-radius:8px;background:var(--utr-acc);color:var(--utr-on);font-family:var(--utr-num);font-size:10px;font-weight:700;text-align:center;}
+.utr-mode{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+.utr-adv{padding:6px 4px;background:var(--utr-bg);color:var(--utr-mut);border:1px solid var(--utr-bd);border-radius:5px;cursor:pointer;font-family:var(--utr-ui);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;line-height:1.2;}
+.utr-adv:hover{color:var(--utr-fg);}
+.utr-adv.on-adv{background:#1a3a1a;border-color:#2d7a2d;color:#6dbf6d;}
+.utr-adv.on-dis{background:#3a1a1a;border-color:#7a2d2d;color:#df6a6a;}
+.utr-bb{display:flex;align-items:stretch;border:1px solid var(--utr-bd);border-radius:5px;overflow:hidden;min-width:0;}
+.utr-bb button{flex:0 0 26px;background:var(--utr-bg);color:var(--utr-fg);border:none;cursor:pointer;font-family:var(--utr-ui);font-size:15px;line-height:1;padding:0;}
+.utr-bb button:hover{color:var(--utr-acc);background:rgba(255,255,255,.1);}
+.utr-bbv{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--utr-ui);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:6px 2px;line-height:1.2;white-space:nowrap;overflow:hidden;}
+.utr-bb.boon .utr-bbv{color:#9fdcae;} .utr-bb.bane .utr-bbv{color:#ff9d8a;}
+.utr-act{display:flex;gap:4px;}
+.utr-x{flex:0 0 auto;width:34px;padding:0;background:transparent;color:var(--utr-mut);border:1px solid var(--utr-bd);border-radius:5px;cursor:pointer;font-family:var(--utr-ui);font-size:17px;line-height:1;}
+.utr-x:hover{color:#df6a6a;border-color:#7a2d2d;}
+.utr-roll{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:7px 10px;background:var(--utr-acc);color:var(--utr-on);border:none;border-radius:5px;cursor:pointer;font-family:var(--utr-ui);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;line-height:1.2;}
+.utr-roll:hover{filter:brightness(1.12);}
+.utr-ico{display:inline-block;flex:0 0 auto;}
+@media (max-width:768px){.utr-die{min-height:40px;font-size:13px;}.utr-adv,.utr-bbv{min-height:36px;}.utr-x,.utr-roll{min-height:40px;}}
+</style>
 </head>
 <body>
 <script>
@@ -842,14 +873,17 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>
   <div class="log-entries" id="log-entries"></div>
-  <div class="dice-tray">
+  <div class="dice-tray utr">
+    <div class="utr-pool" id="utr-pool"><span class="utr-empty">Empty</span></div>
+    <div class="utr-dice"><button type="button" class="utr-die" data-d="2" onclick="UTray.add(2)" oncontextmenu="return UTray.sub(event,2)" title="Add a D2 (right-click removes one)">D2</button><button type="button" class="utr-die" data-d="4" onclick="UTray.add(4)" oncontextmenu="return UTray.sub(event,4)" title="Add a D4 (right-click removes one)">D4</button><button type="button" class="utr-die" data-d="6" onclick="UTray.add(6)" oncontextmenu="return UTray.sub(event,6)" title="Add a D6 (right-click removes one)">D6</button><button type="button" class="utr-die" data-d="8" onclick="UTray.add(8)" oncontextmenu="return UTray.sub(event,8)" title="Add a D8 (right-click removes one)">D8</button><button type="button" class="utr-die" data-d="10" onclick="UTray.add(10)" oncontextmenu="return UTray.sub(event,10)" title="Add a D10 (right-click removes one)">D10</button><button type="button" class="utr-die" data-d="12" onclick="UTray.add(12)" oncontextmenu="return UTray.sub(event,12)" title="Add a D12 (right-click removes one)">D12</button><button type="button" class="utr-die" data-d="20" onclick="UTray.add(20)" oncontextmenu="return UTray.sub(event,20)" title="Add a D20 (right-click removes one)">D20</button><button type="button" class="utr-die" data-d="100" onclick="UTray.add(100)" oncontextmenu="return UTray.sub(event,100)" title="Add a D100 (right-click removes one)">D100</button></div>
+    <div class="utr-mode"><span class="utr-bb boon" title="Boons on the next D20: roll an extra D20 and keep the lowest"><button type="button" onclick="trayBB('boon',-1)" aria-label="One fewer boon">−</button><span class="utr-bbv" id="tray-boon">0 boons</span><button type="button" onclick="trayBB('boon',1)" aria-label="One more boon">+</button></span><span class="utr-bb bane" title="Banes on the next D20: roll an extra D20 and keep the highest"><button type="button" onclick="trayBB('bane',-1)" aria-label="One fewer bane">−</button><span class="utr-bbv" id="tray-bane">0 banes</span><button type="button" onclick="trayBB('bane',1)" aria-label="One more bane">+</button></span></div>
+    <div class="utr-act"><button type="button" class="utr-x" onclick="UTray.clear()" title="Clear" aria-label="Clear">×</button><button type="button" class="utr-roll" onclick="UTray.roll()" title="Roll the pool"><svg class="utr-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg><span>Roll</span></button></div>
+    <div class="utr-legacy" hidden>
     <div class="dice-pool-display" id="dice-pool-display"><span class="empty">Empty</span></div>
-    <div class="tray-row">
-      <span class="bb-ctl boon" title="Boons on the next roll: roll an extra D20 and keep the lowest"><button onclick="trayBB('boon',-1)">−</button><span class="bb-val" id="tray-boon">0 boons</span><button onclick="trayBB('boon',1)">＋</button></span>
-      <span class="bb-ctl bane" title="Banes on the next roll: roll an extra D20 and keep the highest"><button onclick="trayBB('bane',-1)">−</button><span class="bb-val" id="tray-bane">0 banes</span><button onclick="trayBB('bane',1)">＋</button></span>
-    </div>
+    
     <div class="dice-btns"><button class="dice-btn" onclick="trayAdd(4)" oncontextmenu="return poolSub(event,4)">D4</button><button class="dice-btn" onclick="trayAdd(6)" oncontextmenu="return poolSub(event,6)">D6</button><button class="dice-btn" onclick="trayAdd(8)" oncontextmenu="return poolSub(event,8)">D8</button><button class="dice-btn" onclick="trayAdd(10)" oncontextmenu="return poolSub(event,10)">D10</button><button class="dice-btn" onclick="trayAdd(12)" oncontextmenu="return poolSub(event,12)">D12</button><button class="dice-btn" onclick="trayAdd(20)" oncontextmenu="return poolSub(event,20)">D20</button></div>
     <div class="dice-tray-actions"><button class="dice-clear-btn" onclick="trayClear()">Clear</button><button class="dice-roll-btn" onclick="trayRoll()" title="Roll the dice pool (the boons / banes above go on its D20)">🎲 Roll</button></div>
+    </div>
   </div>
 </div>
 </div>
@@ -2394,6 +2428,75 @@ function poolSub(e,s){ if(e&&e.preventDefault) e.preventDefault(); var i=_pool.l
 // Every roll clears the tray (pool and Adv / Dis), as on the GM Screen.
 (function(){ var _r=trayRoll; trayRoll=function(){ var out=_r.apply(this,arguments); try{ trayClear(); if(TR.boon||TR.bane){ TR.boon=0; TR.bane=0; renderTray(); } }catch(e){} return out; }; })();
 
+</script>
+<script>
+// ═══ DICE TRAY — the GM Screen's pool tray (same rows, same controls on every d20 sheet) ═══
+// Tap a die to add it to the pool (right-click removes one). ADV / DIS go on the
+// pool's first d20 and are the sheet's own Advantage switch; × clears; Roll throws
+// the pool, logs it, and clears the tray (pool, ADV / DIS, boons / banes).
+var UTR_HOOK = {
+  letter:'D', noAdv:true,
+  // Boons / banes go on the pool's first D20 (extra D20s, keep the lowest / highest).
+  d20:function(){ var nb=TR.boon-TR.bane; if(!nb) return null; var p=d20Pool(nb); return { v:p.result, txt:p.n+'D20('+p.rolls.join(',')+') '+(nb>0?'keep lowest':'keep highest')+' → '+p.result }; },
+  note:function(){ var m=[]; if(TR.boon) m.push(TR.boon+(TR.boon===1?' boon':' boons')); if(TR.bane) m.push(TR.bane+(TR.bane===1?' bane':' banes')); return m.join(', '); },
+  lone:function(v){ return v===1?{word:'DRAGON!',type:'crit'}:v===20?{word:'DEMON!',type:'fumble'}:{type:'normal'}; },
+  after:function(){ TR.boon=0; TR.bane=0; renderTray(); }
+};
+var UTray = (function(){
+  var H = UTR_HOOK, pool = {}, own = 'none', L = H.letter || 'd';
+  function R(n){ return 1 + Math.floor(Math.random() * n); }
+  function $u(id){ return document.getElementById(id); }
+  function getAdv(){ if(H.noAdv) return 'none'; try { if(H.get) return H.get(); } catch(e){} return own; }
+  function putAdv(m){ own = m; if(H.set) try { H.set(m); } catch(e){} }
+  function sides(){ return Object.keys(pool).map(Number).filter(function(d){ return pool[d] > 0; }).sort(function(a, b){ return a - b; }); }
+  function label(){ return sides().map(function(d){ return pool[d] + L + d; }).join(' + '); }
+  function render(){
+    var el = $u('utr-pool'); if(el){ var t = label(); el.innerHTML = t ? '' : '<span class="utr-empty">Empty</span>'; if(t) el.textContent = t; }
+    [].forEach.call(document.querySelectorAll('.utr-die'), function(b){
+      var n = pool[b.dataset.d] || 0, c = b.querySelector('.utr-cnt');
+      b.classList.toggle('has', n > 0);
+      if(n){ if(!c){ c = document.createElement('span'); c.className = 'utr-cnt'; b.appendChild(c); } c.textContent = n; } else if(c) c.remove();
+    });
+    var m = getAdv(), a = $u('utr-adv'), d = $u('utr-dis');
+    if(a) a.classList.toggle('on-adv', m === 'adv'); if(d) d.classList.toggle('on-dis', m === 'dis');
+  }
+  function add(d){ pool[d] = (pool[d] || 0) + 1; render(); }
+  function sub(e, d){ if(e && e.preventDefault) e.preventDefault(); if(pool[d]) pool[d]--; render(); return false; }
+  function adv(m){ putAdv(getAdv() === m ? 'none' : m); render(); }
+  function clear(){ pool = {}; putAdv('none'); if(H.after) try { H.after(); } catch(e){} render(); }
+  function roll(){
+    var ds = sides(); if(!ds.length) return;
+    if(H.pre && H.pre() === false) return;
+    var m = getAdv(), parts = [], tot = 0, nat = null, count = 0, has20 = pool[20] > 0;
+    var note = has20 && H.note ? H.note() : '';
+    ds.forEach(function(d){ count += pool[d]; });
+    ds.forEach(function(d){
+      var n = pool[d];
+      if(d === 20){
+        var sp = H.d20 ? H.d20() : null;
+        if(!sp && m !== 'none'){ var a = R(20), b = R(20), k = m === 'adv' ? Math.max(a, b) : Math.min(a, b); sp = { v: k, txt: L + '20(' + a + ',' + b + ' ' + (m === 'adv' ? '▲' : '▼') + ' ' + k + ')' }; }
+        if(sp){ tot += sp.v; nat = sp.v; parts.push(sp.txt); n--; }
+        if(!n) return;
+      }
+      var r = []; for(var i = 0; i < n; i++) r.push(R(d));
+      r.forEach(function(v){ tot += v; }); if(d === 20 && nat === null) nat = r[0];
+      parts.push(n + L + d + '(' + r.join(',') + ')');
+    });
+    var lone = count === 1 && ds[0] === 20, res = { type: 'normal' };
+    if(lone) res = H.lone ? H.lone(nat) : { type: nat === 20 ? 'crit' : nat === 1 ? 'fumble' : 'normal' };
+    var lbl = label();
+    pool = {}; putAdv('none'); if(H.after) try { H.after(); } catch(e){} render();   // every roll clears the tray
+    addLog('Dice Pool: ' + lbl, String(tot) + (res.word ? ' · ' + res.word : ''), parts.join(' + ') + ' = ' + tot + (note ? ' · ' + note : ''), res.type);
+  }
+  function init(){
+    render();
+    // The sheet's own rolls spend its Advantage switch: keep ADV / DIS in step.
+    var lg = document.querySelector('.dice-tray.utr .utr-legacy');
+    if(lg && window.MutationObserver) new MutationObserver(render).observe(lg, { attributes: true, subtree: true, attributeFilter: ['class'] });
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  return { add: add, sub: sub, adv: adv, clear: clear, roll: roll, render: render };
+})();
 </script>
 </body>
 </html>

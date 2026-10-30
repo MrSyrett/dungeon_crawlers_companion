@@ -157,6 +157,13 @@ function iceServers(): Array<{ urls: string | string[]; username?: string; crede
   return servers;
 }
 
+// Light / dark, before first paint. The account-wide choice is localStorage.dd_theme
+// ("light" | "dark"; anything else = dark). Stamp it on <html data-mode> so
+// public/vtt/board.css's :root[data-mode="light"] rules apply from the first frame,
+// and follow a change made in another tab live (board.js repaints its canvas
+// surround on the same storage event).
+const MODE_SCRIPT = `<script>(function(){var d=document.documentElement;function a(){var m="dark";try{if(localStorage.getItem("dd_theme")==="light")m="light"}catch(e){}d.setAttribute("data-mode",m)}a();try{addEventListener("storage",function(e){if(e.key===null||e.key==="dd_theme")a()})}catch(e){}})();</script>`;
+
 function pageHtml(cfg: Record<string, unknown>, bar: string): string {
   const title = `${String(cfg.campaignName)} — VTT`;
   const system = isSystemKey(cfg.system) ? cfg.system : null;
@@ -179,6 +186,7 @@ function pageHtml(cfg: Record<string, unknown>, bar: string): string {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+${MODE_SCRIPT}
 <title>${escapeHtml(title)}</title>
 <link rel="icon" type="image/png" href="/icon-64.png">
 <link rel="stylesheet" href="${asset("/vtt/board.css")}">
@@ -202,6 +210,7 @@ ${bar}
 function deniedHtml(): string {
   return `<!doctype html><html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+${MODE_SCRIPT}
 <title>No access</title><link rel="stylesheet" href="/vtt/board.css"></head>
 <body style="display:grid;place-items:center;height:100vh;text-align:center">
 <div><h1 style="color:var(--gold)">Not your table</h1>

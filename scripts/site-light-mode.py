@@ -1,0 +1,202 @@
+# python3 scripts/site-light-mode.py — generates the LIGHT MODE section of app/globals.css (between markers).
+import re
+import os
+P = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'app', 'globals.css')
+# key: (ground, panel, panel2, border, text, muted, head, sub, link, accent-deep, accent-tint for the ground glow, texture or None)
+S = {
+ 'SD':   ('#efeee9','#fbfbf8','#efefec','#cbcbc5','#0a0a0a','#55554f','#0a0a0a','#8a6c0c','#8a6c0c','#8a6c0c','200,160,32',None),
+ 'DND':  ('#e8e3dc','#f7f3ec','#efe7d8','#c8bca8','#1a1613','#5f574d','#7a1119','#8a6412','#9b1b22','#8a6412','155,27,34',None),
+ 'DCC':  ('#e8e4e0','#f5f3f0','#ede9e4','#c9c1b6','#1a1a1a','#575757','#1a1a1a','#b8164a','#b8164a','#8f6f0a','232,39,95',None),
+ 'SW':   ('#e9e6dc','#f8f6ef','#efece2','#c9c3b2','#1a1a1a','#5d5a50','#7a5f0e','#0f7180','#0f7180','#7a5f0e','201,162,39',None),
+ 'MMRPG':('#e8eaed','#f6f7f9','#eceef2','#c9ccd4','#16181c','#5c626e','#b3141a','#1c5a96','#b3141a','#b3141a','236,29,36',None),
+ 'ACE':  ('#dfe9f0','#f7f4ea','#efe9d6','#c4bda8','#1a1a1a','#5a5f66','#1d6f9a','#114c6a','#1d6f9a','#1d6f9a','43,147,201',None),
+ 'KOB':  ('#e6e2ee','#f6f3f8','#ece6f2','#c9c0d6','#1a1a1a','#5a5a66','#5c3596','#1a6f6f','#5c3596','#5c3596','124,77,189',None),
+ 'D62E': ('#e9e6dc','#f8f6ef','#f0ece1','#cfc8b8','#1a1a1a','#5d5a50','#9a4d18','#2b5f9a','#9a4d18','#9a4d18','224,123,57',None),
+ 'GB':   ('#e8ecdf','#f4f6ee','#eaeee0','#c7cdb8','#161a12','#5b6350','#3f6a12','#6a3fa0','#3f6a12','#3f6a12','139,197,63',None),
+ 'CO':   ('#e6ebe9','#f6f8f6','#eaf0ed','#c2cec9','#182220','#586460','#1c6b60','#8a6a1c','#1c6b60','#1c6b60','47,165,149',None),
+ 'NIM':  ('#e4ebe6','#f6f7f3','#e9efeb','#b9c3bc','#1a1a1a','#5a625c','#1f6f46','#2b5f9a','#1f6f46','#1f6f46','47,155,99',None),
+ 'ICRPG':('#e9e6dc','#f8f6ef','#f0ece1','#cfc8b8','#1a1a1a','#5d5a50','#8a3712','#8a3712','#8a3712','#8a3712','200,80,30',None),
+ 'YZE':  ('#e2e8ea','#f4f7f8','#e8eef0','#c2ccce','#141a1c','#5c6a6e','#0b6c80','#0b6c80','#0b6c80','#0b6c80','22,189,214',None),
+ 'TWD':  ('#e7ddcd','#f4efe4','#ece2d3','#cdc0ae','#1a1512','#6d6156','#1a1512','#7a1414','#7a1414','#7a1414','158,27,27','/themes/twd-grime-light.webp'),
+ 'MYZ':  ('#e7ddcd','#f4efe4','#ece2d3','#cdc0ae','#1a1512','#6d6156','#2e2a26','#7e3a12','#7e3a12','#7e3a12','181,85,31',None),
+ 'VAE':  ('#e7ddcd','#f4efe4','#ece2d3','#cdc0ae','#1a1512','#6d6156','#7e5c14','#35508a','#7e5c14','#7e5c14','207,155,46',None),
+ 'LOTR': ('#e7dcbf','#fbf6e6','#efe5c8','#d2c39b','#173523','#5d5a3f','#1f4a30','#8a6a12','#1f4a30','#8a6a12','201,162,39',None),
+ 'DB':   ('#e8e6e2','#fbfbfa','#f0eeeb','#cbc7c0','#1d1b19','#5f5b55','#e42a32','#8a6a1f','#1e5842','#8a6a1f','35,104,85','/themes/db-parchment-light.webp'),
+ 'PB':   ('#e8e0cc','#fbf7ee','#efe6d3','#d2c3a8','#1d1313','#6a5a4e','#1d1313','#7a4a2a','#a3121a','#a3121a','163,18,26','/themes/pb-splatter-light.webp'),
+ 'JLU':  ('#dbe3ef','#f6f8fc','#e9eef8','#c3cbdb','#111726','#586074','#1c49a8','#8a6412','#1c49a8','#1c49a8','47,111,237',None),
+}
+# Each system keeps its dark-mode texture in light mode, as a light version of
+# the same art (public/themes/*-light.webp; see the doc for how they were made).
+TEX = {
+ 'DND': ('dnd-cover-light.webp', 'cover', 'center', 'no-repeat'),
+ 'DCC': ('dcc-splatter-light.webp', 'cover', 'center', 'no-repeat'),
+ 'SW': ('sw-starfield-light.webp', 'cover', 'center', 'no-repeat'),
+ 'MMRPG': ('mmrpg-burst-light.webp', 'cover', 'center', 'no-repeat'),
+ 'ACE': ('ace-speedlines-light.webp', 'cover', 'center', 'no-repeat'),
+ 'KOB': ('kob-halftone-light.webp', 'cover', 'center', 'no-repeat'),
+ 'D62E': ('d62e-blueprint-light.webp', 'cover', 'center', 'no-repeat'),
+ 'GB': ('gb-ectoplasm-light.webp', 'cover', 'top center', 'no-repeat'),
+ 'CO': ('co-grunge-light.webp', 'cover', 'center', 'no-repeat'),
+ 'ICRPG': ('icrpg-grain-light.webp', '900px 560px', 'center', 'repeat'),
+ 'YZE': ('yze-raster-light.webp', 'cover', 'center', 'no-repeat'),
+ 'TWD': ('twd-grime-light.webp', 'cover', 'center', 'no-repeat'),
+ 'MYZ': ('myz-metal-light.webp', 'cover', 'center', 'no-repeat'),
+ 'VAE': ('vae-paper-light.webp', 'cover', 'center', 'no-repeat'),
+ 'LOTR': ('lotr-mist-light.webp', 'cover', 'center', 'no-repeat'),
+ 'DB': ('db-parchment-light.webp', 'cover', 'center', 'no-repeat'),
+ 'PB': ('pb-splatter-light.webp', 'cover', 'center', 'no-repeat'),
+ 'JLU': ('jlu-skyline-light.webp', 'cover', 'bottom center', 'no-repeat'),
+}
+W = {'TWD': ('244, 239, 228', '0.25'), 'DB': ('248, 246, 242', '0.45'), 'PB': ('244, 237, 221', '0.7')}
+L = []
+L.append('''/* ===========================================================================
+   LIGHT MODE — <html data-mode="light">, set by the root layout from the
+   account's Appearance setting (User.theme) before first paint.
+   Every surface above reads the same handful of tokens, so light mode is a
+   second set of VALUES for them and nothing more: the app's own chrome first,
+   then one block per system, each taken from that system's light character
+   sheet (its paper, box, ink, muted and deep accent), so the site and the
+   sheets agree. Display colours step down to their deep cuts so text clears
+   4.5:1 on the paper. Every textured ground keeps its texture: light mode
+   uses a light version of the same art (public/themes/*-light.webp), under a
+   faint wash of the accent; untextured systems get the wash alone. GENERATED by scripts/site-light-mode.py (python3) — edit the
+   table there and re-run; do not hand-edit between the LIGHT-MODE markers.
+   ========================================================================= */
+:root[data-mode="light"] {
+  color-scheme: light;
+  --bg: #f1f2f4;
+  --panel: #ffffff;
+  --panel-2: #eef0f3;
+  --border: #d3d8df;
+  --muted: #5a6370;
+  --text: #15181d;
+  --accent: #2f3640;
+  --on-accent: #ffffff;
+  --signal: #c25700;
+  --red: #b3261e;
+  --gold: #8a6412;
+  /* the lifted "-ink" hues were lifted for the dark panels; on paper they
+     take their deep cuts instead */
+  --crimson-ink: #b3141a;
+  --gold-ink: #8a6412;
+  --blue-ink: #2b5fb0;
+  --dcc-ink: #b8164a;
+  --dcc-gold: #8f6f0a;
+  --kob-ink: #5c3596;
+  --d62e-ink: #9a4d18;
+  --nimble-ink: #1f6f46;
+  --icrpg-ink: #8a3712;
+  --jlu-ink: #1c49a8;
+  --mmrpg-blue: #1c5a96;
+  --lotr-ink: #8a6a12;
+  --db-ink: #1e5842;
+  --pb-ink: #a3121a;
+  --twd-bone: #1a1512;
+  --myz-steel: #2e2a26;
+  --vae-bone: #1a1512;
+  --pb-bone: #7a4a2a;
+  --gb-ecto: #3f6a12;
+  --sw-cyan: #0f7180;
+  --candela-gold: #8a6a1c;
+  --grade-1: #66666d;
+  --grade-2: #2f8a45;
+  --grade-3: #2a68b8;
+  --grade-4: #7a45b0;
+  --grade-5: #9a650c;
+  --grade-6: #b3402f;
+  --bronze: #8f5a2e;
+  --silver: #646b72;
+  --good: #2f7a46;
+  --bad: #b3261e;
+}
+''')
+for k,(bg,pa,p2,bo,tx,mu,hd,sb,lk,ac,tint,tex) in S.items():
+    sel = ':root[data-mode="light"][data-system="%s"]:not([data-chrome]) body' % k
+    glow = 'radial-gradient(85%% 40%% at 50%% 0%%, rgba(%s, 0.14) 0%%, rgba(%s, 0) 72%%)' % (tint, tint)
+    if k in TEX:
+        f, size, pos, rep = TEX[k]
+        layers = [glow] + (['linear-gradient(rgba(%s, %s), rgba(%s, %s))' % (W[k][0], W[k][1], W[k][0], W[k][1])] if k in W else []) + ['url("/themes/%s")' % f]
+        n = len(layers)
+        ground = ('  background-image:\n    ' + ',\n    '.join(layers) + ';\n'
+                  '  background-size: ' + ', '.join(['cover'] * (n - 1) + [size]) + ';\n'
+                  '  background-position: ' + ', '.join(['center'] * (n - 1) + [pos]) + ';\n'
+                  '  background-repeat: ' + ', '.join(['no-repeat'] * (n - 1) + [rep]) + ';\n')
+    else:
+        ground = ('  background-image:\n    %s,\n    radial-gradient(130%% 96%% at 50%% 46%%, rgba(0, 0, 0, 0) 50%%, rgba(0, 0, 0, 0.07) 100%%);\n  background-size: cover;\n' % glow)
+    L.append('''%s {
+  --panel: %s;
+  --panel-2: %s;
+  --border: %s;
+  --text: %s;
+  --muted: %s;
+  --sys-head: %s;
+  --sys-sub: %s;
+  --sys-link: %s;
+  --sys-hilite: %s;
+  --sys-action: %s;
+  --gold: %s;
+  --sys: %s;
+  background-color: %s;
+%s}
+''' % (sel, pa, p2, bo, tx, mu, hd, sb, lk, ac, ac, ac, ac, bg, ground))
+# per-system extras that hard-code dark-only colours
+L.append('''/* DCC re-points --red at its magenta; keep that on paper. */
+:root[data-mode="light"][data-system="DCC"]:not([data-chrome]) body { --red: var(--dcc-ink); }
+/* Pirate Borg's titles are white on black; on bone they take the ink. */
+:root[data-mode="light"][data-system="PB"]:not([data-chrome]) body :is(h1, h2, [data-dash-head]):not(.dcc-chrome *) { color: var(--sys-head); }
+/* The home roster's names sit on the ground, not on a tile, so their dark
+   halo would smudge on paper. */
+:root[data-mode="light"] .home-roster { --rtsh: none; }
+/* The game and tool tiles are artwork — dark grounds in every mode — so they
+   keep the dark-mode inks. */
+/* ...and so is the navbar, which stays the dark bar in both modes, the way the
+   sheets keep their dark masthead and roll log: the game wordmarks in it are
+   drawn for a dark ground (white blackletter, yellow crawl, outlined logos). */
+:root[data-mode="light"] .dcc-chrome {
+  color-scheme: dark;
+  --bg: #0b0c0e;
+  --panel: #14161a;
+  --panel-2: #1c1f24;
+  --border: #2b3038;
+  --accent: #d0d5dc;
+  --on-accent: #1a1a1a;
+  --signal: #ff8419;
+  --red: #b82018;
+}
+:root[data-mode="light"] .home-tile,
+:root[data-mode="light"] .roster-card,
+:root[data-mode="light"] .dcc-chrome {
+  --text: #e9edf2;
+  --muted: #8d96a3;
+  --crimson-ink: #ff3b30; --gold-ink: #e2b23a; --blue-ink: #8ab4f8;
+  --dcc-ink: #ee4a78; --dcc-gold: #f2c230; --kob-ink: #c9aaff; --d62e-ink: #f0a050;
+  --nimble-ink: #7fd39a; --icrpg-ink: #e8823c; --jlu-ink: #6293f2; --mmrpg-blue: #7fc0f5;
+  --lotr-ink: #e2c36b; --db-ink: #5cb894; --pb-ink: #e6463a; --twd-bone: #d8cfbf;
+  --myz-steel: #d9d3c6; --vae-bone: #e7dec9; --pb-bone: #e8e0cc; --gb-ecto: #b6e34a;
+  --sw-cyan: #30d5e8; --candela-gold: #d8b24a;
+  --jlu-gold: #e2b23a; --mmrpg-ink: #ff3b30; --nimble-blue: #8ab4f8;
+}
+''')
+# Roster cards (My Characters / My Campaigns) are dark art cards: re-resolve each
+# system's tile colours ON the card, where the dark inks are restored above.
+g = open(P, encoding='utf8').read()
+rows = re.findall(r'^\[data-sys="(\w+)"\],\s*\.home-tile\[data-sys="\w+"\]\s*\{([^}]*)\}', g, re.M)
+rl = []
+for k, body in rows:
+    decl = ' '.join(d.strip() + ';' for d in body.split(';') if re.match(r'\s*--tile-(accent|ink|sub)\s*:', d))
+    if decl: rl.append(':root[data-mode="light"] [data-sys="%s"] .roster-card { %s }' % (k, decl))
+L.append('\n'.join(rl) + '\n')
+L.append('''/* The roster's system labels sit on the paper: the white wordmarks take the ink. */
+:root[data-mode="light"] .roster-sys[data-sys="PB"] .roster-sys-name,
+:root[data-mode="light"] .roster-sys[data-sys="GB"] .roster-sys-name { color: var(--text); -webkit-text-stroke: 0; }
+''')
+css = '\n'.join(L)
+s = open(P, encoding='utf8').read()
+A, B = '/* LIGHT-MODE:START */', '/* LIGHT-MODE:END */'
+block = A + '\n' + css + B + '\n'
+if A in s:
+    s = s[:s.index(A)] + block + s[s.index(B) + len(B) + 1:]
+else:
+    s = s.rstrip('\n') + '\n\n' + block
+open(P, 'w', encoding='utf8').write(s)
+print('ok', len(css))

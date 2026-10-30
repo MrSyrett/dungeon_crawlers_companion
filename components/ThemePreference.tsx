@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { setTheme as saveTheme } from "@/app/actions/theme";
+import { SHEET_PREFIXES } from "@/lib/theme";
 
 // The ONE light/dark control for the whole app.
 //
@@ -10,37 +12,27 @@ import { useEffect, useState } from "react";
 // fourteen sheets. It lives here now, and the mini-bar links to this page
 // instead of carrying its own toggle.
 //
-// What it writes: `dd_theme`, which every standalone sheet reads at load
-// (lib/minibar.ts seeds the sheet's own `<prefix>_dark` key from it before the
-// sheet's script runs, so a sheet opens in the right mode with no flash). The
-// Next pages are dark-only today, so this preference is about the sheets and
-// the prep builders — said plainly below rather than implied.
+// It is saved to the ACCOUNT (User.theme), so it follows you to every device,
+// and mirrored to the browser so nothing has to wait on a fetch to paint:
+//   * a `dd_theme` cookie — the root layout reads it (or User.theme) to render
+//     <html data-mode> on the server, so Next pages never flash;
+//   * localStorage `dd_theme` + each sheet's `<prefix>_dark` — what the static
+//     tools (sheets, preps, GM Screen, Map Maker, Tabletop) read at load. The
+//     layout's boot script re-syncs these from the account on every page view.
 
 type Theme = "dark" | "light";
 
 const KEY = "dd_theme";
 
-function read(): Theme {
-  try {
-    return localStorage.getItem(KEY) === "light" ? "light" : "dark";
-  } catch {
-    return "dark"; // private mode / storage blocked
-  }
-}
-
-export default function ThemePreference() {
-  // Start on the default and correct after mount: localStorage isn't readable
-  // while rendering on the server, and guessing would flash the wrong state.
-  const [theme, setTheme] = useState<Theme>("dark");
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    setTheme(read());
-    setReady(true);
-  }, []);
+export default function ThemePreference({ initial }: { initial?: string }) {
+  // The server passes the account's value, so the right button is lit on first paint.
+  const [theme, setTheme] = useState<Theme>(initial === "light" ? "light" : "dark");
+  const ready = true;
 
   function choose(next: Theme) {
     setTheme(next);
+    document.documentElement.dataset.mode = next;
+    void saveTheme(next).catch(() => {});
     try {
       localStorage.setItem(KEY, next);
       // Mirror into every sheet's own dark-mode key so a sheet already open in
@@ -69,16 +61,8 @@ export default function ThemePreference() {
         </button>
       </div>
       <p className="text-[12px] leading-relaxed text-[var(--muted)]">
-        Applies to character sheets and adventure preps. The rest of the site is dark only.
+        Applies everywhere — site pages, character sheets, adventure preps, the GM Screen, Map Maker and Tabletop. Saved to your account.
       </p>
     </div>
   );
 }
-
-// Every sheet follows the same convention — "sd_character_sheet.html" keeps its
-// dark flag in "sd_dark" — which is what lets one preference drive all of them.
-// Kept in step with the tool list in lib/tools.ts.
-const SHEET_PREFIXES = [
-  "sd", "dcc", "dnd", "ace", "kob", "nimble", "sw", "d62e",
-  "icrpg", "co", "yze", "mmrpg", "jlu", "gb", "twd", "myz", "vae", "lotr", "db", "pb",
-];

@@ -1,0 +1,5 @@
+/* Light-only rules, written as plain selectors: the builder states each one under
+   :root[data-mode="light"] with the same specificity bump as the twins, after them. */
+body::before { opacity: .5; }
+/* Window headers of a campaign: a pale wash of the system colour, the accent line kept. */
+:root[data-gm-theme] .cst-head { background: linear-gradient(180deg, color-mix(in srgb, var(--gt-b) 9%, #fff), color-mix(in srgb, var(--gt-b) 5%, #f1f2f4)) !important; box-shadow: 0 1px 0 color-mix(in srgb, var(--accent) 35%, transparent) !important; }

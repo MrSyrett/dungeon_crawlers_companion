@@ -19,6 +19,9 @@ model User {
   // them (admins are auto-approved on signup). Existing accounts were backfilled
   // to true by the migration so this gate only affects people who join later.
   approved     Boolean    @default(false)
+  // Light / dark mode for the whole site (pages, sheets, preps, GM Screen,
+  // Map Maker, Tabletop). "dark" | "light". Set on Account › Appearance.
+  theme        String     @default("dark")
 
   sessions  Session[]
   documents Document[]

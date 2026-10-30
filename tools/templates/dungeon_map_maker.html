@@ -6,6 +6,11 @@
        from /fonts/google on this origin. Fetching them remotely as well was
        what made the type pop in a beat late. -->
 <meta charset="utf-8">
+<!-- Light / dark: the account-wide choice lives in localStorage.dd_theme
+     ("light" | "dark"; anything else = dark). Stamp it on <html data-mode> before
+     first paint, and follow changes made in another tab live. Every light rule
+     below is keyed off :root[data-mode="light"]; dark is the unmarked default. -->
+<script>(function(){var d=document.documentElement;function a(){var m="dark";try{if(localStorage.getItem("dd_theme")==="light")m="light"}catch(e){}d.setAttribute("data-mode",m)}a();try{addEventListener("storage",function(e){if(e.key===null||e.key==="dd_theme")a()})}catch(e){}})();</script>
 <!-- Fixed size on mobile: no pinch zoom, so the page behaves like an app rather
      than a zoomable document. iOS Safari honours maximum-scale/user-scalable ONLY in
      standalone (Home Screen) mode, not in a browser tab — Apple removed the tab
@@ -284,6 +289,42 @@
 /* dd-no-spin-global — hide number-input spinner arrows everywhere */
 input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none;margin:0;}
+
+  /* ── Light mode (dd_theme = "light") ─────────────────────────────────
+     The editor's CHROME only — sidebar, dock, popups, dialogs, the site bar.
+     The map itself (canvas, textures, grid, the theme's surround colour that
+     JS paints on .preview-area) is artwork and is never recoloured. The accent
+     here is monochrome, so in light it mirrors to a dark ink. The injected site
+     bar (#dd-nav, lib/sitenav.ts) pins its own palette and is not touched here. */
+  :root[data-mode="light"]{
+    color-scheme:light;
+    --bg:#e8ebef; --panel:#f7f8fa; --panel2:#eceff3; --line:#cdd3da;
+    --ink:#1c2128; --muted:#59626f; --gold:#2b313a; --gold-dim:#9aa3ae;
+    --active:#dfe3e8; --danger:#a3412c;
+    --fg:#1c2128; --chip:#e6e9ed; --bad:#b23a26;
+  }
+  :root[data-mode="light"] .sidebar,:root[data-mode="light"] .objgrid{scrollbar-color:#b9c0c8 transparent}
+  :root[data-mode="light"] .sidebar::-webkit-scrollbar-thumb,:root[data-mode="light"] .objgrid::-webkit-scrollbar-thumb{background:#b9c0c8;background-clip:content-box}
+  :root[data-mode="light"] .sidebar:hover::-webkit-scrollbar-thumb,:root[data-mode="light"] .objgrid:hover::-webkit-scrollbar-thumb{background:#9aa3ae;background-clip:content-box}
+  :root[data-mode="light"] .switch input:checked + .slider{background:var(--gold);border-color:var(--gold)}
+  :root[data-mode="light"] .switch input:checked + .slider::before{background:#fff}
+  :root[data-mode="light"] .seg button.on{color:#fff}
+  :root[data-mode="light"] .btn.gold{background:linear-gradient(180deg,#3b424c,#242930);border-color:#242930;color:#fff}
+  :root[data-mode="light"] .lyr.active{background:#e4e8ed}
+  :root[data-mode="light"] .asset-count.over{color:#b23a26}
+  :root[data-mode="light"] .packs .pk button:hover{color:#b23a26}
+  :root[data-mode="light"] .objgrid button{background:#dde1e6}
+  :root[data-mode="light"] .objgrid button.on{background:#c9cfd6}
+  :root[data-mode="light"] .objgrid .tbadge.tn{color:#fff}
+  :root[data-mode="light"] .pickpop{box-shadow:0 10px 28px rgba(22,30,42,.2)}
+  :root[data-mode="light"] .float{background:rgba(250,251,252,.92);box-shadow:0 2px 10px rgba(22,30,42,.12)}
+  :root[data-mode="light"] .zoombar button:hover{background:var(--active)}
+  :root[data-mode="light"] #pfSaveOk{color:#fff!important}
+  :root[data-mode="light"] #mapsModal,:root[data-mode="light"] #exportModal,
+  :root[data-mode="light"] #shortcutsModal,:root[data-mode="light"] #prefabSaveModal{background:rgba(24,28,34,.38)!important}
+  :root[data-mode="light"] #mapsModal>div,:root[data-mode="light"] #exportModal>div,
+  :root[data-mode="light"] #shortcutsModal>div,:root[data-mode="light"] #prefabSaveModal>div,
+  :root[data-mode="light"] #cropBar{box-shadow:0 12px 40px rgba(22,30,42,.25)!important}
 </style>
 </head>
 <body>

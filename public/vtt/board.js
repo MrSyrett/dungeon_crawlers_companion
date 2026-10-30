@@ -341,10 +341,14 @@
     }
     function cancelGlide(id) { delete glides[id]; }
 
+    // Light mode (<html data-mode="light">, from the account-wide dd_theme) lightens
+    // only the EMPTY surround the map sits on and the loading text drawn over it.
+    // The map, grid, fog and tokens are artwork and are drawn the same either way.
+    function lightMode() { return typeof document !== "undefined" && document.documentElement.getAttribute("data-mode") === "light"; }
     function render() {
       var s = cssSize();
       ctx.clearRect(0, 0, s.w, s.h);
-      ctx.fillStyle = "#0b0d10";
+      ctx.fillStyle = lightMode() ? "#dde1e6" : "#0b0d10";
       ctx.fillRect(0, 0, s.w, s.h);
 
       // While a scene is streaming in, show just a blank canvas + a progress bar so
@@ -499,16 +503,17 @@
       var pct = Math.max(0, Math.min(100, state.loading || 0));
       var cx = s.w / 2, cy = s.h / 2, bw = Math.min(280, s.w * 0.6), bh = 8;
       ctx.save();
-      ctx.fillStyle = "#c8cdd6"; ctx.font = "600 13px system-ui, sans-serif";
+      var lm = lightMode();
+      ctx.fillStyle = lm ? "#3d4652" : "#c8cdd6"; ctx.font = "600 13px system-ui, sans-serif";
       ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
       ctx.fillText("Loading scene…", cx, cy - 16);
       // track
-      ctx.fillStyle = "rgba(255,255,255,0.12)";
+      ctx.fillStyle = lm ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.12)";
       roundRect(cx - bw / 2, cy - bh / 2, bw, bh, bh / 2); ctx.fill();
       // fill
       ctx.fillStyle = "#c8a24a";
       roundRect(cx - bw / 2, cy - bh / 2, Math.max(bh, bw * pct / 100), bh, bh / 2); ctx.fill();
-      ctx.fillStyle = "#8b93a0"; ctx.font = "600 11px system-ui, sans-serif";
+      ctx.fillStyle = lm ? "#59626f" : "#8b93a0"; ctx.font = "600 11px system-ui, sans-serif";
       ctx.fillText(Math.round(pct) + "%", cx, cy + 22);
       ctx.restore();
     }
@@ -1571,6 +1576,9 @@
     canvas.addEventListener("wheel", onWheel, { passive: false });
     root.addEventListener("keydown", onKey);
     root.addEventListener("resize", resize);
+    // The site's light/dark switch, changed in another tab: the page's head script
+    // re-stamps <html data-mode>; repaint so the canvas surround follows it.
+    root.addEventListener("storage", function (e) { if (!e.key || e.key === "dd_theme") scheduleRender(); });
     canvas.addEventListener("dblclick", function (e) {
       var p = localPoint(e); var t = tokenAt(p.x, p.y);
       if (t) emit("open", { token: t });

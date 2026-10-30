@@ -59,7 +59,7 @@ export default async function AdminUsersPage() {
             <section className="mb-8">
               <h2 className="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.18em] text-[var(--gold)]">
                 Awaiting approval
-                <span className="rounded-full bg-[var(--gold)] px-2 py-0.5 text-[10px] font-black text-black">
+                <span className="rounded-full bg-[var(--gold)] px-2 py-0.5 text-[10px] font-black text-[var(--on-accent)]">
                   {pending.length}
                 </span>
               </h2>
