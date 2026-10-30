@@ -2460,10 +2460,11 @@ div.roster-card:hover { border-color: var(--tile-accent); }
    ========================================================================= */
 :root[data-mode="light"] {
   color-scheme: light;
-  --bg: #f1f2f4;
-  --panel: #ffffff;
-  --panel-2: #eef0f3;
-  --border: #d3d8df;
+  --bg: #dfe1e5;
+  --panel: #eaecef;
+  --panel-raise: #f6f7f9;
+  --panel-2: #dcdfe4;
+  --border: #c3c8d0;
   --muted: #5a6370;
   --text: #15181d;
   --accent: #2f3640;
@@ -2554,19 +2555,20 @@ div.roster-card:hover { border-color: var(--tile-accent); }
 }
 
 :root[data-mode="light"][data-system="SD"]:not([data-chrome]) body {
-  --panel: #fbfbf8;
-  --panel-2: #efefec;
-  --border: #cbcbc5;
+  --panel: #ecebe6;
+  --panel-raise: #f7f7f4;
+  --panel-2: #e4e4de;
+  --border: #b8b8b2;
   --text: #0a0a0a;
   --muted: #55554f;
   --sys-head: #0a0a0a;
-  --sys-sub: #8a6c0c;
-  --sys-link: #8a6c0c;
-  --sys-hilite: #8a6c0c;
-  --sys-action: #8a6c0c;
-  --gold: #8a6c0c;
-  --sys: #8a6c0c;
-  background-color: #efeee9;
+  --sys-sub: #7c610b;
+  --sys-link: #7c610b;
+  --sys-hilite: #7c610b;
+  --sys-action: #7c610b;
+  --gold: #7c610b;
+  --sys: #7c610b;
+  background-color: #dfded9;
   background-image:
     radial-gradient(85% 40% at 50% 0%, rgba(200,160,32, 0.14) 0%, rgba(200,160,32, 0) 72%),
     radial-gradient(130% 96% at 50% 46%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.07) 100%);
@@ -2579,7 +2581,7 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --mmrpg-ink: var(--crimson-ink);
   --jlu-gold: var(--gold-ink);
   --nimble-blue: var(--blue-ink);
-  --bg: #f1f2f4;
+  --bg: #dfe1e5;
   --accent: #2f3640;
   --on-accent: #ffffff;
   --signal: #c25700;
@@ -2614,18 +2616,19 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --silver: #646b72;
   --good: #2f7a46;
   --bad: #b3261e;
-  --panel: #f7f3ec;
-  --panel-2: #efe7d8;
-  --border: #c8bca8;
+  --panel: #e5e0d8;
+  --panel-raise: #f2eee7;
+  --panel-2: #ded7cc;
+  --border: #b7ab99;
   --text: #1a1613;
   --muted: #5f574d;
   --sys-head: #7a1119;
-  --sys-sub: #8a6412;
+  --sys-sub: #785710;
   --sys-link: #9b1b22;
-  --sys-hilite: #8a6412;
-  --sys-action: #8a6412;
-  --gold: #8a6412;
-  --sys: #8a6412;
+  --sys-hilite: #785710;
+  --sys-action: #785710;
+  --gold: #785710;
+  --sys: #785710;
   --red: #b3261e;
   color: var(--text);
 }
@@ -2636,7 +2639,7 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --mmrpg-ink: var(--crimson-ink);
   --jlu-gold: var(--gold-ink);
   --nimble-blue: var(--blue-ink);
-  --bg: #f1f2f4;
+  --bg: #dfe1e5;
   --accent: #2f3640;
   --on-accent: #ffffff;
   --signal: #c25700;
@@ -2671,18 +2674,19 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --silver: #646b72;
   --good: #2f7a46;
   --bad: #b3261e;
-  --panel: #f5f3f0;
-  --panel-2: #ede9e4;
-  --border: #c9c1b6;
+  --panel: #e6e1dd;
+  --panel-raise: #f1eeeb;
+  --panel-2: #dfdad3;
+  --border: #b8b0a6;
   --text: #1a1a1a;
   --muted: #575757;
   --sys-head: #1a1a1a;
   --sys-sub: #b8164a;
   --sys-link: #b8164a;
-  --sys-hilite: #8f6f0a;
-  --sys-action: #8f6f0a;
-  --gold: #8f6f0a;
-  --sys: #8f6f0a;
+  --sys-hilite: #725908;
+  --sys-action: #725908;
+  --gold: #725908;
+  --sys: #725908;
   --red: #b8164a;
   color: var(--text);
 }
@@ -2693,7 +2697,7 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --mmrpg-ink: var(--crimson-ink);
   --jlu-gold: var(--gold-ink);
   --nimble-blue: var(--blue-ink);
-  --bg: #f1f2f4;
+  --bg: #dfe1e5;
   --accent: #2f3640;
   --on-accent: #ffffff;
   --signal: #c25700;
@@ -2728,18 +2732,19 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --silver: #646b72;
   --good: #2f7a46;
   --bad: #b3261e;
-  --panel: #f8f6ef;
-  --panel-2: #efece2;
-  --border: #c9c3b2;
+  --panel: #e6e3d9;
+  --panel-raise: #f4f1e9;
+  --panel-2: #dfdccf;
+  --border: #b8b2a3;
   --text: #1a1a1a;
   --muted: #5d5a50;
-  --sys-head: #7a5f0e;
-  --sys-sub: #0f7180;
-  --sys-link: #0f7180;
-  --sys-hilite: #7a5f0e;
-  --sys-action: #7a5f0e;
-  --gold: #7a5f0e;
-  --sys: #7a5f0e;
+  --sys-head: #755b0d;
+  --sys-sub: #0e6977;
+  --sys-link: #0e6977;
+  --sys-hilite: #755b0d;
+  --sys-action: #755b0d;
+  --gold: #755b0d;
+  --sys: #755b0d;
   --red: #b3261e;
   color: var(--text);
 }
@@ -2750,7 +2755,7 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --mmrpg-ink: var(--crimson-ink);
   --jlu-gold: var(--gold-ink);
   --nimble-blue: var(--blue-ink);
-  --bg: #f1f2f4;
+  --bg: #dfe1e5;
   --accent: #2f3640;
   --on-accent: #ffffff;
   --signal: #c25700;
@@ -2785,9 +2790,10 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --silver: #646b72;
   --good: #2f7a46;
   --bad: #b3261e;
-  --panel: #f6f7f9;
-  --panel-2: #eceef2;
-  --border: #c9ccd4;
+  --panel: #e6e8eb;
+  --panel-raise: #f2f3f5;
+  --panel-2: #dfe1e5;
+  --border: #b7bac2;
   --text: #16181c;
   --muted: #5c626e;
   --sys-head: #b3141a;
@@ -2807,7 +2813,7 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --mmrpg-ink: var(--crimson-ink);
   --jlu-gold: var(--gold-ink);
   --nimble-blue: var(--blue-ink);
-  --bg: #f1f2f4;
+  --bg: #dfe1e5;
   --accent: #2f3640;
   --on-accent: #ffffff;
   --signal: #c25700;
@@ -2842,18 +2848,19 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --silver: #646b72;
   --good: #2f7a46;
   --bad: #b3261e;
-  --panel: #f7f4ea;
-  --panel-2: #efe9d6;
-  --border: #c4bda8;
+  --panel: #dde5ea;
+  --panel-raise: #f0f1ec;
+  --panel-2: #d7dcda;
+  --border: #b3ad9a;
   --text: #1a1a1a;
   --muted: #5a5f66;
-  --sys-head: #1d6f9a;
+  --sys-head: #1a6389;
   --sys-sub: #114c6a;
-  --sys-link: #1d6f9a;
-  --sys-hilite: #1d6f9a;
-  --sys-action: #1d6f9a;
-  --gold: #1d6f9a;
-  --sys: #1d6f9a;
+  --sys-link: #1a6389;
+  --sys-hilite: #1a6389;
+  --sys-action: #1a6389;
+  --gold: #1a6389;
+  --sys: #1a6389;
   --red: #b3261e;
   color: var(--text);
 }
@@ -2864,7 +2871,7 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --mmrpg-ink: var(--crimson-ink);
   --jlu-gold: var(--gold-ink);
   --nimble-blue: var(--blue-ink);
-  --bg: #f1f2f4;
+  --bg: #dfe1e5;
   --accent: #2f3640;
   --on-accent: #ffffff;
   --signal: #c25700;
@@ -2899,13 +2906,14 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --silver: #646b72;
   --good: #2f7a46;
   --bad: #b3261e;
-  --panel: #f6f3f8;
-  --panel-2: #ece6f2;
-  --border: #c9c0d6;
+  --panel: #e4dfec;
+  --panel-raise: #f1eef5;
+  --panel-2: #ddd8e7;
+  --border: #b8afc3;
   --text: #1a1a1a;
   --muted: #5a5a66;
   --sys-head: #5c3596;
-  --sys-sub: #1a6f6f;
+  --sys-sub: #186767;
   --sys-link: #5c3596;
   --sys-hilite: #5c3596;
   --sys-action: #5c3596;
@@ -2921,7 +2929,7 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --mmrpg-ink: var(--crimson-ink);
   --jlu-gold: var(--gold-ink);
   --nimble-blue: var(--blue-ink);
-  --bg: #f1f2f4;
+  --bg: #dfe1e5;
   --accent: #2f3640;
   --on-accent: #ffffff;
   --signal: #c25700;
@@ -2956,18 +2964,19 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --silver: #646b72;
   --good: #2f7a46;
   --bad: #b3261e;
-  --panel: #f8f6ef;
-  --panel-2: #f0ece1;
-  --border: #cfc8b8;
+  --panel: #e7e4d9;
+  --panel-raise: #f4f1e9;
+  --panel-2: #e1ddd1;
+  --border: #bdb7a8;
   --text: #1a1a1a;
   --muted: #5d5a50;
-  --sys-head: #9a4d18;
+  --sys-head: #964b17;
   --sys-sub: #2b5f9a;
-  --sys-link: #9a4d18;
-  --sys-hilite: #9a4d18;
-  --sys-action: #9a4d18;
-  --gold: #9a4d18;
-  --sys: #9a4d18;
+  --sys-link: #964b17;
+  --sys-hilite: #964b17;
+  --sys-action: #964b17;
+  --gold: #964b17;
+  --sys: #964b17;
   --red: #b3261e;
   color: var(--text);
 }
@@ -2978,7 +2987,7 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --mmrpg-ink: var(--crimson-ink);
   --jlu-gold: var(--gold-ink);
   --nimble-blue: var(--blue-ink);
-  --bg: #f1f2f4;
+  --bg: #dfe1e5;
   --accent: #2f3640;
   --on-accent: #ffffff;
   --signal: #c25700;
@@ -3013,9 +3022,10 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --silver: #646b72;
   --good: #2f7a46;
   --bad: #b3261e;
-  --panel: #f4f6ee;
-  --panel-2: #eaeee0;
-  --border: #c7cdb8;
+  --panel: #e5eadc;
+  --panel-raise: #f0f3ea;
+  --panel-2: #dee3d3;
+  --border: #b5bba7;
   --text: #161a12;
   --muted: #5b6350;
   --sys-head: #3f6a12;
@@ -3035,7 +3045,7 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --mmrpg-ink: var(--crimson-ink);
   --jlu-gold: var(--gold-ink);
   --nimble-blue: var(--blue-ink);
-  --bg: #f1f2f4;
+  --bg: #dfe1e5;
   --accent: #2f3640;
   --on-accent: #ffffff;
   --signal: #c25700;
@@ -3070,13 +3080,14 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --silver: #646b72;
   --good: #2f7a46;
   --bad: #b3261e;
-  --panel: #f6f8f6;
-  --panel-2: #eaf0ed;
-  --border: #c2cec9;
+  --panel: #e3e9e6;
+  --panel-raise: #f1f4f2;
+  --panel-2: #dbe2df;
+  --border: #b1bdb8;
   --text: #182220;
   --muted: #586460;
   --sys-head: #1c6b60;
-  --sys-sub: #8a6a1c;
+  --sys-sub: #795d19;
   --sys-link: #1c6b60;
   --sys-hilite: #1c6b60;
   --sys-action: #1c6b60;
@@ -3087,19 +3098,20 @@ div.roster-card:hover { border-color: var(--tile-accent); }
 }
 
 :root[data-mode="light"][data-system="NIM"]:not([data-chrome]) body {
-  --panel: #f6f7f3;
-  --panel-2: #e9efeb;
-  --border: #b9c3bc;
+  --panel: #e1e8e3;
+  --panel-raise: #f1f3ef;
+  --panel-2: #d7dfd9;
+  --border: #a9b2ac;
   --text: #1a1a1a;
   --muted: #5a625c;
-  --sys-head: #1f6f46;
+  --sys-head: #1e6b43;
   --sys-sub: #2b5f9a;
-  --sys-link: #1f6f46;
-  --sys-hilite: #1f6f46;
-  --sys-action: #1f6f46;
-  --gold: #1f6f46;
-  --sys: #1f6f46;
-  background-color: #e4ebe6;
+  --sys-link: #1e6b43;
+  --sys-hilite: #1e6b43;
+  --sys-action: #1e6b43;
+  --gold: #1e6b43;
+  --sys: #1e6b43;
+  background-color: #d1d9d3;
   background-image:
     radial-gradient(85% 40% at 50% 0%, rgba(47,155,99, 0.14) 0%, rgba(47,155,99, 0) 72%),
     radial-gradient(130% 96% at 50% 46%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.07) 100%);
@@ -3112,7 +3124,7 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --mmrpg-ink: var(--crimson-ink);
   --jlu-gold: var(--gold-ink);
   --nimble-blue: var(--blue-ink);
-  --bg: #f1f2f4;
+  --bg: #dfe1e5;
   --accent: #2f3640;
   --on-accent: #ffffff;
   --signal: #c25700;
@@ -3147,9 +3159,10 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --silver: #646b72;
   --good: #2f7a46;
   --bad: #b3261e;
-  --panel: #f8f6ef;
-  --panel-2: #f0ece1;
-  --border: #cfc8b8;
+  --panel: #e7e4d9;
+  --panel-raise: #f4f1e9;
+  --panel-2: #e1ddd1;
+  --border: #bdb7a8;
   --text: #1a1a1a;
   --muted: #5d5a50;
   --sys-head: #8a3712;
@@ -3169,7 +3182,7 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --mmrpg-ink: var(--crimson-ink);
   --jlu-gold: var(--gold-ink);
   --nimble-blue: var(--blue-ink);
-  --bg: #f1f2f4;
+  --bg: #dfe1e5;
   --accent: #2f3640;
   --on-accent: #ffffff;
   --signal: #c25700;
@@ -3204,18 +3217,19 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --silver: #646b72;
   --good: #2f7a46;
   --bad: #b3261e;
-  --panel: #f4f7f8;
-  --panel-2: #e8eef0;
-  --border: #c2ccce;
+  --panel: #dfe6e8;
+  --panel-raise: #eff2f4;
+  --panel-2: #d8e0e2;
+  --border: #b1babc;
   --text: #141a1c;
-  --muted: #5c6a6e;
-  --sys-head: #0b6c80;
-  --sys-sub: #0b6c80;
-  --sys-link: #0b6c80;
-  --sys-hilite: #0b6c80;
-  --sys-action: #0b6c80;
-  --gold: #0b6c80;
-  --sys: #0b6c80;
+  --muted: #556266;
+  --sys-head: #0b687b;
+  --sys-sub: #0b687b;
+  --sys-link: #0b687b;
+  --sys-hilite: #0b687b;
+  --sys-action: #0b687b;
+  --gold: #0b687b;
+  --sys: #0b687b;
   --red: #b3261e;
   color: var(--text);
 }
@@ -3226,7 +3240,7 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --mmrpg-ink: var(--crimson-ink);
   --jlu-gold: var(--gold-ink);
   --nimble-blue: var(--blue-ink);
-  --bg: #f1f2f4;
+  --bg: #dfe1e5;
   --accent: #2f3640;
   --on-accent: #ffffff;
   --signal: #c25700;
@@ -3261,11 +3275,12 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --silver: #646b72;
   --good: #2f7a46;
   --bad: #b3261e;
-  --panel: #f4efe4;
-  --panel-2: #ece2d3;
-  --border: #cdc0ae;
+  --panel: #e5dbcb;
+  --panel-raise: #f0eadd;
+  --panel-2: #dfd4c4;
+  --border: #bbaf9e;
   --text: #1a1512;
-  --muted: #6d6156;
+  --muted: #64594f;
   --sys-head: #1a1512;
   --sys-sub: #7a1414;
   --sys-link: #7a1414;
@@ -3283,7 +3298,7 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --mmrpg-ink: var(--crimson-ink);
   --jlu-gold: var(--gold-ink);
   --nimble-blue: var(--blue-ink);
-  --bg: #f1f2f4;
+  --bg: #dfe1e5;
   --accent: #2f3640;
   --on-accent: #ffffff;
   --signal: #c25700;
@@ -3318,11 +3333,12 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --silver: #646b72;
   --good: #2f7a46;
   --bad: #b3261e;
-  --panel: #f4efe4;
-  --panel-2: #ece2d3;
-  --border: #cdc0ae;
+  --panel: #e5dbcb;
+  --panel-raise: #f0eadd;
+  --panel-2: #dfd4c4;
+  --border: #bbaf9e;
   --text: #1a1512;
-  --muted: #6d6156;
+  --muted: #64594f;
   --sys-head: #2e2a26;
   --sys-sub: #7e3a12;
   --sys-link: #7e3a12;
@@ -3340,7 +3356,7 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --mmrpg-ink: var(--crimson-ink);
   --jlu-gold: var(--gold-ink);
   --nimble-blue: var(--blue-ink);
-  --bg: #f1f2f4;
+  --bg: #dfe1e5;
   --accent: #2f3640;
   --on-accent: #ffffff;
   --signal: #c25700;
@@ -3375,18 +3391,19 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --silver: #646b72;
   --good: #2f7a46;
   --bad: #b3261e;
-  --panel: #f4efe4;
-  --panel-2: #ece2d3;
-  --border: #cdc0ae;
+  --panel: #e5dbcb;
+  --panel-raise: #f0eadd;
+  --panel-2: #dfd4c4;
+  --border: #bbaf9e;
   --text: #1a1512;
-  --muted: #6d6156;
-  --sys-head: #7e5c14;
+  --muted: #64594f;
+  --sys-head: #755613;
   --sys-sub: #35508a;
-  --sys-link: #7e5c14;
-  --sys-hilite: #7e5c14;
-  --sys-action: #7e5c14;
-  --gold: #7e5c14;
-  --sys: #7e5c14;
+  --sys-link: #755613;
+  --sys-hilite: #755613;
+  --sys-action: #755613;
+  --gold: #755613;
+  --sys: #755613;
   --red: #b3261e;
   color: var(--text);
 }
@@ -3397,7 +3414,7 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --mmrpg-ink: var(--crimson-ink);
   --jlu-gold: var(--gold-ink);
   --nimble-blue: var(--blue-ink);
-  --bg: #f1f2f4;
+  --bg: #dfe1e5;
   --accent: #2f3640;
   --on-accent: #ffffff;
   --signal: #c25700;
@@ -3432,9 +3449,10 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --silver: #646b72;
   --good: #2f7a46;
   --bad: #b3261e;
-  --panel: #fbf6e6;
-  --panel-2: #efe5c8;
-  --border: #d2c39b;
+  --panel: #e5dabc;
+  --panel-raise: #f5eeda;
+  --panel-2: #e1d4b4;
+  --border: #bfb58f;
   --text: #173523;
   --muted: #5d5a3f;
   --sys-head: #1f4a30;
@@ -3454,7 +3472,7 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --mmrpg-ink: var(--crimson-ink);
   --jlu-gold: var(--gold-ink);
   --nimble-blue: var(--blue-ink);
-  --bg: #f1f2f4;
+  --bg: #dfe1e5;
   --accent: #2f3640;
   --on-accent: #ffffff;
   --signal: #c25700;
@@ -3489,18 +3507,19 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --silver: #646b72;
   --good: #2f7a46;
   --bad: #b3261e;
-  --panel: #fbfbfa;
-  --panel-2: #f0eeeb;
-  --border: #cbc7c0;
+  --panel: #e6e4df;
+  --panel-raise: #f5f5f3;
+  --panel-2: #dfddd8;
+  --border: #bab6af;
   --text: #1d1b19;
   --muted: #5f5b55;
   --sys-head: #1e5842;
-  --sys-sub: #8a6a1f;
+  --sys-sub: #755a1a;
   --sys-link: #1e5842;
-  --sys-hilite: #8a6a1f;
-  --sys-action: #8a6a1f;
-  --gold: #8a6a1f;
-  --sys: #8a6a1f;
+  --sys-hilite: #755a1a;
+  --sys-action: #755a1a;
+  --gold: #755a1a;
+  --sys: #755a1a;
   --red: #b3261e;
   color: var(--text);
 }
@@ -3511,7 +3530,7 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --mmrpg-ink: var(--crimson-ink);
   --jlu-gold: var(--gold-ink);
   --nimble-blue: var(--blue-ink);
-  --bg: #f1f2f4;
+  --bg: #dfe1e5;
   --accent: #2f3640;
   --on-accent: #ffffff;
   --signal: #c25700;
@@ -3546,9 +3565,10 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --silver: #646b72;
   --good: #2f7a46;
   --bad: #b3261e;
-  --panel: #fbf7ee;
-  --panel-2: #efe6d3;
-  --border: #d2c3a8;
+  --panel: #e6dec9;
+  --panel-raise: #f5f0e4;
+  --panel-2: #e1d7c1;
+  --border: #c0b199;
   --text: #1d1313;
   --muted: #6a5a4e;
   --sys-head: #1d1313;
@@ -3568,7 +3588,7 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --mmrpg-ink: var(--crimson-ink);
   --jlu-gold: var(--gold-ink);
   --nimble-blue: var(--blue-ink);
-  --bg: #f1f2f4;
+  --bg: #dfe1e5;
   --accent: #2f3640;
   --on-accent: #ffffff;
   --signal: #c25700;
@@ -3603,13 +3623,14 @@ div.roster-card:hover { border-color: var(--tile-accent); }
   --silver: #646b72;
   --good: #2f7a46;
   --bad: #b3261e;
-  --panel: #f6f8fc;
-  --panel-2: #e9eef8;
-  --border: #c3cbdb;
+  --panel: #d9e1ed;
+  --panel-raise: #eef2f8;
+  --panel-2: #d4dce9;
+  --border: #b1b9c9;
   --text: #111726;
-  --muted: #586074;
+  --muted: #565e71;
   --sys-head: #1c49a8;
-  --sys-sub: #8a6412;
+  --sys-sub: #785710;
   --sys-link: #1c49a8;
   --sys-hilite: #1c49a8;
   --sys-action: #1c49a8;
@@ -3681,79 +3702,91 @@ div.roster-card:hover { border-color: var(--tile-accent); }
 :root[data-mode="light"] .roster-sys[data-sys="PB"] .roster-sys-name,
 :root[data-mode="light"] .roster-sys[data-sys="GB"] .roster-sys-name { color: var(--text); -webkit-text-stroke: 0; }
 
+/* The Token Maker tile on the home page is still a dark canvas, so its name
+   (and ring) keep the dark-mode near-white instead of the paper ink. */
+:root[data-mode="light"] .home-tile[data-tool="token"] { --tile-accent: #d0d5dc; }
+
+/* A card inside a section is raised: it takes the lighter paper, so the two
+   don't merge into one white sheet. Out-ranks the per-system section rule
+   (the inner card matches that too). */
+:root[data-mode="light"]:not([data-chrome]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class*="bg-[var(--panel)]"]:not(.dcc-chrome, .dcc-chrome *),
+:root[data-mode="light"][data-chrome] body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class*="bg-[var(--panel)]"]:not(.dcc-chrome, .dcc-chrome *) {
+  --panel: var(--panel-raise);
+}
+
 /* Brand colours as text, deepened for paper. */
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="text-[var(--dnd)]"],
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="hover:text-[var(--dnd)]"]:hover,
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) .group:hover [class~="group-hover:text-[var(--dnd)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--dnd)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--dnd)]"]:hover,
-:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--dnd)]"] { color: #c8102e; }
+:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--dnd)]"] { color: #bf0f2c; }
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="text-[var(--dcc)]"],
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="hover:text-[var(--dcc)]"]:hover,
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) .group:hover [class~="group-hover:text-[var(--dcc)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--dcc)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--dcc)]"]:hover,
-:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--dcc)]"] { color: #d5174e; }
+:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--dcc)]"] { color: #be1445; }
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="text-[var(--sw)]"],
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="hover:text-[var(--sw)]"]:hover,
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) .group:hover [class~="group-hover:text-[var(--sw)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--sw)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--sw)]"]:hover,
-:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--sw)]"] { color: #876a09; }
+:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--sw)]"] { color: #745b08; }
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="text-[var(--mmrpg)]"],
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="hover:text-[var(--mmrpg)]"]:hover,
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) .group:hover [class~="group-hover:text-[var(--mmrpg)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--mmrpg)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--mmrpg)]"]:hover,
-:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--mmrpg)]"] { color: #c8102e; }
+:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--mmrpg)]"] { color: #bf0f2c; }
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="text-[var(--ace)]"],
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="hover:text-[var(--ace)]"]:hover,
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) .group:hover [class~="group-hover:text-[var(--ace)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--ace)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--ace)]"]:hover,
-:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--ace)]"] { color: #1972a0; }
+:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--ace)]"] { color: #16668e; }
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="text-[var(--kob)]"],
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="hover:text-[var(--kob)]"]:hover,
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) .group:hover [class~="group-hover:text-[var(--kob)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--kob)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--kob)]"]:hover,
-:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--kob)]"] { color: #8c46e2; }
+:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--kob)]"] { color: #7f30de; }
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="text-[var(--nimble)]"],
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="hover:text-[var(--nimble)]"]:hover,
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) .group:hover [class~="group-hover:text-[var(--nimble)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--nimble)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--nimble)]"]:hover,
-:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--nimble)]"] { color: #267c4f; }
+:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--nimble)]"] { color: #216c45; }
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="text-[var(--d62e)]"],
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="hover:text-[var(--d62e)]"]:hover,
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) .group:hover [class~="group-hover:text-[var(--d62e)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--d62e)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--d62e)]"]:hover,
-:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--d62e)]"] { color: #ac541b; }
+:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--d62e)]"] { color: #9b4c18; }
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="text-[var(--gb)]"],
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="hover:text-[var(--gb)]"]:hover,
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) .group:hover [class~="group-hover:text-[var(--gb)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--gb)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--gb)]"]:hover,
-:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--gb)]"] { color: #527523; }
+:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--gb)]"] { color: #4a6a20; }
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="text-[var(--candela)]"],
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="hover:text-[var(--candela)]"]:hover,
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) .group:hover [class~="group-hover:text-[var(--candela)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--candela)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--candela)]"]:hover,
-:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--candela)]"] { color: #23796e; }
+:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--candela)]"] { color: #1e695f; }
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="text-[var(--icrpg)]"],
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="hover:text-[var(--icrpg)]"]:hover,
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) .group:hover [class~="group-hover:text-[var(--icrpg)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--icrpg)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--icrpg)]"]:hover,
-:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--icrpg)]"] { color: #b6491b; }
+:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--icrpg)]"] { color: #a54219; }
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="text-[var(--yze)]"],
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="hover:text-[var(--yze)]"]:hover,
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) .group:hover [class~="group-hover:text-[var(--yze)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--yze)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--yze)]"]:hover,
-:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--yze)]"] { color: #0e7887; }
+:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--yze)]"] { color: #0c6b7a; }
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="text-[var(--twd)]"],
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="hover:text-[var(--twd)]"]:hover,
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) .group:hover [class~="group-hover:text-[var(--twd)]"],
@@ -3765,19 +3798,19 @@ div.roster-card:hover { border-color: var(--tile-accent); }
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) .group:hover [class~="group-hover:text-[var(--myz)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--myz)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--myz)]"]:hover,
-:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--myz)]"] { color: #a95622; }
+:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--myz)]"] { color: #944c1e; }
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="text-[var(--vae)]"],
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="hover:text-[var(--vae)]"]:hover,
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) .group:hover [class~="group-hover:text-[var(--vae)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--vae)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--vae)]"]:hover,
-:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--vae)]"] { color: #8a691e; }
+:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--vae)]"] { color: #795c1a; }
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="text-[var(--lotr)]"],
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="hover:text-[var(--lotr)]"]:hover,
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) .group:hover [class~="group-hover:text-[var(--lotr)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--lotr)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--lotr)]"]:hover,
-:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--lotr)]"] { color: #856b1a; }
+:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--lotr)]"] { color: #745d16; }
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="text-[var(--db)]"],
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="hover:text-[var(--db)]"]:hover,
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) .group:hover [class~="group-hover:text-[var(--db)]"],
@@ -3795,23 +3828,23 @@ div.roster-card:hover { border-color: var(--tile-accent); }
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) .group:hover [class~="group-hover:text-[var(--jlu)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--jlu)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--jlu)]"]:hover,
-:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--jlu)]"] { color: #1c62eb; }
+:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--jlu)]"] { color: #1356db; }
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="text-[var(--sd)]"],
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="hover:text-[var(--sd)]"]:hover,
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) .group:hover [class~="group-hover:text-[var(--sd)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--sd)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--sd)]"]:hover,
-:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--sd)]"] { color: #826815; }
+:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--sd)]"] { color: #745d13; }
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="text-[var(--crimson)]"],
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="hover:text-[var(--crimson)]"]:hover,
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) .group:hover [class~="group-hover:text-[var(--crimson)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--crimson)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--crimson)]"]:hover,
-:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--crimson)]"] { color: #c8102e; }
+:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--crimson)]"] { color: #bf0f2c; }
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="text-[var(--signal)]"],
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) [class~="hover:text-[var(--signal)]"]:hover,
 :root[data-mode="light"]:not(:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"])) .group:hover [class~="group-hover:text-[var(--signal)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="text-[var(--signal)]"],
 :root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) [class~="hover:text-[var(--signal)]"]:hover,
-:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--signal)]"] { color: #ad5000; }
+:root[data-mode="light"]:is([data-system="DND"], [data-system="DCC"], [data-system="SW"], [data-system="MMRPG"], [data-system="ACE"], [data-system="KOB"], [data-system="D62E"], [data-system="GB"], [data-system="CO"], [data-system="ICRPG"], [data-system="YZE"], [data-system="TWD"], [data-system="MYZ"], [data-system="VAE"], [data-system="LOTR"], [data-system="DB"], [data-system="PB"], [data-system="JLU"]) body :is([class*="bg-[var(--panel)]"], [class*="bg-[var(--panel-2)]"]):not(.dcc-chrome, .dcc-chrome *) .group:hover [class~="group-hover:text-[var(--signal)]"] { color: #9e4900; }
 /* LIGHT-MODE:END */

@@ -101,7 +101,7 @@ function Caret() {
   );
 }
 
-// The Games menu: the home page's game tiles in miniature, three across. Each
+// The Games menu: the home page's game tiles in miniature, two across. Each
 // tile IS a .home-tile (app/globals.css), so it wears its system's face, colour
 // and cover art from the same tokens as the home page; .home-tile-mini only
 // shrinks the box. The names are fitted to the smaller tiles with the home
@@ -139,10 +139,10 @@ function GamesMenu({
   return (
     <div
       ref={ref}
-      className="nav-games absolute left-0 top-full mt-1 w-[34rem] overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--panel)] p-1.5 shadow-xl"
-      style={{ "--rows": Math.ceil(list.length / 3) } as React.CSSProperties}
+      className="nav-games absolute left-0 top-full mt-1 w-[24rem] overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--panel)] p-1.5 shadow-xl"
+      style={{ "--rows": Math.ceil(list.length / 2) } as React.CSSProperties}
     >
-      <div className="grid grid-cols-3 gap-1.5">
+      <div className="grid grid-cols-2 gap-1.5">
         {list.map((s) => (
           <button
             key={s.key}

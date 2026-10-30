@@ -25,6 +25,39 @@ S = {
  'PB':   ('#e8e0cc','#fbf7ee','#efe6d3','#d2c3a8','#1d1313','#6a5a4e','#1d1313','#7a4a2a','#a3121a','#a3121a','163,18,26','/themes/pb-splatter-light.webp'),
  'JLU':  ('#dbe3ef','#f6f8fc','#e9eef8','#c3cbdb','#111726','#586074','#1c49a8','#8a6412','#1c49a8','#1c49a8','47,111,237',None),
 }
+# DEPTH (2026-10-30). The table above holds each system's sheet paper, which is
+# all but white — and white sections on a near-white ground, with white cards
+# inside them, read as one flat sheet. So the surfaces step instead:
+#   ground (light-ground systems only) — the darkest paper,
+#   --panel   (sections)               — a parchment / grey tone on top of it,
+#   --panel-raise (cards nested in a section) — the original near-white paper,
+#   --panel-2 (chips, fields, hovers)  — a step darker than the section.
+# Every tone is mixed from the system's own ground, paper and border, so each
+# keeps its tint (DND warm, YZE cool, LOTR straw...).
+def _mix(a, b, t):
+    a = a.lstrip('#'); b = b.lstrip('#')
+    return '#%02x%02x%02x' % tuple(round(int(a[i:i+2], 16) * (1 - t) + int(b[i:i+2], 16) * t) for i in (0, 2, 4))
+import colorsys as _cs
+def _l(h):
+    h = h.lstrip('#'); c = [int(h[i:i+2], 16) / 255 for i in (0, 2, 4)]
+    return sum(w * (v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4) for w, v in zip((0.2126, 0.7152, 0.0722), c))
+def _ink(h, surf, need=4.6):
+    """The same hue, darkened only as far as it takes to read on `surf`."""
+    x = h.lstrip('#'); r, g, b = (int(x[i:i+2], 16) / 255 for i in (0, 2, 4))
+    hh, ll, ss = _cs.rgb_to_hls(r, g, b); sl = _l(surf)
+    while ll > 0.03:
+        c = '#%02x%02x%02x' % tuple(round(v * 255) for v in _cs.hls_to_rgb(hh, ll, ss))
+        if (sl + 0.05) / (_l(c) + 0.05) >= need: return c
+        ll -= 0.01
+    return c
+RAISE = {}
+for _k, _v in list(S.items()):
+    _g, _p, _p2, _b = _v[0], _v[1], _v[2], _v[3]
+    RAISE[_k] = _mix(_p, _g, 0.3)
+    _pan2 = _mix(_g, _b, 0.3)
+    S[_k] = (_mix(_g, _b, 0.45), _mix(_g, _b, 0.08), _pan2, _mix(_b, _v[4], 0.1)) \
+        + tuple(_ink(c, _pan2) for c in _v[4:10]) + _v[10:]
+
 # Each system keeps its dark-mode texture in light mode, as a light version of
 # the same art (public/themes/*-light.webp; see the doc for how they were made).
 TEX = {
@@ -56,10 +89,11 @@ L.append('''/* =================================================================
    ========================================================================= */
 :root[data-mode="light"] {
   color-scheme: light;
-  --bg: #f1f2f4;
-  --panel: #ffffff;
-  --panel-2: #eef0f3;
-  --border: #d3d8df;
+  --bg: #dfe1e5;
+  --panel: #eaecef;
+  --panel-raise: #f6f7f9;
+  --panel-2: #dcdfe4;
+  --border: #c3c8d0;
   --muted: #5a6370;
   --text: #15181d;
   --accent: #2f3640;
@@ -123,6 +157,7 @@ for k,(bg,pa,p2,bo,tx,mu,hd,sb,lk,ac,tint,tex) in S.items():
 :root[data-mode="light"][data-system="%s"]:not([data-chrome]) body %s {
   color-scheme: light;
 %s  --panel: %s;
+  --panel-raise: %s;
   --panel-2: %s;
   --border: %s;
   --text: %s;
@@ -137,8 +172,8 @@ for k,(bg,pa,p2,bo,tx,mu,hd,sb,lk,ac,tint,tex) in S.items():
   --red: %s;
   color: var(--text);
 }
-''' % (k, SECTION, '  --mmrpg-ink: var(--crimson-ink);\n  --jlu-gold: var(--gold-ink);\n  --nimble-blue: var(--blue-ink);\n' + ''.join('  %s: %s;\n' % (n, v) for n, v in LIGHT_ROOT if n not in ('--panel', '--panel-2', '--border', '--text', '--muted', '--gold', '--red')),
-       pa, p2, bo, tx, mu, hd, sb, lk, ac, ac, ac, ac, RED_LIGHT.get(k, '#b3261e')))
+''' % (k, SECTION, '  --mmrpg-ink: var(--crimson-ink);\n  --jlu-gold: var(--gold-ink);\n  --nimble-blue: var(--blue-ink);\n' + ''.join('  %s: %s;\n' % (n, v) for n, v in LIGHT_ROOT if n not in ('--panel', '--panel-raise', '--panel-2', '--border', '--text', '--muted', '--gold', '--red')),
+       pa, RAISE[k], p2, bo, tx, mu, hd, sb, lk, ac, ac, ac, ac, RED_LIGHT.get(k, '#b3261e')))
         continue
     sel = ':root[data-mode="light"][data-system="%s"]:not([data-chrome]) body' % k
     glow = 'radial-gradient(85%% 40%% at 50%% 0%%, rgba(%s, 0.14) 0%%, rgba(%s, 0) 72%%)' % (tint, tint)
@@ -154,6 +189,7 @@ for k,(bg,pa,p2,bo,tx,mu,hd,sb,lk,ac,tint,tex) in S.items():
         ground = ('  background-image:\n    %s,\n    radial-gradient(130%% 96%% at 50%% 46%%, rgba(0, 0, 0, 0) 50%%, rgba(0, 0, 0, 0.07) 100%%);\n  background-size: cover;\n' % glow)
     L.append('''%s {
   --panel: %s;
+  --panel-raise: %s;
   --panel-2: %s;
   --border: %s;
   --text: %s;
@@ -167,7 +203,7 @@ for k,(bg,pa,p2,bo,tx,mu,hd,sb,lk,ac,tint,tex) in S.items():
   --sys: %s;
   background-color: %s;
 %s}
-''' % (sel, pa, p2, bo, tx, mu, hd, sb, lk, ac, ac, ac, ac, bg, ground))
+''' % (sel, pa, RAISE[k], p2, bo, tx, mu, hd, sb, lk, ac, ac, ac, ac, bg, ground))
 # per-system extras that hard-code dark-only colours
 L.append('''/* Pirate Borg's titles are white on black; inside a paper section they take the ink. */
 :root[data-mode="light"][data-system="PB"]:not([data-chrome]) body [class*="bg-[var(--panel"] :is(h1, h2, [data-dash-head]):not(.dcc-chrome *) { color: var(--sys-head); }
@@ -225,7 +261,7 @@ L.append('''/* The roster's system labels sit on the paper: the white wordmarks 
 import colorsys
 def _hex(h): h = h.lstrip('#'); return [int(h[i:i+2], 16) / 255 for i in (0, 2, 4)]
 def _lum(c): return sum(w * (v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4) for w, v in zip((0.2126, 0.7152, 0.0722), c))
-def _deep(h, paper='#f6f3ec'):
+def _deep(h, paper='#e3dfd6'):
     r, g, b = _hex(h); hh, ll, ss = colorsys.rgb_to_hls(r, g, b); pl = _lum(_hex(paper))
     while ll > 0.05:
         c = colorsys.hls_to_rgb(hh, ll, ss)
@@ -250,6 +286,19 @@ for t in BRAND:
     sels = [':root[data-mode="light"]:not(%s) %s' % (DG, x) for x in toks] + \
            [':root[data-mode="light"]%s body %s %s' % (DG, SECTION, x) for x in toks]
     bl.append(',\n'.join(sels) + ' { color: %s; }' % d)
+L.append('''/* The Token Maker tile on the home page is still a dark canvas, so its name
+   (and ring) keep the dark-mode near-white instead of the paper ink. */
+:root[data-mode="light"] .home-tile[data-tool="token"] { --tile-accent: #d0d5dc; }
+''')
+_NEST = '%s [class*="bg-[var(--panel)]"]:not(.dcc-chrome, .dcc-chrome *)' % SECTION
+L.append('''/* A card inside a section is raised: it takes the lighter paper, so the two
+   don't merge into one white sheet. Out-ranks the per-system section rule
+   (the inner card matches that too). */
+:root[data-mode="light"]:not([data-chrome]) body %s,
+:root[data-mode="light"][data-chrome] body %s {
+  --panel: var(--panel-raise);
+}
+''' % (_NEST, _NEST))
 L.append('/* Brand colours as text, deepened for paper. */\n' + '\n'.join(bl) + '\n')
 css = '\n'.join(L)
 s = open(P, encoding='utf8').read()
@@ -261,3 +310,14 @@ else:
     s = s.rstrip('\n') + '\n\n' + block
 open(P, 'w', encoding='utf8').write(s)
 print('ok', len(css))
+
+if __name__ == '__main__':
+    def _cr(a, b):
+        la, lb = _lum(_hex(a)), _lum(_hex(b)); return (max(la, lb) + 0.05) / (min(la, lb) + 0.05)
+    worst = []
+    for k, v in S.items():
+        for surf_name, surf in (('panel', v[1]), ('panel2', v[2]), ('raise', RAISE[k])):
+            for nm, ink in (('text', v[4]), ('muted', v[5]), ('head', v[6]), ('sub', v[7]), ('link', v[8]), ('acc', v[9])):
+                c = _cr(ink, surf)
+                if c < 4.5: worst.append((round(c, 2), k, nm, surf_name))
+    print('contrast < 4.5:', sorted(worst) or 'none')
