@@ -141,7 +141,10 @@
       ".dccs-info .uprow.on{color:#e6e3da;}",
       ".dccs-info .uprow.on b{color:#8fd18f;}",
       ".dccs-info .uprow.off{opacity:.55;}",
-      ".dccs-info .uprow .upmark{display:inline-block;width:1.3em;}",
+      // The mark sizes to its content: a fixed 1.3em fitted the ✓ but "Locked" ran
+      // into the "Rank N:" label beside it. Locked is a small tag, ✓ stays a glyph.
+      ".dccs-info .uprow .upmark{display:inline-block;min-width:1.3em;margin-right:4px;}",
+      ".dccs-info .uprow .upmark.lk{min-width:0;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#8a8a93;border:1px solid #3a3a40;border-radius:4px;padding:0 5px;vertical-align:1px;}",
       ".dccs-info .mt{color:#8a8a93;font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}",
       ".dccs-info-body{padding:16px 18px 18px;}",
     ].join("\n");
@@ -273,7 +276,7 @@
     return '<div class="uphdr">Rank Upgrades' + (haveRank ? ' <span class="upnow">(at Rank ' + rank + ')</span>' : "") + '</div>' +
       e.upgrades.map(function (u) {
         var on = haveRank && Number(u.rank) <= rank;
-        var mark = haveRank ? '<span class="upmark">' + (on ? "✓" : "Locked") + "</span> " : "";
+        var mark = haveRank ? '<span class="upmark' + (on ? "" : " lk") + '">' + (on ? "✓" : "Locked") + "</span>" : "";
         return '<div class="uprow' + (on ? " on" : (haveRank ? " off" : "")) + '">' + mark + '<b>Rank ' + esc(u.rank) + ':</b> ' + esc(u.text) + '</div>';
       }).join("");
   }
@@ -392,11 +395,59 @@
       return nm === k || src === k;
     }) || null;
   }
+  // WHICH ATTACK SKILL A WEAPON USES. A book weapon is named after its skill
+  // ("Baseball Bat"), but an enchanted, looted, renamed or homebrew one isn't
+  // ("Enchanted Baseball Bat of the Weeping Moon", "Big Bertha"). Tried in order:
+  //   1. the item's own name, exactly (book weapons);
+  //   2. its recorded base item (the Enchanted builder and GM enchant stamp it);
+  //   3. an attack skill named INSIDE the item's name, longest first, as whole
+  //      words — "Enchanted Baseball Bat" → Baseball Bat, "Heavy Crossbow +2" →
+  //      Heavy Crossbow (not Crossbow), but "Longbow" never matches "Bow";
+  //   4. "<Skill> Skill" in its effect text ("Dagger Skill at Rank 15").
+  // Damage Effects and spells are never a weapon's skill.
+  function attackEntries() {
+    return entries().filter(function (e) { return e.kind === "attack" && !/damage effect/i.test(e.group || ""); });
+  }
+  function wordRx(name) {
+    return new RegExp("(^|[^a-z0-9])" + String(name).toLowerCase().replace(/[^a-z0-9]+/g, "[^a-z0-9]*") + "s?([^a-z0-9]|$)");
+  }
+  // A catalog / homebrew item's declared weapon skill (the homebrew builder's
+  // "Weapon skill" field), by item name.
+  function declaredSkill(n) {
+    if (!n) return "";
+    var k = String(n).toLowerCase().replace(/[^a-z0-9]/g, "");
+    var items = [];
+    try { if (typeof DCC_ITEMS !== "undefined") items = items.concat(DCC_ITEMS); } catch (e) {}
+    if (Array.isArray(window.__DCC_HB_ITEMS)) items = window.__DCC_HB_ITEMS.concat(items);
+    var it = items.find(function (x) { return x && x.name && String(x.name).toLowerCase().replace(/[^a-z0-9]/g, "") === k; });
+    return it && it.skill ? String(it.skill) : "";
+  }
+  function weaponSkillFor(itemName, base, effect) {
+    var atk = function (n) { var e = n ? lookup(n) : null; return e && e.kind === "attack" && !/damage effect/i.test(e.group || "") ? e : null; };
+    var hit = atk(declaredSkill(itemName)) || atk(declaredSkill(base)) || atk(itemName) || atk(base);
+    if (hit) return hit;
+    var hay = [itemName, base].filter(Boolean).map(function (x) { return String(x).toLowerCase(); });
+    var best = null;
+    attackEntries().forEach(function (e) {
+      var rx = wordRx(e.name);
+      if (hay.some(function (h) { return rx.test(h); }) && (!best || e.name.length > best.name.length)) best = e;
+    });
+    if (best) return best;
+    var m = String(effect || "").match(/([A-Za-z][\w' -]*?)\s+Skill\b/g) || [];
+    for (var i = 0; i < m.length; i++) {
+      var words = m[i].replace(/\s+Skill$/i, "").split(/\s+/);
+      // "+2 to your Dagger Skill" → try "Dagger", "your Dagger", … shortest-suffix first
+      for (var k = words.length - 1; k >= 0; k--) { var e2 = atk(words.slice(k).join(" ")); if (e2) return e2; }
+    }
+    return null;
+  }
   // Picking up a weapon puts its weapon skill on the Skills list (Rank 0 until it's
   // trained) — no-op when the skill is already there or the item has no matching
   // attack skill. Fills the first blank row so it lands with the other skills.
-  function ensureWeaponSkill(itemName) {
-    var e = lookup(itemName);
+  // `extra` = { base, effect } for enchanted / renamed weapons (weaponSkillFor).
+  function ensureWeaponSkill(itemName, extra) {
+    extra = extra || {};
+    var e = weaponSkillFor(itemName, extra.base, extra.effect);
     if (!e || e.kind !== "attack") return null;
     var have = findSkillRow(e.name);
     if (have) return have;
@@ -472,6 +523,7 @@
     isAttackSkillRow: isAttackSkillRow,
     isAttackEntry: function (name) { return isAttackEntry(lookup(name)); },
     ensureWeaponSkill: ensureWeaponSkill,
+    weaponSkillFor: function (n, b, ef) { var e = weaponSkillFor(n, b, ef); return e ? e.name : null; },
     // Kept as no-ops for callers from before the Attacks block was folded into Skills.
     refreshSkillRadial: function () {},
     refreshAllSkillRadials: function () {},
@@ -518,6 +570,9 @@
           .then(function (j) {
             if (!j || !Array.isArray(j.items)) return;
             window[slot] = j.items.map(function (it) { return it && it.data; }).filter(function (d) { return d && d.name; });
+            // Homebrew attacks and Damage Effects only resolve once this lands, so
+            // re-link the attack rows (damage dice + Damage Effect buttons) now.
+            syncDamage();
             var ov = document.getElementById("dccs-overlay");
             if (ov && ov.style.display === "flex") renderPicker();  // refresh if open
           })

@@ -22770,6 +22770,7 @@ function wireAiConsole(root) {
     const nm = card.querySelector('.dlb-name'), q = card.querySelector('.dlb-qty'), sel = card.querySelector('.dlb-cat'), bon = card.querySelector('.dlb-bon'), nt = card.querySelector('.dlb-notes');
     nm.value = name || ''; q.value = (qty == null || qty === '' ? '1' : String(qty)); sel.value = cat; nt.value = notes || '';
     if(meta.slot) card.dataset.slot = meta.slot;
+    if(meta.base) card.dataset.base = meta.base;   // an enchanted weapon's base → its weapon skill on the sheet
     let ed = null;
     if(sys && LB() && LB().has(sys)) {
       ed = LB().editor(bon, { sys, benefits: meta.benefits || [], empty: 'No bonuses', extra: [{ label:'🎲', title:'Re-roll this item’s bonuses at the panel’s level', onClick(){
@@ -22795,6 +22796,7 @@ function wireAiConsole(root) {
       const row = { item: item.slice(0, 80), qty: qty || 1, notes: (card.querySelector('.dlb-notes').value || '').trim().slice(0, 160) };
       const cat = card.querySelector('.dlb-cat').value; if(cat) row.cat = cat;
       if(card.dataset.slot) row.slot = card.dataset.slot;
+      if(card.dataset.base) row.base = card.dataset.base;
       if(card._ed) { row.bv = 2; row.benefits = card._ed.get(); }
       out.push(row);
     });
@@ -22985,6 +22987,7 @@ function wireAiConsole(root) {
     const nm=card.querySelector('.dlb-name'), qty=card.querySelector('.dlb-qty'), sel=card.querySelector('.dlb-cat'), bon=card.querySelector('.dlb-bon'), notes=card.querySelector('.dlb-notes');
     nm.value=o.name||''; qty.value=(o.qty==null?'1':String(o.qty)); sel.value=cat; notes.value=o.notes||'';
     if(o.slot) card.dataset.slot=o.slot;
+    if(o.base) card.dataset.base=o.base;   // an enchanted weapon's base → its weapon skill on the sheet
     if(o.tier) card.dataset.tier=o.tier;
     const spellItem = /^(scroll|tome)$/.test(cat) && !/upgrade/i.test(o.name || '');
     if(spellItem) card.dataset.spell = '1';
@@ -23012,6 +23015,7 @@ function wireAiConsole(root) {
       const row={ item:item.slice(0,80), qty:(card.querySelector('.dlb-qty').value||'').trim()||1, notes:(card.querySelector('.dlb-notes').value||'').trim().slice(0,160), bv:2 };
       const cat=card.querySelector('.dlb-cat').value; if(cat) row.cat=cat;
       if(card.dataset.slot) row.slot=card.dataset.slot;
+      if(card.dataset.base) row.base=card.dataset.base;
       row.benefits = card._ed ? card._ed.get() : [];
       out.push(row);
     });
@@ -23037,7 +23041,7 @@ function wireAiConsole(root) {
   function rollGold(formula){ const f=String(formula||''); if(/none|nuthin/i.test(f))return 0; const m=f.match(/(\d+)\s*d\s*(\d+)/i); if(!m)return 0; let total=0; const num=+m[1],sides=+m[2]; for(let i=0;i<num;i++) total+=1+Math.floor(Math.random()*sides); const mult=f.match(/[x×]\s*([\d,]+)/i); if(mult) total*=(parseInt(mult[1].replace(/,/g,''),10)||1); return total; }
   function enchantCard(key, cat){
     const e = window.dccEnchantItem(key, cat||'');
-    return addCard({ name:e.name, qty:1, category:e.category, slot:e.slot, tier:key, benefits:e.benefits });
+    return addCard({ name:e.name, qty:1, category:e.category, slot:e.slot, tier:key, benefits:e.benefits, base:e.base });
   }
   rollTier.addEventListener('click', () => {
     const key=boxTier.value, td=lootTier(key);

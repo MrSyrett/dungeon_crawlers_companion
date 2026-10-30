@@ -160,14 +160,31 @@ function BonusPopover({
   const [pos, setPos] = useState<{ left: number; top: number }>({ left: -9999, top: -9999 });
   const K = kinds.find((x) => x.k === kind);
 
+  // Placed against its "+" button, and RE-placed whenever anything scrolls or
+  // the window resizes. It is position:fixed (it must escape the builder's
+  // overflow), so without this it stayed put in the viewport while the page —
+  // or the editor's own scrolling panel — moved the button out from under it.
+  // Scroll is listened for in the capture phase so an inner scroller counts too.
   useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const r = anchor.getBoundingClientRect();
-    const w = el.offsetWidth, h = el.offsetHeight;
-    let y = r.bottom + 6;
-    if (y + h > window.innerHeight - 8) y = Math.max(8, r.top - h - 6);
-    setPos({ left: Math.min(Math.max(8, r.left), window.innerWidth - w - 8), top: y });
+    const place = () => {
+      const el = ref.current;
+      if (!el) return;
+      const r = anchor.getBoundingClientRect();
+      const w = el.offsetWidth, h = el.offsetHeight;
+      let y = r.bottom + 6;
+      if (y + h > window.innerHeight - 8) y = Math.max(8, r.top - h - 6);
+      setPos({ left: Math.min(Math.max(8, r.left), window.innerWidth - w - 8), top: y });
+    };
+    place();
+    let raf = 0;
+    const onMove = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(place); };
+    window.addEventListener("scroll", onMove, true);
+    window.addEventListener("resize", onMove);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onMove, true);
+      window.removeEventListener("resize", onMove);
+    };
   }, [anchor, kind]);
 
   useEffect(() => {

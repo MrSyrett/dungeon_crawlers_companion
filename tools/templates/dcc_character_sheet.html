@@ -1196,7 +1196,10 @@ function activeBuffSet() {
 }
 function hasBuff(name) { return activeBuffSet().has(String(name).toLowerCase()); }
 function activeDebuffMods() {
-  const out = { penalty: 0, dis: false, noDex: false, parts: [] };
+  // atkDis: Disadvantage on Attacks only (Terrified, Staggered). oneShot: debuffs that
+  // end once the roll they affect is made (Stunned "once you make a Check", Queasy and
+  // Staggered "end of the next Action") — cleared by dccSpendOneShot after that roll.
+  const out = { penalty: 0, dis: false, atkDis: false, noDex: false, parts: [], oneShot: [] };
   const raw = document.getElementById('debuffs')?.value || '';
   if (!raw.trim() || typeof DCC_DEBUFFS === 'undefined') return out;
   raw.split(',').forEach(tok => {
@@ -1211,11 +1214,21 @@ function activeDebuffMods() {
     if (pm) { out.penalty -= (parseInt(pm[1], 10) || 0) * cnt; touched = true; }
     if (/all checks at disadvantage|disadvantage on next check|next rolled action at disadvantage/i.test(eff)) { out.dis = true; touched = true; }
     if (/cannot add your dex/i.test(eff)) { out.noDex = true; touched = true; }
+    if (/(?:all your|if it's an) attacks?,? at disadvantage/i.test(eff)) { out.atkDis = true; touched = true; }
+    if (touched && /once you make a check|end of the next action taken/i.test(d.duration || '')) out.oneShot.push(d.name);
     if (touched) out.parts.push(d.name + (cnt > 1 ? '×' + cnt : ''));
   });
   return out;
 }
 function mergeExtra(a, b) { if (a && b) return a === b ? a : null; return a || b || null; }
+// A one-shot debuff has now been used up by the roll it applied to.
+function dccSpendOneShot(dm, attack) {
+  (dm && dm.oneShot || []).forEach(n => {
+    if(/staggered/i.test(n) && !attack) return;   // Staggered only bites an Attack (or a Move)
+    if(typeof dccRemoveDebuff === 'function') dccRemoveDebuff(n);
+    addLog(n + ' ends', '—', 'Used up by that roll', 'normal');
+  });
+}
 function debuffTag(mods) { return mods.penalty ? ` + Debuffs(${mods.penalty})` : ''; }
 
 // Sync DEX Mod → Evade DEX field and recalc total
@@ -1237,7 +1250,10 @@ function calcEvadeTotal() {
 // Sync Enhanced INT → Mana Max
 function syncMana() {
   const val = document.getElementById('int-enh')?.value;
-  document.getElementById('mana-max').value = val || '';
+  // Mana Max = INT, including Good Sleep's +Floor to all Stats.
+  const n = parseInt(val, 10);
+  const gs = (!isNaN(n) && typeof hasBuff === 'function' && hasBuff('Good Sleep')) ? getFloor() : 0;
+  document.getElementById('mana-max').value = isNaN(n) ? (val || '') : String(n + gs);
 }
 
 // ── DR CALC ──
@@ -1313,6 +1329,11 @@ function updateHpPips() {
 // Long Rest (8 hrs): full Health Bar, full Mana, and clears all Fatigued.
 // Re-activate the n lowest-% lost Health Bar slots (fill upward). Returns how many.
 function healHpSlots(n) {
+  // The Taint: "Cannot be healed" (until the end of combat).
+  if(/(^|,)\s*the taint\b/i.test(document.getElementById('debuffs')?.value || '')) {
+    addLog('Healing blocked', '✗', 'The Taint — you cannot be healed until it ends', 'fumble');
+    return 0;
+  }
   const lost = [...document.querySelectorAll('.hp-pip')].filter(p => p.dataset.active === 'false')
     .sort((a, b) => (+a.dataset.pct) - (+b.dataset.pct)).slice(0, n);
   lost.forEach(p => { p.dataset.active = 'true'; p.classList.remove('dimmed'); });
@@ -1663,8 +1684,43 @@ function syncLinkedAttacks() {
     tr.title = entry.name + ' — Damage ' + (dice || entry.base) + ' at Rank ' + rank + (abil.length ? ' · unlocked ' + abil.join(' · ') : '');
     tr.dataset.atkTitle = '1';
   });
+  document.querySelectorAll('#skills-body tr').forEach(dccRenderFx);
 }
 window.syncLinkedAttacks = syncLinkedAttacks;
+
+// Weapons carried before weapon → skill linking reached every path (an Enchanted
+// builder weapon, a GM loot weapon) never brought their skill. Once per row, on
+// load: give each weapon its (base) weapon skill if the crawler lacks it, then mark
+// the row so a skill the player later removes doesn't come back.
+function dccWeaponSkillMigrate(){
+  if(!window.DCCSkills || !DCCSkills.ensureWeaponSkill) return;
+  document.querySelectorAll('#inv-body tr').forEach(tr => {
+    if(tr.dataset.cat !== 'weapon' || tr.dataset.wsk) return;
+    const t = tr.querySelectorAll('input[type="text"]');
+    const nm = String(t[0] ? t[0].value : '').trim(); if(!nm) return;
+    try { DCCSkills.ensureWeaponSkill(nm, { base: tr.dataset.base || '', effect: t[2] ? t[2].value : '' }); } catch(e) {}
+    tr.dataset.wsk = '1';
+  });
+}
+
+// ── DAMAGE EFFECTS (Core p.180) ──
+// A Damage Effect Skill on the sheet (Skullcracker, Powerful Strike, Toss… or a
+// homebrew one) adds a roll option to every attack it works with — the effects and
+// which attacks they fit live in public/tools-data/dcc-damage-effects.js. The
+// buttons sit on their own line under the attack's Notes; each rolls the attack
+// with that effect applied (rollSkill's `fxName`).
+function dccFxEsc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function dccRenderFx(tr){
+  const main = tr.querySelector('.dl-main'); if(!main) return;
+  let box = main.querySelector('.dl-fx');
+  const list = (window.DCCDmgFx && skillDmgOf(tr)) ? DCCDmgFx.forAttack(tr) : [];
+  if(!list.length){ if(box) box.remove(); return; }
+  const key = list.map(o => o.fx.name + ':' + o.rank).join('|');
+  if(box && box.dataset.key === key) return;
+  if(!box){ box = document.createElement('div'); box.className = 'dl-fx'; main.appendChild(box); }
+  box.dataset.key = key;
+  box.innerHTML = list.map(o => `<button type="button" class="dl-fxbtn" data-fx="${dccFxEsc(o.fx.name)}" onclick="sheetRollSkill(this,this.dataset.fx)" title="${dccFxEsc(o.fx.name + ' (Rank ' + o.rank + '): ' + DCCDmgFx.summary(o.fx, o.rank))}">${dccFxEsc(o.fx.name)}</button>`).join('');
+}
 
 // ── HOTLIST ──
 function buildHotlist() {
@@ -1961,11 +2017,11 @@ function sheetRollEvade(){
 // and this guard refuses it. Attack rows (Dmg dice) are Attacks, so they can't use
 // the AI Favor +1 Action. Rolling the same skill from the Action tab goes through
 // turnDo -> turnRollRow -> rollSkill, which spends there — never both.
-function sheetRollSkill(btn){
+function sheetRollSkill(btn, fxName){
   const row = btn && btn.closest('tr'); if(!row) return;
   const kind = skillDmgOf(row) ? 'attack' : 'other';
   if(!turnCan(kind)) { refreshSpellManaState(); return; }
-  const r = rollSkill(btn);
+  const r = rollSkill(btn, fxName);
   if(!r) return;                          // out of Mana — nothing rolled, no Action spent
   turnSpend(kind, r.name || 'Skill');
   // Only redraw the Action hub when it's on screen (switchTab('turn') renders it).
@@ -1990,7 +2046,7 @@ function turnSkillRows(){
   }).filter(Boolean);
 }
 function turnFindSkill(rx){ return turnSkillRows().find(r => rx.test(r.name) || rx.test(r.tr.dataset.src || '')) || null; }
-function turnRollRow(r){ const b = r.tr.querySelector('.skill-roll-btn'); return b ? rollSkill(b) : null; }
+function turnRollRow(r, fxName){ const b = r.tr.querySelector('.skill-roll-btn'); return b ? rollSkill(b, fxName) : null; }
 function turnHitStr(r){ const sm = r.stat ? getStatMod(r.stat) : 0; const n = r.rank + sm; return 'd20' + (n >= 0 ? '+' : '−') + Math.abs(n); }
 // "2d4 +STR dmg" — the damage Stat is the weapon's own (dccDmgStatOf), plus any Rank die.
 function turnDmgStr(r){
@@ -2062,11 +2118,17 @@ function turnBuildOpts(){
   });
   O.hotlist.sort((a, b) => (a.slot ?? 99) - (b.slot ?? 99));   // spells and items in Hotlist slot order
   // Attacks — weapon / attack skills (Dmg in their Notes). Attack spells are cast from the Hotlist.
-  rows.filter(r => r.dice && !r.spell).forEach(r => add('attacks', {
-    name: r.name, kind: 'attack',
-    sub: turnHitStr(r) + ' to hit · ' + turnDmgStr(r) + (r.rank > 0 ? '' : ' · untrained (Disadvantage)'),
-    btn: 'Attack', run: () => turnRollRow(r),
-  }));
+  // A Damage Effect the crawler has (Skullcracker, Powerful Strike…) is one more
+  // button on each attack it works with.
+  rows.filter(r => r.dice && !r.spell).forEach(r => {
+    const fx = window.DCCDmgFx ? DCCDmgFx.forAttack(r.tr) : [];
+    add('attacks', {
+      name: r.name, kind: 'attack',
+      sub: turnHitStr(r) + ' to hit · ' + turnDmgStr(r) + (r.rank > 0 ? '' : ' · untrained (Disadvantage)'),
+      btn: 'Attack', run: () => turnRollRow(r),
+      btns: fx.length ? [['Attack', () => turnRollRow(r)]].concat(fx.map(o => [o.fx.name, () => turnRollRow(r, o.fx.name)])) : undefined,
+    });
+  });
   // Use a Skill — the other active skills.
   rows.filter(r => !r.dice && !r.spell && !r.passive).forEach(r => add('checks', {
     name: r.name, kind: 'other', sub: turnHitStr(r) + (r.check ? ' · ' + r.check : ''),
@@ -2329,6 +2391,7 @@ function rollStat(id, name) {
   let label = name+' Check'+(roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':'');
   const base = advDetail ? advDetail : `d20(${roll})`;
   addLog(label, total, `${base} + Mod(${mod})${debuffTag(dm)} = ${total}`, type);
+  dccSpendOneShot(dm, false);
 }
 
 // The Evade Total box doubles as the roll control, so support keyboard
@@ -2351,6 +2414,7 @@ function rollEvade() {
   const base = advDetail ? advDetail : `d20(${roll})`;
   addLog('Evade Roll'+(roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':''), total,
     `${base} + DEX(${dex}${dm.noDex?' — Woozy':''}) + Buffs(${buffs})${debuffTag(dm)} = ${total}`, type);
+  dccSpendOneShot(dm, false);
 }
 
 // Resolve a saved attack's stat, tolerating older saves that stored separate
@@ -2365,12 +2429,18 @@ function atkStatOf(a) {
 function spellManaOf(row) {
   const texts = row.querySelectorAll('input[type="text"]');
   const note = texts[3] ? texts[3].value : '';
+  // A spell worn on gear is an Inherent Spell — no Mana (Tables 39/41). Equipping
+  // writes "Inherent · no Mana" and records the grant on the row.
+  if(/\bno\s+mana\b/i.test(note)) return 0;
+  try { if(JSON.parse(row.dataset.grants || '[]').some(g => g && g.kind === 'spell')) return 0; } catch(e) {}
   const m = String(note).match(/(\d+)\s*mana/i);
   if(m) return parseInt(m[1], 10) || 0;
   const src = row.dataset.src || (texts[0] ? texts[0].value : '');
-  if(typeof DCC_SPELLS !== 'undefined' && src) {
+  if(src) {
     const t = String(src).toLowerCase();
-    const sp = DCC_SPELLS.find(s => s.name.toLowerCase() === t);
+    // Book spells plus the player's homebrew ones.
+    const list = (typeof DCC_SPELLS !== 'undefined' ? DCC_SPELLS : []).concat(Array.isArray(window.__DCC_HB_SPELLS) ? window.__DCC_HB_SPELLS : []);
+    const sp = list.find(s => s && String(s.name).toLowerCase() === t);
     if(sp && sp.mana) return sp.mana;
   }
   return 0;
@@ -2425,7 +2495,7 @@ function addAiFavor(n, name) {
   addLog('AI Favor', '+' + n, (name ? name + ' — ' : '') + 'now ' + (cur + n), 'crit');
 }
 
-function rollSkill(btn) {
+function rollSkill(btn, fxName) {
   const row = btn.closest('tr');
   if(!consumeSpellMana(row)) return;
   const inputs = row.querySelectorAll('input[type="text"]');
@@ -2445,11 +2515,14 @@ function rollSkill(btn) {
   const wooz = !!diceStr && dm.noDex && statId === 'dex';    // Woozy: no DEX Mod on an Attack Check (damage unaffected)
   const statMod = statId && !wooz ? getStatMod(statId) : 0;
   const totalMod = rank + statMod + dm.penalty;
-  const {result: roll, detail: advDetail} = rollWithAdv(20, mergeExtra(untrainedDis(inputs[1]), dm.dis ? 'disadvantage' : null));
+  const {result: roll, detail: advDetail} = rollWithAdv(20, mergeExtra(untrainedDis(inputs[1]), (dm.dis || (diceStr && dm.atkDis)) ? 'disadvantage' : null));
   const total = roll + totalMod;
   let type = roll===20?'crit':roll===1?'fumble':'normal';
   const statLabel = statId ? ` + ${statId.toUpperCase()}(${statMod}${wooz?' — Woozy':''})` : '';
   const base = advDetail ? advDetail : `d20(${roll})`;
+  // A chosen Damage Effect (dcc-damage-effects.js), at that effect Skill's own Rank.
+  const fxo = (fxName && diceStr && window.DCCDmgFx) ? DCCDmgFx.forAttack(row).find(o => o.fx.name === fxName) : null;
+  const fxT = fxo ? DCCDmgFx.tierAt(fxo.fx, fxo.rank) : null;
   if(diceStr) {
     // Attack skill: To Hit (vs the target's Evade) and Damage in one roll.
     const m = diceStr.match(/^(\d*)d(\d+)$/i);
@@ -2471,14 +2544,54 @@ function rollSkill(btn) {
       bang = 2 + brs.reduce((a,b)=>a+b,0);
       bangTxt = '+Bang Bro(2' + (bn ? '+' + bn + 'd6:' + brs.join('+') : '') + ')';
     }
-    const dmg = rolls.reduce((a,b)=>a+b,0) + rk.total + dMod + bang;
+    let baseSum = rolls.reduce((a,b)=>a+b,0);
+    let fxTxt = '', fxAdd = 0, fxLate = '';
+    if(fxT) {
+      const fr = fxo.rank;
+      // Extra base damage dice — base damage, so doubled on a Critical Hit like the weapon's.
+      const fm = String(fxT.dice || '').match(/^(\d*)d(\d+)$/i);
+      if(fm) {
+        const fn = parseInt(fm[1] || '1', 10) * (roll === 20 ? 2 : 1), fs = parseInt(fm[2], 10);
+        const fr2 = Array.from({length: fn}, () => d(fs));
+        baseSum += fr2.reduce((a,b)=>a+b,0);
+        fxTxt += `+${fn}d${fs}(${fr2.join('+')})`;
+      }
+      // "Multiply your base damage dice result by your Rank" (Powerful Strike).
+      if(fxT.multOf !== 'total' && fxT.mult) {
+        const k = fxT.mult === 'rank' ? Math.max(1, fr) : (parseInt(fxT.mult, 10) || 1);
+        baseSum *= k; fxTxt += `×${k}${fxT.mult === 'rank' ? '(Rank)' : ''}`;
+      }
+      for(let k = 0; k < (fxT.rankDice || 0); k++) { const r2 = dccRollRankDie(fr); fxAdd += r2.total; fxTxt += '+RankDie[' + r2.parts.join('+') + ']'; }
+      if(fxT.stat) { const sm2 = getStatMod(fxT.stat); fxAdd += sm2; fxTxt += `+${fxT.stat.toUpperCase()}(${sm2})`; }
+      if(fxT.multOf === 'total' && fxT.mult) fxLate = '×' + (parseInt(fxT.mult, 10) || 1);
+    }
+    let dmg = baseSum + rk.total + dMod + bang + fxAdd;
+    if(fxLate) dmg *= parseInt(fxLate.slice(1), 10);
     const sm = rk.txt + (dStat ? `+${dStat.toUpperCase()}(${dMod})` : '') + bangTxt;
-    addLog(`${name}` + (roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':''), `Hit: ${total}  |  Dmg: ${dmg}`,
-      `${base}+Rank(${rank})${statLabel.replace(' + ','+')}${debuffTag(dm)}=${total}  |  ${num}d${sides}${roll===20?' crit':''}(${rolls.join('+')})${sm}=${dmg}`, type);
+    addLog(`${name}` + (fxo ? ' · ' + fxo.fx.name : '') + (roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':''), `Hit: ${total}  |  Dmg: ${dmg}`,
+      `${base}+Rank(${rank})${statLabel.replace(' + ','+')}${debuffTag(dm)}=${total}  |  ${num}d${sides}${roll===20?' crit':''}(${rolls.join('+')})${fxTxt ? ' ' + fxo.fx.name + '[' + fxTxt + ']' : ''}${sm}${fxLate ? ' then ' + fxLate + ' total' : ''}=${dmg}`, type);
+    // Rank upgrades that do more than damage ("the target gains the Woozy Debuff") —
+    // in the log (which the GM sees) rather than only in the row's hover title.
+    {
+      const ent = dccCombatEntry(row.dataset.src || name) || (row.dataset.src ? dccCombatEntry(name) : null);
+      const riders = ent ? dccAbilitiesAtRank(ent.upgrades, rank).filter(t => /debuff|target|knock|prone|push|stun|bleed|ignore|extra/i.test(t) && !/^R\d+:\s*(and\s+)?add 1 rank damage die\.?$/i.test(t)) : [];
+      if(riders.length) addLog(name + ' — on a hit', riders.length + ' rank effect' + (riders.length > 1 ? 's' : ''), riders.join(' · '), 'normal');
+    }
+    if(fxo) {
+      // What else the effect does on a hit — for the GM to apply to the target.
+      const cond = fxT.cond || fxo.fx.condition;
+      const bits = [];
+      if((fxT.debuffs || []).length) bits.push('target gains ' + fxT.debuffs.join(', '));
+      if(fxT.toss) bits.push('ends Held · throw ' + DCCDmgFx.tossFeet(fxo.rank) + ' ft');
+      if(fxT.note) bits.push(fxT.note);
+      if(fxT.cooldown) bits.push('cooldown ' + fxT.cooldown);
+      if(cond || bits.length) addLog(fxo.fx.name + ' (Rank ' + fxo.rank + ')', bits.length ? bits[0] : 'applied', [cond ? 'Only if: ' + cond : '', bits.slice(1).join(' · ')].filter(Boolean).join(' · '), 'normal');
+    }
   } else {
     addLog(`${name}`+(roll===20?' ★':roll===1?' ✗':''), total,
       `${base}+Rank(${rank})${statLabel}${debuffTag(dm)}=${total}`, type);
   }
+  dccSpendOneShot(dm, !!diceStr);
   // Using a skill marks it for advancement (Core p.169).
   const chk = row.querySelector('input[type="checkbox"]');
   if(chk && chk.style.visibility !== 'hidden' && !chk.checked) { chk.checked = true; try { chk.dispatchEvent(new Event('input', { bubbles: true })); } catch(e) {} }
@@ -2732,6 +2845,8 @@ function collectSheet() {
     const rec = { item: inputs[0]?.value||'', qty: inputs[1]?.value||'', notes: inputs[2]?.value||'' };
     if(tr.dataset.cat) rec.cat = tr.dataset.cat;
     if(tr.dataset.slot) rec.slot = tr.dataset.slot;
+    if(tr.dataset.base) rec.base = tr.dataset.base;
+    if(tr.dataset.wsk) rec.wsk = 1;
     if(tr.dataset.effect) rec.effect = tr.dataset.effect;
     if(tr.dataset.benefits) rec.benefits = tr.dataset.benefits;
     if(tr.dataset.bv) rec.bv = tr.dataset.bv;
@@ -2911,12 +3026,15 @@ function applySheet(data) {
       // re-apply here — just re-mark the row so its radial shows ● and unequip works.
       if(inv.cat) tr.dataset.cat = inv.cat;
       if(inv.slot) tr.dataset.slot = inv.slot;
+      if(inv.base) tr.dataset.base = inv.base;
+      if(inv.wsk) tr.dataset.wsk = '1';
       if(inv.effect) tr.dataset.effect = inv.effect;
       if(inv.benefits) tr.dataset.benefits = inv.benefits;
       if(inv.bv) tr.dataset.bv = inv.bv;
       if(inv.iid) tr.dataset.iid = inv.iid;
       if(inv.equipped) { tr.dataset.equipped = '1'; tr.dataset.equipPlaced = inv.equipPlaced||''; tr.dataset.equipBonus = inv.equipBonus||''; }
     });
+    setTimeout(dccWeaponSkillMigrate, 0);
   }
   // Bonus badges on items, and the "granted by <item>" badges on Skills / Spells.
   try { if(window.DCCEquip && DCCEquip.refreshAll) DCCEquip.refreshAll(); } catch(e){}
@@ -3545,11 +3663,16 @@ if(typeof renderTurn === 'function') setTimeout(() => switchTab('turn'), 0);
   const mv = document.getElementById('evade-move'); if(mv && !String(mv.value).trim()) mv.value = '20';
   const st = document.getElementById('evade-step'); if(st && !String(st.value).trim()) st.value = '10';
   const bf = document.getElementById('buffs');
-  if(bf) bf.addEventListener('input', () => {
+  // Buffs and the Floor both feed derived values (Good Sleep = +Floor to all Stats,
+  // Mana Max = INT), so either changing recalculates them.
+  const recalc = () => {
     STATS.forEach(s => updateMod(s.id));
-    syncEvadeDex(); updateHpPips(); calcDR();
+    syncEvadeDex(); updateHpPips(); calcDR(); syncMana();
     if(typeof recalcAllAttacks === 'function') recalcAllAttacks();
-  });
+  };
+  if(bf) bf.addEventListener('input', recalc);
+  const fl = document.getElementById('f-floor');
+  if(fl) fl.addEventListener('input', recalc);
 })();
 
 // autoLoad() is deferred to the end of the campaign <script> block below, so
@@ -4205,6 +4328,12 @@ function lootAddItems(items){
     // in Notes; those are read once (DCCEquip migrates the row).
     if(it.cat) tr.dataset.cat = it.cat;
     if(it.slot) tr.dataset.slot = it.slot;
+    if(it.base) tr.dataset.base = it.base;
+    // A weapon from the GM brings its weapon skill, like one from the item picker —
+    // an enchanted one ("Enchanted Baseball Bat of …") by its base weapon.
+    if(it.cat === 'weapon' && window.DCCSkills && DCCSkills.ensureWeaponSkill) {
+      try { DCCSkills.ensureWeaponSkill(it.item || '', { base: it.base || '', effect: it.notes || '' }); tr.dataset.wsk = '1'; } catch(e) {}
+    }
     if(it.bv === 2 && it.benefits != null && window.DCCEquip && DCCEquip.setBenefits) {
       let list = it.benefits; if(typeof list === 'string') { try { list = JSON.parse(list); } catch(e){ list = []; } }
       DCCEquip.setBenefits(tr, Array.isArray(list) ? list : []);
@@ -4479,6 +4608,7 @@ autoLoad();
   <script src="/tools-data/dcc-sheet-debuffs.js"></script>
   <script src="/tools-data/dcc-sheet-buffs.js"></script>
   <script src="/tools-data/dcc-sheet-skills.js"></script>
+  <script src="/tools-data/dcc-damage-effects.js"></script>
   <script src="/tools-data/dcc-sheet-hotlist.js"></script>
   <script src="/tools-data/dcc-bonus.js"></script>
   <script src="/tools-data/dcc-sheet-equip.js"></script>
@@ -4502,6 +4632,12 @@ autoLoad();
 .dcc-list .dl-row{display:grid;align-items:center;column-gap:8px;row-gap:1px;padding:6px 4px;}
 .dl-row .dl-main,.dl-row .dl-line{display:contents;}
 .sk-grid{display:grid;grid-template-columns:22px minmax(0,1fr) 44px 118px;grid-template-areas:"pin name num ctrl" "pin sub num ctrl";column-gap:8px;}
+/* Damage Effect buttons (dccRenderFx): their own line under an attack's Notes. */
+.dl-row.sk-grid{grid-template-areas:"pin name num ctrl" "pin sub num ctrl" "pin fx fx fx";}
+.dl-row .dl-fx{grid-area:fx;display:flex;flex-wrap:wrap;gap:4px;margin-top:3px;}
+.dl-fxbtn{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--dcc-dk);background:transparent;border:1px solid var(--dcc-dk);border-radius:10px;padding:1px 8px;line-height:1.5;cursor:pointer;}
+.dl-fxbtn::before{content:"⚔ ";}
+.dl-fxbtn:hover{background:var(--dcc-dk);color:var(--paper,#fff);}
 .iv-grid{display:grid;grid-template-columns:22px minmax(0,1fr) 44px 62px;grid-template-areas:"pin name num ctrl" "pin sub num ctrl";column-gap:8px;}
 .dl-row>.hot-pin{grid-area:pin;align-self:center;}
 .dl-row .dl-name{grid-area:name;}

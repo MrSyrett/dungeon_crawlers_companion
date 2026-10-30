@@ -110,6 +110,11 @@
     p = norm(p).replace(/^(?:bronze|silver|gold|platinum|legendary|celestial)\s+tier\s*[—–-]\s*/i, "");
     if (!p) return null;
     var m;
+    // A bonus that only applies sometimes ("+3 Evade Buff with a novel accusation",
+    // "+2 DR against fire") stays a note — applying it on equip would make it permanent.
+    if (/^[+-]\s*\d/.test(p) && /\s(?:with|when|while|if|vs\.?|versus|against|during|after|once)\s/i.test(p)) return { kind: "note", target: p };
+    // "Random Armor Piece (+1 DR)" / "… granting +2 Damage Resistance" — a DR bonus mid-sentence.
+    if ((m = p.match(/(?:\(|\bgranting\s+|\bgives\s+)\+\s*(\d+)\s*(?:DR\b|Damage Resistance)\)?/i))) return { kind: "dr", amount: +m[1] };
     if ((m = p.match(new RegExp("^\\+?\\s*(\\d+)\\s*%\\s*(?:to\\s+)?(" + STAT_RE + ")\\b", "i")))) return { kind: "stat", target: STAT_ID[m[2].toLowerCase()], amount: +m[1] };   // "+5% CON" → "+5 CON"
     if ((m = p.match(/^\+\s*(\d+)\s*(?:to\s+)?all\s+stats\b/i))) return { kind: "allstats", amount: +m[1] };
     if ((m = p.match(new RegExp("^([+-]\\s*\\d+)\\s*(?:to\\s+)?(" + STAT_RE + ")\\b", "i")))) return { kind: "stat", target: STAT_ID[m[2].toLowerCase()], amount: int(m[1]) };
@@ -186,8 +191,8 @@
   }
 
   // ── the popover: pick a kind, fill it in, Add ───────────────────────────────
-  var pop = null, popClose = null;
-  function closePop() { if (pop) { pop.remove(); pop = null; } if (popClose) { document.removeEventListener("mousedown", popClose, true); document.removeEventListener("keydown", popClose, true); popClose = null; } }
+  var pop = null, popClose = null, popMove = null;
+  function closePop() { if (pop) { pop.remove(); pop = null; } if (popMove) { window.removeEventListener("scroll", popMove, true); window.removeEventListener("resize", popMove); popMove = null; } if (popClose) { document.removeEventListener("mousedown", popClose, true); document.removeEventListener("keydown", popClose, true); popClose = null; } }
   function openPop(anchor, onAdd, startKind, only) {
     closePop(); injectCss();
     pop = document.createElement("div"); pop.className = "dcbn-pop";
@@ -248,17 +253,27 @@
       return o;
     }
     pop.addEventListener("click", function (e) {
-      var kb = e.target.closest(".dcbn-kind"); if (kb) { kind = kb.dataset.k; render(); return; }
+      var kb = e.target.closest(".dcbn-kind"); if (kb) { kind = kb.dataset.k; render(); if (popMove) popMove(); return; }
       if (e.target.closest(".dcbn-cancel")) { closePop(); return; }
       if (e.target.closest(".dcbn-ok")) { var o = collect(); if (o) { closePop(); onAdd(o); } }
     });
     pop.addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.target.closest(".dcbn-kind")) { e.preventDefault(); var o = collect(); if (o) { closePop(); onAdd(o); } } });
     render();
-    // place under (or above) the anchor, inside the viewport
-    var r = anchor.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
-    var x = Math.min(Math.max(8, r.left), window.innerWidth - w - 8);
-    var y = r.bottom + 6; if (y + h > window.innerHeight - 8) y = Math.max(8, r.top - h - 6);
-    pop.style.left = x + "px"; pop.style.top = y + "px";
+    // place under (or above) the anchor, inside the viewport — and RE-place on any
+    // scroll (capture phase, so an inner scrolling panel counts) or resize: the
+    // picker is position:fixed, so otherwise it stayed put while the button moved.
+    function place() {
+      if (!pop) return;
+      var r = anchor.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+      var x = Math.min(Math.max(8, r.left), window.innerWidth - w - 8);
+      var y = r.bottom + 6; if (y + h > window.innerHeight - 8) y = Math.max(8, r.top - h - 6);
+      pop.style.left = x + "px"; pop.style.top = y + "px";
+    }
+    place();
+    var raf = 0;
+    popMove = function () { cancelAnimationFrame(raf); raf = requestAnimationFrame(place); };
+    window.addEventListener("scroll", popMove, true);
+    window.addEventListener("resize", popMove);
     popClose = function (e) {
       if (e.type === "keydown") { if (e.key === "Escape") closePop(); return; }
       if (pop && !pop.contains(e.target) && e.target !== anchor) closePop();

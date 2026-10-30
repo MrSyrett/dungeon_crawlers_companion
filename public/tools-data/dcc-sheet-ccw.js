@@ -223,7 +223,11 @@
   const d = (n) => Math.floor(Math.random() * n) + 1;
   function rollStat() { let r = d(6); while (r === 1) r = d(6); return r; } // reroll 1s
   const esc = (s) => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-  const attr = (s) => esc(s).replace(/'/g, "&#39;"); // safe inside single-quoted onclick args
+  const attr = (s) => esc(s).replace(/'/g, "&#39;");
+  // A string argument inside onclick="fn('…')": the browser decodes &#39; back to '
+  // BEFORE the JS runs, so attr() broke on "Wrasslin'" / "Nature's Breath". Escape
+  // for JS first (\' and \\), then for the HTML attribute.
+  const jsa = (s) => esc(String(s == null ? "" : s).replace(/\\/g, "\\\\").replace(/'/g, "\\'"));
 
   // Stat modifier from a stat SCORE (Core Table 2, p.57). The score determines
   // the mod; they are never summed.
@@ -252,21 +256,44 @@
   }
 
   function raceByName(n) { return allRaces().find((r) => r.name === n) || null; }
-  function skillByName(n) {
-    if (typeof DCC_SKILLS === "undefined") return null;
-    const t = String(n).toLowerCase();
-    return DCC_SKILLS.find((s) => s.name.toLowerCase() === t) ||
-      DCC_SKILLS.find((s) => s.name.toLowerCase().replace(/[^a-z]/g, "") === t.replace(/[^a-z]/g, "")) || null;
+  // Book entries + the user's homebrew (own + campaign-shared, pulled by
+  // dcc-sheet-skills.js into window.__DCC_HB_SKILLS / __DCC_HB_SPELLS in the book shape).
+  function allSkills() {
+    const book = (typeof DCC_SKILLS !== "undefined" ? DCC_SKILLS : []);
+    const hb = (typeof window !== "undefined" && Array.isArray(window.__DCC_HB_SKILLS)) ? window.__DCC_HB_SKILLS : [];
+    return book.concat(hb).filter((s) => s && s.name);
   }
+  function allSpells() {
+    const book = (typeof DCC_SPELLS !== "undefined" ? DCC_SPELLS : []);
+    const hb = (typeof window !== "undefined" && Array.isArray(window.__DCC_HB_SPELLS)) ? window.__DCC_HB_SPELLS : [];
+    return book.concat(hb).filter((s) => s && s.name);
+  }
+  // Names the race/class text uses for a differently-named book entry.
+  const NAME_ALIASES = { intimidation: "Intimidate", smite: "Paladin's Smite" };
+  // Find a skill/spell by name: exact (case-insensitive), then letters-only, then with a
+  // trailing " Spell(s)"/" Skill(s)" dropped ("Hot Stuff Aura Spell"), then a plural "s"
+  // dropped ("Detect Traps" → "Detect Trap"), then a known alias.
+  function lookupByName(list, n) {
+    const raw = String(n == null ? "" : n).replace(/\s+/g, " ").trim();
+    if (!raw || !list.length) return null;
+    const lc = (x) => String(x).toLowerCase(), lt = (x) => lc(x).replace(/[^a-z]/g, "");
+    const find = (t) => {
+      if (!t) return null;
+      const l = lc(t), L = lt(t);
+      return list.find((s) => lc(s.name) === l) || (L ? list.find((s) => lt(s.name) === L) : null) || null;
+    };
+    let hit = find(raw);
+    if (hit) return hit;
+    const bare = raw.replace(/\s+(?:spells?|skills?)$/i, "").trim();
+    if (bare !== raw && (hit = find(bare))) return hit;
+    if (/[^s]s$/i.test(bare) && (hit = find(bare.slice(0, -1)))) return hit;
+    const al = NAME_ALIASES[lc(bare)];
+    return al ? find(al) : null;
+  }
+  function skillByName(n) { return lookupByName(allSkills(), n); }
   // Governing stat for a skill, lowercased for the sheet's selects; "" if none.
   function skillStatLc(name) { const sd = skillByName(name); return sd && sd.stat ? String(sd.stat).toLowerCase() : ""; }
-  function spellByName(n) {
-    if (typeof DCC_SPELLS === "undefined") return null;
-    const t = String(n).trim().toLowerCase();
-    if (!t) return null;
-    return DCC_SPELLS.find((s) => s.name.toLowerCase() === t) ||
-      DCC_SPELLS.find((s) => s.name.toLowerCase().replace(/[^a-z]/g, "") === t.replace(/[^a-z]/g, "")) || null;
-  }
+  function spellByName(n) { return lookupByName(allSpells(), n); }
   // ── Experience skill options ────────────────────────────────────────────────
   // Some experiences list "flavor" perks that aren't real skills (no rulebook
   // entry, no mechanics) — those are dropped from the options. Others are an open
@@ -278,8 +305,8 @@
   // The concrete skills an "…of choice" option resolves to.
   function choicePool(label) {
     const l = String(label || "").toLowerCase();
-    const SK = (typeof DCC_SKILLS !== "undefined" ? DCC_SKILLS : []);
-    const SP = (typeof DCC_SPELLS !== "undefined" ? DCC_SPELLS : []);
+    const SK = allSkills();
+    const SP = allSpells();
     const inGroups = (gs) => SK.filter((s) => gs.indexOf(s.group) >= 0).map((s) => s.name).sort();
     if (/edged/.test(l)) return inGroups(["Edged"]);
     if (/hand-?to-?hand/.test(l)) return inGroups(["Hand-to-Hand"]);
@@ -311,13 +338,91 @@
   // ── Race/Class grant router ─────────────────────────────────────────────────
   // The wizard already applies stat bonuses (via finalStats/raceStatMods). This
   // routes every OTHER grant: a named Spell → a full spell row (details + info),
-  // a named Skill → a skill row, and anything it can't resolve (passives, clubs,
-  // resistances, "of your choice", boxes) → a Notes line, so nothing is silently
-  // dropped. `addSkill(name, rank)`, `addSpell(spellObj, rank)`, `notes[]`.
-  function splitGrantNames(s) {
-    return String(s).split(/\s*(?:\/|,| and | & )\s*/i).map((x) => x.trim()).filter(Boolean);
+  // a named Skill → a skill row, a flat "+N DR" / "+N DR Buff" / "+N ft Move" /
+  // "+N Step" / "+N Evade" → the matching combat box (via `fx`), and anything it
+  // can't resolve (passives, clubs, resistances, rank caps, unmade picks) → a Notes
+  // line, so nothing is silently dropped.
+  //   addSkill(name, rank, qualifier?), addSpell(spellObj, rank, qualifier?), notes[], fx{}
+  // `qualifier` is any "(…)" / "with …" / "which …" text attached to the name.
+  // Choice grants ("+3 in a Weapon Skill of your choice", "+3 Rapier or Longsword
+  // Skill") are picked on the Race/Class steps — see grantChoiceSpec / routeGrants.
+
+  // A named skill or spell, preferring the kind order given ("skill" | "spell").
+  function findNamed(name, kinds) {
+    for (const k of (kinds || ["skill", "spell"])) {
+      const o = k === "spell" ? spellByName(name) : skillByName(name);
+      if (o) return { kind: k, obj: o };
+    }
+    return null;
   }
-  function classifyGrant(g, addSkill, addSpell, notes) {
+  const escRe = (x) => String(x).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  // Known names that themselves contain a list separator ("Rise, Dead Minion!") —
+  // protected from splitting, longest first.
+  function sepNames() {
+    return allSkills().concat(allSpells()).map((x) => x.name)
+      .filter((n) => /,|\/|&|\sand\s/i.test(n)).sort((a, b) => b.length - a.length);
+  }
+  // Split a name list on "," "/" "&" " and " (and " or " when asked) outside
+  // parentheses; strip a leading "and " / "or " / "in " / "the " from each piece.
+  function splitTopLevel(s, withOr) {
+    const out = []; let depth = 0, cur = "";
+    const sepWord = withOr ? /^\s+(?:and|or)\s+/i : /^\s+and\s+/i;
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i];
+      if (c === "(") depth++;
+      else if (c === ")") depth = Math.max(0, depth - 1);
+      if (depth === 0) {
+        if (c === "," || c === "/" || c === "&") { out.push(cur); cur = ""; continue; }
+        const m = s.slice(i).match(sepWord);
+        if (m && /\S$/.test(cur)) { out.push(cur); cur = ""; i += m[0].length - 1; continue; }
+      }
+      cur += c;
+    }
+    out.push(cur);
+    return out.map((x) => x.replace(/\s+/g, " ").trim().replace(/^(?:(?:and|or|in|the)\s+)+/i, "").trim()).filter(Boolean);
+  }
+  function splitGrantNames(s) { return splitTopLevel(String(s || "")); }
+  // Resolve a grant's name list to skills/spells. Tries the whole text first, then
+  // splits (keeping separator-containing names whole). → { hits:[{kind,obj,qual}], miss:[] }
+  function grantNamesFor(text, kinds) {
+    const res = { hits: [], miss: [] };
+    const t = String(text || "").replace(/\s+/g, " ").trim().replace(/^(?:(?:in|the)\s+)+/i, "").replace(/[\s,]+$/, "");
+    if (!t) return res;
+    const whole = findNamed(t, kinds);
+    if (whole) { res.hits.push(Object.assign(whole, { qual: "" })); return res; }
+    const prot = [];
+    let s = t;
+    sepNames().forEach((nm) => {
+      const re = new RegExp("(^|[^A-Za-z])(" + escRe(nm) + ")(?![A-Za-z])", "i");
+      s = s.replace(re, (m, pre, hit) => { prot.push(hit); return pre + "\u0001" + (prot.length - 1) + "\u0002"; });
+    });
+    splitTopLevel(s).forEach((p0) => {
+      const p = p0.replace(/\u0001(\d+)\u0002/g, (m, i) => prot[+i]);
+      const last = res.hits[res.hits.length - 1];
+      // A trailing clause qualifies the name before it ("…, with a guitar specialty").
+      if (last && /^(?:with|which|using|while|when|you|as|but|that)\b/i.test(p)) { last.qual = last.qual ? last.qual + "; " + p : p; return; }
+      let f = findNamed(p, kinds), qual = "";
+      if (!f) { const m = p.match(/^(.*?)\s*\(([^)]*)\)\s*(.*)$/); if (m && m[1]) { f = findNamed(m[1], kinds); qual = [m[2], m[3]].filter(Boolean).join(" ").trim(); } }
+      if (!f) { const m = p.match(/^(.+?)\s+((?:with|which|using)\s.+)$/i); if (m) { f = findNamed(m[1], kinds); qual = m[2]; } }
+      if (f) res.hits.push(Object.assign(f, { qual: qual })); else res.miss.push(p);
+    });
+    return res;
+  }
+  // A short name-like leftover ("Creepy Chains (Club)") vs a rules clause.
+  function looksLikeName(m) {
+    return String(m).split(/\s+/).length <= 5 && !/\b(?:you|your|which|that|when|while|each|per|can|costs?|if|to|of|all)\b/i.test(m);
+  }
+  // Flat combat-number grants → { field, n } in the sheet's data.combat names.
+  function combatGrant(raw) {
+    let m;
+    if ((m = raw.match(/^\+\s*(\d+)\s*DR\s+Buffs?\.?$/i))) return { field: "drBuffs", n: +m[1] };
+    if ((m = raw.match(/^\+\s*(\d+)\s*(?:to\s+)?DR\.?$/i))) return { field: "drArmor", n: +m[1] };
+    if ((m = raw.match(/^\+\s*(\d+)\s*(?:ft\.?|feet)?\s*(?:to\s+)?(?:your\s+)?Move\.?$/i))) return { field: "evadeMove", n: +m[1] };
+    if ((m = raw.match(/^\+\s*(\d+)\s*(?:ft\.?|feet)?\s*(?:to\s+)?(?:your\s+)?Step\.?$/i))) return { field: "evadeStep", n: +m[1] };
+    if ((m = raw.match(/^\+\s*(\d+)\s*(?:to\s+)?(?:your\s+)?Evade(?:\s+Buffs?)?\.?$/i))) return { field: "evadeBuffs", n: +m[1] };
+    return null;
+  }
+  function classifyGrant(g, addSkill, addSpell, notes, fx) {
     const raw = String(g || "").trim();
     if (!raw) return;
     const sm = raw.match(/^([+-]\d+)\s+(.+)$/);
@@ -326,43 +431,173 @@
       const rest = sm[2];
       const leftover = rest
         .replace(/\b(strength|intelligence|constitution|dexterity|charisma|str|int|con|dex|cha)\b/gi, "")
-        .replace(/to all stats|all stats/gi, "").replace(/\band\b|,/gi, "").replace(/\s+/g, "");
+        .replace(/to all stats|all stats/gi, "").replace(/\band\b|\bto\b|,/gi, "").replace(/\s+/g, "");
       const hasStat = /(strength|intelligence|constitution|dexterity|charisma|\bstr\b|\bint\b|\bcon\b|\bdex\b|\bcha\b|all stats)/i.test(rest);
       if (hasStat && leftover === "") return;
     }
-    const amount = sm ? Math.abs(parseInt(sm[1], 10)) : 1;
-    const subject = sm ? sm[2] : raw;
-    const vague = /of your choice|a chosen|chosen|as you please|split|\bor\b/i.test(subject);
+    // "+2 DR", "+3 DR Buff", "+10ft Move" … → the combat boxes (summed by the caller).
+    if (fx) { const c = combatGrant(raw); if (c) { fx[c.field] = (fx[c.field] || 0) + c.n; return; } }
+    // Penalties to a skill/spell aren't auto-applied (and never as a bonus).
+    if (!sm || sm[1][0] === "-") {
+      if (!sm) { // a bare grant that IS a known spell/skill name
+        const sp = spellByName(raw); if (sp) { addSpell(sp, 1, ""); return; }
+        const sd = skillByName(raw); if (sd) { addSkill(sd.name, 1, ""); return; }
+      }
+      notes.push(raw);
+      return;
+    }
+    const amount = Math.abs(parseInt(sm[1], 10));
+    const subject = sm[2];
+    const vague = /of your choice|a chosen|chosen|as you please|split|\bor\b|\beither\b|\ball\b|-based|\bany\b|\bevery\b/i.test(subject);
+    if (vague) { notes.push(raw); return; }
     const isSpell = /\bspells?\b/i.test(subject);
     const isSkill = /\bskills?\b/i.test(subject);
-    const body = subject.replace(/\b(spells?|skills?)\b/gi, "").trim();
-    const noteMiss = (miss, suffix) => { if (miss.length) notes.push(`+${amount} ${miss.join("/")}${suffix}`); };
+    const kinds = isSpell && !isSkill ? ["spell", "skill"] : ["skill", "spell"];
+    const suffix = isSpell && !isSkill ? " Spell" : isSkill ? " Skill" : "";
+    // Whole subject first ("Hot Stuff Aura Spell", homebrew "+2 Fireball"), then the
+    // list with the Skill/Spell words dropped.
+    let r = { hits: [], miss: [] };
+    const whole = findNamed(subject, kinds);
+    if (whole) r.hits.push(Object.assign(whole, { qual: "" }));
+    else r = grantNamesFor((isSpell || isSkill) ? subject.replace(/\b(spells?|skills?)\b/gi, " ") : subject, kinds);
+    if (!r.hits.length) { notes.push(raw); return; }
+    r.hits.forEach((h) => { if (h.kind === "spell") addSpell(h.obj, amount, h.qual || ""); else addSkill(h.obj.name, amount, h.qual || ""); });
+    const named = r.miss.filter(looksLikeName), prose = r.miss.filter((m) => !looksLikeName(m));
+    if (named.length) notes.push(`+${amount} ${named.join("/")}${suffix}`);
+    if (prose.length) notes.push(raw);
+  }
 
-    if (isSpell && !vague) { // "+N X/Y Spell(s)" — resolve each named spell
-      const parts = splitGrantNames(body), miss = [];
-      parts.forEach((p) => { const sp = spellByName(p); if (sp) addSpell(sp, amount); else miss.push(p); });
-      if (parts.length) { noteMiss(miss, " Spell"); return; }
+  // ── Race/Class choice grants ────────────────────────────────────────────────
+  // "+5 in a Weapon Skill of your choice", "+2 in two Spells of your choice",
+  // "+3 Rapier or Longsword Skill", "+2 Zone of Control and a Reach Weapon Skill of
+  // your choice", "+3 in a Fire Spell", "+2 to your choice of two of the following
+  // Skills: A, B, or C" → { amount, fixed:[{kind,obj}], picks:[{label, kind, pool}] }.
+  // null when the grant isn't a pick (or no pool can be built for it).
+  const CRAFTING_SKILLS = ["Alchemy", "Bomb Surgeon", "Calligraphy", "Cooking", "Engineering", "Fabricate", "Gear Head",
+    "Improvised Explosive Device", "Infusion", "Repair", "Salvage", "Smithing", "Tattoo Artistry", "Trap Engineer"];
+  const COUNT_WORD = { a: 1, an: 1, one: 1, two: 2, three: 3, four: 4 };
+  function choicePoolFor(desc, kind) {
+    const d0 = String(desc || "").toLowerCase().replace(/\bdifferent\b/g, "").replace(/\s+/g, " ").trim();
+    const uniq = (a) => [...new Set(a)].sort((x, y) => x.localeCompare(y));
+    if (kind === "spell") {
+      const SP = allSpells();
+      if (!d0) return uniq(SP.map((s) => s.name));
+      if (/^passive$/.test(d0)) return uniq(SP.filter((s) => s.passive).map((s) => s.name));
+      if (/^(attack|utility|heal(?:ing)?)$/.test(d0)) { const t = d0.replace(/ing$/, ""); return uniq(SP.filter((s) => s.type === t).map((s) => s.name)); }
+      // An element ("Fire", "Sonic", "Ice"…): spells whose text names that damage.
+      if (/^[a-z]+$/.test(d0)) { const re = new RegExp("\\b" + d0 + "\\b", "i"); return uniq(SP.filter((s) => re.test(s.desc || "") || re.test(s.name)).map((s) => s.name)); }
+      return [];
     }
-    if (isSkill && !vague) { // "+N X and Y Skills"
-      const parts = splitGrantNames(body), miss = [];
-      parts.forEach((p) => { const sd = skillByName(p); if (sd) addSkill(sd.name, amount); else miss.push(p); });
-      if (parts.length) { noteMiss(miss, " Skill"); return; }
+    const SK = allSkills();
+    const inGroups = (gs) => uniq(SK.filter((s) => gs.indexOf(s.group) >= 0).map((s) => s.name));
+    if (!d0) return uniq(SK.map((s) => s.name));
+    if (/crafting/.test(d0)) return uniq(CRAFTING_SKILLS.filter((n) => skillByName(n)).map((n) => skillByName(n).name));
+    if (/weapon/.test(d0)) {
+      if (/edged/.test(d0)) return inGroups(["Edged"]);
+      if (/reach/.test(d0)) return inGroups(["Reach"]);
+      if (/ranged/.test(d0)) return inGroups(["Ranged"]);
+      if (/bashing/.test(d0)) return inGroups(["Bashing"]);
+      if (/hand-?to-?hand|unarmed/.test(d0)) return inGroups(["Hand-to-Hand"]);
+      if (/melee/.test(d0)) return inGroups(["Bashing", "Edged", "Reach", "Hand-to-Hand"]);
+      if (/^weapon$/.test(d0)) return inGroups(["Bashing", "Edged", "Ranged", "Reach", "Hand-to-Hand"]);
+      return [];
     }
-    if (sm && !vague) { // "+N Name" (no Skill/Spell word) — try matching a Skill
-      const parts = splitGrantNames(subject), miss = []; let any = false;
-      parts.forEach((p) => { const sd = skillByName(p); if (sd) { addSkill(sd.name, amount); any = true; } else miss.push(p); });
-      if (any) { noteMiss(miss, ""); return; }
+    return [];
+  }
+  function grantChoiceSpec(g) {
+    const raw = String(g || "").trim();
+    const sm = raw.match(/^\+(\d+)\s+(.+)$/);
+    if (!sm) return null;
+    const amount = parseInt(sm[1], 10);
+    const subject = sm[2].replace(/\s+/g, " ").trim().replace(/\.$/, "");
+    const nameList = (txt, kinds) => splitTopLevel(txt, true).map((p) => findNamed(p, kinds));
+    // "to your choice of two of the following Skills: A, B, or C"
+    let m = subject.match(/choice of (\w+)(?: of)? the following (skills?|spells?)\s*:\s*(.+)$/i);
+    if (m) {
+      const n = COUNT_WORD[m[1].toLowerCase()] || parseInt(m[1], 10) || 1, kind = /spell/i.test(m[2]) ? "spell" : "skill";
+      const hits = nameList(m[3], [kind]);
+      if (!hits.length || hits.some((h) => !h)) return null;
+      const pool = hits.map((h) => h.obj.name);
+      return { amount, fixed: [], picks: Array.from({ length: n }, (_, i) => ({ label: n > 1 ? "Pick " + (i + 1) + " of " + n : "Pick one", kind, pool })) };
     }
-    if (!sm) { // a bare grant that IS a known spell/skill name
-      const sp = spellByName(raw); if (sp) { addSpell(sp, 1); return; }
-      const sd = skillByName(raw); if (sd) { addSkill(sd.name, 1); return; }
+    // "X or Y Skill(s)" / "in either X or Y Skills"
+    if (/\bor\b/i.test(subject) && !/of your choice|\bchoice\b/i.test(subject)) {
+      const kind = /\bspells?\b/i.test(subject) && !/\bskills?\b/i.test(subject) ? "spell" : "skill";
+      const body = subject.replace(/\b(spells?|skills?)\b/gi, " ").replace(/^\s*in\s+/i, "").replace(/^\s*either\s+/i, "");
+      const hits = nameList(body, [kind, kind === "spell" ? "skill" : "spell"]);
+      if (hits.length < 2 || hits.some((h) => !h)) return null;
+      return { amount, fixed: [], picks: [{ label: "Pick one", kind: hits[0].kind, pool: hits.map((h) => h.obj.name) }], mixed: hits };
     }
-    notes.push(raw);
+    // Segments joined by " and ": fixed names, or "a/one/two <descriptor> Skill/Spell (of your choice)".
+    const segs = splitTopLevel(subject.replace(/^in\s+/i, ""));
+    const fixed = [], picks = [];
+    for (const seg of segs) {
+      const pm = seg.match(/^(?:in\s+)?(a|an|one|two|three|four)\s+(.*?)\s*\b(skills?|spells?)\b(?:\s+of\s+(?:your\s+)?choice)?$/i);
+      if (pm) {
+        const n = COUNT_WORD[pm[1].toLowerCase()], kind = /spell/i.test(pm[3]) ? "spell" : "skill";
+        const pool = choicePoolFor(pm[2], kind);
+        if (!pool.length) return null;
+        const label = (pm[2] ? pm[2].replace(/\bdifferent\b/i, "").trim() + " " : "") + (kind === "spell" ? "Spell" : "Skill");
+        for (let i = 0; i < n; i++) picks.push({ label: label + (n > 1 ? " " + (i + 1) + " of " + n : ""), kind, pool });
+        continue;
+      }
+      const f = findNamed(seg.replace(/\b(spells?|skills?)\b/gi, " ").trim(), ["skill", "spell"]);
+      if (!f) return null;
+      fixed.push(f);
+    }
+    return picks.length ? { amount, fixed, picks } : null;
+  }
+  // The chosen race + class grants, each with a stable key for its picks.
+  function grantList() {
+    const race = raceByName(W.race), cls = classByName(W.class);
+    const out = [];
+    (race && race.grants ? race.grants : []).forEach((g, i) => out.push({ src: "race", i, g, key: "race|" + race.name + "|" + i }));
+    (cls && cls.grants ? cls.grants : []).forEach((g, i) => out.push({ src: "class", i, g, key: "class|" + cls.name + "|" + i }));
+    return out;
   }
   // All grant strings for the chosen race + class.
-  function grantStrings() {
-    const race = raceByName(W.race), cls = classByName(W.class);
-    return [...(race && race.grants ? race.grants : []), ...(cls && cls.grants ? cls.grants : [])];
+  function grantStrings() { return grantList().map((x) => x.g); }
+  function grantPicks(key) { return (W.grantChoices && W.grantChoices[key]) || []; }
+  // Is every pick of this choice grant made (and, for "two …", distinct)?
+  function choiceComplete(spec, key) {
+    const p = grantPicks(key);
+    if (!spec.picks.every((pk, i) => p[i] && pk.pool.indexOf(p[i]) >= 0)) return false;
+    const chosen = spec.picks.map((_, i) => p[i]);
+    return new Set(chosen).size === chosen.length;
+  }
+  function grantChoicesDone(src) {
+    return grantList().filter((x) => x.src === src).every((x) => { const sp = grantChoiceSpec(x.g); return !sp || choiceComplete(sp, x.key); });
+  }
+  // Route every race/class grant: a completed pick lands as real skills/spells;
+  // everything else goes through classifyGrant.
+  function routeGrants(addSkill, addSpell, notes, fx) {
+    grantList().forEach((x) => {
+      const spec = grantChoiceSpec(x.g);
+      if (spec && choiceComplete(spec, x.key)) {
+        const put = (f) => { if (!f) return; if (f.kind === "spell") addSpell(f.obj, spec.amount, ""); else addSkill(f.obj.name, spec.amount, ""); };
+        spec.fixed.forEach(put);
+        const p = grantPicks(x.key);
+        spec.picks.forEach((pk, i) => put(findNamed(p[i], [pk.kind, pk.kind === "spell" ? "skill" : "spell"])));
+        return;
+      }
+      classifyGrant(x.g, addSkill, addSpell, notes, fx);
+    });
+  }
+  // The pick selects for one race/class card.
+  function renderGrantChoices(src) {
+    if (!isThird()) return "";
+    let h = "";
+    grantList().filter((x) => x.src === src).forEach((x) => {
+      const spec = grantChoiceSpec(x.g);
+      if (!spec) return;
+      const p = grantPicks(x.key);
+      h += `<div class="dccw-field" style="margin-top:8px;"><label>${esc(x.g)}</label><div style="display:flex;flex-wrap:wrap;gap:6px;">` +
+        spec.picks.map((pk, j) => `<select style="flex:1;min-width:150px;" onchange="DCCW.setGrantChoice('${src}',${x.i},${j},this.value)"><option value="">— ${esc(pk.label)} —</option>` +
+          pk.pool.map((nm) => `<option value="${attr(nm)}" ${p[j] === nm ? "selected" : ""}>${esc(nm)}</option>`).join("") + `</select>`).join("") +
+        `</div></div>`;
+      if (!choiceComplete(spec, x.key)) h += `<p class="dccw-warn" style="margin-top:4px;">${spec.picks.length > 1 ? "Choose " + spec.picks.length + " different options" : "Choose one"} for: ${esc(x.g)}</p>`;
+    });
+    return h ? `<div class="dccw-card" style="margin-top:10px;"><b>Your picks</b><p class="dccw-sub" style="margin:2px 0 4px;">These grants let you choose — the pick lands on your Skills list at the granted Ranks.</p>${h}</div>` : "";
   }
   // Weapon-skill choices, minus the passive Damage Effects. Humans wield the human
   // weapon groups; animal crawlers pick a natural attack (Animal/Pet Strike, minus
@@ -429,6 +664,7 @@
       lootSpellChoice: {}, // Spells instead of loot: { weapon|armor|item|x<i>: { on, opt } } (Core p.116)
       lootSpellSub: true,  // Floor 4/5: swap a duplicate loot Spell for another book Spell
       boosts: [],       // Floor 4/5: names of the 6 / 8 Skills chosen for the extra 2d2/1d2 boost
+      grantChoices: {}, // Race/Class choice grants: { "race|<name>|<i>": [pick, pick…] }
       story: { trauma: "", loose: "", regret: "" },
       gear: { clothes: "", useful: "", junk: "", weapon: "", extra: "" },
       gearInit: false,
@@ -702,7 +938,7 @@
           <span class="dccw-sub">${esc(race.group)}-based · Size ${race.size} (${SIZE_NAME[race.size] || "—"}) · Stat mods: ${modLine}</span>
         </div>
         <ul class="dccw-grants">${grants.map((g) => `<li>${esc(g)}</li>`).join("")}</ul>
-      </div>` : ""}`;
+      </div>${renderGrantChoices("race")}` : ""}`;
   }
 
   // ── step: class (Third-Floor+) ──────────────────────────────────────────────
@@ -724,7 +960,7 @@
         </div>
         ${cls.prerequisites ? `<p class="dccw-sub" style="margin-bottom:6px;">Prerequisite: ${esc(cls.prerequisites)}</p>` : ""}
         <ul class="dccw-grants">${cls.grants.map((g) => `<li>${esc(g)}</li>`).join("")}</ul>
-      </div>` : `<p class="dccw-warn">Choose a class to continue.</p>`}`;
+      </div>${renderGrantChoices("class")}` : `<p class="dccw-warn">Choose a class to continue.</p>`}`;
   }
 
   // ── step: experiences (Third-Floor+) ────────────────────────────────────────
@@ -753,8 +989,8 @@
         h += `<div>` + opts.map((sk) => {
           const on = (slot.skills || []).includes(sk);
           const choice = isChoiceSkill(sk);
-          const info = choice ? "" : `<span class="dccw-i" title="Skill info" onclick="event.stopPropagation();DCCW.toggleInfo('${attr(sk)}')">i</span>`;
-          return `<span class="dccw-chip ${on ? "on" : ""}"><span onclick="DCCW.toggleExpSkill(${idx},'${attr(sk)}')">${esc(sk)}${on ? " ✓" : ""}</span>${info}</span>`;
+          const info = choice ? "" : `<span class="dccw-i" title="Skill info" onclick="event.stopPropagation();DCCW.toggleInfo('${jsa(sk)}')">i</span>`;
+          return `<span class="dccw-chip ${on ? "on" : ""}"><span onclick="DCCW.toggleExpSkill(${idx},'${jsa(sk)}')">${esc(sk)}${on ? " ✓" : ""}</span>${info}</span>`;
         }).join("") + `</div>`;
         // For any selected "…of choice" option, make the concrete pick here so it
         // lands on the sheet as a real skill.
@@ -853,7 +1089,7 @@
     W.boosts = (W.boosts || []).filter((b) => cands.indexOf(b) >= 0);   // drop picks no longer on the list
     const need = boostsNeeded();
     let h = `<h3>Floor ${W.floor} skill boosts</h3><p class="dccw-hint">Choose <b>${n}</b> Skills. When you finish, each gains <b>2d2</b> Ranks if it's at Rank 4 or less, or <b>1d2</b> if it's Rank 5+ (after all other boosts; max Rank 10). <b>${W.boosts.length}/${need}</b> chosen.</p><div>`;
-    h += cands.map((sk) => { const on = W.boosts.indexOf(sk) >= 0; return `<span class="dccw-chip ${on ? "on" : ""}" style="padding-right:12px;"><span onclick="DCCW.toggleBoost('${attr(sk)}')">${esc(sk)}${on ? " ✓" : ""}</span></span>`; }).join("");
+    h += cands.map((sk) => { const on = W.boosts.indexOf(sk) >= 0; return `<span class="dccw-chip ${on ? "on" : ""}" style="padding-right:12px;"><span onclick="DCCW.toggleBoost('${jsa(sk)}')">${esc(sk)}${on ? " ✓" : ""}</span></span>`; }).join("");
     h += `</div>`;
     if (W.boosts.length !== need) h += `<p class="dccw-warn">Choose ${need} skills to continue.</p>`;
     return h;
@@ -922,8 +1158,8 @@
 
   // ── step: background ──────────────────────────────────────────────────────────
   function skillChip(era, sk, on) {
-    return `<span class="dccw-chip ${on ? "on" : ""}"><span onclick="DCCW.toggleBgSkill('${era}','${attr(sk)}')">${esc(sk)}${on ? " ✓" : ""}</span>` +
-      `<span class="dccw-i" title="What does this skill do?" onclick="event.stopPropagation();DCCW.toggleInfo('${attr(sk)}')">i</span></span>`;
+    return `<span class="dccw-chip ${on ? "on" : ""}"><span onclick="DCCW.toggleBgSkill('${era}','${jsa(sk)}')">${esc(sk)}${on ? " ✓" : ""}</span>` +
+      `<span class="dccw-i" title="What does this skill do?" onclick="event.stopPropagation();DCCW.toggleInfo('${jsa(sk)}')">i</span></span>`;
   }
   function skillDesc(sk) {
     const sd = skillByName(sk);
@@ -1101,9 +1337,9 @@
       return { name: name, stat: "", checkType: "Active", notes: "", src: "", isAttack: false, dice: "" };
     }
     function addSkill(name, rank, note) {
-      const key = String(name).toLowerCase();
+      const m = skillMeta(name);
+      const key = String(m.name).toLowerCase();   // canonical: "Hot Stuff Aura Spell" stacks onto "Hot Stuff Aura"
       if (!skillRank[key]) {
-        const m = skillMeta(name);
         skillRank[key] = { name: m.name, rank: 0, stat: m.stat, checkType: m.checkType, notes: m.notes, src: m.src, isAttack: m.isAttack, dice: m.dice };
       }
       skillRank[key].rank = Math.min(10, skillRank[key].rank + rank);
@@ -1124,15 +1360,25 @@
     // Race/Class grants (they count from the Third Floor). Named Skills stack into
     // the skill map; named Spells become full spell rows (details + info button);
     // anything unresolved is collected for the Background Notes.
+    // Flat DR / DR Buff / Move / Step / Evade grants are summed into `grantCombat`.
     const grantNotes = [];
     const grantSpells = [];
+    const grantCombat = {};
     if (third) {
-      grantStrings().forEach((g) => classifyGrant(
-        g,
-        (name, rank) => addSkill(name, rank, "Race/Class grant"),
-        (sp, rank) => { const k = sp.name.toLowerCase(); if (!skillRank[k] && !grantSpells.some((x) => x.name.toLowerCase() === k)) grantSpells.push(Object.assign(spellRow(sp, rank), { _spell: sp })); },
+      routeGrants(
+        (name, rank, qual) => { addSkill(name, rank, "Race/Class grant"); if (qual) addSkill(name, 0, qual); },
+        (sp, rank, qual) => {
+          const k = sp.name.toLowerCase();
+          if (skillRank[k]) { addSkill(sp.name, rank, qual || "Race/Class grant"); return; }   // already known: ranks stack
+          const prev = grantSpells.find((x) => x.name.toLowerCase() === k);
+          if (prev) { prev.rank = String(Math.min(10, (parseInt(prev.rank, 10) || 0) + rank)); return; }
+          const row = Object.assign(spellRow(sp, rank), { _spell: sp });
+          if (qual) row.notes = [row.notes, qual].filter(Boolean).join(" · ");
+          grantSpells.push(row);
+        },
         grantNotes,
-      ));
+        grantCombat,
+      );
     }
 
     const skills = Object.values(skillRank).map((s) => ({ name: s.name, rank: String(s.rank), stat: s.stat, checkType: s.checkType, notes: s.notes, checked: false, src: s.src || "" }));
@@ -1170,13 +1416,24 @@
       const isSpell = s.checkType === "Spell";
       atks.push({ name: s.name + (isSpell ? " (Spell)" : ""), rank: String(s.rank), dice: s.dice || "", stat: s.stat, effects: isSpell ? s.notes : "", src: s.src || s.name });
     });
-    // Loot: the tiered weapon adds Weapon-Skill ranks to the primary attack.
+    // Loot: the tiered weapon adds Weapon-Skill ranks to the primary attack — on its
+    // Attacks row AND its Skills row (the sheet's migrateAttacksToSkills only sets a
+    // Rank when it creates a row, so the Skills row is what actually carries it).
     if (third && W.loot && atks[1]) {
       const lr = LOOT_ROWS.find((r) => String(r.row) === String(W.loot));
-      const bonus = lr && !(W.lootRolled && W.lootRolled.weapon && W.lootRolled.weapon.spells) ? (TIER_WEAPON_SKILL[lr.weapon] || 0) : 0;
-      if (bonus) atks[1].rank = String(Math.min(10, (parseInt(atks[1].rank, 10) || 0) + bonus));
+      let bonus = lr && !(W.lootRolled && W.lootRolled.weapon && W.lootRolled.weapon.spells) ? (TIER_WEAPON_SKILL[lr.weapon] || 0) : 0;
       // Floor 4/5 bonus loot: an extra weapon upgrades the primary weapon the same way.
-      (W.lootExtra || []).forEach((o) => { if (o.slot === "weapon" && !o.spells) { const b2 = TIER_WEAPON_SKILL[o.tier] || 0; if (b2) atks[1].rank = String(Math.min(10, (parseInt(atks[1].rank, 10) || 0) + b2)); } });
+      (W.lootExtra || []).forEach((o) => { if (o.slot === "weapon" && !o.spells) bonus += TIER_WEAPON_SKILL[o.tier] || 0; });
+      if (bonus) {
+        const bump = (r) => String(Math.min(10, (parseInt(r, 10) || 0) + bonus));
+        const norm = (x) => String(x || "").toLowerCase().replace(/\s*\(spell\)\s*$/, "").trim();
+        const keys = [norm(atks[1].src), norm(atks[1].name)].filter(Boolean);
+        atks[1].rank = bump(atks[1].rank);
+        const rev = skills.slice().reverse();   // the specialty row is pushed last — prefer it over a same-named background row
+        const row = rev.find((s) => keys.indexOf(norm(s.src)) >= 0 && keys.indexOf(norm(s.name)) >= 0) ||
+          rev.find((s) => keys.indexOf(norm(s.name)) >= 0) || rev.find((s) => s.src && keys.indexOf(norm(s.src)) >= 0);
+        if (row) row.rank = bump(row.rank);
+      }
     }
     // Floor 4/5 extra boosts (Core p.118): each chosen Skill +2d2 at Rank ≤4, else +1d2
     // (max 10). Applied last; the same roll goes to that skill's Attacks row(s).
@@ -1196,7 +1453,7 @@
         boostLog.push(s.name + " +" + add);
       });
     }
-    return { skills, atks, notes: grantNotes, boostLog };
+    return { skills, atks, notes: grantNotes, boostLog, combat: grantCombat };
   }
 
   // ── step: review ──────────────────────────────────────────────────────────────
@@ -1253,8 +1510,8 @@
   // ── validation ────────────────────────────────────────────────────────────────
   function canAdvance() {
     const key = steps()[W.step].key;
-    if (key === "race") return isThird() ? !!W.race : true;
-    if (key === "class") return !!W.class;
+    if (key === "race") return isThird() ? (!!W.race && grantChoicesDone("race")) : true;
+    if (key === "class") return !!W.class && grantChoicesDone("class");
     if (key === "stats") return statsAssigned();
     if (key === "background") return ERAS.every((e) => W.bg[e] && (W.bg[e].skills || []).length === 2);
     if (key === "combat") return W.combat.type === "weapon" ? !!W.combat.weapon : (finalStats().int >= 4 && !!W.combat.spell);
@@ -1272,7 +1529,7 @@
     const cfg = third ? FLOOR_CFG[W.floor] : null;
     const fin = finalStats();
     const race = raceByName(W.race);
-    const { skills, atks, notes: grantNotes, boostLog } = buildSkillsAndAttacks();
+    const { skills, atks, notes: grantNotes, boostLog, combat: grantCombat } = buildSkillsAndAttacks();
     const data = {};
     data.header = { "f-name": W.basics.name, "f-race": W.race, "f-gender": W.basics.gender, "f-level": third ? String(cfg.level) : "1", "f-floor": third ? String(W.floor) : "1", "f-crawler": W.basics.crawler, "f-class": third ? W.class : "" };
     data.stats = {};
@@ -1294,8 +1551,13 @@
         drArmor = dr ? String(dr) : "";
       }
     }
+    // Race/Class "+N DR" adds to the DR (armor) box; "+N DR Buff" / Move / Step / Evade
+    // to their own boxes.
+    const gc = grantCombat || {};
+    const plus = (base, n) => (n ? String((parseInt(base, 10) || 0) + n) : String(base));
     data.combat = {
-      evadeBuffs: "", evadeMove: "20", evadeStep: "10", drArmor: drArmor, drBuffs: "",
+      evadeBuffs: gc.evadeBuffs ? String(gc.evadeBuffs) : "", evadeMove: plus("20", gc.evadeMove), evadeStep: plus("10", gc.evadeStep),
+      drArmor: gc.drArmor ? plus(drArmor, gc.drArmor) : drArmor, drBuffs: gc.drBuffs ? String(gc.drBuffs) : "",
       drAiFavor: String(aiFavor),                    // AI Favor -> its own box, not notes
       drSize: third ? (race ? String(race.size) : "4") : "4", // race Size at Floor 3+; tutorial = Medium (4)
       manaCurrentVal: String(fin.int), debuffs: "",
@@ -1337,7 +1599,16 @@
       if (!W.lootRolled) rollLoot();
       const R = W.lootRolled;
       if (R) {
-        [R.weapon, R.armor, R.item, R.consumable].concat(W.lootExtra || []).forEach((o) => { if (o && !o.spells) inv.push({ item: o.name, qty: "1", notes: o.notes }); });
+        // Tier Weapon/Armor benefits (DR, CON, STR/DEX, Weapon-Skill / Catcher ranks) are
+        // already baked into the sheet above, so those rows carry an authoritative EMPTY
+        // benefit list (bv=2) — otherwise the equip engine parses the tier text
+        // ("+4 DR, +5 CON…", "+2 Weapon Skill") and applies it a second time on equip.
+        [R.weapon, R.armor, R.item, R.consumable].concat(W.lootExtra || []).forEach((o) => {
+          if (!o || o.spells) return;
+          const row = { item: o.name, qty: "1", notes: o.notes };
+          if (o.tierBenefit) { row.bv = "2"; row.benefits = "[]"; }
+          inv.push(row);
+        });
       }
       resolveLootSpells(skills, fin.int, inv, lootSpellLog);
     }
@@ -1406,17 +1677,33 @@
     // named Spells as full spell rows (details + info), and note the rest. Nothing
     // the crawler already earned is disturbed.
     const gNotes = [];
-    const findRow = (nm) => data.skills.find((s) => String(s.name).toLowerCase() === String(nm).toLowerCase());
-    grantStrings().forEach((g) => classifyGrant(
-      g,
-      (name, rank) => {
+    const gCombat = {};
+    const findRow = (nm) => data.skills.find((s) => String(s.name).toLowerCase() === String(nm).toLowerCase() || (s.src && String(s.src).toLowerCase() === String(nm).toLowerCase()));
+    const addQual = (row, qual) => { if (qual && String(row.notes || "").indexOf(qual) === -1) row.notes = [row.notes, qual].filter(Boolean).join(" · "); };
+    routeGrants(
+      (name, rank, qual) => {
         const ex = findRow(name);
-        if (ex) ex.rank = String(Math.min(10, (parseInt(ex.rank, 10) || 0) + rank));
-        else { const sd = skillByName(name); data.skills.push({ name: sd ? sd.name : name, rank: String(Math.min(10, rank)), stat: skillStatLc(name), checkType: sd && sd.passive ? "Passive" : "Active", notes: "Race/Class grant", checked: false, src: sd ? sd.name : "" }); }
+        if (ex) { ex.rank = String(Math.min(10, (parseInt(ex.rank, 10) || 0) + rank)); addQual(ex, qual); }
+        else { const sd = skillByName(name); const row = { name: sd ? sd.name : name, rank: String(Math.min(10, rank)), stat: skillStatLc(name), checkType: sd && sd.passive ? "Passive" : "Active", notes: "Race/Class grant", checked: false, src: sd ? sd.name : "" }; addQual(row, qual); data.skills.push(row); }
       },
-      (sp, rank) => { if (!findRow(sp.name)) data.skills.push(spellRow(sp, rank)); },
+      (sp, rank, qual) => {
+        const ex = findRow(sp.name);
+        if (ex) { ex.rank = String(Math.min(10, (parseInt(ex.rank, 10) || 0) + rank)); addQual(ex, qual); return; }   // known Spell: ranks stack
+        const row = spellRow(sp, rank); addQual(row, qual); data.skills.push(row);
+      },
       gNotes,
-    ));
+      gCombat,
+    );
+    // Flat DR / DR Buff / Move / Step / Evade grants add onto the existing boxes. A
+    // box holding free text (not a plain number) is left alone and the grant noted.
+    const C = data.combat;
+    [["drArmor", "DR", ""], ["drBuffs", "DR Buff", ""], ["evadeMove", "ft Move", "20"], ["evadeStep", "Step", "10"], ["evadeBuffs", "Evade", ""]].forEach(([f, lbl, dflt]) => {
+      const n = gCombat[f];
+      if (!n) return;
+      const cur = String(C[f] == null || C[f] === "" ? dflt : C[f]).trim();
+      if (cur === "" || /^[+-]?\d+$/.test(cur)) C[f] = String((parseInt(cur, 10) || 0) + n);
+      else gNotes.push("+" + n + " " + lbl);
+    });
 
     const note = `Reached Floor 3 (Level ${upgradeLevel()}): chose race ${W.race} and class ${W.class}, distributed ${statBudget()} stat points. Existing skills, attacks and loot kept as-is.` +
       (gNotes.length ? ` Race/Class grants to apply yourself: ${gNotes.join("; ")}.` : "");
@@ -1524,6 +1811,15 @@
       render();
     },
     setClass(v) { W.class = v; render(); },
+    // Race/Class choice grant pick: src "race"|"class", i = grant index, j = pick index.
+    setGrantChoice(src, i, j, value) {
+      const x = grantList().find((g) => g.src === src && g.i === i); if (!x) return;
+      const C = W.grantChoices || (W.grantChoices = {});
+      const arr = (C[x.key] || []).slice();
+      arr[j] = value || "";
+      C[x.key] = arr;
+      render();
+    },
     setExp(idx, name) { if (W.experiences[idx]) { W.experiences[idx] = { exp: name, skills: [], choices: {} }; render(); } },
     toggleExpSkill(idx, sk) {
       const slot = W.experiences[idx]; if (!slot) return;

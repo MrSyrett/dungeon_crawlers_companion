@@ -135,8 +135,8 @@
   }
 
   // ── the "+ Bonus" popover ────────────────────────────────────────────────────
-  var pop = null, popClose = null;
-  function closePop() { if (pop) { pop.remove(); pop = null; } if (popClose) { document.removeEventListener("mousedown", popClose, true); document.removeEventListener("keydown", popClose, true); popClose = null; } }
+  var pop = null, popClose = null, popMove = null;
+  function closePop() { if (pop) { pop.remove(); pop = null; } if (popMove) { window.removeEventListener("scroll", popMove, true); window.removeEventListener("resize", popMove); popMove = null; } if (popClose) { document.removeEventListener("mousedown", popClose, true); document.removeEventListener("keydown", popClose, true); popClose = null; } }
   function openPop(sys, anchor, onAdd, only) {
     var cfg = cfgOf(sys); if (!cfg) return;
     closePop(); injectCss();
@@ -187,16 +187,27 @@
       return o;
     }
     pop.addEventListener("click", function (e) {
-      var kb = e.target.closest(".lbn-kind"); if (kb) { kind = kb.dataset.k; render(); return; }
+      var kb = e.target.closest(".lbn-kind"); if (kb) { kind = kb.dataset.k; render(); if (popMove) popMove(); return; }
       if (e.target.closest(".lbn-cancel")) { closePop(); return; }
       if (e.target.closest(".lbn-ok")) { var o = collect(); if (o) { closePop(); onAdd(o); } }
     });
     pop.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); var o = collect(); if (o) { closePop(); onAdd(o); } } });
     render();
-    var r = anchor.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
-    pop.style.left = Math.min(Math.max(8, r.left), window.innerWidth - w - 8) + "px";
-    var y = r.bottom + 6; if (y + h > window.innerHeight - 8) y = Math.max(8, r.top - h - 6);
-    pop.style.top = y + "px";
+    // Placed against its button and RE-placed on any scroll (capture phase, so an
+    // inner scrolling panel counts) or resize: the picker is position:fixed, so
+    // without this it stayed put while the button scrolled away beneath it.
+    function place() {
+      if (!pop) return;
+      var r = anchor.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+      pop.style.left = Math.min(Math.max(8, r.left), window.innerWidth - w - 8) + "px";
+      var y = r.bottom + 6; if (y + h > window.innerHeight - 8) y = Math.max(8, r.top - h - 6);
+      pop.style.top = y + "px";
+    }
+    place();
+    var raf = 0;
+    popMove = function () { cancelAnimationFrame(raf); raf = requestAnimationFrame(place); };
+    window.addEventListener("scroll", popMove, true);
+    window.addEventListener("resize", popMove);
     popClose = function (e) {
       if (e.type === "keydown") { if (e.key === "Escape") closePop(); return; }
       if (pop && !pop.contains(e.target) && e.target !== anchor) closePop();

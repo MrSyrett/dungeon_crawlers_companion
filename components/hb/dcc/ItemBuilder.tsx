@@ -63,9 +63,12 @@ export function toBadges(v: unknown): Badge[] {
 }
 export const fromBadges = (list: Badge[]): DccBonus[] => list.map(asBonus);
 
-export type ItemDraft = { category: string; tier: string; slot: string; price: number | null; effect: string; benefits: Badge[] };
+/** `skill` = the attack skill a WEAPON is wielded with (a homebrew "Big Bertha"
+ *  swung as a Baseball Bat) — the sheet adds it to the Skills list when the weapon
+ *  is picked up or equipped. Empty = the sheet works it out from the name. */
+export type ItemDraft = { category: string; tier: string; slot: string; price: number | null; effect: string; benefits: Badge[]; skill: string };
 
-export const blankItem = (): ItemDraft => ({ category: "mundane", tier: "", slot: "", price: null, effect: "", benefits: [] });
+export const blankItem = (): ItemDraft => ({ category: "mundane", tier: "", slot: "", price: null, effect: "", benefits: [], skill: "" });
 
 export function itemFromData(d: Record<string, unknown>): ItemDraft {
   const p = parseInt(String(d.price ?? ""), 10);
@@ -76,6 +79,7 @@ export function itemFromData(d: Record<string, unknown>): ItemDraft {
     price: Number.isFinite(p) && p > 0 ? p : null,
     effect: String(d.effect ?? ""),
     benefits: toBadges(d.benefits),
+    skill: String(d.skill ?? ""),
   };
 }
 
@@ -88,6 +92,7 @@ export function itemPayload(name: string, it: ItemDraft): Record<string, unknown
     price: it.price ?? "",
     effect: it.effect.trim(),
     benefits: fromBadges(it.benefits),
+    skill: it.category === "weapon" ? it.skill.trim() : "",
   };
 }
 
@@ -118,6 +123,19 @@ export default function ItemBuilder({ value: it, onChange, names }: { value: Ite
           <Stepper value={it.price} min={1} max={10000000} nullable width="6em" ariaLabel="price" onChange={(v) => set("price", v)} />
         </div>
       </div>
+      {it.category === "weapon" ? (
+        <div className="sm:col-span-2">
+          <label className={lbl}>Weapon skill</label>
+          <select className="h-[34px] w-full max-w-sm rounded border border-[var(--border)] bg-[var(--panel-2)] px-2 text-sm text-[var(--text)] outline-none focus:border-[var(--hb-accent)]"
+            value={it.skill} onChange={(e) => set("skill", e.target.value)} aria-label="weapon skill">
+            <option value="">Work it out from the name</option>
+            {(it.skill && !names.attacks.some((a) => a.name === it.skill) ? [{ name: it.skill }, ...names.attacks] : names.attacks).map((a) => (
+              <option key={a.name} value={a.name}>{a.name}{a.meta ? ` — ${a.meta}` : ""}</option>
+            ))}
+          </select>
+          <p className="mt-1 text-[11px] text-[var(--muted)]">The attack skill it&apos;s wielded with. A crawler who picks it up gets this skill (Rank 0) if they don&apos;t have it.</p>
+        </div>
+      ) : null}
       <div className="sm:col-span-2">
         <label className={lbl}>Bonuses (applied while equipped)</label>
         <BonusBadges value={it.benefits} kinds={dccKinds(names)} stats={STATS} max={20} empty="No bonuses — flavour-only item" onChange={(v) => set("benefits", v)} />
@@ -136,7 +154,7 @@ export default function ItemBuilder({ value: it, onChange, names }: { value: Ite
 const CAT: Record<string, string> = Object.fromEntries(DCC_ITEM_CATEGORIES);
 
 export function ItemPreview({ name, it, names }: { name: string; it: ItemDraft; names: DccNames }) {
-  const sub = [it.tier, CAT[it.category] ?? it.category, it.slot].filter(Boolean).join(" · ");
+  const sub = [it.tier, CAT[it.category] ?? it.category, it.slot, it.category === "weapon" && it.skill ? `${it.skill} skill` : ""].filter(Boolean).join(" · ");
   return (
     <Preview title={name || "Unnamed item"} subtitle={sub}>
       {it.benefits.length ? <BadgeStrip value={it.benefits} kinds={dccKinds(names)} stats={STATS} /> : null}

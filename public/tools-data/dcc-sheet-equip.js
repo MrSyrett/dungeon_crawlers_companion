@@ -225,12 +225,22 @@
       if (label) { addName(gearInput(label), name); placed = label; }
     }
     // A book ring "of +N to a Stat" asks which Stat once, and becomes a real Stat bonus.
-    var chosen = meta.benefits.findIndex(function (b) { return b.kind === "note" && /^\+\s*\d+\s*(?:to\s+)?(?:a\s+)?(?:chosen\s+)?stat\b/i.test(b.target); });
-    if (chosen >= 0 && !meta.benefits.some(function (b) { return b.kind === "stat"; })) {
-      var n = parseInt(meta.benefits[chosen].target.replace(/[^0-9]/g, ""), 10) || 1, pick = "";
+    var CHOSEN_RX = /\+\s*(\d+)\s*(?:to\s+)?(?:a\s+|one\s+)?(?:chosen\s+)?stat\b(?!s)/i;
+    var chosen = meta.benefits.findIndex(function (b) { return b.kind === "note" && CHOSEN_RX.test(b.target); });
+    // Every add path drops "note" bonuses, so the ring's own text is checked too
+    // (Silver/Golden Ring "+2/+3 to a chosen Stat").
+    var chosenTxt = "";
+    if (chosen < 0) {
+      var cat0 = lookup(name);
+      var src0 = [tr.dataset.effect, cat0 && cat0.effect, rowNotes(tr)].filter(Boolean).join(" ");
+      var mm0 = src0.match(CHOSEN_RX);
+      if (mm0) chosenTxt = mm0[0];
+    }
+    if ((chosen >= 0 || chosenTxt) && !meta.benefits.some(function (b) { return b.kind === "stat"; })) {
+      var n = parseInt((chosen >= 0 ? meta.benefits[chosen].target : chosenTxt).replace(/[^0-9]/g, ""), 10) || 1, pick = "";
       try { pick = window.prompt("This grants +" + n + " to a Stat. Which one? (STR / INT / CON / DEX / CHA)", ""); } catch (e) {}
       var sid = { str: "str", strength: "str", int: "int", intelligence: "int", con: "con", constitution: "con", dex: "dex", dexterity: "dex", cha: "cha", charisma: "cha" }[norm(pick).toLowerCase()];
-      if (sid) { meta.benefits[chosen] = { kind: "stat", target: sid, amount: n }; setBenefits(tr, meta.benefits); }
+      if (sid) { if (chosen >= 0) meta.benefits[chosen] = { kind: "stat", target: sid, amount: n }; else meta.benefits.push({ kind: "stat", target: sid, amount: n }); setBenefits(tr, meta.benefits); }
     }
     var iid = tr.dataset.iid || ("it" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
     tr.dataset.iid = iid;
@@ -253,6 +263,12 @@
         if (!have.some(function (n) { return n.toLowerCase() === b.target.toLowerCase(); })) { have.push(b.target); writeBuffs(have); rec.buffs.push(b.target); }
       }
     });
+    // Wielding a weapon needs its weapon skill: an enchanted or renamed one
+    // ("Enchanted Baseball Bat") brings its BASE weapon's skill at Rank 0 if the
+    // crawler doesn't have it yet — learned, so it stays when the weapon comes off.
+    if (meta.cat === "weapon" && window.DCCSkills && window.DCCSkills.ensureWeaponSkill) {
+      try { window.DCCSkills.ensureWeaponSkill(name, { base: tr.dataset.base || "", effect: rowNotes(tr) }); tr.dataset.wsk = "1"; } catch (e) {}
+    }
     try { if (typeof floatHealToTop === "function") floatHealToTop(); } catch (e) {}
     try { if (typeof syncLinkedAttacks === "function") syncLinkedAttacks(); } catch (e) {}
     tr.dataset.equipped = "1";

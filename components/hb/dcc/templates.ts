@@ -41,11 +41,14 @@ async function monsters(): Promise<TemplateOption[]> {
 
 async function skills(): Promise<TemplateOption[]> {
   const { DCC_SKILLS } = await import("@/lib/data/dcc-skills");
+  const { DCC_FX_BOOK } = await import("./fxBook");
   const groupOf = (c: string) => (c === "attack" ? "Attack skills" : "Utility skills");
   return DCC_SKILLS.map((s, i): TemplateOption => ({
     key: `${s.name}#${s.category}#${i}`, name: s.name, group: groupOf(s.category),
     meta: [s.group, s.stat ?? (s.passive ? "Passive" : ""), s.damage ? `${s.damage}${s.damageType ? ` ${s.damageType}` : ""}` : "", s.range, s.desc ? snip(s.desc, 60) : ""].filter(Boolean).join(" · "),
-    data: bookRow(s),
+    // A book Damage Effect brings its mechanics (fxBook.ts); its description is then
+    // written from them, so the book text isn't carried over twice.
+    data: s.group === "Damage Effect" && DCC_FX_BOOK[s.name] ? { ...bookRow(s), desc: "", effect: DCC_FX_BOOK[s.name] } : bookRow(s),
   })).sort(byOrder(["Attack skills", "Utility skills"]));
 }
 

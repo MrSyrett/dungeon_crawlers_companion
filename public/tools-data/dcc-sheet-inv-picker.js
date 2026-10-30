@@ -51,6 +51,10 @@
         .then(function (j) {
           if (!j || !Array.isArray(j.items)) return;
           hbItems = j.items.map(function (it) { return it && it.data; }).filter(function (d) { return d && d.name; });
+          // Shared with the equip engine and the weapon → skill lookup, which read
+          // window.__DCC_HB_ITEMS (it was never published, so a homebrew item's own
+          // data was invisible to them).
+          window.__DCC_HB_ITEMS = hbItems;
           var ov = document.getElementById("dcci-overlay");
           if (ov && ov.style.display === "flex") renderPicker();   // refresh if open
         })
@@ -201,7 +205,7 @@
     var nm0 = name || (it ? it.name : "");
     if (nm0 && window.DCCFx && window.DCCFx.invRowByName(nm0)) {
       window.DCCFx.stackAdd(nm0, 1);
-      if (it && it.category === "weapon" && window.DCCSkills && window.DCCSkills.ensureWeaponSkill) { try { window.DCCSkills.ensureWeaponSkill(it.name); } catch (e) {} }
+      if (it && it.category === "weapon" && window.DCCSkills && window.DCCSkills.ensureWeaponSkill) { try { window.DCCSkills.ensureWeaponSkill(nm0, { base: it.name, effect: it.effect }); } catch (e) {} }
       return;
     }
     var tr = newInvRow();
@@ -209,18 +213,21 @@
     // Stamp category/slot/effect so the row's radial can equip it (works for
     // homebrew armor/accessories too, which a name lookup wouldn't find).
     if (tr && it) { tr.dataset.cat = it.category || ""; if (it.slot) tr.dataset.slot = it.slot; if (it.effect) tr.dataset.effect = it.effect; if (window.DCCEquip && window.DCCEquip.setBenefits) { var bl = (Array.isArray(it.benefits) && it.benefits.length) ? it.benefits : (window.DCCBonus ? window.DCCBonus.fromText(it.effect || "").filter(function (b) { return b.kind !== "note"; }) : []); window.DCCEquip.setBenefits(tr, bl); try { window.DCCEquip.refreshRow(tr.querySelector(".hot-pin")); } catch (e) {} } }
-    // Auto-equip body-slot gear straight into the Gear slots instead of leaving
-    // it to be pinned to the Hotlist.
+    autoEquip(tr, it);
+    // A weapon brings its weapon skill onto the Skills list (which rolls To Hit + Damage).
+    if (it && it.category === "weapon" && window.DCCSkills && window.DCCSkills.ensureWeaponSkill) {
+      try { window.DCCSkills.ensureWeaponSkill(name || it.name, { base: it.name, effect: it.effect }); } catch (e) {}
+    }
+  }
+  // Auto-equip body-slot gear straight into the Gear slots instead of leaving
+  // it to be pinned to the Hotlist.
+  function autoEquip(tr, it) {
     var equipped = false;
     if (tr && it && isBodySlot(it.slot) && window.DCCEquip && typeof window.DCCEquip.isEquipType === "function" && window.DCCEquip.isEquipType(tr)) {
       var pin = tr.querySelector(".hot-pin");
       if (pin && tr.dataset.equipped !== "1") { try { window.DCCEquip.click(pin); equipped = true; } catch (e) {} }
     }
     if (!equipped) { try { if (window.DCCHotlist) window.DCCHotlist.refresh(); } catch (e) {} }
-    // A weapon brings its weapon skill onto the Skills list (which rolls To Hit + Damage).
-    if (it && it.category === "weapon" && window.DCCSkills && window.DCCSkills.ensureWeaponSkill) {
-      try { window.DCCSkills.ensureWeaponSkill(it.name) || (name && window.DCCSkills.ensureWeaponSkill(name)); } catch (e) {}
-    }
   }
 
   // ── picker ──────────────────────────────────────────────────────────────────
@@ -360,9 +367,25 @@
     if (tr) {
       tr.dataset.cat = it.category || "";
       if (it.slot) tr.dataset.slot = it.slot;
-      if (window.DCCEquip && window.DCCEquip.setBenefits) { window.DCCEquip.setBenefits(tr, ench.benefits || []); try { window.DCCEquip.refreshRow(tr.querySelector(".hot-pin")); } catch (e) {} }
+      // The base item, kept on the row (and saved), so a renamed enchanted weapon
+      // still knows which weapon skill it uses.
+      tr.dataset.base = it.name;
+      // The base item keeps what it already did (Bitchass Buckler's +3 DR) — the
+      // enchantment ADDS to it. Same bonus twice is kept once.
+      var baseB = carriesSpell(it) ? [] : ((Array.isArray(it.benefits) && it.benefits.length) ? it.benefits : (window.DCCBonus ? window.DCCBonus.fromText(it.effect || "").filter(function (b) { return b.kind !== "note"; }) : []));
+      var all = [], seen = {};
+      baseB.concat(ench.benefits || []).forEach(function (b) { var k = window.DCCBonus ? window.DCCBonus.label(b) : JSON.stringify(b); if (!seen[k]) { seen[k] = 1; all.push(b); } });
+      if (window.DCCEquip && window.DCCEquip.setBenefits) { window.DCCEquip.setBenefits(tr, all); try { window.DCCEquip.refreshRow(tr.querySelector(".hot-pin")); } catch (e) {} }
     }
-    try { if (window.DCCHotlist) window.DCCHotlist.refresh(); } catch (e) {}
+    // Same as any other add: worn gear goes straight on, and a weapon brings its
+    // BASE weapon's skill ("Enchanted Baseball Bat" → Baseball Bat) to the Skills list.
+    // A scroll/tome is read, not worn, so it skips both.
+    if (!carriesSpell(it)) {
+      autoEquip(tr, it);
+      if (it.category === "weapon" && window.DCCSkills && window.DCCSkills.ensureWeaponSkill) {
+        try { window.DCCSkills.ensureWeaponSkill(name, { base: it.name, effect: it.effect }); } catch (e) {}
+      }
+    } else { try { if (window.DCCHotlist) window.DCCHotlist.refresh(); } catch (e) {} }
     closePicker();
   }
 

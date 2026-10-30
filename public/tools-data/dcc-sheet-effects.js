@@ -167,6 +167,19 @@
         return true;
       }
     }
+    // A homebrew heal spell (SpellBuilder type "heal") carries its healing dice in
+    // `damage` (+ rank upgrades, + its damage Stat) — heal yourself or an ally.
+    if (sp.type === "heal" && /^\d*d\d+$/i.test(String(sp.damage || ""))) {
+      var hd = typeof dccDiceAtRank === "function" ? dccDiceAtRank(sp.damage, sp.upgrades || [], R) : sp.damage;
+      var hm = hd.match(/(\d*)d(\d+)/i), hr = roll(parseInt(hm[1] || "1", 10), parseInt(hm[2], 10));
+      var hs = sp.damageStat && sp.damageStat !== "none" ? String(sp.damageStat).toLowerCase() : "", hsm = hs ? statMod(hs) : 0;
+      var amt2 = Math.max(0, hr.total + hsm), why = hd + "(" + hr.rolls.join("+") + ")" + (hs ? "+" + hs.toUpperCase() + "(" + hsm + ")" : "") + "=" + amt2 + " slots";
+      choose(n + " — heal " + amt2 + " slots", [{ label: "Myself", value: "self" }, { label: "An ally", value: "ally" }], function (who) {
+        if (who === "self") { var g3 = healSelf(amt2); log(n + tag, "+" + g3 + " HB", why, "crit"); }
+        else log(n + tag, "+" + amt2 + " HB", "An ally heals " + why, "crit");
+      });
+      return true;
+    }
     // Utility spells that call for no Check: just cast (no d20).
     var desc = sp.desc || "";
     if (sp.type !== "attack" && !/\bcheck\b|opposed|attack/i.test(desc)) {
@@ -245,18 +258,32 @@
   }
 
   // Apply an item's effect by name (+ its notes). Returns true if the item was "used up".
-  function itemEffect(name, notes, after) {
+  // The spell a scroll/tome holds as a Spell badge (the GM Loot Box, the Enchanted
+  // builder) — { sp, rank } — or null. Its name may be just "Spell Scroll".
+  function spellBadge(tr) {
+    if (!tr || !window.DCCEquip || !window.DCCEquip.benefitsOf) return null;
+    var b = (window.DCCEquip.benefitsOf(tr) || []).find(function (x) { return x && x.kind === "spell" && x.target; });
+    var sp = b ? spellBy(b.target) : null;
+    return sp ? { sp: sp, rank: parseInt(b.amount, 10) || 0 } : null;
+  }
+  function itemEffect(name, notes, after, tr) {
     var it = itemBy(name), nm = String(name || ""), low = norm(nm), text = ((it && it.effect) || "") + " " + (notes || "");
-    var m;
-    // Spell Scroll: <Spell> — cast once, free, at a fixed Rank.
+    var m, badge = spellBadge(tr), cat = tr && tr.dataset ? String(tr.dataset.cat || "") : "";
+    // Spell Scroll — cast once, free, at a fixed Rank. The spell (and Rank) come from its
+    // Spell badge when it has one, else from its name ("Spell Scroll: Fireball (Rank 3)").
+    var isScroll = cat === "scroll" || /^(?:spell\s+)?scroll\b/i.test(nm);
+    if (isScroll && badge) { castFromScroll(badge.sp, badge.rank || 1); return after(true); }
     if ((m = nm.match(/^(?:spell\s+)?scroll(?:\s+of)?\s*[:\-–—]?\s*(.+?)(?:\s*\(rank\s*(\d+)\))?$/i)) && spellBy(m[1])) {
       castFromScroll(spellBy(m[1]), parseInt(m[2], 10) || 1); return after(true);
     }
     // Magic Tome / Spellbook / "Tome of <Spell>" — reading it teaches the Spell and uses the tome up.
-    // Rank: the Rank written on the tome (the creation wizard's tomes note "at Rank N"), else 1d6−1 (min 1).
+    // Rank: the badge's Rank, else the Rank written on the tome (the creation wizard's tomes
+    // note "at Rank N"), else 1d6−1 (min 1).
     // Already know it? Nothing to learn — the tome is kept (it can still be traded or sold).
-    if ((m = nm.match(/^(?:magic\s+tome|spellbook|tome)\s*(?:of)?\s*[:\-–—]?\s*(.+)$/i)) && spellBy(m[1])) {
-      var sp = spellBy(m[1]);
+    var isTome = cat === "tome" || /^(?:magic\s+tome|spellbook|tome)\b/i.test(nm);
+    if ((isTome && badge) || ((m = nm.match(/^(?:magic\s+tome|spellbook|tome)\s*(?:of)?\s*[:\-–—]?\s*(.+)$/i)) && spellBy(m[1]))) {
+      var sp = isTome && badge ? badge.sp : spellBy(m[1]);
+      if (isTome && badge && badge.rank) notes = (notes ? notes + " " : "") + "Rank " + badge.rank;
       var rowOf = function () { return [].slice.call(document.querySelectorAll("#skills-body tr")).find(function (tr) { var t = tr.querySelector('input[type="text"]'); return t && norm(t.value) === norm(sp.name); }); };
       if (rowOf()) { log("Read " + nm, "Already known", "You already know " + sp.name + " — the tome is kept", "normal"); return after(false); }
       var noted = String(notes || "").match(/\brank\s*(\d+)/i);
@@ -312,7 +339,12 @@
   function castFromScroll(sp, rank) {
     if (spellEffect(sp.name, rank, { scroll: true })) return;
     var m = String(sp.desc || "").match(/Base Damage:\s*(\d*)d(\d+)\s*\+\s*(STR|INT|CON|DEX|CHA)?/i);
-    var stat = m && m[3] ? m[3].toLowerCase() : String(sp.stat || "int").toLowerCase(), sm = statMod(stat);
+    // A homebrew attack spell carries its dice (and damage Stat) as fields, not prose.
+    if (!m && sp.type === "attack" && /^\d*d\d+$/i.test(String(sp.damage || ""))) {
+      var hm2 = String(sp.damage).match(/^(\d*)d(\d+)$/i);
+      m = [sp.damage, hm2[1], hm2[2], sp.damageStat && sp.damageStat !== "none" ? sp.damageStat : (sp.damageStat === "none" ? "" : sp.stat)];
+    }
+    var stat = m && m[3] ? String(m[3]).toLowerCase() : String(sp.stat || "int").toLowerCase(), sm = statMod(stat);
     var d20 = roll(1, 20).total, hit = d20 + rank + sm;
     var type = d20 === 20 ? "crit" : d20 === 1 ? "fumble" : "normal";
     if (m) {
@@ -329,7 +361,7 @@
     var tr = trOrBtn && trOrBtn.closest ? trOrBtn.closest("tr") : trOrBtn;
     if (!tr) return false;
     var r = rowOf(tr), cons = isConsumable(tr);
-    itemEffect(r.name, r.notes, function (spent) { if (spent && cons) consumeOne(tr); else save(); });
+    itemEffect(r.name, r.notes, function (spent) { if (spent && cons) consumeOne(tr); else save(); }, tr);
     return true;
   }
   // Use by name (a Hotlist slot with no matching Inventory row).

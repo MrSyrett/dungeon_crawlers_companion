@@ -611,6 +611,8 @@ function normalizeDccItem(input: unknown): { name: string; data: Record<string, 
   const tier = str(o.tier);
   if ((DCC_ITEM_TIERS as readonly string[]).includes(tier)) data.tier = tier;
   if (str(o.slot)) data.slot = str(o.slot).slice(0, 60);
+  // The attack skill a homebrew weapon is wielded with (the sheet adds it on pick-up).
+  if (category === "weapon" && str(o.skill)) data.skill = str(o.skill).slice(0, 80);
   const price = num(o.price);
   if (price != null && price > 0) data.price = price;
   const benefits = normalizeDccBenefits(o.benefits);
@@ -826,7 +828,40 @@ function normalizeDccSkill(input: unknown): { name: string; data: Record<string,
     if (ds) data.damageStat = ds;
   }
   if (str(o.limitations)) data.limitations = str(o.limitations).slice(0, 200);
+  // A Damage Effect's mechanics (components/hb/dcc/SkillBuilder → the sheet's
+  // public/tools-data/dcc-damage-effects.js).
+  if (str(o.group) === "Damage Effect") {
+    const fx = normalizeDccEffect(o.effect);
+    if (fx) data.effect = fx;
+  }
   return { name, data };
+}
+
+const DCC_FX_GROUPS = ["Edged", "Bashing", "Ranged", "Reach", "Hand-to-Hand", "Animal/Pet Strike"];
+function normalizeDccEffect(v: unknown): Record<string, unknown> | null {
+  if (!v || typeof v !== "object") return null;
+  const e = v as Record<string, unknown>;
+  const list = (x: unknown, max: number, len: number) => (Array.isArray(x) ? x.map((y) => str(y).slice(0, len)).filter(Boolean).slice(0, max) : []);
+  const attacks = list(e.attacks, 60, 80);
+  const groups = list(e.groups, 10, 40).filter((g) => DCC_FX_GROUPS.includes(g));
+  const tiers = (Array.isArray(e.tiers) ? e.tiers : []).slice(0, 6).map((t) => {
+    const o = (t ?? {}) as Record<string, unknown>;
+    const d = parseDice(str(o.dice));
+    const multRaw = o.mult === "rank" ? "rank" : Math.round(num(o.mult) ?? 0);
+    const stat = str(o.stat).toUpperCase();
+    return {
+      rank: Math.max(0, Math.min(20, Math.round(num(o.rank) ?? 0))),
+      dice: d && d.n > 0 && d.n <= 10 ? `${d.n}d${d.d}` : "",
+      rankDice: Math.max(0, Math.min(3, Math.round(num(o.rankDice) ?? 0))),
+      mult: multRaw === "rank" ? "rank" : (multRaw >= 2 && multRaw <= 10 ? multRaw : 0),
+      multOf: o.multOf === "total" ? "total" : "base",
+      stat: (DCC_STATS as readonly string[]).includes(stat) ? stat.toLowerCase() : "",
+      debuffs: list(o.debuffs, 6, 40),
+      note: str(o.note).slice(0, 160),
+    };
+  });
+  if (!tiers.length) return null;
+  return { attacks, groups, condition: str(e.condition).slice(0, 160), extra: str(e.extra).slice(0, 2000), tiers };
 }
 
 // A homebrew Spell (DccSpell shape). Mana cost + governing stat + rank upgrades.

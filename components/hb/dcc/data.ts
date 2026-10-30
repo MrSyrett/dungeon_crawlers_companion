@@ -8,9 +8,11 @@
 import { useEffect, useState } from "react";
 
 export type NameMeta = { name: string; meta?: string };
-export type DccNames = { skills: NameMeta[]; spells: NameMeta[]; buffs: NameMeta[] };
+/** `attacks` = every attack skill (book + homebrew) a weapon can use or a Damage
+ *  Effect can work with — Damage Effects themselves excluded; meta = its group. */
+export type DccNames = { skills: NameMeta[]; spells: NameMeta[]; buffs: NameMeta[]; attacks: NameMeta[] };
 
-const EMPTY: DccNames = { skills: [], spells: [], buffs: [] };
+const EMPTY: DccNames = { skills: [], spells: [], buffs: [], attacks: [] };
 let cache: Promise<DccNames> | null = null;
 
 function loadScript(src: string): Promise<void> {
@@ -54,6 +56,9 @@ function load(): Promise<DccNames> {
         skills: uniq([...hs.map((s) => ({ name: String(s.name), meta: "homebrew" })), ...rows(global("DCC_SKILLS")).map((s) => ({ name: String(s.name), meta: String(s.stat ?? "") || undefined }))]),
         spells: uniq([...hp.map((s) => ({ name: String(s.name), meta: "homebrew" })), ...rows(global("DCC_SPELLS")).map((s) => ({ name: String(s.name), meta: s.mana != null ? `${s.mana} mana` : undefined }))]),
         buffs: uniq(rows(global("DCC_BUFFS")).map((s) => ({ name: String(s.name), meta: String(s.kind ?? "") || undefined }))),
+        attacks: uniq([...hs, ...rows(global("DCC_SKILLS"))]
+          .filter((s) => s.category === "attack" && String(s.group ?? "") !== "Damage Effect")
+          .map((s) => ({ name: String(s.name), meta: String(s.group ?? "") || undefined }))),
       };
     })();
   }

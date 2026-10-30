@@ -70,7 +70,7 @@ const SCHEMAS: Record<string, Schema<unknown>> = {
     blank: blankSkill,
     fromData: skillFromData,
     payload: skillPayload,
-    Builder: (p) => <SkillBuilder value={p.value} onChange={p.onChange} />,
+    Builder: (p) => <SkillBuilder value={p.value} onChange={p.onChange} names={p.names} />,
     Preview: (p) => <SkillPreview name={p.name} s={p.value} />,
   }),
   "dcc-spell": schema<SpellDraft>({
