@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, useTransition } from "react";
+import { createPortal } from "react-dom";
 
 // ONE DIALOG, TWO JOBS: creating a campaign and editing one.
 //
@@ -52,6 +53,8 @@ type EditProps = Common & {
   removeMember: (formData: FormData) => Promise<void>;
 };
 
+const noopSubscribe = () => () => {};
+
 export default function CampaignDialog(props: CreateProps | EditProps) {
   const editing = props.mode === "edit";
   const ref = useRef<HTMLDialogElement>(null);
@@ -66,6 +69,9 @@ export default function CampaignDialog(props: CreateProps | EditProps) {
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  // The dialog is portalled to <body> (see the render), which needs the DOM.
+  // (false during server render and hydration, true after — without a setState.)
+  const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
 
   const seedName = editing ? props.name : "";
   const seedUrl = editing ? props.vttUrl ?? "" : "";
@@ -182,7 +188,13 @@ export default function CampaignDialog(props: CreateProps | EditProps) {
           can run off a short screen (a laptop in landscape, a phone with the
           keyboard up), and the UA's own max-height only applies while the margin
           is doing its job. */}
-      <dialog
+      {/* PORTALLED TO <body>. The trigger can sit inside a themed card (the
+          Campaign card wears its system's tile, which re-points --text and
+          --muted for its dark art), and a <dialog> inherits custom properties
+          from wherever it sits in the DOM — the top layer changes where it
+          paints, not what it inherits. In light mode that made the form light
+          text on a light panel. Under <body> it reads the page's own tokens. */}
+      {mounted ? createPortal(<dialog
         ref={ref}
         onClose={() => setOpen(false)}
         onCancel={() => setOpen(false)}
@@ -420,7 +432,7 @@ export default function CampaignDialog(props: CreateProps | EditProps) {
             </button>
           </div>
         </div>
-      </dialog>
+      </dialog>, document.body) : null}
     </>
   );
 }

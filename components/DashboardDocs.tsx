@@ -15,6 +15,8 @@ import {
 } from "./systemStore";
 import { createDocument, deleteDocument } from "@/app/actions/documents";
 import { ConfirmButton } from "./ConfirmButton";
+import CharacterCard from "./CharacterCard";
+import type { CharCardData } from "@/lib/rosters";
 
 // Compact per-document row the server hands us — no Prisma objects, no rendered
 // panels, just what a list item needs. `vttHref` is where the sheet's campaign
@@ -27,7 +29,9 @@ export type DocRow = {
   vttHref: string | null;
   vttKind: "owlbear" | "tabletop" | null;
 };
-export type Panel = { toolId: string; docs: DocRow[] };
+/** `cards` (characters only): the shared Character cards, the same ones My
+ *  Characters shows — see components/CharacterCard.tsx. */
+export type Panel = { toolId: string; docs: DocRow[]; cards?: CharCardData[] };
 export type SystemPanels = Partial<Record<SystemKey, { character?: Panel; session?: Panel }>>;
 
 function formatDate(ms: number): string {
@@ -80,6 +84,17 @@ function DocList({
 
       {docs.length === 0 ? (
         <p className="px-4 py-5 text-base text-[var(--muted)] sm:text-sm">{emptyLine(kind, system)}</p>
+      ) : kind === "characters" && panel.cards ? (
+        // Characters: the same cards as My Characters, in this system's identity.
+        <div className="roster-panel-cards home-roster" data-sys={system}>
+          <ul className="roster-cards">
+            {panel.cards.map((c) => (
+              <li key={c.id} className="min-w-0">
+                <CharacterCard c={c} />
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : (
         <ul className="divide-y divide-[var(--border)]">
           {docs.map((doc) => (

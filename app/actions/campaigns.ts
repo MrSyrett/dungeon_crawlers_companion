@@ -27,6 +27,8 @@ export async function deleteCampaign(formData: FormData): Promise<void> {
   await prisma.campaign.deleteMany({ where: { id, ownerId: user.id } });
   // A campaign drives Launch VTT on the dashboard too, so refresh both lists.
   revalidatePath("/campaigns");
+  revalidatePath("/my-campaigns");
+  revalidatePath("/my-characters");
   revalidatePath("/dashboard");
 }
 
@@ -47,6 +49,8 @@ export async function clearCampaignRolls(formData: FormData): Promise<void> {
   await prisma.campaignRoll.deleteMany({ where: { campaignId: id, campaign: { ownerId: user.id } } });
   // The row's "N rolls" line reads from the count.
   revalidatePath("/campaigns");
+  revalidatePath("/my-campaigns");
+  revalidatePath("/my-characters");
 }
 
 /**
@@ -81,6 +85,8 @@ export async function setCampaignVttUrl(formData: FormData): Promise<void> {
 
   await prisma.campaign.updateMany({ where: { id, ownerId: user.id }, data: { vttUrl } });
   revalidatePath("/campaigns");
+  revalidatePath("/my-campaigns");
+  revalidatePath("/my-characters");
   revalidatePath("/dashboard");
 }
 
@@ -129,6 +135,8 @@ export async function createCampaign(formData: FormData): Promise<void> {
   }
 
   revalidatePath("/campaigns");
+  revalidatePath("/my-campaigns");
+  revalidatePath("/my-characters");
   revalidatePath("/dashboard");
 }
 
@@ -142,6 +150,8 @@ export async function renameCampaign(formData: FormData): Promise<void> {
 
   await prisma.campaign.updateMany({ where: { id, ownerId: user.id }, data: { name } });
   revalidatePath("/campaigns");
+  revalidatePath("/my-campaigns");
+  revalidatePath("/my-characters");
 }
 
 // Mint a fresh join code for a campaign you own.
@@ -175,6 +185,8 @@ export async function regenerateCampaignCode(formData: FormData): Promise<void> 
     }
   }
   revalidatePath("/campaigns");
+  revalidatePath("/my-campaigns");
+  revalidatePath("/my-characters");
   revalidatePath("/dashboard");
 }
 
@@ -247,5 +259,7 @@ export async function removeCampaignMember(formData: FormData): Promise<void> {
   });
 
   revalidatePath("/campaigns");
+  revalidatePath("/my-campaigns");
+  revalidatePath("/my-characters");
   revalidatePath("/dashboard");
 }

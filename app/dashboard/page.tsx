@@ -6,6 +6,7 @@ import { SYSTEMS, type SystemKey } from "@/components/systemStore";
 import { getHiddenSystemKeys } from "@/lib/systems";
 import DashboardDocs, { type SystemPanels, type DocRow } from "@/components/DashboardDocs";
 import { readSystemCookie, readViewCookie } from "@/lib/system-cookie";
+import { loadCharacterCards, type CharCardData } from "@/lib/rosters";
 
 // The homepage. The top navbar (SiteNav, in the root layout) owns system
 // selection, the Characters/Adventures tabs, Compendium and Tools; this page
@@ -22,11 +23,19 @@ export default async function DashboardPage() {
   // The system/view the browser last chose, so the first paint is already theirs.
   const [initialSystem, initialView] = await Promise.all([readSystemCookie(), readViewCookie()]);
 
-  const docs = await prisma.document.findMany({
+  // Characters are the same cards My Characters shows (lib/rosters.ts); the
+  // adventure list below still comes from the plain document rows.
+  const [docs, charCards] = await Promise.all([prisma.document.findMany({
     where: { userId: user.id },
     orderBy: { updatedAt: "desc" },
     select: { id: true, title: true, updatedAt: true, tool: true, linkedCampaignId: true },
-  });
+  }), loadCharacterCards(user.id)]);
+  const cardsBySystem = new Map<SystemKey, CharCardData[]>();
+  for (const c of charCards) {
+    const l = cardsBySystem.get(c.system);
+    if (l) l.push(c);
+    else cardsBySystem.set(c.system, [c]);
+  }
 
   // Map each campaign-linked sheet to its campaign's Owlbear room (if any) so it
   // can offer Launch VTT; sheets with a campaign but no room fall back to our
@@ -71,8 +80,8 @@ export default async function DashboardPage() {
   for (const s of SYSTEMS) {
     const charId = TOOL_ORDER.find((id) => TOOLS[id].system === s.key && TOOLS[id].kind === "character");
     const sessId = TOOL_ORDER.find((id) => TOOLS[id].system === s.key && TOOLS[id].kind === "session");
-    const entry: { character?: { toolId: string; docs: DocRow[] }; session?: { toolId: string; docs: DocRow[] } } = {};
-    if (charId) entry.character = { toolId: charId, docs: byTool.get(charId) ?? [] };
+    const entry: SystemPanels[SystemKey] = {};
+    if (charId) entry.character = { toolId: charId, docs: byTool.get(charId) ?? [], cards: cardsBySystem.get(s.key) ?? [] };
     if (sessId) entry.session = { toolId: sessId, docs: byTool.get(sessId) ?? [] };
     panels[s.key] = entry;
   }

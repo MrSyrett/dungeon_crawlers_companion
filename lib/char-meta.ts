@@ -18,18 +18,37 @@ type SheetBlob = {
   level?: unknown;
 };
 
-export type CharMeta = { name: string; cls: string; level: number | null };
+export type CharMeta = {
+  name: string;
+  cls: string;
+  level: number | null;
+  /** What the system calls its level, when it isn't "LV" (Marvel's Rank). */
+  levelLabel?: string;
+  /** One more identifying detail where the class line doesn't carry it — the
+   *  ancestry / race a system keeps separately (Shadowdark, DCC). */
+  extra?: string;
+};
+
+// The card's detail line: "LV 3 · Fighter · Dwarf", "Rank 2 · Mutant", "Smuggler".
+export function charMetaLine(m: Pick<CharMeta, "cls" | "level" | "levelLabel" | "extra"> | null | undefined): string {
+  if (!m) return "";
+  return [m.level !== null && m.level !== undefined ? `${m.levelLabel || "LV"} ${m.level}` : "", m.cls, m.extra || ""]
+    .map((v) => String(v).trim())
+    .filter(Boolean)
+    .join(" · ");
+}
 
 export function readCharMeta(data: unknown, fallbackTitle: string): CharMeta | null {
   const blob = (data ?? null) as Record<string, unknown> | null;
   try {
     const sd = blob?.sd_sheet;
     if (typeof sd === "string") {
-      const s = JSON.parse(sd) as SheetBlob;
+      const s = JSON.parse(sd) as SheetBlob & { ancestry?: unknown };
       return {
         name: (typeof s.name === "string" && s.name.trim()) || fallbackTitle || "Unnamed",
         cls: typeof s.class === "string" ? s.class : "",
         level: typeof s.level === "number" ? s.level : null,
+        extra: typeof s.ancestry === "string" ? s.ancestry.trim() : "",
       };
     }
     // Candela Obscura: no levels — the roster shows role · specialty as the class.
@@ -132,6 +151,7 @@ export function readCharMeta(data: unknown, fallbackTitle: string): CharMeta | n
         name: (typeof s.name === "string" && s.name.trim()) || fallbackTitle || "Unnamed",
         cls,
         level: Number.isFinite(rank) && rank > 0 ? rank : null,
+        levelLabel: "Rank",
       };
     }
     const jlu = blob?.jlu_sheet;
@@ -161,12 +181,13 @@ export function readCharMeta(data: unknown, fallbackTitle: string): CharMeta | n
     if (typeof dcc === "string") {
       const s = JSON.parse(dcc) as { header?: Record<string, unknown> };
       const h = s.header || {};
-      const nm = h["f-name"], cl = h["f-class"];
+      const nm = h["f-name"], cl = h["f-class"], race = h["f-race"];
       const lv = parseInt(String(h["f-level"] ?? ""), 10);
       return {
         name: (typeof nm === "string" && nm.trim()) || fallbackTitle || "Unnamed",
         cls: typeof cl === "string" ? cl : "",
         level: Number.isNaN(lv) ? null : lv,
+        extra: typeof race === "string" ? race.trim() : "",
       };
     }
     // Nimble: class + level like Shadowdark.

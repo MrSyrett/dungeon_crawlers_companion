@@ -46,4 +46,6 @@ export async function deleteDocument(formData: FormData): Promise<void> {
   // both — otherwise the deleted character lingers on /campaigns until a reload.
   revalidatePath("/dashboard");
   revalidatePath("/campaigns");
+  revalidatePath("/my-campaigns");
+  revalidatePath("/my-characters");
 }
