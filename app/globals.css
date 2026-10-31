@@ -2221,7 +2221,6 @@ a.roster-card-link:hover { text-decoration: underline; text-underline-offset: 3p
 .roster-card .roster-actions { margin-top: auto; padding-top: 0.55rem; gap: 0.3rem; }
 /* Four buttons have to share one row on a third-width card. */
 .roster-card .roster-btn { padding: 0.3rem 0.5rem; letter-spacing: 0.06em; }
-.roster-btn-go { border-color: color-mix(in srgb, var(--tile-accent, #fff) 70%, transparent); color: var(--tile-accent, #fff); }
 .roster-btn-danger:hover { border-color: #ff6b5e; color: #ff6b5e; }
 .roster-btn:disabled:hover { border-color: rgba(255, 255, 255, 0.28); color: rgba(255, 255, 255, 0.9); }
 /* Link: the join-code field, in place of the buttons. */
