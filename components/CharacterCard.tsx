@@ -75,7 +75,7 @@ export default function CharacterCard({ c }: { c: CharCardData }) {
               href={c.vtt.href}
               {...(c.vtt.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
               title={c.vtt.external ? "Open this campaign's OBR room in a new tab" : "Open this campaign's VTT"}
-              className="roster-btn roster-btn-go"
+              className="roster-btn"
             >
               {c.vtt.external ? "VTT ↗" : "VTT"}
             </a>

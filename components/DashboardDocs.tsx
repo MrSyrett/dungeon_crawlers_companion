@@ -114,7 +114,7 @@ function DocList({
                   {doc.chapters ? <span className="roster-card-meta">Chapters: {doc.chapters}</span> : null}
                   <span className="roster-card-camp">Updated {formatDate(doc.updatedAt)}</span>
                   <div className="roster-actions">
-                    <a href={`/tools/${toolId}/${doc.id}`} className="roster-btn roster-btn-go">
+                    <a href={`/tools/${toolId}/${doc.id}`} className="roster-btn">
                       Open
                     </a>
                     <form action={deleteDocument} className="contents">
