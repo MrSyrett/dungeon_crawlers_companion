@@ -97,6 +97,13 @@ export const DB_HEROIC_ABILITIES = [
     text: "At the start of a round, keep last round's initiative card instead of drawing a new one. Not an action." },
   { name: "Weasel", requirement: R(["Evade"]), wp: 3, timing: "reaction", page: 39, tags: ["defense"],
     text: "When attacked with another player character within 2 m, make the attack hit them instead. Activate before any dodge or parry; no effect on area attacks. The new target may dodge or parry as normal." },
+
+  // Solo heroic abilities — "Alone in Deepfall Breach" (solo adventure, p.1). Pick them at
+  // character creation or when earning a heroic ability through play.
+  { name: "Army of One", requirement: null, wp: null, timing: "roundStart", page: 1, tags: ["initiative"], source: "solo",
+    text: "When fighting alone, draw two initiative cards each round and keep both: you get two turns every round." },
+  { name: "Sole Survivor", requirement: null, wp: 3, timing: "free", page: 1, tags: ["utility"], source: "solo",
+    text: "When adventuring alone, push a roll without taking a condition." },
 ];
 
 // Skill groups used by `any` requirements.

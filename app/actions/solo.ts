@@ -7,8 +7,9 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { SOLO_KEY, SOLO_TOOL, soloEnabledFor } from "@/lib/solo";
+import { SOLO_MODULES } from "@/lib/solo-modules";
 
-const MODULES: Record<string, string> = { "db-deepfall": "Alone in Deepfall Breach" };
+const MODULES: Record<string, string> = Object.fromEntries(SOLO_MODULES.map((m) => [m.id, m.title]));
 
 export async function createSoloCampaign(formData: FormData): Promise<void> {
   const user = await getCurrentUser();

@@ -1327,7 +1327,10 @@ function autoMods(o){
 }
 var _last=null;
 function allConds(){ return CONDS.every(function(c){ return S.cond[c]; }); }
-function canPushLast(){ return !!(_last && S.opts.push && !_last.res.ok && !_last.res.demon && _last.o.canPush!==false && !_last.pushed && !allConds()); }
+function canPushLast(noCond){ return !!(_last && S.opts.push && !_last.res.ok && !_last.res.demon && _last.o.canPush!==false && !_last.pushed && (noCond || !allConds())); }
+// Sole Survivor (solo heroic ability, 3 WP): push without taking a condition — so it works even
+// when every condition is already taken. "When adventuring alone": the player decides.
+function canSurvivorPush(){ return hasAbility('Sole Survivor') && S.wp>=3 && canPushLast(true); }
 function d20Pool(nb){ var n=1+Math.abs(nb), rs=[]; for(var i=0;i<n;i++) rs.push(d(20)); var r=nb>0?Math.min.apply(null,rs):nb<0?Math.max.apply(null,rs):rs[0]; return {rolls:rs,result:r,n:n}; }
 // o: {label, target, skill?, attr?, weapon?, ranged?, boons?:[], banes?:[], canPush?, noMark?, noTray?, onDone(res)}
 function testRoll(o){
@@ -1353,6 +1356,7 @@ function resolveRoll(o,boons,banes,pushed){
   // (not a Demon, pushing on, not already pushed, a condition left to take).
   clearPushBtns();
   if(entry&&canPushLast()){ var pb=document.createElement('button'); pb.className='log-push'; pb.type='button'; pb.textContent='Push'; pb.title='Re-roll, then take a condition you don\'t have'; pb.onclick=function(){ pushLast(); }; entry.appendChild(pb); }
+  if(entry&&canSurvivorPush()){ var sb=document.createElement('button'); sb.className='log-push'; sb.type='button'; sb.textContent='Push · Sole Survivor (3 WP)'; sb.title='When adventuring alone: re-roll without taking a condition'; sb.onclick=function(){ pushLast(true); }; entry.appendChild(sb); }
   // A roll only adds to the log: the tray's one-shot boons/banes reset, and a Dragon / Demon ticks
   // that skill's advancement mark in place. Nothing else on the sheet is re-rendered.
   renderTray(); if((res.dragon||res.demon)&&o.skill&&!o.noMark) showMark(o.skill);
@@ -1361,9 +1365,12 @@ function resolveRoll(o,boons,banes,pushed){
   return res;
 }
 function clearPushBtns(){ document.querySelectorAll('#log-entries .log-push').forEach(function(b){ b.remove(); }); }
-function pushLast(){
-  if(!canPushLast()) return; var L=_last; L.pushed=true; clearPushBtns();
+function pushLast(survivor){
+  if(survivor){ if(!canSurvivorPush()) return; } else if(!canPushLast()) return;
+  var L=_last; L.pushed=true; clearPushBtns();
+  if(survivor){ S.wp-=3; addLog('Sole Survivor','−3 WP','Push without taking a condition','normal'); }
   var o=Object.assign({},L.o,{onDone:null}); var res=resolveRoll(o,L.boons,L.banes,true); _last.pushed=true; _last.o=L.o;
+  if(survivor){ changed(); renderTray(); if(L.o.onDone) try{ L.o.onDone(res); }catch(e){ console.error(e); } return res; }
   chooseCondition('You pushed the roll — take a condition you don\'t already have (and explain how the action caused it).',function(){ renderTray(); if(L.o.onDone) try{ L.o.onDone(res); }catch(e){ console.error(e); } });
   return res;
 }
@@ -1711,6 +1718,7 @@ function activateAbility(i){ var a=S.abilities[i]; if(!a) return; var def=abilit
   if(def.wp==='varies'){ openDlg(n,'<p class="m-hint">'+esc(def.text||'')+'</p><div class="m-lbl">WP to spend</div><input id="ab-wp" class="m-input" type="number" value="1">',[{t:'Activate',f:function(){ var x=num($('ab-wp').value,1); closeDlg(); if(spendWp(x,n)){ addLog(n,'−'+x+' WP',def.text||'','normal'); changed(); } }}]); return; }
   if(n==='Hunting Instincts'&&!activateAbility._prey){
     openDlg(n,'<p class="m-hint">'+esc(def.text||'')+'</p><div class="m-lbl">Your prey</div><input id="ab-prey" class="m-input" type="text" value="'+esc(S.prey||'')+'" placeholder="Which creature?">',[{t:'Activate ('+wp+' WP)',f:function(){ var v=($('ab-prey').value||'').trim(); closeDlg(); activateAbility._prey=v||S.prey||''; try{ activateAbility(i); } finally { activateAbility._prey=null; } }}]); return; }
+  if(n==='Sole Survivor'){ if(canSurvivorPush()) pushLast(true); else addLog(n,'—','Use it from the Push button on a failed roll (3 WP, no condition)','normal'); return; }
   if(!spendWp(wp,n)) return;
   if(def.timing==='action') useAction();
   var extra='';
@@ -1729,6 +1737,8 @@ function activateAbility(i){ var a=S.abilities[i]; if(!a) return; var def=abilit
   // Initiative is dealt on the GM screen: these just pay the WP and tell the GM.
   if(n==='Lightning Fast') extra=' · tell the GM which of your two cards you keep';
   if(n==='Veteran') extra=' · tell the GM you keep last round\'s card';
+  // Solo abilities ("Alone in Deepfall Breach")
+  if(n==='Army of One') extra=' · when fighting alone you draw two initiative cards and keep both (solo play deals them for you)';
   addLog(n,wp?'−'+wp+' WP':'Activated',(def.text||'')+extra,'normal'); changed(); }
 function preyBoon(){ if(!S.prey) return; if(!spendWp(1,'Hunting Instincts')) return; TR.boon++; addLog('Hunting Instincts','−1 WP','A boon on your next attack against '+S.prey+' (in the tray)','normal'); changed(); }
 function endBerserk(quiet){ S.berserk=false; S.cond.Exhausted=true; if(!quiet) addLog('Berserker ends','Exhausted','The rage is over','normal'); changed(); }
@@ -2033,7 +2043,7 @@ function pickerCustom(){
 
 // ═══ RULES & OPTIONS ════════════════════════════════════════════════════════
 function openRules(){
-  var h='<h4>Rolling</h4><ul><li>Roll a D20: equal to or under your skill level (or attribute) succeeds. A 1 is a <b>Dragon</b>, a 20 a <b>Demon</b>.</li><li><b>Boon</b>: roll an extra D20, keep the lowest. <b>Bane</b>: keep the highest. They cancel one for one; several add dice.</li><li>A Dragon or Demon on a skill marks it for advancement.</li><li>Only one person can help — helping gives a boon (add it in the dice tray) and costs their action in combat.</li><li><b>Pushing</b>: a failed roll (never a Demon) shows a Push button — re-roll it, then take a condition you don\'t already have.</li></ul>';
+  var h='<h4>Rolling</h4><ul><li>Roll a D20: equal to or under your skill level (or attribute) succeeds. A 1 is a <b>Dragon</b>, a 20 a <b>Demon</b>.</li><li><b>Boon</b>: roll an extra D20, keep the lowest. <b>Bane</b>: keep the highest. They cancel one for one; several add dice.</li><li>A Dragon or Demon on a skill marks it for advancement.</li><li>Only one person can help — helping gives a boon (add it in the dice tray) and costs their action in combat.</li><li><b>Pushing</b>: a failed roll (never a Demon) shows a Push button — re-roll it, then take a condition you don\'t already have. With <b>Sole Survivor</b> (solo play) a second button pushes for 3 WP with no condition.</li></ul>';
   h+='<h4>Conditions</h4><p>Exhausted (STR), Sickly (CON), Dazed (AGL), Angry (INT), Scared (WIL), Disheartened (CHA): each is a bane on the attribute and its skills. A stretch rest heals one, a shift rest all.</p>';
   h+='<h4>Combat</h4><ul><li>Each round the GM deals initiative cards (1–10, lowest first); the deal shows in your Roll Log. Lightning Fast and Veteran: activate them here (it spends the WP) and tell the GM. On your turn: movement and one action, then End Turn.</li><li>Parry or dodge are reactions: they replace your turn, so you must not have acted yet this round.</li><li>Damage = weapon dice + damage bonus (STR for STR skills, AGL for AGL skills; none for crossbows). Armor subtracts its rating.</li><li>Dragon on an attack: double the weapon dice, a free extra attack (melee) or ignore armor (piercing). Only a Dragon parries or dodges it.</li><li>At 0 HP make a death roll (CON) each turn: three successes and you recover D6 HP, three failures and you die.</li></ul>';
   h+='<h4>Magic</h4><ul><li>2 WP per power level (1–3); tricks cost 1 WP and always work. Prepared spells = INT base chance.</li><li>No casting with metal armor or a metal weapon at hand.</li><li>At 1 WP or less you can draw power from the body: roll a die, gain WP, take that much damage after.</li></ul>';

@@ -7223,6 +7223,32 @@ export const DB_HEROIC_ABILITIES: DbHeroicAbility[] = [
   ],
   "text": "When attacked with another player character within 2 m, make the attack hit them instead. Activate before any dodge or parry; no effect on area attacks. The new target may dodge or parry as normal.",
   "source": "core"
+ },
+ {
+  "id": "army-of-one",
+  "name": "Army of One",
+  "requirement": null,
+  "wp": null,
+  "timing": "roundStart",
+  "page": 1,
+  "tags": [
+   "initiative"
+  ],
+  "source": "solo",
+  "text": "When fighting alone, draw two initiative cards each round and keep both: you get two turns every round."
+ },
+ {
+  "id": "sole-survivor",
+  "name": "Sole Survivor",
+  "requirement": null,
+  "wp": 3,
+  "timing": "free",
+  "page": 1,
+  "tags": [
+   "utility"
+  ],
+  "source": "solo",
+  "text": "When adventuring alone, push a roll without taking a condition."
  }
 ];
 

@@ -5,6 +5,7 @@
 // Part of the removable Solo Play feature — see SOLO-REMOVAL.md.
 import { useState } from "react";
 import { createSoloCampaign } from "@/app/actions/solo";
+import { SOLO_MODULES } from "@/lib/solo-modules";
 
 export default function NewSoloCampaign({
   characters,
@@ -27,12 +28,14 @@ export default function NewSoloCampaign({
     <form action={createSoloCampaign} className="flex w-full flex-col gap-3 px-4 py-4">
       <div>
         <label className={label} htmlFor="solo-name">Name</label>
-        <input id="solo-name" name="name" className={field} placeholder="Alone in Deepfall Breach" maxLength={80} />
+        <input id="solo-name" name="name" className={field} placeholder="Named after the adventure" maxLength={80} />
       </div>
       <div>
         <label className={label} htmlFor="solo-module">Adventure</label>
         <select id="solo-module" name="module" className={field} defaultValue="db-deepfall">
-          <option value="db-deepfall">Alone in Deepfall Breach (5 missions)</option>
+          {SOLO_MODULES.map((m) => (
+            <option key={m.id} value={m.id}>{m.label}</option>
+          ))}
         </select>
       </div>
       <div>

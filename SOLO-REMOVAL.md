@@ -17,12 +17,12 @@ and page checks it.
 ## Remove it completely
 
 ### 1. Delete these solo-only files and folders
-- `lib/solo.ts`
+- `lib/solo.ts`, `lib/solo-modules.ts`
 - `app/solo/` (the `/solo/[id]` page route)
 - `app/actions/solo.ts`
 - `components/solo/` (`SoloCampaignCard.tsx`, `NewSoloCampaign.tsx`)
 - `tools/templates/db_solo.html`
-- `public/tools-data/solo/` (`db-solo-tables.js`, `db-solo-deepfall.js`)
+- `public/tools-data/solo/` (`db-solo-tables.js`, `db-solo-deepfall.js`, `db-solo-sinking-tower.js`)
 - `SOLO-REMOVAL.md` (this file)
 
 ### 2. Remove the marked hooks in shared files

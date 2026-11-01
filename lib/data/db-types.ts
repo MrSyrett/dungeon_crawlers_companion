@@ -7,7 +7,7 @@
 // `metal`, `flying`, `poison`…) stay typed as `unknown` rather than failing excess-property checks.
 
 export type DbAttr = "STR" | "CON" | "AGL" | "INT" | "WIL" | "CHA";
-export type DbSource = "core" | "bestiary" | "magic" | "pathofglory" | "Homebrew";
+export type DbSource = "core" | "bestiary" | "magic" | "pathofglory" | "solo" | "Homebrew";
 export type DbSupply = "Common" | "Uncommon" | "Rare" | "Unique";
 export type DbCoinUnit = "gold" | "silver" | "copper";
 export interface DbCost { amount: number; unit: DbCoinUnit; per?: string; note?: string }
