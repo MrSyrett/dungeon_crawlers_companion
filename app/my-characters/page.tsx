@@ -6,6 +6,8 @@ import { loadCharacterCards, type CharCardData } from "@/lib/rosters";
 import PageHeader from "@/components/PageHeader";
 import RosterSysName from "@/components/RosterSysName";
 import CharacterCard from "@/components/CharacterCard";
+// SOLO PLAY (removable — see SOLO-REMOVAL.md)
+import { soloEnabledFor, loadSoloCampaigns } from "@/lib/solo";
 
 // MY CHARACTERS — every sheet you've made, across every game, GROUPED BY SYSTEM
 // and wearing that system's identity (its accent, display face and cover
@@ -28,6 +30,10 @@ export default async function MyCharactersPage() {
   if (!user) redirect("/login");
 
   const cards = await loadCharacterCards(user.id);
+  // SOLO PLAY: which Dragonbane hero plays in which solo campaign (only while the switch is on).
+  const soloOn = soloEnabledFor(user.email);
+  const soloBy = new Map<string, { id: string; name: string }>();
+  if (soloOn) for (const sc of await loadSoloCampaigns(user.id)) if (sc.character && !soloBy.has(sc.character.id)) soloBy.set(sc.character.id, { id: sc.id, name: sc.name });
   const bySystem = new Map<SystemKey, CharCardData[]>();
   for (const c of cards) {
     const list = bySystem.get(c.system);
@@ -58,7 +64,10 @@ export default async function MyCharactersPage() {
             <ul className="roster-cards">
               {bySystem.get(s.key)!.map((c) => (
                 <li key={c.id} className="min-w-0">
-                  <CharacterCard c={c} />
+                  <CharacterCard
+                    c={c}
+                    solo={soloOn && c.system === "DB" ? { campaignId: soloBy.get(c.id)?.id ?? null, campaignName: soloBy.get(c.id)?.name } : undefined}
+                  />
                 </li>
               ))}
             </ul>

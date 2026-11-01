@@ -6,6 +6,8 @@ import { setSystem } from "./systemStore";
 import { deleteDocument } from "@/app/actions/documents";
 import { ConfirmButton } from "./ConfirmButton";
 import type { CharCardData } from "@/lib/rosters";
+// SOLO PLAY (removable — see SOLO-REMOVAL.md)
+import { createSoloCampaign } from "@/app/actions/solo";
 
 // ONE CHARACTER CARD for both character lists — My Characters (every system) and
 // a system's Characters page. Data comes from loadCharacterCards (lib/rosters.ts).
@@ -23,7 +25,10 @@ import type { CharCardData } from "@/lib/rosters";
 //
 // Plain <a> for the sheet and the VTT: both are route handlers serving whole
 // standalone HTML pages, which <Link> would prefetch for nothing.
-export default function CharacterCard({ c }: { c: CharCardData }) {
+/** SOLO PLAY: `solo` is passed only while the solo switch is on for this user, and
+ *  only for Dragonbane characters. `campaignId` is the solo campaign this character
+ *  already plays in, if any. */
+export default function CharacterCard({ c, solo }: { c: CharCardData; solo?: { campaignId: string | null; campaignName?: string } }) {
   const router = useRouter();
   const [linking, setLinking] = useState(false);
   const [code, setCode] = useState("");
@@ -46,7 +51,9 @@ export default function CharacterCard({ c }: { c: CharCardData }) {
         {c.name}
       </a>
       {c.meta ? <span className="roster-card-meta">{c.meta}</span> : null}
-      <span className="roster-card-camp">{c.campaign ? `Campaign: ${c.campaign.name}` : "No campaign"}</span>
+      <span className="roster-card-camp">
+        {c.campaign ? `Campaign: ${c.campaign.name}` : solo?.campaignId ? `Solo: ${solo.campaignName || "Solo campaign"}` : "No campaign"}
+      </span>
 
       {linking ? (
         <form onSubmit={join} className="roster-link-form">
@@ -84,6 +91,11 @@ export default function CharacterCard({ c }: { c: CharCardData }) {
             <button type="button" className="roster-btn" onClick={openCampaign} title={`View ${c.campaign.name}`}>
               Campaign
             </button>
+          ) : solo?.campaignId ? (
+            // SOLO PLAY: already in a solo campaign — continue it.
+            <a href={`/solo/${solo.campaignId}`} className="roster-btn" title="Continue your solo campaign">
+              Solo
+            </a>
           ) : (
             <button
               type="button"
@@ -94,6 +106,13 @@ export default function CharacterCard({ c }: { c: CharCardData }) {
               Link
             </button>
           )}
+          {solo && !c.campaign && !solo.campaignId ? (
+            // SOLO PLAY: start a solo campaign with this hero.
+            <form action={createSoloCampaign} className="contents">
+              <input type="hidden" name="character" value={c.id} />
+              <button className="roster-btn" title="Play Alone in Deepfall Breach solo with this hero">Solo</button>
+            </form>
+          ) : null}
           <form action={deleteDocument} className="contents">
             <input type="hidden" name="id" value={c.id} />
             <ConfirmButton message={`Delete "${c.name}"? This cannot be undone.`} className="roster-btn roster-btn-danger">

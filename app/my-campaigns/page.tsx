@@ -5,6 +5,9 @@ import { loadCampaignCards, type CampCardData } from "@/lib/rosters";
 import PageHeader from "@/components/PageHeader";
 import RosterSysName from "@/components/RosterSysName";
 import CampaignCard from "@/components/CampaignCard";
+// SOLO PLAY (removable — see SOLO-REMOVAL.md)
+import { soloEnabledFor, loadSoloCampaigns, type SoloSummary } from "@/lib/solo";
+import SoloCampaignCard from "@/components/solo/SoloCampaignCard";
 
 // MY CAMPAIGNS — the campaign counterpart of My Characters: every campaign you
 // run (Game Master) or play in (one of your sheets is linked to it), across
@@ -31,15 +34,17 @@ export default async function MyCampaignsPage() {
     if (list) list.push(c);
     else bySystem.set(c.system, [c]);
   }
-  const systems = SYSTEMS.filter((s) => bySystem.has(s.key));
+  // SOLO PLAY: solo campaigns sit in their system's group (Dragonbane).
+  const solo: SoloSummary[] = soloEnabledFor(user.email) ? await loadSoloCampaigns(user.id) : [];
+  const systems = SYSTEMS.filter((s) => bySystem.has(s.key) || (s.key === "DB" && solo.length > 0));
 
   return (
     <div className="home-roster mx-auto w-full max-w-5xl px-5 py-10">
       <PageHeader
         title="My Campaigns"
         subtitle={
-          cards.length
-            ? `${cards.length} ${cards.length === 1 ? "campaign" : "campaigns"} across ${systems.length} ${systems.length === 1 ? "game" : "games"}`
+          cards.length + solo.length
+            ? `${cards.length + solo.length} ${cards.length + solo.length === 1 ? "campaign" : "campaigns"} across ${systems.length} ${systems.length === 1 ? "game" : "games"}`
             : "The games you run and the games you play in"
         }
       />
@@ -52,11 +57,18 @@ export default async function MyCampaignsPage() {
           <section key={s.key} className="roster-sys" data-sys={s.key}>
             <RosterSysName system={s.key} name={s.name} />
             <ul className="roster-cards">
-              {bySystem.get(s.key)!.map((c) => (
+              {(bySystem.get(s.key) ?? []).map((c) => (
                 <li key={c.id} className="min-w-0">
                   <CampaignCard c={c} />
                 </li>
               ))}
+              {s.key === "DB"
+                ? solo.map((x) => (
+                    <li key={x.id} className="min-w-0">
+                      <SoloCampaignCard s={x} />
+                    </li>
+                  ))
+                : null}
             </ul>
           </section>
         ))

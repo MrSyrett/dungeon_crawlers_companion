@@ -5,6 +5,8 @@ import { type SystemKey } from "@/components/systemStore";
 import { readSystemCookie } from "@/lib/system-cookie";
 import { loadCampaignCards } from "@/lib/rosters";
 import CampaignsList, { type CampaignsBySystem } from "@/components/CampaignsList";
+// SOLO PLAY (removable — see SOLO-REMOVAL.md)
+import { soloEnabledFor, loadSoloCampaigns, loadDbCharacters } from "@/lib/solo";
 
 export const dynamic = "force-dynamic";
 
@@ -35,5 +37,10 @@ export default async function CampaignsPage() {
     (c.role === "gm" ? g.owned : g.joined).push(c);
   }
 
-  return <CampaignsList bySystem={bySystem} hiddenKeys={hiddenSystems as SystemKey[]} initialSystem={initialSystem} />;
+  // SOLO PLAY: only loaded (and only shown) while the switch is on for this user.
+  const solo = soloEnabledFor(user.email)
+    ? { campaigns: await loadSoloCampaigns(user.id), characters: await loadDbCharacters(user.id) }
+    : null;
+
+  return <CampaignsList bySystem={bySystem} hiddenKeys={hiddenSystems as SystemKey[]} initialSystem={initialSystem} solo={solo} />;
 }

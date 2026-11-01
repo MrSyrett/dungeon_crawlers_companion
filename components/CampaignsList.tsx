@@ -13,6 +13,10 @@ import { createCampaign } from "@/app/actions/campaigns";
 import CampaignDialog from "./CampaignDialog";
 import CampaignCard from "./CampaignCard";
 import type { CampCardData } from "@/lib/rosters";
+// SOLO PLAY (removable — see SOLO-REMOVAL.md)
+import type { SoloSummary } from "@/lib/solo";
+import SoloCampaignCard from "./solo/SoloCampaignCard";
+import NewSoloCampaign from "./solo/NewSoloCampaign";
 
 // The Campaigns body: shows ONE system's campaigns at a time, driven by the same
 // shared system store the top navbar writes — exactly how DashboardDocs shows one
@@ -34,10 +38,13 @@ export default function CampaignsList({
   bySystem,
   hiddenKeys = [],
   initialSystem,
+  solo = null,
 }: {
   initialSystem?: SystemKey;
   bySystem: CampaignsBySystem;
   hiddenKeys?: SystemKey[];
+  /** SOLO PLAY: null unless the solo switch is on for this user. */
+  solo?: { campaigns: SoloSummary[]; characters: { id: string; name: string; linked: boolean }[] } | null;
 }) {
   const storedSystem = useSyncExternalStore(subscribeSystem, getSystemSnapshot, serverSystem(initialSystem));
 
@@ -125,6 +132,36 @@ export default function CampaignsList({
                 ))}
               </ul>
             </div>
+          </div>
+        ) : null}
+
+        {/* SOLO PLAY — solo campaigns (Dragonbane only for now). Removable: see SOLO-REMOVAL.md. */}
+        {solo && system === "DB" ? (
+          <div className="mt-6 rounded-lg border border-[var(--border)] bg-[var(--panel)]">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] px-4 py-3">
+              <h3 data-dash-head className="text-base font-bold uppercase tracking-[0.15em] sm:text-sm">
+                Solo
+              </h3>
+              <NewSoloCampaign
+                characters={solo.characters.filter((c) => !c.linked)}
+                className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] transition-colors hover:border-[var(--sys-hilite)] hover:text-[var(--text)] sm:min-h-0 sm:px-2.5 sm:py-1 sm:text-[11px]"
+              />
+            </div>
+            {solo.campaigns.length === 0 ? (
+              <p className="px-4 py-5 text-base text-[var(--muted)] sm:text-sm">
+                No solo campaigns yet. Hit + Solo to play Alone in Deepfall Breach with one of your heroes — no GM needed.
+              </p>
+            ) : (
+              <div className="roster-panel-cards" data-sys={system}>
+                <ul className="roster-cards">
+                  {solo.campaigns.map((s) => (
+                    <li key={s.id} className="min-w-0">
+                      <SoloCampaignCard s={s} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         ) : null}
       </div>

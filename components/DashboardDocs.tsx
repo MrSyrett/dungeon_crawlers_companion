@@ -53,10 +53,13 @@ function DocList({
   kind,
   panel,
   system,
+  soloLinks = null,
 }: {
   kind: "characters" | "adventures";
   panel?: Panel;
   system: SystemKey;
+  /** SOLO PLAY: null unless the solo switch is on (see SOLO-REMOVAL.md). */
+  soloLinks?: Record<string, { id: string; name: string } | null> | null;
 }) {
   const noun = kind === "characters" ? "characters" : "adventures";
   if (!panel) {
@@ -92,7 +95,10 @@ function DocList({
           <ul className="roster-cards">
             {panel.cards.map((c) => (
               <li key={c.id} className="min-w-0">
-                <CharacterCard c={c} />
+                <CharacterCard
+                  c={c}
+                  solo={soloLinks && c.system === "DB" ? { campaignId: soloLinks[c.id]?.id ?? null, campaignName: soloLinks[c.id]?.name } : undefined}
+                />
               </li>
             ))}
           </ul>
@@ -143,7 +149,9 @@ export default function DashboardDocs({
   hiddenKeys = [],
   initialSystem,
   initialView,
+  soloLinks = null,
 }: {
+  soloLinks?: Record<string, { id: string; name: string } | null> | null;
   panels: SystemPanels;
   hiddenKeys?: SystemKey[];
   // What the server rendered, read from the cookie the store mirrors
@@ -174,6 +182,7 @@ export default function DashboardDocs({
           kind={view}
           system={system}
           panel={view === "characters" ? panel?.character : panel?.session}
+          soloLinks={soloLinks}
         />
       </div>
     </div>

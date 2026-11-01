@@ -7,6 +7,8 @@ import { getHiddenSystemKeys } from "@/lib/systems";
 import DashboardDocs, { type SystemPanels, type DocRow } from "@/components/DashboardDocs";
 import { readSystemCookie, readViewCookie } from "@/lib/system-cookie";
 import { loadCharacterCards, loadChapterCounts, type CharCardData } from "@/lib/rosters";
+// SOLO PLAY (removable — see SOLO-REMOVAL.md)
+import { soloEnabledFor, loadSoloCampaigns } from "@/lib/solo";
 
 // The homepage. The top navbar (SiteNav, in the root layout) owns system
 // selection, the Characters/Adventures tabs, Compendium and Tools; this page
@@ -88,5 +90,9 @@ export default async function DashboardPage() {
     panels[s.key] = entry;
   }
 
-  return <DashboardDocs panels={panels} hiddenKeys={hiddenSystems as SystemKey[]} initialSystem={initialSystem} initialView={initialView} />;
+  // SOLO PLAY: hero → solo campaign, only while the switch is on for this user.
+  const soloLinks: Record<string, { id: string; name: string } | null> | null = soloEnabledFor(user.email) ? {} : null;
+  if (soloLinks) for (const sc of await loadSoloCampaigns(user.id)) if (sc.character && !soloLinks[sc.character.id]) soloLinks[sc.character.id] = { id: sc.id, name: sc.name };
+
+  return <DashboardDocs soloLinks={soloLinks} panels={panels} hiddenKeys={hiddenSystems as SystemKey[]} initialSystem={initialSystem} initialView={initialView} />;
 }

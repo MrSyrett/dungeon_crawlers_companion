@@ -2581,5 +2581,67 @@ var UTray = (function(){
   return { add: add, sub: sub, adv: adv, clear: clear, roll: roll, render: render };
 })();
 </script>
+<script>
+/* ═══ SOLO PLAY BRIDGE ═════════════════════════════════════════════════════════
+   Part of the removable Solo Play feature (see SOLO-REMOVAL.md) — delete this
+   whole <script> block to remove it. It does NOTHING unless the sheet is opened
+   by the solo page: framed, with ?solo=1 on the URL. Normal use (dashboard,
+   campaigns, the VTT popup) never runs a line of it.
+   It reports the sheet's rolls, damage and HP/WP to the solo page, and lets the
+   solo page ask the sheet to roll a skill, take damage, dodge, parry, make a fear
+   roll, end the turn, mark skills or add an item — always through the sheet's
+   own functions, so armor, banes, push, death rolls and saving work as usual. */
+(function(){
+  if(window.parent===window || !/[?&]solo=1(&|$)/.test(window.location.search)) return;
+  var ORIGIN=window.location.origin, pendingReq=null;
+  function post(m){ try{ m.src='db-sheet'; window.parent.postMessage(m, ORIGIN); }catch(e){} }
+  function snapshot(){
+    var sk=[]; try{ (window.DB_SKILLS||[]).forEach(function(d){ var lv=skillLevel(d.name); if(lv>0) sk.push({name:d.name,level:lv,mark:!!(S.skills[d.name]&&S.skills[d.name].mark)}); }); }catch(e){}
+    var conds={}; try{ CONDS.forEach(function(c){ conds[c]=!!S.cond[c]; }); }catch(e){}
+    var attrs={}; try{ ATTRS.forEach(function(a){ attrs[a]=attr(a); }); }catch(e){}
+    return { kind:'state', name:(S.name||'').trim(), kin:S.kin, profession:S.profession, hp:num(S.hp), hpMax:hpMax(), wp:num(S.wp), wpMax:wpMax(),
+      cond:conds, attrs:attrs, dead:!!S.death.dead, rallied:!!S.death.rallied, death:{s:S.death.s,f:S.death.f}, built:!!S.built,
+      armor:(function(){ try{ return armorRating(); }catch(e){ return 0; } })(),
+      armyOfOne:hasAbility('Army of One'), soleSurvivor:hasAbility('Sole Survivor'), skills:sk };
+  }
+  var stT=null; function postState(){ if(stT) clearTimeout(stT); stT=setTimeout(function(){ stT=null; post(snapshot()); },80); }
+  // wrap the sheet's own functions (reassigning the globals the rest of the sheet calls)
+  var _resolve=resolveRoll;
+  resolveRoll=function(o,boons,banes,pushed){ var req=pendingReq; pendingReq=null; var res=_resolve(o,boons,banes,pushed);
+    post({kind:'roll',req:req,label:o.label,skill:o.skill||null,attr:o.attr||null,weapon:!!o.weapon,ranged:!!o.ranged,ok:!!res.ok,dragon:!!res.dragon,demon:!!res.demon,roll:res.roll,target:res.target,pushed:!!pushed});
+    postState(); return res; };
+  var _dmg=rollDamage;
+  rollDamage=function(i,o,ch,notes,label,pre){ var total=_dmg(i,o,ch,notes,label,pre); var dd=null; try{ dd=weaponAt(i); }catch(e){}
+    var types=dd?A(dd.features).filter(function(f){ return /^(Bludgeoning|Slashing|Piercing)$/.test(f); }).map(function(f){ return f.toLowerCase(); }):[];
+    post({kind:'damage',label:label||'Damage',total:num(total),weapon:dd?dd.name:'',types:types,ranged:!!(dd&&dd.ranged),ignoresArmor:!!((ch&&ch.armor)||(o&&o.weak)),self:/self/i.test(label||'')});
+    return total; };
+  var _changed=changed; changed=function(){ _changed(); postState(); };
+  function firstMelee(){ var i=-1; S.inventory.some(function(r,k){ if(kindOf(r)==='weapon'&&r.equipped){ var d=wDef(r); if(d&&!d.ranged){ i=k; return true; } } return false; }); return i; }
+  window.addEventListener('message', function(e){
+    if(e.origin!==ORIGIN || e.source!==window.parent) return; var m=e.data||{}; if(m.src!=='db-solo') return;
+    try{
+      switch(m.cmd){
+        case 'state': post(snapshot()); break;
+        case 'roll': pendingReq=m.req||null;
+          if(m.attr){ testRoll({label:m.label||((ATTR_FULL[m.attr]||m.attr)+' ('+m.attr+')'),target:attr(m.attr),attr:m.attr,boons:m.boons||[],banes:m.banes||[]}); }
+          else if(m.skill){ rollSkill(m.skill,{boons:m.boons||[],banes:m.banes||[]}); }
+          if(pendingReq===m.req) pendingReq=null; break;   // nothing rolled (e.g. an unknown school)
+        case 'damage': takeDamage(num(m.n),{type:m.type||undefined,ignoreArmor:!!m.ignoreArmor,label:m.label||'Damage taken'}); break;
+        case 'heal': healHp(num(m.n),m.why||'Healed'); break;
+        case 'dodge': pendingReq=m.req||null; dodge(m.mode||undefined); if(pendingReq===m.req) pendingReq=null; break;
+        case 'parry': { var wi=firstMelee(); if(wi<0){ addLog('Parry','—','No melee weapon in hand','normal'); post({kind:'roll',req:m.req,label:'Parry',ok:false,none:true}); break; } pendingReq=m.req||null; parry(wi); if(pendingReq===m.req) pendingReq=null; break; }
+        case 'fear': rollFear(); break;
+        case 'endTurn': endTurn(); break;
+        case 'mark': (m.skills||[]).forEach(function(n){ skRec(n).mark=true; }); addLog('Advancement marks','+'+(m.skills||[]).length,(m.skills||[]).join(', ')+' · roll advancement between missions','normal'); changed(); break;
+        case 'addItem': { var k=addGearByName(m.name,num(m.qty,1),m.note||''); if(!k){ S.inventory.push({name:m.name,qty:num(m.qty,1),wt:m.wt==null?1:m.wt,note:m.note||''}); } addLog('Found',m.name,m.note||'','normal'); changed(); break; }
+        case 'coins': { var c=S.coins||{gold:0,silver:0,copper:0}; c[m.unit]=num(c[m.unit])+num(m.n); S.coins=c; addLog('Found coins','+'+num(m.n)+' '+m.unit,'','normal'); changed(); break; }
+        case 'log': addLog(m.label||'Solo',m.result||'',m.detail||'',m.type||'normal'); break;
+      }
+    }catch(err){ console.error('solo bridge', err); }
+  });
+  function ready(){ post({kind:'ready'}); post(snapshot()); }
+  if(document.readyState==='complete') setTimeout(ready,300); else window.addEventListener('load', function(){ setTimeout(ready,300); });
+})();
+</script>
 </body>
 </html>
