@@ -560,6 +560,13 @@ body.dark .sl::after{background:#3a3320;}
 .sdt-pip.hd{border-style:dashed;}
 .sdt-end{flex:0 0 auto;background:var(--gold);color:var(--on-gold);border:none;border-radius:7px;padding:7px 14px;font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .sdt-end:hover{filter:brightness(1.08);}
+.turn-mode{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-ink);white-space:nowrap;}
+.turn-mode .tm-sw{position:relative;width:34px;height:19px;border-radius:999px;border:1.5px solid var(--gold);background:transparent;flex:0 0 auto;transition:background .15s;}
+.turn-mode .tm-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--gold);transition:left .15s,background .15s;}
+.turn-mode.on .tm-sw{background:var(--gold);}
+.turn-mode.on .tm-sw::after{left:17px;background:#fff;}
+.turn-mode:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px;}
+.turn-free{font-family:'Montserrat',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 0;}
 .sdt-row2{display:flex;align-items:center;gap:10px;padding:0 10px 9px;flex-wrap:wrap;}
 .sdt-luck{display:inline-flex;align-items:center;gap:6px;font-family:'Montserrat',sans-serif;font-size:12px;color:var(--ink);}
 .sdt-lbl{font-weight:800;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-ink);}
@@ -597,6 +604,7 @@ body.dark .sdt-badge.bad{color:#f08a84;border-color:#a8433d;}
 .sdt-empty{font-family:'Montserrat',sans-serif;font-size:11px;color:var(--muted);padding:10px 2px;}
 @media (max-width:600px){
   .sdt-row1{flex-wrap:nowrap;justify-content:space-between;align-items:center;gap:6px;}
+  .sdt-row1:has(.turn-mode){flex-wrap:wrap;}
   .sdt-econ{flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-start;gap:4px;}
   .sdt-econ > *{padding:3px 8px;font-size:11px;white-space:nowrap;flex:0 1 auto;min-width:0;}
   .sdt-row2{justify-content:space-between;}
@@ -1816,12 +1824,18 @@ function setDefaultTab(){ setTab('action'); }   // sheets always open on the Act
 // (rollSpell() already handles lost spells, scrolls and wands — this tab just calls it).
 // End Turn clears the bubbles and writes nothing to the Roll Log. No round counter.
 var _sdTurn = { move: false, action: false, second: false, focus: '' };
+// TURN-BASED MODE (Action tab switch, saved as turnBased; on unless turned off). Off = free play:
+// your Action isn't spent or checked, and there's no HeroDark second action.
+var _sdTurnBased = true;
+function turnOn(){ return _sdTurnBased !== false; }
+function toggleTurnMode(){ _sdTurnBased = !turnOn(); _sdTurn = { move: false, action: false, second: false, focus: _sdTurn.focus || '' }; addLog('Turn-based mode', turnOn() ? 'On' : 'Off', turnOn() ? 'Actions are tracked per turn' : 'Free play — actions aren\'t tracked', 'normal'); sdAfter(); }
+function turnModeBtn(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: one action per turn, End Turn brings it back. Click for free play.' : 'Free play: actions aren\'t tracked. Click to count actions per turn (combat).') + '"><span class="tm-sw"></span>Turn-based</button>'; }
 var _sdTurnOpts = [];
 var _sdTurnCollapsed = { checks: true };
 var _sdFromTab = false;   // true while an Action-tab card is running its roll (it spends the turn itself)
 // A stat check rolled from the main sheet uses your Action (never blocks the roll).
 function sdSheetCheckSpend(){
-  if(_sdFromTab) return;
+  if(_sdFromTab || !turnOn()) return;
   if(!_sdTurn.action){ _sdTurn.action = true; if(typeof sdAfter === 'function') sdAfter(); }
 }
 function sdEsc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -1833,14 +1847,15 @@ function sdOneActionOnly(){ return sdHD() && typeof isDyingActive === 'function'
 // The HeroDark second action is "a second attack or cast a spell" only.
 function sdSecondOk(sec){ return sec === 'attacks' || sec === 'spells'; }
 function sdCan(kind, sec){
-  if(kind === 'free') return true;
+  if(kind === 'free' || !turnOn()) return true;
   if(sdOneActionOnly()) return !_sdTurn.action;
   return !_sdTurn.action || (sdHD() && !_sdTurn.move && sdSecondOk(sec));
 }
-function sdSecondAction(sec){ return _sdTurn.action && sdHD() && !_sdTurn.move && !sdOneActionOnly() && sdSecondOk(sec); }
+function sdSecondAction(sec){ return turnOn() && _sdTurn.action && sdHD() && !_sdTurn.move && !sdOneActionOnly() && sdSecondOk(sec); }
 function sdSetFocus(nm){ _sdTurn.focus = nm; if(typeof addTracker === 'function') addTracker('Focused'); }
 function sdEndFocus(){ _sdTurn.focus = ''; if(typeof trackerActive === 'function' && trackerActive('Focused')) removeTracker('Focused'); }
 function sdSpend(kind){
+  if(!turnOn()) return;
   if(kind === 'action'){ if(!_sdTurn.action) _sdTurn.action = true; else { _sdTurn.move = true; _sdTurn.second = true; } }
 }
 function sdAfter(){ renderSDTurn(); if(typeof saveSheet === 'function') saveSheet(false); }
@@ -2102,8 +2117,9 @@ function renderSDTurn(){
   host.innerHTML = `
     <div class="sdt-top">
       <div class="sdt-row1">
-        <div class="sdt-econ">${pip(_sdTurn.action, 'Action')}${second}</div>
-        <button class="sdt-end" onclick="sdEndTurn()" title="Clear this turn's action">End Turn</button>
+        ${turnOn() ? `<div class="sdt-econ">${pip(_sdTurn.action, 'Action')}${second}</div>
+        <button class="sdt-end" onclick="sdEndTurn()" title="Clear this turn's action">End Turn</button>` : `<span class="turn-free">Free play — actions aren't tracked</span>`}
+        ${turnModeBtn()}
       </div>
     </div>
     ${sec('attacks', 'Attacks', O.attacks, 'No attacks yet — add weapons on the Equipment tab.')}
@@ -4274,6 +4290,7 @@ function collectSheet(){
       spellGBonus: document.getElementById('spell-gbonus')?.value || '',
       tab: _tab,
       turn: Object.assign({}, _sdTurn),
+      turnBased: turnOn(),
       campaign: _campaign ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
       mastery: Array.isArray(_charMastery) ? _charMastery : [],
       trusty: _charTrusty || null,
@@ -4415,6 +4432,7 @@ function _applySDData(d){
     _tab = 'action';   // a loaded character opens on the Action tab
     _sdTurn = { move: false, action: false, second: false, focus: '' };
     if(d._sheet && d._sheet.turn && typeof d._sheet.turn === 'object') Object.assign(_sdTurn, d._sheet.turn);
+    _sdTurnBased = !(d._sheet && d._sheet.turnBased === false);
     _charMastery = Array.isArray(d._sheet?.mastery) ? d._sheet.mastery.slice() : [];
     _charTrusty = (d._sheet && d._sheet.trusty && d._sheet.trusty.value) ? d._sheet.trusty : null;
     _charExtraWeapons = Array.isArray(d._sheet?.extraWeapons) ? d._sheet.extraWeapons.slice() : [];

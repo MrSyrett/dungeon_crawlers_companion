@@ -496,6 +496,14 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .turn-pip.used{background:var(--rule);border-color:var(--rule);color:var(--muted);text-decoration:line-through;}
 .turn-end-btn{flex:0 0 auto;background:var(--mv);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;margin-left:auto;}
 .turn-end-btn:hover{filter:brightness(1.1);}
+.turn-mode{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mv-dk);white-space:nowrap;}
+.turn-mode .tm-sw{position:relative;width:34px;height:19px;border-radius:999px;border:1.5px solid var(--mv);background:transparent;flex:0 0 auto;transition:background .15s;}
+.turn-mode .tm-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--mv);transition:left .15s,background .15s;}
+.turn-mode.on .tm-sw{background:var(--mv);}
+.turn-mode.on .tm-sw::after{left:17px;background:#fff;}
+.turn-mode:focus-visible{outline:2px solid var(--mv);outline-offset:2px;border-radius:6px;}
+.turn-free{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 0;}
+body.dark .turn-mode{color:#f4a6a8;}
 .turn-row2{display:flex;align-items:center;gap:10px;padding:0 10px 8px;flex-wrap:wrap;}
 .turn-subtabs{display:flex;gap:0;border-top:1px solid var(--rule);}
 .turn-subtab{flex:1;padding:9px 4px;background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);}
@@ -1419,14 +1427,19 @@ var _turnOpts=[];
 var _turnCollapsed={checks:true};
 function turnState(){ if(!S.turn) S.turn={std:false,move:false,react:false,dodge:0}; return S.turn; }
 function tEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+// TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = free
+// play: no action economy — nothing is spent or greyed out; conditions that stop you still apply.
+function turnOn(){ return S.turnBased!==false; }
+function toggleTurnMode(){ S.turnBased=!turnOn(); var t=turnState(); t.std=t.move=t.react=false; t.dodge=0; addLog('Turn-based mode',turnOn()?'On':'Off',turnOn()?'Actions are tracked per turn':'Free play — actions aren\'t tracked','normal'); renderTurn(); scheduleAutosave(); }
+function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" onclick="toggleTurnMode()" title="'+(on?'Turn-based: one action and one reaction per turn, End Turn brings them back. Click for free play.':'Free play: actions aren\'t tracked. Click to count actions per turn (combat).')+'"><span class="tm-sw"></span>Turn-based</button>'; }
 function turnCan(kind){ var t=turnState();
-  if(kind==='free') return true;
+  if(kind==='free'||!turnOn()) return true;
   if(kind==='std') return !t.std;
   if(kind==='move') return true;            // movement is a given — no bubble to spend
   if(kind==='react') return !t.react;
   if(kind==='stdmove') return !t.std;
   return true; }
-function turnSpend(kind){ var t=turnState();
+function turnSpend(kind){ var t=turnState(); if(!turnOn()) return;
   if(kind==='std') t.std=true; else if(kind==='move') t.move=true; else if(kind==='react') t.react=true;
   else if(kind==='stdmove'){ t.std=true; } }
 // Which action slots a power can use, from its action text.
@@ -1524,7 +1537,7 @@ function turnBuildOpts(){
   // Actions
   var run=runSpeed(), hv=speedHalvedByCond()?Math.floor(run/2):run, nm=condNoMove(), nmB=nm?nm+' — can’t move':'';
   add('actions',{name:'Move Again', sub:'Spend your action to move a second time', blocked:nmB, btns:[{label:'Move',kind:'std',run:function(){ addLog('Move Again','Run '+hv,'Action spent on movement','normal'); return true; }}]});
-  add('actions',{name:'Dodge', sub:'Attacks against you have trouble until your next turn', btns:[{label:'Dodge',kind:'std',run:function(){ turnState().dodge=2; addLog('Dodge','Dodging','Attacks against you have trouble until your next turn','normal'); return true; }}]});
+  add('actions',{name:'Dodge', sub:'Attacks against you have trouble until your next turn', btns:[{label:'Dodge',kind:'std',run:function(){ if(turnOn()) turnState().dodge=2; addLog('Dodge','Dodging','Attacks against you have trouble until your next turn','normal'); return true; }}]});
   add('actions',{name:'Grab', sub:'Melee check vs Melee defense — a Fantastic also pins', blocked:condDisabled('melee',true), btns:[{label:'Roll',kind:'std',run:function(){ doCheck('Grab','melee',{attack:true}); return true; }}]});
   add('actions',{name:'Escape', sub:'Melee check vs the grabber’s Melee defense (or the Narrator’s TN — 20 webbing/chains, 16 rope)', btns:[{label:'Roll',kind:'std',run:function(){ doCheck('Escape','melee',{}); return true; }}]});
   add('actions',{name:'Help', sub:'Give an ally (or yourself) an edge on their next action', btns:[{label:'Use',kind:'std',run:function(){ addLog('Help','Edge','An ally gets an edge on their next action','normal'); return true; }}]});
@@ -1573,8 +1586,8 @@ function renderTurn(){
     return '<div class="turn-sec'+(col?' collapsed':'')+'"><div class="turn-sec-hd" onclick="turnToggleSec(\''+key+'\')"><span class="tsh-caret">▼</span><span class="tsh-title">'+title+'</span></div>'
       +'<div class="turn-sec-body">'+(list.length?list.map(card).join(''):'<div class="turn-empty">'+empty+'</div>')+'</div></div>'; };
   host.innerHTML='<div class="turn-top">'
-    +'<div class="turn-row1"><div class="turn-econ">'+pip(t.std,'Action')+pip(t.react,'Reaction')+'</div>'
-    +'<button class="turn-end-btn" onclick="endTurn()" title="Reset your actions for the next turn">End Turn</button></div>'
+    +'<div class="turn-row1"><div class="turn-econ">'+(turnOn()?pip(t.std,'Action')+pip(t.react,'Reaction'):'<span class="turn-free">Free play — actions aren\'t tracked</span>')+'</div>'
+    +(turnOn()?'<button class="turn-end-btn" onclick="endTurn()" title="Reset your actions for the next turn">End Turn</button>':'')+turnModeBtn()+'</div>'
     +'<div class="turn-row2">'
     +'<button class="turn-mini'+(karmaArmed?' on':'')+'" onclick="toggleKarma();renderTurn()" '+(num(S.karma.cur)<=0&&!karmaArmed?'disabled':'')+' title="Spend 1 Karma for an edge on your next roll">Karma Edge</button>'
     +'<div class="turn-badges">'+badges+'</div>'
@@ -1906,6 +1919,7 @@ function applySheet(d){
   S.conditions={}; if(d.conditions) CONDITIONS.forEach(function(c){ if(d.conditions[c.name])S.conditions[c.name]=true; });
   if(Array.isArray(d.powers)) S.powers=d.powers.map(function(p){ return {name:p.name||'',powerSet:p.powerSet||'',action:p.action||'',duration:p.duration||'',cost:p.cost||'',range:p.range||'',prerequisites:p.prerequisites||'',effect:p.effect||'',fantastic:p.fantastic||'',from:p.from||''}; });
   if(Array.isArray(d.iconics)) S.iconics=d.iconics.slice();
+  S.turnBased=d.turnBased!==false;
   S.turn={std:false, move:false, react:false, dodge:0};
   if(d.turn&&typeof d.turn==='object') ['std','move','react','dodge','sub'].forEach(function(k){ if(d.turn[k]!=null) S.turn[k]=d.turn[k]; });
   if(Array.isArray(d.traits)) S.traits=d.traits.map(function(t){ return {name:t.name||'',description:t.description||''}; });

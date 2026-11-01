@@ -1541,10 +1541,15 @@ function closeDlg(force){ if(_dlgModal&&!force) return; _dlgModal=false; $('dlg-
 // turn, so they need a turn you haven't taken yet and they spend it. End Turn
 // gives your action, any spent reaction and extra attacks back.
 function inCombat(){ return true; }
-function canAct(){ if(S.death.dead) return false; if(S.hp<=0&&!S.death.rallied) return false; return !S.turn.action&&!S.turn.done; }
-function canReact(){ if(S.death.dead||S.hp<=0) return false; if(S.berserk) return false; return !S.turn.action&&!S.turn.done; }
-function useAction(){ if(S.turn.action&&S.turn.extra>0){ S.turn.extra--; return; } S.turn.action=true; }
-function useReaction(){ S.turn.done=true; }
+// TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = free
+// play: no action economy — nothing is spent or greyed out; dying and death still limit you.
+function turnOn(){ return S.turnBased!==false; }
+function toggleTurnMode(){ S.turnBased=!turnOn(); S.turn.action=false; S.turn.done=false; S.turn.extra=0; S.turn.dual=false; addLog('Turn-based mode',turnOn()?'On':'Off',turnOn()?'Actions are tracked per turn':'Free play — actions aren\'t tracked','normal'); changed(); }
+function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" onclick="toggleTurnMode()" title="'+(on?'Turn-based: one action per turn, End Turn brings it back. Click for free play.':'Free play: actions aren\'t tracked. Click to count actions per turn (combat).')+'"><span class="tm-sw"></span>Turn-based</button>'; }
+function canAct(){ if(S.death.dead) return false; if(S.hp<=0&&!S.death.rallied) return false; return !turnOn()||(!S.turn.action&&!S.turn.done); }
+function canReact(){ if(S.death.dead||S.hp<=0) return false; if(S.berserk) return false; return !turnOn()||(!S.turn.action&&!S.turn.done); }
+function useAction(){ if(!turnOn()) return; if(S.turn.action&&S.turn.extra>0){ S.turn.extra--; return; } S.turn.action=true; }
+function useReaction(){ if(!turnOn()) return; S.turn.done=true; }
 function canAttack(){ return canAct()||(S.turn.extra>0&&!S.death.dead); }
 // End Turn (as on the D&D sheet): your action, any spent reaction and extra attacks come back.
 function endTurn(){ S.turn.action=false; S.turn.done=false; S.turn.extra=0; S.turn.dual=false; S.turn.gone=null; changed(); }
@@ -1868,10 +1873,13 @@ function renderTurn(){
   // Initiative is dealt by the GM (it shows in the Roll Log): the top row is the action economy and End Turn.
   var h='<div class="db-top"><div class="db-row1">';
   h+='<div class="db-econ">';
+  if(turnOn()){
   // The pip row never changes size: the extra-attack pip keeps its slot (hidden) when there's none.
   h+='<span class="db-pip'+(t.action||t.done?' used':'')+'" title="One action per turn">Action</span><span class="db-pip extra'+(t.extra>0?'':' off')+'" title="'+(t.dual?'Dual Wield: one extra attack with your other one-handed weapon, at a bane':'Critical hit: one free extra attack against another enemy')+'">+'+Math.max(1,num(t.extra))+' attack</span>';
+  } else h+='<span class="turn-free">Free play — actions aren\'t tracked</span>';
   h+='</div>';
-  h+=tbtn('⟳ End Turn','endTurn()','end','Start a new turn — your action and reaction come back');
+  if(turnOn()) h+=tbtn('⟳ End Turn','endTurn()','end','Start a new turn — your action and reaction come back');
+  h+=turnModeBtn();
   // Status badges: always one line (it scrolls sideways when full) with a fixed height, even when
   // empty, so a badge coming or going never changes the height above the cards.
   h+='</div><div class="db-badges">';
@@ -2442,6 +2450,13 @@ body.dark .db-top{background:#1c1c21;}
 .db-rx label{display:flex;align-items:center;gap:5px;cursor:pointer;}
 .db-rx input{accent-color:var(--acc);width:16px;height:16px;}
 /* a toggle (not a checkbox: no form field in the Action tab, so nothing there can take focus on a tap) */
+.turn-mode{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:var(--f-label);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--acc-dk);white-space:nowrap;}
+.turn-mode .tm-sw{position:relative;width:34px;height:19px;border-radius:999px;border:1.5px solid var(--acc);background:transparent;flex:0 0 auto;transition:background .15s;}
+.turn-mode .tm-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--acc);transition:left .15s,background .15s;}
+.turn-mode.on .tm-sw{background:var(--acc);}
+.turn-mode.on .tm-sw::after{left:17px;background:#fff;}
+.turn-mode:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:6px;}
+.turn-free{font-family:var(--f-label);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted,#8a867f);padding:4px 0;}
 .db-tog{display:inline-flex;align-items:center;gap:6px;background:transparent;border:none;padding:2px 0;cursor:pointer;font-family:var(--f-ui);font-size:13px;color:var(--ink);}
 .db-tog-box{width:16px;height:16px;border:1.5px solid var(--acc);border-radius:4px;flex:0 0 auto;}
 .db-tog.on .db-tog-box{background:var(--acc);box-shadow:inset 0 0 0 2px var(--card);}

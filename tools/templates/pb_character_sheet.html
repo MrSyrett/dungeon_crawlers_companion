@@ -1713,17 +1713,22 @@ var DX={breath:0};   // Hold-your-breath round count (not saved)
 function inCombat(){ return true; }
 function incapacitated(){ return S.dead||num(S.cond.out)>0||S.hp<0||timedHas('paralyzed'); }
 function actsMax(){ return timedHas('acts')?2:1; }
-function canAct(){ return !incapacitated()&&num(S.turn.acts)<actsMax(); }
-function useAction(){ S.turn.acts=num(S.turn.acts)+1; }
+// TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = free
+// play: no action economy — nothing is spent or greyed out; being out, paralyzed or dead still limits you.
+function turnOn(){ return S.turnBased!==false; }
+function toggleTurnMode(){ S.turnBased=!turnOn(); S.turn=blankTurn(); addLog('Turn-based mode',turnOn()?'On':'Off',turnOn()?'Actions are tracked per turn':'Free play — actions aren\'t tracked','normal'); changed(); }
+function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" onclick="toggleTurnMode()" title="'+(on?'Turn-based: one action per turn, End Turn brings it back. Click for free play.':'Free play: actions aren\'t tracked. Click to count actions per turn (combat).')+'"><span class="tm-sw"></span>Turn-based</button>'; }
+function canAct(){ return !incapacitated()&&(!turnOn()||num(S.turn.acts)<actsMax()); }
+function useAction(){ if(!turnOn()) return; S.turn.acts=num(S.turn.acts)+1; }
 // Which allowance an attack with w would use: 'knave' | 'extra' | 'pistol' | 'bayonet' | 'action' | ''.
-function attackSlot(w){ var t=S.turn; if(incapacitated()) return '';
+function attackSlot(w){ var t=S.turn; if(incapacitated()) return ''; if(!turnOn()) return 'action';
   if(isKnave(w)&&num(t.knave)>0) return 'knave';
   if(num(t.extra)>0) return 'extra';
   if(has('flintlock-fanatic')&&w.pistol&&num(t.pistols)>0&&num(t.pistols)<3) return 'pistol';
   if(has('fix-bayonets')&&w.ref==='bayonet'&&t.reloaded&&!t.bayonet) return 'bayonet';
   return canAct()?'action':''; }
 // Spend the allowance for an attack; returns a label for the log ('' for a plain action).
-function spendAttack(w){ var t=S.turn, slot=attackSlot(w), how='';
+function spendAttack(w){ var t=S.turn, slot=attackSlot(w), how=''; if(!turnOn()) return how;
   if(slot==='knave'){ t.knave=0; how='second knife'; }
   else if(slot==='extra'){ t.extra=num(t.extra)-1; how='extra attack'; }
   else if(slot==='pistol'){ how='pistol '+(num(t.pistols)+1)+' of 3'; }
@@ -2187,12 +2192,13 @@ function renderTurn(){
   var el=$('pb-turn'); if(!el) return; var c=S.combat, t=S.turn; var act=canAct(); var parts=[];
   // the action economy and End Turn, then the badges (as on the Dragonbane sheet)
   var h='<div class="pb-top"><div class="pb-row1"><div class="pb-econ">', mx=actsMax(), inc=incapacitated();
+  if(!turnOn()) h+='<span class="turn-free">Free play — actions aren\'t tracked</span>'; else {
   for(var i=0;i<mx;i++) h+='<span class="pb-pip'+(inc||i<num(t.acts)?' used':'')+'" title="Move and take one action: attack, reload, cast, pray, use a relic or an item">Action'+(mx>1?' '+(i+1):'')+'</span>';
   if(!inc){ if(num(t.extra)>0) h+='<span class="pb-pip extra" title="A free attack (defense critical'+(c.eldritch==='panic'?' or Eldritch Mind panic':'')+')">+'+num(t.extra)+' attack</span>';
     if(num(t.knave)>0&&has('knife-knave')) h+='<span class="pb-pip extra" title="Knife Knave: attack with your second knife">+ second knife</span>';
     if(has('flintlock-fanatic')&&num(t.pistols)>0&&num(t.pistols)<3) h+='<span class="pb-pip extra" title="Flintlock Fanatic: up to three pistols a turn">+'+(3-num(t.pistols))+' pistol'+(3-num(t.pistols)>1?'s':'')+'</span>';
-    if(has('fix-bayonets')&&t.reloaded&&!t.bayonet&&attackList().some(function(w){ return w.ref==='bayonet'; })) h+='<span class="pb-pip extra" title="Fix Bayonets!: attack with the bayonet on a turn spent reloading">+ bayonet</span>'; }
-  h+='</div>'+tbtn('⟳ End Turn','endTurn()','end','Start a new turn — your action comes back')+'</div><div class="pb-badges">';
+    if(has('fix-bayonets')&&t.reloaded&&!t.bayonet&&attackList().some(function(w){ return w.ref==='bayonet'; })) h+='<span class="pb-pip extra" title="Fix Bayonets!: attack with the bayonet on a turn spent reloading">+ bayonet</span>'; } }
+  h+='</div>'+(turnOn()?tbtn('⟳ End Turn','endTurn()','end','Start a new turn — your action comes back'):'')+turnModeBtn()+'</div><div class="pb-badges">';
   if(S.dead) h+='<span class="pb-badge warn">Dead</span>'; else if(S.hp===0) h+='<span class="pb-badge warn">Broken</span>';
   if(num(S.cond.out)) h+='<span class="pb-badge warn">Out '+num(S.cond.out)+' rounds</span>'; if(S.cond.stunned) h+='<span class="pb-badge warn">Stunned</span>';
   if(num(S.cond.hemorrhage)) h+='<span class="pb-badge warn">Hemorrhage'+(S.cond.hemorrhage===2?': last hour':'')+'</span>';
@@ -2230,7 +2236,7 @@ function renderActionTab(act){ var h='';
     else btns+=tbtn('Attack','doAttack(\''+w.uid+'\',{})','',g,!!g);
     a+=tcard(esc(w.name)+(w.trusted?' <span class="tag">trusted</span>':''),sub,btns,!!g&&!(w.blackPowder&&!w.loaded&&act)); });
   var dropped=items('weapon').filter(function(w){ return w.dropped; }); dropped.forEach(function(w){ a+=tcard(esc(w.name)+' <span class="tag warn">dropped</span>','',tbtn('Pick up','pickUp(\''+w.uid+'\')','ghost')); });
-  if(!S.dead&&num(S.turn.extra)>0) a='<div class="pb-note good">Extra attack: make it with any weapon below.</div>'+a;
+  if(!S.dead&&turnOn()&&num(S.turn.extra)>0) a='<div class="pb-note good">Extra attack: make it with any weapon below.</div>'+a;
   h+=tsec('attacks','Attacks',a);
   // Defend sits right under Attacks (it used to be its own sub-tab)
   h+=renderDefendSection();
@@ -2732,6 +2738,13 @@ body.dark .pb-top{background:#1a1111;}
 .pb-pip{font-family:var(--f-label);font-size:13px;letter-spacing:.06em;text-transform:uppercase;border:1.5px solid var(--acc);color:var(--acc-dk);background:transparent;border-radius:14px;padding:3px 13px;}
 .pb-pip.used{background:var(--rule);border-color:var(--rule);color:var(--muted);text-decoration:line-through;}
 .pb-pip.extra{border-color:#c9a14a;color:#c9a14a;}
+.turn-mode{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:var(--f-label);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--acc-dk);white-space:nowrap;}
+.turn-mode .tm-sw{position:relative;width:34px;height:19px;border-radius:999px;border:1.5px solid var(--acc);background:transparent;flex:0 0 auto;transition:background .15s;}
+.turn-mode .tm-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--acc);transition:left .15s,background .15s;}
+.turn-mode.on .tm-sw{background:var(--acc);}
+.turn-mode.on .tm-sw::after{left:17px;background:#fff;}
+.turn-mode:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:6px;}
+.turn-free{font-family:var(--f-label);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 0;}
 .pb-do{flex:0 0 auto;background:var(--acc);color:#fff;border:none;border-radius:7px;padding:6px 12px;font-family:var(--f-label);font-size:14px;letter-spacing:.01em;cursor:pointer;white-space:nowrap;}
 .pb-do:hover{filter:brightness(1.15);}
 .pb-do.ghost{background:transparent;color:var(--acc-dk);border:1px solid var(--acc);}

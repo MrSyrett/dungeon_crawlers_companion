@@ -551,12 +551,26 @@ body.dark .act-subtab.on{color:var(--yz);}
 .act-card.disabled .ac-name{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px;}
 .act-empty{font-size:12px;color:var(--muted);padding:10px 2px;line-height:1.5;}
 body.dark .act-pip{color:#5fd6ea;border-color:#5fd6ea;}
+.turn-mode{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--yz-dk);white-space:nowrap;}
+.turn-mode .tm-sw{position:relative;width:34px;height:19px;border-radius:999px;border:1.5px solid var(--yz-dk);background:transparent;flex:0 0 auto;transition:background .15s;}
+.turn-mode .tm-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--yz-dk);transition:left .15s,background .15s;}
+.turn-mode.on .tm-sw{background:var(--yz-dk);}
+.turn-mode.on .tm-sw::after{left:17px;background:#fff;}
+.turn-mode:focus-visible{outline:2px solid var(--yz-dk);outline-offset:2px;border-radius:6px;}
+.turn-free{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 0;}
+body.dark .turn-mode{color:#5fd6ea;}
+body.dark .turn-mode .tm-sw{border-color:#5fd6ea;}
+body.dark .turn-mode .tm-sw::after{background:#5fd6ea;}
+body.dark .turn-mode.on .tm-sw{background:#5fd6ea;}
+body.dark .turn-mode.on .tm-sw::after{background:#06141a;}
+body.dark .turn-mode:focus-visible{outline-color:#5fd6ea;}
 body.dark .act-sec-hd .ttl,body.dark .act-sec-hd .caret,body.dark .act-card .ac-tag{color:var(--yz);}
 body.dark .act-mini{color:var(--yz);border-color:var(--yz);}
 @media (max-width:600px){
   .act-row1{flex-wrap:nowrap;justify-content:space-between;align-items:center;gap:6px;}
   .act-econ{flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-start;gap:4px;}
   .act-econ > *{padding:3px 8px;font-size:11px;white-space:nowrap;flex:0 1 auto;min-width:0;}
+  .act-econ > .turn-free{padding:0;white-space:normal;line-height:1.2;}
   .act-row2 .act-badges{order:-1;flex-basis:100%;justify-content:center;}
   .act-row2 .act-badges:empty{display:none;}
   .act-card .ac-do{padding:9px 12px;font-size:12px;}
@@ -1322,6 +1336,7 @@ function rollAttr(k){
 // A skill or attribute roll from the main sheet takes the Full action (p.65). Silent when it's
 // already spent — the roll always goes ahead; Action-tab cards spend through actDo instead.
 function actSheetRollSpend(){
+  if(!turnOn()) return;
   if(_actFromTab || !actCan('full')) return;
   actSpend('full'); renderAction(); scheduleAutosave();
 }
@@ -1669,6 +1684,7 @@ function applySheet(d){
   S.gear=inv;
   S.crits = Array.isArray(d.crits) ? d.crits.map(function(c){ return {name:c.name||'',effect:c.effect||'',mod:num(c.mod)}; }) : [];
   if(Array.isArray(d.relationships)) S.relationships=d.relationships.map(function(r){ return {name:r.name||'',note:r.note||r.type||''}; });
+  S.turnBased=d.turnBased!==false;
   if(d.act && typeof d.act==='object') S.act={full:!!d.act.full,quick:num(d.act.quick),used:num(d.act.used),sub:d.act.sub==='quick'?'quick':'full'};
   _lastRoll=null;
   renderAll();
@@ -1765,15 +1781,20 @@ function actLogOnly(label, result, detail){ return function(){ addLog(label, res
 // QUICK actions (the second forfeits the full action). Quick actions include
 // movement, and Defend / Dodge can interrupt out of turn — but they still need a
 // quick action, so save one if you expect to be attacked.
+// TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = free
+// play: no action economy — nothing is spent or greyed out; Broken still limits you.
+function turnOn(){ return !S||S.turnBased!==false; }
+function toggleTurnMode(){ S.turnBased=!turnOn(); var a=actState(); a.full=false; a.quick=0; a.used=0; addLog('Turn-based mode',turnOn()?'On':'Off',turnOn()?'Actions are tracked per round':'Free play — actions aren\'t tracked','normal'); renderAction(); scheduleAutosave(); }
+function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" onclick="toggleTurnMode()" title="'+(on?'Turn-based: one full and one quick action per round, End Turn brings them back. Click for free play.':'Free play: actions aren\'t tracked. Click to count actions per round (combat).')+'"><span class="tm-sw"></span>Turn-based</button>'; }
 function actCan(kind){
   var a=actState();
-  if(kind==='free') return true;
+  if(kind==='free'||!turnOn()) return true;
   if(kind==='full') return !a.full && a.quick<2;
   return a.quick===0 || (a.quick===1 && !a.full);
 }
 function actSpend(kind,label){
   var a=actState();
-  if(kind==='free') return true;
+  if(kind==='free'||!turnOn()) return true;
   if(!actCan(kind)){ addLog('Action', 'No '+(kind==='full'?'full':'quick')+' action left', kind==='full'?'You used both quick actions (two quick actions forfeit your full action). End your turn to reset.':'Your actions are spent this round. End your turn to reset.', 'normal'); return false; }
   if(kind==='full') a.full=true; else a.quick++;
   return true;
@@ -1875,7 +1896,7 @@ function renderAction(){
   // Broken (p.68): a single move action per round and nothing else.
   var broken=S.health && S.health.max>0 && num(S.health.dmg)>=S.health.max;
   if(broken) _actOpts.forEach(function(o){
-    if(o.name==='Move'){ if(a.quick>=1||a.full) o.blocked='Broken — one move per round'; }
+    if(o.name==='Move'){ if(turnOn()&&(a.quick>=1||a.full)) o.blocked='Broken — one move per round'; }
     else o.blocked='Broken — you can only move';
   });
   var fullUsed=a.full||a.quick>=2, quickUsed=a.quick>=1;
@@ -1887,8 +1908,8 @@ function renderAction(){
   var eqFull=O.equip.filter(function(o){ return o.kind==='full'; }), eqQuick=O.equip.filter(function(o){ return o.kind!=='full'; });
   var tabs='<div class="act-subtabs"><button class="act-subtab'+(sub==='full'?' on':'')+'" onclick="actSetSub(\'full\')">Full Actions</button>'
     +'<button class="act-subtab'+(sub==='quick'?' on':'')+'" onclick="actSetSub(\'quick\')">Quick Actions</button></div>';
-  host.innerHTML='<div class="act-top"><div class="act-row1"><div class="act-econ">'+pips+'</div>'
-    +'<button class="act-end" onclick="actEndTurn()" title="Reset this round\'s actions">End Turn</button></div>'
+  host.innerHTML='<div class="act-top"><div class="act-row1"><div class="act-econ">'+(turnOn()?pips:'<span class="turn-free">Free play — actions aren\'t tracked</span>')+'</div>'
+    +(turnOn()?'<button class="act-end" onclick="actEndTurn()" title="Reset this round\'s actions">End Turn</button>':'')+turnModeBtn()+'</div>'
     +(badges?'<div class="act-row2"><div class="act-badges">'+badges+'</div></div>':'')+tabs+'</div>'
     +(sub==='full'
       ? actSec('attacks','Attacks',O.attacks,'')

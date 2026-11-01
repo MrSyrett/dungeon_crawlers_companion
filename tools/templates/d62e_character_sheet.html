@@ -484,6 +484,13 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 #d6-action button.turn-pip.add:hover{border-color:var(--act-acc);color:var(--act-title);}
 #d6-action .turn-end-btn{flex:0 0 auto;margin-left:auto;background:var(--act-btn);color:var(--act-btn-ink);border:none;border-radius:7px;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 #d6-action .turn-end-btn:hover{filter:brightness(1.08);}
+#d6-action .turn-mode{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--act-title);white-space:nowrap;}
+#d6-action .turn-mode .tm-sw{position:relative;width:34px;height:19px;border-radius:999px;border:1.5px solid var(--act-acc);background:transparent;flex:0 0 auto;transition:background .15s;}
+#d6-action .turn-mode .tm-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--act-acc);transition:left .15s,background .15s;}
+#d6-action .turn-mode.on .tm-sw{background:var(--act-acc);}
+#d6-action .turn-mode.on .tm-sw::after{left:17px;background:#fff;}
+#d6-action .turn-mode:focus-visible{outline:2px solid var(--act-acc);outline-offset:2px;border-radius:6px;}
+#d6-action .turn-free{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 0;}
 #d6-action .turn-row2{display:flex;align-items:center;gap:12px;padding:0 10px 9px;flex-wrap:wrap;}
 #d6-action .turn-stat{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--muted);font-size:12px;display:inline-flex;align-items:center;gap:5px;}
 #d6-action .turn-stat .tm-lbl{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
@@ -520,6 +527,7 @@ body.dark #d6-action .turn-badge.warn{color:#f0c060;}
   #d6-action .turn-econ{flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-start;gap:4px;}
   #d6-action .turn-econ > *{padding:3px 8px;font-size:11px;white-space:nowrap;flex:0 1 auto;min-width:0;}
   #d6-action .turn-end-btn{margin-left:0;}
+  #d6-action .turn-mode{margin-left:auto;}
   #d6-action .turn-row2 .turn-badges{order:-1;flex-basis:100%;justify-content:center;}
   #d6-action .turn-row2 .turn-badges:empty{display:none;}
   #d6-action .tc-do{padding:9px 12px;font-size:12px;}
@@ -1295,7 +1303,7 @@ function rollCode(label, basePips, opts) {
 // penalty first only when every declared slot is already used). It never blocks the roll.
 var _fromActionTab = false;
 function actSheetSpend(run) {
-  if(_fromActionTab || typeof _act === 'undefined' || typeof renderAction !== 'function') { run(); return; }
+  if(_fromActionTab || typeof _act === 'undefined' || typeof renderAction !== 'function' || !turnOn()) { run(); return; }   // free play: not counted
   if(_act.used >= _act.declared) { _act.declared = Math.min(9, _act.used + 1); const el = $('f-map'); if(el) el.value = actMap(); updateModNote(); }
   run(); _act.used++; renderAction(); scheduleAutosave();
 }
@@ -1714,6 +1722,12 @@ function addGearFromData(name) {
 // editing weapons, powers and skills — stays on the other tabs.
 var _act = { declared: 1, used: 0, full: '', collapsed: { skills: true } };
 var _actOpts = [];
+// TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = free
+// play: rolls don't take action slots or raise the Multi-Action Penalty, nothing greys out.
+var _turnBased = true;
+function turnOn() { return _turnBased !== false; }
+function toggleTurnMode() { _turnBased = !turnOn(); addLog('Turn-based mode', turnOn() ? 'On' : 'Off', turnOn() ? 'Actions are tracked per round' : 'Free play — actions aren\'t tracked', 'normal'); actEndTurn(); }
+function turnModeBtn() { const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: declared actions and the Multi-Action Penalty are tracked per round, End Turn clears them. Click for free play.' : 'Free play: actions aren\'t tracked. Click to count actions per round (combat).') + '"><span class="tm-sw"></span>Turn-based</button>'; }
 function actMap() { return Math.max(0, (_act.declared || 1) - 1); }
 function actSetDeclared(n) {
   _act.declared = Math.max(1, Math.min(9, n));
@@ -1728,6 +1742,7 @@ function actDo(i, j) {
   const o = _actOpts[i]; if(!o) return;
   const run0 = (o.btns && o.btns[j]) ? o.btns[j][1] : o.run; if(!run0) return;
   const run = () => { _fromActionTab = true; try { run0(); } finally { _fromActionTab = false; } };   // the tab spends; the sheet hook must not
+  if(!turnOn()) { run(); renderAction(); scheduleAutosave(); return; }   // free play: nothing is spent
   if(_act.full) return;                                     // Full Defense: no other actions this turn
   if(o.kind === 'free') { run(); renderAction(); scheduleAutosave(); return; }   // not an action
   if(o.kind === 'full') {
@@ -1778,7 +1793,7 @@ function renderAction() {
   ACT_CFG.badges().forEach(b => badges.push('<span class="turn-badge good">' + esc(b) + '</span>'));
   const pts = ACT_CFG.points().map(p => '<span class="turn-stat"><span class="tm-lbl">' + esc(p.label) + '</span> <b>' + esc(p.value) + '</b>' + (p.btn ? ' <button class="turn-mini" onclick="' + p.btn.fn + '" title="' + esc(p.btn.title || '') + '">' + esc(p.btn.label) + '</button>' : '') + '</span>').join('');
   const card = o => {
-    const can = !o.blocked && !_act.full && !(o.kind === 'full' && used > 0);
+    const can = !o.blocked && (!turnOn() || (!_act.full && !(o.kind === 'full' && used > 0)));
     let btns = '';
     if(o.btns) btns = o.btns.map((b, j) => '<button class="tc-do" onclick="actDo(' + o.i + ',' + j + ')">' + esc(b[0]) + '</button>').join('');
     else if(o.run) btns = '<button class="tc-do" onclick="actDo(' + o.i + ')">' + esc(o.btn || 'Roll') + '</button>';
@@ -1793,7 +1808,7 @@ function renderAction() {
   };
   host.innerHTML =
     '<div class="turn-top">'
-    + '<div class="turn-row1"><div class="turn-econ">' + pips + '</div><button class="turn-end-btn" onclick="actEndTurn()" title="Clear this round\'s actions and the Multi-Action Penalty">End Turn</button></div>'
+    + '<div class="turn-row1">' + (turnOn() ? '<div class="turn-econ">' + pips + '</div><button class="turn-end-btn" onclick="actEndTurn()" title="Clear this round\'s actions and the Multi-Action Penalty">End Turn</button>' : '<span class="turn-free">Free play — actions aren\'t tracked</span>') + turnModeBtn() + '</div>'
     + '<div class="turn-row2">' + pts + '<div class="turn-badges">' + badges.join('') + '</div></div>'
     + '</div>'
     + sec('attacks', 'Attacks', S.attacks, 'No weapons yet — add them from ' + ACT_CFG.weaponsHome + '.')
@@ -1911,7 +1926,7 @@ var ACT_CFG = {
     const mv = num(($('f-move') || {}).value) || 10;
     add('actions', { name: 'Move', kind: 'move', sub: 'An action segment (p.32) · walk ' + Math.round(mv / 2) + ' m · run ' + mv + ' m, −1D to every skill roll this round',
       btns: [['Walk', () => addLog('Walk', Math.round(mv / 2) + ' m', 'Movement action', 'normal')],
-             ['Run', () => { if(!_act.ran) { _act.ran = true; updateModNote(); } addLog('Run', mv + ' m', 'Movement action · −1D to every skill roll this round', 'normal'); }]] });
+             ['Run', () => { if(turnOn() && !_act.ran) { _act.ran = true; updateModNote(); } addLog('Run', mv + ' m', 'Movement action · −1D to every skill roll this round', 'normal'); }]] });
     const dv = ($('dodge-val') || {}).textContent || '—', pv = ($('parry-val') || {}).textContent || '—';
     const sc = n => { const tr = actSkillRow(n); return tr ? code(rowTotal(tr)) : 'untrained'; };
     add('actions', { name: 'Full Defense', kind: 'full', sub: 'Optional (Active & Responsive Combat): your only action this turn (not after acting, no movement) — add Acrobatics (' + sc('Acrobatics') + ') to Dodge and Melee (' + sc('Melee') + ') to Parry', btn: 'Defend',
@@ -2076,7 +2091,7 @@ function collectSheet() {
     system: 'D62E', name: v('f-name'), genre: v('f-genre'), template: v('f-template'), archetype: v('f-archetype'),
     attrs: attrs,
     skills: skillRows().map(tr => ({ name: tr.querySelector('.sk-name-in').value.trim(), attribute: tr.dataset.attr, pips: codeOrZero(tr.querySelector('.sk-adds').value), adv: tr.dataset.adv === '1', spec: !!(tr.querySelector('.sk-spec') && tr.querySelector('.sk-spec').checked), specName: (tr.querySelector('.sk-specname') && tr.querySelector('.sk-specname').value.trim()) || '' })).filter(s => s.name),
-    heroPoints: num(v('f-hero')), characterPoints: num(v('f-cp')), map: num(v('f-map')), actionTurn: _act,
+    heroPoints: num(v('f-hero')), characterPoints: num(v('f-cp')), map: num(v('f-map')), actionTurn: _act, turnBased: turnOn(),
     move: v('f-move'),
     wound: wound,
     weapons: [...document.querySelectorAll('#weapons-body tr')].map(tr => ({ name: tr.querySelector('.wp-name').value, damage: tr.querySelector('.wp-dmg').value, range: tr.querySelector('.wp-range').value, skill: tr.querySelector('.wp-skill').value, notes: tr.querySelector('.wp-notes').value, link: tr.dataset.link || '', fixed: tr.dataset.fixed ? true : undefined })).filter(w => w.name || w.damage),
@@ -2109,7 +2124,7 @@ function applySheet(d) {
   buildStats(d.attrs && typeof d.attrs === 'object' ? d.attrs : { Agility:9, Brawn:9, Knowledge:9, Perception:9 });
   $('skills-body').innerHTML = ''; (d.skills || []).forEach(s => addSkillRow(s));
   wound = WOUND_PEN[d.wound] !== undefined ? d.wound : 'none'; heroArmed = 0; assetBonusPips = 0; renderWoundTrack();
-  set('f-hero', d.heroPoints != null ? d.heroPoints : 1); set('f-cp', d.characterPoints || 0); set('f-map', d.map || 0); if(d.actionTurn && typeof d.actionTurn === 'object') Object.assign(_act, d.actionTurn); _act.declared = Math.max(1, num(d.map || 0) + 1, _act.used || 0);
+  set('f-hero', d.heroPoints != null ? d.heroPoints : 1); set('f-cp', d.characterPoints || 0); set('f-map', d.map || 0); if(d.actionTurn && typeof d.actionTurn === 'object') Object.assign(_act, d.actionTurn); _turnBased = d.turnBased !== false; _act.declared = Math.max(1, num(d.map || 0) + 1, _act.used || 0);
   set('f-move', d.move != null ? d.move : '10');
   const ar = d.armor || {}; set('f-armor', ar.name); set('f-armor-prot', ar.protection);
   $('weapons-body').innerHTML = ''; (d.weapons || []).forEach(addWeaponRow); ensureUnarmed();

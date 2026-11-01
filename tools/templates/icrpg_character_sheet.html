@@ -1191,6 +1191,12 @@ function setDefaultTab(){ setTab('action'); }   // sheets always open on the Act
 // regain CON + 1 HP. Management (adding loot, abilities, spells) stays in the other
 // tabs — this tab only performs. No round counter; End Turn logs nothing.
 var _icTurn = { move:false, action:false, far:false, mode:'normal' };
+// TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = free
+// play: Move/Action aren't tracked, nothing greys out — DYING still limits what you can do.
+var _icTurnBased = true;
+function turnOn(){ return _icTurnBased!==false; }
+function toggleTurnMode(){ _icTurnBased=!turnOn(); addLog('Turn-based mode', turnOn()?'On':'Off', turnOn()?'Actions are tracked per turn':'Free play — actions aren\'t tracked', 'normal'); icEndTurn(); }
+function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" onclick="toggleTurnMode()" title="'+(on?'Turn-based: Move and one Action per TURN, End Turn brings them back. Click for free play.':'Free play: actions aren\'t tracked. Click to count Move and Action per TURN (combat).')+'"><span class="tm-sw"></span>Turn-based</button>'; }
 var _icCollapsed = { checks:true };
 var _icOpts = [];
 var IC_EFF = { d4:'Basic', d6:'WeaponsTools', d8:'Guns', d10:'MagicEnergy', d12:'Ultimate' };
@@ -1495,7 +1501,7 @@ function icBuildOpts(){
 function icCan(kind, o){
   // DYING = unconscious: only the dying rolls (and Defense, which the GM may still call for).
   if($('f-dying').checked && o && !o.dying && !o.resist) return false;
-  if(kind==='free') return true;
+  if(kind==='free' || !turnOn()) return true;   // free play: no per-TURN limit
   if(kind==='far') return !_icTurn.move && !_icTurn.action;   // Move Far / Recover take the whole TURN
   return !_icTurn.action;
 }
@@ -1503,6 +1509,7 @@ function icDo(i){
   var o=_icOpts[i]; if(!o) return;
   if(!icCan(o.kind, o)){ addLog('Turn', $('f-dying').checked&&!o.dying?'Unconscious':'No Action left', $('f-dying').checked&&!o.dying?'You\'re DYING — only the Dying and Miracle rolls are possible.':o.kind==='far'?'That takes your whole TURN.':'You\'ve already acted this TURN. End your turn to reset.', 'normal'); return; }
   o.run();
+  if(!turnOn()){ icAfter(); return; }   // free play: nothing is spent
   if(o.kind==='far'){ _icTurn.move=true; _icTurn.action=true; _icTurn.far=true; }
   else if(o.kind==='action') _icTurn.action=true;
   icAfter();
@@ -1545,8 +1552,8 @@ function icRenderTurn(){
   };
   host.innerHTML=
     '<div class="ic-top">'+
-      '<div class="ic-row1"><div class="ic-econ">'+pip(_icTurn.move,'Move','move','Move NEAR (click to mark)')+pip(_icTurn.action,'Action','action','Your one roll this TURN (click to mark)')+'</div>'+
-        '<button class="ic-end" onclick="icEndTurn()" title="Reset Move and Action for your next TURN">End Turn</button></div>'+
+      '<div class="ic-row1">'+(turnOn()?'<div class="ic-econ">'+pip(_icTurn.move,'Move','move','Move NEAR (click to mark)')+pip(_icTurn.action,'Action','action','Your one roll this TURN (click to mark)')+'</div>'+
+        '<button class="ic-end" onclick="icEndTurn()" title="Reset Move and Action for your next TURN">End Turn</button>':'<span class="turn-free">Free play — actions aren\'t tracked</span>')+turnModeBtn()+'</div>'+
       '<div class="ic-row2">'+
         '<span class="ic-stat"><span class="ic-lbl">HP</span> <b>'+hp+'</b>/'+max+'</span>'+
         '<span class="ic-stat"><span class="ic-lbl">Target</span> <b>'+icTarget()+'</b></span>'+
@@ -1680,7 +1687,7 @@ function collectSheet(){
     target:num(v('f-target')), dying:$('f-dying').checked, coin:$('coin-btn').classList.contains('on'),
     notes:v('f-notes'), stats:stats, effort:effort,
     abilities:collectRows('abil'), spells:collectRows('spell'), loot:collectRows('loot'),
-    turn:{ move:_icTurn.move, action:_icTurn.action, far:_icTurn.far, mode:_icTurn.mode },
+    turn:{ move:_icTurn.move, action:_icTurn.action, far:_icTurn.far, mode:_icTurn.mode }, turnBased:turnOn(),
     campaign:(typeof _campaign!=='undefined' && _campaign)?{ id:_campaign.id, code:_campaign.code, name:_campaign.name }:null,
   };
 }
@@ -1701,6 +1708,7 @@ function applySheet(d){
   icSyncItemSpells();
   if(typeof campaignRestore==='function') campaignRestore(d.campaign);
   if(d.turn && typeof d.turn==='object'){ _icTurn.move=!!d.turn.move; _icTurn.action=!!d.turn.action; _icTurn.far=!!d.turn.far; _icTurn.mode=(['easy','hard'].indexOf(d.turn.mode)>=0)?d.turn.mode:'normal'; }
+  _icTurnBased=d.turnBased!==false;
   recalc(); renderHearts(); setDefaultTab();
   if(window.__ddSaveTitle && d.name) try{ window.__ddSaveTitle(d.name); }catch(e){}
 }
@@ -1947,6 +1955,13 @@ window.openCampaign=openCampaign; window.closeCampaign=closeCampaign; window.cam
 .ic-pip.used{background:var(--rule);border-color:var(--rule);color:var(--muted);text-decoration:line-through;}
 .ic-end{flex:0 0 auto;margin-left:auto;background:var(--icrpg);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .ic-end:hover{filter:brightness(1.1);}
+.turn-mode{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--icrpg-dk);white-space:nowrap;}
+.turn-mode .tm-sw{position:relative;width:34px;height:19px;border-radius:999px;border:1.5px solid var(--icrpg);background:transparent;flex:0 0 auto;transition:background .15s;}
+.turn-mode .tm-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--icrpg);transition:left .15s,background .15s;}
+.turn-mode.on .tm-sw{background:var(--icrpg);}
+.turn-mode.on .tm-sw::after{left:17px;background:#fff;}
+.turn-mode:focus-visible{outline:2px solid var(--icrpg);outline-offset:2px;border-radius:6px;}
+.turn-free{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 0;}
 .ic-row2{display:flex;align-items:center;gap:10px;padding:0 10px 9px;flex-wrap:wrap;}
 .ic-stat{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--muted);font-size:12px;}
 .ic-stat .ic-lbl{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
@@ -1985,6 +2000,7 @@ body.dark .ic-coin{color:#f0cf62;}
   .ic-econ > *{padding:3px 8px;font-size:11px;white-space:nowrap;flex:0 1 auto;min-width:0;}
   .ic-row1{flex-wrap:nowrap;justify-content:space-between;align-items:center;gap:6px;}
   .ic-end{margin-left:0;}
+  .turn-mode{margin-left:auto;}
   .ic-badges{order:-1;flex-basis:100%;justify-content:center;}
   .ic-coin{margin-left:auto;}
   .ic-do{padding:9px 12px;font-size:12px;}

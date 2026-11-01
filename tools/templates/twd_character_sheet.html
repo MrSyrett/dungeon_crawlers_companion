@@ -535,6 +535,18 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .act-pip.used{background:var(--rule);border-color:var(--rule);color:var(--muted);text-decoration:line-through;}
 .act-end{flex:0 0 auto;background:var(--yz-dk);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .act-end:hover{filter:brightness(1.12);}
+.turn-mode{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--yz-dk);white-space:nowrap;}
+.turn-mode .tm-sw{position:relative;width:34px;height:19px;border-radius:999px;border:1.5px solid var(--yz-dk);background:transparent;flex:0 0 auto;transition:background .15s;}
+.turn-mode .tm-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--yz-dk);transition:left .15s,background .15s;}
+.turn-mode.on .tm-sw{background:var(--yz-dk);}
+.turn-mode.on .tm-sw::after{left:17px;background:#fff;}
+.turn-mode:focus-visible{outline:2px solid var(--yz-dk);outline-offset:2px;border-radius:6px;}
+.turn-free{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 0;}
+body.dark .turn-mode{color:#d8cfbf;}
+body.dark .turn-mode .tm-sw{border-color:var(--yz);}
+body.dark .turn-mode .tm-sw::after{background:#d8cfbf;}
+body.dark .turn-mode.on .tm-sw{background:var(--yz);}
+body.dark .turn-mode.on .tm-sw::after{background:#fff;}
 .act-row2{display:flex;align-items:center;gap:10px;padding:0 10px 8px;flex-wrap:wrap;}
 .act-stat{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--muted);font-size:12px;}
 .act-stat .al{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
@@ -1557,6 +1569,7 @@ function applySheet(d){
   S.gear=inv;
   S.crits = Array.isArray(d.crits) ? d.crits.map(function(c){ return {name:c.name||'',effect:c.effect||'',mod:num(c.mod)}; }) : [];
   if(Array.isArray(d.relationships)) S.relationships=d.relationships.map(function(r){ return {name:r.name||'',note:r.note||r.type||''}; });
+  S.turnBased=d.turnBased!==false;
   if(d.act && typeof d.act==='object') S.act={full:!!d.act.full,quick:num(d.act.quick),used:num(d.act.used),overwatch:!!d.act.overwatch};
   _lastRoll=null;
   renderAll();
@@ -1649,9 +1662,14 @@ function actLogOnly(label, result, detail){ return function(){ addLog(label, res
 // 4 Movement, 5 First Aid, 6 Other. Quick, simple things (shout a few words, draw
 // a knife, grab a gun off the counter) are free. Barking orders (Leadership) is
 // your action for the round.
-function actCan(kind){ if(kind==='free') return true; return !actState().used; }
+// TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = free
+// play: no action economy — nothing is spent or greyed out; being Broken still applies.
+function turnOn(){ return S.turnBased!==false; }
+function toggleTurnMode(){ S.turnBased=!turnOn(); var a=actState(); a.full=false; a.quick=0; a.used=0; a.overwatch=false; addLog('Turn-based mode',turnOn()?'On':'Off',turnOn()?'Actions are tracked per round':'Free play — actions aren\'t tracked','normal'); renderAction(); scheduleAutosave(); }
+function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" onclick="toggleTurnMode()" title="'+(on?'Turn-based: one action per round, End Turn brings it back. Click for free play.':'Free play: actions aren\'t tracked. Click to count actions per round (a brawl).')+'"><span class="tm-sw"></span>Turn-based</button>'; }
+function actCan(kind){ if(kind==='free'||!turnOn()) return true; return !actState().used; }
 function actSpend(kind,label){
-  if(kind==='free') return true;
+  if(kind==='free'||!turnOn()) return true;
   if(!actCan(kind)){ addLog('Action','No action left','You get one action per round in a brawl. End your turn to reset.','normal'); return false; }
   actState().used=1; return true;
 }
@@ -1666,7 +1684,7 @@ function renderAction(){
   weps.filter(function(x){ return !/ranged/i.test(x.g.skill||''); }).forEach(function(x){ var w=x.g,i=x.i;
     actAdd('attacks',{name:w.name||'Weapon',tag:'Phase 3',kind:'action',sub:actWeaponSub(w),btn:'Attack',run:function(){ rollAttack(i); }},O); });
   actAdd('brawl',{name:'Take cover',tag:'Phase 1',kind:'action',sub:'Mobility · in cover now on a success (ranged attacks need +1 success); fail = in cover at round end',btn:'Roll',run:actSkillRoll('Mobility','Take cover')},O);
-  actAdd('brawl',{name:'Overwatch',tag:'Phase 2',kind:'action',sub:'Ranged Combat · cover an area; fire in the Movement phase if anyone enters it',btn:'Use',run:function(){ actState().overwatch=true; addLog('Overwatch','Ranged action','Covering an area — fire in Phase 4 if anyone moves into it'); }},O);
+  actAdd('brawl',{name:'Overwatch',tag:'Phase 2',kind:'action',sub:'Ranged Combat · cover an area; fire in the Movement phase if anyone enters it',btn:'Use',run:function(){ if(turnOn()) actState().overwatch=true; addLog('Overwatch','Ranged action','Covering an area — fire in Phase 4 if anyone moves into it'); }},O);
   actAdd('brawl',{name:'Move',tag:'Phase 4',kind:'action',sub:'Mobility · one range step closer or further (Short ↔ Long); opposed if chased',btn:'Roll',run:actSkillRoll('Mobility','Move')},O);
   actAdd('brawl',{name:'First aid',tag:'Phase 5',kind:'action',sub:'Medicine · a Broken person within Short range — not yourself · back up with 1 Health +1 per extra success',btn:'Roll',run:actSkillRoll('Medicine','First aid')},O);
   actAdd('brawl',{name:'Bark orders',tag:'Any phase',kind:'action',sub:'Leadership · each success = +1 die for an ally this round (max 3 each); can\'t be helped',btn:'Roll',run:actSkillRoll('Leadership','Orders')},O);
@@ -1675,8 +1693,8 @@ function renderAction(){
   var broken=S.health && S.health.max>0 && num(S.health.dmg)>=S.health.max;
   if(broken) _actOpts.forEach(function(o){ o.blocked='Broken — skill rolls fail; you can only talk or crawl to cover'; });
   var badges=(broken?'<span class="act-badge warn" title="All skill rolls fail automatically while Broken (p.67)">Broken</span>':'')+(ow?'<span class="act-badge" title="Fire your ranged weapon if anyone moves into the area">Overwatch</span>':'');
-  host.innerHTML='<div class="act-top"><div class="act-row1"><div class="act-econ"><span class="act-pip'+(a.used?' used':'')+'">Action</span></div>'
-    +'<button class="act-end" onclick="actEndTurn()" title="Reset this round\'s action">End Turn</button></div>'
+  host.innerHTML='<div class="act-top"><div class="act-row1"><div class="act-econ">'+(turnOn()?'<span class="act-pip'+(a.used?' used':'')+'">Action</span>':'<span class="turn-free">Free play — actions aren\'t tracked</span>')+'</div>'
+    +(turnOn()?'<button class="act-end" onclick="actEndTurn()" title="Reset this round\'s action">End Turn</button>':'')+turnModeBtn()+'</div>'
     +(badges?'<div class="act-row2"><div class="act-badges">'+badges+'</div></div>':'')+'</div>'
     +actSec('attacks','Attacks',O.attacks,'')
     +actSec('brawl','Brawl Actions',O.brawl,'');

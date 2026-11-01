@@ -1,5 +1,7 @@
 // Dragonbane character creation wizard (window.DBB).
-// Walks the core book's steps — kin (its innate abilities shown with it: they aren't a
+// First a Sources step: build from Core, Optional (Bestiary kin, Book of Magic schools,
+// spells, tricks and the Harmonist bard) and/or Homebrew options — every later list honours it.
+// Then the core book's steps — kin (its innate abilities shown with it: they aren't a
 // choice), profession (with its heroic ability: shown there, and an Artisan picks theirs
 // there), age, name, attributes, trained skills, gear, then one Details step for weakness,
 // memento and appearance, and a final Review — with a "choose or roll" control wherever the
@@ -26,24 +28,32 @@
   var ATTRS = ['STR', 'CON', 'AGL', 'INT', 'WIL', 'CHA'];
   // 'Heroic Ability' is a mage-only step (shown as "Magic"); everyone else's heroic ability
   // is shown, and chosen if there's a choice, on the Profession step.
-  var BASE_STEPS = ['Kin', 'Profession', 'Age', 'Name', 'Attributes', 'Trained Skills', 'Gear', 'Details', 'Review'];
-  var MAGE_STEPS = ['Kin', 'Profession', 'Age', 'Name', 'Attributes', 'Heroic Ability', 'Trained Skills', 'Gear', 'Details', 'Review'];
+  var BASE_STEPS = ['Sources', 'Kin', 'Profession', 'Age', 'Name', 'Attributes', 'Trained Skills', 'Gear', 'Details', 'Review'];
+  var MAGE_STEPS = ['Sources', 'Kin', 'Profession', 'Age', 'Name', 'Attributes', 'Heroic Ability', 'Trained Skills', 'Gear', 'Details', 'Review'];
   // a mage picks the school (Magic step) before skills: the school sets the profession skill list
   function steps() { return caster() ? MAGE_STEPS : BASE_STEPS; }
   // Casters: a Mage (any school a new mage may take), or a Bard who gives up Musician for
   // Harmonism (Book of Magic p.46: three rank 1 Harmonism spells, three Harmonism tricks, a grimoire).
   function harmonist() { var p = prof(); return !!(p && !p.mage && B.harmonist && bardSchools(p).length); }
   function caster() { var p = prof(); return !!(p && (p.mage || harmonist())); }
-  function bardSchools(p) { return A(((window.DB_MAGIC_RULES || {}).creationSchools || {})[p.name]); }
+  function bardSchools(p) { if (B && !B.src.optional) return []; return A(((window.DB_MAGIC_RULES || {}).creationSchools || {})[p.name]); }
   function schoolRec(n) { return A(window.DB_MAGIC_SCHOOLS).find(function (x) { return x.name === n; }) || null; }
+  function schoolOk(n) { var r = schoolRec(n); return !r || allow(r); }
   // the skill a caster must have trained from the start: the mage's school, or Performance for a harmonist
   function forcedSkill() { var p = prof(); return !p ? '' : p.mage ? B.school : harmonist() ? 'Performance' : ''; }
-  function kinRoll(x) { return B.kinSet === 'core' ? x.roll : x.roll20; }
   // Homebrew kin and professions (db-homebrew.js pushes them into DB_KIN / DB_PROFESSIONS, source
-  // 'Homebrew') have no table roll: they're picked, and listed with either kin set.
+  // 'Homebrew') have no table roll: they're picked.
   function isHb(x) { return !!x && x.source === 'Homebrew'; }
-  function coreOk(x) { return (x.source || 'core') === 'core' || isHb(x); }
-  function kinList() { return A(window.DB_KIN).filter(function (x) { return B.kinSet !== 'core' || coreOk(x); }); }
+  // Sources: 'core' (the core rules — a record without a source, or an expansion's revision of a
+  // core record, which keeps its corePage), 'optional' (Bestiary, Book of Magic, solo…) or 'homebrew'.
+  function srcOf(x) { if (!x) return 'core'; if (x.source === 'Homebrew') return 'homebrew'; return ((x.source || 'core') === 'core' || x.corePage != null || x.existing) ? 'core' : 'optional'; }
+  function allow(x) { return !!B.src[srcOf(x)]; }
+  function kinList() { return A(window.DB_KIN).filter(allow); }
+  function profs() { return A(window.DB_PROFESSIONS).filter(allow); }
+  var SRC = [
+    { k: 'core', title: 'Core', tx: 'The core rulebook: its six kin, ten professions, the three core schools of magic and their spells and tricks, and the weakness, memento and appearance tables.' },
+    { k: 'optional', title: 'Optional', tx: 'The expansions: Bestiary kin, the Book of Magic\'s schools, spells and tricks, and the Harmonist bard.' },
+    { k: 'homebrew', title: 'Homebrew', tx: 'Your own kin, professions, spells and more from the Homebrew pages.' }];
   function pickOf(list) { list = A(list).filter(Boolean); return list.length ? list[Math.floor(Math.random() * list.length)] : ''; }
   function last() { return steps().length - 1; }
   // School summaries, titles and starting skills come from DB_MAGIC_SCHOOLS (Book of Magic).
@@ -55,7 +65,7 @@
 
   function fresh() { return { kin: '', prof: '', age: '', name: '', nick: '', attrs: {}, method: 'roll', order: 'order', pool: null, assign: [0, 1, 2, 3, 4, 5], swap: [], swapped: false,
     profSkills: [], freeSkills: [], school: '', ability: '', spells: [], tricks: [], kit: -1, kitChoice: {}, food: null, silver: null, foodTxt: '', silverTxt: '',
-    weakness: '', memento: '', appearance: '', kinSet: 'all', harmonist: '', tools: '' }; }
+    weakness: '', memento: '', appearance: '', harmonist: '', tools: '', src: { core: true, optional: true, homebrew: true } }; }
   function kin() { return A(window.DB_KIN).find(function (k) { return k.name === B.kin; }) || null; }
   function prof() { return A(window.DB_PROFESSIONS).find(function (p) { return p.name === B.prof; }) || null; }
   function age() { return A(T().ages).find(function (a) { return a.id === B.age; }) || null; }
@@ -84,7 +94,8 @@
   function valid(i) {
     var p = prof();
     switch (steps()[i]) {
-      case 'Kin': return !!kin(); case 'Profession': return !!p && (p.mage || !p.heroicChoice || !!B.ability); case 'Age': return !!age();
+      case 'Sources': return !!(B.src.core || B.src.optional || B.src.homebrew);
+      case 'Kin': return !!kin() && allow(kin()); case 'Profession': return !!p && (p.mage || !p.heroicChoice || !!B.ability); case 'Age': return !!age();
       case 'Name': return !!String(B.name).trim();
       case 'Attributes': return ATTRS.every(function (a) { return B.attrs[a] != null; });
       case 'Trained Skills': if (!p) return false; var fs = forcedSkill(); return (!p.mage || !!B.school) && B.profSkills.length === nProf() && B.freeSkills.length === nFree() && (!fs || B.profSkills.indexOf(fs) >= 0) && enchantOk();
@@ -116,8 +127,9 @@
 
   // Big choices (kin, profession, age): rounded cards with a meta line and the table roll.
   function rng(r) { return Array.isArray(r) ? (r[0] === r[1] ? String(r[0]) : r[0] + '–' + r[1]) : String(r == null ? '' : r); }
+  // (the table rolls aren't shown on the cards: the Roll button does the rolling)
   function picks(items) { return '<div class="bd-picks">' + items.map(function (it) {
-    return '<button class="bd-pick' + (it.on ? ' sel' : '') + '" aria-pressed="' + !!it.on + '" onclick="' + it.act + '"><span class="bd-pick-hd"><b>' + esc(it.name) + '</b>' + (it.roll ? '<span class="bd-pick-roll">' + esc(it.roll) + '</span>' : '') + '</span>' + (it.meta ? '<span class="bd-pick-meta">' + esc(it.meta) + '</span>' : '') + '</button>'; }).join('') + '</div>'; }
+    return '<button class="bd-pick' + (it.on ? ' sel' : '') + '" aria-pressed="' + !!it.on + '" onclick="' + it.act + '"><span class="bd-pick-hd"><b>' + esc(it.name) + '</b></span>' + (it.meta ? '<span class="bd-pick-meta">' + esc(it.meta) + '</span>' : '') + '</button>'; }).join('') + '</div>'; }
   function modsTxt(a) { return Object.keys(a.mods || {}).map(function (m) { return m + ' ' + (a.mods[m] > 0 ? '+' : '') + a.mods[m]; }); }
   function abilDef(n) { return SH() ? SH().abilityDef(n) : null; }
   // the profession's heroic ability with its rules text; a choice (Artisan) is picked here
@@ -139,20 +151,23 @@
   function page() {
     var h = '', k = kin(), p = prof(), a = age();
     switch (steps()[step]) {
+      case 'Sources': return sourcesPage();
       case 'Kin':
-        h += sub(rollBtn(B.kinSet === 'core' ? 'Roll D12' : 'Roll D20', 'DBB.rollKin()') + chip('All kin <small>(Bestiary, D20)</small>', B.kinSet !== 'core', "DBB.set('kinSet','all')") + chip('Core kin only <small>(D12)</small>', B.kinSet === 'core', "DBB.set('kinSet','core')"));
-        h += picks(kinList().map(function (x) { return { name: x.name, on: B.kin === x.name, act: "DBB.set('kin','" + jsq(x.name) + "')", roll: rng(kinRoll(x)), meta: 'Movement ' + x.movement + ' · ' + A(x.abilities).map(function (y) { return y.name; }).join(', ') + (x.source === 'bestiary' ? ' · Bestiary' : isHb(x) ? ' · Homebrew' : '') }; }));
+        if (!kinList().length) return emptyFor('kin');
+        h += sub(rollBtn(B.src.core ? (B.src.optional ? 'Roll D20' : 'Roll D12') : 'Roll', 'DBB.rollKin()'));
+        h += picks(kinList().map(function (x) { return { name: x.name, on: B.kin === x.name, act: "DBB.set('kin','" + jsq(x.name) + "')", meta: 'Movement ' + x.movement + ' · ' + A(x.abilities).map(function (y) { return y.name; }).join(', ') + (x.source === 'bestiary' ? ' · Bestiary' : isHb(x) ? ' · Homebrew' : '') }; }));
         if (k) { h += box('<b>' + esc(k.name) + '</b> — ' + esc(k.text) + '<br>Movement <b>' + k.movement + '</b>.' + (k.source === 'bestiary' ? ' <small>(Bestiary p.' + k.page + ' — playable if your group agrees)</small>' : isHb(k) ? ' <small>(homebrew)</small>' : '') + (A(k.traits).length ? '<br>Traits: ' + A(k.traits).map(esc).join(', ') + '.' : ''));
           h += '<div class="m-lbl">Innate abilit' + (A(k.abilities).length > 1 ? 'ies' : 'y') + '</div>' + A(k.abilities).map(function (x) { return box('<b>' + esc(x.name) + '</b>' + (x.wp === 'varies' ? ' · ' + esc(x.wpNote || 'WP varies') : x.wp ? ' · ' + x.wp + ' WP' : '') + '<br>' + esc(x.text)); }).join('');
           if (k.pcNotes) h += '<div class="m-lbl">As a player character</div>' + box(esc(k.pcNotes)); }
         return h;
       case 'Profession':
-        h += sub(rollBtn('Roll D10', 'DBB.rollProf()')) + picks(A(window.DB_PROFESSIONS).map(function (x) { var hs = A(x.heroicAbilities);
-          return { name: x.name, on: B.prof === x.name, act: "DBB.set('prof','" + jsq(x.name) + "')", roll: rng(x.roll), meta: 'Key ' + x.keyAttribute + ' · ' + (x.mage ? 'school of magic' : x.heroicChoice ? 'choice of ' + hs.length + ' abilities' : hs.join(', ') + (bardSchools(x).length ? ' or Harmonism' : '')) + (isHb(x) ? ' · Homebrew' : '') }; }));
+        if (!profs().length) return emptyFor('professions');
+        h += sub(rollBtn(B.src.core ? 'Roll D10' : 'Roll', 'DBB.rollProf()')) + picks(profs().map(function (x) { var hs = A(x.heroicAbilities);
+          return { name: x.name, on: B.prof === x.name, act: "DBB.set('prof','" + jsq(x.name) + "')", meta: 'Key ' + x.keyAttribute + ' · ' + (x.mage ? 'school of magic' : x.heroicChoice ? 'choice of ' + hs.length + ' abilities' : hs.join(', ') + (bardSchools(x).length ? ' or Harmonism' : '')) + (isHb(x) ? ' · Homebrew' : '') }; }));
         if (p) { h += box('<b>' + esc(p.name) + '</b> — ' + esc(p.text) + '<br>Key attribute <b>' + p.keyAttribute + '</b>.'); h += profAbilities(p); }
         return h;
       case 'Age':
-        h += sub(rollBtn('Roll D6', 'DBB.rollAge()')) + picks(A(T().ages).map(function (x) { var m = modsTxt(x); return { name: x.name, on: B.age === x.id, act: "DBB.set('age','" + x.id + "')", roll: rng(x.roll), meta: x.trainedSkills + ' trained skills' + (m.length ? ' · ' + m.join(', ') : '') }; }));
+        h += sub(rollBtn('Roll D6', 'DBB.rollAge()')) + picks(A(T().ages).map(function (x) { var m = modsTxt(x); return { name: x.name, on: B.age === x.id, act: "DBB.set('age','" + x.id + "')", meta: x.trainedSkills + ' trained skills' + (m.length ? ' · ' + m.join(', ') : '') }; }));
         if (a) { var mods = modsTxt(a); h += box('<b>' + esc(a.name) + '</b> — ' + a.trainedSkills + ' trained skills (' + a.professionSkills + ' from your profession + ' + a.freeSkills + ' of your choice)' + (mods.length ? '<br>Attributes: ' + mods.join(', ') + ' (never above 18).' : '<br>No attribute changes.')); }
         return h;
       case 'Name':
@@ -177,14 +192,31 @@
     { k: 'weakness', label: 'Weakness', list: function () { return window.DB_WEAKNESSES; }, val: function (r) { return r.name + ' — ' + r.text; }, none: 'None' },
     { k: 'memento', label: 'Memento', list: function () { return window.DB_MEMENTOS; }, val: function (r) { return r.text; }, none: 'None' },
     { k: 'appearance', label: 'Appearance', list: function () { return window.DB_APPEARANCES; }, val: function (r) { return r.text; }, none: 'Choose…' }];
+  // Each table is a dropdown (None, Write your own…, then the table's entries) with a Roll
+  // button; the text box appears only for "Write your own".
   function detailsPage() {
-    return '<p class="m-hint" style="margin-bottom:4px;">Pick from each D20 table, roll for it, or write your own. A weakness and a memento are optional.</p>' + DETAILS.map(function (t) { var cur = B[t.k], rows = A(t.list()), match = false;
-      var opts = rows.map(function (r) { var v = t.val(r), on = v === cur; if (on) match = true; return '<option value="' + esc(v) + '"' + (on ? ' selected' : '') + '>' + r.roll + '. ' + esc(v) + '</option>'; }).join('');
-      var head = '<option value=""' + (!cur ? ' selected' : '') + '>— ' + esc(t.none) + ' —</option>' + (cur && !match ? '<option value="' + esc(cur) + '" selected>Your own: ' + esc(cur) + '</option>' : '');
-      return '<div class="bd-detail">' + lblRoll(t.label, rollBtn('Roll D20', "DBB.rollTable('" + t.k + "')")) +
-        '<select class="m-input bd-select" onchange="DBB.set(\'' + t.k + '\',this.value)">' + head + opts + '</select>' +
-        '<input class="m-input" style="margin-top:6px;" placeholder="Or write your own" value="' + esc(cur) + '" onchange="DBB.set(\'' + t.k + '\',this.value)" oninput="DBB.setq(\'' + t.k + '\',this.value)"></div>'; }).join('');
+    return '<p class="m-hint" style="margin-bottom:4px;">Pick from each D20 table, roll for it, or write your own. A weakness and a memento are optional.</p>' + DETAILS.map(function (t) { var cur = B[t.k], rows = A(t.list()).filter(allow);
+      var match = rows.some(function (r) { return t.val(r) === cur; }), own = !!B[t.k + 'Own'] || (!!cur && !match);
+      var opts = '<option value=""' + (!cur && !own ? ' selected' : '') + '>— ' + esc(t.none) + ' —</option><option value="__own"' + (own ? ' selected' : '') + '>Write your own…</option>' +
+        rows.map(function (r) { var v = t.val(r); return '<option value="' + esc(v) + '"' + (!own && v === cur ? ' selected' : '') + '>' + esc(v) + '</option>'; }).join('');
+      return '<div class="bd-detail">' + lblRoll(t.label, rows.length ? rollBtn('Roll D20', "DBB.rollTable('" + t.k + "')") : '') +
+        '<select class="m-input bd-select" onchange="DBB.detail(\'' + t.k + '\',this.value)">' + opts + '</select>' +
+        (own ? '<input class="m-input" id="bd-own-' + t.k + '" style="margin-top:6px;" placeholder="Write your own ' + esc(t.label.toLowerCase()) + '" value="' + esc(cur) + '" oninput="DBB.setq(\'' + t.k + '\',this.value)">' : '') + '</div>'; }).join('');
   }
+  // The Sources step: three toggles, at least one on. Counts show what each brings.
+  function sourcesPage() {
+    var count = function (k, list) { return A(list).filter(function (x) { return srcOf(x) === k; }).length; };
+    var h = '<p class="m-hint" style="margin-bottom:8px;">Choose what this character may be built from. Every later step only offers options from these. The book\'s age, attribute and gear rules always apply.</p><div class="bd-abils">';
+    h += SRC.map(function (s) { var on = !!B.src[s.k];
+      var bits = [['kin', count(s.k, window.DB_KIN)], ['professions', count(s.k, window.DB_PROFESSIONS)], ['spells', count(s.k, window.DB_SPELLS)], ['magic tricks', count(s.k, window.DB_MAGIC_TRICKS)]].filter(function (b) { return b[1]; }).map(function (b) { return b[1] + ' ' + b[0]; });
+      return '<button class="bd-abil' + (on ? ' sel' : '') + '" aria-pressed="' + on + '" onclick="DBB.src(\'' + s.k + '\')"><span class="bd-pick-hd"><b>' + esc(s.title) + '</b><span class="bd-pick-roll">' + (on ? '✓ Included' : 'Off') + '</span></span><span class="bd-abil-tx">' + esc(s.tx) + '</span>' +
+        '<span class="bd-pick-meta">' + (bits.length ? esc(bits.join(' · ')) : (s.k === 'homebrew' ? 'Nothing yet — make some on the Homebrew pages.' : '')) + '</span></button>'; }).join('');
+    h += '</div>';
+    if (!(B.src.core || B.src.optional || B.src.homebrew)) h += '<div class="res-box bd-todo">Choose at least one.</div>';
+    else if (!B.src.core) h += '<div class="res-box">Without Core you\'ll only see ' + (B.src.optional && B.src.homebrew ? 'optional and homebrew' : B.src.optional ? 'optional' : 'homebrew') + ' kin and professions — make sure there are some.</div>';
+    return h;
+  }
+  function emptyFor(what) { return '<div class="res-box bd-todo">No ' + esc(what) + ' in your chosen sources. <a href="#" style="color:#5cb894;" onclick="DBB.go(0);return false;">Change sources</a></div>'; }
   function rangeVal(t, v) { return A(t).find(function (x) { return v >= x.min && v <= x.max; }) || null; }
   // The whole character on one page, each part with a link back to its step.
   function reviewPage() {
@@ -247,7 +279,7 @@
     if (B.school === 'Enchanting') h += '<div class="res-box' + (enchantOk() ? '' : ' bd-todo') + '" style="margin-top:0;margin-bottom:8px;">Enchanting needs <b>Crafting 12</b> or higher, also for a new character' + (enchantOk() ? ' ✓' : ' — train Crafting (as a profession or free skill) with STR 13 or more') + '.</div>';
     h += '<div class="m-lbl">1 · Profession skills — choose ' + np + ' of ' + list.length + ' <span class="bd-count' + (profDone ? ' ok' : '') + '">' + B.profSkills.length + '/' + np + '</span></div><div class="m-row">' + list.map(function (s) { var on = B.profSkills.indexOf(s) >= 0; var forced = !!fsk && s === fsk;
       return chip(esc(s) + ' <small>' + lvl(s) + '</small>', on, forced ? '' : "DBB.toggleSkill('prof','" + jsq(s) + "')", forced || (!on && profDone), forced ? (p.mage ? 'Your school is always trained' : 'Harmonism is cast with Performance') : ''); }).join('') + '</div>';
-    var all = A(window.DB_SKILLS).filter(function (s) { return s.type !== 'secondary'; });
+    var all = A(window.DB_SKILLS).filter(function (s) { return s.type !== 'secondary' && (allow(s) || B.profSkills.indexOf(s.name) >= 0); });
     h += '<div class="m-lbl">2 · Free choice — ' + nf + ' more of any skill <span class="bd-count' + (B.freeSkills.length >= nf ? ' ok' : '') + '">' + B.freeSkills.length + '/' + nf + '</span></div>';
     if (!profDone) h += '<p class="m-hint" style="margin:-2px 0 6px;">Choose your ' + np + ' profession skills first.</p>';
     h += '<div class="m-row' + (profDone ? '' : ' bd-locked') + '">' + all.map(function (s) { var taken = B.profSkills.indexOf(s.name) >= 0, on = B.freeSkills.indexOf(s.name) >= 0;
@@ -261,6 +293,7 @@
   function schoolCards(p) {
     // a homebrew caster profession offers only its own school(s)
     var R = window.DB_MAGIC_RULES || {}, schools = isHb(p) && Object.keys(p.schoolSkills || {}).length ? Object.keys(p.schoolSkills) : A((R.creationSchools || {}).Mage).length ? R.creationSchools.Mage : A(R.schools).length ? R.schools : Object.keys(p.schoolSkills || {});
+    if (!isHb(p)) schools = schools.filter(schoolOk);
     return '<div class="m-lbl">School of magic</div><div class="bd-schools">' + schools.map(function (s) { var on = B.school === s;
       var sk = A(window.DB_SKILLS).find(function (x) { return x.name === s; });
       var rec = schoolRec(s) || {}, recipe = s === 'Alchemy';
@@ -284,8 +317,8 @@
       else h += schoolCards(p);
       if (!B.school) return h;
       var gen = hm ? [] : ['General'];
-      var sp = A(window.DB_SPELLS).filter(function (s) { return s.rank === 1 && (s.school === B.school || gen.indexOf(s.school) >= 0); });
-      var tr = A(window.DB_MAGIC_TRICKS).filter(function (s) { return s.school === B.school || gen.indexOf(s.school) >= 0; });
+      var sp = A(window.DB_SPELLS).filter(function (s) { return s.rank === 1 && (s.school === B.school || gen.indexOf(s.school) >= 0) && allow(s); });
+      var tr = A(window.DB_MAGIC_TRICKS).filter(function (s) { return (s.school === B.school || gen.indexOf(s.school) >= 0) && allow(s); });
       if (B.school === 'Enchanting') h += '<div class="m-lbl">Your tools</div><div class="m-row">' + ENCH_TOOLS.map(function (t) { return chip(esc(t), B.tools === t, "DBB.set('tools','" + jsq(t) + "')"); }).join('') + '</div><p class="m-hint">Enchanting spells need the tools for the item: blacksmithing for metal, carpentry for wood, tanning for leather.</p>';
       if (B.school === 'Alchemy') h += '<p class="m-hint" style="margin-top:8px;">Alchemy\'s spells are <b>recipes</b>: you brew doses instead of casting. You start with a small field laboratory, D6 doses of general herbs and one dose of each recipe you choose.</p>';
       // the same rows as the sheet's spell picker (name, meta line, text, Learn button)
@@ -306,10 +339,10 @@
   var KIT_NUM = ['I', 'II', 'III'];
   function kitRolls(n) { return n >= 3 ? ['1–2', '3–4', '5–6'] : n === 2 ? ['1–3', '4–6'] : ['1–6']; }
   function gearPage() {
-    var p = prof(), h = sub(rollBtn('Roll D6', 'DBB.rollKit()')), KIT_ROLL = kitRolls(A(p.kits).length);
+    var p = prof(), h = sub(rollBtn('Roll D6', 'DBB.rollKit()'));
     h += '<div class="bd-kits">' + A(p.kits).map(function (k, i) { var on = B.kit === i;
       return '<button class="bd-kit' + (on ? ' sel' : '') + '" aria-pressed="' + on + '" onclick="DBB.kit(' + i + ')">' +
-        '<span class="bd-kit-hd"><b>Kit ' + (KIT_NUM[i] || i + 1) + '</b><span class="bd-kit-roll">D6 · ' + (KIT_ROLL[i] || '') + '</span></span>' +
+        '<span class="bd-kit-hd"><b>Kit ' + (KIT_NUM[i] || i + 1) + '</b></span>' +
         '<span class="bd-kit-items">' + k.items.map(function (it, ix) { var t = it.choice ? it.choice.join(' or ') : (it.qty > 1 ? it.qty + '× ' : '') + it.name + (it.note ? ' (' + it.note + ')' : '');
           var picked = on && it.choice && B.kitChoice[ix];
           return '<span class="bd-kit-it' + (it.choice ? ' ch' : '') + '">' + esc(picked || t) + (it.choice ? ' <i>' + (picked ? 'chosen' : 'choose') + '</i>' : '') + '</span>'; }).join('') + '</span>' +
@@ -333,15 +366,37 @@
       if (k === 'harmonist') { var on = v === '1'; if (!!B.harmonist === on) return; B.harmonist = on ? '1' : ''; B.school = on ? 'Harmonism' : ''; B.spells = []; B.tricks = [];
         if (on) { if (B.profSkills.indexOf('Performance') < 0) { B.profSkills = ['Performance'].concat(B.profSkills).slice(0, nProf()); } B.freeSkills = B.freeSkills.filter(function (x) { return x !== 'Performance'; }); }
         render(); return; }
-      if (k === 'kinSet') { B.kinSet = v === 'core' ? 'core' : 'all'; if (B.kinSet === 'core' && kin() && !coreOk(kin())) B.kin = ''; render(); return; } if (k === 'prof' && B.prof !== v) { B.harmonist = ''; B.tools = ''; B.profSkills = []; B.freeSkills = []; B.school = ''; B.ability = ''; B.spells = []; B.tricks = []; B.kit = -1; B.kitChoice = {}; B.food = null; B.silver = null; }
+      if (k === 'prof' && B.prof !== v) { B.harmonist = ''; B.tools = ''; B.profSkills = []; B.freeSkills = []; B.school = ''; B.ability = ''; B.spells = []; B.tricks = []; B.kit = -1; B.kitChoice = {}; B.food = null; B.silver = null; }
       if (k === 'age' && B.age !== v) { B.freeSkills = B.freeSkills.slice(0, (A(T().ages).find(function (a) { return a.id === v; }) || {}).freeSkills || 4); }
       B[k] = String(v);
       // a homebrew caster profession with a single school: that school is the choice
       if (k === 'prof') { var hp = prof(), ks = hp && isHb(hp) && hp.mage ? Object.keys(hp.schoolSkills || {}) : []; if (ks.length === 1 && !B.school) { B.school = ks[0]; B.profSkills = [ks[0]]; } }
       if (step > last()) step = last(); render(); },
     setq: function (k, v) { B[k] = v; var ft = $('builder-ft'); if (ft) { var nb = ft.querySelector('.m-btn:last-child'); if (nb) nb.disabled = !(step === last() ? allValid() : valid(step)); } },
-    rollKin: function () { var core = B.kinSet === 'core', n = d(core ? 12 : 20); var k = kinList().find(function (x) { return inRoll(kinRoll(x), n); }); if (k) { api.set('kin', k.name); log('Kin', k.name, (core ? 'd12(' : 'd20(') + n + ')'); } },
-    rollProf: function () { var n = d(10); var p = A(window.DB_PROFESSIONS).find(function (x) { return x.roll === n; }); if (p) { api.set('prof', p.name); log('Profession', p.name, 'd10(' + n + ')'); } },
+    // Core + Optional: the Bestiary's D20 kin table; Core alone: the core D12 table; otherwise
+    // (homebrew / optional only) a random pick from what's listed.
+    rollKin: function () { var k = null, how = '';
+      if (B.src.core) { var big = B.src.optional, n = d(big ? 20 : 12); how = (big ? 'd20(' : 'd12(') + n + ')'; k = kinList().find(function (x) { return srcOf(x) !== 'homebrew' && inRoll(big ? x.roll20 : x.roll, n); }); }
+      else { k = pickOf(kinList()); how = 'random pick'; }
+      if (k) { api.set('kin', k.name); log('Kin', k.name, how); } },
+    rollProf: function () { var p = null, how = '';
+      if (B.src.core) { var n = d(10); how = 'd10(' + n + ')'; p = profs().find(function (x) { return srcOf(x) === 'core' && x.roll === n; }); }
+      else { p = pickOf(profs()); how = 'random pick'; }
+      if (p) { api.set('prof', p.name); log('Profession', p.name, how); } },
+    // Sources: toggle one, then drop any choice the new set no longer offers.
+    src: function (k) { if (!(k in B.src)) return; B.src[k] = !B.src[k];
+      if (B.kin && kin() && !allow(kin())) B.kin = '';
+      if (B.prof && prof() && !allow(prof())) api.set('prof', '');
+      if (B.harmonist && !B.src.optional) api.set('harmonist', '');
+      var p = prof();
+      if (B.school && p && !isHb(p) && !schoolOk(B.school)) { B.profSkills = B.profSkills.filter(function (x) { return x !== B.school; }); B.school = ''; B.spells = []; B.tricks = []; }
+      var okName = function (list) { return function (n) { var x = A(list).find(function (y) { return y.name === n; }); return !x || allow(x); }; };
+      B.spells = B.spells.filter(okName(window.DB_SPELLS)); B.tricks = B.tricks.filter(okName(window.DB_MAGIC_TRICKS)); B.freeSkills = B.freeSkills.filter(okName(window.DB_SKILLS));
+      render(); },
+    // Details dropdowns: a table entry, none, or "Write your own…" (which shows the text box)
+    detail: function (k, v) { var t = DETAILS.find(function (x) { return x.k === k; }); if (!t) return;
+      if (v === '__own') { var rows = A(t.list()); if (rows.some(function (r) { return t.val(r) === B[k]; })) B[k] = ''; B[k + 'Own'] = true; render(); var el = $('bd-own-' + k); if (el) el.focus(); return; }
+      B[k + 'Own'] = false; B[k] = String(v); render(); },
     rollAge: function () { var n = d(6); var a = A(T().ages).find(function (x) { return inRoll(x.roll, n); }); if (a) { api.set('age', a.id); log('Age', a.name, 'd6(' + n + ')'); } },
     // the book's D6 tables have six entries; a shorter homebrew list rolls among its own
     rollName: function () { var k = kin(); if (!k) return; var l = A(k.names); var v = l.length === 6 ? l[d(6) - 1] : pickOf(l); if (v) api.set('name', v); },
@@ -368,8 +423,8 @@
       else if (B.profSkills.length >= nProf() && B.profSkills.indexOf(n) < 0 && list.length < nFree()) list.push(n);
       render(); },
     toggleList: function (k, n) { n = String(n).replace(/&#39;/g, "'"); var l = B[k]; var i = l.indexOf(n); if (i >= 0) l.splice(i, 1); else if (l.length < 3) l.push(n); render(); },
-    rollTable: function (which) { var list = which === 'weakness' ? window.DB_WEAKNESSES : which === 'memento' ? window.DB_MEMENTOS : window.DB_APPEARANCES; var n = d(20);
-      var row = A(list).find(function (x) { return x.roll === n; }); if (!row) return; B[which] = which === 'weakness' ? row.name + ' — ' + row.text : row.text; log(which.charAt(0).toUpperCase() + which.slice(1), which === 'weakness' ? row.name : row.text, 'd20(' + n + ')'); render(); },
+    rollTable: function (which) { var list = A(which === 'weakness' ? window.DB_WEAKNESSES : which === 'memento' ? window.DB_MEMENTOS : window.DB_APPEARANCES).filter(allow); var n = d(20);
+      var row = list.length === 20 ? list.find(function (x) { return x.roll === n; }) : pickOf(list); if (!row) return; B[which + 'Own'] = false; B[which] = which === 'weakness' ? row.name + ' — ' + row.text : row.text; log(which.charAt(0).toUpperCase() + which.slice(1), which === 'weakness' ? row.name : row.text, 'd20(' + n + ')'); render(); },
     // three kits = 1–2 / 3–4 / 5–6 (the book); a homebrew profession may have one or two
     rollKit: function () { var len = Math.max(1, Math.min(3, A(prof() && prof().kits).length)), n = d(6), i = Math.floor((n - 1) * len / 6); api.kit(i); log('Starting gear', 'Kit ' + kitRolls(len)[i], 'd6(' + n + ')'); },
     kit: function (i) { if (B.kit !== i) { B.kit = i; B.kitChoice = {}; api.rollSupplies(true); } render(); },

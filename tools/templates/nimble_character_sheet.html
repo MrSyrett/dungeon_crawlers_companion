@@ -898,6 +898,9 @@ const D = {
 };
 let saveAdv = '', saveDis = '';
 let wounds = 0, actions = 3, advState = 0;
+// TURN-BASED MODE (Action tab switch, saved as turnBased; on unless turned off). Off = free play: actions aren't spent or counted.
+let _nimTB = true;
+function turnOn() { return _nimTB !== false; }
 let conditions = [];
 
 // ═══ LOOKUPS ══════════════════════════════════════════════════════════════
@@ -1004,7 +1007,7 @@ function renderWounds() {
   for(let i = 1; i <= max; i++) { const p = document.createElement('div'); p.className = 'pip wound' + (i <= wounds ? ' on' : ''); p.textContent = i; p.onclick = () => { wounds = i === wounds ? i - 1 : i; recalc(); scheduleAutosave(); }; wrap.appendChild(p); }
 }
 function renderActions() { if(typeof nimMaxActions === 'function' && actions > nimMaxActions()) actions = nimMaxActions(); if(typeof nimTurnMaybeRender === 'function') nimTurnMaybeRender(); const wrap = $('action-pips'); if(!wrap) return; wrap.innerHTML = '';   /* the Actions tile was retired — the Action tab is the tracker */ for(let i = 1; i <= 3; i++) { const p = document.createElement('div'); p.className = 'pip act' + (i > actions ? ' spent' : ''); p.textContent = i; p.onclick = () => { actions = i > actions ? i : i - 1; renderActions(); }; wrap.appendChild(p); } }
-function spendAction() { if(actions > 0) { actions -= 1; renderActions(); } }
+function spendAction() { if(!turnOn()) return; if(actions > 0) { actions -= 1; renderActions(); } }
 function resetActions() { actions = 3; renderActions(); }
 
 // ═══ CONDITIONS ═══ (clickable toggle badges under the skills list)
@@ -1656,7 +1659,7 @@ function collectSheet() {
     stats, saveAdv, saveDis, skillPts, skillTotals,
     hp: { cur: num(v('hp-cur')), max: num(v('hp-max')), temp: num(v('hp-temp')) }, wounds, woundsMax: num(v('wounds-max')),
     hitDice: { cur: num(v('hd-cur')), max: num(v('hd-max')) }, mana: { cur: num(v('mana-cur')), max: num(v('mana-max')) },
-    armor: v('f-armor'), shield: v('f-shield'), armorBonus: num(v('armor-bonus')), armorScore: armorValue(), initBonus: num(v('init-bonus')), speedBonus: num(v('speed-bonus')), size: v('f-size'), actions,
+    armor: v('f-armor'), shield: v('f-shield'), armorBonus: num(v('armor-bonus')), armorScore: armorValue(), initBonus: num(v('init-bonus')), speedBonus: num(v('speed-bonus')), size: v('f-size'), actions, turnBased: turnOn(),
     attacks: [...document.querySelectorAll('#attacks-body tr')].map(tr => ({ name: tr.querySelector('.atk-name').value, damage: tr.querySelector('.atk-dmg').value, props: tr.querySelector('.atk-props').value, link: tr.dataset.link || '', fixed: tr.dataset.fixed ? true : undefined })).filter(a => a.name || a.damage),
     picks: [...document.querySelectorAll('#picks-body tr')].map(tr => tr.dataset.pick),
     spells: [...document.querySelectorAll('#spells-body tr')].map(tr => ({ name: tr.querySelector('.sp-name').value, tier: num(tr.querySelector('.sp-tier').value), fromRid: tr.dataset.fromRid || undefined, from: tr.dataset.fromRid ? tr.dataset.from : undefined })).filter(s => s.name),
@@ -1677,7 +1680,7 @@ function applySheet(d) {
   wounds = d.wounds || 0; set('wounds-max', d.woundsMax || 6); if(d.woundsMax) $('wounds-max').dataset.manual = '1'; else delete $('wounds-max').dataset.manual;
   const hd = d.hitDice || {}; set('hd-cur', hd.cur ?? 1); set('hd-max', hd.max ?? 1); if(hd.max) $('hd-max').dataset.manual = '1'; else delete $('hd-max').dataset.manual;
   const mn = d.mana || {}; set('mana-cur', mn.cur || 0); set('mana-max', mn.max || 0); if(mn.max) $('mana-max').dataset.manual = '1'; else delete $('mana-max').dataset.manual;
-  set('f-armor', d.armor); set('f-shield', d.shield); set('armor-bonus', d.armorBonus || 0); set('init-bonus', d.initBonus || 0); set('speed-bonus', d.speedBonus || 0); set('f-size', d.size || 'Medium'); actions = typeof d.actions === 'number' ? d.actions : 3;
+  set('f-armor', d.armor); set('f-shield', d.shield); set('armor-bonus', d.armorBonus || 0); set('init-bonus', d.initBonus || 0); set('speed-bonus', d.speedBonus || 0); set('f-size', d.size || 'Medium'); actions = typeof d.actions === 'number' ? d.actions : 3; _nimTB = d.turnBased !== false;
   $('attacks-body').innerHTML = ''; (d.attacks || []).forEach(addAttackRow); ensureUnarmed();
   fillPoolPick(); $('picks-body').innerHTML = ''; (d.picks || []).forEach(p => addPick(p));
   $('spells-body').innerHTML = ''; (d.spells || []).forEach(addSpellRow);
@@ -2014,13 +2017,15 @@ function nimDyingSave(){
 function nimMaxActions(){ return nimDying() ? 1 : 3; }
 function nimSpellCost(sp){ if(!sp || !sp.actions) return { n: 1, timed: '' }; const m = /(\d+)\s*Actions?/i.exec(sp.actions); if(m) return { n: +m[1], timed: '' }; const t = /Casting Time:\s*([^.;]+)/i.exec(sp.actions); return { n: 0, timed: t ? t[1].trim() : sp.actions }; }
 function nimAfter(){ renderActions(); renderNimTurn(); if(typeof scheduleAutosave === 'function') scheduleAutosave(); }
-function nimSpend(n){ actions = Math.max(0, actions - n); }
+function nimSpend(n){ if(!turnOn()) return; actions = Math.max(0, actions - n); }
+function toggleTurnMode(){ _nimTB = !turnOn(); actions = nimMaxActions(); _nturn.attacks = 0; _nturn.moves = 0; _nturn.reacted = {}; addLog('Turn-based mode', turnOn() ? 'On' : 'Off', turnOn() ? 'Actions are tracked per turn' : 'Free play — actions aren\'t tracked', 'normal'); nimAfter(); }
+function turnModeBtn(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: 3 actions per turn, End Turn recharges them. Click for free play.' : 'Free play: actions aren\'t tracked. Click to count actions per turn (combat).') + '"><span class="tm-sw"></span>Turn-based</button>'; }
 
 function nimBuild(){
   const O = { attacks: [], spells: [], equip: [], reactions: [], actions: [], checks: [] };
   _nturnOpts = [];
   const add = (sec, o) => { o.i = _nturnOpts.length; _nturnOpts.push(o); O[sec].push(o); };
-  const rushed = _nturn.attacks;   // dis count for the NEXT attack this turn
+  const rushed = turnOn() ? _nturn.attacks : 0;   // dis count for the NEXT attack this turn (none in free play)
   // Attacks (rows from the Attacks tab — management stays there)
   document.querySelectorAll('#attacks-body tr').forEach(tr => {
     const name = (tr.querySelector('.atk-name') || {}).value || ''; const dmg = (tr.querySelector('.atk-dmg') || {}).value || '';
@@ -2031,7 +2036,7 @@ function nimBuild(){
       btn: 'Attack', run: () => {
         nimNetDis(rushed);
         rollAttack(name, dmg, { vicious: /vicious/i.test(props), item: atkItemBonus(tr) });   // spends 1 action
-        _nturn.attacks += 1; nimDyingSave(); return true; } });
+        if(turnOn()) _nturn.attacks += 1; nimDyingSave(); return true; } });
   });
   // Spells (rows from the Spells tab)
   const mana = num($('mana-cur').value);
@@ -2042,17 +2047,17 @@ function nimBuild(){
     const c = nimSpellCost(sp);
     const dm = sp ? /Damage:\s*([^.]+)/i.exec(sp.text) : null;
     const rng = sp ? /Range:\s*([^.]+)|Reach:\s*([^.]+)/i.exec(sp.text) : null;
-    const blocked = c.timed ? 'Casting time ' + c.timed : (tier > mana ? 'Not enough mana' : '');
+    const blocked = c.timed && turnOn() ? 'Casting time ' + c.timed : (tier > mana ? 'Not enough mana' : '');
     const harmful = !!(dm && (parseDamage(dm[1]) || /^\s*d([468])\1\b/i.test(dm[1])));   // a harmful spell is an attack → Rushed
     add('spells', { name: name, cost: c.timed ? 99 : c.n,
-      sub: [c.timed ? '' : c.n + ' action' + (c.n === 1 ? '' : 's'), tier ? tier + ' mana' : 'Cantrip', dm ? dm[1].trim() : '', rng ? 'Range ' + (rng[1] || rng[2]).trim() : '', harmful && rushed ? 'Rushed: disadvantage ×' + rushed : ''].filter(Boolean).join(' · '),
+      sub: [c.timed ? (turnOn() ? '' : 'Casting time ' + c.timed) : c.n + ' action' + (c.n === 1 ? '' : 's'), tier ? tier + ' mana' : 'Cantrip', dm ? dm[1].trim() : '', rng ? 'Range ' + (rng[1] || rng[2]).trim() : '', harmful && rushed ? 'Rushed: disadvantage ×' + rushed : ''].filter(Boolean).join(' · '),
       blocked: blocked, btn: 'Cast', run: () => {
-        const before = actions, adv0 = advState, n0 = $('adv-n').value;
+        const before = actions, m0 = num($('mana-cur').value), adv0 = advState, n0 = $('adv-n').value;
         if(harmful) nimNetDis(rushed);
         castSpell(tr.querySelector('button.small-btn'));   // spends mana + 1 action (or aborts)
-        if(actions === before) { advState = 0; $('adv-n').value = n0; if(adv0) setAdv(adv0); else clearAdv(); return false; }
+        if(turnOn() ? actions === before : (tier > 0 && num($('mana-cur').value) === m0)) { advState = 0; $('adv-n').value = n0; if(adv0) setAdv(adv0); else clearAdv(); return false; }
         if(c.n > 1) nimSpend(c.n - 1);
-        if(harmful) _nturn.attacks += 1;
+        if(harmful && turnOn()) _nturn.attacks += 1;
         nimDyingSave();
         return true; } });
   });
@@ -2063,7 +2068,7 @@ function nimBuild(){
   const melee = [...document.querySelectorAll('#attacks-body tr')].filter(atkRowReady).map(tr => ({ item: atkItemBonus(tr), name: (tr.querySelector('.atk-name') || {}).value || '', dmg: (tr.querySelector('.atk-dmg') || {}).value || '', props: (tr.querySelector('.atk-props') || {}).value || '' }))
     .filter(a => a.name.trim() && !/\brange|ranged|bow|crossbow|sling|ballista/i.test(a.props + ' ' + a.name));   // Thrown melee weapons (Dagger, Hand Axe) still count as melee
   const oaw = melee.find(a => !/unarmed/i.test(a.name)) || melee[0];   // prefer a real melee weapon
-  const R = (key, name, sub, run, extra) => add('reactions', Object.assign({ name: name, cost: 1, react: key, sub: sub, btn: 'Use', blocked: _nturn.reacted[key] ? 'Used this round' : '', run: () => { const ok = run(); if(ok !== false) { nimSpend(1); _nturn.reacted[key] = true; } return ok !== false; } }, extra || {}));
+  const R = (key, name, sub, run, extra) => add('reactions', Object.assign({ name: name, cost: 1, react: key, sub: sub, btn: 'Use', blocked: turnOn() && _nturn.reacted[key] ? 'Used this round' : '', run: () => { const ok = run(); if(ok !== false) { nimSpend(1); if(turnOn()) _nturn.reacted[key] = true; } return ok !== false; } }, extra || {}));
   R('defend', 'Defend', 'Reduce one attack\'s damage by your Armor (' + armor + ')', () => { addLog('Defend', '−' + armor + ' dmg', 'Reaction · reduce the attack\'s damage by Armor ' + armor, 'normal'); });
   R('interpose', 'Interpose', 'Swap into the space of a creature within 2 spaces and become the target', () => { addLog('Interpose', '↔', 'Reaction · swapped in to become the target', 'normal'); });
   R('oa', 'Opportunity Attack', oaw ? oaw.name + ' · ' + oaw.dmg + ' · melee, with disadvantage' : 'Needs a melee weapon on the Attacks tab', () => {
@@ -2071,15 +2076,15 @@ function nimBuild(){
     nimNetDis(1);
     const before = actions; rollAttack(oaw.name + ' (opportunity)', oaw.dmg, { vicious: /vicious/i.test(oaw.props), item: oaw.item }); if(actions < before) actions = before;   // the reaction pays its own action
     nimDyingSave();
-  }, { btn: 'Attack', blocked: _nturn.reacted.oa ? 'Used this round' : (oaw ? '' : 'No melee weapon') });
+  }, { btn: 'Attack', blocked: turnOn() && _nturn.reacted.oa ? 'Used this round' : (oaw ? '' : 'No melee weapon') });
   R('help', 'Help', 'Give an ally advantage on a roll (explain how; one Help per roll)', () => { addLog('Help', 'Advantage', 'Reaction · an ally gains advantage on their roll', 'normal'); });
   // Actions
   const speed = (typeof speedValue === 'function') ? speedValue() : 6;
-  const used = _nturn.assessed || [];
+  const used = turnOn() ? (_nturn.assessed || []) : [];   // free play: Assess isn't limited per encounter
   add('actions', { name: 'Assess', cost: 1, sub: 'DC 12 skill check — ask a question, create an opening, or anticipate danger' + (used.length ? ' · used this encounter: ' + used.join(', ') : ''), assess: true, btn: 'Roll', blocked: SKILLS.every(([n]) => used.includes(n)) ? 'Every skill used this encounter' : '', run: (skill) => {
     const sk = SKILLS.find(x => x[0] === skill) || SKILLS.find(x => x[0] === 'Perception');
     if(used.includes(sk[0])) { addLog('Assess', '✗', sk[0] + ' already used to Assess this encounter (foes adapt)', 'normal'); return false; }
-    nimSpend(1); (_nturn.assessed = used).push(sk[0]);
+    nimSpend(1); if(turnOn()) (_nturn.assessed = used).push(sk[0]);
     d20Check('Assess · ' + sk[0], skillTotal(sk[0], sk[1]), { dc: 12 }); return true; } });
   return O;
 }
@@ -2126,7 +2131,7 @@ function nimEqOf(tr){
     o.kind = 'scroll'; o.consume = true; o.spell = nimEqSpell(row, it);
     const known = o.spell && nimKnownSchools()[norm(o.spell.school || '')];
     o.check = known ? 0 : 10;
-    const c = nimSpellCost(o.spell); o.cost = o.spell ? c.n : 1; if(o.spell && c.timed) o.blocked = 'Casting time ' + c.timed;
+    const c = nimSpellCost(o.spell); o.cost = o.spell ? c.n : 1; if(o.spell && c.timed && turnOn()) o.blocked = 'Casting time ' + c.timed;
     o.sub = (o.spell ? o.spell.name + ' · ' + o.cost + ' action' + (o.cost === 1 ? '' : 's') : 'Name the spell in the note') + ' · no mana' + (o.check ? ' · DC 10 Arcana first' : '') + ' · used up';
   }
   else if(cat === 'Wand' || /^wand\b/i.test(base)) {
@@ -2134,7 +2139,7 @@ function nimEqOf(tr){
     const tierM = /Tier\s*(\d)/i.exec(base + ' ' + ((it && it.properties) || '')), tier = o.spell ? num(o.spell.tier) : tierM ? +tierM[1] : 0;
     const prof = /wands?/i.test((cls() || {}).weapons || '');
     o.check = prof ? 0 : 10 + tier; o.charges = nimEqCharges(row, it);
-    const c = nimSpellCost(o.spell); o.cost = o.spell ? c.n : 1; if(o.spell && c.timed) o.blocked = 'Casting time ' + c.timed;
+    const c = nimSpellCost(o.spell); o.cost = o.spell ? c.n : 1; if(o.spell && c.timed && turnOn()) o.blocked = 'Casting time ' + c.timed;
     if(o.charges === 0) o.blocked = 'No charges left';
     o.sub = (o.spell ? o.spell.name + ' · ' + o.cost + ' action' + (o.cost === 1 ? '' : 's') : 'Name the spell in the note') + (o.charges != null ? ' · ' + o.charges + ' charge' + (o.charges === 1 ? '' : 's') : '') + (o.check ? ' · DC ' + o.check + ' Arcana (not proficient)' : '');
   }
@@ -2174,7 +2179,7 @@ function nimEqCast(o, rushed){
   const sp = o.spell, dm = /Damage:\s*([^.]+)/i.exec(sp.text), harmful = !!(dm && (parseDamage(dm[1]) || /^\s*d([468])\1\b/i.test(dm[1])));
   if(harmful) nimNetDis(rushed);
   const before = actions; spellEffect(sp.name + ' (' + (o.kind === 'wand' ? 'wand' : 'scroll') + ')', num(sp.tier), sp); actions = before;
-  if(harmful) { _nturn.attacks += 1; }
+  if(harmful && turnOn()) { _nturn.attacks += 1; }
   return harmful;
 }
 function nimUseItem(o, rushed){
@@ -2214,7 +2219,7 @@ function nimEquipOpts(add, rushed){
 function nimDo(i){
   const o = _nturnOpts[i]; if(!o) return;
   if(o.blocked) { addLog(o.name, '✗', o.blocked, 'normal'); return; }
-  if(actions < o.cost) { addLog(o.name, '✗', 'Not enough actions (' + o.cost + ' needed, ' + actions + ' left)', 'normal'); return; }
+  if(turnOn() && actions < o.cost) { addLog(o.name, '✗', 'Not enough actions (' + o.cost + ' needed, ' + actions + ' left)', 'normal'); return; }
   let arg; if(o.assess) { const sel = document.getElementById('nim-assess-skill'); arg = sel ? sel.value : 'Perception'; }
   let ok; _nimFromTab = true; try { ok = o.run(arg); } finally { _nimFromTab = false; }
   nimAfter();
@@ -2235,18 +2240,20 @@ function renderNimTurn(){
   let pips = ''; for(let k = 1; k <= 3; k++) pips += '<span class="nturn-pip' + (k > actions ? ' used' : '') + (k > max ? ' locked' : '') + '">Action ' + k + '</span>';
   const mana = num($('mana-cur').value), manaMax = num($('mana-max').value);
   const badges = (nimDying() ? '<span class="nturn-badge warn" title="Dying: actions are limited to 1">Dying · 1 action</span>' : '')
-    + (_nturn.attacks ? '<span class="nturn-badge" title="Rushed Attacks: each attack after the first this turn has cumulative disadvantage">Rushed · next attack dis ×' + _nturn.attacks + '</span>' : '');
+    + (turnOn() && _nturn.attacks ? '<span class="nturn-badge" title="Rushed Attacks: each attack after the first this turn has cumulative disadvantage">Rushed · next attack dis ×' + _nturn.attacks + '</span>' : '');
   const card = o => {
-    const can = !o.blocked && actions >= o.cost;
+    const can = !o.blocked && (!turnOn() || actions >= o.cost);
     const sub = [o.blocked, o.sub].filter(Boolean).join(' · ');
-    const usedA = _nturn.assessed || [], firstA = (SKILLS.find(([n]) => n === 'Perception' && !usedA.includes(n)) || SKILLS.find(([n]) => !usedA.includes(n)) || ['Perception'])[0];
+    const usedA = turnOn() ? (_nturn.assessed || []) : [], firstA = (SKILLS.find(([n]) => n === 'Perception' && !usedA.includes(n)) || SKILLS.find(([n]) => !usedA.includes(n)) || ['Perception'])[0];
     const assess = o.assess ? '<select id="nim-assess-skill" class="nturn-sel" data-nolock onclick="event.stopPropagation()">' + SKILLS.map(([n]) => '<option' + (n === firstA ? ' selected' : '') + (usedA.includes(n) ? ' disabled' : '') + '>' + n + '</option>').join('') + '</select>' : '';
     return '<div class="nturn-card' + (can ? '' : ' disabled') + '"><div class="nc-main"><div class="nc-name">' + nimEsc(o.name) + '</div>' + (sub ? '<div class="nc-sub">' + nimEsc(sub) + '</div>' : '') + '</div>' + assess + '<button class="nc-do" onclick="nimDo(' + o.i + ')">' + nimEsc(o.btn) + '</button></div>';
   };
   const sec = (k, title, list, empty) => '<div class="nturn-sec' + (_nturnCollapsed[k] ? ' collapsed' : '') + '"><div class="nturn-sec-hd" onclick="nimToggleSec(\'' + k + '\')"><span class="nc-caret">▼</span><span class="nc-title">' + title + '</span></div><div class="nturn-sec-body">' + (list.length ? list.map(card).join('') : '<div class="nturn-empty">' + empty + '</div>') + '</div></div>';
   host.innerHTML =
-    '<div class="nturn-top"><div class="nturn-row1"><div class="nturn-econ">' + pips + '</div>'
-    + '<button class="nturn-end" onclick="nimEndTurn()" title="All actions recharge at the end of your turn">End Turn</button></div>'
+    '<div class="nturn-top"><div class="nturn-row1">'
+    + (turnOn() ? '<div class="nturn-econ">' + pips + '</div>'
+    + '<button class="nturn-end" onclick="nimEndTurn()" title="All actions recharge at the end of your turn">End Turn</button>' : '<span class="turn-free">Free play — actions aren\'t tracked</span>')
+    + turnModeBtn() + '</div>'
     + '<div class="nturn-row2">'
     + (manaMax || mana ? '<span class="nturn-stat"><span class="nl">Mana</span> <b>' + mana + '</b>/' + manaMax + '</span>' : '')
     + '<div class="nturn-badges">' + badges + '</div>'
@@ -2312,6 +2319,13 @@ function gtRoll(){
 .nturn-pip.locked{opacity:.35;}
 .nturn-end{flex:0 0 auto;background:var(--nim);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .nturn-end:hover{filter:brightness(1.1);}
+.turn-mode{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--nim-dk);white-space:nowrap;}
+.turn-mode .tm-sw{position:relative;width:34px;height:19px;border-radius:999px;border:1.5px solid var(--nim);background:transparent;flex:0 0 auto;transition:background .15s;}
+.turn-mode .tm-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--nim);transition:left .15s,background .15s;}
+.turn-mode.on .tm-sw{background:var(--nim);}
+.turn-mode.on .tm-sw::after{left:17px;background:#fff;}
+.turn-mode:focus-visible{outline:2px solid var(--nim);outline-offset:2px;border-radius:6px;}
+.turn-free{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 0;}
 .nturn-row2{display:flex;align-items:center;gap:12px;padding:0 10px 9px;flex-wrap:wrap;}
 .nturn-stat{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--muted);font-size:12px;white-space:nowrap;}
 .nturn-stat .nl{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
@@ -2346,6 +2360,8 @@ body.dark .nturn-badge.warn{color:#f0c060;}
   .nturn-row1 .nturn-econ{flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-start;gap:4px;}
   .nturn-row1 .nturn-econ > *{padding:3px 8px;font-size:11px;white-space:nowrap;flex:0 1 auto;min-width:0;}
   .nturn-row1{flex-wrap:nowrap;justify-content:space-between;align-items:center;gap:6px;}
+  .nturn-row1:has(.turn-mode){flex-wrap:wrap;}
+  .nturn-row1 .nturn-econ:has(+ .nturn-end){flex-basis:calc(100% - 100px);}
   .nturn-row2 .nturn-badges{order:-1;flex-basis:100%;justify-content:center;}
   .nturn-row2 .nturn-badges:empty{display:none;}
   .nturn-card .nc-do{padding:9px 12px;font-size:12px;}

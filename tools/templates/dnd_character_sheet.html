@@ -225,6 +225,15 @@ body.dark .turn-pill.ready{color:#f0cf62;}
 body.dark .econ-chip.avail{background:rgba(90,200,120,.18);color:#7ad48a;}
 .turn-end-btn{flex:0 0 auto;background:var(--dnd);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .turn-end-btn:hover{background:#b93b3b;}
+.turn-row1{flex-wrap:wrap;}   /* the Turn-based switch drops under End Turn when the row is narrow */
+.turn-row1 .turn-econ{flex-basis:0;min-width:200px;}
+.turn-mode{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--dnd-dk);white-space:nowrap;}
+.turn-mode .tm-sw{position:relative;width:34px;height:19px;border-radius:999px;border:1.5px solid var(--dnd);background:transparent;flex:0 0 auto;transition:background .15s;}
+.turn-mode .tm-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--dnd);transition:left .15s,background .15s;}
+.turn-mode.on .tm-sw{background:var(--dnd);}
+.turn-mode.on .tm-sw::after{left:17px;background:#fff;}
+.turn-mode:focus-visible{outline:2px solid var(--dnd);outline-offset:2px;border-radius:6px;}
+.turn-free{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 0;align-self:center;}
 .turn-row2{display:flex;align-items:center;gap:14px;padding:0 10px 7px;flex-wrap:wrap;}
 .turn-slots{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1 1 auto;min-width:0;}
 .tslot{display:flex;align-items:center;gap:4px;}
@@ -1215,7 +1224,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="turn-top">
           <div class="turn-row1">
             <div class="turn-econ" id="turn-econ"></div>
-            <button class="turn-end-btn" onclick="endTurn()" title="Start a new turn — regain your action, bonus action, reaction and movement">⟳ End Turn</button>
+            <button class="turn-end-btn" id="turn-end-btn" onclick="endTurn()" title="Start a new turn — regain your action, bonus action, reaction and movement">⟳ End Turn</button>
+            <span id="turn-mode-slot" style="display:contents;"></span>
           </div>
           <div class="turn-row2">
             <div class="turn-slots" id="turn-slots"></div>
@@ -2546,10 +2556,12 @@ function invUse(tr){
 const ITEM_COST_LBL = { action:'Action', bonus:'Bonus Action', reaction:'Reaction', attack:'Replaces an attack' };
 // Is that part of the turn still free? ('attack' = one attack of the Attack action is left.)
 function itemCostSpent(cost){
+  if(!turnOn()) return false;
   if(cost === 'attack') return turnActionSpentByOther() || (_turn.actionType === 'attack' && _turn.attacksMade >= attacksPerAction());
   return cost === 'action' ? _turn.action : !!_turn[cost];
 }
 function itemSpendCost(cost){
+  if(!turnOn()) return;
   if(cost === 'attack'){ _turn.action = true; _turn.actionType = 'attack'; _turn.attacksMade++; return; }
   _turn[cost] = true; if(cost === 'action') _turn.actionType = 'other';
 }
@@ -4285,6 +4297,15 @@ function syncTabHeight(){
 // marks the economy slot used and logs it. End Turn resets the economy.
 let _turn = { action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0, sneakUsed:false };
 let _turnSub = 'action';
+// TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = free
+// play: no action economy — nothing is spent or greyed out; Incapacitated still stops you.
+let _turnBased = true;
+function turnOn(){ return _turnBased !== false; }
+function freshTurn(){ return { action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0, sneakUsed:false, dash:false, dodge:0, ready:0 }; }
+function toggleTurnMode(){ _turnBased = !turnOn(); _turn = freshTurn(); addLog('Turn-based mode', turnOn() ? 'On' : 'Off', turnOn() ? 'Actions are tracked per turn' : 'Free play — actions aren\'t tracked', 'normal'); renderTurn(); scheduleAutosave(); }
+function turnModeBtn(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: Action, Bonus Action and Reaction once per turn, End Turn brings them back. Click for free play.' : 'Free play: actions aren\'t tracked. Click to count actions per turn (combat).') + '"><span class="tm-sw"></span>Turn-based</button>'; }
+// Free play: whatever was just spent comes straight back, so nothing stays used.
+function freePlayClear(){ if(!turnOn()) _turn = freshTurn(); }
 let _turnOpts = [];
 let _turnCollapsed = {};   // { sectionId: true } — collapsed section state
 
@@ -4355,10 +4376,10 @@ function activatedFeatures(){
 function turnCastType(ct){ const s = shortCastTime(ct); return /bonus/i.test(s) ? 'bonus' : /reaction/i.test(s) ? 'reaction' : /^action$/i.test(s) ? 'action' : null; }
 
 // ── economy state helpers ──
-function turnActionSpentByOther(){ return _turn.action && _turn.actionType !== 'attack'; }
+function turnActionSpentByOther(){ return turnOn() && _turn.action && _turn.actionType !== 'attack'; }
 // The Action is "fully spent" (chip greyed) only when no action remains: used by a
 // non-attack action, or all attacks of an Attack action have been made.
-function actionFullySpent(){ if(!_turn.action) return false; return _turn.actionType === 'attack' ? _turn.attacksMade >= attacksPerAction() : true; }
+function actionFullySpent(){ if(!turnOn() || !_turn.action) return false; return _turn.actionType === 'attack' ? _turn.attacksMade >= attacksPerAction() : true; }
 function econUsed(type){ return type === 'action' ? actionFullySpent() : _turn[type]; }
 
 // Feature / standard-action option cards: { name, meta, usesHTML, disabled, run }.
@@ -4393,7 +4414,7 @@ function standardOpt(a, sub){
         addLog(a.name, 'DC ' + dc, 'Unarmed Strike (one attack of your Attack action) · target makes a STR or DEX save (its choice) or is ' + (a.name === 'Grapple' ? 'Grappled' : 'pushed 5 ft or knocked Prone'), 'normal'); afterTurnAction(); } };
   }
   if(sub === 'action' && a.name === 'Ready') return { name: a.name, meta: a.desc, usesHTML: '', disabled,
-    run(){ _turn.action = true; _turn.actionType = 'ready'; _turn.ready = 1; addLog('Ready', 'Waiting', 'Readied action — click the yellow Action chip when the trigger happens (uses your Reaction)', 'normal'); afterTurnAction(); } };
+    run(){ _turn.action = true; _turn.actionType = 'ready'; _turn.ready = 1; addLog('Ready', 'Waiting', turnOn() ? 'Readied action — click the yellow Action chip when the trigger happens (uses your Reaction)' : 'Readied action — take your response when the trigger happens', 'normal'); afterTurnAction(); } };
   return { name: a.name, meta: a.desc, usesHTML: '', disabled,
     run(){
       if(sub === 'action'){
@@ -4476,7 +4497,7 @@ function oppAttack(i){ if(_turn.reaction || isIncapacitated()) return; const tr 
 // Light weapon is equipped (or a mastered Nick weapon, which can fold it into the Attack action).
 function atkRowKey(tr){ return tr.dataset.rid || tr.dataset.weapon || (tr.querySelector('.atk-name') || {}).value || ''; }
 // 2024 Light property: the Bonus Action attack needs an Attack-action attack this turn with a DIFFERENT Light weapon.
-function offhandReady(tr){ const k = atkRowKey(tr); return _turn.actionType === 'attack' && (_turn.lightAtk || []).some(x => x !== k); }
+function offhandReady(tr){ if(!turnOn()) return true; const k = atkRowKey(tr); return _turn.actionType === 'attack' && (_turn.lightAtk || []).some(x => x !== k); }
 function offhandOpts(){
   const rows = [...document.querySelectorAll('#attacks-body tr')].filter(tr => { const i = rowWeaponInfo(tr); return i.w && i.light; });
   const nick = rows.some(tr => rowMasteryName(tr) === 'Nick');
@@ -4557,6 +4578,9 @@ function renderTurnSlots(){
 }
 function renderTurn(){
   const panel = $('tab-turn'); if(!panel) return;
+  freePlayClear();
+  const ms = $('turn-mode-slot'); if(ms) ms.innerHTML = turnModeBtn();
+  const eb = $('turn-end-btn'); if(eb) eb.style.display = turnOn() ? '' : 'none';
   const mv = turnMoveMax(); if(_turn.move > mv) _turn.move = mv;
   const mvl = $('turn-move-left'), mvm = $('turn-move-max'); if(mvl) mvl.textContent = Math.max(0, mv - _turn.move); if(mvm) mvm.textContent = mv;
   renderTurnSlots();
@@ -4564,7 +4588,7 @@ function renderTurn(){
   if(econ){ const chip = (type, lbl) => (type === 'action' && _turn.ready)
       ? '<button class="econ-chip ready" onclick="toggleEcon(\'action\')" title="Readied — click when the trigger happens (uses your Reaction)">' + lbl + '</button>'
       : '<button class="econ-chip ' + (econUsed(type) ? 'used' : 'avail') + '" onclick="toggleEcon(\'' + type + '\')" title="' + lbl + ' — click to toggle used / ready">' + lbl + '</button>';
-    econ.innerHTML = chip('action', 'Action') + chip('bonus', 'Bonus Action') + chip('reaction', 'Reaction');
+    econ.innerHTML = turnOn() ? chip('action', 'Action') + chip('bonus', 'Bonus Action') + chip('reaction', 'Reaction') : '<span class="turn-free">Free play — actions aren\'t tracked</span>';
     let st = $('turn-status'); if(!st){ st = document.createElement('div'); st.id = 'turn-status'; st.className = 'turn-status'; econ.parentNode.insertBefore(st, econ.nextSibling); }
     st.innerHTML = turnStatusHTML(); st.style.display = st.innerHTML ? '' : 'none'; }
   document.querySelectorAll('.turn-subtab').forEach(b => b.classList.toggle('on', b.dataset.sub === _turnSub));
@@ -4610,13 +4634,14 @@ function afterTurnAction(){ renderTurn(); scheduleAutosave(); }
 // tab's own cards (Hide, Search…) call rollSkill() directly and spend for themselves.
 function checkSpendsAction(){
   if(typeof _locked !== 'undefined' && !_locked) return;   // unlocked = editing, no roll happened
-  if(_turn.action) return;                                 // already spent — just roll
+  if(!turnOn() || _turn.action) return;                    // free play / already spent — just roll
   startOfTurnClear(); _turn.action = true; _turn.actionType = 'other';
   afterTurnAction();
 }
 function sheetRollAbility(id){ rollAbility(id); checkSpendsAction(); }
 function sheetRollSkill(name){ rollSkill(name); checkSpendsAction(); }
 function toggleEcon(type){
+  if(!turnOn()) return;
   if(type === 'action' && _turn.ready){ fireReadied(); return; }
   if(type !== 'reaction') startOfTurnClear();
   if(type === 'action'){
@@ -4943,7 +4968,7 @@ function collectSheet(){
     shown: { scores: shownScores, hpMax: num(v('f-hp-max')), saveBonus: magicSaveBonus() },
     speed: v('f-speed'), speedManual: _speedManual, ac: v('f-ac'), acTemp: v('f-ac-temp'), hpCur: num(v('f-hp-cur')), hpMax: num(v('f-hp-max')) - (_magicApplied.hp || 0), hpTemp: num(v('f-hp-temp')), hitdice: v('f-hitdice'), hdLeft: hdRemaining(), hdUsed,
     locked: _locked, ov: _ov,
-    turn: _turn, turnSub: _turnSub, turnCollapsed: _turnCollapsed,
+    turn: _turn, turnBased: _turnBased, turnSub: _turnSub, turnCollapsed: _turnCollapsed,
     inspiration: $('insp-btn').classList.contains('on'), deathSucc, deathFail, activeConditions, defenses, companions, exhaustion, tab: _tab,
     attacks, inventory, gp: num(v('f-gp')), sp: num(v('f-sp')), cp: num(v('f-cp')),
     proficiencies: v('f-proficiencies'), notes: v('f-notes'),
@@ -4958,6 +4983,7 @@ function applySheet(d){
   _locked = d.locked !== false;   // default locked; set before recalc so overrides/guards see the right state
   _ov = (d.ov && typeof d.ov === 'object') ? d.ov : {};
   _turn = Object.assign({ action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0 }, d.turn || {});
+  _turnBased = d.turnBased !== false;
   _turnSub = d.turnSub || 'action';
   _turnCollapsed = (d.turnCollapsed && typeof d.turnCollapsed === 'object') ? d.turnCollapsed : {};
   _magicApplied = { str:0, dex:0, con:0, int:0, wis:0, cha:0, hp:0 };   // stored scores/HP are base; recalc re-adds the magic delta
