@@ -266,8 +266,13 @@
   }
 
   // ═══════════ 3D physics dice (three.js, lazy-loaded) ═══════════
-  var THREE_URL='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+  // three.js r128 is served from our own site first (public/vendor/three/) — a CDN can be
+  // blocked by an ad/privacy blocker or a network, and every 3D roll then silently fell back
+  // to 2D. The CDN copy is only a backup. why3D records why 3D isn't available (shown in the
+  // dice settings popover).
+  var THREE_URLS=['/vendor/three/three.min.js','https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'];
   var threeState=0; // 0 none, 1 loading, 2 ready, 3 failed
+  var why3D='';
   var renderer,scene,camera,keyLight,rafId,world3d=null,lastT=0,_camTilt=false,floor3d=null,lastRoll=null;
   // THE THROW. Dice fly in from one bottom corner (right hand by default, left
   // hand by setting), off the tray, skip across it, bounce
@@ -287,11 +292,15 @@
   var SHADOW_OP=0.42;   // shadow-map floor darkness; faded with the dice
   var DOWN,UP,_n,_axis,_dq,_corr;
   var HAS_WEBGL=(function(){ try{ var c=document.createElement('canvas'); return !!(window.WebGLRenderingContext&&(c.getContext('webgl')||c.getContext('experimental-webgl'))); }catch(e){ return false; } })();
+  if(!HAS_WEBGL) why3D='3D (WebGL) is turned off or unavailable in this browser — check that hardware acceleration is on, or restart the browser.';
   function loadThree(cb){ if(threeState===2){cb(true);return;} if(threeState===3){cb(false);return;}
     if(threeState===1){ var iv=setInterval(function(){ if(threeState===2){clearInterval(iv);cb(true);} else if(threeState===3){clearInterval(iv);cb(false);} },80); return; }
-    threeState=1; var sc=document.createElement('script'); sc.src=THREE_URL;
-    sc.onload=function(){ threeState=window.THREE?2:3; cb(threeState===2); };
-    sc.onerror=function(){ threeState=3; cb(false); }; document.head.appendChild(sc); }
+    if(window.THREE){ threeState=2; cb(true); return; }
+    threeState=1; var i=0;
+    (function next(){ if(i>=THREE_URLS.length){ threeState=3; why3D='The 3D dice library couldn\'t be loaded (a blocker or the network).'; cb(false); return; }
+      var sc=document.createElement('script'); sc.src=THREE_URLS[i++];
+      sc.onload=function(){ if(window.THREE){ threeState=2; why3D=''; cb(true); } else next(); };
+      sc.onerror=function(){ next(); }; document.head.appendChild(sc); })(); }
   function initGL(){ if(!window.THREE||!HAS_WEBGL) return false;
     DOWN=new THREE.Vector3(0,-1,0); UP=new THREE.Vector3(0,1,0); _n=new THREE.Vector3(); _rr=new THREE.Vector3(); _u=new THREE.Vector3(); _t=new THREE.Vector3(); _rn=new THREE.Vector3(); _imp=new THREE.Vector3(); _cx=new THREE.Vector3(); for(var wi=0;wi<160;wi++) _w.push(new THREE.Vector3()); _axis=new THREE.Vector3(); _dq=new THREE.Quaternion(); _corr=new THREE.Quaternion();
     var cv=document.createElement('canvas'); cv.className='da-canvas'; overlay.appendChild(cv);
@@ -821,7 +830,7 @@
     if(o.material){ (Array.isArray(o.material)?o.material:[o.material]).forEach(_disposeMat); }
     if(o.children){ o.children.forEach(_disposeObj); } }
   function clearWorld(){ if(!world3d)return; world3d.meshes.forEach(function(g){scene.remove(g); _disposeObj(g);}); world3d.shadows.forEach(function(s){scene.remove(s); _disposeObj(s);}); if(world3d.glows)world3d.glows.forEach(function(s){scene.remove(s); _disposeObj(s);}); world3d=null; }
-  function play3D(dice,crit){ if(!renderer && !initGL()){ play2D(dice,crit); return; } clearWorld();
+  function play3D(dice,crit){ if(!renderer){ var ok=false; try{ ok=initGL(); }catch(e){ ok=false; renderer=null; why3D='This browser refused a 3D (WebGL) canvas — restarting the browser usually clears it.'; } if(!ok){ play2D(dice,crit); return; } } clearWorld();
     _camTilt = true; applyCam();   // always tip the camera 30° (the d4 angle) — reads better and separates overlapping dice in depth
     if(floor3d) floor3d.material.opacity=SHADOW_OP;
     var metas=[],inits=[],maxSpawn=0, fromBottom=Math.random()<0.5; dice.forEach(function(r,i){ var gg=getGeoGroups(r.sides); var s=makeInit(r.sides,i,dice.length,gg.hull,fromBottom); s.groups=gg.groups; s.spawnStep=(r.wave||0)*WAVE_STEPS; if(s.spawnStep>maxSpawn)maxSpawn=s.spawnStep; inits.push(s); metas.push({geo:gg.geo,groups:gg.groups,sides:r.sides,display:r.display,faceSet:r.faceSet,color:r.color,numColor:r.numColor,wave:r.wave||0,tetra:gg.tetra}); });
@@ -988,7 +997,8 @@
       +'<div class="da-row"><span class="k">Linger</span><div class="da-seg" data-k="linger"><button data-v="1000">1s</button><button data-v="2000">2s</button><button data-v="4000">4s</button><button data-v="8000">8s</button></div></div>'
       +'<div class="da-row" style="align-items:flex-start"><span class="k" style="padding-top:3px">Dice colour</span><div class="da-swatches" data-k="dice"></div></div>'
       +'<div class="da-row" style="align-items:flex-start"><span class="k" style="padding-top:3px">Number colour</span><div class="da-swatches" data-k="num"></div></div>'
-      +'<div class="da-hint">Rolls animate on the sheet and match the log. 3D needs a one-time load; it falls back to 2D offline.</div>';
+      +'<div class="da-hint">Rolls animate on the sheet and match the log. 3D needs a one-time load; it falls back to 2D offline.</div>'
+      +'<div class="da-hint da-why" style="color:#e0a05a;display:none;"></div>';
     document.body.appendChild(pop);
     function swatches(box, list, key){ box.innerHTML='';
       if(key==='dice'){ var rb=document.createElement('button'); rb.className='da-sw3 da-rand'; rb.title='Random colour per die'; rb.style.background='conic-gradient(from 90deg,#d8b24a,#c0251e,#3b7dd8,#3fa45b,#8a6fd6,#d8b24a)'; rb.onclick=function(){ setS('dice','random'); }; box.appendChild(rb); }
@@ -998,7 +1008,7 @@
     swatches(pop.querySelector('[data-k="num"]'), PRESETS_NUM, 'num');
     pop.querySelector('[data-k="on"]').onclick=function(){ setS('on', !S.on); };
     pop.querySelector('[data-k="sound"]').onclick=function(){ setS('sound', S.sound===false); };
-    pop.querySelectorAll('[data-k="mode"] button').forEach(function(b){ b.onclick=function(){ setS('mode', b.dataset.v); if(b.dataset.v==='3d'&&HAS_WEBGL) loadThree(function(){}); }; });
+    pop.querySelectorAll('[data-k="mode"] button').forEach(function(b){ b.onclick=function(){ setS('mode', b.dataset.v); if(b.dataset.v==='3d'&&HAS_WEBGL) loadThree(function(){ showWhy(); }); showWhy(); }; });
     pop.querySelectorAll('[data-k="linger"] button').forEach(function(b){ b.onclick=function(){ setS('linger', +b.dataset.v); }; });
     var finSel=pop.querySelector('select[data-k="finish"]'); if(finSel) finSel.onchange=function(){ setS('finish', finSel.value); };
     var texSel=pop.querySelector('select[data-k="texture"]'); if(texSel) texSel.onchange=function(){ setS('texture', texSel.value); };
@@ -1019,7 +1029,10 @@
     var rb=pop.querySelector('.da-rand'); if(rb) rb.classList.toggle('sel', S.dice==='random'); }
   function setS(k,v){ S[k]=v; persist(); syncPop(); }
   function playPreview(){ if(S.on) play([{sides:20,display:'20'}], 'normal'); }
-  function togglePop(btn){ if(!pop) buildPop(); if(pop.style.display==='none'){ var r=btn.getBoundingClientRect(); pop.style.display='block';
+  // why 3D is showing as 2D (only when 3D is the chosen style and it can't run)
+  function showWhy(){ if(!pop) return; var el=pop.querySelector('.da-why'); if(!el) return; var msg=(S.mode==='3d'&&(why3D||threeState===3))?('3D unavailable: '+(why3D||'the 3D dice library didn\'t load.')+' Rolls show in 2D until then.'):'';
+    el.textContent=msg; el.style.display=msg?'':'none'; }
+  function togglePop(btn){ if(!pop) buildPop(); showWhy(); if(pop.style.display==='none'){ var r=btn.getBoundingClientRect(); pop.style.display='block';
       var top=r.bottom+6, left=Math.min(r.left, window.innerWidth-pop.offsetWidth-8); if(top+pop.offsetHeight>window.innerHeight-8) top=Math.max(8,r.top-pop.offsetHeight-6);
       pop.style.top=top+'px'; pop.style.left=Math.max(8,left)+'px'; syncPop(); setTimeout(function(){ document.addEventListener('mousedown', outside); },0); }
     else closePop(); }
@@ -1044,7 +1057,7 @@
     if(clear && clear.parentNode){ clear.parentNode.insertBefore(g, clear); } else host.appendChild(g); }
 
   // ─── expose for sheet persistence ───
-  window.DiceAnim={ lastRoll:function(){ return lastRoll; }, _world:function(){ return world3d; }, _groups:function(sides){ return getGeoGroups(sides).groups; }, get:function(){ return {on:S.on,mode:S.mode,dice:S.dice,num:S.num,linger:S.linger,finish:S.finish,texture:S.texture,hand:S.hand,sound:S.sound,font:S.font}; },
+  window.DiceAnim={ status:function(){ return {mode:S.mode,on:S.on,webgl:HAS_WEBGL,three:['none','loading','ready','failed'][threeState],renderer:!!renderer,why:why3D}; }, lastRoll:function(){ return lastRoll; }, _world:function(){ return world3d; }, _groups:function(sides){ return getGeoGroups(sides).groups; }, get:function(){ return {on:S.on,mode:S.mode,dice:S.dice,num:S.num,linger:S.linger,finish:S.finish,texture:S.texture,hand:S.hand,sound:S.sound,font:S.font}; },
     restore:function(o,force){ if(hadLS&&force!==true) return; if(o&&typeof o==='object'){ if(typeof o.on==='boolean')S.on=o.on; if(o.mode)S.mode=o.mode; if(o.dice)S.dice=o.dice; if(o.num)S.num=o.num; if(typeof o.linger==='number')S.linger=o.linger; if(o.finish||o.texture||o.mat||o.tex){ var mt=migrate(o); S.finish=mt.finish; S.texture=mt.texture; } if(o.hand==='left'||o.hand==='right')S.hand=o.hand; if(typeof o.sound==='boolean')S.sound=o.sound; if(o.font==='themed'||o.font==='standard')S.font=o.font; persistLocal(); syncPop(); if(S.on&&S.mode==='3d'&&HAS_WEBGL) loadThree(function(){}); } },
     play:function(dice,crit){ play(dice,crit); } };
 
