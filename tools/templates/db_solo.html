@@ -104,10 +104,21 @@ p{line-height:1.45;margin:4px 0;}
 select,input[type=text],input[type=number],textarea{background:var(--input-bg);color:var(--ink);border:1px solid var(--input-border);border-radius:6px;padding:5px 8px;}
 textarea{width:100%;min-height:54px;resize:vertical;}
 /* journal */
-.jr{display:flex;flex-direction:column;gap:5px;max-height:380px;overflow-y:auto;}
-.je{border-left:3px solid var(--rule);padding:2px 0 2px 8px;font-size:14px;}
-.je.k-roll{border-color:var(--acc);} .je.k-threat{border-color:var(--red);} .je.k-combat{border-color:#b56a1f;} .je.k-note{border-color:var(--gold-lt);} .je.k-mission{border-color:var(--gold);}
-.je .t{font-size:11px;color:var(--muted);font-family:var(--f-label);}
+.jr{display:flex;flex-direction:column;gap:6px;max-height:460px;overflow-y:auto;padding-right:4px;}
+.jr .st{font-style:italic;line-height:1.5;margin:2px 0;padding-left:10px;border-left:3px solid var(--gold-lt);}
+.jr .sh{font-family:var(--f-label);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--acc-dk);margin-top:8px;padding-top:6px;border-top:1px solid var(--rule);}
+.jr .sh span{text-transform:none;letter-spacing:0;color:var(--muted);font-family:var(--f-ui);font-size:13px;}
+.jr .ln{font-size:12.5px;color:var(--muted);padding-left:10px;border-left:3px solid var(--rule);}
+.jr .ln b{font-weight:600;color:var(--ink);}
+.jr .ln.k-score{border-color:var(--gold);color:var(--gold);} .jr .ln.k-score b{color:var(--gold);}
+.jr .ln.k-roll{border-color:var(--acc);} .jr .ln.k-threat{border-color:var(--red);} .jr .ln.k-combat{border-color:#b56a1f;} .jr .ln.k-note{border-color:var(--gold-lt);}
+/* scroll bars in the page's colours */
+*{scrollbar-width:thin;scrollbar-color:var(--acc) transparent;}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--acc);border-radius:8px;border:2px solid var(--bg);}
+::-webkit-scrollbar-thumb:hover{background:var(--acc-dk);}
+::-webkit-scrollbar-corner{background:transparent;}
 /* combat */
 .foe{border:1px solid var(--rule);border-radius:8px;padding:7px 9px;background:var(--box);}
 .foe.dead{opacity:.45;} .foe.turn{border-color:#b56a1f;border-width:2px;}
@@ -186,7 +197,9 @@ function refreshSummary(){
       S.m.status==='briefing'?'Briefing': S.m.status==='won'?(S.m.drowned?'Hero lost':one?'Adventure complete':'Mission complete'):
       ((mi&&mi.hideRoute&&cw?('At '+cw.name):('Waypoint '+Math.min(S.m.cur+1,S.m.wps.length)+' of '+S.m.wps.length))+(mi&&mi.scoring?' · score '+scoreTotal():'')+(S.combat?' · in combat':'')) };
 }
-function jlog(k,h,x){ S.journal.unshift({t:Date.now(),k:k,h:h,x:x||''}); if(S.journal.length>400) S.journal.length=400; }
+function jlog(k,h,x){ S.journal.unshift({t:Date.now(),k:k,h:h,x:x||''}); if(S.journal.length>1000) S.journal.length=1000; }
+// The Story: narration (read-aloud text, outcomes, story beats) between the mechanical lines.
+function story(x){ if(x) jlog('story','',String(x)); }
 
 // ── the embedded sheet (bridge) ────────────────────────────────────────────
 var frame=null, reqs={}, ORIGIN=window.location.origin;
@@ -232,8 +245,8 @@ function render(){
   else if(S.m.status==='briefing') h+=briefingCard();
   else if(S.m.status==='won') h+=debriefCard();
   else h+=routeCard()+sinkCard()+waypointCard(false)+threatCard()+scoreCard();
-  h+=toolsCard()+journalCard();
-  r.innerHTML=h; renderPC(); renderJournal(); renderTool();
+  h+=journalCard();
+  r.innerHTML=h; renderPC(); renderJournal();
 }
 function headCard(){
   return '<div class="card"><div class="card-h"><h2 id="so-title">'+esc(S.name)+'</h2><button class="btn ghost" data-a="rename" title="Rename this solo campaign">Rename</button></div>'+
@@ -403,7 +416,7 @@ function sinkCard(){
   return h;
 }
 function scoreTotal(){ return S.m&&S.m.score?S.m.score.reduce(function(t,x){ return t+x.n; },0):0; }
-function addScore(n,label){ if(!S.m||!curMission()||!curMission().scoring||!n) return; S.m.score=S.m.score||[]; S.m.score.push({n:n,label:label||''}); jlog('mission','Score '+(n>0?'+':'')+n,label||''); }
+function addScore(n,label){ if(!S.m||!curMission()||!curMission().scoring||!n) return; S.m.score=S.m.score||[]; S.m.score.push({n:n,label:label||''}); jlog('score',(n>0?'+':'')+n+' point'+(Math.abs(n)===1?'':'s'),label||''); }
 function scoreHtml(all){ var list=A(S.m&&S.m.score); return (list.length?'<div class="small">'+(all?list:list.slice(-10)).slice().reverse().map(function(x){ return '<div>'+(x.n>0?'+':'')+x.n+' · '+esc(x.label)+'</div>'; }).join('')+'</div>':'<span class="muted small">No points yet.</span>'); }
 function scoreCard(){
   var mi=curMission(); if(!S.m||!mi||!mi.scoring||S.m.status!=='active') return '';
@@ -426,37 +439,16 @@ function debriefCard(){
   return h+'</div></div>';
 }
 
-// ── tools ─────────────────────────────────────────────────────────────────
-var TOOLS=[['fortune','Fortune'],['insp','Inspiration'],['two','Two outcomes'],['dd','Dragon/Demon'],['dmg','Damage'],['treasure','Treasure'],['explore','Explore'],['rules','Rules']];
-function toolsCard(){ return '<div class="card"><div class="card-h"><h3>Solo tools</h3></div><div class="card-b"><div class="tabs">'+TOOLS.map(function(t){ return '<button data-a="tool" data-t="'+t[0]+'" class="'+(UI.tool===t[0]?'on':'')+'">'+t[1]+'</button>'; }).join('')+'</div><div id="so-tool"></div></div></div>'; }
-function renderTool(){
-  var el=$('so-tool'); if(!el) return; var h='', o=UI.out[UI.tool]||'';
-  if(UI.tool==='fortune'){
-    h+='<p class="tiny muted">Ask what you\'d ask a GM. Only roll when you want fate to decide.</p><input type="text" id="f-q" placeholder="Your question (optional)" style="width:100%;margin:4px 0">';
-    h+='<div class="row">'+T.fortune.columns.map(function(c){ return '<label class="chip"><input type="radio" name="fcol" value="'+c.id+'"'+(UI.fortCol===c.id?' checked':'')+'> '+esc(c.label)+'</label>'; }).join('')+'</div>';
-    h+='<div class="row" style="margin-top:6px"><label class="chip"><input type="radio" name="ftilt" value="low"'+(UI.fortTilt==='low'?' checked':'')+'> Likely no / low</label><label class="chip"><input type="radio" name="ftilt" value="even"'+(UI.fortTilt==='even'?' checked':'')+'> Even</label><label class="chip"><input type="radio" name="ftilt" value="high"'+(UI.fortTilt==='high'?' checked':'')+'> Likely yes / high</label></div>';
-    h+='<div class="row" style="margin-top:8px"><button class="btn pri" data-a="fortune">Ask the Fortune Chart</button></div>';
-  } else if(UI.tool==='insp'){
-    h+='<p class="tiny muted">Roll one column for a single word, or several to build a phrase. Interpret it to fit the moment.</p><div class="row">'+['action','attribute','thing'].map(function(k){ return '<label class="chip"><input type="checkbox" data-insp="'+k+'"'+(UI.insp[k]?' checked':'')+'> '+k.charAt(0).toUpperCase()+k.slice(1)+'</label>'; }).join('')+'</div><div class="row" style="margin-top:8px"><button class="btn pri" data-a="insp">Roll Inspiration</button></div>';
-  } else if(UI.tool==='two'){
-    h+='<p class="tiny muted">Unsure what a failure means? Write two outcomes; D6 1–3 picks the first, 4–6 the second.</p><input type="text" id="two-a" placeholder="Outcome 1" style="width:100%;margin:3px 0"><input type="text" id="two-b" placeholder="Outcome 2" style="width:100%;margin:3px 0"><div class="row" style="margin-top:6px"><button class="btn pri" data-a="two">Roll D6</button></div>';
-  } else if(UI.tool==='dd'){
-    h+='<p class="tiny muted">Outside combat, a Dragon or Demon adds to your success or failure (or give a boon/bane to a related next action).</p><div class="row"><button class="btn pri" data-a="dd" data-k="0">Dragon effect</button><button class="btn warn" data-a="dd" data-k="1">Demon effect</button></div>';
-  } else if(UI.tool==='dmg'){
-    h+='<p class="tiny muted">Harm of unknown size: roll the category, then apply it to your sheet (armor counts unless it wouldn\'t).</p><div class="row"><button class="btn pri" data-a="suffer">Roll Suffering Damage</button></div>';
-  } else if(UI.tool==='treasure'){
-    h+='<p class="tiny muted">Stands in for the boxed set\'s treasure cards: one find from coins, valuables and gear.</p><div class="row"><button class="btn pri" data-a="treasure">Draw a treasure</button></div>';
-  } else if(UI.tool==='explore'){
-    h+='<p class="tiny muted">The exploration tables, on their own.</p><div class="row"><button class="btn" data-a="x-loc">Location</button><button class="btn" data-a="x-inh">Inhabitants</button><button class="btn" data-a="x-trap">Trap</button><button class="btn" data-a="x-threat">Threat</button></div>';
-  } else if(UI.tool==='rules'){
-    h+=T.rules.map(function(r){ return '<p class="small"><b>'+esc(r[0])+'.</b> '+esc(r[1])+'</p>'; }).join('');
-  }
-  if(o) h+='<div class="out">'+o+'</div>';
-  el.innerHTML=h;
-}
-function journalCard(){ return '<div class="card"><div class="card-h"><h3>Journal</h3></div><div class="card-b"><textarea id="j-note" placeholder="Write what happens…"></textarea><div class="row" style="margin:6px 0 10px"><button class="btn" data-a="note">Add to journal</button></div><div class="jr" id="so-journal"></div></div></div>'; }
+// THE STORY — the game log, oldest first: what you find, what happens, how it ends, with the
+// rolls and fights as small lines between. Read-only; it scrolls to the newest entry.
+function journalCard(){ return '<div class="card"><div class="card-h"><h3>Story</h3></div><div class="card-b"><div class="jr" id="so-journal"></div></div></div>'; }
 function renderJournal(){ var el=$('so-journal'); if(!el) return;
-  el.innerHTML=S.journal.slice(0,120).map(function(j){ var dt=new Date(j.t); return '<div class="je k-'+esc(j.k)+'"><div class="t">'+dt.toLocaleDateString()+' '+dt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})+'</div><b>'+esc(j.h)+'</b>'+(j.x?' — '+esc(j.x):'')+'</div>'; }).join('')||'<span class="muted small">Nothing yet.</span>'; }
+  var list=S.journal.slice(0,300).reverse();
+  el.innerHTML=list.map(function(j){ var dt=new Date(j.t), tt=esc(dt.toLocaleDateString()+' '+dt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
+    if(j.k==='story') return '<p class="st" title="'+tt+'">'+esc(j.x)+'</p>';
+    if(j.k==='mission') return '<div class="sh" title="'+tt+'">'+esc(j.h)+(j.x?' <span>'+esc(j.x)+'</span>':'')+'</div>';
+    return '<div class="ln k-'+esc(j.k)+'" title="'+tt+'"><b>'+esc(j.h)+'</b>'+(j.x?' — '+esc(j.x):'')+'</div>'; }).join('')||'<span class="muted small">Your story begins when you set out.</span>';
+  el.scrollTop=el.scrollHeight; }
 
 // ── tables ─────────────────────────────────────────────────────────────────
 function fortune(col,tilt){ var a=d(6), b=null, n=a; if(tilt!=='even'){ b=d(6); n=tilt==='low'?Math.min(a,b):Math.max(a,b); }
@@ -484,7 +476,7 @@ function enterMission(){
   if(!mi.hideRoute&&!S.m.wps.some(function(w){ return w.objective; })) S.m.wps[S.m.wps.length-1].objective=true;
   S.m.cur=0; S.m.status='active'; S.m.objective=false; S.m.flags={}; S.m.shown=[]; S.m.trail=[]; S.m.score=[]; S.m.sink=null; S.m.drowned=false;
   S.m.threat={text:mi.threat.text,trigger:mi.threat.trigger,inherent:!!mi.threat.inherent,encounter:mi.threat.encounter||null,value:1,hits:0};
-  jlog('mission',mTitle(S.m.idx),(mi.startLog||'Into the Breach.')+' '+L('threat','Threat')+': '+mi.threat.text);
+  jlog('mission',mTitle(S.m.idx),L('threat','Threat')+': '+mi.threat.text); story(mi.briefing); if(mi.startLog) story(mi.startLog);
   var w0=curWp(); w0.visited=true; enterFx(w0,wpDef(w0),true);
   save(); render();
 }
@@ -501,6 +493,7 @@ function goTo(id){ var i=wpIndex(id); if(i<0) return; var from=curWp(); if(from)
   if(S.m.cur!==i) S.m.trail.push(S.m.cur); S.m.cur=i; var w=curWp(), def=wpDef(w);
   jlog('mission',(w.visited?'Back to ':'')+w.name,''); if(!w.visited){ w.visited=true; enterFx(w,def,false); } }
 function enterFx(w,def,first){ var mi=curMission(); if(!def) return;
+  if(def.text&&!w.told){ w.told=true; story(def.text); }
   if(def.floor) addScore(1,'Floor discovered: '+w.name);
   if(!first&&mi.threat&&mi.threat.onEnter&&!S.m.sink&&def.floor) threatAdd(mi.threat.onEnter,'Time passes: '+w.name);
   if(def.onEnter) applyEffects(def.onEnter,w,def,{label:w.name}); }
@@ -518,13 +511,14 @@ function skillLvl(n){ var s=PC&&A(PC.skills).find(function(x){ return x.name===n
 function threatAdd(n,why){ var t=S.m&&S.m.threat; if(!t||S.m.sink) return; var was=t.value; t.value=Math.max(1,Math.min(6,t.value+n)); if(t.value!==was){ jlog('threat',L('threat','Threat')+' '+(n>0?'+':'')+n+' → '+t.value, why||''); if(t.value>=6&&was<6){ if(curMission().threat.stages){ setTimeout(clockStage,60); } else { jlog('threat','The threat comes to pass!',t.trigger); toast('Threat! '+t.trigger); } } } }
 // A fixed clock (threat.stages) strikes on its own when it fills: the next stage happens.
 function clockStage(){ if(!S.m||S.m.status!=='active'||S.m.sink) return; var mi=curMission(), th=S.m.threat; if(!th||th.value<6||!mi.threat.stages) return;
-  var st=mi.threat.stages[Math.min(th.hits||0,mi.threat.stages.length-1)]; th.hits=(th.hits||0)+1; jlog('threat',st.title||'The clock strikes',st.text); toast(st.title||'The clock strikes!');
+  var st=mi.threat.stages[Math.min(th.hits||0,mi.threat.stages.length-1)]; th.hits=(th.hits||0)+1; jlog('threat',st.title||'The clock strikes',''); story(st.text); toast(st.title||'The clock strikes!');
   if(st.reset!==false) th.value=1;
   dlgQ('<h3>'+esc(st.title||'The clock strikes')+'</h3><p class="read">'+esc(st.text)+'</p><div class="row" style="margin-top:10px"><button class="btn pri" data-a="close">'+esc(st.button||'Go on')+'</button></div>');
   applyEffects(st.fx,curWp(),wpDef(curWp()),{label:st.title||'Clock'}); save(); render(); }
 // Effects of a challenge, a stage, an escape or a won fight.
 function applyEffects(fx,w,def,c){
   if(!fx) return;
+  if(fx.say) story(fx.say);
   if(fx.ifFlag!=null){ applyEffects(hasReq(fx.ifFlag,w)?fx.then:fx.else,w,def,c); }
   if(fx.reveal) fx.reveal.forEach(function(s){ if(A(w.revealed).indexOf(s)<0) w.revealed.push(s); });
   arr1(fx.flag).forEach(function(k){ S.m.flags[k]=true; });
@@ -567,7 +561,7 @@ function doChallenge(cid){
     if(prev&&prev.ok&&!c.repeatOk) return;                       // already succeeded
     var res={ok:r.ok,dragon:r.dragon,demon:r.demon,word:word(r),text:r.ok?c.success:(c.failure||''),pendingFail:!r.ok&&!r.demon};
     w.results[c.id]=res;
-    jlog('roll',c.label+': '+res.word+(r.pushed?' (pushed)':''),(sk||c.attr)+' '+r.roll+' vs '+r.target+(res.text?' · '+res.text:''));
+    jlog('roll',c.label+': '+res.word+(r.pushed?' (pushed)':''),(sk||c.attr)+' '+r.roll+' vs '+r.target); if(res.text&&(r.ok||r.demon)) story(res.text);
     if(r.ok){ if(c.firstTry&&attempt===1&&!w.failedOnce&&!anyOn(c.firstTryUnless,w)) addScore(c.firstTry.n||1,c.firstTry.label||c.label+' on the first attempt'); applyEffects(c.onSuccess,w,def,c); }
     else if(r.demon) applyEffects(c.onFail,w,def,c); // a Demon can't be pushed: the failure lands now
     if(r.dragon||r.demon){ var k=r.dragon?0:1; var row=T.dragonDemon[d(6)-1][k]; jlog('roll',(r.dragon?'Dragon':'Demon')+' effect',row); toast((r.dragon?'Dragon: ':'Demon: ')+row); }
@@ -577,38 +571,38 @@ function doChallenge(cid){
 // A choice (no roll): take the stone, accept the offer, pull the drape…
 function doChoice(cid){ var w=curWp(), def=wpDef(w); var c=A(def&&def.challenges).find(function(x){ return x.id===cid; }); if(!c) return;
   preCheck(w,def,c,function(){ w.tries=w.tries||{}; w.tries[c.id]=(w.tries[c.id]||0)+1;
-    w.results[c.id]={ok:true,word:c.resultWord||'Done',text:c.success||''}; jlog('mission',c.label,c.success||'');
+    w.results[c.id]={ok:true,word:c.resultWord||'Done',text:c.success||''}; jlog('note',c.label,''); story(c.success);
     if(c.firstTry&&w.tries[c.id]===1&&!anyOn(c.firstTryUnless,w)) addScore(c.firstTry.n||1,c.firstTry.label||c.label);
     applyEffects(c.onSuccess,w,def,c); save(); render(); }); }
 // A card of options (press plates, open chests, take a stone): each option once.
 function doOption(cid,oid){ var w=curWp(), def=wpDef(w); var c=A(def&&def.challenges).find(function(x){ return x.id===cid; }); if(!c) return; var o=A(c.options).find(function(x){ return x.id===oid; }); if(!o) return;
   w.used=w.used||{}; if(w.used[cid+':'+oid]&&!o.repeat) return;
   preCheck(w,def,c,function(){ w.tries=w.tries||{}; w.tries[c.id]=(w.tries[c.id]||0)+1; w.used[cid+':'+oid]=(w.used[cid+':'+oid]||0)+1;
-    jlog('mission',c.label+': '+o.label,o.text||'');
+    jlog('note',c.label+': '+o.label,''); story(o.text);
     if(o.firstTry&&w.tries[c.id]===1) addScore(o.firstTry.n||1,o.firstTry.label||c.label+' on the first attempt');
     w.results[c.id]={ok:true,word:o.label,text:o.text||''}; applyEffects(o.fx,w,def,{label:c.label+': '+o.label}); save(); render(); }); }
 function acceptFail(cid){ var w=curWp(), def=wpDef(w); var c=A(def&&def.challenges).find(function(x){ return x.id===cid; }); var res=w.results[cid]; if(!c||!res) return;
-  res.pendingFail=false; if(c.firstTry) w.failedOnce=true; jlog('roll',c.label+': failure accepted',c.failure||''); applyEffects(c.onFail,w,def,c); save(); render(); }
+  res.pendingFail=false; if(c.firstTry) w.failedOnce=true; jlog('roll',c.label+': failure accepted',''); story(c.failure); applyEffects(c.onFail,w,def,c); save(); render(); }
 // ── the sinking finale ────────────────────────────────────────────────────
 function startSinking(){ if(!S.m||S.m.sink||S.m.status!=='active') return; var mi=curMission(); if(!mi.sink) return;
-  S.m.sink={round:0}; jlog('threat',mi.sink.title||'Sinking!',mi.sink.text||''); toast(mi.sink.title||'Sinking!'); sinkNext(); }
+  S.m.sink={round:0}; jlog('threat',mi.sink.title||'Sinking!',''); story(mi.sink.text); toast(mi.sink.title||'Sinking!'); sinkNext(); }
 function sinkNext(){ var mi=curMission(), sk=S.m&&S.m.sink; if(!sk) return;
   var next=A(mi.sink.order).find(function(id){ return !S.m.flags['sunk:'+id]; }); sk.round++;
-  if(next){ S.m.flags['sunk:'+next]=true; var w=S.m.wps[wpIndex(next)]; jlog('threat','Round '+sk.round+': '+(w?w.name:next)+' goes under','');
+  if(next){ S.m.flags['sunk:'+next]=true; var w=S.m.wps[wpIndex(next)]; jlog('threat','Round '+sk.round,''); story((w?w.name.replace(/^\d+\.\s*/,'The '):'A floor')+' slips beneath the waves.');
     if(curWp()&&curWp().def===next){ save(); render(); drownFlow(); return; } }
   save(); render(); }
 function drownFlow(){ var mi=curMission(); if(S.combat){ jlog('combat','The fight ends','The sea takes the floor'); S.combat=null; }
   dlg('<h3>The sea pours in</h3><p class="small">'+esc(mi.sink.drown||'The floor you stand on goes under. Anyone still inside drowns.')+'</p><p class="small muted">Solo mercy rule (ours, not the book\'s): one SWIMMING roll with a bane to fight your way out through a window.</p><div class="row" style="margin-top:10px"><button class="btn pri" data-a="drown-swim">Roll SWIMMING · bane</button></div>'); }
 function escapeTower(how){ if(!S.m||S.m.status!=='active') return; closeDlg(); S.m.escaped=true; S.m.objective=true; jlog('mission',how||'You got out',''); finishMission(); }
-function offerTreasures(n,pre){ var list=[]; for(var i=0;i<n;i++){ var t=treasure(); list.push(t); jlog('roll','Treasure',t.text); }
+function offerTreasures(n,pre){ var list=[]; for(var i=0;i<n;i++){ var t=treasure(); list.push(t); jlog('note','Treasure',t.text); }
   addScore(n,n>1?n+' treasures found':'Treasure found'); UI.lastTreasures=list; UI.lastTreasure=list[0];
   dlgQ((pre?'<p class="read">'+esc(pre)+'</p>':'')+'<h3>Treasure'+(n>1?' ×'+n:'')+'</h3>'+list.map(function(t){ return '<p><b>'+esc(t.text)+'</b></p>'; }).join('')+'<div class="row" style="margin-top:10px"><button class="btn pri" data-a="take-treasure">Add '+(n>1?'them':'it')+' to my sheet</button><button class="btn ghost" data-a="close">Leave '+(n>1?'them':'it')+'</button></div>'); save(); render(); }
-function nextWaypoint(){ var w=curWp(); if(w) w.done=true; if(S.m.cur<S.m.wps.length-1){ S.m.cur++; var n=curWp(); jlog('mission','Waypoint '+(S.m.cur+1)+': '+(n.unknown?'Unknown':n.name),''); }
+function nextWaypoint(){ var w=curWp(); if(w) w.done=true; if(S.m.cur<S.m.wps.length-1){ S.m.cur++; var n=curWp(); jlog('mission','Waypoint '+(S.m.cur+1)+': '+(n.unknown?'Unknown':n.name),''); var nd=wpDef(n); if(nd&&nd.text&&!n.told){ n.told=true; story(nd.text); } }
   if(w&&w.foundLoot){ offerTreasure(); w.foundLoot=false; } save(); render(); }
 function addWaypoints(n,label){ for(var i=0;i<n;i++) S.m.wps.splice(S.m.cur+1+i,0,{name:'Unknown',unknown:true,results:{},revealed:[],done:false,extra:label}); jlog('mission',n+' new waypoint'+(n>1?'s':''),label); }
 function genWaypoint(){ var w=curWp(); w.gen=genLocation(); w.unknown=true;
   if(w.gen.details.some(function(x){ return /foe|lair|Inhabited/i.test(x.v); })||/Inhabited/.test(w.gen.area)) setInhabitants(w);
-  jlog('mission','Revealed: '+w.gen.area,genText(w.gen)); save(); render(); }
+  jlog('mission','Revealed: '+w.gen.area,''); story(genText(w.gen)+'.'); save(); render(); }
 function setInhabitants(w){ var r=inhabitant(); w.gen.inhabitants=r.name;
   if(r.foes&&r.foes.length) w.genFoes={id:'gen-'+uid(),label:r.name,note:'Rolled on Inhabitants — ask Fortune (Number) how many, and (Reaction) whether they\'re hostile.',foes:r.foes.map(function(ref){ return {ref:ref,count:2,solo:1}; })};
   else w.genFoes=null; }
@@ -653,7 +647,7 @@ function startFight(e,solo){
   if(e.reduceBy&&S.m&&S.m.counters){ var cut=Math.min(foes.length,S.m.counters[e.reduceBy]||0); for(var k=0;k<cut;k++){ foes[foes.length-1-k].fled=true; foes[foes.length-1-k].frozen=true; } }
   if(e.onStart&&S.m) applyEffects(e.onStart,curWp(),wpDef(curWp()),{label:e.label});
   S.combat={enc:e.id,label:e.label,objective:!!e.objective,round:0,foes:foes,order:[],turn:-1,pending:null,pcLeft:0,pcActed:0,underwater:!!e.underwater};
-  jlog('combat','Fight: '+e.label,foes.map(function(f){ return f.name; }).join(', '));
+  jlog('combat','Fight: '+e.label,foes.map(function(f){ return f.name; }).join(', ')); if(e.note) story(e.note);
   newRound(); }
 function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
 function newRound(){
@@ -696,7 +690,7 @@ function monsterTurn(f){
   var a=list[idx]||{name:'Attack',text:'',damage:'D6',dodge:true};
   var dmg=a.damage?rollExpr(a.damage):null;
   S.combat.pending={type:'incoming',foe:f.uid,title:f.name+' — '+a.name,text:a.text||'',dmg:dmg?dmg.total:0,dmgText:dmg?a.damage+' = '+dmg.text:'',dtype:a.type||'',ia:!!a.ignoreArmor,canDodge:a.dodge!==false&&(!!a.damage||!a.fear),canParry:!!a.parry,fear:!!a.fear,auto:true,noDefense:false};
-  jlog('combat',f.name+': '+a.name+' (D6 '+n+')',(dmg?dmg.total+' damage':'')+(a.fear?' · fear attack':''));
+  jlog('combat',f.name+' — '+a.name,(a.text||'')+(dmg?' ('+dmg.total+' damage)':''));
 }
 function npcWeapon(f,kind){ var ws=f.weapons; if(kind==='ranged') return ws.find(function(w){ return w.ranged; })||ws[0]; if(kind==='melee') return ws.find(function(w){ return !w.ranged; })||ws[0]; return ws[0]; }
 function npcBonus(f,w){ if(!f.bonus) return ''; var k=w&&w.ranged?'AGL':'STR'; return f.bonus[k]||f.bonus.STR||f.bonus.AGL||''; }
@@ -840,7 +834,7 @@ document.addEventListener('click',function(e){
         rows.forEach(function(x){ jlog('roll','Search found',x.text); }); save(); dlg(html); render(); }); break;
     case 's-treasure': closeDlg(); for(var i=0;i<(+t.dataset.n||1);i++) offerTreasure(); break;
     case 's-path': { var n2=d(4); addWaypoints(n2,'Secret path'); closeDlg(); save(); render(); break; }
-    case 's-details': { var g=genLocation(); jlog('roll','Hidden antechamber',genText(g)); UI.out.explore='<b>Hidden antechamber</b>: '+esc(genText(g)); UI.tool='explore'; closeDlg(); save(); render(); break; }
+    case 's-details': { var g=genLocation(); jlog('roll','Hidden antechamber',''); story('Behind it, a hidden antechamber: '+genText(g)+'.'); closeDlg(); dlg('<h3>Hidden antechamber</h3><p>'+genHtml(g)+'</p><div class="row" style="margin-top:10px"><button class="btn pri" data-a="close">Go on</button></div>'); save(); render(); break; }
     case 'scavenge': { var sc=T.pickRange(T.scavenge,d(10)); var txt2=sc.text+(sc.sub?' '+sc.sub.rows[d(sc.sub.die)-1]+'.':''); jlog('roll','Scavenge',txt2); if(curWp()){ curWp().scav=(curWp().scav||0)+1; if(curWp().scav>1) threatAdd(1,'Scavenging again takes a stretch'); }
       dlg('<h3>Scavenge</h3><p>'+esc(txt2)+'</p><div class="row" style="margin-top:8px">'+(sc.treasure?'<button class="btn pri" data-a="s-treasure" data-n="1">Draw a treasure</button>':'')+(sc.again?'<button class="btn" data-a="scavenge">Roll again</button>':'')+(sc.sub&&/Supplies|Interesting/.test(sc.text)?'<button class="btn" data-a="take-item" data-name="'+esc(sc.sub.rows.find(function(x){ return txt2.indexOf(x)>=0; })||'')+'">Add to my sheet</button>':'')+'<button class="btn ghost" data-a="close">Done</button></div>'); save(); render(); break; }
     case 'take-item': send('addItem',{name:t.dataset.name||'Item'}); closeDlg(); break;
@@ -873,22 +867,7 @@ document.addEventListener('click',function(e){
     case 'flee': jlog('combat','You flee!','A diversion waypoint is added'); S.combat=null; if(S.m&&S.m.status==='active') addWaypoints(1,'Fled'); save(); render(); break;
     case 'end-fight': { var obj=S.combat.objective, won=!alive().length, eid=S.combat.enc; jlog('combat','Fight over',S.combat.label); S.combat=null; if(obj&&S.m&&!S.m.objective){ S.m.objective=true; jlog('mission','Objective achieved',curMission().objective); }
       if(won&&S.m&&S.m.flags){ S.m.flags['won:'+eid]=true; var ew=findEncounter(eid); if(ew&&ew.time) threatAdd(ew.time,'The fight took time'); if(ew&&ew.onWin) applyEffects(ew.onWin,curWp(),wpDef(curWp()),{label:ew.label}); } save(); render(); break; }
-    case 'tool': UI.tool=t.dataset.t; render(); break;
-    case 'fortune': { var col=(document.querySelector('input[name=fcol]:checked')||{}).value||'yesno'; var tilt=(document.querySelector('input[name=ftilt]:checked')||{}).value||'even'; UI.fortCol=col; UI.fortTilt=tilt; var q=($('f-q')||{}).value||''; var fr3=fortune(col,tilt);
-      UI.out.fortune=(q?'<div class="small muted">'+esc(q)+'</div>':'')+'<b class="big">'+esc(fr3.res)+'</b> <span class="small muted">D6 '+fr3.dice.join(', ')+(fr3.dice.length>1?' → '+fr3.n:'')+(fr3.extreme?' · extreme or twist':'')+'</span>';
-      jlog('roll','Fortune'+(q?': '+q:''),fr3.res+' (D6 '+fr3.n+')'); save(); renderTool(); renderJournal(); break; }
-    case 'insp': { [].forEach.call(document.querySelectorAll('[data-insp]'),function(x){ UI.insp[x.dataset.insp]=x.checked; }); var p=inspiration(UI.insp); if(!p){ toast('Pick a column'); break; } UI.out.insp='<b class="big">'+esc(p)+'</b>'; jlog('roll','Inspiration',p); save(); renderTool(); renderJournal(); break; }
-    case 'two': { var oa=($('two-a')||{}).value||'Outcome 1', ob=($('two-b')||{}).value||'Outcome 2'; var n3=d(6); var res3=n3<=3?oa:ob; UI.out.two='D6 '+n3+': <b class="big">'+esc(res3)+'</b>'; jlog('roll','Two outcomes',res3+' (D6 '+n3+')'); save(); renderTool(); renderJournal(); break; }
-    case 'dd': { var k=+t.dataset.k; var n4=d(6); var row=T.dragonDemon[n4-1][k]; UI.out.dd=(k?'Demon':'Dragon')+' (D6 '+n4+'): <b>'+esc(row)+'</b>'; jlog('roll',(k?'Demon':'Dragon')+' effect',row); save(); renderTool(); renderJournal(); break; }
-    case 'suffer': { var s=T.pickRange(T.suffering,d(6)); var r5=rollExpr(s.dice); UI.lastSuffer=r5.total; UI.out.dmg='<b>'+esc(s.name)+'</b>: '+s.dice+' = <b class="big">'+r5.total+'</b> <span class="small muted">'+esc(r5.text)+'</span><div class="row" style="margin-top:6px"><button class="btn warn" data-a="suffer-apply">Apply to my sheet</button></div>'; jlog('roll','Suffering damage: '+s.name,r5.total+''); save(); renderTool(); renderJournal(); break; }
-    case 'suffer-apply': send('damage',{n:UI.lastSuffer||0,label:'Suffering damage'}); UI.out.dmg+='<div class="small muted">Applied.</div>'; renderTool(); break;
-    case 'treasure': offerTreasure(); save(); renderJournal(); break;
     case 'take-treasure': { A(UI.lastTreasures||(UI.lastTreasure?[UI.lastTreasure]:[])).forEach(function(tr){ if(tr.kind==='coins') send('coins',{unit:tr.unit,n:tr.amount}); else send('addItem',{name:tr.name,note:tr.note||'',wt:tr.wt}); }); UI.lastTreasures=null; closeDlg(); break; }
-    case 'x-loc': { var g2=genLocation(); UI.out.explore=genHtml(g2); jlog('roll','Location',genText(g2)); save(); renderTool(); renderJournal(); break; }
-    case 'x-inh': { var ih=inhabitant(); UI.out.explore='Inhabitants: <b class="big">'+esc(ih.name)+'</b>'; jlog('roll','Inhabitants',ih.name); save(); renderTool(); renderJournal(); break; }
-    case 'x-trap': closeDlg(); trapFlow(); break;
-    case 'x-threat': { var th2=T.threats[d(6)-1]; UI.out.explore='<b>'+esc(th2.text)+'</b> At 6: '+esc(th2.trigger); jlog('roll','Threat',th2.text); save(); renderTool(); renderJournal(); break; }
-    case 'note': { var tx=($('j-note')||{}).value||''; if(tx.trim()){ jlog('note','Note',tx.trim()); save(); render(); } break; }
   }
 });
 document.addEventListener('change',function(e){ if(e.target.dataset&&e.target.dataset.a==='army'){ S.army=e.target.checked; save(); } });
@@ -904,8 +883,8 @@ function leaveFlow(){
 function finishMission(){
   closeDlg(); var mi=curMission();
   var mk=mi.marks==null?5:mi.marks;
-  if(S.m.drowned){ S.done[mi.id]=S.done[mi.id]==='won'?'won':'lost'; S.m.status='won'; S.m.sink=null; jlog('mission','Lost: '+mi.title,'Score '+scoreTotal()); }
-  else if(S.m.objective){ S.done[mi.id]='won'; S.m.status='won'; S.m.sink=null; S.marks+=mk; jlog('mission',(MOD.missions.length>1?'Mission complete: ':'Adventure complete: ')+mi.title,(mk?'+'+mk+' advancement marks':'')+(mi.scoring?' · score '+scoreTotal():'')); }
+  if(S.m.drowned){ S.done[mi.id]=S.done[mi.id]==='won'?'won':'lost'; S.m.status='won'; S.m.sink=null; story(mi.lostText); jlog('mission','Lost: '+mi.title,mi.scoring?'Score '+scoreTotal():''); }
+  else if(S.m.objective){ S.done[mi.id]='won'; S.m.status='won'; S.m.sink=null; S.marks+=mk; if(mi.reward) story(mi.reward.text); jlog('mission',(MOD.missions.length>1?'Mission complete: ':'Adventure complete: ')+mi.title,(mk?'+'+mk+' advancement marks':'')+(mi.scoring?' · score '+scoreTotal():'')); }
   else { jlog('mission','Mission abandoned: '+mi.title,''); S.m=null; }
   S.combat=null; save(); render();
 }
