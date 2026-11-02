@@ -68,7 +68,7 @@
     d = window.collectSheet();
     const log = (m) => { if (window.addLog) window.addLog("Level Up", "✗", m, "fumble"); };
     if (!C().callingByName(d.calling || d.cls)) { log("Choose a calling first (or use Create)"); return; }
-    if (num(d.level) >= MAX()) { log("Already at level " + MAX() + " — heroes keep earning XP but gain no more levels"); return; }
+    if (num(d.level) >= MAX()) { log("Already at level " + MAX() + " — the highest level a hero can reach"); return; }
     ensureModal();
     lu = { hpMethod: "avg", roll: null, subclass: "", pick: { mode: "virtue", virtue: "" }, craft: "", reward: "", rewardItem: "", expertise: [], styles: {}, foes: [], lands: [], specChoose: [] };
     ctx = buildCtx(); computeSteps(); step = 0;
@@ -116,9 +116,7 @@
 
   // ── steps ──────────────────────────────────────────────────────────────
   function rHP() {
-    const xp = num(d.xp), need = (T().xpByLevel || [])[ctx.newLevel - 1];
     let h = '<p class="m-hint">' + esc(d.name || "Your hero") + ' rises from <b>' + d.level + '</b> to <b>' + ctx.newLevel + '</b> as a ' + esc(ctx.c.name) + '. (Single calling — multicalling is not modelled.)</p>';
-    if (need != null) h += '<div class="dndb-note">Experience: <b>' + xp + '</b> / ' + need + ' needed for level ' + ctx.newLevel + (xp < need ? ' — <span style="color:#e2a06b;">not yet earned; levelling anyway</span>' : ' ✓') + '</div>';
     if (ctx.features.length) h += '<div class="dndb-note">New at level ' + ctx.newLevel + ': <b>' + esc(ctx.features.join(", ")) + '</b></div>';
     const avg = Math.floor(ctx.hitDie / 2) + 1;
     h += '<span class="m-lbl" style="display:block;margin-top:10px;">Hit points (d' + ctx.hitDie + ')</span><div class="dndb-seg"><button class="dndb-seg-btn' + (lu.hpMethod === "avg" ? " on" : "") + '" data-hpm="avg">Fixed (' + avg + ')</button><button class="dndb-seg-btn' + (lu.hpMethod === "roll" ? " on" : "") + '" data-hpm="roll">Roll d' + ctx.hitDie + '</button></div>';

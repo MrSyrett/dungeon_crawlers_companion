@@ -461,6 +461,9 @@ body.dark .dtype-sel{background-image:url("data:image/svg+xml;utf8,<svg xmlns='h
 .inv-cost-val{font-family:var(--f-num);font-size:11px;font-weight:600;color:var(--ink);}
 .pick-sel{border:1px solid var(--input-border);background:var(--input-bg);color:var(--ink);font-family:var(--f-ui);font-size:12px;padding:5px 6px;border-radius:3px;outline:none;flex:1 1 160px;min-width:0;}
 .notes-box{padding:8px 10px;}
+.notes-feat{padding:8px 10px 0;}
+.notes-feat .nf-pair{display:flex;gap:10px;}
+.notes-feat .nf-pair input{flex:1 1 0;min-width:0;}
 .notes-box textarea{width:100%;min-height:80px;border:1px solid var(--rule);background:var(--input-bg);color:var(--ink);font-family:var(--f-ui);font-size:13px;line-height:1.5;padding:8px;outline:none;resize:vertical;}
 .feat-item{border-bottom:1px solid var(--rule);padding:6px 4px;}
 .feat-item .fi-name{font-family:var(--f-ui);font-weight:600;font-size:13px;color:var(--acc-dk);text-transform:uppercase;letter-spacing:.03em;}
@@ -1120,11 +1123,13 @@ body:not(.dark) .death-pip,body:not(.dark) .exh-pip{border-color:#8a7a52;}
   .rw-btn{min-height:34px;}
   .fw-pip{width:20px;height:20px;}
 }
-/* the LotR header carries eleven fields: let them wrap into two even rows */
+/* seven detail fields: one row on desktop; on narrow screens they wrap into full rows */
 .hdr-metarow{row-gap:7px;}
-.hdr-metarow>.lockfield{min-width:128px;}
-.hdr-metarow>.lockfield.lf-narrow{min-width:64px;}
+.hdr-metarow>.lockfield{min-width:92px;}
+.hdr-metarow>.lockfield.lf-narrow{min-width:56px;}
 .hdr-metarow>.lockfield.lf-wide{min-width:190px;}
+@media(max-width:768px){.hdr-metarow>*{flex:1 1 22%!important;}}
+@media(max-width:460px){.hdr-metarow>*{flex:1 1 40%!important;}}
 .lockfield label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sh-pip{position:relative;}
 .sh-pip.scar{background:var(--scar-c);border-color:var(--shadow-c);box-shadow:none;}
@@ -1328,18 +1333,16 @@ body.dark{--scar-c:#3a1f48;}
       </div>
     </div>
     <div class="hdr-metarow">
-      <div class="lockfield" style="flex:1.4 1 0;"><label>Culture</label><input type="text" id="f-culture" list="dl-cultures" placeholder="Hobbits of the Shire" oninput="onCultureChange()"></div>
-      <div class="lockfield" style="flex:1.1 1 0;"><label>Subculture</label><input type="text" id="f-subculture" list="dl-subcultures" placeholder="—" oninput="onCultureChange()"></div>
+      <div class="lockfield lf-narrow" style="flex:.55 1 0;"><label>Level</label><input type="number" id="f-level" min="1" max="10" value="1" oninput="onLevelChange()"></div>
       <div class="lockfield" style="flex:1.1 1 0;"><label>Calling</label><input type="text" id="f-class" list="dl-classes" placeholder="Warden" oninput="onClassChange()"></div>
       <div class="lockfield" style="flex:1.2 1 0;"><label id="lbl-subclass">Specialisation</label><input type="text" id="f-subclass" list="dl-subclasses" placeholder="from 3rd level" oninput="onSubclassChange()"></div>
-      <div class="lockfield lf-narrow" style="flex:.55 1 0;"><label>Level</label><input type="number" id="f-level" min="1" max="10" value="1" oninput="onLevelChange()"></div>
+      <div class="lockfield" style="flex:1.4 1 0;"><label>Culture</label><input type="text" id="f-culture" list="dl-cultures" placeholder="Hobbits of the Shire" oninput="onCultureChange()"></div>
+      <div class="lockfield" style="flex:1 1 0;"><label>Subculture</label><input type="text" id="f-subculture" list="dl-subcultures" placeholder="—" oninput="onCultureChange()"></div>
       <div class="lockfield" style="flex:1.2 1 0;"><label>Background</label><input type="text" id="f-background" list="dl-backgrounds" placeholder="—" oninput="onBackgroundChange()"></div>
-      <div class="lockfield" style="flex:.9 1 0;"><label>Standard of Living</label><select id="f-standard" onchange="scheduleAutosave()"><option value="">—</option><option>Poor</option><option>Frugal</option><option>Common</option><option>Prosperous</option><option>Rich</option><option>Very Rich</option></select></div>
-      <div class="lockfield lf-wide" style="flex:1.4 1 0;"><label>Distinctive Features</label><span style="display:flex;gap:4px;"><input type="text" id="f-feat1" list="dl-dfeatures" placeholder="Bold" data-nolock oninput="scheduleAutosave()"><input type="text" id="f-feat2" list="dl-dfeatures" placeholder="Wary" data-nolock oninput="scheduleAutosave()"></span></div>
-      <div class="lockfield" style="flex:1 1 0;"><label>Experience <span id="xp-lvl-badge"></span></label><span class="hdr-xp"><input type="number" id="f-xp" min="0" value="0" data-nolock class="no-spin" oninput="onXPChange()" title="Experience points — the next level's threshold is shown alongside"><span class="xp-next" id="xp-next">/ 300</span></span></div>
-      <div class="lockfield" style="flex:.9 1 0;"><label>Player</label><input type="text" id="f-player" placeholder="—" data-nolock oninput="scheduleAutosave()"></div>
-      <div class="lockfield lf-wide" style="flex:1.2 1 0;"><label>Rest</label><span class="rest-btns hdr-rest"><button class="rest-btn" onclick="shortRest()" title="Short Rest — spend Hit Dice; short-rest uses and craft slots return (8 hours on the road)">Short Rest</button><button class="rest-btn" onclick="longRest()" title="Long Rest — only in a safe haven: full HP, half your Hit Dice, −1 exhaustion">Long Rest</button></span></div>
+      <div class="lockfield" style="flex:1.6 1 0;"><label>Standard of Living</label><select id="f-standard" onchange="scheduleAutosave()"><option value="">—</option><option>Poor</option><option>Frugal</option><option>Common</option><option>Prosperous</option><option>Rich</option><option>Very Rich</option></select></div>
     </div>
+    <!-- XP and Player are no longer shown (narrative advancement); hidden carriers keep old saves' values -->
+    <input type="hidden" id="f-xp" value="0"><input type="hidden" id="f-player" value="">
   </div>
 
   <div class="body-row">
@@ -1380,6 +1383,7 @@ body.dark{--scar-c:#3a1f48;}
     <!-- MAIN: COMBAT / SHADOW / TABS -->
     <div class="main-col">
       <div class="mc-combat">
+      <div class="section-bar red"><span>Vitals</span><span class="hdr-right"><button class="hdr-btn" onclick="shortRest()" title="Short Rest — spend Hit Dice; short-rest uses and craft slots return (8 hours on the road)">Short Rest</button><button class="hdr-btn" onclick="longRest()" title="Long Rest — only in a safe haven: full HP, half your Hit Dice, −1 exhaustion">Long Rest</button></span></div>
       <div class="combat-strip">
         <div class="cbt-left">
           <div class="cbt ac-tile"><div class="c-lbl" id="ac-lbl">Armour Class</div>
@@ -1567,6 +1571,7 @@ body.dark{--scar-c:#3a1f48;}
       <!-- NOTES TAB -->
       <div class="tab-panel" id="tab-notes">
         <div class="section-bar"><span>Notes &amp; Tale</span></div>
+        <div class="notes-feat"><div class="fw-box"><label>Distinctive Features</label><span class="nf-pair"><input type="text" id="f-feat1" list="dl-dfeatures" placeholder="Bold" data-nolock oninput="scheduleAutosave()"><input type="text" id="f-feat2" list="dl-dfeatures" placeholder="Wary" data-nolock oninput="scheduleAutosave()"></span></div></div>
         <div class="notes-box"><textarea id="f-notes" data-nolock placeholder="Hope and fears, allies, the road behind and the road ahead…" oninput="scheduleAutosave()"></textarea></div>
       </div>
       </div><!-- mc-tabs -->
@@ -3291,7 +3296,7 @@ function renderFellowship(){
   const role = ($('fw-role').value || ''), rd = (D.journey().roles || []).find(r => r.name === role);
   $('fw-role-text').innerHTML = rd ? '<b>' + esc(rd.name) + ':</b> ' + esc(rd.task) + ' <button class="small-btn" style="margin-left:6px;" onclick="rollSkill(\'' + jsq(rd.skill) + '\')">Roll ' + esc(rd.skill) + '</button>' : 'Pick your journey role for the next journey (Guide, Hunter, Look-out or Scout).';
   renderSongs();
-  const tr = num($('fw-heir-train').value), L = totalLevel(), xp = num($('f-xp').value);
+  const tr = num($('fw-heir-train').value), L = totalLevel(), xp = num(($('f-xp') || {}).value);
   $('fw-heir-note').innerHTML = tr ? 'Should this hero fall or retire, the heir inherits <b>' + Math.min(tr * L, Math.ceil(xp / 2)) + ' XP</b> (training ' + tr + ' × level ' + L + ', at most half your XP) and up to three magical heirlooms. Raise an Heir (Yule): 50 s more each time.' : 'Raise an Heir (Yule undertaking): spend 50 silver pennies on a successor\'s training and name them here.';
 }
 function setFellowshipPip(i){ const cur = num($('fw-points').value); $('fw-points').value = (i === cur ? i - 1 : i); renderFellowship(); scheduleAutosave(); }
@@ -3334,7 +3339,7 @@ function performSong(i){
 // ═══ XP ═══════════════════════════════════════════════════════════════════
 function xpNext(){ const t = D.tables(); const L = totalLevel(); return (t && t.xpByLevel && L < MAX_LEVEL) ? t.xpByLevel[L] : null; }
 function renderXP(){
-  const nx = xpNext(), xp = num($('f-xp').value), el = $('xp-next'), b = $('xp-lvl-badge');
+  const el = $('xp-next'); if(!el) return; const nx = xpNext(), xp = num(($('f-xp') || {}).value), b = $('xp-lvl-badge');
   if(!el) return;
   if(nx == null){ el.textContent = '· max'; el.classList.remove('ready'); el.title = (D.tables() || {}).beyondTenth || ''; if(b) b.innerHTML = ''; return; }
   el.textContent = '/ ' + nx; const ready = xp >= nx; el.classList.toggle('ready', ready);

@@ -502,9 +502,7 @@ body.dark .sheet{border-color:#444;}
 .lockfield input{font-size:12px;}
 .hdr-field input::placeholder,.lockfield input::placeholder{color:rgba(255,255,255,.42);}
 body.dark .hdr-field input,body.dark .lockfield input{color:#fff;}
-.rest-cell{flex:1.1 1 0;display:flex;align-items:stretch;min-width:76px;}
-.hdr-rest-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;background:rgba(255,255,255,.10);color:#fff;border:1px solid rgba(255,255,255,.28);border-radius:7px;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;}
-.hdr-rest-btn:hover{background:rgba(255,255,255,.2);}
+.sl .sd-rest-btn{margin-left:0;}   /* sits right after Initiative in the Vitals header */
 
 /* 2 — each section is its own card; the columns hold them in gapped flex */
 .main-body{display:flex;gap:14px;padding:16px;border-bottom:none;align-items:flex-start;}
@@ -788,14 +786,13 @@ body.dark .sdt-badge.bad{color:#f08a84;border-color:#a8433d;}
       <div class="hdr-field name-primary"><label>Name</label><input type="text" id="f-name" placeholder="Character Name"></div>
     </div>
     <div class="hdr-metarow">
-      <div class="lockfield" style="flex:1.3 1 0;"><label>Ancestry</label><input type="text" id="f-ancestry" placeholder="Elf, Dwarf..."></div>
+      <div class="lockfield" style="flex:.6 1 0;"><label>Level</label><input type="text" id="f-level" placeholder="1" style="font-size:16px;font-weight:900;"></div>
       <div class="lockfield" style="flex:1.3 1 0;"><label>Class</label><input type="text" id="f-class" placeholder="Fighter, Wizard..."></div>
-      <div class="lockfield"><label>Title</label><input type="text" id="f-title" placeholder="Apprentice..."></div>
+      <div class="lockfield" style="flex:1.3 1 0;"><label>Ancestry</label><input type="text" id="f-ancestry" placeholder="Elf, Dwarf..."></div>
+      <div class="lockfield" style="flex:1.6 1 0;"><label>Background</label><input type="text" id="f-background" placeholder="Acolyte, Soldier..."></div>
+      <div class="lockfield" style="flex:1.5 1 0;"><label>Title</label><input type="text" id="f-title" placeholder="Apprentice..."></div>
       <div class="lockfield" style="flex:1.6 1 0;"><label>Alignment</label><input type="text" id="f-alignment" placeholder="Lawful / Neutral / Chaotic"></div>
-      <div class="lockfield"><label>Background</label><input type="text" id="f-background" placeholder="Acolyte, Soldier..."></div>
       <div class="lockfield"><label>Deity</label><input type="text" id="f-deity" placeholder=""></div>
-      <div class="lockfield" style="flex:.5 1 0;"><label>Level</label><input type="text" id="f-level" placeholder="1" style="font-size:16px;font-weight:900;"></div>
-      <div class="rest-cell"><button onclick="takeRest()" class="hdr-rest-btn" title="Rest — heal and recover"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13 3a9 9 0 1 0 8 13.4A7.2 7.2 0 0 1 13 3Z"/></svg> Rest</button></div>
     </div>
   </div>
 
@@ -823,11 +820,11 @@ body.dark .sdt-badge.bad{color:#f08a84;border-color:#a8433d;}
 
       <!-- VITALS: HP / AC / XP / Luck -->
       <div class="card sd-vitals-card">
-      <div class="sl"><span>Vitals</span><button type="button" class="trk-add sd-init-btn" onclick="rollInitiative()" title="Roll Initiative — d20 + DEX modifier (posted to the campaign Roll Log)">Initiative <b id="init-mod">+0</b></button></div>
+      <div class="sl"><span>Vitals</span><button type="button" class="trk-add sd-init-btn" onclick="rollInitiative()" title="Roll Initiative — d20 + DEX modifier (posted to the campaign Roll Log)">Initiative<b id="init-mod" hidden>+0</b></button><button type="button" class="trk-add sd-rest-btn" onclick="takeRest()" title="Rest — heal and recover"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13 3a9 9 0 1 0 8 13.4A7.2 7.2 0 0 1 13 3Z"/></svg> Rest</button></div>
       <div class="sd-vitals">
         <div class="sd-vital">
           <span class="sv-lbl">HP</span>
-          <div class="sv-row"><input type="text" class="sv-big" id="hp-current" data-nolock placeholder="0" oninput="onHPChange()"><span class="sv-slash">/</span><input type="text" class="sv-sm" id="hp-max" data-nolock placeholder="0"></div>
+          <div class="sv-row"><input type="text" class="sv-big" id="hp-current" data-nolock placeholder="0" oninput="onHPChange()"><span class="sv-slash">/</span><input type="text" class="sv-sm" id="hp-max" placeholder="0"></div>
         </div>
         <div class="sd-vital sd-vital-ac">
           <span class="sv-lbl">AC</span>
@@ -3660,6 +3657,8 @@ function setAuto(k, on){ _sdAuto[k] = !!on; if(k === 'stats'){ sdApplyStatsMode(
 function sdApplyStatsMode(){
   const man = !isAuto();
   const xn = document.getElementById('xp-next');
+  const hm = document.getElementById('hp-max');   // Max HP: locked in Auto (level-ups set it), your own number in Manual
+  if(hm){ hm.readOnly = !man; if(man) hm.setAttribute('data-nolock',''); else hm.removeAttribute('data-nolock'); hm.removeAttribute('data-lk-ro'); hm.title = man ? 'Manual mode: your own Max HP' : 'Max HP — set by level-ups (switch to Manual under the lock to edit)'; }
   if(xn){ xn.readOnly = !man; if(man) xn.setAttribute('data-nolock',''); else xn.removeAttribute('data-nolock'); xn.title = man ? 'Manual mode: your own XP target' : 'Auto: 10 × current level'; }
   [['ac-val','.sd-vital-ac .sv-lbl','AC'],['armor-val','.def-cell .def-mini','Armor']].forEach(([id, lblSel, lbl]) => {
     const el = document.getElementById(id); if(!el) return;
@@ -5327,6 +5326,12 @@ if(typeof applyAutoLock==='function') applyAutoLock(_autoConsume);   // lock der
 @container (max-width:460px){
   .hdr-metarow > *{flex:1 1 47%!important;}
 }
+/* Row 2 (7 fields: Level · Class · Ancestry/Race · …) wraps into full rows:
+   4 + 3 on medium widths, 3 + 2 + 2 on phones, so no field sits alone. */
+@container (max-width:900px){.hdr-row .hdr-metarow>*{flex:1 1 22%!important;}}
+@media(max-width:768px){.hdr-row .hdr-metarow>*{flex:1 1 22%!important;}}
+@container (max-width:460px){.hdr-row .hdr-metarow>*{flex:1 1 40%!important;}.hdr-row .hdr-metarow>:nth-child(-n+3){flex:1 1 26%!important;}}
+@media(max-width:460px){.hdr-row .hdr-metarow>*{flex:1 1 40%!important;}.hdr-row .hdr-metarow>:nth-child(-n+3){flex:1 1 26%!important;}}
 @container (max-width:420px){
   .stats-grid{grid-template-columns:1fr 1fr;}
   .hdr-fields,.hdr-fields-2{grid-template-columns:1fr;}

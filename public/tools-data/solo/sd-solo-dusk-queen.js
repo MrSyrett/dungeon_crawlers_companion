@@ -137,6 +137,7 @@ window.SD_SOLO_MODULES.push({
         text:'The toppled remains of a great idol of the Dusk Queen lie in pieces; centipedes pick through the rubble after smaller vermin. A broken-down wall opens north into a cave. To the west, a rusted portcullis furred with yellow mold — through it you can make out a round chamber.',
         challenges:[
           { id:'mold', label:'Force the mold-covered portcullis', choice:true, button:'Force it', hideIf:'portcullis-open', note:'Anyone who disturbs or burns the yellow mold risks it.',
+            confirm:'The yellow mold is the deadly kind. Everyone at the portcullis breathes the spores and must pass a CON check, DC 21 — fail, and they die within the minute. Force it anyway?',
             success:'You heave at the bars. A cloud of yellow spores bursts over you.', onSuccess:{ saveAll:{ stat:'con', dc:21, label:'Yellow mold (CON)', onFail:{ kill:true, say:'{name} chokes on the spores. After a long, terrible minute, they are still.' }, after:{ flag:'portcullis-open', say:'The rusted portcullis grinds up at last.' } } } }
         ],
         search:[ { id:'mold', text:'The yellow mold on the portcullis is the deadly kind — its spores kill. Disturbing it, or burning it, would be a desperate act.', fx:{ clue:{ id:'mold', text:'The yellow mold on the portcullis kills whoever disturbs it (CON DC 21).' } } } ],

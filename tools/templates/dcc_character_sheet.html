@@ -484,8 +484,10 @@ body.dark .hdr-field input{color:#fff;border-bottom-color:transparent;}
 .hdr-field.name-primary input{font-size:17px;}
 .lockfield input{font-size:13px;}
 .hdr-field input::placeholder,.lockfield input::placeholder{color:rgba(255,255,255,.5);}
-.hdr-metarow .rest-btn{background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.32);border-radius:5px;}
-.hdr-metarow .rest-btn:hover{background:rgba(255,255,255,.3);}
+/* Short / Long Rest sit on the right of the Defense header */
+.section-bar.has-rest{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:5px;padding-bottom:5px;}
+.section-bar.has-rest .sb-rest{display:flex;gap:5px;flex:0 0 auto;}
+.section-bar.has-rest .rest-btn{flex:0 0 auto;padding:4px 10px;letter-spacing:.06em;}
 
 /* 2 — card bubbles + gapped body */
 .sheet-body{padding:16px;display:flex;flex-direction:column;gap:14px;background:transparent;}
@@ -547,6 +549,12 @@ body.dark .section-bar::after{background:#544c54;}
 /* Header meta fields wrap into 2-3 columns on small screens (gold-standard) */
 @media(max-width:768px){.hdr-metarow>*{flex:1 1 31%!important;}}
 @media(max-width:460px){.hdr-metarow>*{flex:1 1 47%!important;}}
+/* Row 2 (7 fields: Level · Class · Ancestry/Race · …) wraps into full rows:
+   4 + 3 on medium widths, 3 + 2 + 2 on phones, so no field sits alone. */
+@container (max-width:900px){.hdr-row .hdr-metarow>*{flex:1 1 22%!important;}}
+@media(max-width:768px){.hdr-row .hdr-metarow>*{flex:1 1 22%!important;}}
+@container (max-width:460px){.hdr-row .hdr-metarow>*{flex:1 1 40%!important;}.hdr-row .hdr-metarow>:nth-child(-n+3){flex:1 1 26%!important;}}
+@media(max-width:460px){.hdr-row .hdr-metarow>*{flex:1 1 40%!important;}.hdr-row .hdr-metarow>:nth-child(-n+3){flex:1 1 26%!important;}}
 
 /* dd-no-spin-global — hide number-input spinner arrows everywhere */
 input[type=number]{-moz-appearance:textfield;appearance:textfield;}
@@ -735,19 +743,13 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="hdr-field name-primary"><label>Character name</label><input type="text" id="f-name" placeholder="Character Name"></div>
     </div>
     <div class="hdr-metarow">
-      <div class="lockfield" style="flex:1.4 1 0;"><label>Race</label><input type="text" id="f-race" placeholder="Human, Bune..."></div>
+      <div class="lockfield" style="flex:.6 1 0;"><label>Level</label><input type="text" id="f-level" data-nolock placeholder="1" title="Level (editable while locked)" style="text-align:center;"></div>
       <div class="lockfield" style="flex:1.2 1 0;"><label>Class</label><input type="text" id="f-class"></div>
+      <div class="lockfield" style="flex:1.4 1 0;"><label>Race</label><input type="text" id="f-race" placeholder="Human, Bune..."></div>
       <div class="lockfield" style="flex:1.5 1 0;"><label>Gender / Pronouns</label><input type="text" id="f-gender"></div>
       <div class="lockfield" style="flex:.6 1 0;"><label>Size</label><input type="text" id="dr-size" placeholder="—" oninput="dccSizeCoerce(this)" title="Size (number only)" style="text-align:center;"></div>
       <div class="lockfield"><label>Crawler #</label><input type="text" id="f-crawler"></div>
-      <div class="lockfield" style="flex:.6 1 0;"><label>Level</label><input type="text" id="f-level" data-nolock placeholder="1" title="Level (editable while locked)" style="text-align:center;"></div>
       <div class="lockfield" style="flex:.6 1 0;"><label>Floor</label><input type="text" id="f-floor" data-nolock placeholder="1" title="Current dungeon floor (F). Many effects read as ‘X + F’." style="text-align:center;"></div>
-      <div class="lockfield" style="flex:2 1 0;"><label>Rest</label>
-        <div style="display:flex;gap:4px;">
-          <button type="button" class="rest-btn" onclick="rest('short')" title="Short Rest (2 hrs): heal 5 Health Bar slots and regain half your Mana.">Short</button>
-          <button type="button" class="rest-btn" onclick="rest('long')" title="Long Rest (8 hrs): full Health Bar, full Mana, and clears all Fatigued.">Long</button>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -807,7 +809,10 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         </div>
         </div>
       <div class="card def-card">
-        <div class="section-bar">Defense</div>
+        <div class="section-bar has-rest"><span>Defense</span><span class="sb-rest">
+          <button type="button" class="rest-btn" onclick="rest('short')" title="Short Rest (2 hrs): heal 5 Health Bar slots and regain half your Mana.">Short Rest</button>
+          <button type="button" class="rest-btn" onclick="rest('long')" title="Long Rest (8 hrs): full Health Bar, full Mana, and clears all Fatigued.">Long Rest</button>
+        </span></div>
 
           <!-- EVADE / DR / EXTERNAL BUFFS -->
           <div class="combat-section" style="display:flex;gap:0;align-items:stretch;">
