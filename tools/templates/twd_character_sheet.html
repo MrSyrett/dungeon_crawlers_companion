@@ -657,8 +657,8 @@ body.dark .act-mini{color:var(--yz);border-color:var(--yz);}
      would nest it inside itself. (A cross-origin parent makes the check throw,
      and "framed" is the safe answer to that too.)
 
-     Order in the header is VTT · dice · Clear: dice-anim.js mounts its gear
-     immediately before the LAST .log-clear, which is Clear. */
+     Order in the header is Roll Log · VTT · ⚙ · dice · Clear: sheet-settings.js and
+     dice-anim.js mount their buttons immediately before the LAST .log-clear, which is Clear. */
   var __ddFramed = false;
   try { __ddFramed = window.self !== window.top; } catch (e) { __ddFramed = true; }
 
@@ -756,7 +756,7 @@ body.dark .act-mini{color:var(--yz);border-color:var(--yz);}
       <div class="vit-row">
       <div class="stat-bubbles m-armor">
         <div class="card">
-          <div class="section-bar accent"><span>Armor</span></div>
+          <div class="section-bar accent"><span id="armor-lbl">Armor</span></div>
           <div class="blk bubble-val" onclick="rollArmor()" title="Armor Level of the gear you have equipped — click to roll it; each 6 stops one point of damage"><span class="stress-val" id="armor-val">0</span></div>
         </div>
       </div>
@@ -832,7 +832,7 @@ body.dark .act-mini{color:var(--yz);border-color:var(--yz);}
 <!-- Roll Log -->
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
-  <div class="log-header"><span class="log-title" aria-hidden="true"></span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
+  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #3a2a2a;background:transparent;color:#a89f93;" title="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="if(window.YZEB)YZEB.launch();" title="Character Builder">Create</button>
@@ -866,6 +866,7 @@ body.dark .act-mini{color:var(--yz);border-color:var(--yz);}
 </div>
 
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">The Walking Dead — Quick Rules</div><button class="x" onclick="closeRules()">✕</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
+<div id="stats-overlay" class="ov" onclick="if(event.target===this)closeStats()"><div class="modal" style="max-width:420px;"><div class="modal-hd"><div class="ttl">Your stats</div><button class="x" onclick="closeStats()">✕</button></div><div class="modal-bd" id="stats-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">✕</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
 <div id="advance-overlay" class="ov" onclick="if(event.target===this)closeAdvance()"><div class="modal"><div class="modal-hd"><div class="ttl">✦ Advancement</div><button class="x" onclick="closeAdvance()">✕</button></div><div class="modal-bd" id="advance-body"></div></div></div>
 <div id="crit-overlay" class="ov" onclick="if(event.target===this)closeCritInfo()"><div class="modal"><div class="modal-hd"><div class="ttl">Critical Injury</div><button class="x" onclick="closeCritInfo()">✕</button></div><div class="modal-bd" id="crit-info-body"></div></div></div>
@@ -1001,7 +1002,7 @@ function setHealth(i){
   st.dmg=max-newRem; renderVitals(); scheduleAutosave();
 }
 function bumpMax(w,d){ var st=S[w]; st.max=clamp(st.max+d,0,20); if(st.dmg>st.max)st.dmg=st.max; renderVitals(); scheduleAutosave(); }
-function autoDerive(w){ S[w].max=derivedMax(w); if(S[w].dmg>S[w].max)S[w].dmg=S[w].max; renderVitals(); scheduleAutosave(); addLog(w==='health'?'Health':'Resolve','max '+S[w].max, 'derived from attributes','normal'); }
+function autoDerive(w){ S[w].max=derivedMax(w); if(S[w].dmg>S[w].max)S[w].dmg=S[w].max; renderVitals(); scheduleAutosave(); }
 
 // ── Render: conditions ──
 function renderConds(){
@@ -1070,12 +1071,15 @@ function addRelRow(){ S.relationships.push({name:'',note:''}); renderRelationshi
 function relock(){ try{ if(window.applySheetLock) window.applySheetLock(); }catch(e){} }
 function gearOf(kind){ var out=[]; S.gear.forEach(function(g,i){ if((g.kind||'gear')===kind) out.push({g:g,i:i}); }); return out; }
 // Core p.67: worn armor's penalty is subtracted from every Mobility roll (soft vest −1, body armor −2, metal-plated −3).
-function armorMobPenalty(){ var n=0; S.gear.forEach(function(g){ if(g.kind!=='armor'||!g.equipped) return;
+function armorMobPenalty(){ return manual('mobPen')?Math.max(0,num(S.man.mobPen)):armorMobPenaltyCalc(); }
+function armorMobPenaltyCalc(){ var n=0; S.gear.forEach(function(g){ if(g.kind!=='armor'||!g.equipped) return;
   var c=G(window.TWD_ARMOR).find(function(a){ return a.name===g.name; }), m=String(g.penalty!=null&&g.penalty!==''?g.penalty:((c&&c.penalty)||g.note||'')).match(/[-−–]\s*(\d+)/);
   n+=m?parseInt(m[1],10):0; }); return n; }
 function skillPenalty(name){ return name==='Mobility'?armorMobPenalty():0; }
-function armorRating(){ var r=0; S.gear.forEach(function(g){ if(g.kind==='armor'&&g.equipped) r+=num(g.rating); }); return r; }
-function renderArmorVal(){ var el=$('armor-val'); if(el) el.textContent=armorRating(); }
+function armorRatingCalc(){ var r=0; S.gear.forEach(function(g){ if(g.kind==='armor'&&g.equipped) r+=num(g.rating); }); return r; }
+function armorRating(){ return manual('armor')?Math.max(0,num(S.man.armor)):armorRatingCalc(); }
+function renderArmorVal(){ var el=$('armor-val'); if(el) el.textContent=armorRating();
+  var lb=$('armor-lbl'), m=!autoOn('stats'); if(lb){ lb.textContent='Armor'+(m?' ✎':''); lb.onclick=m?editStats:null; lb.style.cursor=m?'pointer':''; lb.title=m?'Your own numbers — click to change':''; } }
 // Weapon damage is a number, except explosives which keep their Blast Power text ("BP 8").
 function dmgVal(v){ return /BP\s*\d+/i.test(String(v))?String(v).trim():num(v); }
 function gEdit(i,f,v){ var g=S.gear[i]; if(!g)return; g[f]=f==='damage'?dmgVal(v):f==='rating'?num(v):v; scheduleAutosave(); if(f==='weight')renderEnc(); if(f==='rating')renderArmorVal(); if((g.kind==='weapon')&&g.equipped)renderAttacks(); }
@@ -1154,12 +1158,13 @@ function rollUnarmed(){
 function renderWeapons(){ renderInventory(); renderAttacks(); }
 function renderGear(){ renderInventory(); }
 // TWD core p.28: you can carry a number of slots equal to Strength + 2 (Packmule talent: +1).
-function encLimit(){ var n=attrVal('STR')+2; (S.talents||[]).forEach(function(t){ if(t&&/^packmule$/i.test(String(t.name||'').trim())) n++; }); return n; }
+function encLimit(){ return manual('carry')?Math.max(0,num(S.man.carry)):encLimitCalc(); }
+function encLimitCalc(){ var n=attrVal('STR')+2; (S.talents||[]).forEach(function(t){ if(t&&/^packmule$/i.test(String(t.name||'').trim())) n++; }); return n; }
 function renderEnc(){
   var limit=encLimit(), load=0;
   S.gear.forEach(function(g){ load+=itemWeight(g.weight==null?'1':g.weight); });
   var loadStr=(Math.round(load*100)/100).toString();
-  var le=$('enc-limit'), lo=$('enc-load'); if(le)le.textContent=limit; if(lo){ lo.textContent=loadStr; lo.className='e-val'+(load>limit?' over':''); }
+  var le=$('enc-limit'), lo=$('enc-load'), m=!autoOn('stats'); if(le){ le.textContent=limit+(m?' ✎':''); le.onclick=m?editStats:null; le.style.cursor=m?'pointer':''; le.title=m?'Your own number — click to change':''; } if(lo){ lo.textContent=loadStr; lo.className='e-val'+(autoOn('enc')&&load>limit?' over':''); lo.title=autoOn('enc')&&load>limit?'Over your carry limit':''; }
 }
 
 // ── Picker (weapons + gear) ──
@@ -1341,7 +1346,7 @@ function rollQuick(){
   doPool(n+'d6 free pool', n, false);
 }
 function rollArmor(){
-  var r=armorRating(); if(r<1){ addLog('Armor','—','No armor equipped — equip armor on the Gear tab','fumble'); return; }
+  var r=armorRating(); if(r<1){ sheetToast('No armor equipped — equip armor on the Gear tab'); return; }
   var rolls=[]; for(var i=0;i<Math.min(12,r);i++)rolls.push(die6());
   var c=countPool(rolls);
   animDice(rolls, [], false);
@@ -1349,7 +1354,7 @@ function rollArmor(){
 }
 function rollCrit(kind){
   var table=(kind==='phys')?CRITP:CRITM;
-  if(!table || !table.length){ addLog((kind==='phys'?'Physical':'Mental')+' Crit','—','No critical-injury table for this system','normal'); return; }
+  if(!table || !table.length){ sheetToast('No critical-injury table for this system'); return; }
   var d=1+Math.floor(Math.random()*6), u=1+Math.floor(Math.random()*6), code=''+d+u;
   var row=critLookup(table,code);
   var name=row?((kind==='phys'?row.injury:(row.trauma||row.injury))||('Critical '+code)):('Critical '+code);
@@ -1410,14 +1415,14 @@ function doPush(){
   var base=pr.base.map(function(v){ return v===6?6:die6(); });
   var stress=(pr.stress||[]).map(function(v){ return v===6?6:die6(); });
   var ones=0;
-  if(alien){ bumpStress(1); stress.push(die6()); }   // +1 Stress → add one Stress Die to the re-roll
+  if(alien){ if(autoOn('spend')) bumpStress(1); stress.push(die6()); }   // +1 Stress → add one Stress Die to the re-roll
   stress.forEach(function(v){ if(v===1)ones++; });
   var bad=alien && ones>0;
   var cc=countPool(base.concat(stress)), t;
   if(pr.kind==='attack') t=atkResult(cc.succ>=1, cc.succ, pr.wdmg, pr.bp||0);
   else t=tierOf(cc.succ);
   var detail=poolStr(base)+(stress.length?' + '+stress.length+' stress('+stress.join(',')+')':'')+' · '+cc.succ+' succ · PUSHED'
-    +(alien?' (+1 stress)'+badTag(ones):(cc.bane?' — a condition / '+cc.bane+' damage or stress':' — take a condition'));
+    +(alien?(autoOn('spend')?' (+1 stress)':' (add 1 stress)')+badTag(ones):(cc.bane?' — a condition / '+cc.bane+' damage or stress':' — take a condition'));
   animDice(base, stress, glowFor(cc.succ, bad));
   addLog(pr.label+' · pushed', cc.succ+'  '+t.t, detail, t.type);
   if(bad) onBad(pr.label+' · pushed');
@@ -1570,6 +1575,7 @@ function applySheet(d){
   S.crits = Array.isArray(d.crits) ? d.crits.map(function(c){ return {name:c.name||'',effect:c.effect||'',mod:num(c.mod)}; }) : [];
   if(Array.isArray(d.relationships)) S.relationships=d.relationships.map(function(r){ return {name:r.name||'',note:r.note||r.type||''}; });
   S.turnBased=d.turnBased!==false;
+  S.auto=(d.auto&&typeof d.auto==='object')?Object.assign({},d.auto):{}; S.man=(d.man&&typeof d.man==='object')?Object.assign({},d.man):{};
   if(d.act && typeof d.act==='object') S.act={full:!!d.act.full,quick:num(d.act.quick),used:num(d.act.used),overwatch:!!d.act.overwatch};
   _lastRoll=null;
   renderAll();
@@ -1589,15 +1595,15 @@ function saveSheet(quiet){
   var data=collectSheet(), json=JSON.stringify(data);
   try{ localStorage.setItem('twd_sheet',json); }catch(e){}
   if(window.__ddSave) window.__ddSave({ twd_sheet:json });
-  if(!quiet) addLog('Sheet Saved','✓',data.name||'Unnamed','normal');
+  if(!quiet) sheetToast('Sheet saved');
 }
 function syncDocTitle(){ var name=($('f-name').value||'').trim(); if(name&&window.__ddSaveTitle) window.__ddSaveTitle(name); }
 function exportSheet(){
   var data=collectSheet(), blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=((data.name||'yze-character').replace(/[^a-z0-9]+/gi,'_').toLowerCase()||'yze-character')+'.json'; a.click();
-  setTimeout(function(){ URL.revokeObjectURL(a.href); },1000); addLog('Sheet Exported','↓',a.download,'normal');
+  setTimeout(function(){ URL.revokeObjectURL(a.href); },1000); sheetToast('Exported '+a.download);
 }
-function importSheet(input){ var f=input.files&&input.files[0]; if(!f)return; var r=new FileReader(); r.onload=function(){ try{ applySheet(JSON.parse(r.result)); saveSheet(true); addLog('Imported','↑',f.name,'normal'); }catch(e){ addLog('Import failed','✗','Not a valid sheet file','fumble'); } }; r.readAsText(f); input.value=''; }
+function importSheet(input){ var f=input.files&&input.files[0]; if(!f)return; var r=new FileReader(); r.onload=function(){ try{ applySheet(JSON.parse(r.result)); saveSheet(true); sheetToast('Imported '+f.name); }catch(e){ sheetToast('Import failed — not a valid sheet file','fumble'); } }; r.readAsText(f); input.value=''; }
 var _pageReady=false; setTimeout(function(){ _pageReady=true; },2500);
 function autoSaveOnExit(){ if(!_pageReady)return; try{ saveSheet(true); }catch(e){} try{ syncDocTitle(); }catch(e){} }
 window.addEventListener('beforeunload',autoSaveOnExit); window.addEventListener('pagehide',autoSaveOnExit);
@@ -1621,7 +1627,7 @@ function actSynth(){ return (typeof isAndroid==='function') && isAndroid(); }
 function actPoolOf(skName, bonus){ var s=skillObj(skName)||{attr:'STR'}; return Math.max(1, attrVal(s.attr)+num(S.skills[skName])+num(bonus)-condPenaltyFor(s.attr)-critPenalty()-skillPenalty(skName)); }
 function actDo(i,j){
   var o=_actOpts[i]; if(!o) return;
-  if(o.blocked){ addLog(o.name, o.blocked, '', 'normal'); return; }
+  if(o.blocked){ sheetToast(o.name+': '+o.blocked); return; }
   if(!actCan(o.kind)){ actSpend(o.kind, o.name); return; }
   var run=(o.btns&&o.btns[j])?o.btns[j][1]:o.run;
   _actFromTab=true; var ok; try{ ok=run(); } finally{ _actFromTab=false; }
@@ -1654,7 +1660,7 @@ function actWeaponSub(w){
   return bits.join(' · ');
 }
 function actOutOfAmmo(w){ var a=parseInt(w.ammo,10); return (!isNaN(a) && a<=0) ? 'Out of ammo' : ''; }
-function actSkillRoll(name, label, bonus){ return function(){ var s=skillObj(name); if(!s){ addLog(label||name,'—','No '+name+' skill on this sheet','normal'); return; } var gb=num(bonus)||gearSkillBonus(name); var pool=attrVal(s.attr)+num(S.skills[name])+gb-condPenaltyFor(s.attr)-critPenalty()-skillPenalty(name); doPool((label?label+' · ':'')+name+' ('+s.attr+')'+(gb?' '+(gb>0?'+':'−')+Math.abs(gb)+' gear':''), pool, true); }; }
+function actSkillRoll(name, label, bonus){ return function(){ var s=skillObj(name); if(!s){ sheetToast('No '+name+' skill on this sheet'); return; } var gb=num(bonus)||gearSkillBonus(name); var pool=attrVal(s.attr)+num(S.skills[name])+gb-condPenaltyFor(s.attr)-critPenalty()-skillPenalty(name); doPool((label?label+' · ':'')+name+' ('+s.attr+')'+(gb?' '+(gb>0?'+':'−')+Math.abs(gb)+' gear':''), pool, true); }; }
 function actLogOnly(label, result, detail){ return function(){ addLog(label, result, detail||'', 'normal'); }; }
 
 // THE WALKING DEAD (Core p.64-67): in a brawl everyone gets ONE action per round,
@@ -1666,7 +1672,26 @@ function actLogOnly(label, result, detail){ return function(){ addLog(label, res
 // is spent automatically and nothing greys out — the Action pip stays and can be ticked by hand
 // (as it can when on); being Broken still applies.
 function turnOn(){ return S.turnBased!==false; }
-function toggleTurnMode(){ S.turnBased=!turnOn(); var a=actState(); a.full=false; a.quick=0; a.used=0; a.overwatch=false; addLog('Turn-based mode',turnOn()?'On':'Off',turnOn()?'Actions are tracked per round':'Actions aren\'t spent automatically','normal'); renderAction(); scheduleAutosave(); }
+// SHEET SETTINGS (⚙) — sheet-settings.js draws these; the values live in S and save with the sheet.
+// S.auto.{spend,stats,enc} default ON; S.turnBased keeps its own key.
+if(typeof window.sheetToast!=='function') window.sheetToast=function(t){ if(window.console) console.log(t); };
+function autoOn(k){ return !(S&&S.auto&&S.auto[k]===false); }
+function setAuto(k,on){ S.auto=S.auto||{}; S.auto[k]=!!on; renderAttrSkills(); renderArmorVal(); renderEnc(); scheduleAutosave(); }
+window.SHEET_SETTINGS=function(){ return [
+  {key:'turn',group:'auto',label:'Turn-based actions',hint:'Rolls and Action-tab moves take your one action per round; off: tick it yourself',get:turnOn,set:function(on){ if(on!==turnOn()) toggleTurnMode(); }},
+  {key:'spend',group:'auto',label:'Add Stress when pushing',hint:'Pushing a roll adds 1 Stress by itself; off: add it yourself',get:function(){ return autoOn('spend'); },set:function(on){ setAuto('spend',on); }},
+  {key:'stats',group:'auto',label:'Auto-calculated stats',hint:'Armor Level, armor Mobility penalty and carry limit from your gear and Strength; off: type your own',get:function(){ return autoOn('stats'); },set:function(on){ if(!on){ S.man=S.man||{}; ['armor','mobPen','carry'].forEach(function(k){ if(S.man[k]==null) S.man[k]=manCalc(k); }); } setAuto('stats',on); }},
+  {key:'enc',group:'auto',label:'Encumbrance warning',hint:'Flag Carried when it goes over your carry limit',get:function(){ return autoOn('enc'); },set:function(on){ setAuto('enc',on); }}
+]; };
+// Auto-calculated stats off: the player's own numbers (S.man) replace the computed ones.
+function manCalc(k){ return k==='armor'?armorRatingCalc():k==='mobPen'?armorMobPenaltyCalc():k==='carry'?encLimitCalc():''; }
+function manual(k){ return !autoOn('stats')&&S.man&&S.man[k]!=null&&S.man[k]!==''; }
+function editStats(){ S.man=S.man||{}; var f=function(k,l){ return '<label style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0;"><span>'+l+'</span><input class="m-input" style="width:90px" type="number" data-man="'+k+'" value="'+esc(S.man[k]!=null?S.man[k]:manCalc(k))+'"></label>'; };
+  $('stats-body').innerHTML='<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). These numbers are used for armor rolls, Mobility and encumbrance.</p>'+f('armor','Armor Level')+f('mobPen','Mobility penalty (armor)')+f('carry','Carry limit')+'<div style="text-align:right;margin-top:10px;"><button class="m-btn" onclick="saveStats()">Save</button></div>';
+  $('stats-overlay').classList.add('open'); }
+function closeStats(){ $('stats-overlay').classList.remove('open'); }
+function saveStats(){ [].forEach.call(document.querySelectorAll('#stats-body [data-man]'),function(i){ var v=i.value.trim(); S.man[i.dataset.man]=v===''?null:num(v); }); closeStats(); renderAttrSkills(); renderArmorVal(); renderEnc(); scheduleAutosave(); }
+function toggleTurnMode(){ S.turnBased=!turnOn(); var a=actState(); a.full=false; a.quick=0; a.used=0; a.overwatch=false; renderAction(); scheduleAutosave(); try{ SheetSettings.refresh(); }catch(e){} }
 function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: actions are spent automatically. Click to tick them by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
 // the Action pip is a button: tick or untick it by hand (both modes); unticking it when
 // turn-based also drops an Overwatch that spent it
@@ -1674,7 +1699,7 @@ function togglePip(){ var a=actState(); a.used=a.used?0:1; if(!a.used&&turnOn())
 function actCan(kind){ if(kind==='free'||!turnOn()) return true; return !actState().used; }
 function actSpend(kind,label){
   if(kind==='free'||!turnOn()) return true;
-  if(!actCan(kind)){ addLog('Action','No action left','You get one action per round in a brawl. End your turn to reset.','normal'); return false; }
+  if(!actCan(kind)){ sheetToast('No action left — you get one action per round in a brawl. End your turn to reset.'); return false; }
   actState().used=1; return true;
 }
 function renderAction(){
@@ -1722,9 +1747,9 @@ function campaignRenderModal(){
 }
 function campaignError(msg){ var el=$('campaign-error'); if(el)el.textContent=msg; }
 async function campaignJoin(){ var code=(($('campaign-code-input')||{}).value||'').trim().toUpperCase(); if(!code){ campaignError('Enter a join code.'); return; } try{ var r=await fetch('/api/campaigns?code='+encodeURIComponent(code),{credentials:'same-origin'}); if(r.status === 429){ campaignError('Too many tries — wait a few minutes and try again.'); return; } if(r.status===404){ campaignError('No campaign found with that code.'); return; } if(!r.ok)throw new Error(r.status); _campaign=await r.json(); campaignConnected(); }catch(e){ campaignError('Could not join — are you signed in to the app?'); } }
-function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign','Link','Connected to "'+_campaign.name+'" ('+_campaign.code+')','normal'); saveSheet(true); }
+function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); sheetToast('Linked to "'+_campaign.name+'"'); saveSheet(true); }
 function campaignLeaveSilent(){ if(_campaignTimer){ clearInterval(_campaignTimer); _campaignTimer=null; } _campaign=null; _campaignLastId=0; campaignUpdateBtn(); }
-function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign','Link','Left "'+name+'"','normal'); saveSheet(true); }
+function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); sheetToast('Left "'+name+'"'); saveSheet(true); }
 function campaignBroadcast(label,result,detail,type){ if(!_campaign||CAMPAIGN_SKIP_LABELS.has(String(label)))return; fetch('/api/campaigns/'+_campaign.id+'/rolls',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({clientKey:_campaignClientKey,source:campaignPlayerName(),label:String(label),result:String(result),detail:String(detail||''),type:type||'normal'})}).catch(function(){}); }
 function campaignAddRemote(roll){
   roll = _sniffRollType(roll);
@@ -1876,6 +1901,9 @@ autoLoad();
 
 <script src="/tools-data/twd-sheet-builder.js"></script>
 <script src="/tools-data/dice-anim.js"></script>
+<!-- Sheet Settings (⚙ in the roll log) — shared asset: /tools-data/sheet-settings.js -->
+<script src="/tools-data/sheet-settings.js"></script>
+<style>body.log-compact .log-entry .roll-detail{display:none;}</style>
 <script src="/tools-data/twd-homebrew.js"></script>
 <script>
 if(window.TWDHomebrew){ try{ window.TWDHomebrew.load(function(){ if(typeof _pk!=='undefined' && _pk) renderPicker(); }); }catch(e){} }
@@ -1885,8 +1913,6 @@ if(window.TWDHomebrew){ try{ window.TWDHomebrew.load(function(){ if(typeof _pk!=
 .log-lock:hover{background:rgba(255,255,255,.35);}
 .log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
 .log-lock .lk-ico{font-size:15px;line-height:1;}
-.log-auto:not(.on){opacity:.55;}
-.log-auto:not(.on) .lk-ico{filter:grayscale(1);}
 .log-x{font-size:13px;line-height:1;padding:3px 7px;}
 .lk-ro-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none!important;pointer-events:none;}
 input.no-spin{-moz-appearance:textfield;}

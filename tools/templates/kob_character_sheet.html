@@ -48,6 +48,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .log-entry .roll-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#888;margin-bottom:2px;}
 .log-entry .roll-result{font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;color:var(--log-text);line-height:1;}
 .log-entry .roll-detail{font-family:'Share Tech Mono',monospace;font-size:10px;color:#777;margin-top:3px;line-height:1.4;word-break:break-word;}
+body.log-compact .log-entry .roll-detail{display:none;}
 .log-entry.crit .roll-result{color:#ffd700;}.log-entry.fumble .roll-result{color:#ff4444;}
 .log-entry.crit{border-color:#ffd700;}.log-entry.fumble{border-color:#ff4444;}
 .log-entry.remote{border-left:3px solid #8a7ac8;border-right:3px solid #8a7ac8;background:#1c1a24;}
@@ -815,9 +816,9 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
   <div class="log-header">
-    <span class="log-title" aria-hidden="true"></span>
+    <span class="log-title">Roll Log</span>
     <div style="display:flex;align-items:center;gap:6px;">
-      <button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button>
+      <button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button>
     </div>
   </div>
   <div class="log-actions">
@@ -910,6 +911,17 @@ let injury = 0;   // 0 none · 1 Superficial · 2 Severe · 3 Adrenalized
 function nsbuOn() { return !!(options && options.nsbu); }
 function curStats() { return (nsbuOn() && typeof KOB_NSBU !== 'undefined') ? KOB_NSBU.skills : STATS; }
 function tokenName() { return nsbuOn() ? 'Turbo Token' : 'Adversity Token'; }
+
+// SHEET SETTINGS (⚙) — sheet-settings.js draws these; auto.spend defaults ON and saves with the sheet.
+if(typeof window.sheetToast !== 'function') window.sheetToast = function(t) { if(window.console) console.log(t); };
+let auto = {};
+function autoOn(k) { return !(auto && auto[k] === false); }
+function setAuto(k, on) { auto = auto || {}; auto[k] = !!on; recalc(); scheduleAutosave(); }
+// the verdict's "→ +1 AT" only when the sheet really adds it
+function atVerdict(v) { return autoOn('spend') ? v : v.replace(/ → \+\d+ (AT|Turbo)/, ''); }
+window.SHEET_SETTINGS = function() { const tn = nsbuOn() ? 'Turbo' : 'Adversity'; return [
+  { key:'spend', group:'auto', label:'Spend ' + tn + ' Tokens automatically', hint:'The ✦ +1 boost on a roll takes its token' + (nsbuOn() ? ' (2 at Severe; Adrenalized adds 10)' : '') + '; off: the boost still adds, count tokens yourself', get:() => autoOn('spend'), set:on => setAuto('spend', on) }
+]; };
 
 function book() { return $('f-book').value || 'bikes'; }
 function bookInfo() { return D.books().find(b => b.key === book()) || null; }
@@ -1032,7 +1044,7 @@ function renderStress() {
     const c = document.createElement('div');
     c.className = 'stress-cell' + (i <= stress ? ' on' + (i <= 4 ? ' ok' : i <= 9 ? ' mild' : '') : '');
     c.textContent = i;
-    c.onclick = () => { stress = (i === stress) ? i - 1 : i; recalc(); if(stress >= 13) addLog('Stress 13', 'Boom', 'Get outta here! You must leave the fight.', 'fumble'); scheduleAutosave(); };
+    c.onclick = () => { stress = (i === stress) ? i - 1 : i; recalc(); if(stress >= 13) sheetToast('Stress 13 — get outta here! You must leave the fight.'); scheduleAutosave(); };
     track.appendChild(c);
   }
   $('stress-val').textContent = stress;
@@ -1085,9 +1097,9 @@ function doCheck(label, sides, bonus, opts) {
   let type = j.type;
   if(r.lucky && type !== 'crit') type = 'crit';
   const gain = atOnFail();
-  if(tn && j.type === 'fumble' && opts.earnAT !== false) { at += gain; renderAT(); scheduleAutosave(); }
+  if(tn && j.type === 'fumble' && opts.earnAT !== false && autoOn('spend')) { at += gain; renderAT(); scheduleAutosave(); }
   _lastRoll = { label, total, tn, spent:0 };
-  addLog(label, String(total), detail + (nsbuOn() ? j.verdict.replace(' → +1 AT', ' → +1 Turbo') : j.verdict.replace(' → +1 AT', opts.earnAT === false ? ' → +1 AT' : ' → +' + gain + ' AT')), type, { atBtn: true });
+  addLog(label, String(total), detail + atVerdict(nsbuOn() ? j.verdict.replace(' → +1 AT', ' → +1 Turbo') : j.verdict.replace(' → +1 AT', opts.earnAT === false ? ' → +1 AT' : ' → +' + gain + ' AT')), type, { atBtn: true });
   return total;
 }
 function spendATOnRoll() {
@@ -1095,8 +1107,9 @@ function spendATOnRoll() {
   const tName = tokenName();
   // NSBU: at Severe injury (or worse) Turbo Tokens cost double to boost.
   const cost = (nsbuOn() && injury >= 2) ? 2 : 1;
-  if(at < cost) { addLog(tName + 's', String(at), cost > 1 ? 'Severe injury — a boost costs 2 Turbo Tokens, and you don\'t have two.' : 'None left — fail a check to earn some.', 'fumble'); return; }
-  at -= cost; renderAT();
+  const track = autoOn('spend');   // ⚙ off: the boost applies, the tokens are the player's to count
+  if(track && at < cost) { sheetToast(cost > 1 ? 'Severe injury — a boost costs 2 Turbo Tokens, and you don\'t have two' : 'No ' + tName + 's left — fail a check to earn some'); return; }
+  if(track) { at -= cost; renderAT(); }
   const bonusPer = (book() === 'bikes' && /red/i.test($('f-bike-color').value)) || (book() === 'brooms' && /daring dodger/i.test($('f-broom').value)) ? 2 : 1;
   _lastRoll.total += bonusPer; _lastRoll.spent += cost;
   const j = judge(_lastRoll.total, _lastRoll.tn);
@@ -1106,7 +1119,7 @@ function spendATOnRoll() {
 function rollStat(id) {
   if(nsbuOn()) { nsbuRollStat(id); return; }
   const sm = stressMods();
-  if(sm.out) { addLog(id, '✗', 'Stress 13 — you are out of the fight.', 'fumble'); return; }
+  if(sm.out) { sheetToast('Stress 13 — you are out of the fight'); return; }
   doCheck(id + ' check', dieOf(id), bonusOf(id), { note: fearNote() });
 }
 // NSBU "Blowing Up": roll the skill die; on a max it steps up to the next die type,
@@ -1129,11 +1142,11 @@ function nsbuRollStat(id) {
   let detail = parts.join(' ') + (bonus ? ' ' + (bonus > 0 ? '+' : '') + bonus : '') + (blew ? ' · BLOW UP ×' + blew + ' → d' + finalDie : '');
   const j = judge(total, tn);
   let type = blew ? 'crit' : j.type;
-  if(tn && j.type === 'fumble') { at += 1; renderAT(); scheduleAutosave(); }
+  if(tn && j.type === 'fumble' && autoOn('spend')) { at += 1; renderAT(); scheduleAutosave(); }
   // A Tough Check failed by 5+ inflicts an Injury Level.
   if(tn && norm(id) === 'tough' && total <= tn - 5) nsbuInjury(1, 'Failed a Tough Check by 5+');
   _lastRoll = { label: id + ' check', total, tn, spent:0 };
-  addLog(id + ' check', String(total), detail + j.verdict.replace(' → +1 AT', ' → +1 Turbo'), type, { atBtn:true });
+  addLog(id + ' check', String(total), detail + atVerdict(j.verdict.replace(' → +1 AT', ' → +1 Turbo')), type, { atBtn:true });
 }
 // ── NSBU chrome: badge, Turbo-token label, Injury track ──
 function renderNsbu() {
@@ -1153,8 +1166,8 @@ function renderInjury() {
     '<button class="inj-cell' + (i === injury ? ' on lv' + i : '') + '" onclick="setInjury(' + i + ')" title="' + esc(lbl) + '">' + esc(lbl) + '</button>'
   ).join('');
 }
-function setInjury(n) { const prev = injury; injury = (n === injury && n > 0) ? n - 1 : n; renderInjury(); if(injury !== prev) { if(injury === 3) { at += 10; renderAT(); addLog('Adrenalized', 'Boom', 'Injury: Adrenalized — gain 10 Turbo Tokens. Fail a Tough Check now and you\'re Incapacitated or Dead.', 'fumble'); } else addLog('Injury', injury ? '' : '✚', injury ? NSBU_INJURY[injury] + (injury === 2 ? ' — Turbo Tokens cost double to Blow Up' : '') : 'Recovered — Healthy', injury ? 'fumble' : 'normal'); } scheduleAutosave(); }
-function nsbuInjury(delta, why) { const prev = injury; injury = Math.max(0, Math.min(3, injury + delta)); if(injury !== prev) { renderInjury(); if(injury === 3) { at += 10; renderAT(); } addLog('Injury', injury === 3 ? 'Boom' : '', (why ? why + ' — ' : '') + NSBU_INJURY[injury] + (injury === 3 ? ' (gain 10 Turbo Tokens!)' : injury === 2 ? ' (Turbo costs double to Blow Up)' : ''), 'fumble'); scheduleAutosave(); } }
+function setInjury(n) { const prev = injury; injury = (n === injury && n > 0) ? n - 1 : n; renderInjury(); if(injury !== prev) { if(injury === 3) { if(autoOn('spend')) { at += 10; renderAT(); } addLog('Adrenalized', 'Boom', 'Injury: Adrenalized — gain 10 Turbo Tokens. Fail a Tough Check now and you\'re Incapacitated or Dead.', 'fumble'); } else addLog('Injury', injury ? '' : '✚', injury ? NSBU_INJURY[injury] + (injury === 2 ? ' — Turbo Tokens cost double to Blow Up' : '') : 'Recovered — Healthy', injury ? 'fumble' : 'normal'); } scheduleAutosave(); }
+function nsbuInjury(delta, why) { const prev = injury; injury = Math.max(0, Math.min(3, injury + delta)); if(injury !== prev) { renderInjury(); if(injury === 3 && autoOn('spend')) { at += 10; renderAT(); } addLog('Injury', injury === 3 ? 'Boom' : '', (why ? why + ' — ' : '') + NSBU_INJURY[injury] + (injury === 3 ? ' (gain 10 Turbo Tokens!)' : injury === 2 ? ' (Turbo costs double to Blow Up)' : ''), 'fumble'); scheduleAutosave(); } }
 function fearNote() { const f = $('f-fear').value.trim(); return f ? 'fear: ' + f + '? −1 to −3' : ''; }
 function planStat(id) {
   const half = dieOf(id) / 2 + bonusOf(id);
@@ -1166,7 +1179,7 @@ function planStat(id) {
 function rollLoose(sides) { doCheck('d' + sides, sides, 0, { earnAT: false }); }
 function rollPower(id) {
   const pd = num($('f-power-die').value);
-  if(!pd) { addLog('Power', '—', 'No Power Die yet — your powers haven\'t manifested.', 'normal'); return; }
+  if(!pd) { sheetToast('No Power Die yet — your powers haven\'t manifested'); return; }
   doCheck(id + ' + Power', dieOf(id), bonusOf(id), { extra: { sides: pd, label: 'Power', bonus: num($('f-power-bonus').value) + stressMods().power } });
 }
 
@@ -1387,7 +1400,7 @@ function renderAbilityPicker() {
   if(ab) ab.addEventListener('click', e => {
     const b = e.target.closest('[data-buy-ability]'); if(!b) return;
     const key = b.dataset.buyAbility, cost = num(b.dataset.cost);
-    if(at < cost) { addLog('Level Up', 'Turbo', 'Not enough Turbo Tokens for ' + key + ' (need ' + cost + ').', 'fumble'); return; }
+    if(at < cost) { sheetToast('Not enough Turbo Tokens for ' + key + ' (need ' + cost + ')'); return; }
     at -= cost; renderAT();
     addAbilityRow({ name: key, note: '' });
     addLog('Level Up', '−' + cost + ' Turbo', 'Bought ' + key + ' · ' + at + ' Turbo left', 'crit');
@@ -1494,6 +1507,7 @@ function showRollToast(label, result, detail, type) {
   _toastTimer = setTimeout(function() { t.className = ''; }, 3500);
 }
 function addLog(label, result, detail, type, opts) {
+  if(label === 'Character Builder') { sheetToast(String(detail || 'Character built').split(' — ')[0]); return; }   // the builder's (shared JS) note isn't roll-log material
   type = type || 'normal'; opts = opts || {};
   const entries = $('log-entries');
   const hint = entries.querySelector('.log-hint'); if(hint) hint.remove();
@@ -1527,7 +1541,7 @@ function collectSheet() {
     system:'KOB', v:1, book: book(),
     options: { nsbu: nsbuOn() }, injury,
     name: v('f-name'), pronouns: v('f-pronouns'), trope: v('f-trope'), age: v('f-age'),
-    stats, mods, bonuses, at, stress,
+    stats, mods, bonuses, at, stress, auto,
     abilities: [...document.querySelectorAll('#abilities-body tr')].map(tr => ({ name: tr.querySelector('.ab-name').value, note: tr.querySelector('.ab-note').value })).filter(a => a.name || a.note),
     strengths: [...document.querySelectorAll('#strengths-body tr')].map(tr => ({ name: tr.querySelector('.st-name').value, note: tr.querySelector('.st-note').value })).filter(s => s.name || s.note),
     flaw: v('f-flaw'), knack: v('f-knack'),
@@ -1549,6 +1563,7 @@ function applySheet(d) {
   // skill set (KoB stats vs the 9 NSBU skills) is laid out.
   options = Object.assign({ nsbu:false }, d.options || {});
   injury = typeof d.injury === 'number' ? d.injury : 0;
+  auto = (d.auto && typeof d.auto === 'object') ? Object.assign({}, d.auto) : {};
   buildStats();
   fillAgeOptions(); fillDatalists();
   set('f-name', [d.name, d.lastName].filter(Boolean).join(' ')); set('f-pronouns', d.pronouns); set('f-trope', d.trope); set('f-age', d.age);
@@ -1573,7 +1588,7 @@ function saveSheet(quiet) {
   const data = collectSheet(); const json = JSON.stringify(data);
   try { localStorage.setItem('kob_sheet', json); } catch(e) {}
   if(window.__ddSave) window.__ddSave({ kob_sheet: json });
-  if(!quiet) addLog('Sheet Saved', '✓', data.name || 'Unnamed', 'normal');
+  if(!quiet) sheetToast('Sheet saved');
 }
 function syncDocTitle() { const name = ($('f-name').value || '').trim(); if(name && window.__ddSaveTitle) window.__ddSaveTitle(name); }
 function exportSheet() {
@@ -1582,12 +1597,12 @@ function exportSheet() {
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = ((data.name || 'kob-character').replace(/[^a-z0-9]+/gi, '_').toLowerCase() || 'kob-character') + '.json';
   a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-  addLog('Sheet Exported', '↓', a.download, 'normal');
+  sheetToast('Exported ' + a.download);
 }
 function importSheet(input) {
   const f = input.files && input.files[0]; if(!f) return;
   const r = new FileReader();
-  r.onload = () => { try { applySheet(JSON.parse(r.result)); saveSheet(true); addLog('Imported', '↑', f.name, 'normal'); } catch(e) { addLog('Import failed', '✗', 'Not a valid sheet file', 'fumble'); } };
+  r.onload = () => { try { applySheet(JSON.parse(r.result)); saveSheet(true); sheetToast('Imported ' + f.name); } catch(e) { sheetToast('Import failed — not a valid sheet file'); } };
   r.readAsText(f); input.value = '';
 }
 function newCharacter() { at = 3; stress = 0; options = { nsbu:false }; injury = 0; applySheet({}); }
@@ -1637,9 +1652,9 @@ async function campaignJoin() {
   try { const r = await fetch('/api/campaigns?code=' + encodeURIComponent(code), { credentials:'same-origin' }); if(r.status === 429){ campaignError('Too many tries — wait a few minutes and try again.'); return; } if(r.status === 404) { campaignError('No campaign found with that code.'); return; } if(!r.ok) throw new Error(r.status); _campaign = await r.json(); campaignConnected(); }
   catch(e) { campaignError('Could not join — are you signed in to the app?'); }
 }
-function campaignConnected() { _campaignLastId = 0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign', 'Link', 'Connected to "' + _campaign.name + '" (' + _campaign.code + ')', 'normal'); saveSheet(true); }
+function campaignConnected() { _campaignLastId = 0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); sheetToast('Linked to "' + _campaign.name + '"'); saveSheet(true); }
 function campaignLeaveSilent() { if(_campaignTimer) { clearInterval(_campaignTimer); _campaignTimer = null; } _campaign = null; _campaignLastId = 0; campaignUpdateBtn(); }
-function campaignLeave() { const name = _campaign ? _campaign.name : ''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign', 'Link', 'Left "' + name + '"', 'normal'); saveSheet(true); }
+function campaignLeave() { const name = _campaign ? _campaign.name : ''; campaignLeaveSilent(); campaignRenderModal(); sheetToast('Left "' + name + '"'); saveSheet(true); }
 const CAMPAIGN_SKIP_LABELS = new Set(['Sheet Saved','Sheet Exported','Imported','Import failed','Campaign','Character Builder','Relationship question']);
 function campaignBroadcast(label, result, detail, type) {
   if(!_campaign || CAMPAIGN_SKIP_LABELS.has(String(label))) return;
@@ -1803,6 +1818,8 @@ if (window.KOBHB) KOBHB.load(function () { try { fillDatalists(); recalc(); } ca
 </script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js (injects CSS + audio + 2D/3D engine). Extracted from the per-sheet inline copy. -->
 <script src="/tools-data/dice-anim.js"></script>
+<!-- Sheet Settings (⚙ in the roll log) — shared asset: /tools-data/sheet-settings.js -->
+<script src="/tools-data/sheet-settings.js"></script>
 <style id="dd-lock-style">
 .log-lock{display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:6px;padding:2px 7px;cursor:pointer;line-height:1;transition:background .12s,border-color .12s;}
 .log-lock:hover{background:rgba(255,255,255,.35);}

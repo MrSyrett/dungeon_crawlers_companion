@@ -128,8 +128,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .log-lock:hover{background:rgba(255,255,255,.35);}
 .log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
 .log-lock .lk-ico{font-size:15px;line-height:1;}
-.log-auto:not(.on){opacity:.55;}
-.log-auto:not(.on) .lk-ico{filter:grayscale(1);}
+body.log-compact .log-entry .roll-detail{display:none;}
+.stat-man::after{content:" ✎";font-size:.55em;opacity:.7;vertical-align:middle;}
 .log-x{font-size:13px;line-height:1;padding:3px 7px;}
 /* Unlocked: show which automated fields are now hand-editable. */
 body.unlocked #f-ac[contenteditable="true"],body.unlocked #f-speed[contenteditable="true"],body.unlocked #f-hp-max[contenteditable="true"],body.unlocked #c-init[contenteditable="true"],body.unlocked #c-prof[contenteditable="true"]{outline:1px dashed var(--dnd);outline-offset:2px;border-radius:4px;cursor:text;}
@@ -1320,9 +1320,9 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
   <div class="log-header">
-    <div class="log-title" aria-hidden="true"></div>
+    <div class="log-title">Roll Log</div>
     <div style="display:flex;align-items:center;gap:8px;">
-      <button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button type="button" id="auto-toggle" class="log-lock log-auto on" onclick="toggleAutoUse()" aria-pressed="true" aria-label="Use up consumables automatically" title="Auto-use on: potions, scrolls, thrown flasks, torches and candles, the Oil a lantern burns, and item charges or uses come off your inventory by themselves. Click to count them by hand."><span class="lk-ico">🎒</span></button><button id="lock-toggle" class="log-lock" onclick="toggleLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (automated). Click to unlock for manual editing."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button>
+      <button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button>
     </div>
   </div>
   <div class="log-actions">
@@ -1410,6 +1410,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 </div>
 
 <!-- DESCRIPTION MODAL (features / spells) -->
+<!-- YOUR STATS (Auto-calculated stats off, ⚙ in the roll log) -->
+<div id="stats-overlay" class="ov" onclick="if(event.target===this)closeStats()"><div class="modal" style="max-width:380px;"><div class="modal-hd"><div class="ttl">Your stats</div><button class="x" onclick="closeStats()">&#10005;</button></div><div class="modal-bd" id="stats-body"></div><div class="modal-ft"><button class="m-btn ghost" onclick="closeStats()">Cancel</button><button class="m-btn" onclick="saveStats()">Save</button></div></div></div>
 <div id="desc-overlay" class="ov" onclick="if(event.target===this)closeDesc()">
   <div class="modal">
     <div class="modal-hd"><div class="ttl" id="desc-title">—</div><button class="x" onclick="closeDesc()">&#10005;</button></div>
@@ -1466,8 +1468,8 @@ let _locked = true;                // Sheet lock: true = automated (fields read-
 let _ov = {};                      // Manual overrides for computed display fields (key → value). Set while unlocked; honored by the automation so re-locking keeps edited numbers and only recomputes what wasn't overridden.
 // Write a computed value to a display element, UNLESS the player has overridden it
 // (then write the override) or is actively editing it (then leave it alone).
-function setAuto(id, key, computed){ const el = $(id); if(!el || document.activeElement === el) return; el.textContent = (_ov[key] != null && String(_ov[key]) !== '') ? _ov[key] : computed; }
-function ovNum(key, fallback){ return (_ov[key] != null && String(_ov[key]) !== '' && !isNaN(parseInt(_ov[key],10))) ? parseInt(_ov[key],10) : fallback; }
+function setAuto(id, key, computed){ const el = $(id); if(!el || document.activeElement === el) return; const o = OV(); el.textContent = (o[key] != null && String(o[key]) !== '') ? o[key] : computed; }
+function ovNum(key, fallback){ const o = OV(); return (o[key] != null && String(o[key]) !== '' && !isNaN(parseInt(o[key],10))) ? parseInt(o[key],10) : fallback; }
 let saveProf = {};                 // { STR:true, ... }
 let skillProf = {};                // { Athletics:1 } (0 none, 1 prof, 2 expertise)
 let slotUsed = {};                 // { 1:2, 2:0, pact:1 }
@@ -1487,7 +1489,7 @@ function defaultOptions(){ return {}; }
 let options = defaultOptions();
 
 function levelNow(){ return totalLevel(); }
-function profBonus(){ if(_ov && _ov.prof != null && String(_ov.prof) !== '' && !isNaN(parseInt(_ov.prof,10))) return parseInt(_ov.prof,10); const t = D.tables(); const L = levelNow(); if(t && t.proficiencyByLevel && t.proficiencyByLevel[L-1]) return t.proficiencyByLevel[L-1]; return 2 + Math.floor((L-1)/4); }
+function profBonus(){ const o = OV(); if(o && o.prof != null && String(o.prof) !== '' && !isNaN(parseInt(o.prof,10))) return parseInt(o.prof,10); const t = D.tables(); const L = levelNow(); if(t && t.proficiencyByLevel && t.proficiencyByLevel[L-1]) return t.proficiencyByLevel[L-1]; return 2 + Math.floor((L-1)/4); }
 function score(id){ return num($('sc-' + id) ? $('sc-' + id).value : 10); }
 function modOf(id){ return abilMod(score(id)); }
 // ── Multiclass model ──────────────────────────────────────────────────────
@@ -1612,6 +1614,7 @@ function recalc(){
   refreshAtkActions();
   renderSpellHeader();
   renderSlots();   // ends with renderSpells(), reflecting any newly-granted spells
+  renderStatsMan();
 }
 
 // ═══ SHEET LOCK ═══════════════════════════════════════════════════════════
@@ -1648,6 +1651,7 @@ function applyLock(){
                        : 'Sheet unlocked (manual editing; rolling disabled). Click to lock.';
     const ico = btn.querySelector('.lk-ico'); if(ico) ico.textContent = locked ? '🔒' : '🔓';
   }
+  if(window.SheetSettings) SheetSettings.refresh();
 }
 function setLocked(v){
   _locked = !!v;
@@ -1721,7 +1725,7 @@ function d20Check(label, mod, opts){
   return { total, nat: r.nat, type };
 }
 // Rolling is disabled while the sheet is unlocked (you're editing, not playing).
-function rollsOff(){ if(_locked) return false; addLog('Rolling off', '🔓', 'Lock the sheet to roll', 'fumble'); return true; }
+function rollsOff(){ if(_locked) return false; sheetToast('Lock the sheet (⚙ in the roll log) to roll'); return true; }
 function jackBonus(){ return hasFeature('Jack of All Trades') ? Math.floor(profBonus() / 2) : 0; }
 function rollAbility(id){ if(rollsOff()) return; const jb = jackBonus(); d20Check(id + ' check', modOf(id) + jb, { kind:'check', abil:id, note: jb ? 'Jack of All Trades +' + jb : '' }); }
 const AUTOFAIL_STRDEX = ['Paralyzed','Petrified','Stunned','Unconscious'];
@@ -1802,7 +1806,7 @@ function adjustHP(sign){
   const curEl = $('f-hp-cur'), maxEl = $('f-hp-max'), tempEl = $('f-hp-temp');
   const max = num(maxEl.textContent); let cur = num(curEl.value), temp = num(tempEl.value);
   if(sign > 0){
-    if(isDead()){ addLog('Heal', '✗', 'The character is dead — healing has no effect. After a revival spell, clear the death-save failures first.', 'fumble'); amtEl.value = ''; return; }
+    if(isDead()){ sheetToast('The character is dead — healing has no effect. After a revival spell, clear the death-save failures first.'); amtEl.value = ''; return; }
     const wasDown = cur === 0;
     cur = Math.min(max || cur + amt, cur + amt); curEl.value = cur;
     addLog('Heal', '+' + amt, 'HP ' + cur + (max ? '/' + max : ''), 'normal');
@@ -1816,7 +1820,8 @@ function adjustHP(sign){
     if(temp > 0 && dmg > 0){ soaked = Math.min(temp, dmg); temp -= soaked; dmg -= soaked; tempEl.value = temp; }
     cur = Math.max(0, before - dmg); curEl.value = cur;
     addLog('Damage', '-' + amt + (dtype ? ' ' + dtype : ''), adj.note + (soaked ? soaked + ' soaked by temp · ' : '') + 'HP ' + cur + (max ? '/' + max : '') + (cur === 0 ? ' — down!' : ''), cur === 0 ? 'fumble' : 'normal');
-    if(before > 0 && cur === 0){                 // just dropped to 0 — concentration ends outright (Incapacitated), no save
+    if(!autoOn('prompts')){ }                    // Dying & concentration switch off (⚙): nothing applied by itself
+    else if(before > 0 && cur === 0){                 // just dropped to 0 — concentration ends outright (Incapacitated), no save
       if(_concentration) dropConcentration();
       const overkill = dmg - before;             // damage beyond what brought you to 0
       setUnconscious(true); deathSucc = 0; deathFail = 0;
@@ -1840,6 +1845,7 @@ function tickDeathDamage(dmg, max, crit){
 // Hand-typed Current HP: dropping to 0 or coming back up runs the same automation as Damage/Heal.
 function onHPTyped(el){
   const before = num(el._prev), now = Math.max(0, num(el.value)); el.value = now; el._prev = now;
+  if(!autoOn('prompts')) return;   // Dying & concentration switch off (⚙)
   if(before > 0 && now === 0){ if(_concentration) dropConcentration(); setUnconscious(true); deathSucc = 0; deathFail = 0; renderDeath(); addLog('Downed', 'Down', 'At 0 HP — Unconscious, roll Death Saves', 'fumble'); }
   else if(before === 0 && now > 0 && !isDead()) reviveFromDown();
 }
@@ -1855,12 +1861,12 @@ function reviveFromDown(){
 }
 // ── Concentration (A2) ────────────────────────────────────────────────────
 function startConcentration(name){
-  if(_concentration && norm(_concentration) !== norm(name)) addLog('Concentration', '…', 'Dropped ' + _concentration + ' for ' + name, 'normal');
+  if(_concentration && norm(_concentration) !== norm(name)) sheetToast('Dropped ' + _concentration + ' for ' + name);
   _concentration = name; renderConcentration(); scheduleAutosave();
 }
 function dropConcentration(silent){
   if(!_concentration) return;
-  if(!silent) addLog('Concentration', '—', 'Stopped concentrating on ' + _concentration, 'normal');
+  if(!silent) sheetToast('Stopped concentrating on ' + _concentration);
   _concentration = null; renderConcentration(); scheduleAutosave();
 }
 // On taking damage: CON save DC = max(10, ⌊damage/2⌋) or concentration breaks.
@@ -1892,7 +1898,7 @@ function updateDicePoolDisplay(){
 function clearDicePool(){ dicePool = []; updateDicePoolDisplay(); }
 function rollDicePool(){
   if(rollsOff()) return;
-  if(!dicePool.length){ addLog('Dice Pool', '—', 'No dice in the pool — tap dice to add', 'normal'); return; }
+  if(!dicePool.length){ sheetToast('No dice in the pool — tap dice to add'); return; }
   const parts = []; let total = 0;
   dicePool.forEach(sides => {
     if(sides === 20 && _adv !== 'norm'){ const r = rawD20(); total += r.nat; parts.push('d20[' + r.faces.join(',') + '→' + r.nat + (r.mode === 'adv' ? ' adv' : ' dis') + ']'); }
@@ -2065,7 +2071,7 @@ function refreshAtkActions(){ [...document.querySelectorAll('#attacks-body tr')]
 // Versatile: toggle two-handed use on a row (off automatically while a shield is held).
 function toggleTwoHanded(btn){
   const tr = _atkRow(btn), on = tr.dataset.twoHanded !== '1';
-  if(on && hasShield()){ addLog('Two-handed', '✗', "Can't wield a weapon in two hands while holding a shield", 'fumble'); return; }
+  if(on && hasShield()){ sheetToast("Can't wield a weapon in two hands while holding a shield"); return; }
   tr.dataset.twoHanded = on ? '1' : ''; renderAtkActions(tr); scheduleAutosave();
 }
 // Sneak Attack: a full attack (to-hit + weapon damage) with an extra sneakDice()d6.
@@ -2143,7 +2149,7 @@ function renderMasteryPicker(){
 function toggleMasteryPick(name){
   const list = masteryChoices().slice(); const i = list.findIndex(x => norm(x) === norm(name));
   if(i >= 0) list.splice(i, 1);
-  else { if(list.length >= masteryCount()){ addLog('Weapon Mastery', '✗', 'Already mastering ' + masteryCount() + ' weapon kinds — remove one first', 'fumble'); return; } list.push(name); }
+  else { if(list.length >= masteryCount()){ sheetToast('Already mastering ' + masteryCount() + ' weapon kinds — remove one first'); return; } list.push(name); }
   window.setChoice('mastery', list);
   renderMasteryPicker(); refreshAtkActions(); refreshTurnHub();
 }
@@ -2226,24 +2232,24 @@ function rollAttackFull(btn){ doAttack(_atkRow(btn), 0); }
 function doAttack(tr, sneakD6, asReaction, opts){
   opts = opts || {};
   if(rollsOff()) return;
-  if(isIncapacitated()){ addLog('Attack', '✗', "Incapacitated — you can't take actions, bonus actions or reactions", 'fumble'); return; }
+  if(isIncapacitated()){ sheetToast("Incapacitated — you can't take actions, bonus actions or reactions"); return; }
   const offhand = !!opts.offhand;
   // Turn economy: a normal attack spends your Attack action (Extra Attack lets you
   // keep attacking until all attacks are made); an Opportunity Attack spends your Reaction;
   // the off-hand Light-weapon attack spends your Bonus Action.
   if(asReaction){
-    if(_turn.reaction){ addLog('Opportunity Attack', '—', 'Reaction already used this turn — End Turn to refresh', 'normal'); return; }
+    if(_turn.reaction){ sheetToast('Opportunity Attack' + ': ' + ('Reaction already used this turn — End Turn to refresh')); return; }
   } else if(offhand){
-    if(_turn.bonus){ addLog('Off-hand attack', '—', 'Bonus Action already used this turn — End Turn to refresh', 'normal'); return; }
-    if(!offhandReady(tr)){ addLog('Off-hand attack', '—', 'Take the Attack action with a different Light weapon first', 'normal'); return; }
+    if(_turn.bonus){ sheetToast('Off-hand attack' + ': ' + ('Bonus Action already used this turn — End Turn to refresh')); return; }
+    if(!offhandReady(tr)){ sheetToast('Off-hand attack' + ': ' + ('Take the Attack action with a different Light weapon first')); return; }
   } else if(turnActionSpentByOther() || (_turn.actionType === 'attack' && _turn.attacksMade >= attacksPerAction())){
-    addLog('Attack', '—', 'No attack left this turn — End Turn to refresh', 'normal'); return;
+    sheetToast('No attack left this turn — End Turn to refresh'); return;
   }
   // Loading: only one piece of ammunition per action / bonus action / reaction (Crossbow Expert ignores it).
   if(!asReaction && !offhand && rowWeaponInfo(tr).loading && _turn.loadingFired && !hasFeature('Crossbow Expert')){
-    addLog('Attack', '—', 'Loading — this weapon fires only once per action', 'normal'); return; }
+    sheetToast('Loading — this weapon fires only once per action'); return; }
   sneakD6 = sneakD6 || 0;
-  if(sneakD6 > 0){ if(_turn.sneakUsed){ addLog('Sneak Attack', '—', 'Already used this turn — End Turn to refresh', 'normal'); return; } _turn.sneakUsed = true; }
+  if(sneakD6 > 0){ if(_turn.sneakUsed){ sheetToast('Sneak Attack' + ': ' + ('Already used this turn — End Turn to refresh')); return; } _turn.sneakUsed = true; }
   const c = atkCalc(tr, { offhand });
   const name = (asReaction ? 'Opportunity Attack: ' : offhand ? 'Off-hand: ' : '') + (tr.querySelector('.atk-name').value || 'Attack') + (sneakD6 ? ' + Sneak Attack' : '');
   // to-hit
@@ -2441,7 +2447,40 @@ function scrollStats(lvl){ for(const row of SCROLL_TABLE){ if(lvl <= row[0]) ret
 // the inventory by themselves. Off = the item still works, only the count / charges are left alone.
 let _autoUse = true;
 function autoUse(){ return _autoUse !== false; }
-function toggleAutoUse(){ _autoUse = !autoUse(); renderAutoBtn(); addLog('Auto-use', autoUse() ? 'On' : 'Off', autoUse() ? 'Consumables are used up automatically' : 'Count consumables yourself', 'normal'); scheduleAutosave(); }
+function toggleAutoUse(){ _autoUse = !autoUse(); renderAutoBtn(); scheduleAutosave(); }
+// SHEET SETTINGS (⚙) — sheet-settings.js draws these; saved on the sheet as auto:{spend,stats,enc,prompts}
+// (default on) and man:{ac,speed,init,prof,spAtk,spDC}. locked, turnBased and autoUse keep their own keys.
+if(typeof window.sheetToast !== 'function') window.sheetToast = function(t){ if(window.console) console.log(t); };
+let _sheetAuto = {}, _man = {};
+function autoOn(k){ return _sheetAuto[k] !== false; }
+function setOpt(k, on){ _sheetAuto[k] = !!on; recalc(); refreshTurnHub(); scheduleAutosave(); }
+window.SHEET_SETTINGS = function(){ return [
+  { key:'lock', group:'sheet', label:'Lock the sheet', hint:'Automated and read-only; unlock to type over any number (rolling pauses while unlocked)', get: () => _locked, set: on => { if(on !== _locked) setLocked(on); } },
+  { key:'turn', group:'auto', label:'Turn-based actions', hint:'Attacks, spells and features spend your action, bonus action and reaction; off: tick them yourself', get: turnOn, set: on => { if(on !== turnOn()) toggleTurnMode(); } },
+  { key:'use', group:'auto', label:'Use up consumables', hint:'Potions, scrolls, thrown flasks, torches, lantern Oil and item charges come off your inventory', get: autoUse, set: on => { if(on !== autoUse()) toggleAutoUse(); } },
+  { key:'spend', group:'auto', label:'Spend spell slots & uses automatically', hint:'Casting takes a slot (or the free cast) and features used from the Action tab tick off a use; off: mark them yourself', get: () => autoOn('spend'), set: on => setOpt('spend', on) },
+  { key:'stats', group:'auto', label:'Auto-calculated stats', hint:'AC, Speed, Initiative, Proficiency Bonus, Spell Attack and Save DC; off: type your own', get: () => autoOn('stats'), set: on => { if(!on) seedMan(); setOpt('stats', on); } },
+  { key:'enc', group:'auto', label:'Carrying capacity warning', hint:'Carried weight turns red over your capacity (STR × 15 lb)', get: () => autoOn('enc'), set: on => setOpt('enc', on) },
+  { key:'prompts', group:'auto', label:'Dying & concentration', hint:'0 HP knocks you out and starts death saves, damage at 0 HP adds failures, damage while concentrating rolls the CON save', get: () => autoOn('prompts'), set: on => setOpt('prompts', on) }
+]; };
+// Auto-calculated stats off: the player's own numbers (_man) sit on top of any unlocked-sheet overrides (_ov).
+const MAN_STATS = [['ac','f-ac','Armor Class'],['speed','f-speed','Speed'],['init','c-init','Initiative'],['prof','c-prof','Proficiency Bonus'],['spAtk','sp-atk','Spell Attack'],['spDC','sp-dc','Spell Save DC']];
+const MAN_SIGNED = { init:1, prof:1, spAtk:1 };
+function OV(){ if(autoOn('stats')) return _ov; const o = Object.assign({}, _ov); MAN_STATS.forEach(([k]) => { if(_man[k] != null && _man[k] !== '') o[k] = _man[k]; }); return o; }
+function manFmt(k, v){ return MAN_SIGNED[k] ? sgn(v) : String(v); }
+function manRead(id){ const el = $(id); const v = el ? parseInt(String(el.textContent).replace(/−/g, '-').replace(/[^\d-]/g, ''), 10) : NaN; return isNaN(v) ? null : v; }
+function seedMan(){ MAN_STATS.forEach(([k, id]) => { if(_man[k] == null){ const v = manRead(id); if(v != null) _man[k] = manFmt(k, v); } }); }
+function renderStatsMan(){ const man = !autoOn('stats');
+  MAN_STATS.forEach(([k, id]) => { const el = $(id); if(!el) return; el.classList.toggle('stat-man', man); el.contentEditable = (!man && !_locked) ? 'true' : 'false';
+    el.onclick = man ? (e => { e.stopPropagation(); editStats(); }) : null; el.style.cursor = man ? 'pointer' : '';
+    if(man) el.title = 'Your own number — click to change'; else if(k !== 'ac' && k !== 'speed') el.title = ''; }); }
+function editStats(){
+  $('stats-body').innerHTML = '<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). These numbers are shown on the sheet and used for rolls.</p>'
+    + MAN_STATS.map(([k, id, l]) => '<div class="m-lbl">' + l + '</div><input class="m-input" type="number" data-man="' + k + '" value="' + esc(_man[k] != null ? parseInt(_man[k], 10) : (manRead(id) != null ? manRead(id) : '')) + '">').join('');
+  $('stats-overlay').classList.add('open');
+}
+function closeStats(){ $('stats-overlay').classList.remove('open'); }
+function saveStats(){ document.querySelectorAll('#stats-body [data-man]').forEach(i => { const k = i.dataset.man, v = i.value.trim(); _man[k] = v === '' ? null : manFmt(k, num(v)); }); closeStats(); recalc(); refreshTurnHub(); scheduleAutosave(); }
 function renderAutoBtn(){ const b = $('auto-toggle'); if(!b) return; const on = autoUse(); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.title = on ? 'Auto-use on: potions, scrolls, thrown flasks, torches and candles, the Oil a lantern burns, and item charges or uses come off your inventory by themselves. Click to count them by hand.' : 'Auto-use off: nothing is taken from your inventory — count consumables and charges yourself. Click to turn it back on.'; }
 // Log tail for a used item: what's left, or a note that auto-use left the count alone.
 function usedTail(word, left){ return !autoUse() ? ' · not counted (auto-use off)' : ' · ' + word + (left > 0 ? ' (' + left + ' left)' : ' (none left)'); }
@@ -2457,7 +2496,7 @@ function consumeRow(tr){
 function castScroll(tr){
   if(rollsOff()) return;
   if(spellsBlockedByArmor('Scroll')) return;
-  const sp = spellByName(tr.dataset.scroll); if(!sp){ addLog('Spell Scroll', '✗', 'Unknown spell on this scroll', 'fumble'); return; }
+  const sp = spellByName(tr.dataset.scroll); if(!sp){ sheetToast('Unknown spell on this scroll'); return; }
   const st = scrollStats(sp.level), label = 'Scroll: ' + sp.name;
   const dmgInfo = spellDamage(sp); let dice = dmgInfo.dice; if(sp.level === 0 && dice) dice = scaleCantrip(dice, 1);
   const dtype = dmgInfo.type ? ' ' + dmgInfo.type : '', save = spellSaveAbility(sp), heal = spellHealing(sp);
@@ -2604,8 +2643,8 @@ function equipmentOpts(filterCost){
 function useInvItem(rid){
   const tr = invRows().find(r => r.dataset.rid === rid); if(!tr) return;
   const u = invUse(tr); if(!u || itemCostSpent(u.cost) || isIncapacitated()) return;
-  if(u.cmax && u.charges <= 0){ addLog(u.name, '✗', 'No charges left', 'fumble'); return; }
-  if(u.fuel && !fuelRow(u.fuel)){ addLog(u.name, '✗', 'No Oil — a lamp or lantern burns a flask of Oil', 'fumble'); return; }
+  if(u.cmax && u.charges <= 0){ sheetToast(u.name + ': ' + ('No charges left')); return; }
+  if(u.fuel && !fuelRow(u.fuel)){ sheetToast(u.name + ': ' + ('No Oil — a lamp or lantern burns a flask of Oil')); return; }
   if(rollsOff()) return;   // using an item rolls — the sheet must be locked (play mode)
   if(u.kind === 'scroll'){ if(spellsBlockedByArmor('Scroll')) return; itemSpendCost(u.cost); castScroll(tr); afterTurnAction(); return; }
   itemSpendCost(u.cost);
@@ -2669,8 +2708,9 @@ function carriedWeight(){ let t = 0; invRows().forEach(tr => { const it = itemDa
 function updateCarry(){ const el = $('carry-weight'); if(!el) return;
   const strEl = $('sc-STR'), w = carriedWeight(), sizeMul = /tiny/i.test(_size) ? 0.5 : /large|huge|garg/i.test(_size) ? 2 : 1, cap = Math.floor((num(strEl && strEl.value) || 10) * 15 * sizeMul);
   el.textContent = w + ' / ' + cap + ' lb';
-  el.style.color = w > cap ? 'var(--red)' : (w > cap * 0.667 ? 'var(--dnd)' : 'var(--muted)');
-  el.title = w > cap ? 'Over your carrying capacity (STR × 15 lb)' : 'Carried weight vs capacity (STR × 15 lb)'; }
+  const warn = autoOn('enc');
+  el.style.color = !warn ? 'var(--muted)' : w > cap ? 'var(--red)' : (w > cap * 0.667 ? 'var(--dnd)' : 'var(--muted)');
+  el.title = !warn ? 'Carried weight vs capacity (STR × 15 lb) — warning off' : w > cap ? 'Over your carrying capacity (STR × 15 lb)' : 'Carried weight vs capacity (STR × 15 lb)'; }
 function invRowRef(tr){ return tr.dataset.ref || tr.querySelector('.inv-name').value; }
 function invRowKind(tr){ return itemKind(invRowRef(tr)); }
 function invRowDisplay(tr){ const nm = tr.querySelector('.inv-name'); return (nm && nm.value) || invRowRef(tr); }
@@ -2735,23 +2775,23 @@ function warnArmorEquip(tr, slot){
   const ref = invRowRef(tr), display = invRowDisplay(tr);
   const a = slot === 'shield' ? (D.armor().find(x => /shield/i.test(x.category || '')) || { category:'Shield', name:'Shield' }) : (magicArmorBase(ref) || D.armor().find(x => norm(x.name) === norm(ref)));
   if(!a) return;
-  if(!armorProficient(a)) addLog('Armor', '⚠', 'Not proficient with ' + display + " — Disadvantage on STR/DEX d20 tests and you can't cast spells while wearing it", 'fumble');
-  const m = String(a.strength || '').match(/(\d+)/); if(m && score('STR') < +m[1]) addLog('Armor', '⚠', display + ' needs Str ' + m[1] + ' — Speed −10 ft while worn', 'fumble');
-  if(a.stealthDisadvantage) addLog('Armor', '⚠', display + ' — Disadvantage on Stealth checks', 'normal');
+  if(!armorProficient(a)) sheetToast('Not proficient with ' + display + " — Disadvantage on STR/DEX d20 tests and you can't cast spells while wearing it");
+  const m = String(a.strength || '').match(/(\d+)/); if(m && score('STR') < +m[1]) sheetToast(display + ' needs Str ' + m[1] + ' — Speed −10 ft while worn');
+  if(a.stealthDisadvantage) sheetToast(display + ' — Disadvantage on Stealth checks');
 }
 // A5: a shield ends two-handed use of Versatile weapons, and a Two-Handed weapon drops the shield.
 function shieldVsTwoHanded(display){
   [...document.querySelectorAll('#attacks-body tr')].forEach(tr => {
     const info = rowWeaponInfo(tr); const nm = tr.querySelector('.atk-name').value || tr.dataset.weapon;
-    if(tr.dataset.twoHanded === '1'){ tr.dataset.twoHanded = ''; addLog('Shield', '⚠', nm + ': two-handed use ended — you\'re holding ' + display, 'normal'); }
-    else if(info.twoHandedProp) addLog('Shield', '⚠', nm + ' is Two-Handed — you can\'t attack with it while holding ' + display, 'fumble');
+    if(tr.dataset.twoHanded === '1'){ tr.dataset.twoHanded = ''; sheetToast(nm + ': two-handed use ended — you\'re holding ' + display); }
+    else if(info.twoHandedProp) sheetToast(nm + ' is Two-Handed — you can\'t attack with it while holding ' + display);
   });
 }
 function weaponVsShield(tr, display){
   const w = invBaseWeapon(tr); if(!w || !(w.properties || []).some(p => /^two-handed$/i.test(p))) return;
   const sh = equippedShieldRow(); if(!sh) return;
   sh.dataset.equipped = ''; renderInvActions(sh);
-  addLog('Shield', '⚠', invRowDisplay(sh) + ' unequipped — ' + display + ' needs both hands', 'normal');
+  sheetToast(invRowDisplay(sh) + ' unequipped — ' + display + ' needs both hands');
 }
 // ── Named magic weapons: "Weapon (longsword)" has a fixed base; "Weapon (any sword)" etc. let the
 // player pick one on equip. The +N, Finesse and an overriding damage type are parsed from the text.
@@ -2879,7 +2919,7 @@ function armorPenalties(){
 }
 function spellsBlockedByArmor(label){
   const ap = armorPenalties(); if(!ap.nonProf) return false;
-  addLog(label ? 'Cast (' + label + ')' : 'Cast', '✗', "Can't cast spells — not proficient with " + ap.nonProf, 'fumble'); return true;
+  sheetToast("Can't cast spells — not proficient with " + ap.nonProf); return true;
 }
 // Unarmored AC when no armor is worn: the best of plain 10+DEX and any class
 // feature that sets an unarmored formula (2024). Shield is added by computeAC,
@@ -2918,7 +2958,7 @@ function reconcileAC(){
   const acEl = $('f-ac'); if(!acEl) return;
   const tempEl = $('f-ac-temp'); if(tempEl) tempEl.disabled = false;   // the AC bonus field is always live
   setAuto('f-ac', 'ac', String(computeAC()));   // honors a manual AC override; skipped while being edited
-  acEl.title = (_ov.ac != null && String(_ov.ac) !== '') ? 'AC — manual override (unlock to change)' : 'Auto-calculated from armor / shield / class features / magic items, plus any AC bonus';
+  acEl.title = (OV().ac != null && String(OV().ac) !== '') ? 'AC — manual override (unlock to change)' : 'Auto-calculated from armor / shield / class features / magic items, plus any AC bonus';
 }
 function onTempAC(){ reconcileAC(); scheduleAutosave(); }
 // ── Magic items: parse worn bonuses, apply to AC / saves / attacks / abilities / spells ────────
@@ -2967,10 +3007,10 @@ function attunedCount(){ return attunedRefs.length; }
 function renderAttuneCount(){ const el = $('attune-count'); if(el) el.textContent = attunedCount() + '/3'; }
 function toggleAttune(btn){
   const tr = btn.closest('tr'), rid = tr.dataset.rid, nm = invRowDisplay(tr);
-  if(isAttunedRow(tr)){ attunedRefs = attunedRefs.filter(r => r !== rid); addLog('Attunement', '—', 'Unattuned ' + nm, 'normal'); }
+  if(isAttunedRow(tr)){ attunedRefs = attunedRefs.filter(r => r !== rid); }
   else {
-    if(attunedCount() >= 3){ addLog('Attunement', '✗', 'Already attuned to 3 items', 'fumble'); return; }
-    attunedRefs.push(rid); addLog('Attunement', '✦', 'Attuned to ' + nm, 'normal');
+    if(attunedCount() >= 3){ sheetToast('Already attuned to 3 items'); return; }
+    attunedRefs.push(rid);
   }
   renderInvActions(tr); renderAttuneCount(); recalc(); scheduleAutosave();
 }
@@ -3212,13 +3252,12 @@ function pickBase(kind, plus, base, rid){
     row.dataset.base = base; if(plus && !num(row.dataset.plus)) row.dataset.plus = plus;
     renderInvDetail(row);
     const eq = row.querySelector('.inv-eq-pip'); if(eq && row.dataset.equipped !== '1') toggleEquip(eq);
-    addLog('Item', '✦', invRowDisplay(row) + ' — base weapon: ' + base, 'normal');
     scheduleAutosave(); return;
   }
   const tr = addInvRow({ name: base + ' +' + plus, ref: base, plus: plus, qty:1 });
   const eq = tr.querySelector('.inv-eq-pip'); if(eq) toggleEquip(eq);   // add + equip with its bonuses
   scheduleAutosave();
-  addLog('Item', '+', base + ' +' + plus + ' added & equipped', 'normal');
+  
 }
 // Choose the spell contained in a Spell Scroll; its info then shows in the row's details.
 function openScrollPicker(){
@@ -3240,7 +3279,6 @@ function pickScroll(spell){
   const ov = $('scroll-overlay'); if(ov) ov.classList.remove('open');
   addInvRow({ name: 'Spell Scroll (' + spell + ')', ref: 'Spell Scroll', scroll: spell, qty:1 });
   scheduleAutosave();
-  addLog('Item', '+', 'Spell Scroll (' + spell + ') added', 'normal');
 }
 function storeSetTab(t){ _storeTab = t; $('store-search').value = ''; renderStore(); }
 function flashBtn(btn, txt){ const o = btn.textContent; btn.textContent = txt; btn.disabled = true; setTimeout(() => { btn.textContent = o; btn.disabled = false; }, 700); }
@@ -3535,9 +3573,9 @@ function autoSpeed(){
 function onSpeedInput(){ _speedManual = true; scheduleAutosave(); }
 function reconcileSpeed(){
   const el = $('f-speed'); if(!el) return;
-  if(_ov.speed == null || String(_ov.speed) === ''){ if(!speciesData() && !classList().length) return; }   // nothing to base it on yet (unless overridden)
+  if(OV().speed == null || String(OV().speed) === ''){ if(!speciesData() && !classList().length) return; }   // nothing to base it on yet (unless overridden)
   setAuto('f-speed', 'speed', String(autoSpeed()));   // honors a manual Speed override
-  el.title = (_ov.speed != null && String(_ov.speed) !== '') ? 'Speed — manual override (unlock to change)' : 'Auto-calculated from your species and features';
+  el.title = (OV().speed != null && String(OV().speed) !== '') ? 'Speed — manual override (unlock to change)' : 'Auto-calculated from your species and features';
 }
 
 // ── Monk Martial Arts die on Unarmed + Monk weapons (#5) ───────────────────
@@ -3752,8 +3790,8 @@ function multiCasterLevel(){ let lvl = 0; nonPactCasters().forEach(({cl,c}) => {
 function casterType(){ const cs = spellcastingClasses().slice().sort((a,b)=>num(b.cl.level)-num(a.cl.level)); return cs.length ? cs[0].c.spellcasting : (_forceSpells ? 'third' : 'none'); }
 function spellAbilityId(){ if(_spellAbility && !spellcastingClasses().length) return _spellAbility; const cs = spellcastingClasses().slice().sort((a,b)=>num(b.cl.level)-num(a.cl.level)); if(cs.length && cs[0].c.spellcastingAbility) return cs[0].c.spellcastingAbility; const c = classData(); return (c && c.spellcastingAbility) ? c.spellcastingAbility : 'INT'; }
 function abilityForSpell(sp){ const sk = sp && spellsKnown.find(s => norm(s.name) === norm(sp.name)); if(sk && sk.ability) return String(sk.ability).toUpperCase(); if(_spellAbility && !spellcastingClasses().length) return _spellAbility; const owner = (sk && spellOwner(sk)) || spellcastingClasses().find(x => spellOnCasterList(sp, x.c)); return (owner && owner.c.spellcastingAbility) ? owner.c.spellcastingAbility : spellAbilityId(); }
-function spellDC(ab){ if(_ov.spDC != null && String(_ov.spDC) !== '') return ovNum('spDC', 8); return 8 + profBonus() + modOf(ab || spellAbilityId()) + magicSum('spellDC') + exhPenalty(); }   // 2024: Exhaustion lowers spell save DCs too
-function spellAtkBonus(ab){ if(_ov.spAtk != null && String(_ov.spAtk) !== '') return ovNum('spAtk', 0); return profBonus() + modOf(ab || spellAbilityId()) + magicSum('spellAtk'); }
+function spellDC(ab){ if(OV().spDC != null && String(OV().spDC) !== '') return ovNum('spDC', 8); return 8 + profBonus() + modOf(ab || spellAbilityId()) + magicSum('spellDC') + exhPenalty(); }   // 2024: Exhaustion lowers spell save DCs too
+function spellAtkBonus(ab){ if(OV().spAtk != null && String(OV().spAtk) !== '') return ovNum('spAtk', 0); return profBonus() + modOf(ab || spellAbilityId()) + magicSum('spellAtk'); }
 // A racial/feature-granted spell (e.g. High Elf's cantrip on a Fighter) also opens the Spells tab.
 function isCaster(){ return _forceSpells || spellcastingClasses().length > 0 || spellsKnown.some(s => s.granted || s.item); }
 // Prepared-spell budget (A5): sum each non-pact caster class's Prepared Spells (or Spells Known) at its level.
@@ -3968,7 +4006,7 @@ function togglePrep(n){
   if(!s.prepared && !s.granted && !prepRoomFor(s)){
     const sp = spellByName(n), isCantrip = sp && sp.level === 0, o = spellOwner(s), multi = spellcastingClasses().length > 1;
     const lim = multi && o ? (isCantrip ? cantripMaxFor(o) : preparedMaxFor(o)) : (isCantrip ? cantripMax() : preparedMax());
-    addLog(isCantrip ? 'Cantrips' : 'Prepared Spells', '✗', 'At your ' + (multi && o ? o.c.name + ' ' : '') + (isCantrip ? 'cantrip' : 'prepared') + ' limit (' + lim + ') — un-prepare one first', 'fumble'); return;
+    sheetToast('At your ' + (multi && o ? o.c.name + ' ' : '') + (isCantrip ? 'cantrip' : 'prepared') + ' limit (' + lim + ') — un-prepare one first'); return;
   }
   s.prepared = !s.prepared; renderSpells(); renderSpellHeader(); scheduleAutosave();
 }
@@ -4010,13 +4048,14 @@ function syncSpellAttacks(){ spellsKnown.forEach(sk => addSpellAttackRow(sk.name
 window.syncSpellAttacks = syncSpellAttacks;
 // Spend the lowest available slot of at least `lvl` — regular slots first, then a Pact slot.
 function spendSpellSlot(lvl, name, strict){
+  if(!autoOn('spend')) return lvl;   // Spend switch off (⚙): the player marks slots by hand
   const arr = slotArray();
   // Returns the slot level spent (Pact slots are always their own level), or false.
   if(arr){ for(let i = lvl; i <= 9; i++){ const max = arr[i-1] || 0, used = slotUsed[String(i)] || 0; if(used < max){ slotUsed[String(i)] = used + 1; renderSlots(); scheduleAutosave(); return i; } } }
   const pm = pactInfo();
   if(pm && pm.level >= lvl){ const used = slotUsed['pact'] || 0; if(used < pm.slots){ slotUsed['pact'] = used + 1; renderSlots(); scheduleAutosave(); return pm.level; } }
   if(!arr && !pm && !strict) return lvl;   // no slot tracking → allow
-  addLog('Cast ' + name, '✗', (!arr && !pm) ? 'Free cast already used this Long Rest — and you have no spell slots' : 'No slots of level ' + lvl + '+ left', 'fumble'); return false;
+  sheetToast('Cast ' + name + ': ' + ((!arr && !pm) ? 'Free cast already used this Long Rest — and you have no spell slots' : 'No slots of level ' + lvl + '+ left')); return false;
 }
 function spellSaveAbility(sp){
   if(sp && sp.roll) return sp.roll === 'save' ? (sp.saveAbility || '') : '';
@@ -4052,13 +4091,14 @@ function spellEffectSummary(sp){ const d = (sp && sp.description) || ''; const f
 function availableCastLevels(minLevel){
   const set = [];
   const arr = slotArray();
-  if(arr){ for(let i = minLevel; i <= 9; i++){ const max = arr[i-1] || 0, used = slotUsed[String(i)] || 0; if(max > 0 && used < max) set.push(i); } }
+  if(arr){ for(let i = minLevel; i <= 9; i++){ const max = arr[i-1] || 0, used = slotUsed[String(i)] || 0; if(max > 0 && (used < max || !autoOn('spend'))) set.push(i); } }
   const pm = pactInfo();
   if(pm && pm.level >= minLevel && (slotUsed['pact'] || 0) < pm.slots && set.indexOf(pm.level) < 0) set.push(pm.level);
   return set.sort((a,b) => a-b);
 }
 // Spend a slot of exactly `level` (a regular slot, else a Pact slot of that level).
 function spendSlotAt(level, name){
+  if(!autoOn('spend')) return true;
   const arr = slotArray();
   if(arr){ const max = arr[level-1] || 0, used = slotUsed[String(level)] || 0; if(max > 0 && used < max){ slotUsed[String(level)] = used + 1; renderSlots(); scheduleAutosave(); return true; } }
   const pm = pactInfo();
@@ -4128,7 +4168,7 @@ function castSpellFull(name, castLevel, opts){
   // need a slot of the spell's level. A deliberate upcast always spends the chosen slot.
   const freeCast = isFreeCastSpell(sk);
   let usedFree = false;
-  if(lvl > 0 && !ritual){
+  if(lvl > 0 && !ritual && autoOn('spend')){
     if(castLevel != null && useLevel > lvl){ if(!spendSlotAt(useLevel, label)) return false; }
     else if(freeCast && !freeCastUsed[norm(name)]){ freeCastUsed[norm(name)] = true; usedFree = true; }
     else if(castLevel != null){ if(!spendSlotAt(useLevel, label)) return false; }
@@ -4231,7 +4271,7 @@ function spellSustain(sp){
 function sustainSpell(){
   if(rollsOff()) return;
   const cs = concentratedSpell(), sus = spellSustain(cs); if(!sus) return;
-  if(_turn.bonus){ addLog(_concentration + ' (sustain)', '—', 'Bonus Action already used this turn — End Turn to refresh', 'normal'); return; }
+  if(_turn.bonus){ sheetToast(_concentration + ' (sustain)' + ': ' + ('Bonus Action already used this turn — End Turn to refresh')); return; }
   const dd = rollDiceExpr(sus.dice, false);
   addLog(_concentration + ' (sustain)', dd.total + ' ' + sus.type, 'automatic hit · damage ' + dd.detail, 'normal');
   _turn.bonus = true; afterTurnAction();
@@ -4318,7 +4358,7 @@ let _turnSub = 'action';
 let _turnBased = true;
 function turnOn(){ return _turnBased !== false; }
 function freshTurn(){ return { action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0, sneakUsed:false, dash:false, dodge:0, ready:0, hand:{} }; }
-function toggleTurnMode(){ _turnBased = !turnOn(); _turn = freshTurn(); addLog('Turn-based mode', turnOn() ? 'On' : 'Off', turnOn() ? 'Actions are spent automatically' : 'Tick actions by hand', 'normal'); renderTurn(); scheduleAutosave(); }
+function toggleTurnMode(){ _turnBased = !turnOn(); _turn = freshTurn(); renderTurn(); scheduleAutosave(); if(window.SheetSettings) SheetSettings.refresh(); }
 function turnModeBtn(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: Action, Bonus Action and Reaction are spent automatically, End Turn brings them back. Click to tick them by hand instead.' : 'Manual: actions aren\'t spent automatically — tick the chips yourself. Click to spend them automatically.') + '"><span class="tm-sw"></span></button>'; }
 // Manual mode: whatever an action just spent comes straight back (only the hand-ticked chips,
 // _turn.hand, stay); Dash / Dodge / Ready and movement are kept until End Turn.
@@ -4403,10 +4443,10 @@ function econUsed(type){ return type === 'action' ? actionFullySpent() : _turn[t
 function featureOpt(f){
   const res = resourcesForFeature(f.name)[0];
   let usesHTML = 'At will', noRes = false;
-  if(res){ const left = Math.max(0, res.max - (resourceUsed[res.key]||0)); usesHTML = '<b>' + left + '</b>/' + res.max; noRes = left <= 0; }
+  if(res){ const left = Math.max(0, res.max - (resourceUsed[res.key]||0)); usesHTML = '<b>' + left + '</b>/' + res.max; noRes = left <= 0 && autoOn('spend'); }
   const disabled = _turn[f.type] || noRes;
   return { name: f.name, meta: tcClip(f.desc, 95), usesHTML, disabled,
-    run(){ if(res){ resourceUsed[res.key] = (resourceUsed[res.key]||0) + 1; renderResources(); } _turn[f.type] = true;
+    run(){ if(res && autoOn('spend')){ resourceUsed[res.key] = (resourceUsed[res.key]||0) + 1; renderResources(); } _turn[f.type] = true;
       addLog(f.name, '✦', res ? ('used · ' + Math.max(0, res.max - (resourceUsed[res.key]||0)) + ' left') : 'used', 'normal'); afterTurnAction(); } };
 }
 // Standard actions with an effect on the sheet:
@@ -4494,9 +4534,9 @@ function castableSpells(sub){
 // 2024: on your own turn you can expend only ONE spell slot to cast a spell (Action and Bonus Action spells combined).
 function slotsSpentTotal(){ return Object.keys(slotUsed || {}).reduce((n, k) => n + (num(slotUsed[k]) || 0), 0); }
 function slotCastBlocked(sk, sp, sub){ return sub !== 'reaction' && _turn.slotCast && sp && sp.level > 0 && hasSlotTracking() && !(isFreeCastSpell(sk) && !freeCastUsed[norm(sk.name)]); }
-function turnCastSpell(name, sub, castLevel){ if(isIncapacitated && isIncapacitated()){ addLog('Cast', '✗', 'Incapacitated — you can\'t take actions', 'fumble'); return; }
+function turnCastSpell(name, sub, castLevel){ if(isIncapacitated && isIncapacitated()){ sheetToast('Incapacitated — you can\'t take actions'); return; }
   const sk = spellsKnown.find(s => norm(s.name) === norm(name)), sp = spellByName(name);
-  if(slotCastBlocked(sk || { name }, sp, sub)){ addLog('Cast ' + name, '—', 'You already expended a spell slot this turn — only cantrips or slot-free casts until End Turn', 'normal'); return; }
+  if(slotCastBlocked(sk || { name }, sp, sub)){ sheetToast('Cast ' + name + ': ' + ('You already expended a spell slot this turn — only cantrips or slot-free casts until End Turn')); return; }
   const before = slotsSpentTotal();
   if(castSpellFull(name, castLevel)){ _turn[sub] = true; if(sub !== 'reaction' && slotsSpentTotal() > before) _turn.slotCast = true; afterTurnAction(); } }
 function toggleTurnSec(id){ _turnCollapsed[id] = !_turnCollapsed[id]; renderTurn(); scheduleAutosave(); }
@@ -4582,7 +4622,7 @@ function turnSpellsHTML(sub){
     h += '<div class="turn-sl-hd">' + (lvl === 0 ? 'Cantrips' : 'Level ' + lvl) + '</div>';
     byLvl[lvl].forEach(({ sk, sp }) => {
       const free = sp.level === 0 ? Infinity : freeSlotsAtOrAbove(sp.level);
-      const noSlot = (sp.level > 0 && hasSlotTracking() && free <= 0) || slotCastBlocked(sk, sp, sub);
+      const noSlot = (autoOn('spend') && sp.level > 0 && hasSlotTracking() && free <= 0) || slotCastBlocked(sk, sp, sub);
       h += spellRowHTML(sk, sp, { prep:false, nameInput:false, turnSub:sub, disabled: econ || noSlot });
     });
   });
@@ -4752,8 +4792,8 @@ const INCAPACITATING = ['Incapacitated','Paralyzed','Petrified','Stunned','Uncon
 function isIncapacitated(){ return INCAPACITATING.some(c => activeCond(c)); }
 function toggleCondition(name){
   const i = activeConditions.findIndex(x => norm(x) === norm(name));
-  if(i >= 0){ activeConditions.splice(i,1); addLog('Condition removed', '—', name, 'normal'); }
-  else { activeConditions.push(name); addLog('Condition', '⚠', name + ' applied', 'fumble');
+  if(i >= 0){ activeConditions.splice(i,1); }
+  else { activeConditions.push(name);
     if(_concentration && INCAPACITATING.some(c => norm(c) === norm(name))) dropConcentration(); }
   renderConditions(); recalc(); scheduleAutosave();
 }
@@ -4907,8 +4947,8 @@ function renderLongRestModal(){
   $('desc-body').innerHTML = h;
 }
 function completeLongRest(){
-  if(isDead()){ addLog('Long Rest', '✗', 'The character is dead — a rest has no effect.', 'fumble'); closeDesc(); return; }
-  if(num($('f-hp-cur').value) <= 0){ addLog('Long Rest', '✗', 'You need at least 1 Hit Point at the start of a Long Rest to gain its benefits.', 'fumble'); closeDesc(); return; }
+  if(isDead()){ sheetToast('The character is dead — a rest has no effect.'); closeDesc(); return; }
+  if(num($('f-hp-cur').value) <= 0){ sheetToast('You need at least 1 Hit Point at the start of a Long Rest to gain its benefits.'); closeDesc(); return; }
   $('f-hp-cur').value = $('f-hp-max').textContent; $('f-hp-temp').value = 0;
   slotUsed = {}; freeCastUsed = {}; deathSucc = 0; deathFail = 0; dropConcentration(true); setUnconscious(false);
   const hadExh = exhaustion > 0;
@@ -4918,7 +4958,7 @@ function completeLongRest(){
   resetResources('long');
   const recharged = restoreCharges();
   renderDeath(); renderSlots(); renderExhaustion();
-  addLog('Long Rest', '☀', 'Full HP, all spell slots, death saves cleared' + (hadExh ? ', −1 Exhaustion' : '') + ', +' + Math.max(0,regained) + ' Hit Dice' + (recharged ? ', ' + recharged + ' item' + (recharged > 1 ? 's' : '') + ' recharged' : ''), 'crit');
+  sheetToast('Long Rest' + ': ' + ('Full HP, all spell slots, death saves cleared' + (hadExh ? ', −1 Exhaustion' : '') + ', +' + Math.max(0,regained) + ' Hit Dice' + (recharged ? ', ' + recharged + ' item' + (recharged > 1 ? 's' : '') + ' recharged' : '')));
   closeDesc();
   scheduleAutosave();
 }
@@ -4984,7 +5024,7 @@ function collectSheet(){
     shown: { scores: shownScores, hpMax: num(v('f-hp-max')), saveBonus: magicSaveBonus() },
     speed: v('f-speed'), speedManual: _speedManual, ac: v('f-ac'), acTemp: v('f-ac-temp'), hpCur: num(v('f-hp-cur')), hpMax: num(v('f-hp-max')) - (_magicApplied.hp || 0), hpTemp: num(v('f-hp-temp')), hitdice: v('f-hitdice'), hdLeft: hdRemaining(), hdUsed,
     locked: _locked, ov: _ov,
-    turn: _turn, turnBased: _turnBased, autoUse: _autoUse, turnSub: _turnSub, turnCollapsed: _turnCollapsed,
+    turn: _turn, turnBased: _turnBased, autoUse: _autoUse, auto: _sheetAuto, man: _man, turnSub: _turnSub, turnCollapsed: _turnCollapsed,
     inspiration: $('insp-btn').classList.contains('on'), deathSucc, deathFail, activeConditions, defenses, companions, exhaustion, tab: _tab,
     attacks, inventory, gp: num(v('f-gp')), sp: num(v('f-sp')), cp: num(v('f-cp')),
     proficiencies: v('f-proficiencies'), notes: v('f-notes'),
@@ -5001,6 +5041,7 @@ function applySheet(d){
   _turn = Object.assign({ action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0 }, d.turn || {});
   _turnBased = d.turnBased !== false;
   _autoUse = d.autoUse !== false; renderAutoBtn();
+  _sheetAuto = (d.auto && typeof d.auto === 'object') ? d.auto : {}; _man = (d.man && typeof d.man === 'object') ? d.man : {}; if(window.SheetSettings) SheetSettings.refresh();
   _turnSub = d.turnSub || 'action';
   _turnCollapsed = (d.turnCollapsed && typeof d.turnCollapsed === 'object') ? d.turnCollapsed : {};
   _magicApplied = { str:0, dex:0, con:0, int:0, wis:0, cha:0, hp:0 };   // stored scores/HP are base; recalc re-adds the magic delta
@@ -5040,7 +5081,7 @@ function saveSheet(quiet){
   const data = collectSheet(); const json = JSON.stringify(data);
   try { localStorage.setItem('dnd_sheet', json); } catch(e){}
   if(window.__ddSave) window.__ddSave({ dnd_sheet: json });
-  if(!quiet) addLog('Sheet Saved', '✓', data.name || 'Unnamed', 'normal');
+  if(!quiet) sheetToast('Sheet saved');
 }
 function syncDocTitle(){ const name = ($('f-name').value || '').trim(); if(name && window.__ddSaveTitle) window.__ddSaveTitle(name); }
 function exportSheet(){
@@ -5048,12 +5089,12 @@ function exportSheet(){
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = ((data.name || 'dnd-character').replace(/[^a-z0-9]+/gi,'_').toLowerCase() || 'dnd-character') + '.json';
   a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-  addLog('Sheet Exported', '↓', a.download, 'normal');
+  sheetToast('Exported ' + a.download);
 }
 function importSheet(input){
   const f = input.files && input.files[0]; if(!f) return;
   const r = new FileReader();
-  r.onload = () => { try { applySheet(JSON.parse(r.result)); saveSheet(true); addLog('Imported', '↑', f.name, 'normal'); } catch(e){ addLog('Import failed', '✗', 'Not a valid sheet file', 'fumble'); } };
+  r.onload = () => { try { applySheet(JSON.parse(r.result)); saveSheet(true); sheetToast('Imported ' + f.name); } catch(e){ sheetToast('Import failed — not a valid sheet file'); } };
   r.readAsText(f); input.value = '';
 }
 function autoLoad(){
@@ -5122,9 +5163,9 @@ async function campaignJoin(){
   try { const r = await fetch('/api/campaigns?code=' + encodeURIComponent(code), { credentials:'same-origin' }); if(r.status === 429){ campaignError('Too many tries — wait a few minutes and try again.'); return; } if(r.status === 404){ campaignError('No campaign found with that code.'); return; } if(!r.ok) throw new Error(r.status); _campaign = await r.json(); campaignConnected(); }
   catch(e){ campaignError('Could not join — are you signed in to the app?'); }
 }
-function campaignConnected(){ _campaignLastId = 0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign', 'Link', 'Connected to "' + _campaign.name + '" (' + _campaign.code + ')', 'normal'); saveSheet(true); }
+function campaignConnected(){ _campaignLastId = 0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); sheetToast('Linked to "' + _campaign.name + '"'); saveSheet(true); }
 function campaignLeaveSilent(){ if(_campaignTimer){ clearInterval(_campaignTimer); _campaignTimer = null; } _campaign = null; _campaignLastId = 0; campaignUpdateBtn(); }
-function campaignLeave(){ const name = _campaign ? _campaign.name : ''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign', 'Link', 'Left "' + name + '"', 'normal'); saveSheet(true); }
+function campaignLeave(){ const name = _campaign ? _campaign.name : ''; campaignLeaveSilent(); campaignRenderModal(); sheetToast('Left "' + name + '"'); saveSheet(true); }
 const CAMPAIGN_SKIP_LABELS = new Set(['Sheet Saved','Sheet Exported','Imported','Import failed','Campaign','Claimed']);
 function campaignBroadcast(label, result, detail, type){
   if(!_campaign || CAMPAIGN_SKIP_LABELS.has(String(label))) return;
@@ -5324,6 +5365,8 @@ function poolSub(e,s){ if(e&&e.preventDefault) e.preventDefault(); var i=dicePoo
 (function(){ var _r=rollDicePool; rollDicePool=function(){ var out=_r.apply(this,arguments); try{ clearDicePool(); setAdv('norm'); }catch(e){} return out; }; })();
 </script>
 <script src="/tools-data/dice-anim.js"></script>
+<!-- Sheet Settings (⚙ in the roll log) — shared asset: /tools-data/sheet-settings.js -->
+<script src="/tools-data/sheet-settings.js"></script>
 <script>
 // ═══ DICE TRAY — the GM Screen's pool tray (same rows, same controls on every d20 sheet) ═══
 // Tap a die to add it to the pool (right-click removes one). ADV / DIS go on the

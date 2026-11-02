@@ -1581,9 +1581,9 @@ body.dark{--scar-c:#3a1f48;}
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
   <div class="log-header">
-    <div class="log-title" aria-hidden="true"></div>
+    <div class="log-title">Roll Log</div>
     <div style="display:flex;align-items:center;gap:8px;">
-      <button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button type="button" id="auto-toggle" class="log-lock log-auto on" onclick="toggleAutoUse()" aria-pressed="true" aria-label="Use up consumables automatically" title="Auto-use on: torches, candles, flasks of oil (thrown or burned by a lamp or lantern), herbal remedies and healer&#39;s kit uses come off your inventory by themselves. Click to count them by hand."><span class="lk-ico">🎒</span></button><button id="lock-toggle" class="log-lock" onclick="toggleLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (automated). Click to unlock for manual editing."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button>
+      <button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button>
     </div>
   </div>
   <div class="log-actions">
@@ -1657,6 +1657,8 @@ body.dark{--scar-c:#3a1f48;}
 </div>
 
 <!-- DESCRIPTION MODAL (features / rests / Shadow) -->
+<!-- YOUR STATS (Auto-calculated stats off, ⚙ in the roll log) -->
+<div id="stats-overlay" class="ov" onclick="if(event.target===this)closeStats()"><div class="modal" style="max-width:380px;"><div class="modal-hd"><div class="ttl">Your stats</div><button class="x" onclick="closeStats()">&#10005;</button></div><div class="modal-bd" id="stats-body"></div><div class="modal-ft"><button class="m-btn ghost" onclick="closeStats()">Cancel</button><button class="m-btn" onclick="saveStats()">Save</button></div></div></div>
 <div id="desc-overlay" class="ov" onclick="if(event.target===this)closeDesc()">
   <div class="modal">
     <div class="modal-hd"><div class="ttl" id="desc-title">—</div><button class="x" onclick="closeDesc()">&#10005;</button></div>
@@ -1723,8 +1725,8 @@ const D = {
 // ── state ──────────────────────────────────────────────────────────────────
 let _locked = true;                // true = automated (fields read-only); false = manual editing
 let _ov = {};                      // manual overrides for computed display fields (key → value)
-function setAuto(id, key, computed){ const el = $(id); if(!el || document.activeElement === el) return; el.textContent = (_ov[key] != null && String(_ov[key]) !== '') ? _ov[key] : computed; }
-function ovNum(key, fallback){ return (_ov[key] != null && String(_ov[key]) !== '' && !isNaN(parseInt(_ov[key],10))) ? parseInt(_ov[key],10) : fallback; }
+function setAuto(id, key, computed){ const el = $(id); if(!el || document.activeElement === el) return; const o = OV(); el.textContent = (o[key] != null && String(o[key]) !== '') ? o[key] : computed; }
+function ovNum(key, fallback){ const o = OV(); return (o[key] != null && String(o[key]) !== '' && !isNaN(parseInt(o[key],10))) ? parseInt(o[key],10) : fallback; }
 let saveProf = {};                 // { STR:true, ... }
 let skillProf = {};                // { Athletics:1 } (0 none, 1 proficient, 2 expertise)
 let deathSucc = 0, deathFail = 0;
@@ -1747,7 +1749,7 @@ function defaultOptions(){ return {}; }
 let options = defaultOptions();
 
 function levelNow(){ return totalLevel(); }
-function profBonus(){ if(_ov && _ov.prof != null && String(_ov.prof) !== '' && !isNaN(parseInt(_ov.prof,10))) return parseInt(_ov.prof,10); const t = D.tables(); const L = levelNow(); if(t && t.proficiencyByLevel && t.proficiencyByLevel[L-1]) return t.proficiencyByLevel[L-1]; return 2 + Math.floor((L-1)/4); }
+function profBonus(){ const o = OV(); if(o && o.prof != null && String(o.prof) !== '' && !isNaN(parseInt(o.prof,10))) return parseInt(o.prof,10); const t = D.tables(); const L = levelNow(); if(t && t.proficiencyByLevel && t.proficiencyByLevel[L-1]) return t.proficiencyByLevel[L-1]; return 2 + Math.floor((L-1)/4); }
 function halfPB(){ return Math.floor(profBonus() / 2); }
 function rawScore(id){ return num($('sc-' + id) ? $('sc-' + id).value : 10); }
 function score(id){ const raw = rawScore(id); if(typeof itemBonus !== 'function') return raw; const ib = itemBonus(); const s = raw + (ib.stat[id] || 0); return Math.max(s, ib.setstat[id] || 0); }
@@ -1898,6 +1900,7 @@ function recalc(){
   renderRewardCount();
   renderConditions();
   renderDefenses();
+  renderStatsMan();
 }
 
 // ═══ SHEET LOCK ═══════════════════════════════════════════════════════════
@@ -1924,6 +1927,7 @@ function applyLock(){
     const ico = btn.querySelector('.lk-ico'); if(ico) ico.textContent = locked ? '🔒' : '🔓';
   }
   syncSharedLock();
+  if(window.SheetSettings) SheetSettings.refresh();
 }
 function syncSharedLock(){ try { window._sheetLocked = _locked; if(typeof window.applySheetLock === 'function') window.applySheetLock(); } catch(e){} }
 function setLocked(v){ _locked = !!v; applyLock(); recalc(); renderShadow(); scheduleAutosave(); }
@@ -2007,7 +2011,7 @@ function d20Check(label, mod, opts){
   addLog(label, opts.plain ? String(total) : misFail ? 'Fail (' + total + ')' : sgn(total), detail, type);   // opts.plain: bare integer (Initiative → GM Screen)
   return { total, nat: r.nat, type, autoFail: misFail, mode: r.mode };
 }
-function rollsOff(){ if(_locked) return false; addLog('Rolling off', '🔓', 'Lock the sheet to roll', 'fumble'); return true; }
+function rollsOff(){ if(_locked) return false; sheetToast('Lock the sheet (⚙ in the roll log) to roll'); return true; }
 function rollAbility(id){ if(rollsOff()) return; const er = errandRunner(); d20Check(id + ' check', modOf(id) + er, { kind:'check', abil:id, adv: (id === 'STR' && hasFeature('War-Hardened')) ? 'War-Hardened' : '', note: er ? 'Errand Runner +' + er : '' }); }
 const AUTOFAIL_STRDEX = ['Paralyzed','Petrified','Stunned','Unconscious'];
 function rollSave(id, extra){
@@ -2092,7 +2096,7 @@ function adjustHP(sign){
   const curEl = $('f-hp-cur'), tempEl = $('f-hp-temp');
   const max = hpMaxEffective(); let cur = num(curEl.value), temp = num(tempEl.value);
   if(sign > 0){
-    if(isDead()){ addLog('Heal', '✗', 'The hero has fallen — healing has no effect. Clear the death-save failures first if they return.', 'fumble'); amtEl.value = ''; return; }
+    if(isDead()){ sheetToast('The hero has fallen — healing has no effect. Clear the death-save failures first if they return.'); amtEl.value = ''; return; }
     const wasDown = cur === 0;
     cur = Math.min(max || cur + amt, cur + amt); curEl.value = cur;
     addLog('Heal', '+' + amt, 'HP ' + cur + (max ? '/' + max : ''), 'normal');
@@ -2106,10 +2110,11 @@ function adjustHP(sign){
     cur = Math.max(0, before - dmg);
     // Stone-Hard: dropped to 0 but not killed outright → 1 HP instead (once per short rest).
     let stone = '';
-    if(before > 0 && cur === 0 && hasVirtue('Stone-Hard')){ const r = allResources().find(x => norm(x.name) === 'stone-hard'); if(r && (resourceUsed[r.key] || 0) < r.max && (dmg - before) < hpMaxBase()){ resourceUsed[r.key] = (resourceUsed[r.key] || 0) + 1; cur = 1; stone = ' · Stone-Hard: 1 HP instead'; renderResources(); renderFeatures(); } }
+    if(before > 0 && cur === 0 && autoOn('prompts') && hasVirtue('Stone-Hard')){ const r = allResources().find(x => norm(x.name) === 'stone-hard'); if(r && (resourceUsed[r.key] || 0) < r.max && (dmg - before) < hpMaxBase()){ resourceUsed[r.key] = (resourceUsed[r.key] || 0) + 1; cur = 1; stone = ' · Stone-Hard: 1 HP instead'; renderResources(); renderFeatures(); } }
     curEl.value = cur;
     addLog('Damage', '-' + amt + (dtype ? ' ' + dtype : ''), adj.note + (soaked ? soaked + ' soaked by temp · ' : '') + 'HP ' + cur + (max ? '/' + max : '') + (cur === 0 ? ' — down!' : '') + stone, cur === 0 ? 'fumble' : 'normal');
-    if(before > 0 && cur === 0){
+    if(!autoOn('prompts')){ }   // Dying rules switch off (⚙): nothing applied by itself
+    else if(before > 0 && cur === 0){
       const overkill = dmg - before;
       setUnconscious(true); deathSucc = 0; deathFail = 0;
       if(max > 0 && overkill >= max){ deathFail = 3; renderDeath(); addLog('Massive Damage', 'Down', 'Overflow ' + overkill + ' ≥ max HP — instant death', 'fumble'); }
@@ -2131,6 +2136,7 @@ function tickDeathDamage(dmg, max, crit){
 }
 function onHPTyped(el){
   const before = num(el._prev), now = Math.max(0, num(el.value)); el.value = now; el._prev = now;
+  if(!autoOn('prompts')) return;   // Dying rules switch off (⚙)
   if(before > 0 && now === 0){ setUnconscious(true); deathSucc = 0; deathFail = 0; renderDeath(); addLog('Downed', 'Down', 'At 0 HP — unconscious, roll death saves', 'fumble'); }
   else if(before === 0 && now > 0 && !isDead()) reviveFromDown();
 }
@@ -2154,7 +2160,7 @@ function updateDicePoolDisplay(){
 function clearDicePool(){ dicePool = []; updateDicePoolDisplay(); }
 function rollDicePool(){
   if(rollsOff()) return;
-  if(!dicePool.length){ addLog('Dice Pool', '—', 'No dice in the pool — tap dice to add', 'normal'); return; }
+  if(!dicePool.length){ sheetToast('No dice in the pool — tap dice to add'); return; }
   const parts = []; let total = 0;
   dicePool.forEach(sides => {
     if(sides === 20 && _adv !== 'norm'){ const r = rawD20(); total += r.nat; parts.push('d20[' + r.faces.join(',') + '→' + r.nat + (r.mode === 'adv' ? ' adv' : ' dis') + ']'); }
@@ -2326,7 +2332,7 @@ function renderAtkActions(tr){
 function refreshAtkActions(){ [...document.querySelectorAll('#attacks-body tr')].forEach(renderAtkActions); }
 function toggleTwoHanded(btn){
   const tr = _atkRow(btn), on = tr.dataset.twoHanded !== '1';
-  if(on && hasShield()){ addLog('Two-handed', '✗', "Can't wield a weapon in two hands while holding a shield", 'fumble'); return; }
+  if(on && hasShield()){ sheetToast("Can't wield a weapon in two hands while holding a shield"); return; }
   tr.dataset.twoHanded = on ? '1' : ''; renderAtkActions(tr); scheduleAutosave();
 }
 function rollSneak(btn){ doAttack(_atkRow(btn), sneakDice()); }
@@ -2374,14 +2380,14 @@ function rollAttackFull(btn){ doAttack(_atkRow(btn), 0); }
 function doAttack(tr, sneakD6, asReaction, opts){
   opts = opts || {};
   if(rollsOff()) return;
-  if(isIncapacitated()){ addLog('Attack', '✗', "Incapacitated — you can't take actions, bonus actions or reactions", 'fumble'); return; }
+  if(isIncapacitated()){ sheetToast("Incapacitated — you can't take actions, bonus actions or reactions"); return; }
   const offhand = !!opts.offhand;
-  if(asReaction){ if(_turn.reaction){ addLog('Opportunity Attack', '—', 'Reaction already used this turn — End Turn to refresh', 'normal'); return; } }
-  else if(offhand){ if(_turn.bonus){ addLog('Off-hand attack', '—', 'Bonus action already used this turn — End Turn to refresh', 'normal'); return; }
-    if(turnOn() && !(_turn.actionType === 'attack' && _turn.attacksMade > 0)){ addLog('Off-hand attack', '—', 'Take the Attack action with a light melee weapon first', 'normal'); return; } }
-  else if(turnActionSpentByOther() || (_turn.actionType === 'attack' && _turn.attacksMade >= attacksPerAction())){ addLog('Attack', '—', 'No attack left this turn — End Turn to refresh', 'normal'); return; }
+  if(asReaction){ if(_turn.reaction){ sheetToast('Opportunity Attack' + ': ' + ('Reaction already used this turn — End Turn to refresh')); return; } }
+  else if(offhand){ if(_turn.bonus){ sheetToast('Off-hand attack' + ': ' + ('Bonus action already used this turn — End Turn to refresh')); return; }
+    if(turnOn() && !(_turn.actionType === 'attack' && _turn.attacksMade > 0)){ sheetToast('Off-hand attack' + ': ' + ('Take the Attack action with a light melee weapon first')); return; } }
+  else if(turnActionSpentByOther() || (_turn.actionType === 'attack' && _turn.attacksMade >= attacksPerAction())){ sheetToast('No attack left this turn — End Turn to refresh'); return; }
   sneakD6 = sneakD6 || 0;
-  if(sneakD6 > 0){ if(_turn.sneakUsed){ addLog('Sneak Attack', '—', 'Already used this turn — End Turn to refresh', 'normal'); return; } _turn.sneakUsed = true; }
+  if(sneakD6 > 0){ if(_turn.sneakUsed){ sheetToast('Sneak Attack' + ': ' + ('Already used this turn — End Turn to refresh')); return; } _turn.sneakUsed = true; }
   const c = atkCalc(tr, { offhand });
   const name = (asReaction ? 'Opportunity Attack: ' : offhand ? 'Off-hand: ' : '') + (tr.querySelector('.atk-name').value || 'Attack') + (sneakD6 ? ' + Sneak Attack' : '');
   const ctx = rollCtx('attack', { abil: c.abil, dis: c.dis[0] || '' });
@@ -2530,7 +2536,7 @@ function toggleReward(rid, name){
   const tr = invRows().find(r => r.dataset.rid === rid); if(!tr) return;
   const list = invRewards(tr), i = list.indexOf(name);
   if(i >= 0) list.splice(i, 1);
-  else { list.push(name); if(rewardsApplied() + 1 > rewardsEarned()) addLog('Reward', '⚠', name + ' added — more rewards on your gear (' + (rewardsApplied() + 1) + ') than your level has earned (' + rewardsEarned() + ')', 'fumble'); else addLog('Reward', '★', name + ' — ' + invRowDisplay(tr), 'crit'); }
+  else { list.push(name); if(rewardsApplied() + 1 > rewardsEarned()) sheetToast(name + ' added — more rewards on your gear (' + (rewardsApplied() + 1) + ') than your level has earned (' + rewardsEarned() + ')'); else sheetToast(name + ' — ' + invRowDisplay(tr)); }
   tr.dataset.rewards = list.join(',');
   renderInvActions(tr); renderInvDetail(tr); recalc(); openRewardPicker(tr); scheduleAutosave();
 }
@@ -2573,7 +2579,40 @@ function invQty(tr){ return num(tr.querySelector('.inv-qty').value); }
 // the inventory by themselves. Off = the item still works, only the count / uses are left alone.
 let _autoUse = true;
 function autoUse(){ return _autoUse !== false; }
-function toggleAutoUse(){ _autoUse = !autoUse(); renderAutoBtn(); addLog('Auto-use', autoUse() ? 'On' : 'Off', autoUse() ? 'Consumables are used up automatically' : 'Count consumables yourself', 'normal'); scheduleAutosave(); }
+function toggleAutoUse(){ _autoUse = !autoUse(); renderAutoBtn(); scheduleAutosave(); }
+// SHEET SETTINGS (⚙) — sheet-settings.js draws these; saved on the sheet as auto:{spend,stats,enc,prompts}
+// (default on) and man:{ac,speed,init,prof}. locked, turnBased and autoUse keep their own keys.
+if(typeof window.sheetToast !== 'function') window.sheetToast = function(t){ if(window.console) console.log(t); };
+let _sheetAuto = {}, _man = {};
+function autoOn(k){ return _sheetAuto[k] !== false; }
+function setOpt(k, on){ _sheetAuto[k] = !!on; recalc(); scheduleAutosave(); }
+window.SHEET_SETTINGS = function(){ return [
+  { key:'lock', group:'sheet', label:'Lock the sheet', hint:'Automated and read-only; unlock to type over any number (rolling pauses while unlocked)', get: () => _locked, set: on => { if(on !== _locked) setLocked(on); } },
+  { key:'turn', group:'auto', label:'Turn-based actions', hint:'Attacks and features spend your action, bonus action and reaction; off: tick them yourself', get: turnOn, set: on => { if(on !== turnOn()) toggleTurnMode(); } },
+  { key:'use', group:'auto', label:'Use up consumables', hint:'Torches, candles, flasks of oil, herbal remedies and healer’s kit uses come off your inventory', get: autoUse, set: on => { if(on !== autoUse()) toggleAutoUse(); } },
+  { key:'spend', group:'auto', label:'Spend feature uses automatically', hint:'Calling and virtue features (and Pipe-smoking) tick off their uses per rest; off: mark them yourself', get: () => autoOn('spend'), set: on => setOpt('spend', on) },
+  { key:'stats', group:'auto', label:'Auto-calculated stats', hint:'AC, Speed, Initiative and Proficiency Bonus; off: type your own', get: () => autoOn('stats'), set: on => { if(!on) seedMan(); setOpt('stats', on); } },
+  { key:'enc', group:'auto', label:'Encumbrance penalties', hint:'Over 5× STR lb: −10 speed, disadvantage on Athletics/Acrobatics; over 10×: −20, disadvantage on STR/DEX/CON', get: () => autoOn('enc'), set: on => setOpt('enc', on) },
+  { key:'prompts', group:'auto', label:'Dying rules', hint:'0 HP knocks you out and starts death saves, damage at 0 HP adds failures, massive damage kills; Stone-Hard', get: () => autoOn('prompts'), set: on => setOpt('prompts', on) }
+]; };
+// Auto-calculated stats off: the player's own numbers (_man) sit on top of any unlocked-sheet overrides (_ov).
+const MAN_STATS = [['ac','f-ac','Armour Class'],['speed','f-speed','Speed'],['init','c-init','Initiative'],['prof','c-prof','Proficiency Bonus']];
+const MAN_SIGNED = { init:1, prof:1 };
+function OV(){ if(autoOn('stats')) return _ov; const o = Object.assign({}, _ov); MAN_STATS.forEach(([k]) => { if(_man[k] != null && _man[k] !== '') o[k] = _man[k]; }); return o; }
+function manFmt(k, v){ return MAN_SIGNED[k] ? sgn(v) : String(v); }
+function manRead(id){ const el = $(id); const v = el ? parseInt(String(el.textContent).replace(/−/g, '-').replace(/[^\d-]/g, ''), 10) : NaN; return isNaN(v) ? null : v; }
+function seedMan(){ MAN_STATS.forEach(([k, id]) => { if(_man[k] == null){ const v = manRead(id); if(v != null) _man[k] = manFmt(k, v); } }); }
+function renderStatsMan(){ const man = !autoOn('stats');
+  MAN_STATS.forEach(([k, id]) => { const el = $(id); if(!el) return; el.classList.toggle('stat-man', man); el.contentEditable = (!man && !_locked) ? 'true' : 'false';
+    el.onclick = man ? (e => { e.stopPropagation(); editStats(); }) : null; el.style.cursor = man ? 'pointer' : '';
+    if(man) el.title = 'Your own number — click to change'; else if(k !== 'ac' && k !== 'speed') el.title = ''; }); }
+function editStats(){
+  $('stats-body').innerHTML = '<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). These numbers are shown on the sheet and used for rolls.</p>'
+    + MAN_STATS.map(([k, id, l]) => '<div class="m-lbl">' + l + '</div><input class="m-input" type="number" data-man="' + k + '" value="' + esc(_man[k] != null ? parseInt(_man[k], 10) : (manRead(id) != null ? manRead(id) : '')) + '">').join('');
+  $('stats-overlay').classList.add('open');
+}
+function closeStats(){ $('stats-overlay').classList.remove('open'); }
+function saveStats(){ document.querySelectorAll('#stats-body [data-man]').forEach(i => { const k = i.dataset.man, v = i.value.trim(); _man[k] = v === '' ? null : manFmt(k, num(v)); }); closeStats(); recalc(); scheduleAutosave(); }
 function renderAutoBtn(){ const b = $('auto-toggle'); if(!b) return; const on = autoUse(); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.title = on ? 'Auto-use on: torches, candles, flasks of oil (thrown or burned by a lamp or lantern), herbal remedies and healer\'s kit uses come off your inventory by themselves. Click to count them by hand.' : 'Auto-use off: nothing is taken from your inventory — count consumables and uses yourself. Click to turn it back on.'; }
 // Use one up: a bundle loses one of its contents (and one bundle when it's empty); anything else loses one.
 function consumeRow(tr){
@@ -2621,8 +2660,8 @@ function equipmentOpts(filterCost){
 function useInvItem(rid){
   const tr = invRows().find(r => r.dataset.rid === rid); if(!tr) return;
   const u = invUse(tr); if(!u || itemCostSpent(u.cost) || isIncapacitated()) return;
-  if(u.cmax && u.charges <= 0){ addLog(u.name, '✗', 'No uses left', 'fumble'); return; }
-  if(u.fuel && !fuelRow(u.fuel)){ addLog(u.name, '✗', 'No oil — a lamp or lantern burns a flask of oil', 'fumble'); return; }
+  if(u.cmax && u.charges <= 0){ sheetToast(u.name + ': ' + ('No uses left')); return; }
+  if(u.fuel && !fuelRow(u.fuel)){ sheetToast(u.name + ': ' + ('No oil — a lamp or lantern burns a flask of oil')); return; }
   if(rollsOff()) return;
   itemSpendCost(u.cost);
   const bits = [ITEM_COST_LBL[u.cost], u.effect]; let result = '✦';
@@ -2706,12 +2745,12 @@ function carriedWeight(){ let t = 0; invRows().forEach(tr => { const it = itemDa
 function encumbrance(){
   const str = score('STR') || 10, mult = isDwarf() ? 2 : 1, w = carriedWeight();
   const enc = 5 * str * mult, heavy = 10 * str * mult, max = 15 * str * mult;
-  return { w, enc, heavy, max, level: w > heavy ? 2 : w > enc ? 1 : 0 };
+  return { w, enc, heavy, max, level: !autoOn('enc') ? 0 : w > heavy ? 2 : w > enc ? 1 : 0 };   // Encumbrance switch off (⚙): no penalties
 }
 function updateCarry(){ const el = $('carry-weight'); if(!el) return;
   const e = encumbrance();
   const fat = armourFatigue();
-  el.textContent = e.w + ' lb · ' + (e.level === 2 ? 'heavily encumbered' : e.level === 1 ? 'encumbered' : 'unencumbered') + ' (' + e.enc + ' / ' + e.heavy + ' / max ' + e.max + ')' + (fat ? ' · armour: fatigue disadv.' : '');
+  el.textContent = e.w + ' lb · ' + (!autoOn('enc') ? 'penalties off' : e.level === 2 ? 'heavily encumbered' : e.level === 1 ? 'encumbered' : 'unencumbered') + ' (' + e.enc + ' / ' + e.heavy + ' / max ' + e.max + ')' + (fat ? ' · armour: fatigue disadv.' : '');
   el.className = 'carry-line' + (e.level === 2 ? ' heavy' : e.level === 1 ? ' enc' : '');
   el.title = 'Encumbered over ' + e.enc + ' lb (speed −10, disadvantage on Athletics, Acrobatics and fatigue saves); heavily encumbered over ' + e.heavy + ' lb (speed −20, disadvantage on STR/DEX/CON checks, attacks and saves)' + (isDwarf() ? ' — Dwarves carry double' : '') + (fat ? '. Your armour gives disadvantage on journey fatigue saves.' : '');
 }
@@ -2766,22 +2805,22 @@ function warnArmorEquip(tr, slot){
   const display = invRowDisplay(tr);
   const a = slot === 'shield' ? { category:'Shield', name:'Shield' } : D.armor().find(x => norm(x.name) === norm(invRowRef(tr)));
   if(!a) return;
-  if(!armorProficient(a)) addLog('Armour', '⚠', 'Not proficient with ' + display + ' — disadvantage on STR/DEX checks, saves and attacks', 'fumble');
-  if(a.stealthDisadvantage) addLog('Armour', '⚠', display + ' — disadvantage on Stealth checks', 'normal');
-  if(slot === 'armor' && armourFatigue(a, tr)) addLog('Armour', '⚠', display + ' — disadvantage on journey fatigue saving throws', 'normal');
+  if(!armorProficient(a)) sheetToast('Not proficient with ' + display + ' — disadvantage on STR/DEX checks, saves and attacks');
+  if(a.stealthDisadvantage) sheetToast(display + ' — disadvantage on Stealth checks');
+  if(slot === 'armor' && armourFatigue(a, tr)) sheetToast(display + ' — disadvantage on journey fatigue saving throws');
 }
 function shieldVsTwoHanded(display){
   [...document.querySelectorAll('#attacks-body tr')].forEach(tr => {
     const info = rowWeaponInfo(tr); const nm = tr.querySelector('.atk-name').value || tr.dataset.weapon;
-    if(tr.dataset.twoHanded === '1'){ tr.dataset.twoHanded = ''; addLog('Shield', '⚠', nm + ': two-handed grip ended — you\'re holding ' + display, 'normal'); }
-    else if(info.twoHandedProp) addLog('Shield', '⚠', nm + ' is two-handed — you can\'t attack with it while holding ' + display, 'fumble');
+    if(tr.dataset.twoHanded === '1'){ tr.dataset.twoHanded = ''; sheetToast(nm + ': two-handed grip ended — you\'re holding ' + display); }
+    else if(info.twoHandedProp) sheetToast(nm + ' is two-handed — you can\'t attack with it while holding ' + display);
   });
 }
 function weaponVsShield(tr, display){
   const w = weaponByName(invRowRef(tr)); if(!w || !(w.properties || []).some(p => /^two-handed$/i.test(p))) return;
   const sh = equippedShieldRow(); if(!sh) return;
   sh.dataset.equipped = ''; renderInvActions(sh);
-  addLog('Shield', '⚠', invRowDisplay(sh) + ' unequipped — ' + display + ' needs both hands', 'normal');
+  sheetToast(invRowDisplay(sh) + ' unequipped — ' + display + ' needs both hands');
 }
 function equipWeaponRow(tr){
   const display = invRowDisplay(tr);
@@ -2849,7 +2888,7 @@ function reconcileAC(){
   const acEl = $('f-ac'); if(!acEl) return;
   const c = computeAC();
   setAuto('f-ac', 'ac', String(c.ac));
-  acEl.title = (_ov.ac != null && String(_ov.ac) !== '') ? 'AC — manual override (unlock to change)' : 'AC: ' + c.parts.join(' · ') + (armourFatigue() ? ' — this armour gives disadvantage on fatigue saves' : '');
+  acEl.title = (OV().ac != null && String(OV().ac) !== '') ? 'AC — manual override (unlock to change)' : 'AC: ' + c.parts.join(' · ') + (armourFatigue() ? ' — this armour gives disadvantage on fatigue saves' : '');
 }
 function onTempAC(){ reconcileAC(); scheduleAutosave(); }
 
@@ -2996,7 +3035,7 @@ function renderFeatures(){
   });
 }
 function featureByKey(k){ return autoFeatures().find(f => norm(f.key || f.name) === norm(k)) || null; }
-function spendFeatureUse(key){ const r = resourcesForFeature(key)[0]; if(!r) return true; if((resourceUsed[r.key] || 0) >= r.max){ addLog(key, '✗', 'No uses left — rest to regain', 'fumble'); return false; } resourceUsed[r.key] = (resourceUsed[r.key] || 0) + 1; renderResources(); renderFeatures(); refreshTurnHub(); return true; }
+function spendFeatureUse(key){ const r = resourcesForFeature(key)[0]; if(!r || !autoOn('spend')) return true; if((resourceUsed[r.key] || 0) >= r.max){ sheetToast(key + ': ' + ('No uses left — rest to regain')); return false; } resourceUsed[r.key] = (resourceUsed[r.key] || 0) + 1; renderResources(); renderFeatures(); refreshTurnHub(); return true; }
 function useFeatureHeal(key){
   if(rollsOff()) return; const f = featureByKey(key); if(!f || !f.heal) return;
   if(!spendFeatureUse(key)) return;
@@ -3016,8 +3055,8 @@ function useFeatureTemp(key){
 }
 function smokePipe(){
   const r = resourcesForFeature('Pipe-smoking')[0];
-  if(r && (resourceUsed[r.key] || 0) >= r.max){ addLog('Pipe-smoking', '✗', 'Already smoked for inspiration since your last long rest', 'fumble'); return; }
-  if(r){ resourceUsed[r.key] = (resourceUsed[r.key] || 0) + 1; renderResources(); renderFeatures(); }
+  if(r && autoOn('spend') && (resourceUsed[r.key] || 0) >= r.max){ sheetToast('Already smoked for inspiration since your last long rest'); return; }
+  if(r && autoOn('spend')){ resourceUsed[r.key] = (resourceUsed[r.key] || 0) + 1; renderResources(); renderFeatures(); }
   gainInspiration('An hour with your pipe');
 }
 function addCustomFeature(){ }
@@ -3030,7 +3069,7 @@ function availableVirtues(){ const sp = speciesData(); return D.virtues().filter
 function addVirtueByName(n, asi, pick){
   const vd = virtueData(n); if(!vd || hasVirtue(n)) return;
   virtues.push({ name: vd.name, asi: asi || {}, pick: pick || '' });
-  if(!asi) addLog('Virtue', '✦', vd.name + ' added — apply its ability increase by hand (unlock the sheet)', 'normal');
+  if(!asi) sheetToast(vd.name + ' added — apply its ability increase by hand (unlock the sheet)');
   if(vd.companion === 'Pony') ensurePony();
   renderFeatures(); renderResources(); recalc(); renderFellowship(); scheduleAutosave();
 }
@@ -3201,14 +3240,14 @@ function gainShadow(source, amt, opts){
 window.gainShadow = gainShadow;
 function hardenWill(){
   const pts = shadowPoints(), wis = score('WIS');
-  if(!(pts > 0 && shadowTotal() < wis)){ addLog('Harden Will', '✗', pts ? 'Too late — Shadow has reached your Wisdom (a bout of madness must come first)' : 'No Shadow points to clear', 'fumble'); return; }
+  if(!(pts > 0 && shadowTotal() < wis)){ sheetToast('Harden Will' + ': ' + (pts ? 'Too late — Shadow has reached your Wisdom (a bout of madness must come first)' : 'No Shadow points to clear')); return; }
   $('f-shadow').value = 0; $('f-scars').value = shadowScars() + 1;
   addLog('Harden Will', 'Scar ' + shadowScars(), 'Cleared ' + pts + ' Shadow and took a single Shadow Scar (total ' + shadowTotal() + '/' + wis + ')', 'normal');
   recalc(); renderFellowship(); scheduleAutosave();
 }
 function boutOfMadness(){
   const p = shadowPath();
-  if(!(isAnguished() || !_locked)){ addLog('Bout of Madness', '✗', 'Only an anguished hero suffers a bout of madness', 'fumble'); return; }
+  if(!(isAnguished() || !_locked)){ sheetToast('Only an anguished hero suffers a bout of madness'); return; }
   const cleared = shadowPoints();
   $('f-shadow').value = 0;
   let gainedFlaw = '';
@@ -3250,10 +3289,10 @@ function renderFellowship(){
 function setFellowshipPip(i){ const cur = num($('fw-points').value); $('fw-points').value = (i === cur ? i - 1 : i); renderFellowship(); scheduleAutosave(); }
 function onFellowshipTyped(){ renderFellowship(); scheduleAutosave(); }
 function useSuggestedRating(){ $('fw-rating').value = fellowshipSuggested().n; renderFellowship(); scheduleAutosave(); }
-function refreshFellowship(){ $('fw-points').value = num($('fw-rating').value); addLog('Fellowship', '⟳ ' + num($('fw-rating').value), 'The Fellowship pool is refreshed (Fellowship Phase)', 'normal'); renderFellowship(); scheduleAutosave(); }
+function refreshFellowship(){ $('fw-points').value = num($('fw-rating').value); sheetToast('The Fellowship pool is refreshed (Fellowship Phase)'); renderFellowship(); scheduleAutosave(); }
 function spendFellowship(){
   const pts = num($('fw-points').value);
-  if(pts <= 0){ addLog('Fellowship', '✗', 'The Company has no Fellowship points left', 'fumble'); return; }
+  if(pts <= 0){ sheetToast('The Company has no Fellowship points left'); return; }
   $('fw-points').value = pts - 1;
   const p = patronData();
   addLog('Fellowship point', 'Advantage', 'Spent 1 (' + (pts - 1) + ' left) — advantage on your next ability check, attack roll or saving throw' + (p ? ' · or ' + p.advantage : ''), 'crit');
@@ -3275,7 +3314,7 @@ function renderSongs(){
 function addSong(){ const t = $('song-type').value || 'Lay'; songs.push({ type:t, name:'', used:false }); renderSongs(); scheduleAutosave(); }
 function performSong(i){
   const s = songs[i]; if(!s) return;
-  if(s.used){ addLog(s.type, '✗', (s.name || s.type) + ' was already sung this Adventuring Phase', 'fumble'); return; }
+  if(s.used){ sheetToast((s.name || s.type) + ' was already sung this Adventuring Phase'); return; }
   const r = rollSkill('Performance'); if(!r) return;
   s.used = true;
   const d = (D.phase().songs || []).find(x => x.name === s.type);
@@ -3385,7 +3424,7 @@ let _turnSub = 'action';
 let _turnBased = true;
 function turnOn(){ return _turnBased !== false; }
 function freshTurn(){ return { action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0, sneakUsed:false, dash:false, dodge:0, ready:0, hand:{} }; }
-function toggleTurnMode(){ _turnBased = !turnOn(); _turn = freshTurn(); addLog('Turn-based mode', turnOn() ? 'On' : 'Off', turnOn() ? 'Actions are spent automatically' : 'Tick actions by hand', 'normal'); renderTurn(); scheduleAutosave(); }
+function toggleTurnMode(){ _turnBased = !turnOn(); _turn = freshTurn(); renderTurn(); scheduleAutosave(); if(window.SheetSettings) SheetSettings.refresh(); }
 function turnModeBtn(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: Action, Bonus Action and Reaction are spent automatically, End Turn brings them back. Click to tick them by hand instead.' : 'Manual: actions aren\'t spent automatically — tick the chips yourself. Click to spend them automatically.') + '"><span class="tm-sw"></span></button>'; }
 // Manual mode: whatever an action just spent comes straight back (only the hand-ticked chips,
 // _turn.hand, stay); Dash / Dodge / Ready and movement are kept until End Turn.
@@ -3428,10 +3467,10 @@ function econUsed(type){ return type === 'action' ? actionFullySpent() : _turn[t
 function featureOpt(f){
   const res = f.craft ? allResources().find(r => r.craft) : resourcesForFeature(f.key)[0];
   let usesHTML = 'At will', noRes = false;
-  if(res){ const left = Math.max(0, res.max - (resourceUsed[res.key]||0)); usesHTML = '<b>' + left + '</b>/' + res.max + (f.craft ? ' slots' : ''); noRes = left <= 0; }
+  if(res){ const left = Math.max(0, res.max - (resourceUsed[res.key]||0)); usesHTML = '<b>' + left + '</b>/' + res.max + (f.craft ? ' slots' : ''); noRes = left <= 0 && autoOn('spend'); }
   const disabled = (f.type === 'action' ? _turn.action : _turn[f.type]) || noRes;
   return { name: f.name, meta: tcClip(f.desc, 110), usesHTML, disabled,
-    run(){ if(res){ resourceUsed[res.key] = (resourceUsed[res.key]||0) + 1; renderResources(); renderFeatures(); }
+    run(){ if(res && autoOn('spend')){ resourceUsed[res.key] = (resourceUsed[res.key]||0) + 1; renderResources(); renderFeatures(); }
       if(f.type === 'action'){ _turn.action = true; _turn.actionType = 'other'; } else _turn[f.type] = true;
       addLog(f.name, '✦', res ? ('used · ' + Math.max(0, res.max - (resourceUsed[res.key]||0)) + ' left') : 'used', 'normal'); afterTurnAction(); } };
 }
@@ -3487,7 +3526,7 @@ function doSearch(skill){
 function startOfTurnClear(){ if(_turn.dodge === 2) _turn.dodge = 0; if(_turn.ready === 2) _turn.ready = 0; }
 // The yellow (readied) Action chip: the trigger happened — spend the Reaction.
 function fireReadied(){
-  if(_turn.reaction || isIncapacitated()){ addLog('Readied action', '—', isIncapacitated() ? 'Incapacitated — no reactions' : 'Reaction already used — the readied response is lost', 'normal'); return; }
+  if(_turn.reaction || isIncapacitated()){ sheetToast(isIncapacitated() ? 'Incapacitated — no reactions' : 'Reaction already used — the readied response is lost'); return; }
   _turn.ready = 0; _turn.reaction = true;
   if(_turn.actionType === 'ready') _turn.actionType = 'other';
   addLog('Readied action', '⚡', 'Trigger happened — your readied response uses your Reaction', 'normal');
@@ -3687,8 +3726,8 @@ const INCAPACITATING = ['Incapacitated','Paralyzed','Petrified','Stunned','Uncon
 function isIncapacitated(){ return INCAPACITATING.some(c => activeCond(c)); }
 function toggleCondition(name){
   const i = activeConditions.findIndex(x => norm(x) === norm(name));
-  if(i >= 0){ activeConditions.splice(i,1); addLog('Condition removed', '—', name, 'normal'); }
-  else { activeConditions.push(name); addLog('Condition', '⚠', name + ' applied', 'fumble'); if(hasVirtue('Brave at a Pinch')) gainInspiration('Brave at a Pinch'); }
+  if(i >= 0){ activeConditions.splice(i,1); }
+  else { activeConditions.push(name); if(hasVirtue('Brave at a Pinch')) gainInspiration('Brave at a Pinch'); }
   recalc(); scheduleAutosave();
 }
 function condInfo(name){ const c = D.conditions().find(x => norm(x.name) === norm(name)); if(c){ $('desc-title').textContent = c.name; $('desc-body').innerHTML = '<p>' + esc(c.description) + '</p>'; $('desc-overlay').classList.add('open'); } }
@@ -3761,7 +3800,7 @@ function reconcileSpeed(){
   const el = $('f-speed'); if(!el) return;
   const a = autoSpeed();
   setAuto('f-speed', 'speed', String(a.s));
-  el.title = (_ov.speed != null && String(_ov.speed) !== '') ? 'Speed — manual override (unlock to change)' : 'Speed: ' + a.why;
+  el.title = (OV().speed != null && String(OV().speed) !== '') ? 'Speed — manual override (unlock to change)' : 'Speed: ' + a.why;
 }
 
 // ═══ RESTS ════════════════════════════════════════════════════════════════
@@ -3829,14 +3868,14 @@ function renderLongRestModal(){
   $('desc-body').innerHTML = h;
 }
 function completeLongRest(){
-  if(isDead()){ addLog('Long Rest', '✗', 'The hero has fallen — a rest has no effect.', 'fumble'); closeDesc(); return; }
-  if(num($('f-hp-cur').value) <= 0){ addLog('Long Rest', '✗', 'You need at least 1 hit point at the start of a long rest to gain its benefits.', 'fumble'); closeDesc(); return; }
+  if(isDead()){ sheetToast('The hero has fallen — a rest has no effect.'); closeDesc(); return; }
+  if(num($('f-hp-cur').value) <= 0){ sheetToast('You need at least 1 hit point at the start of a long rest to gain its benefits.'); closeDesc(); return; }
   const hadExh = exhaustion > 0; if(hadExh) exhaustion -= 1;
   $('f-hp-cur').value = hpMaxEffective(); $('f-hp-temp').value = 0;
   deathSucc = 0; deathFail = 0; setUnconscious(false);
   const regained = longRestRegain(); hdSetRemaining(hdRemaining() + regained); updateHitDiceUI();
   resetResources('long'); renderDeath(); recalc();
-  addLog('Long Rest', '☀', 'Full HP, death saves cleared' + (hadExh ? ', −1 exhaustion' : '') + ', +' + Math.max(0,regained) + ' Hit Dice, all uses restored', 'crit');
+  sheetToast('Long Rest' + ': ' + ('Full HP, death saves cleared' + (hadExh ? ', −1 exhaustion' : '') + ', +' + Math.max(0,regained) + ' Hit Dice, all uses restored'));
   closeDesc(); scheduleAutosave();
 }
 
@@ -3894,7 +3933,7 @@ function collectSheet(){
     scores, saveProf, skillProf,
     speed: v('f-speed'), ac: v('f-ac'), acTemp: v('f-ac-temp'), hpCur: num(v('f-hp-cur')), hpMax: num(v('f-hp-max')), hpTemp: num(v('f-hp-temp')), hitdice: v('f-hitdice'), hdLeft: hdRemaining(), hdUsed,
     locked: _locked, ov: _ov,
-    turn: _turn, turnBased: _turnBased, autoUse: _autoUse, turnSub: _turnSub, turnCollapsed: _turnCollapsed,
+    turn: _turn, turnBased: _turnBased, autoUse: _autoUse, auto: _sheetAuto, man: _man, turnSub: _turnSub, turnCollapsed: _turnCollapsed,
     inspiration: $('insp-btn').classList.contains('on'), deathSucc, deathFail, activeConditions, defenses, companions, exhaustion, tab: _tab,
     attacks, inventory, gp: num(v('f-gp')), sp: num(v('f-sp')), cp: num(v('f-cp')),
     proficiencies: v('f-proficiencies'), notes: v('f-notes'),
@@ -3913,6 +3952,7 @@ function applySheet(d){
   _turn = Object.assign({ action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0, sneakUsed:false }, d.turn || {});
   _turnBased = d.turnBased !== false;
   _autoUse = d.autoUse !== false; renderAutoBtn();
+  _sheetAuto = (d.auto && typeof d.auto === 'object') ? d.auto : {}; _man = (d.man && typeof d.man === 'object') ? d.man : {}; if(window.SheetSettings) SheetSettings.refresh();
   _turnSub = d.turnSub || 'action';
   _turnCollapsed = (d.turnCollapsed && typeof d.turnCollapsed === 'object') ? d.turnCollapsed : {};
   const set = (id, val) => { const el = $(id); if(!el) return; const sv = (val == null ? '' : val); if('value' in el) el.value = sv; else el.textContent = sv; };
@@ -3961,7 +4001,7 @@ function saveSheet(quiet){
   const data = collectSheet(); const json = JSON.stringify(data);
   try { localStorage.setItem('lotr_sheet', json); } catch(e){}
   if(window.__ddSave) window.__ddSave({ lotr_sheet: json });
-  if(!quiet) addLog('Sheet Saved', '✓', data.name || 'Unnamed', 'normal');
+  if(!quiet) sheetToast('Sheet saved');
 }
 function syncDocTitle(){ const name = ($('f-name').value || '').trim(); if(name && window.__ddSaveTitle) window.__ddSaveTitle(name); }
 function exportSheet(){
@@ -3969,12 +4009,12 @@ function exportSheet(){
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = ((data.name || 'lotr-hero').replace(/[^a-z0-9]+/gi,'_').toLowerCase() || 'lotr-hero') + '.json';
   a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-  addLog('Sheet Exported', '↓', a.download, 'normal');
+  sheetToast('Exported ' + a.download);
 }
 function importSheet(input){
   const f = input.files && input.files[0]; if(!f) return;
   const r = new FileReader();
-  r.onload = () => { try { applySheet(JSON.parse(r.result)); saveSheet(true); addLog('Imported', '↑', f.name, 'normal'); } catch(e){ addLog('Import failed', '✗', 'Not a valid sheet file', 'fumble'); } };
+  r.onload = () => { try { applySheet(JSON.parse(r.result)); saveSheet(true); sheetToast('Imported ' + f.name); } catch(e){ sheetToast('Import failed — not a valid sheet file'); } };
   r.readAsText(f); input.value = '';
 }
 function autoLoad(){
@@ -4044,9 +4084,9 @@ async function campaignJoin(){
   try { const r = await fetch('/api/campaigns?code=' + encodeURIComponent(code), { credentials:'same-origin' }); if(r.status === 429){ campaignError('Too many tries — wait a few minutes and try again.'); return; } if(r.status === 404){ campaignError('No campaign found with that code.'); return; } if(!r.ok) throw new Error(r.status); _campaign = await r.json(); campaignConnected(); }
   catch(e){ campaignError('Could not join — are you signed in to the app?'); }
 }
-function campaignConnected(){ _campaignLastId = 0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign', 'Link', 'Connected to "' + _campaign.name + '" (' + _campaign.code + ')', 'normal'); saveSheet(true); }
+function campaignConnected(){ _campaignLastId = 0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); sheetToast('Linked to "' + _campaign.name + '"'); saveSheet(true); }
 function campaignLeaveSilent(){ if(_campaignTimer){ clearInterval(_campaignTimer); _campaignTimer = null; } _campaign = null; _campaignLastId = 0; campaignUpdateBtn(); }
-function campaignLeave(){ const name = _campaign ? _campaign.name : ''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign', 'Link', 'Left "' + name + '"', 'normal'); saveSheet(true); }
+function campaignLeave(){ const name = _campaign ? _campaign.name : ''; campaignLeaveSilent(); campaignRenderModal(); sheetToast('Left "' + name + '"'); saveSheet(true); }
 const CAMPAIGN_SKIP_LABELS = new Set(['Sheet Saved','Sheet Exported','Imported','Import failed','Campaign','Claimed']);
 function campaignBroadcast(label, result, detail, type){
   if(!_campaign || CAMPAIGN_SKIP_LABELS.has(String(label))) return;
@@ -4214,14 +4254,16 @@ if(window.LOTRHB) LOTRHB.load(function(){
 </script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js (injects CSS + audio + 2D/3D engine). -->
 <script src="/tools-data/dice-anim.js"></script>
+<!-- Sheet Settings (⚙ in the roll log) — shared asset: /tools-data/sheet-settings.js -->
+<script src="/tools-data/sheet-settings.js"></script>
 
 <style id="dd-lock-style">
 .log-lock{display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:6px;padding:2px 7px;cursor:pointer;line-height:1;transition:background .12s,border-color .12s;}
 .log-lock:hover{background:rgba(255,255,255,.35);}
 .log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
 .log-lock .lk-ico{font-size:15px;line-height:1;}
-.log-auto:not(.on){opacity:.55;}
-.log-auto:not(.on) .lk-ico{filter:grayscale(1);}
+body.log-compact .log-entry .roll-detail{display:none;}
+.stat-man::after{content:" ✎";font-size:.55em;opacity:.7;vertical-align:middle;}
 .log-x{font-size:13px;line-height:1;padding:3px 7px;}
 .lk-ro-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none!important;pointer-events:none;}
 input.no-spin{-moz-appearance:textfield;}

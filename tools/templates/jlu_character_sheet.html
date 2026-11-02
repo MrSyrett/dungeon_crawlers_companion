@@ -179,6 +179,7 @@ textarea{width:100%;border:1px solid var(--input-border);border-radius:6px;paddi
 .log-entry .roll-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#9fb0d6;margin-bottom:2px;}
 .log-entry .roll-result{font-family:'Share Tech Mono',monospace;font-size:20px;font-weight:700;color:var(--log-text);line-height:1.05;}
 .log-entry .roll-detail{font-family:'Share Tech Mono',monospace;font-size:10px;color:#8794b8;margin-top:3px;line-height:1.4;word-break:break-word;}
+body.log-compact .log-entry .roll-detail{display:none;}
 /* Campaign log cards the GM Screen can post: found loot (claim per item), loot boxes (open/claim), system messages. */
 .log-foundloot,.log-system,.log-lootbox{border-left:3px solid var(--jlu) !important;border-right:3px solid var(--jlu) !important;}
 .fl-head,.sys-head,.lb-head{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--jlu);}
@@ -636,7 +637,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <!-- ═══ CANONICAL ROLL LOG ═══ -->
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
-  <div class="log-header"><span class="log-title" aria-hidden="true"></span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
+  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #26314a;background:transparent;color:#9fb0d6;" title="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="if(window.JLUB)JLUB.launch();" title="Character Builder">Create</button>
@@ -662,6 +663,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <!-- Modals -->
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">JLU — Quick Rules</div><button class="x" onclick="closeRules()">✕</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">✕</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
+<div id="stats-overlay" class="ov" onclick="if(event.target===this)closeStats()"><div class="modal"><div class="modal-hd"><div class="ttl">Your Stats</div><button class="x" onclick="closeStats()">✕</button></div><div class="modal-bd" id="stats-body"></div><div class="modal-ft"><span></span><button class="m-btn" onclick="saveStats()">Save</button></div></div></div>
 <div id="levelup-overlay" class="ov" onclick="if(event.target===this)closeLevelUp()"><div class="modal wide"><div class="modal-hd"><div class="ttl">✦ Advance Hero</div><button class="x" onclick="closeLevelUp()">✕</button></div><div class="modal-bd" id="levelup-body"></div><div class="modal-ft"><span id="levelup-note" class="m-hint" style="margin:0;flex:1;"></span><button class="m-btn" onclick="closeLevelUp()">Done</button></div></div></div>
 <!-- Gear shop -->
 <div id="pk-overlay" class="ov" onclick="if(event.target===this)closePk()"><div class="modal wide" style="max-height:90vh;">
@@ -701,7 +703,7 @@ function blankState(){
     paxTotal:null,
     archAbilities:[], grantTraits:[],
     powers:[], knowledge:[], traits:[], limitations:[], equipment:[],
-    weakness:'', soul:'', notes:''};
+    weakness:'', soul:'', notes:'', auto:{}, man:{}};
 }
 var S=blankState(), _adv='none', _ready=false, _saveTimer=null, _toastTimer=null;
 
@@ -719,16 +721,23 @@ function originAttrBonus(k){ return (S.origin==='Kryptonian' && k==='potency') ?
 function originDR(){ if(S.origin==='Kryptonian')return tierVal(); if(S.origin==='Amazon')return tierVal()+1; return 0; }  // Amazon Armor / Blood of Krypton
 function originAttackBonus(){ return S.origin==='Amazon' ? 2 : 0; }   // Amazon Sword +2 Attack
 function originDamageBonus(){ return S.origin==='Amazon' ? 1 : 0; }   // Amazon Sword +1 Damage
-function drTotal(){ return originDR() + num(S.dr); }
+function drCalc(){ return originDR() + num(S.dr); }
+function drTotal(){ return manual('dr')?num(S.man.dr):drCalc(); }
 function attrBase(k){return num(S.attrs[k]);}                          // bought points (PAX basis)
 function attrVal(k){return attrBase(k)+originAttrBonus(k);}            // effective (tests / combat)
 function condPenalty(){ if(S.condLevel===2)return -2; if(S.condLevel===3)return -4; return 0; }
 function condDisadv(){return S.condLevel>=4;}
-function resolveMax(){var t=tierObj(S.tier);return num(t.resolve)+attrVal('spirit')+num(S.resBuy);}
-function defenseTotal(){var t=tierObj(S.tier);return num(t.defense)+num(S.defMod);}
-function attackTotal(){var t=tierObj(S.tier);return num(t.attackBonus)+attrVal('accuracy')+num(S.atkMod)+originAttackBonus();}
-function blockTotal(){return 10+attrVal('resistance')+num(S.blkMod);}
-function dodgeTotal(){return 10+attrVal('agility')+num(S.dodMod);}
+// xxxCalc = the formula; the plain getter returns the player's own number while ⚙ Auto-calculated stats is off.
+function resolveMaxCalc(){var t=tierObj(S.tier);return num(t.resolve)+attrVal('spirit')+num(S.resBuy);}
+function defenseCalc(){var t=tierObj(S.tier);return num(t.defense)+num(S.defMod);}
+function attackCalc(){var t=tierObj(S.tier);return num(t.attackBonus)+attrVal('accuracy')+num(S.atkMod)+originAttackBonus();}
+function blockCalc(){return 10+attrVal('resistance')+num(S.blkMod);}
+function dodgeCalc(){return 10+attrVal('agility')+num(S.dodMod);}
+function resolveMax(){return manual('res')?Math.max(0,num(S.man.res)):resolveMaxCalc();}
+function defenseTotal(){return manual('def')?num(S.man.def):defenseCalc();}
+function attackTotal(){return manual('atk')?num(S.man.atk):attackCalc();}
+function blockTotal(){return manual('blk')?num(S.man.blk):blockCalc();}
+function dodgeTotal(){return manual('dod')?num(S.man.dod):dodgeCalc();}
 function archAbilityCap(){return Math.max(2, 1+tierVal());}           // 2 at Tier D (value 1); +1 per Tier step
 function powerGradeCap(){var t=tierObj(S.tier);return num(t.powerLimit)||5;}
 function inKit(power){var o=originObj(S.origin); if(!o)return true; var kit=o.powerKit||[];
@@ -773,7 +782,8 @@ function renderAttrs(){
 }
 function renderResolve(){
   var mx=resolveMax(); if(S.resCur>mx)S.resCur=mx;
-  $('resolve-max').textContent=S.tier?mx:'—'; $('resolve-cur').textContent=S.tier?S.resCur:'—';
+  var rm=$('resolve-max'), man=!autoOn('stats'); rm.textContent=S.tier?mx+(man?' ✎':''):'—'; $('resolve-cur').textContent=S.tier?S.resCur:'—';
+  rm.onclick=man?editStats:null; rm.style.cursor=man?'pointer':''; rm.title=man?'Your own number — click to change':'';
   var t=tierObj(S.tier);
   $('resolve-cap').textContent=S.tier?('('+num(t.resolve)+' + '+attrVal('spirit')+' Spirit'+(num(S.resBuy)?' + '+num(S.resBuy):'')+')'):'';
 }
@@ -796,14 +806,17 @@ function renderCombat(){
     {lbl:'Block',val:blockTotal(),roll:'blk'},
     {lbl:'Dodge',val:dodgeTotal(),roll:'dod'}
   ];
+  var man=!autoOn('stats');
   host.innerHTML='';
   cells.forEach(function(c){
-    var d=document.createElement('div');d.className='stat'+(c.roll?' click':'');
-    d.innerHTML='<div class="lbl">'+c.lbl+'</div><div class="big">'+(S.tier?c.val:'—')+'</div>';
+    var d=document.createElement('div');d.className='stat'+(c.roll||man?' click':'');
+    // stats off: a ✎ on the label opens the editor (the cell itself still rolls)
+    d.innerHTML='<div class="lbl">'+c.lbl+(man?' <span class="man-ed" title="Your own number — click to change" style="cursor:pointer">✎</span>':'')+'</div><div class="big">'+(S.tier?c.val:'—')+'</div>';
+    if(man){ var ed=d.querySelector('.man-ed'); ed.onclick=function(e){ e.stopPropagation(); editStats(); }; if(!c.roll) d.onclick=editStats; }
     if(c.roll){d.onclick=function(){
-      if(c.roll==='atk')rollD20Test('Attack','accuracy',num(tierObj(S.tier).attackBonus)+num(S.atkMod));
-      else if(c.roll==='blk')rollD20Test('Block','resistance',num(S.blkMod));
-      else if(c.roll==='dod')rollD20Test('Dodge','agility',num(S.dodMod));
+      if(c.roll==='atk'){ if(manual('atk')) rollD20Test('Attack',null,num(S.man.atk)); else rollD20Test('Attack','accuracy',num(tierObj(S.tier).attackBonus)+num(S.atkMod)); }
+      else if(c.roll==='blk'){ if(manual('blk')) rollD20Test('Block',null,num(S.man.blk)-10); else rollD20Test('Block','resistance',num(S.blkMod)); }
+      else if(c.roll==='dod'){ if(manual('dod')) rollD20Test('Dodge',null,num(S.man.dod)-10); else rollD20Test('Dodge','agility',num(S.dodMod)); }
     };}
     host.appendChild(d);
   });
@@ -817,7 +830,7 @@ function renderCombat(){
   var dbon=num(S.dmod)+originDamageBonus();
   $('dmg-str').textContent=S.ddie+' + '+S.datt+(dbon?' + '+dbon:'')+(originDamageBonus()?' (Sword)':'');
   var dre=$('f-dr'); if(dre&&document.activeElement!==dre)dre.value=num(S.dr);
-  var dt=$('dr-total'); if(dt)dt.textContent=S.tier?drTotal():'—';
+  var dt=$('dr-total'); if(dt){ dt.textContent=S.tier?drTotal()+(man?' ✎':''):'—'; dt.onclick=man?editStats:null; dt.style.cursor=man?'pointer':''; dt.title=man?'Your own number — click to change':''; }
   var dh=$('dr-origin-hint'); if(dh)dh.textContent=originDR()?('('+originDR()+' Origin + extra)'):'';
 }
 function renderPlot(){ var el=$('plot-cur'); if(el)el.textContent=num(S.plot); }
@@ -921,6 +934,26 @@ function renderAll(){
 /* ═══ live-play actions ═══ */
 function bumpResolve(d){if(!S.tier)return;S.resCur=clamp(S.resCur+d,0,resolveMax());renderResolve();scheduleAutosave();}
 function restResolve(){if(!S.tier)return;S.resCur=resolveMax();renderResolve();scheduleAutosave();addLog('Resolve','full','recovered to '+resolveMax(),'normal');}
+
+// SHEET SETTINGS (⚙) — sheet-settings.js draws these; S.auto.stats defaults ON and saves with the sheet.
+if(typeof window.sheetToast!=='function') window.sheetToast=function(t){ if(window.console) console.log(t); };
+function autoOn(k){ return !(S.auto&&S.auto[k]===false); }
+function setAuto(k,on){ S.auto=S.auto||{}; S.auto[k]=!!on; renderAll(); scheduleAutosave(); }
+window.SHEET_SETTINGS=function(){ return [
+  {key:'stats',group:'auto',label:'Auto-calculated stats',hint:'Resolve max, Defense, Attack, Block, Dodge and DR from Tier, Origin and Attributes; off: type your own',get:function(){ return autoOn('stats'); },
+   set:function(on){ if(!on){ S.man=S.man||{}; MAN_KEYS.forEach(function(k){ if(S.man[k]==null) S.man[k]=manCalc(k); }); } setAuto('stats',on); }}
+]; };
+// Auto-calculated stats off: the player's own numbers (S.man) replace the computed ones.
+var MAN_KEYS=['res','def','atk','blk','dod','dr'], MAN_LBL={res:'Resolve max',def:'Defense',atk:'Attack bonus',blk:'Block',dod:'Dodge',dr:'Damage Reduction'};
+function manCalc(k){ return k==='res'?resolveMaxCalc():k==='def'?defenseCalc():k==='atk'?attackCalc():k==='blk'?blockCalc():k==='dod'?dodgeCalc():k==='dr'?drCalc():0; }
+function manual(k){ return !autoOn('stats')&&S.man&&S.man[k]!=null&&S.man[k]!==''; }
+function editStats(){ S.man=S.man||{};
+  $('stats-body').innerHTML='<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). These numbers are used for your rolls and shown to the GM.</p>'+
+    MAN_KEYS.map(function(k){ return '<label style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0;"><span>'+MAN_LBL[k]+'</span><input class="m-input" style="width:90px" type="number" data-man="'+k+'" value="'+esc(S.man[k]!=null?S.man[k]:manCalc(k))+'"></label>'; }).join('');
+  $('stats-overlay').classList.add('open'); }
+function closeStats(){ $('stats-overlay').classList.remove('open'); }
+function saveStats(){ [].forEach.call(document.querySelectorAll('#stats-body [data-man]'),function(i){ var v=i.value.trim(); S.man[i.dataset.man]=v===''?null:num(v); });
+  closeStats(); if(S.resCur>resolveMax())S.resCur=resolveMax(); renderAll(); scheduleAutosave(); }
 function gearAddTo(arr, e){ arr.push({name:e.name, note:e.text||'', paxCost:paxOf(e.cost), category:e.category||'Gear'}); }
 function delEquip(i){S.equipment.splice(i,1);renderEquip();renderPax();scheduleAutosave();}
 
@@ -998,6 +1031,7 @@ function showRollToast(label,result,detail,type){
   if(_toastTimer)clearTimeout(_toastTimer); _toastTimer=setTimeout(function(){ t.className=''; },3500);
 }
 function addLog(label,result,detail,type){
+  if(label==='Character built'){ sheetToast(String(detail||'Character').split(' — ')[0]+' is ready'); return; }   // the builder's (shared JS) note isn't roll-log material
   type=type||'normal';
   var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint)hint.remove();
   var div=document.createElement('div'); div.className='log-entry'+(type==='crit'?' crit':type==='fumble'?' fumble':'');
@@ -1154,12 +1188,12 @@ function collectSheet(){S.name=($('f-name').value||'').trim();S.secret=$('f-secr
   var derived={resolveMax:resolveMax(),defense:defenseTotal(),attack:attackTotal(),block:blockTotal(),dodge:dodgeTotal(),dr:drTotal(),tierName:(S.tier?tierObj(S.tier).name:''),
     attrVals:{potency:attrVal('potency'),accuracy:attrVal('accuracy'),agility:attrVal('agility'),resistance:attrVal('resistance'),mind:attrVal('mind'),spirit:attrVal('spirit')}};
   return Object.assign({},S,{system:'JLU',derived:derived,campaign:(typeof _campaign!=='undefined'&&_campaign)?{id:_campaign.id,code:_campaign.code,name:_campaign.name}:null});}
-function saveSheet(quiet){var data=collectSheet(),json;try{json=JSON.stringify(data);}catch(e){return;}try{localStorage.setItem('jlu_sheet',json);}catch(e){}if(window.__ddSave)window.__ddSave({jlu_sheet:json});else if(window.__ddState!==undefined)window.__ddState['jlu_sheet']=json;if(window.__ddSaveTitle&&data.name)try{window.__ddSaveTitle(data.name);}catch(e){}if(!quiet)addLog('Sheet Saved','✓',data.name||'Unnamed','normal');}
+function saveSheet(quiet){var data=collectSheet(),json;try{json=JSON.stringify(data);}catch(e){return;}try{localStorage.setItem('jlu_sheet',json);}catch(e){}if(window.__ddSave)window.__ddSave({jlu_sheet:json});else if(window.__ddState!==undefined)window.__ddState['jlu_sheet']=json;if(window.__ddSaveTitle&&data.name)try{window.__ddSaveTitle(data.name);}catch(e){}if(!quiet)sheetToast('Sheet saved');}
 function syncDocTitle(){var n=($('f-name').value||'').trim();if(n&&window.__ddSaveTitle)try{window.__ddSaveTitle(n);}catch(e){}}
 function applySheet(o){o=o||{};S=Object.assign(blankState(),o);if(!S.attrs)S.attrs=blankState().attrs;renderAll();setDefaultTab();if(typeof campaignRestore==='function'&&o.campaign!==undefined)campaignRestore(o.campaign);if(window.__ddSaveTitle&&S.name)try{window.__ddSaveTitle(S.name);}catch(e){}scheduleAutosave();}
 window.applySheet=applySheet;
-function exportSheet(){var data=collectSheet();var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=((data.name||'jlu-hero').replace(/[^a-z0-9]+/gi,'_').toLowerCase()||'jlu-hero')+'.json';a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);addLog('Sheet Exported','↓',a.download,'normal');}
-function importSheet(input){var f=input.files&&input.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{applySheet(JSON.parse(r.result));saveSheet(true);addLog('Imported','↑',f.name,'normal');}catch(e){addLog('Import failed','✗','Not a valid sheet','fumble');}};r.readAsText(f);input.value='';}
+function exportSheet(){var data=collectSheet();var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=((data.name||'jlu-hero').replace(/[^a-z0-9]+/gi,'_').toLowerCase()||'jlu-hero')+'.json';a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);sheetToast('Exported '+a.download);}
+function importSheet(input){var f=input.files&&input.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{applySheet(JSON.parse(r.result));saveSheet(true);sheetToast('Imported '+f.name);}catch(e){sheetToast('Import failed — not a valid sheet');}};r.readAsText(f);input.value='';}
 var _pageReady=false;setTimeout(function(){_pageReady=true;},2000);
 function autoSaveOnExit(){if(!_ready)return;try{saveSheet(true);}catch(e){}try{syncDocTitle();}catch(e){}}
 window.addEventListener('beforeunload',autoSaveOnExit);window.addEventListener('pagehide',autoSaveOnExit);
@@ -1180,9 +1214,9 @@ function campaignRenderModal(){
 }
 function campaignError(msg){ var el=$('campaign-error'); if(el)el.textContent=msg; }
 async function campaignJoin(){ var code=(($('campaign-code-input')||{}).value||'').trim().toUpperCase(); if(!code){ campaignError('Enter a join code.'); return; } try{ var r=await fetch('/api/campaigns?code='+encodeURIComponent(code),{credentials:'same-origin'}); if(r.status === 429){ campaignError('Too many tries — wait a few minutes and try again.'); return; } if(r.status===404){ campaignError('No campaign found with that code.'); return; } if(!r.ok)throw new Error(r.status); _campaign=await r.json(); campaignConnected(); }catch(e){ campaignError('Could not join — are you signed in to the app?'); } }
-function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign','Link','Connected to "'+_campaign.name+'" ('+_campaign.code+')','normal'); saveSheet(true); }
+function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); sheetToast('Linked to "'+_campaign.name+'"'); saveSheet(true); }
 function campaignLeaveSilent(){ if(_campaignTimer){ clearInterval(_campaignTimer); _campaignTimer=null; } _campaign=null; _campaignLastId=0; campaignUpdateBtn(); }
-function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign','Link','Left "'+name+'"','normal'); saveSheet(true); }
+function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); sheetToast('Left "'+name+'"'); saveSheet(true); }
 function campaignBroadcast(label,result,detail,type){ if(!_campaign||CAMPAIGN_SKIP_LABELS.has(String(label)))return; fetch('/api/campaigns/'+_campaign.id+'/rolls',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({clientKey:_campaignClientKey,source:campaignPlayerName(),label:String(label),result:String(result),detail:String(detail||''),type:type||'normal'})}).catch(function(){}); }
 function campaignAddRemote(roll){
   roll = _sniffRollType(roll);
@@ -1333,6 +1367,8 @@ autoLoad();
 </script>
 <script src="/tools-data/jlu-sheet-builder.js"></script>
 <script src="/tools-data/dice-anim.js"></script>
+<!-- Sheet Settings (⚙ in the roll log) — shared asset: /tools-data/sheet-settings.js -->
+<script src="/tools-data/sheet-settings.js"></script>
 <style id="dd-lock-style">
 .log-lock{display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:6px;padding:2px 7px;cursor:pointer;line-height:1;transition:background .12s,border-color .12s;}
 .log-lock:hover{background:rgba(255,255,255,.35);}

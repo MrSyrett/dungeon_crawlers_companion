@@ -745,12 +745,12 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
           <div class="vline">temp <input type="number" id="hp-temp" data-nolock value="0" oninput="recalc()"><span id="ko-flag"></span></div>
         </div>
         <div class="vital vc">
-          <div class="vlbl"><span>Initiative · Speed</span></div>
+          <div class="vlbl"><span id="is-lbl">Initiative · Speed</span></div>
           <div class="vbig"><span id="init-val">+0</span><span class="sep">·</span><span id="speed-val">6</span><button class="small-btn" style="margin-left:8px;align-self:center;" onclick="nimInitiative()" title="Roll initiative (starts a new encounter: sets your starting actions)">🎲</button></div>
           <div class="vline">init +<input type="number" id="init-bonus" data-nolock value="0" oninput="recalc()"> speed +<input type="number" id="speed-bonus" data-nolock value="0" oninput="recalc()"> size <input type="text" id="f-size" value="Medium" style="width:64px;text-align:left;"></div>
         </div>
         <div class="vital vc">
-          <div class="vlbl"><span>Armor</span></div>
+          <div class="vlbl"><span id="ar-lbl">Armor</span></div>
           <div class="vbig"><span id="armor-val">0</span></div>
           <div class="vline"><input type="text" id="f-armor" list="dl-armor" placeholder="Armor" style="width:100px;" oninput="recalc()"><input type="text" id="f-shield" list="dl-shield" placeholder="Shield" style="width:80px;" oninput="recalc()"> +<input type="number" id="armor-bonus" data-nolock value="0" oninput="recalc()"></div>
         </div>
@@ -820,7 +820,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
-  <div class="log-header"><span class="log-title" aria-hidden="true"></span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button type="button" id="auto-toggle" class="log-lock log-auto on" onclick="toggleAutoUse()" aria-pressed="true" aria-label="Use up consumables automatically" title="Auto-use on: healing potions, torches, spell scrolls, one-time magic items and wand charges come off your inventory by themselves. Click to count them by hand."><span class="lk-ico">🎒</span></button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
+  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #333;background:transparent;color:#888;" title="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="NIMB.launch()" title="Hero Builder" aria-label="Hero Builder">Create</button>
@@ -844,6 +844,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 </div>
 
 <datalist id="dl-ancestries"></datalist><datalist id="dl-backgrounds"></datalist><datalist id="dl-motivations"></datalist><datalist id="dl-armor"></datalist><datalist id="dl-shield"></datalist>
+<!-- YOUR STATS (Auto-calculated stats off, ⚙ in the roll log) -->
+<div id="stats-overlay" class="ov" onclick="if(event.target===this)closeStats()"><div class="modal" style="max-width:380px;"><div class="modal-hd"><div class="ttl">Your stats</div><button class="x" onclick="closeStats()">&#10005;</button></div><div class="modal-bd" id="stats-body"></div><div class="modal-ft"><button class="m-btn ghost" onclick="closeStats()">Cancel</button><button class="m-btn" onclick="saveStats()">Save</button></div></div></div>
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">Nimble — Quick Rules</div><button class="x" onclick="closeRules()">&#10005;</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">&#10005;</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
 
@@ -906,7 +908,30 @@ function turnOn() { return _nimTB !== false; }
 // by themselves. Off = the item still works, only the count / charges are left alone.
 let _nimAuto = true;
 function autoUse() { return _nimAuto !== false; }
-function toggleAutoUse() { _nimAuto = !autoUse(); renderAutoBtn(); addLog('Auto-use', autoUse() ? 'On' : 'Off', autoUse() ? 'Consumables are used up automatically' : 'Count consumables yourself', 'normal'); scheduleAutosave(); }
+function toggleAutoUse() { _nimAuto = !autoUse(); renderAutoBtn(); scheduleAutosave(); }
+// SHEET SETTINGS (⚙) — sheet-settings.js draws these; saved on the sheet as auto:{spend,stats,prompts}
+// (default on) and man:{armor,init,speed}. turnBased and autoUse keep their own keys.
+if(typeof window.sheetToast !== 'function') window.sheetToast = function(t) { if(window.console) console.log(t); };
+let _auto = {}, _man = {};
+function autoOn(k) { return _auto[k] !== false; }
+function setAuto(k, on) { _auto[k] = !!on; recalc(); if(typeof renderNimTurn === 'function') renderNimTurn(); scheduleAutosave(); }
+window.SHEET_SETTINGS = function() { return [
+  { key:'turn', group:'auto', label:'Turn-based actions', hint:'Attacks, spells and items spend your 3 actions; off: tick the pips yourself', get: turnOn, set: on => { if(on !== turnOn()) toggleTurnMode(); } },
+  { key:'use', group:'auto', label:'Use up consumables', hint:'Potions, torches, scrolls, one-time items and wand charges come off your inventory', get: autoUse, set: on => { if(on !== autoUse()) toggleAutoUse(); } },
+  { key:'spend', group:'auto', label:'Spend mana & Hit Dice automatically', hint:'Tiered spells take their mana; Catch Breath and Make Camp take a Hit Die; off: adjust them yourself', get: () => autoOn('spend'), set: on => setAuto('spend', on) },
+  { key:'stats', group:'auto', label:'Auto-calculated stats', hint:'Armor, Initiative, Speed, and max Hit Dice, Wounds and mana; off: type your own', get: () => autoOn('stats'), set: on => { if(!on) { if(_man.armor == null) _man.armor = armorCalc(); if(_man.init == null) _man.init = initCalc(); if(_man.speed == null) _man.speed = speedCalc(); } setAuto('stats', on); } },
+  { key:'prompts', group:'auto', label:'Dying rules', hint:'While Dying: 1 action a turn, and attacking or casting rolls the DC 10 STR save (fail = 1 Wound)', get: () => autoOn('prompts'), set: on => { setAuto('prompts', on); if(typeof renderActions === 'function') renderActions(); } }
+]; };
+// Auto-calculated stats off: the player's own numbers (_man) replace the computed ones.
+function manual(k) { return !autoOn('stats') && _man[k] != null && _man[k] !== ''; }
+function editStats() {
+  const f = (k, l, v) => '<div class="m-lbl">' + l + '</div><input class="m-input" type="number" data-man="' + k + '" value="' + esc(v) + '">';
+  $('stats-body').innerHTML = '<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). These numbers are used for rolls and the Action tab. Max Hit Dice, Wounds and mana are typed in their own boxes.</p>'
+    + f('armor', 'Armor', _man.armor != null ? _man.armor : armorCalc()) + f('init', 'Initiative bonus', _man.init != null ? _man.init : initCalc()) + f('speed', 'Speed', _man.speed != null ? _man.speed : speedCalc());
+  $('stats-overlay').classList.add('open');
+}
+function closeStats() { $('stats-overlay').classList.remove('open'); }
+function saveStats() { document.querySelectorAll('#stats-body [data-man]').forEach(i => { const v = i.value.trim(); _man[i.dataset.man] = v === '' ? null : num(v); }); closeStats(); recalc(); if(typeof renderNimTurn === 'function') renderNimTurn(); scheduleAutosave(); }
 function renderAutoBtn() { const b = document.getElementById('auto-toggle'); if(!b) return; const on = autoUse(); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.title = on ? 'Auto-use on: healing potions, torches, spell scrolls, one-time magic items and wand charges come off your inventory by themselves. Click to count them by hand.' : 'Auto-use off: nothing is taken from your inventory — count consumables and charges yourself. Click to turn it back on.'; }
 let conditions = [];
 
@@ -966,7 +991,8 @@ function skillTotal(name, statId) {
   t += ancG('allSkills') + ancG('skill', name);
   return Math.min(12, t);
 }
-function armorValue() {
+function armorValue() { return manual('armor') ? num(_man.armor) : armorCalc(); }
+function armorCalc() {
   let a = stat('DEX');
   const it = findItem($('f-armor').value, ['Cloth','Leather','Mail','Plate']);
   if(it && it.armor) {
@@ -977,8 +1003,10 @@ function armorValue() {
   if(/\+1 Armor/i.test(ancestryText())) a += 1;
   return a + ancG('armor') + num($('armor-bonus').value) + itemBonus().armor;
 }
-function initBonus() { let i = stat('DEX') + num($('init-bonus').value); if(/\+1 to all skills and Initiative/i.test(ancestryText())) i += 1; return i + ancG('init'); }
-function speedValue() { let s = 6 + num($('speed-bonus').value); const at = ancestryText(); if(/–1 Speed|-1 Speed/.test(at)) s -= 1; if(/\+1 Speed/.test(at)) s += 1; return s + ancG('speed') + itemBonus().speed; }
+function initBonus() { return manual('init') ? num(_man.init) : initCalc(); }
+function initCalc() { let i = stat('DEX') + num($('init-bonus').value); if(/\+1 to all skills and Initiative/i.test(ancestryText())) i += 1; return i + ancG('init'); }
+function speedValue() { return manual('speed') ? num(_man.speed) : speedCalc(); }
+function speedCalc() { let s = 6 + num($('speed-bonus').value); const at = ancestryText(); if(/–1 Speed|-1 Speed/.test(at)) s -= 1; if(/\+1 Speed/.test(at)) s += 1; return s + ancG('speed') + itemBonus().speed; }
 function manaMax() {
   const c = cls(); if(!c || !c.spellcasting) return null;
   const m = /=\s*\(?(INT|WIL)(?:×3|x3)?\)?\s*\+\s*LVL/i.exec(c.spellcasting);
@@ -993,15 +1021,17 @@ function recalc() {
   { const ib = itemBonus(); STATS.forEach(s => { const el = $('sti-' + s); if(!el) return; const n = ib.stat[s] || 0; el.textContent = n ? (n > 0 ? '+' : '') + n + ' item' : ''; el.title = (ib.why.stat[s] || []).join(', '); });
     $('armor-val').title = ib.why.armor.length ? 'Items: ' + ib.why.armor.join(', ') : ''; $('speed-val').title = ib.why.speed.length ? 'Items: ' + ib.why.speed.join(', ') : ''; }
   $('armor-val').textContent = armorValue(); $('init-val').textContent = (initBonus() >= 0 ? '+' : '') + initBonus(); $('speed-val').textContent = speedValue();
+  { const man = !autoOn('stats'), mt = man ? ' ✎' : ''; $('ar-lbl').textContent = 'Armor' + mt; $('is-lbl').textContent = 'Initiative · Speed' + mt;
+    ['armor-val', 'init-val', 'speed-val'].forEach(id => { const el = $(id); el.onclick = man ? editStats : null; el.style.cursor = man ? 'pointer' : ''; if(man) el.title = 'Your own number — click to change'; }); }
   const c = cls();
   $('hd-lbl').textContent = c ? 'd' + c.hitDie : '';
-  if(num($('hd-max').value) !== hdMax() && !$('hd-max').dataset.manual) $('hd-max').value = hdMax();
+  if(autoOn('stats') && num($('hd-max').value) !== hdMax() && !$('hd-max').dataset.manual) $('hd-max').value = hdMax();
   const wm = 6 + ancG('wounds') + (/\+1 max Wounds/i.test(ancestryText()) ? 1 : 0) - (/–1 max Wounds|-1 max Wounds/.test(D.backgrounds().find(b => norm(b.name) === norm($('f-background').value))?.description || '') ? 1 : 0);
-  if(!$('wounds-max').dataset.manual) $('wounds-max').value = wm;
+  if(autoOn('stats') && !$('wounds-max').dataset.manual) $('wounds-max').value = wm;
   renderWounds(); renderActions();
   const mm = manaMax();
   $('mana-lbl').textContent = '';
-  if(mm !== null && !$('mana-max').dataset.manual) $('mana-max').value = mm;
+  if(autoOn('stats') && mm !== null && !$('mana-max').dataset.manual) $('mana-max').value = mm;
   $('slots-note').textContent = 'slots ' + slotsUsed() + ' / ' + (10 + stat('STR'));
   const hp = num($('hp-cur').value);
   $('ko-flag').innerHTML = hp <= 0 ? '<span class="ko-banner">Dying — 1 action, DC 10 STR save to attack</span>' : '';
@@ -1047,8 +1077,8 @@ function removeCondition(name) { conditions = conditions.filter(n => n !== name)
 // ═══ HP / RESTS ═══════════════════════════════════════════════════════════
 function spendHD(maxed) {
   const c = cls(); const die = c ? c.hitDie : 8;
-  if(num($('hd-cur').value) <= 0) { addLog('Hit Dice', '0', 'No Hit Dice left — take a Safe Rest.', 'fumble'); return; }
-  $('hd-cur').value = num($('hd-cur').value) - 1;
+  if(autoOn('spend')) { if(num($('hd-cur').value) <= 0) { sheetToast('No Hit Dice left — take a Safe Rest'); return; }
+  $('hd-cur').value = num($('hd-cur').value) - 1; }
   const roll = maxed ? die : dN(die);
   const gain = Math.max(0, roll + stat('STR'));
   $('hp-cur').value = Math.min(num($('hp-max').value), num($('hp-cur').value) + gain);
@@ -1061,11 +1091,11 @@ function safeRest() {
   $('hp-cur').value = $('hp-max').value; $('hd-cur').value = hdMax(); $('hp-temp').value = 0;
   if(manaMax() !== null) $('mana-cur').value = $('mana-max').value;
   wounds = Math.max(0, wounds - 1); actions = 3;
-  addLog('Safe Rest', '✓', 'HP, Hit Dice and mana restored · 1 Wound healed', 'crit');
+  sheetToast('Safe Rest — HP, Hit Dice and mana restored · 1 Wound healed');
   recalc(); scheduleAutosave();
 }
 function levelUp() {
-  const c = cls(); if(!c) { addLog('Level up', '?', 'Pick a class first.', 'normal'); return; }
+  const c = cls(); if(!c) { sheetToast('Pick a class first'); return; }
   const lv = level(); if(lv >= 20) return;
   $('f-level').value = lv + 1;
   const a = dN(c.hitDie), b = dN(c.hitDie), roll = Math.max(a, b);
@@ -1141,7 +1171,7 @@ function modValue(what) { if(what === 'KEY') return keyStat(); if(what === 'LVL'
 function rollAttack(name, expr, opts) {
   opts = opts || {};   // { noMiss: "does not miss" spells, vicious: Vicious property (+1 die per crit roll) }
   const p = parseDamage(expr);
-  if(!p) { addLog(name, '?', 'Could not read damage "' + expr + '"', 'normal'); return; }
+  if(!p) { sheetToast(name + ': could not read damage "' + expr + '"'); return; }
   const dice = []; const n = advState ? Math.max(1, num($('adv-n').value)) : 0;
   const pool = Array.from({ length: p.count + n }, () => dN(p.sides));
   // Advantage/disadvantage on attacks: extra dice, drop lowest/highest; ties drop left to right.
@@ -1222,8 +1252,8 @@ function refreshSpellRows() {
 function castSpell(btn) {
   const tr = btn.closest('tr'); const name = tr.querySelector('.sp-name').value || 'Spell'; const tier = num(tr.querySelector('.sp-tier').value);
   const sp = D.spells().find(x => norm(x.name) === norm(name));
-  if(tier > 0) {
-    if(num($('mana-cur').value) < tier) { addLog(name, '✗', 'Not enough mana (' + tier + ' needed)', 'fumble'); return; }
+  if(tier > 0 && autoOn('spend')) {
+    if(num($('mana-cur').value) < tier) { sheetToast(name + ': not enough mana (' + tier + ' needed)'); return; }
     $('mana-cur').value = num($('mana-cur').value) - tier;
   }
   spellEffect(name, tier, sp);
@@ -1313,7 +1343,7 @@ function setInvEquipped(tr, on, quiet) {
   if(!k || !it) {   // a bonus-carrying item that isn't a weapon / armor / shield: a plain worn / carried toggle
     if(!invHasBonus(tr)) return;
     tr.dataset.equipped = on ? '1' : '0'; invApplyBonus(tr); refreshInvEquip(tr);
-    if(!quiet) { addLog(on ? 'Equip' : 'Unequip', invDisplay(tr), LootBonus.summary(LB_SYS, invBenefits(tr)), 'normal'); recalc(); scheduleAutosave(); if(typeof renderNimTurn === 'function') renderNimTurn(); }
+    if(!quiet) { recalc(); scheduleAutosave(); if(typeof renderNimTurn === 'function') renderNimTurn(); }
     return;
   }
   const field = k === 'armor' ? 'f-armor' : k === 'shield' ? 'f-shield' : '';
@@ -1326,7 +1356,7 @@ function setInvEquipped(tr, on, quiet) {
   invApplyBonus(tr);
   if(k === 'armor') tr.querySelector('.inv-slots').value = on ? 1 : 2;   // worn 1 slot, unworn 2
   refreshInvEquip(tr);
-  if(!quiet) { addLog(on ? 'Equip' : 'Unequip', invDisplay(tr), k === 'weapon' ? (on ? 'Ready to attack' : 'Stowed — not offered as an attack') : 'Armor ' + armorValue(), 'normal'); recalc(); scheduleAutosave(); if(typeof renderNimTurn === 'function') renderNimTurn(); }
+  if(!quiet) { recalc(); scheduleAutosave(); if(typeof renderNimTurn === 'function') renderNimTurn(); }
 }
 // An attack row is offered when it isn't tied to an Inventory weapon, or that weapon is equipped.
 function atkRowReady(tr) {
@@ -1573,7 +1603,7 @@ function renderStore() {
 // — Ability picker (Class Features tab) ————————————————————————————————————
 function openAbilityPicker() {
   const pools = abilityPools();
-  if(!pools.length) { addLog('Abilities', '—', 'This class has no ability pool.', 'normal'); return; }
+  if(!pools.length) { sheetToast('This class has no ability pool'); return; }
   $('ability-title').textContent = pools.map(p => p.name).join(' / ');
   $('ability-search').value = ''; $('ability-overlay').classList.add('open'); renderAbilityPicker(); $('ability-search').focus();
 }
@@ -1666,7 +1696,7 @@ function collectSheet() {
     stats, saveAdv, saveDis, skillPts, skillTotals,
     hp: { cur: num(v('hp-cur')), max: num(v('hp-max')), temp: num(v('hp-temp')) }, wounds, woundsMax: num(v('wounds-max')),
     hitDice: { cur: num(v('hd-cur')), max: num(v('hd-max')) }, mana: { cur: num(v('mana-cur')), max: num(v('mana-max')) },
-    armor: v('f-armor'), shield: v('f-shield'), armorBonus: num(v('armor-bonus')), armorScore: armorValue(), initBonus: num(v('init-bonus')), speedBonus: num(v('speed-bonus')), size: v('f-size'), actions, turnBased: turnOn(), autoUse: autoUse(),
+    armor: v('f-armor'), shield: v('f-shield'), armorBonus: num(v('armor-bonus')), armorScore: armorValue(), initBonus: num(v('init-bonus')), speedBonus: num(v('speed-bonus')), size: v('f-size'), actions, turnBased: turnOn(), autoUse: autoUse(), auto: _auto, man: _man,
     attacks: [...document.querySelectorAll('#attacks-body tr')].map(tr => ({ name: tr.querySelector('.atk-name').value, damage: tr.querySelector('.atk-dmg').value, props: tr.querySelector('.atk-props').value, link: tr.dataset.link || '', fixed: tr.dataset.fixed ? true : undefined })).filter(a => a.name || a.damage),
     picks: [...document.querySelectorAll('#picks-body tr')].map(tr => tr.dataset.pick),
     spells: [...document.querySelectorAll('#spells-body tr')].map(tr => ({ name: tr.querySelector('.sp-name').value, tier: num(tr.querySelector('.sp-tier').value), fromRid: tr.dataset.fromRid || undefined, from: tr.dataset.fromRid ? tr.dataset.from : undefined })).filter(s => s.name),
@@ -1687,7 +1717,7 @@ function applySheet(d) {
   wounds = d.wounds || 0; set('wounds-max', d.woundsMax || 6); if(d.woundsMax) $('wounds-max').dataset.manual = '1'; else delete $('wounds-max').dataset.manual;
   const hd = d.hitDice || {}; set('hd-cur', hd.cur ?? 1); set('hd-max', hd.max ?? 1); if(hd.max) $('hd-max').dataset.manual = '1'; else delete $('hd-max').dataset.manual;
   const mn = d.mana || {}; set('mana-cur', mn.cur || 0); set('mana-max', mn.max || 0); if(mn.max) $('mana-max').dataset.manual = '1'; else delete $('mana-max').dataset.manual;
-  set('f-armor', d.armor); set('f-shield', d.shield); set('armor-bonus', d.armorBonus || 0); set('init-bonus', d.initBonus || 0); set('speed-bonus', d.speedBonus || 0); set('f-size', d.size || 'Medium'); actions = typeof d.actions === 'number' ? d.actions : 3; _nimTB = d.turnBased !== false; _nimAuto = d.autoUse !== false; renderAutoBtn();
+  set('f-armor', d.armor); set('f-shield', d.shield); set('armor-bonus', d.armorBonus || 0); set('init-bonus', d.initBonus || 0); set('speed-bonus', d.speedBonus || 0); set('f-size', d.size || 'Medium'); actions = typeof d.actions === 'number' ? d.actions : 3; _nimTB = d.turnBased !== false; _nimAuto = d.autoUse !== false; renderAutoBtn(); _auto = (d.auto && typeof d.auto === 'object') ? d.auto : {}; _man = (d.man && typeof d.man === 'object') ? d.man : {}; if(window.SheetSettings) SheetSettings.refresh();
   $('attacks-body').innerHTML = ''; (d.attacks || []).forEach(addAttackRow); ensureUnarmed();
   fillPoolPick(); $('picks-body').innerHTML = ''; (d.picks || []).forEach(p => addPick(p));
   $('spells-body').innerHTML = ''; (d.spells || []).forEach(addSpellRow);
@@ -1707,17 +1737,17 @@ function saveSheet(quiet) {
   const data = collectSheet(); const json = JSON.stringify(data);
   try { localStorage.setItem('nimble_sheet', json); } catch(e) {}
   if(window.__ddSave) window.__ddSave({ nimble_sheet: json });
-  if(!quiet) addLog('Sheet Saved', '✓', data.name || 'Unnamed', 'normal');
+  if(!quiet) sheetToast('Sheet saved');
 }
 function syncDocTitle() { const name = ($('f-name').value || '').trim(); if(name && window.__ddSaveTitle) window.__ddSaveTitle(name); }
 function exportSheet() {
   const data = collectSheet(); const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = ((data.name || 'nimble-hero').replace(/[^a-z0-9]+/gi, '_').toLowerCase() || 'nimble-hero') + '.json'; a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000); addLog('Sheet Exported', '↓', a.download, 'normal');
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000); sheetToast('Exported ' + a.download);
 }
 function importSheet(input) {
   const f = input.files && input.files[0]; if(!f) return; const r = new FileReader();
-  r.onload = () => { try { applySheet(JSON.parse(r.result)); saveSheet(true); addLog('Imported', '↑', f.name, 'normal'); } catch(e) { addLog('Import failed', '✗', 'Not a valid sheet file', 'fumble'); } };
+  r.onload = () => { try { applySheet(JSON.parse(r.result)); saveSheet(true); sheetToast('Imported ' + f.name); } catch(e) { sheetToast('Import failed — not a valid sheet file'); } };
   r.readAsText(f); input.value = '';
 }
 function newCharacter() { wounds = 0; actions = 3; saveAdv = ''; saveDis = ''; applySheet({}); }
@@ -1755,9 +1785,9 @@ function campaignRenderModal() {
 }
 function campaignError(msg) { const el = $('campaign-error'); if(el) el.textContent = msg; }
 async function campaignJoin() { const code = ($('campaign-code-input')?.value || '').trim().toUpperCase(); if(!code) { campaignError('Enter a join code.'); return; } try { const r = await fetch('/api/campaigns?code=' + encodeURIComponent(code), { credentials:'same-origin' }); if(r.status === 429){ campaignError('Too many tries — wait a few minutes and try again.'); return; } if(r.status === 404) { campaignError('No campaign found with that code.'); return; } if(!r.ok) throw new Error(r.status); _campaign = await r.json(); campaignConnected(); } catch(e) { campaignError('Could not join — are you signed in to the app?'); } }
-function campaignConnected() { _campaignLastId = 0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign', 'Link', 'Connected to "' + _campaign.name + '" (' + _campaign.code + ')', 'normal'); saveSheet(true); }
+function campaignConnected() { _campaignLastId = 0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); sheetToast('Linked to "' + _campaign.name + '"'); saveSheet(true); }
 function campaignLeaveSilent() { if(_campaignTimer) { clearInterval(_campaignTimer); _campaignTimer = null; } _campaign = null; _campaignLastId = 0; campaignUpdateBtn(); }
-function campaignLeave() { const name = _campaign ? _campaign.name : ''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign', 'Link', 'Left "' + name + '"', 'normal'); saveSheet(true); }
+function campaignLeave() { const name = _campaign ? _campaign.name : ''; campaignLeaveSilent(); campaignRenderModal(); sheetToast('Left "' + name + '"'); saveSheet(true); }
 const CAMPAIGN_SKIP_LABELS = new Set(['Sheet Saved','Sheet Exported','Imported','Import failed','Campaign','Hero Builder']);
 function campaignBroadcast(label, result, detail, type) { if(!_campaign || CAMPAIGN_SKIP_LABELS.has(String(label))) return; fetch('/api/campaigns/' + _campaign.id + '/rolls', { method:'POST', credentials:'same-origin', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ clientKey:_campaignClientKey, source: campaignPlayerName(), label:String(label), result:String(result), detail:String(detail || ''), type: type || 'normal' }) }).catch(() => {}); }
 // A server that doesn't know a loot type stores it as 'normal'; recover the real
@@ -1930,13 +1960,14 @@ autoLoad();
 </script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js (injects CSS + audio + 2D/3D engine). Extracted from the per-sheet inline copy. -->
 <script src="/tools-data/dice-anim.js"></script>
+<!-- Sheet Settings (⚙ in the roll log) — shared asset: /tools-data/sheet-settings.js -->
+<script src="/tools-data/sheet-settings.js"></script>
 <style id="dd-lock-style">
 .log-lock{display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:6px;padding:2px 7px;cursor:pointer;line-height:1;transition:background .12s,border-color .12s;}
 .log-lock:hover{background:rgba(255,255,255,.35);}
 .log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
 .log-lock .lk-ico{font-size:15px;line-height:1;}
-.log-auto:not(.on){opacity:.55;}
-.log-auto:not(.on) .lk-ico{filter:grayscale(1);}
+body.log-compact .log-entry .roll-detail{display:none;}
 .log-x{font-size:13px;line-height:1;padding:3px 7px;}
 .lk-ro-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none!important;pointer-events:none;}
 input.no-spin{-moz-appearance:textfield;}
@@ -2016,7 +2047,7 @@ function nimDying(){ if(Array.isArray(conditions) && conditions.some(c => /^dyin
 function nimNetDis(k){ if(!k) return; const cur = advState ? advState * Math.max(1, num($('adv-n').value)) : 0; const net = cur - k; advState = 0; $('adv-n').value = Math.max(1, Math.abs(net)); if(net) setAdv(net > 0 ? 1 : -1); else clearAdv(); }
 // Dying: attacking/casting causes 1 Wound unless a DC 10 STR save (core p.9). Uses the hero's STR save adv/dis.
 function nimDyingSave(){
-  if(!nimDying()) return;
+  if(!nimDyingRules()) return;
   clearAdv(); if(saveAdv === 'STR') setAdv(1); else if(saveDis === 'STR') setAdv(-1);
   $('adv-n').value = 1;
   d20Check('Dying · STR save', stat('STR'), { dc: 10, note: 'fail = 1 Wound' });
@@ -2024,11 +2055,12 @@ function nimDyingSave(){
   const pass = nat === 20 || (nat !== 1 && t >= 10);
   if(!pass) { wounds += 1; recalc(); }
 }
-function nimMaxActions(){ return nimDying() ? 1 : 3; }
+function nimMaxActions(){ return nimDyingRules() ? 1 : 3; }
+function nimDyingRules(){ return autoOn('prompts') && nimDying(); }   // Dying rules switch (⚙)
 function nimSpellCost(sp){ if(!sp || !sp.actions) return { n: 1, timed: '' }; const m = /(\d+)\s*Actions?/i.exec(sp.actions); if(m) return { n: +m[1], timed: '' }; const t = /Casting Time:\s*([^.;]+)/i.exec(sp.actions); return { n: 0, timed: t ? t[1].trim() : sp.actions }; }
 function nimAfter(){ renderActions(); renderNimTurn(); if(typeof scheduleAutosave === 'function') scheduleAutosave(); }
 function nimSpend(n){ if(!turnOn()) return; actions = Math.max(0, actions - n); }
-function toggleTurnMode(){ _nimTB = !turnOn(); actions = nimMaxActions(); _nturn.attacks = 0; _nturn.moves = 0; _nturn.reacted = {}; addLog('Turn-based mode', turnOn() ? 'On' : 'Off', turnOn() ? 'Actions are spent automatically' : 'Tick actions by hand', 'normal'); nimAfter(); }
+function toggleTurnMode(){ _nimTB = !turnOn(); actions = nimMaxActions(); _nturn.attacks = 0; _nturn.moves = 0; _nturn.reacted = {}; nimAfter(); if(window.SheetSettings) SheetSettings.refresh(); }
 function turnModeBtn(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: actions are spent automatically (3 per turn), End Turn recharges them. Click to tick them by hand instead.' : 'Manual: actions aren\'t spent automatically — tick the pips yourself. Click to spend them automatically.') + '"><span class="tm-sw"></span></button>'; }
 // An Action pip, by hand (both modes): an unspent pip spends one action, a spent one gives one back.
 function nimTogglePip(k){ const max = nimMaxActions(); if(k > max) return; actions = k > actions ? Math.min(max, actions + 1) : Math.max(0, actions - 1); nimAfter(); }
@@ -2059,7 +2091,7 @@ function nimBuild(){
     const c = nimSpellCost(sp);
     const dm = sp ? /Damage:\s*([^.]+)/i.exec(sp.text) : null;
     const rng = sp ? /Range:\s*([^.]+)|Reach:\s*([^.]+)/i.exec(sp.text) : null;
-    const blocked = c.timed && turnOn() ? 'Casting time ' + c.timed : (tier > mana ? 'Not enough mana' : '');
+    const blocked = c.timed && turnOn() ? 'Casting time ' + c.timed : (tier > mana && autoOn('spend') ? 'Not enough mana' : '');
     const harmful = !!(dm && (parseDamage(dm[1]) || /^\s*d([468])\1\b/i.test(dm[1])));   // a harmful spell is an attack → Rushed
     add('spells', { name: name, cost: c.timed ? 99 : c.n,
       sub: [c.timed ? (turnOn() ? '' : 'Casting time ' + c.timed) : c.n + ' action' + (c.n === 1 ? '' : 's'), tier ? tier + ' mana' : 'Cantrip', dm ? dm[1].trim() : '', rng ? 'Range ' + (rng[1] || rng[2]).trim() : '', harmful && rushed ? 'Rushed: disadvantage ×' + rushed : ''].filter(Boolean).join(' · '),
@@ -2067,7 +2099,7 @@ function nimBuild(){
         const before = actions, m0 = num($('mana-cur').value), adv0 = advState, n0 = $('adv-n').value;
         if(harmful) nimNetDis(rushed);
         castSpell(tr.querySelector('button.small-btn'));   // spends mana + 1 action (or aborts)
-        if(turnOn() ? actions === before : (tier > 0 && num($('mana-cur').value) === m0)) { advState = 0; $('adv-n').value = n0; if(adv0) setAdv(adv0); else clearAdv(); return false; }
+        if(turnOn() ? actions === before : (tier > 0 && autoOn('spend') && num($('mana-cur').value) === m0)) { advState = 0; $('adv-n').value = n0; if(adv0) setAdv(adv0); else clearAdv(); return false; }
         if(c.n > 1) nimSpend(c.n - 1);
         if(harmful && turnOn()) _nturn.attacks += 1;
         nimDyingSave();
@@ -2095,7 +2127,7 @@ function nimBuild(){
   const used = turnOn() ? (_nturn.assessed || []) : [];   // free play: Assess isn't limited per encounter
   add('actions', { name: 'Assess', cost: 1, sub: 'DC 12 skill check — ask a question, create an opening, or anticipate danger' + (used.length ? ' · used this encounter: ' + used.join(', ') : ''), assess: true, btn: 'Roll', blocked: SKILLS.every(([n]) => used.includes(n)) ? 'Every skill used this encounter' : '', run: (skill) => {
     const sk = SKILLS.find(x => x[0] === skill) || SKILLS.find(x => x[0] === 'Perception');
-    if(used.includes(sk[0])) { addLog('Assess', '✗', sk[0] + ' already used to Assess this encounter (foes adapt)', 'normal'); return false; }
+    if(used.includes(sk[0])) { sheetToast(sk[0] + ' already used to Assess this encounter (foes adapt)'); return false; }
     nimSpend(1); if(turnOn()) (_nturn.assessed = used).push(sk[0]);
     d20Check('Assess · ' + sk[0], skillTotal(sk[0], sk[1]), { dc: 12 }); return true; } });
   return O;
@@ -2232,8 +2264,8 @@ function nimEquipOpts(add, rushed){
 }
 function nimDo(i){
   const o = _nturnOpts[i]; if(!o) return;
-  if(o.blocked) { addLog(o.name, '✗', o.blocked, 'normal'); return; }
-  if(turnOn() && actions < o.cost) { addLog(o.name, '✗', 'Not enough actions (' + o.cost + ' needed, ' + actions + ' left)', 'normal'); return; }
+  if(o.blocked) { sheetToast(o.name + ': ' + o.blocked); return; }
+  if(turnOn() && actions < o.cost) { sheetToast(o.name + ': not enough actions (' + o.cost + ' needed, ' + actions + ' left)'); return; }
   let arg; if(o.assess) { const sel = document.getElementById('nim-assess-skill'); arg = sel ? sel.value : 'Perception'; }
   let ok; _nimFromTab = true; try { ok = o.run(arg); } finally { _nimFromTab = false; }
   nimAfter();
@@ -2253,7 +2285,7 @@ function renderNimTurn(){
   const O = nimBuild();
   let pips = ''; for(let k = 1; k <= 3; k++) pips += '<button type="button" class="nturn-pip' + (k > actions ? ' used' : '') + (k > max ? ' locked' : '') + '" onclick="nimTogglePip(' + k + ')" aria-pressed="' + (k > actions) + '"' + (k > max ? ' disabled title="Dying: actions are limited to 1"' : ' title="Click to tick this action used / unused by hand"') + '>Action ' + k + '</button>';
   const mana = num($('mana-cur').value), manaMax = num($('mana-max').value);
-  const badges = (nimDying() ? '<span class="nturn-badge warn" title="Dying: actions are limited to 1">Dying · 1 action</span>' : '')
+  const badges = (nimDyingRules() ? '<span class="nturn-badge warn" title="Dying: actions are limited to 1">Dying · 1 action</span>' : '')
     + (turnOn() && _nturn.attacks ? '<span class="nturn-badge" title="Rushed Attacks: each attack after the first this turn has cumulative disadvantage">Rushed · next attack dis ×' + _nturn.attacks + '</span>' : '');
   const card = o => {
     const can = !o.blocked && (!turnOn() || actions >= o.cost);

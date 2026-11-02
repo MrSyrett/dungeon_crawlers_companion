@@ -44,6 +44,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .log-entry .roll-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#a08a78;margin-bottom:2px;}
 .log-entry .roll-result{font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;color:var(--log-text);line-height:1;}
 .log-entry .roll-detail{font-family:'Share Tech Mono',monospace;font-size:10px;color:#8a7666;margin-top:3px;line-height:1.4;word-break:break-word;}
+body.log-compact .log-entry .roll-detail{display:none;}
 /* Campaign log cards the GM Screen can post: found loot (claim per item), loot boxes (open/claim), system messages. */
 .log-foundloot,.log-system,.log-lootbox{border-left:3px solid var(--icrpg) !important;border-right:3px solid var(--icrpg) !important;}
 .fl-head,.sys-head,.lb-head{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--icrpg);}
@@ -827,7 +828,7 @@ body.dark .tabs-bar{background:#1a161a;}
 
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
-  <div class="log-header"><span class="log-title" aria-hidden="true"></span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button type="button" id="auto-toggle" class="log-lock log-auto on" onclick="toggleAutoUse()" aria-pressed="true" aria-label="Use up consumables automatically" title="Auto-use on: food, potions, scrolls, explosives, torches and other LOOT with uses lose a use (the row goes at the last one) when you USE them, and a kit that empties on a natural 1 is removed. Click to count them by hand."><span class="lk-ico">🎒</span></button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
+  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #3a2c22;background:transparent;color:#9a8676;" title="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="ICRPGB.launch()" title="Character Builder">Create</button>
@@ -867,6 +868,7 @@ body.dark .tabs-bar{background:#1a161a;}
 
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">ICRPG — Quick Rules</div><button class="x" onclick="closeRules()">&#10005;</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">&#10005;</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
+<div id="stats-overlay" class="ov" onclick="if(event.target===this)closeStats()"><div class="modal"><div class="modal-hd"><div class="ttl">Your stats</div><button class="x" onclick="closeStats()">&#10005;</button></div><div class="modal-bd" id="stats-body"></div></div></div>
 <div id="levelup-overlay" class="ov" onclick="if(event.target===this)closeLevelUp()"><div class="modal"><div class="modal-hd"><div class="ttl">Level Up</div><button class="x" onclick="closeLevelUp()">&#10005;</button></div><div class="modal-bd" id="levelup-body"></div></div></div>
 
 <script>
@@ -896,7 +898,8 @@ var SPELLS = G(typeof ICRPG_SPELLS!=='undefined'?ICRPG_SPELLS:undefined);
 function statName(ab){ var s=STATS.find(function(x){return x.abbr===ab;}); return s?s.abbr:ab; }
 function statTotal(ab){ return Math.min(10, num($('st-b-'+ab).value)+num($('st-x-'+ab).value)+icItemStat(ab)); }
 // DEFENSE = CON + Armor (+ equipped LOOT), max +10.
-function icDefense(){ return Math.min(10, statTotal('CON')+num($('f-armor').value)+_icIB.def); }
+function icDefenseCalc(){ return Math.min(10, statTotal('CON')+num($('f-armor').value)+_icIB.def); }
+function icDefense(){ return manual('def')?num(_icMan.def):icDefenseCalc(); }
 function buildStats(){
   // Base is fixed at creation (kept in a hidden input); the player edits Bonus,
   // which sits under the rollable total button. Total = base + bonus (cap +10).
@@ -941,8 +944,9 @@ function recalc(){
   STAT_ABBR.forEach(function(ab){ var t=statTotal(ab); var el=$('st-t-'+ab); if(el){ el.textContent=(t>=0?'+':'')+t; var w=_icIB.why.stat[ab].concat(_icIB.why.all); el.title=w.length?'Includes equipped LOOT / abilities: '+w.join(', '):''; } });
   EFFORT_LIST.forEach(function(ef){ var k=ef.name.replace(/[^A-Za-z]/g,''), el=$('efi-'+k); if(!el) return; var n=(_icIB.effort[k]||0)+(_icIB.effort.All||0); el.textContent=n?icSgn(n):''; el.title=n?'From equipped LOOT / abilities: '+(_icIB.why.effort[k]||[]).concat(_icIB.why.effort.All||[]).join(', '):''; });
   var def=icDefense();
-  $('def-val').textContent=(def>=0?'+':'')+def;
-  $('def-val').title='Roll d20 + Defense to resist danger; enemies must meet or beat 10 + your Defense'+(_icIB.why.def.length?' · Equipped LOOT / abilities: '+_icIB.why.def.join(', '):'');
+  $('def-val').textContent=(def>=0?'+':'')+def+(autoOn('stats')?'':' ✎');
+  $('def-val').title=autoOn('stats')?'Roll d20 + Defense to resist danger; enemies must meet or beat 10 + your Defense'+(_icIB.why.def.length?' · Equipped LOOT / abilities: '+_icIB.why.def.join(', '):''):'Your own number — click to change';
+  $('def-val').onclick=autoOn('stats')?null:editStats; $('def-val').style.cursor=autoOn('stats')?'':'pointer';
   if(typeof refreshWizardButtons==='function') refreshWizardButtons();
   scheduleAutosave();
 }
@@ -1080,13 +1084,12 @@ function icItemEffort(key, noAll){ return (_icIB.effort[key]||0)+(noAll?0:(_icIB
 function icPaintEquip(tr){ var b=tr.querySelector('.it-eq'); if(!b) return; var on=tr.dataset.equipped==='1'; b.classList.toggle('on', on); b.textContent=on?'Equipped':'Carried'; b.title=on?'EQUIPPED — its bonuses apply. Click to carry it instead.':'CARRIED — bonuses only apply when EQUIPPED. Click to equip.'; }
 function icToggleEquip(tr){
   var nm=icLootName(tr);
-  if(tr.dataset.equipped==='1'){ icUnapply(tr); addLog('Unequipped', nm, 'Bonuses removed', 'normal'); }
+  if(tr.dataset.equipped==='1'){ icUnapply(tr); }
   else {
     var list; try{ list=LootBonus.effective(LB_SYS, JSON.parse(tr.dataset.benefits)).filter(function(b){ return b.kind!=='note'; }); }catch(e){ list=[]; }
-    var hp=10*list.reduce(function(t,b){ return t+(b.kind==='heart'?num(b.amount):0); },0);
+    var hp=autoOn('stats')?10*list.reduce(function(t,b){ return t+(b.kind==='heart'?num(b.amount):0); },0):0;   // stats off: Max HP is yours to set
     if(hp){ $('f-hpmax').value=Math.max(0, num($('f-hpmax').value)+hp); if(num($('f-hp').value)>num($('f-hpmax').value)) $('f-hp').value=$('f-hpmax').value; }
     tr.dataset.equipped='1'; tr.dataset.applied=JSON.stringify({ v:2, benefits:list, hp:hp });
-    addLog('Equipped', nm, LootBonus.summary(LB_SYS, list)||'—', 'normal');
   }
   icPaintEquip(tr); icItemsChanged();
 }
@@ -1196,13 +1199,30 @@ var _icTurn = { move:false, action:false, far:false, mode:'normal' };
 // they can when on); DYING still limits what you can do.
 var _icTurnBased = true;
 function turnOn(){ return _icTurnBased!==false; }
-function toggleTurnMode(){ _icTurnBased=!turnOn(); addLog('Turn-based mode', turnOn()?'On':'Off', turnOn()?'Actions are spent automatically':'Actions aren\'t spent automatically — tick the pips by hand', 'normal'); icEndTurn(); }
+function toggleTurnMode(){ _icTurnBased=!turnOn(); icEndTurn(); if(window.SheetSettings) SheetSettings.refresh(); }
 function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend Move and Action automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: Move and Action are spent automatically (one Action per TURN). Click to tick them by hand instead.':'Manual: Move and Action aren\'t spent automatically — tick the pips yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
 // AUTO-USE (roll-log switch, saved on the sheet; on unless turned off): LOOT you USE loses a use by
 // itself. Off = the effect still happens, nothing is counted down or removed.
 var _icAutoUse = true;
 function autoUse(){ return _icAutoUse!==false; }
-function toggleAutoUse(){ _icAutoUse=!autoUse(); renderAutoBtn(); addLog('Auto-use', autoUse()?'On':'Off', autoUse()?'Consumables are used up automatically':'Count consumables yourself', 'normal'); scheduleAutosave(); }
+function toggleAutoUse(){ _icAutoUse=!autoUse(); renderAutoBtn(); scheduleAutosave(); }
+// SHEET SETTINGS (⚙) — sheet-settings.js draws these; values save with the sheet.
+// _icAuto.stats defaults ON; turnBased and autoUse keep their own keys.
+if(typeof window.sheetToast!=='function') window.sheetToast=function(t){ if(window.console) console.log(t); };
+var _icAuto={}, _icMan={};
+function autoOn(k){ return !(_icAuto&&_icAuto[k]===false); }
+function setAuto(k,on){ _icAuto[k]=!!on; recalc(); icMaybeRender(); scheduleAutosave(); }
+window.SHEET_SETTINGS=function(){ return [
+  {key:'turn',group:'auto',label:'Turn-based actions',hint:'Move and Action are spent per TURN on the Action tab; off: tick the pips yourself',get:turnOn,set:function(on){ if(on!==turnOn()) toggleTurnMode(); }},
+  {key:'use',group:'auto',label:'Use up consumables',hint:'Food, potions, scrolls, torches and other LOOT with uses lose a use; a kit that empties on a natural 1 is removed',get:autoUse,set:function(on){ if(on!==autoUse()) toggleAutoUse(); }},
+  {key:'stats',group:'auto',label:'Auto-calculated stats',hint:'Defense from CON + armor + LOOT, and Max HP from HEART LOOT you equip; off: type your own',get:function(){ return autoOn('stats'); },set:function(on){ if(!on && _icMan.def==null) _icMan.def=icDefenseCalc(); setAuto('stats',on); }}
+]; };
+// Auto-calculated stats off: the player's own Defense (_icMan.def) replaces the computed one.
+function manual(k){ return !autoOn('stats')&&!!_icMan&&_icMan[k]!=null&&_icMan[k]!==''; }
+function editStats(){ var cur=_icMan.def!=null?_icMan.def:icDefenseCalc();
+  $('stats-body').innerHTML='<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). This Defense is used for Defense rolls and on the sheet.</p><div class="m-lbl">Defense</div><input id="man-def" class="m-input" type="number" value="'+esc(cur)+'"><div style="display:flex;justify-content:flex-end;margin-top:12px;"><button class="m-btn" onclick="_icMan.def=num($(\'man-def\').value);closeStats();recalc();icMaybeRender();">Save</button></div>';
+  $('stats-overlay').classList.add('open'); }
+function closeStats(){ $('stats-overlay').classList.remove('open'); }
 function renderAutoBtn(){ var b=document.getElementById('auto-toggle'); if(!b) return; var on=autoUse(); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); b.title=on?'Auto-use on: food, potions, scrolls, explosives, torches and other LOOT with uses lose a use (the row goes at the last one) when you USE them, and a kit that empties on a natural 1 is removed. Click to count them by hand.':'Auto-use off: using LOOT applies its effect but no use is taken and nothing is removed — count them yourself. Click to turn it back on.'; }
 var _icCollapsed = { checks:true };
 var _icOpts = [];
@@ -1514,7 +1534,7 @@ function icCan(kind, o){
 }
 function icDo(i){
   var o=_icOpts[i]; if(!o) return;
-  if(!icCan(o.kind, o)){ addLog('Turn', $('f-dying').checked&&!o.dying?'Unconscious':'No Action left', $('f-dying').checked&&!o.dying?'You\'re DYING — only the Dying and Miracle rolls are possible.':o.kind==='far'?'That takes your whole TURN.':'You\'ve already acted this TURN. End your turn to reset.', 'normal'); return; }
+  if(!icCan(o.kind, o)){ sheetToast($('f-dying').checked&&!o.dying?'You\'re DYING — only the Dying and Miracle rolls are possible':o.kind==='far'?'No Action left — that takes your whole TURN':'You\'ve already acted this TURN — end your turn to reset'); return; }
   o.run();
   if(!turnOn()){ icAfter(); return; }   // free play: nothing is spent
   if(o.kind==='far'){ _icTurn.move=true; _icTurn.action=true; _icTurn.far=true; }
@@ -1694,7 +1714,7 @@ function collectSheet(){
     target:num(v('f-target')), dying:$('f-dying').checked, coin:$('coin-btn').classList.contains('on'),
     notes:v('f-notes'), stats:stats, effort:effort,
     abilities:collectRows('abil'), spells:collectRows('spell'), loot:collectRows('loot'),
-    turn:{ move:_icTurn.move, action:_icTurn.action, far:_icTurn.far, mode:_icTurn.mode }, turnBased:turnOn(), autoUse:autoUse(),
+    turn:{ move:_icTurn.move, action:_icTurn.action, far:_icTurn.far, mode:_icTurn.mode }, turnBased:turnOn(), autoUse:autoUse(), auto:_icAuto, man:_icMan,
     campaign:(typeof _campaign!=='undefined' && _campaign)?{ id:_campaign.id, code:_campaign.code, name:_campaign.name }:null,
   };
 }
@@ -1717,6 +1737,7 @@ function applySheet(d){
   if(d.turn && typeof d.turn==='object'){ _icTurn.move=!!d.turn.move; _icTurn.action=!!d.turn.action; _icTurn.far=!!d.turn.far; _icTurn.mode=(['easy','hard'].indexOf(d.turn.mode)>=0)?d.turn.mode:'normal'; }
   _icTurnBased=d.turnBased!==false;
   _icAutoUse=d.autoUse!==false; renderAutoBtn();
+  _icAuto=(d.auto&&typeof d.auto==='object')?d.auto:{}; _icMan=(d.man&&typeof d.man==='object')?d.man:{}; if(window.SheetSettings) SheetSettings.refresh();
   recalc(); renderHearts(); setDefaultTab();
   if(window.__ddSaveTitle && d.name) try{ window.__ddSaveTitle(d.name); }catch(e){}
 }
@@ -1724,18 +1745,18 @@ function saveSheet(quiet){
   var data=collectSheet(); var json=JSON.stringify(data);
   try{ localStorage.setItem('icrpg_sheet', json); }catch(e){}
   if(window.__ddSave) window.__ddSave({ icrpg_sheet:json });
-  if(!quiet) addLog('Sheet Saved', '✓', data.name||'Unnamed', 'normal');
+  if(!quiet) sheetToast('Sheet saved');
 }
 function syncDocTitle(){ var name=($('f-name').value||'').trim(); if(name && window.__ddSaveTitle) window.__ddSaveTitle(name); }
 function exportSheet(){
   var data=collectSheet(); var blob=new Blob([JSON.stringify(data,null,2)], { type:'application/json' });
   var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download=((data.name||'icrpg-character').replace(/[^a-z0-9]+/gi,'_').toLowerCase()||'icrpg-character')+'.json'; a.click();
-  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000); addLog('Sheet Exported','↓',a.download,'normal');
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000); sheetToast('Exported '+a.download);
 }
 function importSheet(input){
   var f=input.files&&input.files[0]; if(!f) return; var r=new FileReader();
-  r.onload=function(){ try{ applySheet(JSON.parse(r.result)); saveSheet(true); addLog('Imported','↑',f.name,'normal'); }catch(e){ addLog('Import failed','✗','Not a valid sheet file','fumble'); } };
+  r.onload=function(){ try{ applySheet(JSON.parse(r.result)); saveSheet(true); sheetToast('Imported '+f.name); }catch(e){ sheetToast('Import failed — not a valid sheet file'); } };
   r.readAsText(f); input.value='';
 }
 var _pageReady=false; setTimeout(function(){ _pageReady=true; }, 2500);
@@ -1766,9 +1787,9 @@ function campaignRenderModal(){
 }
 function campaignError(msg){ var el=$('campaign-error'); if(el) el.textContent=msg; }
 async function campaignJoin(){ var code=(($('campaign-code-input')||{}).value||'').trim().toUpperCase(); if(!code){ campaignError('Enter a join code.'); return; } try{ var r=await fetch('/api/campaigns?code='+encodeURIComponent(code), { credentials:'same-origin' }); if(r.status === 429){ campaignError('Too many tries — wait a few minutes and try again.'); return; } if(r.status===404){ campaignError('No campaign found with that code.'); return; } if(!r.ok) throw new Error(r.status); _campaign=await r.json(); campaignConnected(); }catch(e){ campaignError('Could not join — are you signed in to the app?'); } }
-function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign','Link','Connected to "'+_campaign.name+'" ('+_campaign.code+')','normal'); saveSheet(true); }
+function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); sheetToast('Linked to "'+_campaign.name+'"'); saveSheet(true); }
 function campaignLeaveSilent(){ if(_campaignTimer){ clearInterval(_campaignTimer); _campaignTimer=null; } _campaign=null; _campaignLastId=0; campaignUpdateBtn(); }
-function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign','Link','Left "'+name+'"','normal'); saveSheet(true); }
+function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); sheetToast('Left "'+name+'"'); saveSheet(true); }
 function campaignBroadcast(label,result,detail,type){ if(!_campaign||CAMPAIGN_SKIP_LABELS.has(String(label))) return; fetch('/api/campaigns/'+_campaign.id+'/rolls', { method:'POST', credentials:'same-origin', headers:{ 'content-type':'application/json' }, body:JSON.stringify({ clientKey:_campaignClientKey, source:campaignPlayerName(), label:String(label), result:String(result), detail:String(detail||''), type:type||'normal' }) }).catch(function(){}); }
 function campaignAddRemote(roll){
   roll = _sniffRollType(roll);
@@ -1953,6 +1974,8 @@ window.openCampaign=openCampaign; window.closeCampaign=closeCampaign; window.cam
 </script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js -->
 <script src="/tools-data/dice-anim.js"></script>
+<!-- Sheet Settings (⚙ in the roll log) — shared asset: /tools-data/sheet-settings.js -->
+<script src="/tools-data/sheet-settings.js"></script>
 <style id="ic-action-style">
 /* ── Action tab (turn controller) ── */
 #tab-action{padding:0;}
@@ -2018,8 +2041,6 @@ body.dark .ic-coin{color:#f0cf62;}
 .log-lock:hover{background:rgba(255,255,255,.35);}
 .log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
 .log-lock .lk-ico{font-size:15px;line-height:1;}
-.log-auto:not(.on){opacity:.55;}
-.log-auto:not(.on) .lk-ico{filter:grayscale(1);}
 .log-x{font-size:13px;line-height:1;padding:3px 7px;}
 .lk-ro-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none!important;pointer-events:none;}
 input.no-spin{-moz-appearance:textfield;}

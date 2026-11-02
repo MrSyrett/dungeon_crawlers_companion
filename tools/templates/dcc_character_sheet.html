@@ -56,6 +56,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .log-entry .roll-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#888;margin-bottom:2px;}
 .log-entry .roll-result{font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;color:var(--log-text);line-height:1;}
 .log-entry .roll-detail{font-family:'Share Tech Mono',monospace;font-size:10px;color:#666;margin-top:2px;}
+body.log-compact .log-entry .roll-detail{display:none;}
 .log-entry.crit .roll-result{color:#ffd700;}.log-entry.fumble .roll-result{color:#ff4444;}
 .log-entry.remote{border-left:3px solid #8a7ac8;border-right:3px solid #8a7ac8;background:#1c1a24;}
 .log-entry.crit{border-color:#ffd700;}.log-entry.fumble{border-color:#ff4444;}
@@ -1028,9 +1029,9 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   <!-- Toggle button — desktop: fixed tab; mobile: absolute on log top edge via CSS -->
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
   <div class="log-header">
-    <span class="log-title" aria-hidden="true"></span>
+    <span class="log-title">Roll Log</span>
     <div style="display:flex;align-items:center;gap:6px;">
-      <button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button type="button" id="auto-toggle" class="log-lock log-auto on" onclick="toggleAutoUse()" aria-pressed="true" aria-label="Use up consumables automatically" title="Auto-use on: Hotlist potions, scrolls, tomes, bandages, antidotes, dynamite and torches come off your Inventory when you Use them. Click to count them by hand."><span class="lk-ico">🎒</span></button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button>
+      <button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button>
     </div>
   </div>
   <div class="log-actions">
@@ -1223,6 +1224,7 @@ function activeDebuffMods() {
 function mergeExtra(a, b) { if (a && b) return a === b ? a : null; return a || b || null; }
 // A one-shot debuff has now been used up by the roll it applied to.
 function dccSpendOneShot(dm, attack) {
+  if(!autoOn('light')) return;   // timers off (⚙): clear them by hand
   (dm && dm.oneShot || []).forEach(n => {
     if(/staggered/i.test(n) && !attack) return;   // Staggered only bites an Attack (or a Move)
     if(typeof dccRemoveDebuff === 'function') dccRemoveDebuff(n);
@@ -1233,6 +1235,7 @@ function debuffTag(mods) { return mods.penalty ? ` + Debuffs(${mods.penalty})` :
 
 // Sync DEX Mod → Evade DEX field and recalc total
 function syncEvadeDex() {
+  if(!autoOn('stats')) { calcEvadeTotal(); return; }   // stats off (⚙): the DEX Mod box is the player's
   const m = getStatMod('dex');
   document.getElementById('evade-dex').value = fmtMod(m);
   calcEvadeTotal();
@@ -1249,6 +1252,7 @@ function calcEvadeTotal() {
 
 // Sync Enhanced INT → Mana Max
 function syncMana() {
+  if(!autoOn('stats')) return;
   const val = document.getElementById('int-enh')?.value;
   // Mana Max = INT, including Good Sleep's +Floor to all Stats.
   const n = parseInt(val, 10);
@@ -1258,6 +1262,7 @@ function syncMana() {
 
 // ── DR CALC ──
 function calcDR() {
+  if(!autoOn('stats')) return;
   const armor = parseInt(document.getElementById('dr-armor')?.value)||0;
   const buffs = parseInt(document.getElementById('dr-buffs')?.value)||0;
   // Oakhide spell buff: +2 DR, +2 more at Ranks 5, 10 and 15 (Core spells).
@@ -1331,7 +1336,7 @@ function updateHpPips() {
 function healHpSlots(n) {
   // The Taint: "Cannot be healed" (until the end of combat).
   if(/(^|,)\s*the taint\b/i.test(document.getElementById('debuffs')?.value || '')) {
-    addLog('Healing blocked', '✗', 'The Taint — you cannot be healed until it ends', 'fumble');
+    sheetToast('Healing blocked — The Taint: you cannot be healed until it ends');
     return 0;
   }
   const lost = [...document.querySelectorAll('.hp-pip')].filter(p => p.dataset.active === 'false')
@@ -1405,11 +1410,12 @@ function dccEquipCost(btn, was) {
   if(was || !btn.classList.contains('on') || typeof turnSpendQuiet !== 'function') return;
   const tr = btn.closest('tr'), inp = tr && tr.querySelector('input[type="text"]');
   const nm = inp ? inp.value.trim() : 'item';
-  if(turnSpendQuiet('other', 'Equip ' + nm)) addLog('Equip', nm, '1 Action — ' + (tr && tr.dataset.equipped === '1' ? 'equipped' : 'added to the Hotlist'), 'normal');
+  turnSpendQuiet('other', 'Equip ' + nm);
 }
 
 // ── DYING (Core p.94) ── 0% Health Bar → Dying debuff + CON-Mod countdown; healed → clear.
 function checkDying() {
+  if(!autoOn('dying')) return;   // Dying rules off (⚙): add / clear Dying yourself
   const pips = [...document.querySelectorAll('.hp-pip')];
   if(!pips.length) return;
   const df = document.getElementById('debuffs'); if(!df) return;
@@ -1993,7 +1999,7 @@ const TURN_ACTIONS = 2;
 let _turnBased = true;
 function turnOn(){ return _turnBased !== false; }
 function turnFresh(){ Object.assign(_turn, { used: 0, extra: 0, extraUsed: 0, aiSpent: false, moves: 0, evading: false, done: [] }); }
-function toggleTurnMode(){ _turnBased = !turnOn(); turnFresh(); _turn.potionRound = 0; addLog('Turn-based mode', turnOn() ? 'On' : 'Off', turnOn() ? 'Actions are spent automatically' : 'Actions aren\'t spent automatically — tick the pips by hand', 'normal'); turnAfter(); }
+function toggleTurnMode(){ _turnBased = !turnOn(); turnFresh(); _turn.potionRound = 0; turnAfter(); if(window.SheetSettings) SheetSettings.refresh(); }
 function turnModeBtn(){ const on = turnOn(); return `<button type="button" class="turn-mode${on ? ' on' : ''}" role="switch" aria-checked="${on}" aria-label="Turn-based: spend Actions automatically" onclick="toggleTurnMode()" title="${on ? 'Turn-based: Actions are spent automatically (2 per turn). Click to tick them by hand instead.' : 'Manual: Actions aren\'t spent automatically — tick the pips yourself. Click to spend them automatically.'}"><span class="tm-sw"></span></button>`; }
 // The pips are buttons: tick or untick an Action by hand (both modes). Pips fill left to right,
 // so a used pip takes one off the count and an open one adds one.
@@ -2016,7 +2022,7 @@ function turnSpend(kind, label){
   if(kind === 'free') { _turn.done.push(label); return true; }
   if(!turnOn()) return true;                 // free play: nothing is counted
   if(!turnCan(kind)) {
-    addLog('Turn', 'No Actions left', kind === 'attack' ? 'Both Actions are spent (the +1 Action can\'t be an Attack). End your turn to reset.' : 'Both Actions are spent. End your turn to reset.', 'normal');
+    sheetToast(kind === 'attack' ? 'Both Actions are spent (the +1 Action can\'t be an Attack) — end your turn to reset' : 'Both Actions are spent — end your turn to reset');
     return false;
   }
   if(kind !== 'attack' && _turn.extraUsed < _turn.extra) _turn.extraUsed++;
@@ -2144,7 +2150,7 @@ function turnBuildOpts(){
         sub: r.dice ? turnHitStr(r) + ' to hit · ' + turnDmgStr(r) + turnCostStr(r, ' · ')
                     : [summ, turnCostStr(r, '')].filter(Boolean).join(' · '),
         // Spells can't be cast untrained (Core p.58); scrolls are the exception.
-        blocked: r.spell && r.rank < 1 ? 'No Ranks — can\'t cast untrained' : spellChargeBlock(r.tr) ? 'No charges left' : r.mana && r.mana > curMana ? 'Not enough Mana' : '',
+        blocked: r.spell && r.rank < 1 ? 'No Ranks — can\'t cast untrained' : spellChargeBlock(r.tr) ? 'No charges left' : r.mana && r.mana > curMana && autoOn('spend') ? 'Not enough Mana' : '',
         btn: 'Cast', run: () => turnRollRow(r) });
       return;
     }
@@ -2238,7 +2244,7 @@ function turnItemOpt(x){
 function turnDo(i, j){
   const o = _turnOpts[i]; if(!o) return;
   const run = (o.btns && o.btns[j]) ? o.btns[j][1] : o.run;
-  if(o.blocked) { addLog(o.name, o.blocked, '', 'normal'); return; }
+  if(o.blocked) { sheetToast(o.name + ': ' + o.blocked); return; }
   if(!turnCan(o.kind)) { turnSpend(o.kind, o.name); return; }
   if(dccShockedForfeit(o.kind, o.name)) return;
   const ok = run();
@@ -2250,7 +2256,39 @@ function turnDo(i, j){
 // comes off the Inventory. Off = the effect still happens, the count is left alone.
 let _autoUse = true;
 function autoUse(){ return _autoUse !== false; }
-function toggleAutoUse(){ _autoUse = !autoUse(); renderAutoBtn(); addLog('Auto-use', autoUse() ? 'On' : 'Off', autoUse() ? 'Consumables are used up automatically' : 'Count consumables yourself', 'normal'); if(typeof scheduleAutosave === 'function') scheduleAutosave(); }
+function toggleAutoUse(){ _autoUse = !autoUse(); renderAutoBtn(); if(typeof scheduleAutosave === 'function') scheduleAutosave(); }
+// SHEET SETTINGS (⚙) — sheet-settings.js draws these; values save as data.auto
+// ({spend,stats,light,dying}, default ON); turnBased and autoUse keep their own keys.
+if(typeof window.sheetToast!=='function') window.sheetToast=function(t){ if(window.console) console.log(t); };
+var _dccAuto = {};
+function autoOn(k){ return !(_dccAuto && _dccAuto[k] === false); }
+function setAuto(k, on){ _dccAuto[k] = !!on;
+  if(k === 'stats'){ dccApplyStatsMode(); if(on){ syncEvadeDex(); syncMana(); calcDR(); } }
+  if(typeof refreshSpellManaState === 'function') refreshSpellManaState();
+  if(typeof renderTurn === 'function') renderTurn();
+  if(typeof scheduleAutosave === 'function') scheduleAutosave(); }
+// Stats off: Evade's DEX Mod, Max Mana and DR Total become plain fields the player types in
+// (like current Mana); rolls and rests read those boxes, so the player's numbers are used.
+var DCC_MAN_FIELDS = [['evade-dex','DEX Mod'],['mana-max',''],['dr-total','DR Total']];
+function dccApplyStatsMode(man){
+  const off = !autoOn('stats');
+  DCC_MAN_FIELDS.forEach(([id, lbl]) => {
+    const el = document.getElementById(id); if(!el) return;
+    if(off){ el.removeAttribute('readonly'); el.setAttribute('data-nolock', ''); if(man && man[id] != null) el.value = man[id]; el.title = 'Your own number — type it in (Auto-calculated stats are off under ⚙)'; }
+    else { el.setAttribute('readonly', ''); el.removeAttribute('data-nolock'); el.removeAttribute('data-lk-ro'); el.title = id === 'mana-max' ? 'Max Mana — equals Enhanced INT' : ''; }
+    const sl = el.parentNode && el.parentNode.querySelector('.formula-sublabel'); if(sl && lbl) sl.textContent = lbl + (off ? ' ✎' : '');
+  });
+  if(off) calcEvadeTotal();
+}
+function dccManValues(){ const o = {}; DCC_MAN_FIELDS.forEach(([id]) => { const el = document.getElementById(id); if(el) o[id] = el.value; }); return o; }
+window.SHEET_SETTINGS = function(){ return [
+  { key:'turn', group:'auto', label:'Turn-based actions', hint:'Attacks, spells and items spend your two Actions on the Turn tab; off: tick them yourself', get:turnOn, set:function(on){ if(on !== turnOn()) toggleTurnMode(); } },
+  { key:'use', group:'auto', label:'Use up consumables', hint:'Hotlist potions, scrolls, tomes, bandages, antidotes, dynamite and torches come off your Inventory', get:autoUse, set:function(on){ if(on !== autoUse()) toggleAutoUse(); } },
+  { key:'spend', group:'auto', label:'Spend Mana automatically', hint:'Spells take their Mana and item spells a charge; off: no "not enough" checks — adjust Mana yourself', get:function(){ return autoOn('spend'); }, set:function(on){ setAuto('spend', on); } },
+  { key:'stats', group:'auto', label:'Auto-calculated stats', hint:'Evade DEX Mod, Max Mana (Enhanced INT) and DR Total (armor + buffs, Oakhide, Iron Skin); off: type your own', get:function(){ return autoOn('stats'); }, set:function(on){ setAuto('stats', on); } },
+  { key:'light', group:'auto', label:'Debuff timers', hint:'End Turn rolls damage-over-time Debuffs, and one-roll Debuffs (Stunned, Queasy…) end after that roll', get:function(){ return autoOn('light'); }, set:function(on){ setAuto('light', on); } },
+  { key:'dying', group:'auto', label:'Dying rules', hint:'An empty Health Bar adds the Dying Debuff (with its CON-Mod countdown); healing clears it', get:function(){ return autoOn('dying'); }, set:function(on){ setAuto('dying', on); } }
+]; };
 function renderAutoBtn(){ const b = document.getElementById('auto-toggle'); if(!b) return; const on = autoUse(); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.title = on ? 'Auto-use on: Hotlist potions, scrolls, tomes, bandages, antidotes, dynamite and torches come off your Inventory when you Use them. Click to count them by hand.' : 'Auto-use off: using an item applies its effect but nothing is taken from your Inventory — count consumables yourself. Click to turn it back on.'; }
 // Use an Inventory row without using it up: DCCFx takes one off the Qty box (and the Hotlist
 // "×n"), so bump the box first and put both back once the effect (and any chooser) is done.
@@ -2286,7 +2324,7 @@ function turnSpendAiFavor(){
 function endTurn(){
   // End-of-turn damage from Debuffs (auto-applied to the Health Bar). No turn summary
   // goes to the Roll Log — only the DoT rolls themselves, when there are any.
-  if(typeof rollDoT === 'function') rollDoT();
+  if(typeof rollDoT === 'function' && autoOn('light')) rollDoT();
   Object.assign(_turn, { round: (_turn.round || 1) + 1, used: 0, extra: 0, extraUsed: 0, aiSpent: false, moves: 0, evading: false, done: [] });
   turnAfter();
 }
@@ -2536,10 +2574,12 @@ function spellChargeOf(row) {
 }
 // Why an item spell can't be cast right now ('' if it can).
 function spellChargeBlock(row) {
+  if(!autoOn('spend')) return '';
   const ch = spellChargeOf(row);
   return ch && ch.gearOnly && !ch.has ? 'No charges left — recharges on a ' + ch.resetText : '';
 }
 function consumeSpellMana(row) {
+  if(!autoOn('spend')) return true;   // spending off (⚙): the cast goes ahead, Mana / charges are yours to adjust
   const nm0 = (row.querySelector('input[type="text"]') || {}).value || 'Spell';
   const ch = spellChargeOf(row);
   if(ch && ch.has) {
@@ -2548,7 +2588,7 @@ function consumeSpellMana(row) {
     return true;
   }
   if(ch && ch.gearOnly) {
-    if(typeof addLog === 'function') addLog(nm0 + ' — No charges', '✗', 'No charges left — recharges on a ' + ch.resetText, 'fumble');
+    sheetToast(nm0 + ': no charges left — recharges on a ' + ch.resetText);
     return false;
   }
   const cost = spellManaOf(row);
@@ -2557,7 +2597,7 @@ function consumeSpellMana(row) {
   const cur = el ? (parseInt(el.value, 10) || 0) : 0;
   const nm = (row.querySelector('input[type="text"]') || {}).value || 'Spell';
   if(cur < cost) {
-    if(typeof addLog === 'function') addLog(nm + ' — Out of Mana', 'need ' + cost, 'Have ' + cur + ' Mana, costs ' + cost, 'fumble');
+    sheetToast(nm + ': out of Mana — costs ' + cost + ', you have ' + cur);
     return false;
   }
   const next = cur - cost;
@@ -2753,7 +2793,7 @@ function runAdvancement() {
     addLog(`${name} — Advancement`, res, `d20(${roll}) vs Rank ${rank}`, success ? 'crit' : 'normal');
   });
   if(!marked) {
-    addLog('Advancement', 'no marks', 'Check the ✔ box on skills you used, then roll Advancement', 'normal');
+    sheetToast('Check the ✔ box on skills you used, then roll Advancement');
   } else {
     addLog('Advancement complete', `${gained}/${marked} advanced`, `${marked} marked skill(s) rolled`, 'normal');
   }
@@ -2841,7 +2881,7 @@ function updateDicePoolDisplay() {
 
 function rollDicePool() {
   if(!dicePool.length) {
-    addLog('Dice Tray', '—', 'No dice in pool', 'normal');
+    sheetToast('No dice in the pool');
     return;
   }
   const rollResults = dicePool.map(sides => {
@@ -2961,6 +3001,8 @@ function collectSheet() {
   data.turn = Object.assign({}, _turn, { done: (_turn.done || []).slice(-12) });
   data.turnBased = _turnBased;
   data.autoUse = _autoUse;
+  data.auto = Object.assign({}, _dccAuto);
+  if(!autoOn('stats')) data.man = dccManValues();
 
   // Pinned inventory sections (always at the top of the tab)
   data.gold = document.getElementById('f-gold')?.value || '';
@@ -3128,6 +3170,9 @@ function applySheet(data) {
   if(data.turn && typeof data.turn === 'object') { Object.assign(_turn, data.turn); if(!Array.isArray(_turn.done)) _turn.done = []; }
   _turnBased = data.turnBased !== false;
   _autoUse = data.autoUse !== false;
+  _dccAuto = (data.auto && typeof data.auto === 'object') ? Object.assign({}, data.auto) : {};
+  dccApplyStatsMode(data.man); if(autoOn('stats')) { syncEvadeDex(); syncMana(); calcDR(); }
+  if(window.SheetSettings) SheetSettings.refresh();
   if(typeof renderAutoBtn === 'function') renderAutoBtn();
   if(typeof renderTurn === 'function') renderTurn();
   if(typeof refreshSpellManaState === 'function') refreshSpellManaState();
@@ -3274,7 +3319,7 @@ function newCharacter() {
   // Clear localStorage
   localStorage.removeItem('dcc_sheet');
   if(typeof campaignLeaveSilent === 'function') campaignLeaveSilent();
-  addLog('New Character', '✦', 'Sheet cleared', 'normal');
+  sheetToast('Sheet cleared');
 }
 
 function saveSheet(quiet) {
@@ -3285,7 +3330,7 @@ function saveSheet(quiet) {
   // Save directly to server (primary path — doesn't rely on localStorage patch)
   if(window.__ddSave) window.__ddSave({ dcc_sheet: json });
   syncDocTitle();
-  if(quiet !== true) addLog('Sheet Saved', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 9.5a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v1H4Z"/><path d="M3.6 12h16.8v6a1.5 1.5 0 0 1-1.5 1.5H5.1A1.5 1.5 0 0 1 3.6 18Zm7.1 0v2.2a1.3 1.3 0 0 0 2.6 0V12Z"/></svg>', 'Saved', 'normal');
+  if(quiet !== true) sheetToast('Sheet saved');
 }
 
 // Rename the document on the desk to match the character's name, so the card
@@ -3484,7 +3529,7 @@ async function exportPDF() {
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
 
-    addLog('Sheet Exported', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7 3.5h10v4H7z"/><path d="M5 8.5h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2v-3H7v3H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2Zm12.6 2.2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M8 16h8v4.5H8z"/></svg>', 'Official DCC sheet PDF', 'normal');
+    sheetToast('Sheet exported (PDF)');
   } catch(err) {
     console.warn('Official-PDF export failed, falling back to print view:', err);
     exportPrintablePDF();
@@ -3724,7 +3769,7 @@ function exportPrintablePDF() {
   if(fdoc.readyState === 'complete') setTimeout(go, 120);
   else frame.onload = () => setTimeout(go, 120);
 
-  addLog('Sheet Exported', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7 3.5h10v4H7z"/><path d="M5 8.5h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2v-3H7v3H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2Zm12.6 2.2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M8 16h8v4.5H8z"/></svg>', 'Print / Save as PDF', 'normal');
+  sheetToast('Sheet exported (print / save as PDF)');
 }
 
 function exportSheet() {
@@ -3736,7 +3781,7 @@ function exportSheet() {
   const a = document.createElement('a');
   a.href = url; a.download = filename; a.click();
   URL.revokeObjectURL(url);
-  addLog('Sheet Exported', '↓ JSON', filename, 'normal');
+  sheetToast('Exported ' + filename);
 }
 
 function importSheet(input) {
@@ -3747,7 +3792,7 @@ function importSheet(input) {
     try {
       const data = JSON.parse(e.target.result);
       applySheet(data);
-      addLog('Sheet Imported', '↑ Loaded', file.name, 'normal');
+      sheetToast('Imported ' + file.name);
     } catch(err) {
       alert('Failed to import: ' + err.message);
     }
@@ -3812,7 +3857,7 @@ if(typeof renderTurn === 'function') setTimeout(() => switchTab('turn'), 0);
     if(f && f !== lastFloor) {
       lastFloor = f;
       let n = 0; try { if(window.DCCEquip && DCCEquip.recharge) n = DCCEquip.recharge(['floor']); } catch(e) {}
-      if(n && typeof addLog === 'function') addLog('Floor ' + f, 'recharged', n + ' item spell' + (n === 1 ? '' : 's') + ' recharged (per Floor)', 'normal');
+      if(n) sheetToast('Floor ' + f + ': ' + n + ' item spell' + (n === 1 ? '' : 's') + ' recharged');
     }
   });
   if(fl) fl.addEventListener('input', () => { recalc(); try { if(window.DCCEquip && DCCEquip.refloor) DCCEquip.refloor(); } catch(e) {} });
@@ -4405,7 +4450,7 @@ function campaignConnected() {
   campaignUpdateBtn();
   campaignRenderModal();
   campaignStartPolling();
-  addLog('Campaign', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg>', 'Connected to "'+_campaign.name+'" ('+_campaign.code+')', 'normal');
+  sheetToast('Linked to "'+_campaign.name+'"');
   saveSheet(true);
 }
 
@@ -4420,7 +4465,7 @@ function campaignLeave() {
   const name = _campaign ? _campaign.name : '';
   campaignLeaveSilent();
   campaignRenderModal();
-  addLog('Campaign', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg>', 'Left "'+name+'"', 'normal');
+  sheetToast('Left "'+name+'"');
   saveSheet(true);
 }
 
@@ -4761,6 +4806,8 @@ autoLoad();
   <script src="/tools-data/dcc-sheet-effects.js"></script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js (injects CSS + audio + 2D/3D engine). Extracted from the per-sheet inline copy. -->
 <script src="/tools-data/dice-anim.js"></script>
+<!-- Sheet Settings (⚙ in the roll log) — shared asset: /tools-data/sheet-settings.js -->
+<script src="/tools-data/sheet-settings.js"></script>
 <style id="dcc-turn-style">
 /* Movement: Move / Step stacked; AI Favor one big number */
 .mini-body.mv-stack{flex-direction:column;align-items:stretch;gap:7px;padding:9px 12px 12px;}
@@ -4976,8 +5023,6 @@ body.dark .dcc-list input.dl-name{color:var(--ink);}
 .turn-mode:focus-visible{outline:2px solid var(--red);outline-offset:2px;border-radius:6px;}
 button.turn-pip{cursor:pointer;line-height:inherit;}
 .turn-pip:focus-visible{outline:2px solid var(--red);outline-offset:2px;}
-.log-auto:not(.on){opacity:.55;}
-.log-auto:not(.on) .lk-ico{filter:grayscale(1);}
 .log-x{font-size:13px;line-height:1;padding:3px 7px;}
 .turn-sec{border-bottom:1px solid var(--rule);}
 .turn-sec-hd{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--box);cursor:pointer;user-select:none;}

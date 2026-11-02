@@ -151,6 +151,7 @@ textarea{width:100%;border:1px solid var(--input-border);border-radius:6px;paddi
 .log-entry .roll-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#a9c07f;margin-bottom:2px;}
 .log-entry .roll-result{font-family:'Share Tech Mono',monospace;font-size:20px;font-weight:700;color:var(--log-text);line-height:1.05;}
 .log-entry .roll-detail{font-family:'Share Tech Mono',monospace;font-size:10px;color:#8f9c78;margin-top:3px;line-height:1.4;word-break:break-word;}
+body.log-compact .log-entry .roll-detail{display:none;}
 /* Campaign log cards the GM Screen can post: found loot (claim per item), loot boxes (open/claim), system messages. */
 .log-foundloot,.log-system,.log-lootbox{border-left:3px solid var(--gb) !important;border-right:3px solid var(--gb) !important;}
 .fl-head,.sys-head,.lb-head{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--gb);}
@@ -576,7 +577,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <!-- ═══ CANONICAL ROLL LOG ═══ -->
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
-  <div class="log-header"><span class="log-title" aria-hidden="true"></span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
+  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #2b3620;background:transparent;color:#a9c07f;" title="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="if(window.GBB)GBB.launch();" title="Character Builder">Create</button>
@@ -635,7 +636,7 @@ function blankState(){
 
     traits:{Brains:3,Muscles:3,Moves:3,Cool:3},
     talents:{Brains:{name:''},Muscles:{name:''},Moves:{name:''},Cool:{name:''}},
-    bp:20, gear:[], _built:false };
+    bp:20, gear:[], _built:false, auto:{} };
 }
 var S=blankState(), _ready=false, _saveTimer=null, _toastTimer=null;
 
@@ -665,7 +666,7 @@ function renderTraits(){
 }
 function renderCarry(){
   var el=$('carry'); if(!el)return; var c=carryTotal(), m=num(S.traits.Muscles);
-  el.textContent=c+' / '+m+' Muscles'; el.className='carry'+(c>m?' over':'');
+  el.textContent=c+' / '+m+' Muscles'; el.className='carry'+(autoOn('enc')&&c>m?' over':'');
 }
 function renderGear(){
   var host=$('gear');host.innerHTML='';
@@ -691,13 +692,13 @@ function renderAll(){
 /* live-play actions */
 function bumpBP(d){S.bp=Math.max(0,S.bp+d);renderBP();scheduleAutosave();}
 function setBP(n){S.bp=n;renderBP();scheduleAutosave();}
-function clampSpend(){var v=Math.max(0,num($('f-spend').value));if(v>S.bp)v=S.bp;$('f-spend').value=v;}
+function clampSpend(){var v=Math.max(0,num($('f-spend').value));if(v>S.bp&&autoOn('spend'))v=S.bp;$('f-spend').value=v;}
 function onIdent(){S.name=$('f-name').value;syncDocTitle();refreshWizardButtons();scheduleAutosave();}
 function delGear(i){S.gear.splice(i,1);renderGear();scheduleAutosave();}
 
 /* ═══ DICE — the Ghost Die (GM sets Difficulty; the sheet just rolls) ═══ */
 function d6(){return Math.floor(Math.random()*6)+1;}
-function spendBP(){var s=Math.max(0,Math.min(S.bp,num($('f-spend').value)));if(s>0){S.bp-=s;renderBP();$('f-spend').value=0;}return s;}
+function spendBP(){var s=Math.max(0,num($('f-spend').value));if(autoOn('spend'))s=Math.min(S.bp,s);if(s>0){if(autoOn('spend')){S.bp-=s;renderBP();scheduleAutosave();}$('f-spend').value=0;}return s;}   // ⚙ spend off: the dice still count, BP stay put
 function rollDice(label,baseDice){
   var extra=spendBP(), tb=trayTake('tray-n');
   var n=Math.max(1,baseDice+extra+tb);
@@ -727,6 +728,7 @@ function showRollToast(label,result,detail,type){
   if(_toastTimer)clearTimeout(_toastTimer); _toastTimer=setTimeout(function(){ t.className=''; },3500);
 }
 function addLog(label,result,detail,type){
+  if(label==='Character built'){ sheetToast((detail||'Character')+' is ready'); return; }   // the builder's (shared JS) note isn't roll-log material
   type=type||'normal';
   var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint)hint.remove();
   var cls=type==='crit'?' crit':type==='fumble'?' fumble':type==='ghost'?' ghost':'';
@@ -742,6 +744,15 @@ document.querySelector('.log-header').addEventListener('click',function(e){ if(w
 (function(){ if(window.innerWidth<=768)document.querySelector('.roll-log').classList.add('collapsed'); })();
 function setDarkMode(on){ document.body.classList.toggle('dark',on); try{ localStorage.setItem('gb_dark',on?'1':'0'); }catch(e){} }
 function toggleDarkMode(){ setDarkMode(!document.body.classList.contains('dark')); }
+
+// SHEET SETTINGS (⚙) — sheet-settings.js draws these; S.auto.{spend,enc} default ON and save with the sheet.
+if(typeof window.sheetToast!=='function') window.sheetToast=function(t){ if(window.console) console.log(t); };
+function autoOn(k){ return !(S.auto&&S.auto[k]===false); }
+function setAuto(k,on){ S.auto=S.auto||{}; S.auto[k]=!!on; renderAll(); scheduleAutosave(); }
+window.SHEET_SETTINGS=function(){ return [
+  {key:'spend',group:'auto',label:'Spend Brownie Points automatically',hint:'BP you add to a roll come off your total; off: the dice still count, adjust BP yourself',get:function(){ return autoOn('spend'); },set:function(on){ setAuto('spend',on); }},
+  {key:'enc',group:'auto',label:'Carrying warning',hint:'Flag when your tools weigh more than your Muscles',get:function(){ return autoOn('enc'); },set:function(on){ setAuto('enc',on); }}
+]; };
 
 /* ═══ Rules ═══ */
 function openRules(){
@@ -782,12 +793,12 @@ function lvPickGoal(){ openGoalPickerTo(function(){ return S.goal; }, function(n
 /* theme / persistence */
 function scheduleAutosave(){if(!_ready)return;if(_saveTimer)clearTimeout(_saveTimer);_saveTimer=setTimeout(function(){saveSheet(true);},600);}
 function collectSheet(){S.name=($('f-name').value||'').trim();return Object.assign({},S,{system:'GB',campaign:(typeof _campaign!=='undefined'&&_campaign)?{id:_campaign.id,code:_campaign.code,name:_campaign.name}:null});}
-function saveSheet(quiet){var data=collectSheet(),json;try{json=JSON.stringify(data);}catch(e){return;}try{localStorage.setItem('gb_sheet',json);}catch(e){}if(window.__ddSave)window.__ddSave({gb_sheet:json});else if(window.__ddState!==undefined)window.__ddState['gb_sheet']=json;if(window.__ddSaveTitle&&data.name)try{window.__ddSaveTitle(data.name);}catch(e){}if(!quiet)addLog('Sheet Saved','✓',data.name||'Unnamed','normal');}
+function saveSheet(quiet){var data=collectSheet(),json;try{json=JSON.stringify(data);}catch(e){return;}try{localStorage.setItem('gb_sheet',json);}catch(e){}if(window.__ddSave)window.__ddSave({gb_sheet:json});else if(window.__ddState!==undefined)window.__ddState['gb_sheet']=json;if(window.__ddSaveTitle&&data.name)try{window.__ddSaveTitle(data.name);}catch(e){}if(!quiet)sheetToast('Sheet saved');}
 function syncDocTitle(){var n=($('f-name').value||'').trim();if(n&&window.__ddSaveTitle)try{window.__ddSaveTitle(n);}catch(e){}}
 function applySheet(o){o=o||{};S=Object.assign(blankState(),o);if(!S.traits)S.traits=blankState().traits;if(!S.talents)S.talents=blankState().talents;if(S.current)delete S.current;renderAll();setDefaultTab();if(typeof campaignRestore==='function'&&o.campaign!==undefined)campaignRestore(o.campaign);if(window.__ddSaveTitle&&S.name)try{window.__ddSaveTitle(S.name);}catch(e){}scheduleAutosave();}
 window.applySheet=applySheet;
-function exportSheet(){var data=collectSheet();var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=((data.name||'ghostbuster').replace(/[^a-z0-9]+/gi,'_').toLowerCase()||'ghostbuster')+'.json';a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);addLog('Sheet Exported','↓',a.download,'normal');}
-function importSheet(input){var f=input.files&&input.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{applySheet(JSON.parse(r.result));saveSheet(true);addLog('Imported','↑',f.name,'normal');}catch(e){addLog('Import failed','✗','Not a valid sheet','fumble');}};r.readAsText(f);input.value='';}
+function exportSheet(){var data=collectSheet();var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=((data.name||'ghostbuster').replace(/[^a-z0-9]+/gi,'_').toLowerCase()||'ghostbuster')+'.json';a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);sheetToast('Exported '+a.download);}
+function importSheet(input){var f=input.files&&input.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{applySheet(JSON.parse(r.result));saveSheet(true);sheetToast('Imported '+f.name);}catch(e){sheetToast('Import failed — not a valid sheet');}};r.readAsText(f);input.value='';}
 var _pageReady=false;setTimeout(function(){_pageReady=true;},2000);
 function autoSaveOnExit(){if(!_ready)return;try{saveSheet(true);}catch(e){}try{syncDocTitle();}catch(e){}}
 window.addEventListener('beforeunload',autoSaveOnExit);window.addEventListener('pagehide',autoSaveOnExit);
@@ -808,9 +819,9 @@ function campaignRenderModal(){
 }
 function campaignError(msg){ var el=$('campaign-error'); if(el)el.textContent=msg; }
 async function campaignJoin(){ var code=(($('campaign-code-input')||{}).value||'').trim().toUpperCase(); if(!code){ campaignError('Enter a join code.'); return; } try{ var r=await fetch('/api/campaigns?code='+encodeURIComponent(code),{credentials:'same-origin'}); if(r.status === 429){ campaignError('Too many tries — wait a few minutes and try again.'); return; } if(r.status===404){ campaignError('No campaign found with that code.'); return; } if(!r.ok)throw new Error(r.status); _campaign=await r.json(); campaignConnected(); }catch(e){ campaignError('Could not join — are you signed in to the app?'); } }
-function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign','Link','Connected to "'+_campaign.name+'" ('+_campaign.code+')','normal'); saveSheet(true); }
+function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); sheetToast('Linked to "'+_campaign.name+'"'); saveSheet(true); }
 function campaignLeaveSilent(){ if(_campaignTimer){ clearInterval(_campaignTimer); _campaignTimer=null; } _campaign=null; _campaignLastId=0; campaignUpdateBtn(); }
-function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign','Link','Left "'+name+'"','normal'); saveSheet(true); }
+function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); sheetToast('Left "'+name+'"'); saveSheet(true); }
 function campaignBroadcast(label,result,detail,type){ if(!_campaign||CAMPAIGN_SKIP_LABELS.has(String(label)))return; fetch('/api/campaigns/'+_campaign.id+'/rolls',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({clientKey:_campaignClientKey,source:campaignPlayerName(),label:String(label),result:String(result),detail:String(detail||''),type:type||'normal'})}).catch(function(){}); }
 function campaignAddRemote(roll){
   roll = _sniffRollType(roll);
@@ -995,7 +1006,7 @@ function gearAddTo(arr, it){ var e=it._e||{}; arr.push({name:e.name,hands:e.hand
 function carryOf(arr, mus){ var c=arr.reduce(function(a,g){return a+(parseFloat(g.muscles)||0);},0); return {text:'Carry '+c+' / '+mus+' Muscles', over:c>mus}; }
 function openGearShop(){
   openPickerCfg({ title:'Gear Shop', multi:true, addLabel:'Add', cats:['Weapon (ranged)','Weapon (melee)','Gear'],
-    items:gearItems, carry:function(){ return carryOf(S.gear, num(S.traits.Muscles)); },
+    items:gearItems, carry:function(){ var c=carryOf(S.gear, num(S.traits.Muscles)); if(!autoOn('enc')) c.over=false; return c; },
     custom:function(v){ S.gear.push({name:v,hands:'',muscles:0}); renderGear(); scheduleAutosave(); },
     onAdd:function(it){ gearAddTo(S.gear, it); renderGear(); scheduleAutosave(); } });
 }
@@ -1027,6 +1038,8 @@ autoLoad();
 </script>
 <script src="/tools-data/gb-sheet-builder.js"></script>
 <script src="/tools-data/dice-anim.js"></script>
+<!-- Sheet Settings (⚙ in the roll log) — shared asset: /tools-data/sheet-settings.js -->
+<script src="/tools-data/sheet-settings.js"></script>
 <style id="dd-lock-style">
 .log-lock{display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:6px;padding:2px 7px;cursor:pointer;line-height:1;transition:background .12s,border-color .12s;}
 .log-lock:hover{background:rgba(255,255,255,.35);}

@@ -869,7 +869,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
-  <div class="log-header"><span class="log-title" aria-hidden="true"></span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button type="button" id="auto-toggle" class="log-lock log-auto on" onclick="toggleAutoUse()" aria-pressed="true" aria-label="Use up consumables automatically" title="Auto-use on: potions, bandages, lamp oil and burnt-out torches come off your inventory by themselves. Click to count them by hand."><span class="lk-ico">🎒</span></button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
+  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn campaign" onclick="openCampaign()" title="Campaign" aria-label="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="if(window.DBB)DBB.launch()" title="Character creation">Create</button>
@@ -961,13 +961,16 @@ function attr(a){ return num(S.attrs[a],10); }
 function baseChance(v){ var r=rangeVal(TB().baseChance,num(v)); return r?r.value:(v>=16?7:v>=13?6:v>=9?5:v>=6?4:3); }
 function dmgBonus(v){ var r=rangeVal(TB().damageBonus,num(v)); return r?r.value:(v>=17?'D6':v>=13?'D4':null); }
 function aglMove(v){ var r=rangeVal(TB().movementAgl,num(v)); return r?r.mod:0; }
-function movement(){ var k=kinDef(); var m=(k?k.movement:10)+aglMove(attr('AGL'))+num(S.moveMod)+itemBonus().move; if(S.injuries.some(function(i){ return i.name==='Broken leg'; })) m=Math.ceil(m/2); return Math.max(S.moveMod?4:0,m); }
+function movement(){ if(manual('move')) return num(S.man.move); return movementCalc(); }
+function movementCalc(){ var k=kinDef(); var m=(k?k.movement:10)+aglMove(attr('AGL'))+num(S.moveMod)+itemBonus().move; if(S.injuries.some(function(i){ return i.name==='Broken leg'; })) m=Math.ceil(m/2); return Math.max(S.moveMod?4:0,m); }
 function countAbility(n){ return S.abilities.filter(function(a){ return a.name===n; }).length; }
 function hasAbility(n){ return countAbility(n)>0; }
 // Max HP / WP: + each heroic ability's hpMax / wpMax per copy (Robust +2 HP, Focused +2 WP — and homebrew abilities built with those effects).
 function abilityMax(k,dflt){ return S.abilities.reduce(function(t,a){ var d=abilityDef(a.name); return t+(d&&d[k]!=null?num(d[k]):num(dflt[a.name])); },0); }
-function hpMax(){ return attr('CON')+abilityMax('hpMax',{Robust:2})+itemBonus().hp; }
-function wpMax(){ return attr('WIL')+abilityMax('wpMax',{Focused:2})+itemBonus().wp; }
+function hpMaxCalc(){ return attr('CON')+abilityMax('hpMax',{Robust:2})+itemBonus().hp; }
+function hpMax(){ return manual('hp')?Math.max(1,num(S.man.hp)):hpMaxCalc(); }
+function wpMaxCalc(){ return attr('WIL')+abilityMax('wpMax',{Focused:2})+itemBonus().wp; }
+function wpMax(){ return manual('wp')?Math.max(0,num(S.man.wp)):wpMaxCalc(); }
 function skRec(n){ return S.skills[n]||(S.skills[n]={}); }
 function isSchool(n){ var d=skillDef(n); return !!(d&&d.type==='secondary'); }
 function knowsSchool(n){ return !!(S.skills[n]&&S.skills[n].trained); }
@@ -1012,7 +1015,7 @@ function wornArmor(){ var r=wornRow('armor'); return r?armorDef(r.base||r.name):
 function wornHelmet(){ var r=wornRow('helmet'); return r?helmetDef(r.base||r.name):null; }
 function unarmed(){ return Object.assign({},weaponDef('Unarmed')||{name:'Unarmed',damage:'D6',skill:'Brawling',melee:true,features:['Bludgeoning']},{name:'Unarmed',_unarmed:true}); }
 function weaponSkill(d){ if(!d) return 'Brawling'; if(d.skill) return d.skill; if(d.shield) return bestSkill((D('DB_SKILL_GROUPS')||{}).strMelee||['Axes','Brawling','Hammers','Spears','Swords']); return 'Brawling'; }
-function weaponBonus(d){ if(!d||d.noDamageBonus||A(d.features).indexOf('No damage bonus')>=0) return null; var sk=skillDef(weaponSkill(d)); return dmgBonus(attr(sk?sk.attribute:'STR')); }
+function weaponBonus(d){ if(!d||d.noDamageBonus||A(d.features).indexOf('No damage bonus')>=0) return null; var sk=skillDef(weaponSkill(d)); return dbFor(sk?sk.attribute:'STR'); }
 function hasFeat(d,f){ return A(d&&d.features).some(function(x){ return String(x).toLowerCase()===f.toLowerCase(); }); }
 function isMetalAtHand(){ var a=wornArmor(), h=wornHelmet(); if(a&&a.metal) return a.name; if(h&&h.metal) return h.name;
   var m=atHand().find(function(x){ return x.d&&x.d.metal; }); return m?m.d.name:null; }
@@ -1021,7 +1024,7 @@ function hasBackpack(){ return !!invFind(/^backpack$/i); }
 function carryLimit(){ return Math.ceil(attr('STR')/2)+(hasBackpack()?num((TB().encumbrance||{}).backpack,2):0); }
 function invLoad(){ var t=0; S.inventory.forEach(function(r){ if(isEq(r)&&kindOf(r)!=='gear') return; /* at hand / worn: free */ var w=(r.wt===''||r.wt==null)?1:Number(r.wt); if(isNaN(w)) w=1; t+=w*Math.max(0,num(r.qty,1)); });
   var coins=num(S.coins.gold)+num(S.coins.silver)+num(S.coins.copper); t+=Math.floor(coins/100); return Math.ceil(t-1e-9); }
-function overEnc(){ return invLoad()>carryLimit(); }
+function overEnc(){ return autoOn('enc')&&invLoad()>carryLimit(); }
 function costText(c){ if(!c) return ''; return c.amount+' '+(c.unit==='gold'?'gold':c.unit==='silver'?'silver':'copper')+(c.note?' ('+c.note+')':''); }
 function costCopper(c){ if(!c) return 0; return c.amount*(c.unit==='gold'?100:c.unit==='silver'?10:1); }
 function purseCopper(){ return num(S.coins.gold)*100+num(S.coins.silver)*10+num(S.coins.copper); }
@@ -1150,24 +1153,26 @@ function showMark(n){ var el=document.querySelector('#skills-list .sk-mark[data-
 function poolPips(id,cur,max,fn){ var h=''; for(var i=1;i<=max;i++) h+='<button class="pool-pip'+(i<=cur?' on':'')+'" data-nolock onclick="'+fn+'('+i+')" title="'+(i<=cur?'Lose points down to '+(i-1):'Recover points up to '+i)+'"></button>'; setHTML($(id),h); }
 function renderStatus(){
   var hm=hpMax(), wm=wpMax(); S.hp=Math.max(0,Math.min(num(S.hp),hm)); S.wp=Math.max(0,Math.min(num(S.wp),wm));
-  $('hp-max').textContent=hm; $('wp-max').textContent=wm;
+  $('hp-max').textContent=hm+(autoOn('stats')?'':' ✎'); $('wp-max').textContent=wm+(autoOn('stats')?'':' ✎');
+  ['hp-max','wp-max'].forEach(function(id){ var el=$(id); el.onclick=autoOn('stats')?null:editStats; el.style.cursor=autoOn('stats')?'':'pointer'; el.title=autoOn('stats')?'':'Your own number — click to change'; });
   poolPips('hp-pips',S.hp,hm,'setHpPip'); poolPips('wp-pips',S.wp,wm,'setWpPip');
   var pip=function(cls,n,on,fn){ var h=''; for(var i=0;i<n;i++) h+='<button class="pip '+cls+(i<on?' on':'')+'" onclick="'+fn+'('+(i+1)+')" data-nolock></button>'; return h; };
   setHTML($('death-ok'),pip('ok',3,S.death.s,'setDeathS')); setHTML($('death-bad'),pip('bad',3,S.death.f,'setDeathF'));
   var dying=S.hp<=0&&!S.death.dead; $('death-btn').disabled=!dying; $('death-vital').style.outline=dying?'2px solid var(--red)':'';
   $('dead-banner').classList.toggle('on',!!S.death.dead);
   // Movement, carrying capacity and the two damage bonuses — computed, never entered
-  var sb=dmgBonus(attr('STR')), ab=dmgBonus(attr('AGL'));
+  var sb=dbFor('STR'), ab=dbFor('AGL'), mt=autoOn('stats')?'':' ✎';
   // Armor: the same rating takeDamage() soaks (worn armor + worn helmet)
   var wa=wornArmor(), wh=wornHelmet(), ar=armorRating(), at=[];
   if(wa) at.push(wa.name+' '+wa.rating); if(wh) at.push(wh.name+' '+wh.rating);
   var atip=at.length?at.join(' + '):'No armor or helmet worn';
   if(wa&&wa.bonusVs) Object.keys(wa.bonusVs).forEach(function(t){ atip+=' · +'+wa.bonusVs[t]+' vs '+t; });
   var ib=itemBonus(); if(ib.why.armor.length) atip=(at.length?atip+' + ':'')+ib.why.armor.join(' + '); Object.keys(ib.resist).forEach(function(t){ atip+=' · +'+ib.resist[t]+' vs '+t; }); if(Object.keys(ib.resist).length||(wa&&wa.bonusVs&&Object.keys(wa.bonusVs).length)) atip+=' (pick the damage type under Status ▸ Damage)';
-  morphHTML($('derived'),'<div class="dv" id="dv-armor" title="'+esc(atip)+'"><span class="dl">Armor</span><span class="dval">'+(ar||'—')+'</span></div>'+
-    '<div class="dv" title="Kin '+((kinDef()||{}).movement||10)+' + AGL '+attr('AGL')+(ib.why.move.length?' + '+esc(ib.why.move.join(' + ')):'')+'"><span class="dl">Movement</span><span class="dval">'+movement()+'</span></div>'+
-    '<div class="dv" title="STR '+attr('STR')+'"><span class="dl">Damage Bonus STR</span><span class="dval">'+(sb?'+'+sb:'—')+'</span></div>'+
-    '<div class="dv" title="AGL '+attr('AGL')+'"><span class="dl">Damage Bonus AGL</span><span class="dval">'+(ab?'+'+ab:'—')+'</span></div>');
+  var man=!autoOn('stats'), mk=function(t){ return man?' title="Your own number — click to change" onclick="editStats()" style="cursor:pointer"':' title="'+esc(t)+'"'; };
+  morphHTML($('derived'),'<div class="dv" id="dv-armor"'+mk(atip)+'><span class="dl">Armor'+mt+'</span><span class="dval">'+(ar||'—')+'</span></div>'+
+    '<div class="dv"'+mk('Kin '+((kinDef()||{}).movement||10)+' + AGL '+attr('AGL')+(ib.why.move.length?' + '+ib.why.move.join(' + '):''))+'><span class="dl">Movement'+mt+'</span><span class="dval">'+movement()+'</span></div>'+
+    '<div class="dv"'+mk('STR '+attr('STR'))+'><span class="dl">Damage Bonus STR'+mt+'</span><span class="dval">'+(sb?'+'+sb:'—')+'</span></div>'+
+    '<div class="dv"'+mk('AGL '+attr('AGL'))+'><span class="dl">Damage Bonus AGL'+mt+'</span><span class="dval">'+(ab?'+'+ab:'—')+'</span></div>');
   var ij=''; S.injuries.forEach(function(x,i){ ij+='<button type="button" class="inj-badge" onclick="showInjury('+i+')" title="Details">'+esc(x.name)+'</button>'; });
   setHTML($('injury-list'),ij);
 }
@@ -1219,7 +1224,7 @@ function renderGear(){
       '<td style="white-space:nowrap;text-align:right;">'+acts+'<button class="row-x" onclick="removeInv('+i+')" title="Remove">✕</button></td></tr>'; });
   if(setHTML($('inv-body'),inv)) fillBonus($('inv-body'));
   var n=handCount(); setHTML($('wpn-count'),'At hand <b>'+n+'/3</b>');
-  var load=invLoad(), lim=carryLimit(); var e=$('enc'); e.className='sb-note enc-note'+(load>lim?' over':''); e.title=load>lim?'Over-encumbered':'Load / carrying capacity';
+  var load=invLoad(), lim=carryLimit(); var ov=autoOn('enc')&&load>lim; var e=$('enc'); e.className='sb-note enc-note'+(ov?' over':''); e.title=ov?'Over-encumbered':'Load / carrying capacity';
   setHTML(e,'Carry Capacity <b>'+load+'/'+lim+'</b>');
   $('c-gold').value=num(S.coins.gold); $('c-silver').value=num(S.coins.silver); $('c-copper').value=num(S.coins.copper);
   $('f-tiny').value=S.tiny||'';
@@ -1250,7 +1255,7 @@ function changed(){ renderAll(); scheduleAutosave(); }
 
 // ═══ EDITS ══════════════════════════════════════════════════════════════════
 function locked(){ return !!window._sheetLocked; }
-function needUnlock(){ if(locked()){ addLog('Sheet locked','🔒','Unlock the sheet (padlock in the roll log) to change this','normal'); return true; } return false; }
+function needUnlock(){ if(locked()){ sheetToast('The sheet is locked — unlock it under ⚙ in the roll log to change this'); return true; } return false; }
 function onField(k,v){ S[k]=v; if(k==='name') syncDocTitle(); changed(); }
 function onAttr(a,v){ S.attrs[a]=Math.max(1,Math.min(18,num(v,10))); invalidate('abil-list'); changed(); }
 function onKin(v){ S.kin=v; setKinAbilities(); changed(); }
@@ -1273,16 +1278,16 @@ function removeInjury(i){ var x=S.injuries.splice(i,1)[0]; if(x) addLog('Injury 
 function removeAbility(i){ if(needUnlock()) return; S.abilities.splice(i,1); changed(); }
 function removeSpell(i){ if(needUnlock()) return; S.spells.splice(i,1); changed(); }
 function removeTrick(i){ if(needUnlock()) return; S.tricks.splice(i,1); changed(); }
-function togglePrepared(i){ var s=S.spells[i]; if(!s) return; if(!s.prepared&&S.spells.filter(function(x){ return x.prepared; }).length>=preparedLimit()){ addLog('Prepare spell','Full','You can prepare '+preparedLimit()+' spells (INT base chance). Unprepare one first.','normal'); return; } s.prepared=!s.prepared; changed(); }
+function togglePrepared(i){ var s=S.spells[i]; if(!s) return; if(!s.prepared&&S.spells.filter(function(x){ return x.prepared; }).length>=preparedLimit()){ sheetToast('You can prepare '+preparedLimit()+' spells (INT base chance) — unprepare one first'); return; } s.prepared=!s.prepared; changed(); }
 function toggleBroken(i){ var w=S.inventory[i]; if(!w) return; w.broken=!w.broken; addLog(w.name, w.broken?'Damaged':'Repaired', w.broken?'Bane on every use until repaired with Crafting':'', 'normal'); changed(); }
 // The equip pip: a weapon goes to hand (three at most, shields count); armor and helmets are
 // worn one of each — wearing another takes the old one off.
 function toggleEquip(i){ var r=S.inventory[i]; if(!r||!equippable(r)) return; var k=kindOf(r); r.kind=k;
   if(r.equipped){ r.equipped=false; changed(); return; }
-  if(k==='weapon'||k==='focus'){ if(handCount()>=3){ addLog('At hand','Full','At most three items at hand — stow one first','normal'); return; }
+  if(k==='weapon'||k==='focus'){ if(handCount()>=3){ sheetToast('At most three items at hand — stow one first'); return; }
     if(num(r.qty,1)>1){ var one=Object.assign({},r,{qty:1,equipped:true}); r.qty=num(r.qty,1)-1; S.inventory.splice(i+1,0,one); changed(); return; } }
   else if(k!=='gear') S.inventory.forEach(function(x){ if(x!==r&&kindOf(x)===k) x.equipped=false; });
-  r.equipped=true; if(k!=='weapon'&&k!=='gear'&&inCombat()) addLog(r.name,'Worn','Putting on armor or a helmet takes an action in combat','normal'); changed(); }
+  r.equipped=true; if(k!=='weapon'&&k!=='gear'&&inCombat()) sheetToast('Putting on armor or a helmet takes an action in combat'); changed(); }
 function onInv(i,k,v){ var r=S.inventory[i]; if(!r) return; if(k==='name'&&!r.kind&&equippable(r)) r.kind=kindOf(r);
   if(k==='name'&&r.bv!==2){ var hd=weaponDef(v)||armorDef(v)||helmetDef(v)||gearDef(v); if(hd) hbBon(hd,r); } if(k==='qty') v=Math.max(0,num(v,1)); if(k==='uses') v=Math.max(0,num(v)); if(k==='wt'){ v=String(v).trim(); v=v===''?1:(isNaN(Number(v))?1:Number(v)); } r[k]=v; invalidate('inv-body'); changed(); }
 function removeInv(i){ S.inventory.splice(i,1); changed(); }
@@ -1369,7 +1374,7 @@ function clearPushBtns(){ document.querySelectorAll('#log-entries .log-push').fo
 function pushLast(survivor){
   if(survivor){ if(!canSurvivorPush()) return; } else if(!canPushLast()) return;
   var L=_last; L.pushed=true; clearPushBtns();
-  if(survivor){ S.wp-=3; addLog('Sole Survivor','−3 WP','Push without taking a condition','normal'); }
+  if(survivor){ if(autoOn('spend')) S.wp-=3; addLog('Sole Survivor',autoOn('spend')?'−3 WP':'Used','Push without taking a condition','normal'); }
   var o=Object.assign({},L.o,{onDone:null}); var res=resolveRoll(o,L.boons,L.banes,true); _last.pushed=true; _last.o=L.o;
   if(survivor){ changed(); renderTray(); if(L.o.onDone) try{ L.o.onDone(res); }catch(e){ console.error(e); } return res; }
   chooseCondition('You pushed the roll — take a condition you don\'t already have (and explain how the action caused it).',function(){ renderTray(); if(L.o.onDone) try{ L.o.onDone(res); }catch(e){ console.error(e); } });
@@ -1412,13 +1417,14 @@ function rollFree(n){ var r=d(n); addLog('D'+n, String(r), 'd'+n+'('+r+')', n===
 function rollAttr(a){ testRoll({label:ATTR_FULL[a]+' ('+a+')',target:attr(a),attr:a}); }
 function rollSkill(n,extra){ var d0=skillDef(n); if(d0&&d0.type==='secondary'&&!knowsSchool(n)){ addLog(n,'—','You don\'t know this school of magic','normal'); return; } if(d0&&d0.rollsWith&&d0.rollsWith!==n) return rollSkill(d0.rollsWith,extra);
   testRoll(Object.assign({label:n,target:skillLevel(n),skill:n,attr:d0?d0.attribute:null},extra||{})); }
-function spendWp(n,why){ n=num(n); if(n<=0) return true; if(S.wp<n){ addLog(why||'Willpower','Not enough WP','Needs '+n+' WP, you have '+S.wp,'fumble'); return false; } S.wp-=n; return true; }
+function spendWp(n,why){ n=num(n); if(n<=0||!autoOn('spend')) return true; if(S.wp<n){ sheetToast((why||'Willpower')+': not enough WP — needs '+n+', you have '+S.wp); return false; } S.wp-=n; return true; }
 
 // ═══ DAMAGE, HEALING, DEATH ═════════════════════════════════════════════════
 // type: none = physical / other damage (the default: plain armor + helmet). A typed
 // hit adds item resist vs that type (Cold / Fire) and, for a weapon damage type the
 // player picked (the optional damage-type rule), the armor's bonus vs it.
-function armorRating(type){ var a=wornArmor(), h=wornHelmet(), ib=itemBonus(); var r=(a?a.rating:0)+(h?h.rating:0)+ib.armor, t=String(type||'').toLowerCase();
+function armorCalc(){ var a=wornArmor(), h=wornHelmet(), ib=itemBonus(); return (a?a.rating:0)+(h?h.rating:0)+ib.armor; }
+function armorRating(type){ if(manual('armor')) return num(S.man.armor); var a=wornArmor(), h=wornHelmet(), ib=itemBonus(); var r=(a?a.rating:0)+(h?h.rating:0)+ib.armor, t=String(type||'').toLowerCase();
   if(t&&ib.resist[t]) r+=ib.resist[t];
   if(t&&a&&a.bonusVs&&a.bonusVs[t]) r+=num(a.bonusVs[t]); return r; }
 // Damage types the Take Damage dialog offers: physical/other (default), the weapon
@@ -1442,9 +1448,9 @@ function openTakeDamage(){
 }
 function takeDamage(n,opt){ opt=opt||{}; n=Math.max(0,num(n)); var soak=opt.ignoreArmor?0:armorRating(opt.type); var dmg=Math.max(0,n-soak);
   var before=S.hp; var mx=hpMax();
-  if(before<=0&&dmg>0&&!S.death.dead){ S.death.f=Math.min(3,S.death.f+1); if(S.death.f>=3) S.death.dead=true; addLog('Damage at 0 HP','Death roll failed',n+' damage'+(soak?' − '+soak+' armor':'')+' · failures '+S.death.f+'/3','fumble'); changed(); return dmg; }
+  if(before<=0&&dmg>0&&!S.death.dead&&autoOn('dying')){ S.death.f=Math.min(3,S.death.f+1); if(S.death.f>=3) S.death.dead=true; addLog('Damage at 0 HP','Death roll failed',n+' damage'+(soak?' − '+soak+' armor':'')+' · failures '+S.death.f+'/3','fumble'); changed(); return dmg; }
   var after=before-dmg;
-  if(after<=-mx){ S.hp=0; S.death.dead=true; addLog('Damage','Killed outright',n+(soak?' − '+soak+' armor':'')+' = '+dmg+' · negative HP equal to max HP','fumble'); changed(); return dmg; }
+  if(after<=-mx&&autoOn('dying')){ S.hp=0; S.death.dead=true; addLog('Damage','Killed outright',n+(soak?' − '+soak+' armor':'')+' = '+dmg+' · negative HP equal to max HP','fumble'); changed(); return dmg; }
   S.hp=Math.max(0,after);
   addLog(opt.label||'Damage taken','−'+dmg+' HP',n+(soak?' − '+soak+' armor':'')+(opt.type?' ('+opt.type+')':'')+' → '+S.hp+'/'+mx+(S.hp===0?' · at 0 HP: make death rolls':''),S.hp===0?'fumble':'normal');
   if(S.hp===0){ S.death.s=0; S.death.f=0; S.death.rallied=false; }
@@ -1504,7 +1510,7 @@ function openRestPanel(){
      '<div class="m-lbl">Conditions to heal</div><div class="m-row" id="rs-conds">'+(held.length?held.map(function(c){ return '<button class="chip" data-c="'+c+'">'+c+'</button>'; }).join(''):'<span class="m-hint" style="margin:0;">None</span>')+'</div></div>'+
      '<button class="m-btn" '+(S.rests.stretch?'disabled':'')+' onclick="doStretchRest()">'+(S.rests.stretch?'Used':'Rest')+'</button></div>'+
    '<div class="opt-row"><div><div class="opt-name">Shift Rest</div><div class="opt-note">Six hours in a safe place: all HP, all WP, every condition. Resets the round and stretch rests.</div></div><button class="m-btn" onclick="doShiftRest()">Rest</button></div>'+
-   '<div class="opt-row"><div><div class="opt-name">New Session</div><div class="opt-note">Your memento can be used again.</div></div><button class="m-btn ghost" onclick="S.mementoUsed=false;closeDlg();addLog(\'New session\',\'✓\',\'Memento ready\',\'normal\');changed();">Reset</button></div>';
+   '<div class="opt-row"><div><div class="opt-name">New Session</div><div class="opt-note">Your memento can be used again.</div></div><button class="m-btn ghost" onclick="S.mementoUsed=false;closeDlg();sheetToast(\'Memento ready\');changed();">Reset</button></div>';
   openDlg('Rest',body,[]);
   var row=$('rs-conds'); if(row) row.onclick=function(e){ var b=e.target.closest('[data-c]'); if(b) b.classList.toggle('sel'); };
 }
@@ -1546,7 +1552,7 @@ function inCombat(){ return true; }
 // is spent automatically and nothing greys out — the Action pip stays and can be ticked by hand
 // (as it can when on); dying and death still limit you.
 function turnOn(){ return S.turnBased!==false; }
-function toggleTurnMode(){ S.turnBased=!turnOn(); S.turn.action=false; S.turn.done=false; S.turn.extra=0; S.turn.dual=false; addLog('Turn-based mode',turnOn()?'On':'Off',turnOn()?'Actions are tracked per turn':'Free play — actions aren\'t tracked','normal'); changed(); }
+function toggleTurnMode(){ S.turnBased=!turnOn(); S.turn.action=false; S.turn.done=false; S.turn.extra=0; S.turn.dual=false; changed(); }
 function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: actions are spent automatically. Click to tick them by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
 // the Action pip is a button: tick or untick it by hand (both modes)
 function togglePip(){ S.turn.action=!(S.turn.action||S.turn.done); if(!S.turn.action) S.turn.done=false; changed(); }
@@ -1558,7 +1564,7 @@ function canAttack(){ return canAct()||(S.turn.extra>0&&!S.death.dead); }
 // End Turn (as on the D&D sheet): your action, any spent reaction and extra attacks come back.
 function endTurn(){ S.turn.action=false; S.turn.done=false; S.turn.extra=0; S.turn.dual=false; S.turn.gone=null; changed(); }
 // A stretch or shift rest ends the fight: the turn starts fresh.
-function leaveCombat(quiet){ S.turn={action:false,done:false,extra:0,prone:S.turn.prone}; if(S.berserk) endBerserk(true); if(!quiet){ addLog('Combat over','✓','','normal'); changed(); } }
+function leaveCombat(quiet){ S.turn={action:false,done:false,extra:0,prone:S.turn.prone}; if(S.berserk) endBerserk(true); if(!quiet){ sheetToast('Combat over'); changed(); } }
 function toggleProneTarget(on){ S.proneTarget=!!on; renderTurn(); scheduleAutosave(); }
 
 // ── attacks ──
@@ -1585,7 +1591,7 @@ function doAttack(i,o){
   if(o.offhand){ S.turn.dual=true; if(inCombat()) S.turn.extra=num(S.turn.extra)+1; notes.push('Dual Wield: one extra attack with your other weapon, at a bane'); }
   changed();
   // a tallow candle in hand gutters whenever its bearer attacks
-  if(S.light&&/candle/i.test(S.light.name)) lightCheck(true);
+  if(S.light&&/candle/i.test(S.light.name)&&autoOn('light')) lightCheck(true);
   testRoll({label:(offhand?'Off-hand attack · ':'Attack · ')+dd.name,target:skillLevel(sk),skill:sk,weapon:wpn,ranged:!!dd.ranged,boons:boons,banes:banes,preDamage:function(){ return baseDamage(i,o); },onDone:function(r){
     if(r.ok) afterHit(i,o,r,notes); else if(r.demon) demonMishap(i,dd);
     if(o.backstab&&!r.ok) addLog('Backstabbing','3 WP spent','The attack missed','normal');
@@ -1691,7 +1697,28 @@ function doHelp(){ if(!canAct()){ addLog('Help','—','No action left','normal')
 // AUTO-USE (roll-log switch, saved on the sheet; on unless turned off): consumables come off
 // the inventory by themselves. Off: their effects still happen, the counting is yours.
 function autoUse(){ return S.autoUse!==false; }
-function toggleAutoUse(){ S.autoUse=!autoUse(); renderAutoBtn(); addLog('Auto-use',autoUse()?'On':'Off',autoUse()?'Consumables are used up automatically':'Count consumables yourself','normal'); changed(); }
+// SHEET SETTINGS (⚙) — sheet-settings.js draws these; the values live in S and save with the sheet.
+// S.auto.{spend,stats,enc,light,dying} default ON; S.turnBased and S.autoUse keep their own keys.
+if(typeof window.sheetToast!=='function') window.sheetToast=function(t){ if(window.console) console.log(t); };
+function autoOn(k){ return !(S.auto&&S.auto[k]===false); }
+function setAuto(k,on){ S.auto=S.auto||{}; S.auto[k]=!!on; changed(); }
+window.SHEET_SETTINGS=function(){ return [
+  {key:'turn',group:'auto',label:'Turn-based actions',hint:'Attacks and actions tick off your action and reaction; off: tick them yourself',get:turnOn,set:function(on){ if(on!==turnOn()) toggleTurnMode(); }},
+  {key:'use',group:'auto',label:'Use up consumables',hint:'Potions, bandages, lamp oil and burnt-out torches come off your inventory',get:autoUse,set:function(on){ if(on!==autoUse()) toggleAutoUse(); }},
+  {key:'spend',group:'auto',label:'Spend WP automatically',hint:'Spells, heroic abilities, Fast Healer and Sole Survivor take their WP; off: adjust WP yourself',get:function(){ return autoOn('spend'); },set:function(on){ setAuto('spend',on); }},
+  {key:'stats',group:'auto',label:'Auto-calculated stats',hint:'HP and WP max, armor, movement and damage bonuses from attributes and gear; off: type your own',get:function(){ return autoOn('stats'); },set:function(on){ if(!on){ S.man=S.man||{}; ['hp','wp','armor','move','dbSTR','dbAGL'].forEach(function(k){ if(S.man[k]==null) S.man[k]=manCalc(k); }); } setAuto('stats',on); }},
+  {key:'enc',group:'auto',label:'Encumbrance warning',hint:'Flag when you carry more than your capacity',get:function(){ return autoOn('enc'); },set:function(on){ setAuto('enc',on); }},
+  {key:'light',group:'auto',label:'Light burns out',hint:'A tallow candle rolls its light die each time you attack',get:function(){ return autoOn('light'); },set:function(on){ setAuto('light',on); }},
+  {key:'dying',group:'auto',label:'Dying rules',hint:'Damage at 0 HP counts as a failed death roll; dropping to minus your max HP kills you',get:function(){ return autoOn('dying'); },set:function(on){ setAuto('dying',on); }}
+]; };
+// Auto-calculated stats off: the player's own numbers (S.man) replace the computed ones.
+function manCalc(k){ return k==='hp'?hpMaxCalc():k==='wp'?wpMaxCalc():k==='armor'?armorCalc():k==='move'?movementCalc():k==='dbSTR'?(dmgBonus(attr('STR'))||''):k==='dbAGL'?(dmgBonus(attr('AGL'))||''):''; }
+function manual(k){ return !autoOn('stats')&&S.man&&S.man[k]!=null&&S.man[k]!==''; }
+function dbFor(a){ var k='db'+a; if(manual(k)) return String(S.man[k]).trim()||null; return dmgBonus(attr(a)); }
+function editStats(){ S.man=S.man||{}; var f=function(k,l,hint){ return '<label class="m-row" style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0;"><span>'+l+'</span><input class="m-input" style="width:90px" data-man="'+k+'" value="'+esc(S.man[k]!=null?S.man[k]:manCalc(k))+'" placeholder="'+esc(hint)+'"></label>'; };
+  openDlg('Your stats','<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). These numbers are used for rolls, damage and armor.</p>'+f('hp','Max HP','')+f('wp','Max WP','')+f('armor','Armor','')+f('move','Movement','')+f('dbSTR','Damage bonus STR','e.g. D4')+f('dbAGL','Damage bonus AGL','e.g. D4'),
+    [{t:'Save',f:function(){ [].forEach.call(document.querySelectorAll('[data-man]'),function(i){ var k=i.dataset.man, v=i.value.trim(); S.man[k]=/^db/.test(k)?v.toUpperCase():(v===''?null:num(v)); }); closeDlg(); changed(); }}]); }
+function toggleAutoUse(){ S.autoUse=!autoUse(); renderAutoBtn(); changed(); }
 function renderAutoBtn(){ var b=document.getElementById('auto-toggle'); if(!b) return; var on=autoUse(); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); b.title=on?'Auto-use on: potions, bandages, lamp oil and burnt-out torches come off your inventory by themselves. Click to count them by hand.':'Auto-use off: nothing is taken from your inventory — count consumables yourself. Click to turn it back on.'; }
 function bandageRow(){ return S.inventory.find(function(r){ return /bandage/i.test(r.name)&&(r.uses==null?num(r.qty,1)>0:num(r.uses)>0); })||null; }
 function useBandage(){ var b=bandageRow(); if(!b) return false; if(!autoUse()) return true; if(b.uses!=null){ b.uses=num(b.uses)-1; if(b.uses<=0){ if(num(b.qty,1)>1){ b.qty=num(b.qty,1)-1; b.uses=10; } else S.inventory.splice(S.inventory.indexOf(b),1); } } else { b.qty=num(b.qty,1)-1; if(b.qty<=0) S.inventory.splice(S.inventory.indexOf(b),1); } if(!bandageRow()) markGone('bandage',b); return true; }
@@ -2037,12 +2064,12 @@ function renderPicker(){ if(!_pk) return; var items=pickerItems(); var h='';
   if(isShop()) h='<div class="brow-meta" style="padding:6px 2px;">Purse: '+num(S.coins.gold)+' gold · '+num(S.coins.silver)+' silver · '+num(S.coins.copper)+' copper</div>'+h;
   $('picker-body').innerHTML=h||'<div class="brow-empty">Nothing matches.</div>'; }
 function pickAdd(ix,buy){ var x=pickerItems()[ix]; if(!x) return;
-  if(buy){ if(!pay(costCopper(x.cost))){ addLog('Shop','Too expensive',x.name+' costs '+costText(x.cost),'normal'); return; } }
+  if(buy){ if(!pay(costCopper(x.cost))){ sheetToast('Too expensive — '+x.name+' costs '+costText(x.cost)); return; } }
   if(isShop()) addGearByName(x.name,1);
   if(_pk==='ability'){ addAbility(x.name,'heroic'); }
   if(_pk==='spell'){ S.spells.push({name:x.name,prepared:S.spells.filter(function(s){ return s.prepared; }).length<preparedLimit()}); }
   if(_pk==='trick'){ S.tricks.push({name:x.name}); }
-  addLog(buy?'Bought':'Added',x.name,buy?costText(x.cost):'','normal'); changed(); renderPicker(); }
+  if(buy) addLog('Bought',x.name,costText(x.cost),'normal'); changed(); renderPicker(); }
 // "+ Custom" opens a small form in the shared dialog (no native prompt()).
 function pickerCustom(){
   var wpn=isShop()&&_shopTab==='weapon', ab=_pk==='ability';
@@ -2053,7 +2080,7 @@ function pickerCustom(){
     if(isShop()&&_shopTab==='gear') S.inventory.push({name:n,qty:1,wt:1,note:''});
     if(wpn){ var dmg=($('pc-dmg').value||'').trim()||'D8'; var sk=$('pc-sk').value||'Brawling'; S.inventory.push({name:n,kind:'weapon',qty:1,wt:1,note:'',damage:dmg,skill:sk,melee:true,features:[],equipped:handCount()<3}); }
     if(ab){ S.abilities.push({name:n,kind:'heroic',note:($('pc-text').value||'').trim()}); }
-    closeDlg(); closePicker(); addLog('Added',n,'custom','normal'); changed(); }}]);
+    closeDlg(); closePicker(); void 0; changed(); }}]);
 }
 
 // ═══ RULES & OPTIONS ════════════════════════════════════════════════════════
@@ -2145,18 +2172,18 @@ function saveSheet(quiet){
   var data=collectSheet(); var json=JSON.stringify(data);
   try{ localStorage.setItem('db_sheet', json); }catch(e){}
   if(window.__ddSave) window.__ddSave({ db_sheet:json });
-  if(!quiet) addLog('Sheet Saved', '✓', data.name||'Unnamed', 'normal');
+  if(!quiet) sheetToast('Sheet saved');
 }
 function syncDocTitle(){ var name=(S.name||'').trim(); if(name && window.__ddSaveTitle) window.__ddSaveTitle(name); }
 function exportSheet(){
   var data=collectSheet(); var blob=new Blob([JSON.stringify(data,null,2)], { type:'application/json' });
   var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download=((data.name||'dragonbane-character').replace(/[^a-z0-9]+/gi,'_').toLowerCase()||'dragonbane-character')+'.json'; a.click();
-  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000); addLog('Sheet Exported','↓',a.download,'normal');
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000); sheetToast('Exported '+a.download);
 }
 function importSheet(input){
   var f=input.files&&input.files[0]; if(!f) return; var r=new FileReader();
-  r.onload=function(){ try{ var d=JSON.parse(r.result); if(d.system&&d.system!=='DB') throw new Error('system'); applySheet(d); saveSheet(true); addLog('Imported','↑',f.name,'normal'); }catch(e){ addLog('Import failed','✗','Not a Dragonbane sheet file','fumble'); } };
+  r.onload=function(){ try{ var d=JSON.parse(r.result); if(d.system&&d.system!=='DB') throw new Error('system'); applySheet(d); saveSheet(true); sheetToast('Imported '+f.name); }catch(e){ sheetToast('Import failed — not a Dragonbane sheet file'); } };
   r.readAsText(f); input.value='';
 }
 var _pageReady=false; setTimeout(function(){ _pageReady=true; }, 2500);
@@ -2190,7 +2217,7 @@ window.DBSHEET={
     S.coins={gold:0,silver:num(b.silver),copper:0};
     S.hp=hpMax(); S.wp=wpMax(); S.built=true;
     S.v=2; renderAll(); setDefaultTab(); saveSheet(true); syncDocTitle();
-    addLog('Character created',S.name||'Adventurer',[S.kin,S.profession,(A(TB().ages).find(function(a){ return a.id===S.age; })||{}).name].filter(Boolean).join(' · '),'crit');
+    sheetToast((S.name||'Adventurer')+' is ready');
   }
 };
 
@@ -2212,9 +2239,9 @@ function campaignRenderModal(){
 }
 function campaignError(msg){ var el=$('campaign-error'); if(el) el.textContent=msg; }
 async function campaignJoin(){ var code=(($('campaign-code-input')||{}).value||'').trim().toUpperCase(); if(!code){ campaignError('Enter a join code.'); return; } try{ var r=await fetch('/api/campaigns?code='+encodeURIComponent(code), { credentials:'same-origin' }); if(r.status === 429){ campaignError('Too many tries — wait a few minutes and try again.'); return; } if(r.status===404){ campaignError('No campaign found with that code.'); return; } if(!r.ok) throw new Error(r.status); _campaign=await r.json(); campaignConnected(); }catch(e){ campaignError('Could not join — are you signed in to the app?'); } }
-function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign','Link','Connected to "'+_campaign.name+'" ('+_campaign.code+')','normal'); saveSheet(true); }
+function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); sheetToast('Linked to "'+_campaign.name+'"'); saveSheet(true); }
 function campaignLeaveSilent(){ if(_campaignTimer){ clearInterval(_campaignTimer); _campaignTimer=null; } _campaign=null; _campaignLastId=0; campaignUpdateBtn(); }
-function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign','Link','Left "'+name+'"','normal'); saveSheet(true); }
+function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); sheetToast('Left "'+name+'"'); saveSheet(true); }
 function campaignBroadcast(label,result,detail,type){ if(!_campaign||CAMPAIGN_SKIP_LABELS.has(String(label))) return; fetch('/api/campaigns/'+_campaign.id+'/rolls', { method:'POST', credentials:'same-origin', headers:{ 'content-type':'application/json' }, body:JSON.stringify({ clientKey:_campaignClientKey, source:campaignPlayerName(), label:String(label), result:String(result), detail:String(detail||''), type:type||'normal' }) }).catch(function(){}); }
 function campaignAddRemote(roll){
   roll = _sniffRollType(roll);
@@ -2399,6 +2426,8 @@ if(window.DBHB){ try{ window.DBHB.load(function(){ if(_pk) renderPicker(); rende
 </script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js -->
 <script src="/tools-data/dice-anim.js"></script>
+<!-- Sheet Settings (⚙ in the roll log) — shared asset: /tools-data/sheet-settings.js -->
+<script src="/tools-data/sheet-settings.js"></script>
 <style id="db-action-style">
 /* ── Action tab (turn controller) ── */
 #tab-action{padding:0;}
@@ -2486,6 +2515,7 @@ body.sheet-locked .sk-school-off{display:none;}
 /* auto-use switch: lit while consumables are used up automatically */
 .log-auto:not(.on){opacity:.55;}
 .log-auto:not(.on) .lk-ico{filter:grayscale(1);}
+body.log-compact .log-entry .roll-detail{display:none;}
 .log-x{font-size:13px;line-height:1;padding:3px 7px;}
 .lk-ro-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none!important;pointer-events:none;}
 input.no-spin{-moz-appearance:textfield;}

@@ -20,19 +20,21 @@ export async function createSoloCampaign(formData: FormData): Promise<void> {
   if (!MODULES[moduleId]) return;
   const name = String(formData.get("name") ?? "").trim().slice(0, 80) || MODULES[moduleId];
 
-  // An optional character to link from the start — only one of the user's own
-  // Dragonbane sheets.
-  const charId = String(formData.get("character") ?? "");
-  const ch = charId
-    ? await prisma.document.findFirst({ where: { id: charId, userId: user.id, tool: "db-character" }, select: { id: true, title: true } })
-    : null;
+  // The party, chosen here once for the whole campaign: 1–4 of the user's own
+  // Dragonbane sheets, in the order they were ticked.
+  const ids = [...new Set(formData.getAll("character").map((v) => String(v)).filter(Boolean))].slice(0, 4);
+  const found = ids.length
+    ? await prisma.document.findMany({ where: { id: { in: ids }, userId: user.id, tool: "db-character" }, select: { id: true, title: true } })
+    : [];
+  const party = ids.map((id) => found.find((d) => d.id === id)).filter((d): d is { id: string; title: string } => !!d).map((d) => ({ id: d.id, name: d.title }));
+  if (!party.length) return;
 
   const state = {
     v: 1,
     name,
     moduleId,
-    character: ch ? { id: ch.id, name: ch.title } : null,
-    party: ch ? [{ id: ch.id, name: ch.title }] : [],
+    character: party[0],
+    party,
     summary: { module: MODULES[moduleId], mission: "", progress: "Not started" },
   };
   const doc = await prisma.document.create({

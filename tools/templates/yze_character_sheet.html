@@ -747,11 +747,11 @@ body.dark .act-mini{color:var(--yz);border-color:var(--yz);}
       <div class="vit-row">
       <div class="stat-bubbles m-armor">
         <div class="card">
-          <div class="section-bar accent"><span>Armor</span></div>
+          <div class="section-bar accent"><span>Armor<span id="armor-man"></span></span></div>
           <div class="blk bubble-val"><span class="stress-val" id="armor-val" title="Evolved Edition: a static soak — subtract this from each hit's damage (no roll)">0</span></div>
         </div>
         <div class="card alien-only synth-hide">
-          <div class="section-bar accent"><span>Resolve</span></div>
+          <div class="section-bar accent"><span>Resolve<span id="resolve-man"></span></span></div>
           <div class="blk bubble-val"><span class="stress-val" id="resolve-rating" title="⌈(Wits + Empathy) ÷ 2⌉ — subtracted on Stress &amp; Panic rolls">0</span></div>
         </div>
       </div>
@@ -759,7 +759,7 @@ body.dark .act-mini{color:var(--yz);border-color:var(--yz);}
       <div class="section-bar accent yze-only"><span>Health &amp; Resolve</span></div>
       <div class="section-bar accent alien-only"><span>Health &amp; Stress</span></div>
       <div class="vitals" id="vitals">
-        <div class="vrow"><span class="v-lbl">Health</span><div class="vboxes" id="health-boxes" style="flex:0 1 auto;"></div><span class="broken-tag hide" id="broken-tag-a">Broken</span><button class="dice-btn mini synth-hide" style="margin-left:auto;flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollPanic()">Roll Panic</button></div>
+        <div class="vrow"><span class="v-lbl" id="health-lbl">Health</span><div class="vboxes" id="health-boxes" style="flex:0 1 auto;"></div><span class="broken-tag hide" id="broken-tag-a">Broken</span><button class="dice-btn mini synth-hide" style="margin-left:auto;flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollPanic()">Roll Panic</button></div>
         <div class="vrow alien-only"><span class="v-lbl">Radiation</span><div class="vboxes" id="rad-boxes"></div></div>
         <div class="vrow yze-only"><span class="v-lbl">Resolve</span><div class="vboxes" id="resolve-boxes"></div></div>
         <div class="vrow alien-only synth-hide"><span class="v-lbl">Stress</span><div class="stress-pips" id="stress-pips"></div><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="stressUp()" title="+1 Stress: a 2nd/3rd full-auto burst (Machinegunner ignores it), over-encumbered movement, fatigue, or any unnerving event (core p.72)">+1</button></div>
@@ -825,7 +825,7 @@ body.dark .act-mini{color:var(--yz);border-color:var(--yz);}
 <!-- Roll Log -->
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
-  <div class="log-header"><span class="log-title" aria-hidden="true"></span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button type="button" id="auto-toggle" class="log-lock log-auto on" onclick="toggleAutoUse()" aria-pressed="true" aria-label="Use up consumables automatically" title="Auto-use on: medkits, drugs, coffee, meals, booze and power cells come off your gear when you use them on the Action tab. Click to count them by hand."><span class="lk-ico">🎒</span></button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
+  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #274449;background:transparent;color:#8ba3a8;" title="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="if(window.YZEB)YZEB.launch();" title="Character Builder">Create</button>
@@ -861,6 +861,7 @@ body.dark .act-mini{color:var(--yz);border-color:var(--yz);}
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">Alien RPG — Quick Rules</div><button class="x" onclick="closeRules()">✕</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">✕</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
 <div id="advance-overlay" class="ov" onclick="if(event.target===this)closeAdvance()"><div class="modal"><div class="modal-hd"><div class="ttl">✦ Advancement</div><button class="x" onclick="closeAdvance()">✕</button></div><div class="modal-bd" id="advance-body"></div></div></div>
+<div id="stats-overlay" class="ov" onclick="if(event.target===this)closeStats()"><div class="modal"><div class="modal-hd"><div class="ttl">Your stats</div><button class="x" onclick="closeStats()">✕</button></div><div class="modal-bd" id="stats-body"></div></div></div>
 <div id="crit-overlay" class="ov" onclick="if(event.target===this)closeCritInfo()"><div class="modal"><div class="modal-hd"><div class="ttl">Critical Injury</div><button class="x" onclick="closeCritInfo()">✕</button></div><div class="modal-bd" id="crit-info-body"></div></div></div>
 
 <script>
@@ -940,9 +941,12 @@ function derivedMax(which){
 }
 // Alien Evolved Resolve RATING — a static derived score, subtracted on Stress &
 // Panic rolls. Raised +1 per rank of the Seen It All talent (up to +3).
-function resolveRating(){ return Math.ceil((attrVal('WITS')+attrVal('EMP'))/2)+talentCount('Seen It All'); }
+function resolveRatingCalc(){ return Math.ceil((attrVal('WITS')+attrVal('EMP'))/2)+talentCount('Seen It All'); }
+function resolveRating(){ return manual('resolve')?Math.max(0,num(S.man.resolve)):resolveRatingCalc(); }
+// Alien Health max: the formula, or the player's own number while ⚙ Auto-calculated stats is off.
+function healthMaxNow(){ return manual('hp')?Math.max(0,num(S.man.hp)):derivedMax('health'); }
 // Recompute the Health track's max from attributes + Hardened, keeping damage in range.
-function syncHealthMax(){ var m=derivedMax('health'); S.health.max=m; if(S.health.dmg>m)S.health.dmg=m; renderVitals(); }
+function syncHealthMax(){ var m=healthMaxNow(); S.health.max=m; if(S.health.dmg>m)S.health.dmg=m; renderVitals(); }
 
 // ── Render: attributes with their skills nested underneath ──
 function renderAttrSkills(){
@@ -964,7 +968,7 @@ function renderAttrSkills(){
 }
 function renderAttrs(){ renderAttrSkills(); }
 function setAttr(k,n){ var max=(S.key===k)?(isAndroid()?8:5):(isAndroid()?7:4); n=clamp(n,0,max); S.attrs[k]=(S.attrs[k]===n)?n-1:n;
-  if(isAlien()){ if(k==='STR'||k==='AGI'){ S.health.max=derivedMax('health'); if(S.health.dmg>S.health.max)S.health.dmg=S.health.max; } renderVitals(); }
+  if(isAlien()){ if(k==='STR'||k==='AGI'){ S.health.max=healthMaxNow(); if(S.health.dmg>S.health.max)S.health.dmg=S.health.max; } renderVitals(); }
   renderAttrSkills(); renderEnc(); scheduleAutosave(); }
 
 // ── Render: vitals (Health / Resolve damage tracks) ──
@@ -988,6 +992,7 @@ function renderVitals(){
   $('broken-tag').classList.toggle('hide',!broken);
   var ba=$('broken-tag-a'); if(ba) ba.classList.toggle('hide',!broken);
   var rr=$('resolve-rating'); if(rr) rr.textContent=resolveRating();
+  manMark('resolve-man'); var hl=$('health-lbl'); if(hl){ var on=autoOn('stats')||!isAlien(); hl.textContent='Health'+(on?'':' ✎'); hl.onclick=on?null:editStats; hl.style.cursor=on?'':'pointer'; hl.title=on?'':'Your own number — click to change'; }
   renderStress(); renderRadiation(); renderStoryPoints();
 }
 // Story Points: a cinematic-play meta currency (max 3). Spend one for an
@@ -999,7 +1004,7 @@ function renderStoryPoints(){
 }
 function setStoryPoints(n){ S.storyPoints=(num(S.storyPoints)===n)?n-1:n; if(S.storyPoints<0)S.storyPoints=0; renderStoryPoints(); scheduleAutosave(); }
 function spendStoryPoint(){
-  if(num(S.storyPoints)<1){ addLog('Story Point','—','None to spend — advance your agenda to earn one (max 3)','normal'); return; }
+  if(num(S.storyPoints)<1){ sheetToast('No Story Point to spend — advance your agenda to earn one (max 3)'); return; }
   S.storyPoints=num(S.storyPoints)-1; renderStoryPoints(); scheduleAutosave();
   addLog('Story Point spent','+1 success','One base die in this skill roll counts as a 6 — spend it before or after pushing · '+S.storyPoints+' left','crit');
 }
@@ -1011,7 +1016,7 @@ function renderRadiation(){
 function setRad(n){ var prev=num(S.radiation); S.radiation=(prev===n)?n-1:n; if(S.radiation<0)S.radiation=0; renderRadiation(); scheduleAutosave();
   // Core p.77: every time you gain a rad, roll dice equal to your total rads — each 6 is 1 damage.
   // Broken by radiation → no critical injury; make death rolls until out of the hotspot.
-  for(var r=prev+1;r<=S.radiation;r++) radiationDose(r); }
+  if(autoOn('prompts')) for(var r=prev+1;r<=S.radiation;r++) radiationDose(r); }
 function radiationDose(total){
   var rolls=[],hits=0; for(var k=0;k<total;k++){ var d=die6(); rolls.push(d); if(d===6)hits++; }
   var st=S.health, before=num(st.dmg); if(hits&&st.max>0){ st.dmg=Math.min(st.max,before+hits); renderVitals(); scheduleAutosave(); }
@@ -1019,7 +1024,7 @@ function radiationDose(total){
   animDice(rolls,[],hits?'fumble':'normal');
   addLog('Radiation · '+total+' rad'+(total>1?'s':''), hits?(hits+' damage'):'No damage', poolStr(rolls)+' · each 6 = 1 damage'+(broke?' · BROKEN by radiation: no critical injury — make death rolls at the same interval until you leave the hotspot':''), hits?'fumble':'normal'); }
 // Full-auto fire and facing fear both raise Stress one step (Machinegunner ignores full-auto).
-function stressUp(){ if(isBrokenNow()){ addLog('Stress','—','Broken — you cannot gain more stress (core p.68)','normal'); return; } bumpStress(1); addLog('Stress','Level '+clamp(num(S.stress),0,10),'+1 step — a 2nd/3rd full-auto burst, over-encumbered movement, fatigue or another unnerving event','fumble'); }
+function stressUp(){ if(isBrokenNow()){ sheetToast('Broken — you cannot gain more stress (core p.68)'); return; } bumpStress(1); addLog('Stress','Level '+clamp(num(S.stress),0,10),'+1 step — a 2nd/3rd full-auto burst, over-encumbered movement, fatigue or another unnerving event','fumble'); }
 function renderStress(){
   if(typeof renderAction==='function' && $('act-hub') && S) setTimeout(renderAction,0);
   var host=$('stress-pips'); if(!host)return; var s=clamp(num(S.stress),0,10), pips='';
@@ -1040,7 +1045,7 @@ function setHealth(i){
   st.dmg=max-newRem; renderVitals(); scheduleAutosave();
 }
 function bumpMax(w,d){ var st=S[w]; st.max=clamp(st.max+d,0,20); if(st.dmg>st.max)st.dmg=st.max; renderVitals(); scheduleAutosave(); }
-function autoDerive(w){ S[w].max=derivedMax(w); if(S[w].dmg>S[w].max)S[w].dmg=S[w].max; renderVitals(); scheduleAutosave(); addLog(w==='health'?'Health':'Resolve','max '+S[w].max, 'derived from attributes','normal'); }
+function autoDerive(w){ S[w].max=derivedMax(w); if(S[w].dmg>S[w].max)S[w].dmg=S[w].max; renderVitals(); scheduleAutosave(); }
 
 // ── Render: conditions ──
 function renderConds(){
@@ -1105,8 +1110,9 @@ function addRelRow(){ S.relationships.push({name:'',note:''}); renderRelationshi
 // ── Inventory: one list of general gear, weapons and armor (equippable) ──
 function relock(){ try{ if(window.applySheetLock) window.applySheetLock(); }catch(e){} }
 function gearOf(kind){ var out=[]; S.gear.forEach(function(g,i){ if((g.kind||'gear')===kind) out.push({g:g,i:i}); }); return out; }
-function armorRating(){ var r=0; S.gear.forEach(function(g){ if(g.kind==='armor'&&g.equipped) r+=num(g.rating); }); return r; }
-function renderArmorVal(){ var el=$('armor-val'); if(el) el.textContent=armorRating(); }
+function armorCalc(){ var r=0; S.gear.forEach(function(g){ if(g.kind==='armor'&&g.equipped) r+=num(g.rating); }); return r; }
+function armorRating(){ return manual('armor')?Math.max(0,num(S.man.armor)):armorCalc(); }
+function renderArmorVal(){ var el=$('armor-val'); if(el) el.textContent=armorRating(); manMark('armor-man'); }
 function gEdit(i,f,v){ var g=S.gear[i]; if(!g)return; g[f]=(f==='damage'||f==='rating')?num(v):v; scheduleAutosave(); if(f==='weight')renderEnc(); if(f==='rating')renderArmorVal(); if((g.kind==='weapon')&&g.equipped)renderAttacks(); }
 function gDel(i){ S.gear.splice(i,1); renderInventory(); renderAttacks(); scheduleAutosave(); }
 function gEquip(i,on){ var g=S.gear[i]; if(!g)return; g.equipped=!!on; renderAttacks(); renderArmorVal(); if(g.skillBonus) renderAttrSkills(); scheduleAutosave(); }
@@ -1169,10 +1175,10 @@ function renderAttacks(){
 function renderWeapons(){ renderInventory(); renderAttacks(); }
 function renderGear(){ renderInventory(); }
 function renderEnc(){
-  var limit=attrVal('STR')*2, load=0;
+  var limit=carryLimit(), load=0;
   S.gear.forEach(function(g){ load+=itemWeight(g.weight==null?'1':g.weight); });
   var loadStr=(Math.round(load*100)/100).toString();
-  var le=$('enc-limit'), lo=$('enc-load'); if(le)le.textContent=limit; if(lo){ lo.textContent=loadStr; lo.className='e-val'+(load>limit?' over':''); }
+  var le=$('enc-limit'), lo=$('enc-load'); if(le){ var on=autoOn('stats'); le.textContent=limit+(on?'':' ✎'); le.onclick=on?null:editStats; le.style.cursor=on?'':'pointer'; le.title=on?'':'Your own number — click to change'; } if(lo){ lo.textContent=loadStr; lo.className='e-val'+(autoOn('enc')&&load>limit?' over':''); }
 }
 
 // ── Item store (weapons + armor + gear) with buy-from-cash ──
@@ -1294,7 +1300,7 @@ function glowFor(succ, bad){ return bad ? 'fumble' : (succ>=2 ? 'crit' : 'normal
 function badTag(ones){ return ones>0 ? ' · ⚠ Stress Response ('+ones+' on a Stress Die)' : ''; }
 // The bad state fired: in Alien Evolved a 1 on a Stress Die triggers a Stress Response roll
 // (you also can't push the roll). A Panic Roll is separate — made when you face fear.
-function onBad(label){ rollStressResponse(label); }
+function onBad(label){ if(autoOn('prompts')) rollStressResponse(label); }
 
 // Roll base dice, plus (Alien) a number of Stress Dice equal to stress level.
 // Each 6 is a success; a 1 on a Stress Die is the Panic trigger (the bad state).
@@ -1384,7 +1390,7 @@ function rollStressResponse(label){
 }
 // Made when you face something horrifying (the "Roll Panic" button / GM call).
 function rollPanic(){
-  if(isAlien()&&isBrokenNow()){ addLog('Panic','—','Broken characters never make panic rolls (core p.68)','normal'); return; }
+  if(isAlien()&&isBrokenNow()){ sheetToast('Broken characters never make panic rolls (core p.68)'); return; }
   var stress=clamp(num(S.stress),0,10), res=resolveRating(), roll=die6(), total=roll+stress-res, row=yzeRowLookup(PANIC,total);
   animDice([roll], [], total<=0?'normal':'fumble');   // show the D6 roll with the 3D dice
   addLog('Panic · d6 '+roll+' + stress '+stress+' − Resolve '+res+' = '+total, row?row.effect:'—', row?row.detail:'', total<=0?'normal':'fumble');
@@ -1400,7 +1406,7 @@ function rollQuick(){
 function rollSupply(i){
   var w=S.gear[i]; if(!w)return;
   var rating=parseInt(w.ammo,10);
-  if(isNaN(rating)||rating<=0){ addLog('Supply · '+(w.name||'Weapon'),'—','No ammo supply rating to roll','normal'); return; }
+  if(isNaN(rating)||rating<=0){ sheetToast((w.name||'Weapon')+': no ammo supply rating to roll'); return; }
   // Core p.28: roll dice equal to the current rating, up to a maximum of six.
   var rolls=[],ones=0; for(var k=0;k<Math.min(6,rating);k++){ var d=die6(); rolls.push(d); if(d===1)ones++; }
   if(w.ammoMax==null||w.ammoMax==='') w.ammoMax=String(rating);   // remembered so Reload can refill it
@@ -1411,7 +1417,7 @@ function rollSupply(i){
 }
 function rollCrit(kind){
   var table=(kind==='phys')?CRITP:CRITM;
-  if(!table || !table.length){ addLog((kind==='phys'?'Physical':'Mental')+' Crit','—','No critical-injury table for this system','normal'); return; }
+  if(!table || !table.length){ sheetToast('No '+(kind==='phys'?'physical':'mental')+' critical-injury table for this system'); return; }
   var d=1+Math.floor(Math.random()*6), u=1+Math.floor(Math.random()*6), code=''+d+u;
   var row=critLookup(table,code);
   var name=row?((kind==='phys'?row.injury:(row.trauma||row.injury))||('Critical '+code)):('Critical '+code);
@@ -1486,7 +1492,7 @@ function doPush(){
   var base=pr.base.map(function(v){ return v===6?6:die6(); });
   var stress=(pr.stress||[]).map(function(v){ return v===6?6:die6(); });
   var ones=0;
-  if(alien){ bumpStress(1); stress.push(die6()); }   // +1 Stress → add one Stress Die to the re-roll
+  if(alien){ if(autoOn('spend')) bumpStress(1); stress.push(die6()); }   // +1 Stress → add one Stress Die to the re-roll (⚙ off: the player adds the Stress)
   stress.forEach(function(v){ if(v===1)ones++; });
   var bad=alien && ones>0;
   var cc=countPool(base.concat(stress)), t;
@@ -1625,6 +1631,7 @@ function showRollToast(label,result,detail,type){
   if(_toastTimer)clearTimeout(_toastTimer); _toastTimer=setTimeout(function(){ t.className=''; },3500);
 }
 function addLog(label,result,detail,type){
+  if(label==='Character Built'){ sheetToast((result||'Character')+' is ready'); return; }   // builder housekeeping — not roll-log material
   type=type||'normal';
   var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint)hint.remove();
   var div=document.createElement('div'); div.className='log-entry'+(type==='crit'?' crit':type==='fumble'?' fumble':'');
@@ -1683,7 +1690,7 @@ function applySheet(d){
   S.gear=inv;
   S.crits = Array.isArray(d.crits) ? d.crits.map(function(c){ return {name:c.name||'',effect:c.effect||'',mod:num(c.mod)}; }) : [];
   if(Array.isArray(d.relationships)) S.relationships=d.relationships.map(function(r){ return {name:r.name||'',note:r.note||r.type||''}; });
-  S.turnBased=d.turnBased!==false; S.autoUse=d.autoUse!==false;
+  S.turnBased=d.turnBased!==false; S.autoUse=d.autoUse!==false; S.auto=(d.auto&&typeof d.auto==='object')?d.auto:{}; S.man=(d.man&&typeof d.man==='object')?d.man:{};
   if(d.act && typeof d.act==='object') S.act={full:!!d.act.full,quick:num(d.act.quick),used:num(d.act.used),sub:d.act.sub==='quick'?'quick':'full'};
   _lastRoll=null;
   renderAll();
@@ -1704,15 +1711,15 @@ function saveSheet(quiet){
   var data=collectSheet(), json=JSON.stringify(data);
   try{ localStorage.setItem('yze_sheet',json); }catch(e){}
   if(window.__ddSave) window.__ddSave({ yze_sheet:json });
-  if(!quiet) addLog('Sheet Saved','✓',data.name||'Unnamed','normal');
+  if(!quiet) sheetToast('Sheet saved');
 }
 function syncDocTitle(){ var name=($('f-name').value||'').trim(); if(name&&window.__ddSaveTitle) window.__ddSaveTitle(name); }
 function exportSheet(){
   var data=collectSheet(), blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=((data.name||'yze-character').replace(/[^a-z0-9]+/gi,'_').toLowerCase()||'yze-character')+'.json'; a.click();
-  setTimeout(function(){ URL.revokeObjectURL(a.href); },1000); addLog('Sheet Exported','↓',a.download,'normal');
+  setTimeout(function(){ URL.revokeObjectURL(a.href); },1000); sheetToast('Exported '+a.download);
 }
-function importSheet(input){ var f=input.files&&input.files[0]; if(!f)return; var r=new FileReader(); r.onload=function(){ try{ applySheet(JSON.parse(r.result)); saveSheet(true); addLog('Imported','↑',f.name,'normal'); }catch(e){ addLog('Import failed','✗','Not a valid sheet file','fumble'); } }; r.readAsText(f); input.value=''; }
+function importSheet(input){ var f=input.files&&input.files[0]; if(!f)return; var r=new FileReader(); r.onload=function(){ try{ applySheet(JSON.parse(r.result)); saveSheet(true); sheetToast('Imported '+f.name); }catch(e){ sheetToast('Import failed — not a valid sheet file'); } }; r.readAsText(f); input.value=''; }
 var _pageReady=false; setTimeout(function(){ _pageReady=true; },2500);
 function autoSaveOnExit(){ if(!_pageReady)return; try{ saveSheet(true); }catch(e){} try{ syncDocTitle(); }catch(e){} }
 window.addEventListener('beforeunload',autoSaveOnExit); window.addEventListener('pagehide',autoSaveOnExit);
@@ -1736,7 +1743,7 @@ function actSynth(){ return (typeof isAndroid==='function') && isAndroid(); }
 function actPoolOf(skName, bonus){ var s=skillObj(skName)||{attr:'STR'}; return Math.max(1, attrVal(s.attr)+num(S.skills[skName])+num(bonus)+gearSkillBonus(skName)-condPenaltyFor(s.attr)-critPenalty(skName)); }
 function actDo(i,j){
   var o=_actOpts[i]; if(!o) return;
-  if(o.blocked){ addLog(o.name, o.blocked, '', 'normal'); return; }
+  if(o.blocked){ sheetToast(o.name+': '+o.blocked); return; }
   if(!actCan(o.kind)){ actSpend(o.kind, o.name); return; }
   var run=(o.btns&&o.btns[j])?o.btns[j][1]:o.run;
   _actFromTab=true; var ok; try{ ok=run(); } finally{ _actFromTab=false; }
@@ -1773,7 +1780,7 @@ function actOutOfAmmo(w){ var a=parseInt(w.ammo,10); return (!isNaN(a) && a<=0) 
 // A weapon's full ammo rating: the one remembered at its first supply roll, else the catalog's.
 function actAmmoMax(w){ var m=parseInt(w.ammoMax,10); if(!isNaN(m)) return m;
   var c=G(window.ALIEN_WEAPONS).find(function(d){ return d.name===w.name; }); m=c?parseInt(c.ammo,10):NaN; return isNaN(m)?0:m; }
-function actSkillRoll(name, label, bonus){ return function(){ var s=skillObj(name); if(!s){ addLog(label||name,'—','No '+name+' skill on this sheet','normal'); return; } var gb=num(bonus)+gearSkillBonus(name); var pool=attrVal(s.attr)+num(S.skills[name])+gb-condPenaltyFor(s.attr)-critPenalty(name); doPool((label?label+' · ':'')+name+' ('+s.attr+')'+(gb?' '+(gb>0?'+':'−')+Math.abs(gb)+' gear':''), pool, true); }; }
+function actSkillRoll(name, label, bonus){ return function(){ var s=skillObj(name); if(!s){ sheetToast('No '+name+' skill on this sheet'); return; } var gb=num(bonus)+gearSkillBonus(name); var pool=attrVal(s.attr)+num(S.skills[name])+gb-condPenaltyFor(s.attr)-critPenalty(name); doPool((label?label+' · ':'')+name+' ('+s.attr+')'+(gb?' '+(gb>0?'+':'−')+Math.abs(gb)+' gear':''), pool, true); }; }
 function actLogOnly(label, result, detail){ return function(){ addLog(label, result, detail||'', 'normal'); }; }
 
 // ALIEN (Evolved, p.60): each round, one FULL action + one QUICK action, or two
@@ -1784,7 +1791,7 @@ function actLogOnly(label, result, detail){ return function(){ addLog(label, res
 // is spent automatically and nothing greys out — the pips stay and can be ticked by hand (as they
 // can when on); Broken still limits you.
 function turnOn(){ return !S||S.turnBased!==false; }
-function toggleTurnMode(){ S.turnBased=!turnOn(); var a=actState(); a.full=false; a.quick=0; a.used=0; addLog('Turn-based mode',turnOn()?'On':'Off',turnOn()?'Actions are tracked per round':'Actions aren\'t spent automatically — tick them by hand','normal'); renderAction(); scheduleAutosave(); }
+function toggleTurnMode(){ S.turnBased=!turnOn(); var a=actState(); a.full=false; a.quick=0; a.used=0; renderAction(); scheduleAutosave(); if(window.SheetSettings) SheetSettings.refresh(); }
 function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: your full and quick actions are spent automatically. Click to tick them by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
 // the pips are buttons: tick or untick them by hand (both modes). Pip 1 = the full action (or the
 // second quick action that forfeits it), pip 2 = the quick action.
@@ -1801,7 +1808,7 @@ function actCan(kind){
 function actSpend(kind,label){
   var a=actState();
   if(kind==='free'||!turnOn()) return true;
-  if(!actCan(kind)){ addLog('Action', 'No '+(kind==='full'?'full':'quick')+' action left', kind==='full'?'You used both quick actions (two quick actions forfeit your full action). End your turn to reset.':'Your actions are spent this round. End your turn to reset.', 'normal'); return false; }
+  if(!actCan(kind)){ sheetToast('No '+(kind==='full'?'full':'quick')+' action left — '+(kind==='full'?'you used both quick actions (two quick actions forfeit your full action)':'your actions are spent this round')+'. End your turn to reset.'); return false; }
   if(kind==='full') a.full=true; else a.quick++;
   return true;
 }
@@ -1818,12 +1825,38 @@ function eqQty(g){ var m=String((g&&g.name)||'').match(/×\s*(\d+)\s*$/)||String
 // AUTO-USE (roll-log switch, saved on the sheet; on unless turned off): a used item comes off
 // by itself. Off = the effect still happens, nothing is taken away.
 function autoUse(){ return !S||S.autoUse!==false; }
-function toggleAutoUse(){ S.autoUse=!autoUse(); renderAutoBtn(); addLog('Auto-use',autoUse()?'On':'Off',autoUse()?'Consumables are used up automatically':'Count consumables yourself','normal'); scheduleAutosave(); }
+function toggleAutoUse(){ S.autoUse=!autoUse(); renderAutoBtn(); scheduleAutosave(); }
+// SHEET SETTINGS (⚙) — sheet-settings.js draws these; the values live in S and save with the sheet.
+// S.auto.{spend,stats,enc,prompts} default ON; S.turnBased and S.autoUse keep their own keys.
+if(typeof window.sheetToast!=='function') window.sheetToast=function(t){ if(window.console) console.log(t); };
+function autoOn(k){ return !(S&&S.auto&&S.auto[k]===false); }
+function setAuto(k,on){ S.auto=S.auto||{}; S.auto[k]=!!on; if(k==='stats'&&isAlien()) syncHealthMax(); renderVitals(); renderArmorVal(); renderEnc(); scheduleAutosave(); }
+window.SHEET_SETTINGS=function(){ return [
+  {key:'turn',group:'auto',label:'Turn-based actions',hint:'Rolls and Action-tab moves tick off your full and quick actions; off: tick them yourself',get:turnOn,set:function(on){ if(on!==turnOn()) toggleTurnMode(); }},
+  {key:'use',group:'auto',label:'Use up consumables',hint:'Medkits, drugs, coffee, meals, booze and power cells come off your gear when used on the Action tab',get:autoUse,set:function(on){ if(on!==autoUse()) toggleAutoUse(); }},
+  {key:'spend',group:'auto',label:'Take Stress for pushing',hint:'Pushing a roll raises your Stress Level by one; off: add it yourself',get:function(){ return autoOn('spend'); },set:function(on){ setAuto('spend',on); },show:isAlien},
+  {key:'stats',group:'auto',label:'Auto-calculated stats',hint:isAlien()?'Health max, Resolve, armor from equipped armor and carry limit (Strength × 2); off: type your own':'Armor from equipped armor and carry limit (Strength × 2); off: type your own',get:function(){ return autoOn('stats'); },set:function(on){ if(!on){ S.man=S.man||{}; ['armor','carry','resolve','hp'].forEach(function(k){ if(S.man[k]==null) S.man[k]=manCalc(k); }); } setAuto('stats',on); }},
+  {key:'enc',group:'auto',label:'Encumbrance warning',hint:'Flag the load in red when you carry more than your limit',get:function(){ return autoOn('enc'); },set:function(on){ setAuto('enc',on); }},
+  {key:'prompts',group:'auto',label:'Automatic Stress & radiation rolls',hint:'A 1 on a Stress Die rolls a Stress Response; ticking a rad rolls for radiation damage',get:function(){ return autoOn('prompts'); },set:function(on){ setAuto('prompts',on); },show:isAlien}
+]; };
+// Auto-calculated stats off: the player's own numbers (S.man) replace the computed ones.
+function carryLimitCalc(){ return attrVal('STR')*2; }
+function carryLimit(){ return manual('carry')?Math.max(0,num(S.man.carry)):carryLimitCalc(); }
+function manCalc(k){ return k==='armor'?armorCalc():k==='carry'?carryLimitCalc():k==='resolve'?resolveRatingCalc():k==='hp'?derivedMax('health'):''; }
+function manual(k){ return !autoOn('stats')&&S.man&&S.man[k]!=null&&S.man[k]!==''; }
+function manMark(id){ var m=$(id); if(!m) return; var on=autoOn('stats'); m.textContent=on?'':' ✎'; m.onclick=on?null:function(e){ e.stopPropagation(); editStats(); }; m.style.cursor=on?'':'pointer'; m.title=on?'':'Your own number — click to change'; }
+function closeStats(){ var o=$('stats-overlay'); if(o) o.classList.remove('open'); }
+function editStats(){ S.man=S.man||{}; var o=$('stats-overlay'); if(!o) return;
+  var f=function(k,l){ return '<label style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0;"><span class="m-lbl" style="margin:0;">'+l+'</span><input class="m-input" style="width:90px" type="number" min="0" data-man="'+k+'" value="'+esc(S.man[k]!=null?S.man[k]:manCalc(k))+'"></label>'; };
+  $('stats-body').innerHTML='<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). These numbers are used on the sheet and in your rolls.</p>'+(isAlien()?f('hp','Max Health')+f('resolve','Resolve'):'')+f('armor','Armor')+f('carry','Carry limit')
+    +'<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;"><button class="m-btn ghost" onclick="closeStats()">Cancel</button><button class="m-btn" onclick="saveStats()">Save</button></div>';
+  o.classList.add('open'); }
+function saveStats(){ [].forEach.call(document.querySelectorAll('#stats-body [data-man]'),function(i){ var v=i.value.trim(); S.man[i.dataset.man]=v===''?null:Math.max(0,num(v)); }); closeStats(); if(isAlien()) syncHealthMax(); renderVitals(); renderArmorVal(); renderEnc(); scheduleAutosave(); }
 function renderAutoBtn(){ var b=document.getElementById('auto-toggle'); if(!b) return; var on=autoUse(); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); b.title=on?'Auto-use on: medkits, drugs, coffee, meals, booze and power cells come off your gear when you use them on the Action tab. Click to count them by hand.':'Auto-use off: nothing is taken from your gear — count consumables yourself. Click to turn it back on.'; }
 function eqConsume(i){ var g=S.gear[i]; if(!g||!autoUse()) return; var q=eqQty(g);
   if(q>1){ g.name=eqBaseName(g)+(q-1>1?' ×'+(q-1):''); } else S.gear.splice(i,1);
   renderInventory(); }
-function eqStress(d, label){ return function(){ if(actSynth()){ addLog(label,'—','Synthetics have no Stress','normal'); return false; }
+function eqStress(d, label){ return function(){ if(actSynth()){ sheetToast(label+': synthetics have no Stress'); return false; }
   if(d==='zero') S.stress=0; else S.stress=clamp(num(S.stress)+d,0,10);
   renderStress(); return true; }; }
 function eqNote(label, result, text){ addLog(label, result, text||'', 'normal'); }
@@ -1888,7 +1921,7 @@ function renderAction(){
    ['Give orders','Command','Command · each success = +1 die to their roll carrying out the order'],['Drive a vehicle','Piloting','Piloting'],
    ['Break free','Close Combat','Close Combat · opposed, to escape a grapple']].forEach(function(r){
     actAdd('full',{name:r[0],kind:'full',sub:r[2],btn:r[1]?'Roll':'Use',run:r[1]?actSkillRoll(r[1],r[0]):actLogOnly(r[0],'Full action',r[2])},O); });
-  if(!actSynth() && S.signature) actAdd('full',{name:'Signature item',kind:'full',sub:S.signature+' · once per session: −1 Stress',btn:'Use',run:function(){ if(num(S.stress)<1){ addLog('Signature item','—','No Stress to shed','normal'); return false; } bumpStress(-1); addLog('Signature item','−1 Stress','Stress now '+num(S.stress)+' · once per session','normal'); }},O);
+  if(!actSynth() && S.signature) actAdd('full',{name:'Signature item',kind:'full',sub:S.signature+' · once per session: −1 Stress',btn:'Use',run:function(){ if(num(S.stress)<1){ sheetToast('Signature item: no Stress to shed'); return false; } bumpStress(-1); addLog('Signature item','−1 Stress','Stress now '+num(S.stress)+' · once per session','normal'); }},O);
   // Quick actions (p.60)
   [['Move','Into an adjacent zone, or close in / back off between Short and Adjacent range in your zone'],['Peek through a door or hatch','Move to it and look'],
    ['Lock a door or hatch',''],['Take partial cover',''],['Pick up an item','From the ground']].forEach(function(r){
@@ -1949,9 +1982,9 @@ function campaignRenderModal(){
 }
 function campaignError(msg){ var el=$('campaign-error'); if(el)el.textContent=msg; }
 async function campaignJoin(){ var code=(($('campaign-code-input')||{}).value||'').trim().toUpperCase(); if(!code){ campaignError('Enter a join code.'); return; } try{ var r=await fetch('/api/campaigns?code='+encodeURIComponent(code),{credentials:'same-origin'}); if(r.status === 429){ campaignError('Too many tries — wait a few minutes and try again.'); return; } if(r.status===404){ campaignError('No campaign found with that code.'); return; } if(!r.ok)throw new Error(r.status); _campaign=await r.json(); campaignConnected(); }catch(e){ campaignError('Could not join — are you signed in to the app?'); } }
-function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign','Link','Connected to "'+_campaign.name+'" ('+_campaign.code+')','normal'); saveSheet(true); }
+function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); sheetToast('Linked to "'+_campaign.name+'"'); saveSheet(true); }
 function campaignLeaveSilent(){ if(_campaignTimer){ clearInterval(_campaignTimer); _campaignTimer=null; } _campaign=null; _campaignLastId=0; campaignUpdateBtn(); }
-function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign','Link','Left "'+name+'"','normal'); saveSheet(true); }
+function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); sheetToast('Left "'+name+'"'); saveSheet(true); }
 function campaignBroadcast(label,result,detail,type){ if(!_campaign||CAMPAIGN_SKIP_LABELS.has(String(label)))return; fetch('/api/campaigns/'+_campaign.id+'/rolls',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({clientKey:_campaignClientKey,source:campaignPlayerName(),label:String(label),result:String(result),detail:String(detail||''),type:type||'normal'})}).catch(function(){}); }
 function campaignAddRemote(roll){
   roll = _sniffRollType(roll);
@@ -2104,6 +2137,8 @@ autoLoad();
 <script src="/tools-data/yze-homebrew.js"></script>
 <script src="/tools-data/yze-sheet-builder.js"></script>
 <script src="/tools-data/dice-anim.js"></script>
+<!-- Sheet Settings (⚙ in the roll log) — shared asset: /tools-data/sheet-settings.js -->
+<script src="/tools-data/sheet-settings.js"></script>
 <script>
 if(window.YZEHomebrew){ try{ window.YZEHomebrew.load(function(){ if(typeof _pk!=='undefined' && _pk) renderPicker(); }); }catch(e){} }
 </script>
@@ -2112,8 +2147,7 @@ if(window.YZEHomebrew){ try{ window.YZEHomebrew.load(function(){ if(typeof _pk!=
 .log-lock:hover{background:rgba(255,255,255,.35);}
 .log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
 .log-lock .lk-ico{font-size:15px;line-height:1;}
-.log-auto:not(.on){opacity:.55;}
-.log-auto:not(.on) .lk-ico{filter:grayscale(1);}
+body.log-compact .log-entry .roll-detail{display:none;}
 .log-x{font-size:13px;line-height:1;padding:3px 7px;}
 .lk-ro-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none!important;pointer-events:none;}
 input.no-spin{-moz-appearance:textfield;}

@@ -628,8 +628,8 @@ body.dark .act-badge.warn{color:#f0c060;}
      would nest it inside itself. (A cross-origin parent makes the check throw,
      and "framed" is the safe answer to that too.)
 
-     Order in the header is VTT · dice · Clear: dice-anim.js mounts its gear
-     immediately before the LAST .log-clear, which is Clear. */
+     Order in the header is Roll Log · VTT · ⚙ · dice · Clear: sheet-settings.js and
+     dice-anim.js mount their buttons immediately before the LAST .log-clear, which is Clear. */
   var __ddFramed = false;
   try { __ddFramed = window.self !== window.top; } catch (e) { __ddFramed = true; }
 
@@ -726,7 +726,7 @@ body.dark .act-badge.warn{color:#f0c060;}
     <div class="center-col">
       <div class="vit-row">
         <div class="card m-armor" style="flex:0 0 118px;">
-          <div class="section-bar accent"><span>Armor</span></div>
+          <div class="section-bar accent"><span id="armor-lbl">Armor</span></div>
           <div class="blk" style="padding:12px 10px 16px;display:flex;align-items:center;justify-content:center;min-height:72px;cursor:pointer;" onclick="rollArmor()" title="Sum of equipped armor protection — click to roll; each 6 cancels one point of damage"><span class="stress-val" id="armor-val" style="font-size:56px;font-weight:800;line-height:1;">0</span></div>
         </div>
         <div class="card m-cond" style="flex:1 1 0;min-width:0;">
@@ -788,7 +788,7 @@ body.dark .act-badge.warn{color:#f0c060;}
 <!-- Roll Log -->
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
-  <div class="log-header"><span class="log-title" aria-hidden="true"></span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button type="button" id="auto-toggle" class="log-lock log-auto on" onclick="toggleAutoUse()" aria-pressed="true" aria-label="Use up consumables automatically" title="Auto-use on: poison doses and used-up magic items (Nisse's porridge, homebrew one-use items) come off your inventory by themselves. Click to count them by hand."><span class="lk-ico">🎒</span></button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
+  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #2e3645;background:transparent;color:#a89f93;" title="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="if(window.YZEB)YZEB.launch();" title="Character Builder">Create</button>
@@ -825,6 +825,7 @@ body.dark .act-badge.warn{color:#f0c060;}
 </div>
 
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">Vaesen — Quick Rules</div><button class="x" onclick="closeRules()">✕</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
+<div id="stats-overlay" class="ov" onclick="if(event.target===this)closeStats()"><div class="modal" style="max-width:420px;"><div class="modal-hd"><div class="ttl">Your stats</div><button class="x" onclick="closeStats()">✕</button></div><div class="modal-bd" id="stats-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">✕</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
 <div id="advance-overlay" class="ov" onclick="if(event.target===this)closeAdvance()"><div class="modal"><div class="modal-hd"><div class="ttl">✦ Advancement</div><button class="x" onclick="closeAdvance()">✕</button></div><div class="modal-bd" id="advance-body"></div></div></div>
 <div id="ward-overlay" class="ov" onclick="if(event.target===this)closeWardRoll()"><div class="modal"><div class="modal-hd"><div class="ttl" id="ward-title">Fear Test</div><button class="x" onclick="closeWardRoll()">✕</button></div><div class="modal-bd" id="ward-body"></div></div></div>
@@ -886,7 +887,8 @@ function parseCritMod(eff){ var m=String(eff||'').match(/[-−–]\s*(\d+)/); re
 // reduced automatically; the GM applies the −N with the dice-tray modifier when it hits.
 function critModFor(sk){ return 0; }
 // Armor makes you clumsy: −1/−2/−3 to AGILITY for light/medium/heavy (core p.73).
-function armorAgiPenalty(){ var n=0; S.gear.forEach(function(g){ if(g.kind==='armor'&&g.equipped&&g.penalty!=null&&g.penalty!==''){ n+=Math.max(0,num(g.penalty)); return; } if(g.kind==='armor'&&g.equipped){ var m=String((g.note||'')+' '+(g.name||'')).match(/agility\s*[-−–]\s*(\d+)/i); if(m) n+=parseInt(m[1],10); else if(/heavy armor/i.test(g.name||'')) n+=3; else if(/medium armor/i.test(g.name||'')) n+=2; else if(/light armor/i.test(g.name||'')) n+=1; } }); return n; }
+function armorAgiPenalty(){ return manual('agiPen')?Math.max(0,num(S.man.agiPen)):armorAgiPenaltyCalc(); }
+function armorAgiPenaltyCalc(){ var n=0; S.gear.forEach(function(g){ if(g.kind==='armor'&&g.equipped&&g.penalty!=null&&g.penalty!==''){ n+=Math.max(0,num(g.penalty)); return; } if(g.kind==='armor'&&g.equipped){ var m=String((g.note||'')+' '+(g.name||'')).match(/agility\s*[-−–]\s*(\d+)/i); if(m) n+=parseInt(m[1],10); else if(/heavy armor/i.test(g.name||'')) n+=3; else if(/medium armor/i.test(g.name||'')) n+=2; else if(/light armor/i.test(g.name||'')) n+=1; } }); return n; }
 // GEAR BONUSES (core p.70): an item helps one or two named skills by +N dice while in
 // use. Rows carry skillBonus [{skill,amount}] (homebrew vae-gear, or parsed from a book
 // item's "+N" + the skills its use names). Only ONE item's bonus counts per roll: the best.
@@ -977,12 +979,12 @@ function rollResources(){
   addLog('Resources ('+v+' · '+esc(tier.name)+')', succ+' success'+(succ===1?'':'es')+' to spend', poolStr(a)+' · buy temporary gear (cost N = N successes)'+(num(tier.bonus)?(' · Bartering: '+(tier.bonus>0?'+':'')+tier.bonus+' to Manipulation'):''), succ?'crit':'fumble');
 }
 // A new mystery: Capital is restored to your Living Standard and unspent successes lapse.
-function newMysteryCapital(){ var t=resTier(S.resources); S.capital=num(t.capital); S.purchase=0; renderRes(); scheduleAutosave(); updatePickerCap(); addLog('New mystery','Capital '+num(S.capital),esc(t.name)+' · unspent Resources successes cleared','normal'); }
+function newMysteryCapital(){ var t=resTier(S.resources); S.capital=num(t.capital); S.purchase=0; renderRes(); scheduleAutosave(); updatePickerCap(); sheetToast('New mystery — Capital '+num(S.capital)+', unspent Resources successes cleared'); }
 function useMemento(){
   var healed=0;
   CONDS.forEach(function(c){ if(healed<2 && S.conditions[c.name]){ S.conditions[c.name]=false; healed++; } });
   renderConds(); renderAttrSkills(); scheduleAutosave();
-  addLog('Memento', healed?('Healed '+healed+' Condition'+(healed>1?'s':'')):'Nothing to heal', (S.memento||'A keepsake')+' — once per session while resting', healed?'crit':'normal');
+  if(healed) addLog('Memento', 'Healed '+healed+' Condition'+(healed>1?'s':''), (S.memento||'A keepsake')+' — once per session while resting', 'crit'); else sheetToast('Memento: nothing to heal');
 }
 
 // ── Talents ──
@@ -1010,8 +1012,10 @@ function addRelRow(){ S.relationships.push({name:'',note:''}); renderRelationshi
 // ── Inventory ──
 function relock(){ try{ if(window.applySheetLock) window.applySheetLock(); }catch(e){} }
 function gearOf(kind){ var out=[]; S.gear.forEach(function(g,i){ if((g.kind||'gear')===kind) out.push({g:g,i:i}); }); return out; }
-function armorRating(){ var r=0; S.gear.forEach(function(g){ if(g.kind==='armor'&&g.equipped) r+=num(g.rating); }); return r; }
-function renderArmorVal(){ var el=$('armor-val'); if(el) el.textContent=armorRating(); }
+function armorRatingCalc(){ var r=0; S.gear.forEach(function(g){ if(g.kind==='armor'&&g.equipped) r+=num(g.rating); }); return r; }
+function armorRating(){ return manual('armor')?Math.max(0,num(S.man.armor)):armorRatingCalc(); }
+function renderArmorVal(){ var el=$('armor-val'); if(el) el.textContent=armorRating();
+  var lb=$('armor-lbl'), m=!autoOn('stats'); if(lb){ lb.textContent='Armor'+(m?' ✎':''); lb.onclick=m?editStats:null; lb.style.cursor=m?'pointer':''; lb.title=m?'Your own numbers — click to change':''; } }
 function gEdit(i,f,v){ var g=S.gear[i]; if(!g)return; g[f]=(f==='damage'||f==='rating'||f==='bonus')?num(v):v; scheduleAutosave(); if(f==='rating')renderArmorVal(); if((g.kind==='weapon')&&g.equipped)renderAttacks(); }
 function gDel(i){ S.gear.splice(i,1); renderInventory(); renderAttacks(); scheduleAutosave(); }
 function gEquip(i,on){ var g=S.gear[i]; if(!g)return; g.equipped=!!on; renderAttacks(); renderArmorVal(); if(g.kind==='armor'||(g.kind||'gear')==='gear') renderAttrSkills(); scheduleAutosave(); }
@@ -1144,14 +1148,13 @@ function pickAdd(idx,mode){
   var x=_pkRows[idx]; if(!x)return;
   var fam=GEAR_FAM(_pk), p=fam?num(x.price):0, buying=(mode==='buy'&&p>0);
   var paidS=0, paidC=0;
-  if(buying){ if(buyPower()<p){ addLog('Item Shop','Not enough','“'+(x.name||'Item')+'” costs '+p+' · you have '+num(S.purchase)+' successes + '+num(S.capital)+' Capital','fumble'); return; }
+  if(buying){ if(buyPower()<p){ sheetToast('Not enough — “'+(x.name||'Item')+'” costs '+p+'; you have '+num(S.purchase)+' successes + '+num(S.capital)+' Capital'); return; }
     paidS=Math.min(num(S.purchase),p); paidC=p-paidS; S.purchase=num(S.purchase)-paidS; S.capital=num(S.capital)-paidC; renderRes(); }
   if(_pk==='weap'){ var w=x.data||{}; S.gear.push({kind:'weapon',equipped:false,name:w.name||x.name,bonus:weaponBonus(w.bonus),damage:w.damage!=null?w.damage:1,range:(w.range!=null&&w.range!==0?String(w.range):'0'),weight:w.cost!=null?w.cost:'',skill:w.skill||'Close Combat',features:Array.isArray(w.features)?w.features.slice():[]}); renderWeapons(); setTab('gear'); }
   else if(_pk==='armor'){ var a=x.data||{}, ar={kind:'armor',equipped:false,name:a.name||x.name,rating:num(a.rating),weight:a.weight||'',note:a.note||''}; if(a.penalty!=null) ar.penalty=num(a.penalty); S.gear.push(ar); renderInventory(); setTab('gear'); }
   else if(_pk==='talent'){ var t=x.data||{}; S.talents.push({name:t.name||x.name,note:t.desc||t.note||''}); renderTalents(); setTab('story'); }
   else { var d=x.data||{}; S.gear.push(gearRowOf(d,x.name,false)); renderGear(); renderAttrSkills(); setTab('gear'); }
   if(buying) addLog('Item Shop','Bought '+x.name,'Cost '+p+': '+(paidS?paidS+' success'+(paidS===1?'':'es'):'')+(paidS&&paidC?' + ':'')+(paidC?paidC+' Capital':'')+' → '+num(S.purchase)+' successes, '+num(S.capital)+' Capital left','crit');
-  else if(fam&&p>0) addLog('Item Shop','Added '+x.name,'Found/granted — nothing spent','normal');
   scheduleAutosave(); updatePickerCap(); renderPicker();
 }
 // A gear-family inventory row with its mechanics (skill bonus, wards, consumable, risk).
@@ -1206,7 +1209,7 @@ function rollAttack(i){
   doRoll((w.name||'Attack')+' · '+skName+(gb.n>wb&&gb.n>0?gbLabel(gb):''), attrBase(s.attr)-pen+(wb<0&&gb.n<=0?wb:0), num(S.skills[skName]), gn, s.attr, {kind:'attack',wdmg:num(w.damage),ctype:attrType(s.attr)});
 }
 function rollQuick(){ var n=Math.max(1,Math.min(12,trayTake('tray-mod'))); var a=rollSet(n), succ=count6(a); animDice(a,[],[],glowFor(succ)); addLog(n+'d6 free pool', succ+'  '+tierOf(succ).t, poolStr(a)+' · '+succ+' succ', tierOf(succ).type); _lastRoll=null; }
-function rollArmor(){ var r=armorRating(); if(r<1){ addLog('Armor','—','No armor equipped — equip armor on the Gear tab.','fumble'); return; } var a=rollSet(Math.min(12,r)), blk=count6(a); animDice(a,[],[],blk?'crit':'normal'); addLog('Armor ('+r+')', blk+' blocked', poolStr(a)+' · each 6 cancels 1 damage', blk?'crit':'fumble'); }
+function rollArmor(){ var r=armorRating(); if(r<1){ sheetToast('No armor equipped — equip armor on the Gear tab.'); return; } var a=rollSet(Math.min(12,r)), blk=count6(a); animDice(a,[],[],blk?'crit':'normal'); addLog('Armor ('+r+')', blk+' blocked', poolStr(a)+' · each 6 cancels 1 damage', blk?'crit':'fumble'); }
 
 // ── Fear test / Resist magic (Fear = Logic or Empathy, +1 die per PC present,
 // max +3; magic is resisted with the skill the GM names). Wards from gear are opt-in:
@@ -1253,12 +1256,12 @@ function doPush(){
   var gear=(pr.gear||[]).map(function(v){ return v===6?6:die6(); });
   var succ=count6(base)+count6(skill)+count6(gear);
   var ctype=(pr.ctx&&pr.ctx.ctype)||'Physical';
-  var marked=addCondition(ctype), brokeNote='';
-  if(!marked){ brokeNote=' · '+ctype+' BROKEN — roll a critical injury'; }
+  var auto=autoOn('spend'), marked=auto?addCondition(ctype):null, brokeNote='';
+  if(auto&&!marked){ brokeNote=' · '+ctype+' BROKEN — roll a critical injury'; }
   var th; if(pr.ctx&&pr.ctx.kind==='attack'){ var hit=succ>=1, dmg=hit?(num(pr.ctx.wdmg)+(succ-1)):0; th=hit?{t:'HIT · '+dmg+' Conditions',type:'crit'}:{t:'MISS',type:'fumble'}; }
   else if(pr.ctx&&pr.ctx.fear>0) th=fearTier(succ,pr.ctx.fear);
   else th=tierOf(succ);
-  var detail=poolStr(base)+(skill.length?' + '+skill.length+'sk('+skill.join(',')+')':'')+(gear.length?' + '+gear.length+'gr('+gear.join(',')+')':'')+' · '+succ+' succ · PUSHED — '+(marked?('+1 '+ctype.toLowerCase()+' Condition ('+marked+')'):('already full'))+brokeNote;
+  var detail=poolStr(base)+(skill.length?' + '+skill.length+'sk('+skill.join(',')+')':'')+(gear.length?' + '+gear.length+'gr('+gear.join(',')+')':'')+' · '+succ+' succ · PUSHED — '+(!auto?'take one Condition':marked?('+1 '+ctype.toLowerCase()+' Condition ('+marked+')'):('already full'))+brokeNote;
   animDice(base,skill,gear,glowFor(succ));
   addLog(pr.label+' · pushed', succ+'  '+th.t, detail, th.type);
   renderConds(); renderAttrSkills(); scheduleAutosave();
@@ -1285,7 +1288,7 @@ var _actFromTab=false;
 // is spent automatically and nothing greys out — the Slow / Fast pips stay and can be ticked by
 // hand (as they can when on); Broken still limits you.
 function turnOn(){ return !S||S.turnBased!==false; }
-function toggleTurnMode(){ S.turnBased=!turnOn(); _act=actFresh(); addLog('Turn-based mode',turnOn()?'On':'Off',turnOn()?'Actions are tracked per round':'Actions aren\'t spent automatically','normal'); renderAction(); scheduleAutosave(); }
+function toggleTurnMode(){ S.turnBased=!turnOn(); _act=actFresh(); renderAction(); scheduleAutosave(); try{ SheetSettings.refresh(); }catch(e){} }
 function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: actions are spent automatically. Click to tick them by hand instead.':'Manual: actions aren\'t spent automatically — tick the pips yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
 // the Slow / Fast pips are buttons: tick or untick them by hand (both modes)
 function togglePip(k){ _act[k]=!_act[k]; if(k==='slow'&&!_act.slow) _act.slowAsFast=false; renderAction(); scheduleAutosave(); }
@@ -1306,8 +1309,8 @@ function actRoll(label, sk){ var s=skillObj(sk); if(!s)return; var gb=gearSkillB
 function actParrySkill(){ return gearOf('weapon').some(function(o){ return o.g.equipped && /close combat/i.test(o.g.skill||''); })?'Close Combat':'Force'; }
 function actDo(i){
   var o=_actOpts[i]; if(!o) return;
-  if(o.blocked){ addLog(o.name, o.blocked, '', 'normal'); return; }
-  if(!actCan(o.kind)){ addLog(o.name, 'No '+(o.kind==='slow'?'slow':'')+' action left', o.kind==='slow'?'Your slow action is spent this round.':'Both actions are spent this round.', 'normal'); return; }
+  if(o.blocked){ sheetToast(o.name+': '+o.blocked); return; }
+  if(!actCan(o.kind)){ sheetToast(o.kind==='slow'?'Your slow action is spent this round.':'Both actions are spent this round.'); return; }
   var ok; _actFromTab=true; try{ ok=o.run(); } finally{ _actFromTab=false; }
   if(ok===false){ renderAction(); return; }
   actSpend(o.kind); renderAction(); scheduleAutosave();
@@ -1323,7 +1326,26 @@ function eqQty(g){ var m=String((g&&g.name)||'').match(/×\s*(\d+)\s*$/)||String
 // AUTO-USE (roll-log switch, saved on the sheet; on unless turned off): poison doses and used-up
 // magic items come off the inventory by themselves. Off = the effect happens, the count stays.
 function autoUse(){ return !S||S.autoUse!==false; }
-function toggleAutoUse(){ S.autoUse=!autoUse(); renderAutoBtn(); addLog('Auto-use',autoUse()?'On':'Off',autoUse()?'Consumables are used up automatically':'Count consumables yourself','normal'); scheduleAutosave(); }
+function toggleAutoUse(){ S.autoUse=!autoUse(); renderAutoBtn(); scheduleAutosave(); }
+// SHEET SETTINGS (⚙) — sheet-settings.js draws these; the values live in S and save with the sheet.
+// S.auto.{spend,stats} default ON; S.turnBased and S.autoUse keep their own keys.
+if(typeof window.sheetToast!=='function') window.sheetToast=function(t){ if(window.console) console.log(t); };
+function autoOn(k){ return !(S&&S.auto&&S.auto[k]===false); }
+function setAuto(k,on){ S.auto=S.auto||{}; S.auto[k]=!!on; renderAttrSkills(); renderArmorVal(); scheduleAutosave(); }
+window.SHEET_SETTINGS=function(){ return [
+  {key:'turn',group:'auto',label:'Turn-based actions',hint:'Rolls and Action-tab moves take your slow and fast actions; off: tick them yourself',get:turnOn,set:function(on){ if(on!==turnOn()) toggleTurnMode(); }},
+  {key:'use',group:'auto',label:'Use up consumables',hint:'Poison doses and used-up magic items (Nisse\'s porridge, one-use items) come off your inventory',get:autoUse,set:function(on){ if(on!==autoUse()) toggleAutoUse(); }},
+  {key:'spend',group:'auto',label:'Take a Condition when pushing',hint:'Pushing marks the next free Condition (Broken when full); off: mark it yourself',get:function(){ return autoOn('spend'); },set:function(on){ setAuto('spend',on); }},
+  {key:'stats',group:'auto',label:'Auto-calculated stats',hint:'Armor protection and armor\'s Agility penalty from your equipped armor; off: type your own',get:function(){ return autoOn('stats'); },set:function(on){ if(!on){ S.man=S.man||{}; ['armor','agiPen'].forEach(function(k){ if(S.man[k]==null) S.man[k]=manCalc(k); }); } setAuto('stats',on); }}
+]; };
+// Auto-calculated stats off: the player's own numbers (S.man) replace the computed ones.
+function manCalc(k){ return k==='armor'?armorRatingCalc():k==='agiPen'?armorAgiPenaltyCalc():''; }
+function manual(k){ return !autoOn('stats')&&S.man&&S.man[k]!=null&&S.man[k]!==''; }
+function editStats(){ S.man=S.man||{}; var f=function(k,l){ return '<label style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0;"><span>'+l+'</span><input class="m-input" style="width:90px" type="number" data-man="'+k+'" value="'+esc(S.man[k]!=null?S.man[k]:manCalc(k))+'"></label>'; };
+  $('stats-body').innerHTML='<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). These numbers are used for armor rolls and Agility.</p>'+f('armor','Armor protection')+f('agiPen','Agility penalty (armor)')+'<div style="text-align:right;margin-top:10px;"><button class="m-btn" onclick="saveStats()">Save</button></div>';
+  $('stats-overlay').classList.add('open'); }
+function closeStats(){ $('stats-overlay').classList.remove('open'); }
+function saveStats(){ [].forEach.call(document.querySelectorAll('#stats-body [data-man]'),function(i){ var v=i.value.trim(); S.man[i.dataset.man]=v===''?null:num(v); }); closeStats(); renderAttrSkills(); renderArmorVal(); scheduleAutosave(); }
 function renderAutoBtn(){ var b=document.getElementById('auto-toggle'); if(!b) return; var on=autoUse(); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); b.title=on?'Auto-use on: poison doses and used-up magic items (Nisse\'s porridge, homebrew one-use items) come off your inventory by themselves. Click to count them by hand.':'Auto-use off: nothing is taken from your inventory — count consumables yourself. Click to turn it back on.'; }
 function eqConsume(i){ if(!autoUse()) return; var g=S.gear[i]; if(!g) return; var q=eqQty(g);
   if(q>1){ g.name=eqBaseName(g)+(q-1>1?' ×'+(q-1):''); delete g.charges; } else S.gear.splice(i,1);
@@ -1571,6 +1593,7 @@ function applySheet(d){
   if(Array.isArray(d.relationships)) S.relationships=d.relationships.map(function(r){ return {name:r.name||'',note:r.note||''}; });
   _act=actFresh(); if(d.act&&typeof d.act==='object'){ ['slow','fast','slowAsFast','brokeFree'].forEach(function(k){ _act[k]=!!d.act[k]; }); }
   _actSub=d.actSub==='fast'?'fast':'slow'; S.turnBased=d.turnBased!==false; S.autoUse=d.autoUse!==false;
+  S.auto=(d.auto&&typeof d.auto==='object')?Object.assign({},d.auto):{}; S.man=(d.man&&typeof d.man==='object')?Object.assign({},d.man):{};
   _lastRoll=null; renderAll();
   if(typeof campaignRestore==='function' && d.campaign!==undefined) campaignRestore(d.campaign);
   if(window.__ddSaveTitle && S.name) try{ window.__ddSaveTitle(S.name); }catch(e){}
@@ -1582,10 +1605,10 @@ function renderAll(){
   ['motivation','trauma','secret'].forEach(function(k){ var el=$('f-'+k); if(el)el.value=S[k]||''; });
   renderArchDisp(); renderAttrSkills(); renderConds(); renderRes(); renderTalents(); renderRelationships(); renderInventory(); renderAttacks(); renderCrits(); updateFoot(); refreshWizardButtons(); renderAutoBtn();
 }
-function saveSheet(quiet){ var data=collectSheet(), json=JSON.stringify(data); try{ localStorage.setItem('vae_sheet',json); }catch(e){} if(window.__ddSave) window.__ddSave({ vae_sheet:json }); if(!quiet) addLog('Sheet Saved','✓',data.name||'Unnamed','normal'); }
+function saveSheet(quiet){ var data=collectSheet(), json=JSON.stringify(data); try{ localStorage.setItem('vae_sheet',json); }catch(e){} if(window.__ddSave) window.__ddSave({ vae_sheet:json }); if(!quiet) sheetToast('Sheet saved'); }
 function syncDocTitle(){ var name=($('f-name').value||'').trim(); if(name&&window.__ddSaveTitle) window.__ddSaveTitle(name); }
-function exportSheet(){ var data=collectSheet(), blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=((data.name||'vaesen-character').replace(/[^a-z0-9]+/gi,'_').toLowerCase()||'vaesen-character')+'.json'; a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); },1000); addLog('Sheet Exported','↓',a.download,'normal'); }
-function importSheet(input){ var f=input.files&&input.files[0]; if(!f)return; var r=new FileReader(); r.onload=function(){ try{ applySheet(JSON.parse(r.result)); saveSheet(true); addLog('Imported','↑',f.name,'normal'); }catch(e){ addLog('Import failed','✗','Not a valid sheet file','fumble'); } }; r.readAsText(f); input.value=''; }
+function exportSheet(){ var data=collectSheet(), blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=((data.name||'vaesen-character').replace(/[^a-z0-9]+/gi,'_').toLowerCase()||'vaesen-character')+'.json'; a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); },1000); sheetToast('Exported '+a.download); }
+function importSheet(input){ var f=input.files&&input.files[0]; if(!f)return; var r=new FileReader(); r.onload=function(){ try{ applySheet(JSON.parse(r.result)); saveSheet(true); sheetToast('Imported '+f.name); }catch(e){ sheetToast('Import failed — not a valid sheet file'); } }; r.readAsText(f); input.value=''; }
 var _pageReady=false; setTimeout(function(){ _pageReady=true; },2500);
 function autoSaveOnExit(){ if(!_pageReady)return; try{ saveSheet(true); }catch(e){} try{ syncDocTitle(); }catch(e){} }
 window.addEventListener('beforeunload',autoSaveOnExit); window.addEventListener('pagehide',autoSaveOnExit);
@@ -1616,9 +1639,9 @@ function campaignRenderModal(){
 }
 function campaignError(msg){ var el=$('campaign-error'); if(el)el.textContent=msg; }
 async function campaignJoin(){ var code=(($('campaign-code-input')||{}).value||'').trim().toUpperCase(); if(!code){ campaignError('Enter a join code.'); return; } try{ var r=await fetch('/api/campaigns?code='+encodeURIComponent(code),{credentials:'same-origin'}); if(r.status === 429){ campaignError('Too many tries — wait a few minutes and try again.'); return; } if(r.status===404){ campaignError('No campaign found with that code.'); return; } if(!r.ok)throw new Error(r.status); _campaign=await r.json(); campaignConnected(); }catch(e){ campaignError('Could not join — are you signed in to the app?'); } }
-function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign','Link','Connected to "'+_campaign.name+'" ('+_campaign.code+')','normal'); saveSheet(true); }
+function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); sheetToast('Linked to "'+_campaign.name+'"'); saveSheet(true); }
 function campaignLeaveSilent(){ if(_campaignTimer){ clearInterval(_campaignTimer); _campaignTimer=null; } _campaign=null; _campaignLastId=0; campaignUpdateBtn(); }
-function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign','Link','Left "'+name+'"','normal'); saveSheet(true); }
+function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); sheetToast('Left "'+name+'"'); saveSheet(true); }
 function campaignBroadcast(label,result,detail,type){ if(!_campaign||CAMPAIGN_SKIP_LABELS.has(String(label)))return; fetch('/api/campaigns/'+_campaign.id+'/rolls',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({clientKey:_campaignClientKey,source:campaignPlayerName(),label:String(label),result:String(result),detail:String(detail||''),type:type||'normal'})}).catch(function(){}); }
 function campaignAddRemote(roll){
   roll = _sniffRollType(roll);
@@ -1770,6 +1793,9 @@ autoLoad();
 <script src="/tools-data/vae-sheet-builder.js"></script>
 <script src="/tools-data/vae-homebrew.js"></script>
 <script src="/tools-data/dice-anim.js"></script>
+<!-- Sheet Settings (⚙ in the roll log) — shared asset: /tools-data/sheet-settings.js -->
+<script src="/tools-data/sheet-settings.js"></script>
+<style>body.log-compact .log-entry .roll-detail{display:none;}</style>
 <script>
 if(window.VAEHomebrew){ try{ window.VAEHomebrew.load(function(){ if(typeof _pk!=='undefined' && _pk) renderPicker(); }); }catch(e){} }
 </script>
@@ -1779,8 +1805,6 @@ if(window.VAEHomebrew){ try{ window.VAEHomebrew.load(function(){ if(typeof _pk!=
 .log-lock:hover{background:rgba(255,255,255,.35);}
 .log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
 .log-lock .lk-ico{font-size:15px;line-height:1;}
-.log-auto:not(.on){opacity:.55;}
-.log-auto:not(.on) .lk-ico{filter:grayscale(1);}
 .log-x{font-size:13px;line-height:1;padding:3px 7px;}
 .lk-ro-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none!important;pointer-events:none;}
 input.no-spin{-moz-appearance:textfield;}

@@ -657,14 +657,14 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="section-bar blue"><span>Health &amp; Defence</span></div>
       <div class="derived">
         <div class="derived-cell">
-          <div class="derived-lbl"><span>Defence</span></div>
+          <div class="derived-lbl"><span>Defence<span id="def-man"></span></span></div>
           <div class="def-row">
             <div class="derived-big" id="def-val">8</div>
             <div class="derived-formula" style="margin-left:auto;"><span title="Any other Defence bonus. Worn gear with a Defence value (Gear tab) counts automatically.">other</span> <input type="number" id="def-bonus" title="Any other Defence bonus. Worn gear with a Defence value (Gear tab) counts automatically." data-nolock value="0" oninput="recalc()"> <button class="small-btn" onclick="rollDefence()" title="Roll Moves as a full opposed roll instead of using Defence">🎲</button></div>
           </div>
         </div>
         <div class="derived-cell">
-          <div class="derived-lbl"><span>Health</span></div>
+          <div class="derived-lbl"><span>Health<span id="hp-man"></span></span></div>
           <div class="health-pips" id="hp-pips"></div>
           <div class="derived-formula">bonus <input type="number" id="hp-bonus" data-nolock value="0" oninput="recalc()"> <span id="ko-flag"></span></div>
           <span id="hp-cur" hidden></span><span id="hp-max" hidden></span>
@@ -729,9 +729,9 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
   <div class="log-header">
-    <span class="log-title" aria-hidden="true"></span>
+    <span class="log-title">Roll Log</span>
     <div style="display:flex;align-items:center;gap:6px;">
-      <button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button>
+      <button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button>
     </div>
   </div>
   <div class="log-actions">
@@ -814,6 +814,15 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   </div>
 </div>
 
+<!-- YOUR STATS (⚙ Auto-calculated stats off) -->
+<div id="stats-overlay" class="ov" onclick="if(event.target===this)closeStats()">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-hd"><div class="ttl">Your stats</div><button class="x" onclick="closeStats()">&#10005;</button></div>
+    <div class="modal-bd" id="stats-body"></div>
+    <div class="modal-ft" style="display:flex;justify-content:flex-end;gap:8px;padding:10px 16px;"><button class="m-btn ghost" onclick="closeStats()">Cancel</button><button class="m-btn" onclick="saveStats()">Save</button></div>
+  </div>
+</div>
+
 <!-- LEVEL UP -->
 <div id="levelup-overlay" class="ov" onclick="if(event.target===this)closeLevelUp()">
   <div class="modal" style="max-width:520px;">
@@ -825,6 +834,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
 <script>
 // ═══ CORE STATE ═══════════════════════════════════════════════════════════
+var _auto = {}, _man = {}, _calc = {};   // ⚙ Sheet Settings: switches (default ON), your own stats, the computed ones
 const STATS = [
   { id:'smarts', name:'Smarts', hint:'clever · perceptive' },
   { id:'moves',  name:'Moves',  hint:'quick · accurate' },
@@ -935,17 +945,20 @@ function recalc() {
   if(def < CREATION.minDef) def = CREATION.minDef;
   const gDef = gearDefBonus();
   def += num($('def-bonus').value) + hbFocusBonus('defence') + gDef;
+  _calc.def = def; if(manual('def')) def = Math.max(0, num(_man.def));
   $('def-val').textContent = def;
   $('def-val').title = gDef ? 'Includes ' + (gDef > 0 ? '+' : '') + gDef + ' from worn gear (Gear tab)' : '';
   document.querySelectorAll('#gear-body tr').forEach(refreshGearDef);
 
   // Health: Brawn, +2 with Tough, + bonus (Ogre etc.)
   const tough = hasFocus('brawn', /^tough/i);
-  const max = Math.max(0, statVal('brawn') + (tough ? 2 : 0) + num($('hp-bonus').value) + hbFocusBonus('health'));
+  let max = Math.max(0, statVal('brawn') + (tough ? 2 : 0) + num($('hp-bonus').value) + hbFocusBonus('health'));
+  _calc.hp = max; if(manual('hp')) max = Math.max(0, num(_man.hp));
   if(hpCur === null || hpCur > max) hpCur = max;
   $('hp-max').textContent = max;
   $('hp-cur').textContent = hpCur;
   renderHpPips(max);
+  manMark('def-man'); manMark('hp-man');
   $('ko-flag').innerHTML = (max > 0 && hpCur <= 0) ? '<span class="ko-banner">Knocked Out — back in 5 min with 1 Health</span>' : '';
 
   // hints
@@ -1009,7 +1022,8 @@ function renderKarma() {
 }
 function karmaSpend(why, n) {
   n = n || 1;
-  if(karma < n) { addLog('Karma', '0', 'No Karma left — play your Trait to earn some back!', 'fumble'); return false; }
+  if(!autoOn('spend')) return true;   // ⚙ Spend Karma automatically off: the player adjusts Karma by hand
+  if(karma < n) { sheetToast('No Karma left — play your Trait to earn some back!'); return false; }
   karma -= n;
   renderKarma();
   addLog('Karma −' + n, '✦ ' + karma, why || 'Spent', 'normal');
@@ -1017,12 +1031,33 @@ function karmaSpend(why, n) {
   return true;
 }
 function karmaGain() {
-  if(karma >= CREATION.karmaMax) { addLog('Karma', '10', 'Already at the maximum — spend some!', 'normal'); return; }
+  if(karma >= CREATION.karmaMax) { sheetToast('Karma is already at the maximum — spend some!'); return; }
   karma += 1;
   renderKarma();
   addLog('Karma +1', '✦ ' + karma, 'Played your Trait', 'crit');
   scheduleAutosave();
 }
+
+// SHEET SETTINGS (⚙) — sheet-settings.js draws these; saved with the sheet as auto / man.
+// _auto.{spend,stats} default ON (a missing key reads as ON).
+if(typeof window.sheetToast !== 'function') window.sheetToast = function(t) { if(window.console) console.log(t); };
+function autoOn(k) { return !(_auto && _auto[k] === false); }
+function setAuto(k, on) { _auto[k] = !!on; recalc(); scheduleAutosave(); }
+window.SHEET_SETTINGS = function() { return [
+  { key:'spend', group:'auto', label:'Spend Karma automatically', hint:'Using Power, a Power attack, a buy roll or a +1 Karma die takes 1 Karma; off: adjust Karma yourself', get:() => autoOn('spend'), set:on => setAuto('spend', on) },
+  { key:'stats', group:'auto', label:'Auto-calculated stats', hint:'Defence (Moves × 3, Dodging, gear) and Health (Brawn, Tough, bonus); off: type your own', get:() => autoOn('stats'),
+    set:on => { if(!on) { ['def','hp'].forEach(k => { if(_man[k] == null) _man[k] = _calc[k]; }); } setAuto('stats', on); } },
+]; };
+// Auto-calculated stats off: the player's own numbers (_man) replace the computed ones.
+function manual(k) { return !autoOn('stats') && _man && _man[k] != null && _man[k] !== ''; }
+function manMark(id) { const m = $(id); if(!m) return; const on = autoOn('stats'); m.textContent = on ? '' : ' ✎'; m.onclick = on ? null : editStats; m.style.cursor = on ? '' : 'pointer'; m.title = on ? '' : 'Your own number — click to change'; }
+function closeStats() { $('stats-overlay').classList.remove('open'); }
+function editStats() {
+  const f = (k, l) => '<label style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0;"><span class="m-lbl" style="margin:0;">' + l + '</span><input class="m-input" style="width:90px" type="number" min="0" data-man="' + k + '" value="' + esc(_man[k] != null ? _man[k] : _calc[k]) + '"></label>';
+  $('stats-body').innerHTML = '<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). These numbers replace the formulas and the bonus boxes.</p>' + f('def', 'Defence') + f('hp', 'Max Health');
+  $('stats-overlay').classList.add('open');
+}
+function saveStats() { document.querySelectorAll('#stats-body [data-man]').forEach(i => { const v = i.value.trim(); _man[i.dataset.man] = v === '' ? null : Math.max(0, num(v)); }); closeStats(); recalc(); scheduleAutosave(); }
 
 // ═══ DICE ═════════════════════════════════════════════════════════════════
 function d6() { return Math.floor(Math.random() * 6) + 1; }
@@ -1393,7 +1428,7 @@ function refreshHints() {
 }
 function lookupAbility() {
   const r = findRole($('f-role').value);
-  if(!r) { addLog('Roles', '?', 'No Role called "' + esc($('f-role').value) + '" in the books — write your own ability!', 'normal'); return; }
+  if(!r) { sheetToast('No Role called "' + $('f-role').value + '" in the books — write your own ability!'); return; }
   $('f-ability').value = r.ability;
   if(r.power) { $('has-power').checked = true; onPowerToggle(); }
   if(r.healthBonus) $('hp-bonus').value = r.healthBonus;
@@ -1448,6 +1483,7 @@ function showRollToast(label, result, detail, type) {
   _toastTimer = setTimeout(function() { t.className = ''; }, 3500);
 }
 function addLog(label, result, detail, type, opts) {
+  if(label === 'Hero Builder') { sheetToast(detail || 'Hero ready'); return; }   // builder housekeeping — not roll-log material
   type = type || 'normal'; opts = opts || {};
   const entries = $('log-entries');
   const hint = entries.querySelector('.log-hint'); if(hint) hint.remove();
@@ -1491,6 +1527,7 @@ function collectSheet() {
     attacks: [...document.querySelectorAll('#attacks-body tr')].map(tr => ({ name: tr.querySelector('.atk-name').value, kind: tr.querySelector('.atk-kind').value, damage: tr.querySelector('.atk-dmg').value, link: tr.dataset.link || undefined })),
     gear: [...document.querySelectorAll('#gear-body tr')].map(tr => ({ name: tr.querySelector('.gear-name').value, note: tr.querySelector('.gear-note').value, link: tr.dataset.link || undefined, stowed: tr.dataset.stowed === '1' || undefined })).filter(g => g.name || g.note),
     gearDefAuto: true,
+    auto: _auto, man: _man,
     tab: _tab,
     campaign: (typeof _campaign !== 'undefined' && _campaign) ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
   };
@@ -1510,6 +1547,7 @@ function applySheet(d) {
   $('def-bonus').value = d.defBonus || 0; $('hp-bonus').value = d.hpBonus || 0;
   hpCur = (typeof d.hpCur === 'number') ? d.hpCur : null;
   karma = (typeof d.karma === 'number') ? d.karma : CREATION.karma;
+  _auto = (d.auto && typeof d.auto === 'object') ? d.auto : {}; _man = (d.man && typeof d.man === 'object') ? d.man : {};
   $('f-ability').value = d.ability || ''; $('f-trait-notes').value = d.traitNotes || ''; $('f-notes').value = d.notes || '';
   $('attacks-body').innerHTML = '';
   (d.attacks && d.attacks.length ? d.attacks : [{ name:'Unarmed', kind:'melee', damage:'', unarmed:true }]).forEach(a => addAttackRow(a));
@@ -1534,7 +1572,7 @@ function saveSheet(quiet) {
   const json = JSON.stringify(data);
   try { localStorage.setItem('ace_sheet', json); } catch(e) {}
   if(window.__ddSave) window.__ddSave({ ace_sheet: json });
-  if(!quiet) addLog('Sheet Saved', '✓', data.name || 'Unnamed hero', 'normal');
+  if(!quiet) sheetToast('Sheet saved');
 }
 function syncDocTitle() {
   const name = ($('f-name').value || '').trim();
@@ -1548,12 +1586,12 @@ function exportSheet() {
   a.download = ((data.name || 'ace-hero').replace(/[^a-z0-9]+/gi, '_').toLowerCase() || 'ace-hero') + '.json';
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-  addLog('Sheet Exported', '↓', a.download, 'normal');
+  sheetToast('Exported ' + a.download);
 }
 function importSheet(input) {
   const f = input.files && input.files[0]; if(!f) return;
   const r = new FileReader();
-  r.onload = () => { try { applySheet(JSON.parse(r.result)); saveSheet(true); addLog('Imported', '↑', f.name, 'normal'); } catch(e) { addLog('Import failed', '✗', 'Not a valid sheet file', 'fumble'); } };
+  r.onload = () => { try { applySheet(JSON.parse(r.result)); saveSheet(true); sheetToast('Imported ' + f.name); } catch(e) { sheetToast('Import failed — not a valid sheet file'); } };
   r.readAsText(f);
   input.value = '';
 }
@@ -1648,11 +1686,11 @@ async function campaignJoin() {
 }
 function campaignConnected() {
   _campaignLastId = 0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling();
-  addLog('Campaign', 'Link', 'Connected to "' + _campaign.name + '" (' + _campaign.code + ')', 'normal');
+  sheetToast('Linked to "' + _campaign.name + '"');
   saveSheet(true);
 }
 function campaignLeaveSilent() { if(_campaignTimer) { clearInterval(_campaignTimer); _campaignTimer = null; } _campaign = null; _campaignLastId = 0; campaignUpdateBtn(); }
-function campaignLeave() { const name = _campaign ? _campaign.name : ''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign', 'Link', 'Left "' + name + '"', 'normal'); saveSheet(true); }
+function campaignLeave() { const name = _campaign ? _campaign.name : ''; campaignLeaveSilent(); campaignRenderModal(); sheetToast('Left "' + name + '"'); saveSheet(true); }
 const CAMPAIGN_SKIP_LABELS = new Set(['Sheet Saved','Sheet Exported','Imported','Import failed','Campaign','Roles','Hero Builder']);
 function campaignBroadcast(label, result, detail, type) {
   if(!_campaign) return;
@@ -1843,12 +1881,15 @@ if (window.ACEHB) ACEHB.load(function () { try { fillDatalists(); recalc(); } ca
 </script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js (injects CSS + audio + 2D/3D engine). Extracted from the per-sheet inline copy. -->
 <script src="/tools-data/dice-anim.js"></script>
+<!-- Sheet Settings (⚙ in the roll log) — shared asset: /tools-data/sheet-settings.js -->
+<script src="/tools-data/sheet-settings.js"></script>
 <style id="dd-lock-style">
 .log-lock{display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:6px;padding:2px 7px;cursor:pointer;line-height:1;transition:background .12s,border-color .12s;}
 .log-lock:hover{background:rgba(255,255,255,.35);}
 .log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
 .log-lock .lk-ico{font-size:15px;line-height:1;}
 .log-x{font-size:13px;line-height:1;padding:3px 7px;}
+body.log-compact .log-entry .roll-detail{display:none;}
 .lk-ro-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none!important;pointer-events:none;}
 input.no-spin{-moz-appearance:textfield;}
 input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}

@@ -145,6 +145,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .log-entry .roll-label{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#777;margin-bottom:2px;}
 .log-entry .roll-result{font-family:'Montserrat',monospace;font-size:22px;font-weight:900;color:var(--log-text);line-height:1;}
 .log-entry .roll-detail{font-size:9px;color:#555;margin-top:2px;font-family:'Montserrat',sans-serif;}
+body.log-compact .log-entry .roll-detail{display:none;}
 .log-entry.crit .roll-result{color:#ffd700;}.log-entry.fumble .roll-result{color:#ff4444;}
 .log-entry.remote{border-left:3px solid #8a7ac8;border-right:3px solid #8a7ac8;background:#1c1a24;}
 .log-entry.crit{border-color:#ffd700;}.log-entry.fumble{border-color:#ff4444;}
@@ -491,7 +492,7 @@ body.dark .sheet{border-color:#444;}
 .hdr-logo{flex:0 0 auto;}
 .lg-word{font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:34px;line-height:.9;color:#fff;}
 .lg-sub{font-family:'Montserrat',sans-serif;font-weight:800;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-top:4px;}
-.hdr-top .name-primary{flex:0 1 340px;}
+.hdr-top .name-primary{flex:0 1 340px;margin-left:auto;} /* sits at the right edge (the old Auto switch used to push it there) */
 .hdr-metarow{display:flex;gap:7px;flex-wrap:wrap;align-items:stretch;}
 .hdr-field,.lockfield{border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.08);border-radius:7px;min-width:0;padding:4px 9px;}
 .hdr-metarow .lockfield{flex:1 1 0;}
@@ -830,12 +831,12 @@ body.dark .sdt-badge.bad{color:#f08a84;border-color:#a8433d;}
         </div>
         <div class="sd-vital sd-vital-ac">
           <span class="sv-lbl">AC</span>
-          <div class="sv-row"><input type="text" class="sv-big" id="ac-val" placeholder="0" title="Armor Class — from your equipped armor and shield (turn off Auto to edit by hand)"></div>
+          <div class="sv-row"><input type="text" class="sv-big" id="ac-val" placeholder="0" title="Armor Class — from your equipped armor and shield"></div>
         </div>
         <div class="sd-vital sd-vital-def">
           <span class="sv-lbl">Defense</span>
           <div class="sv-row def-row">
-            <div class="def-cell" title="Armor — the flat amount of damage your equipped armor soaks when you're hit (light 1, medium 2, heavy 3, plus any bonuses). Turn Auto off to edit by hand.">
+            <div class="def-cell" title="Armor — the flat amount of damage your equipped armor soaks when you're hit (light 1, medium 2, heavy 3, plus any bonuses). Turn off Auto-calculated stats under ⚙ to type your own.">
               <span class="def-mini">Armor</span>
               <input type="text" class="sv-big def-armor" id="armor-val" placeholder="0">
             </div>
@@ -962,14 +963,14 @@ body.dark .sdt-badge.bad{color:#f08a84;border-color:#a8433d;}
 <div class="roll-log" id="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
   <div class="log-header" id="log-header-bar">
-    <span class="log-title" aria-hidden="true"></span>
+    <span class="log-title">Roll Log</span>
     <!-- The buttons sit in one flex group, as they do on all thirteen other
          sheets. .log-header is justify-content:space-between, so without this
          wrapper every button added to the header became one more child for the
          free space to be dealt out between — first the dice gear, then the VTT
          button — which is where the gap beside Clear came from. Wrapped,
          space-between only ever sees two children: the title and the group. -->
-    <div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button type="button" id="ammo-switch" class="log-lock log-auto on" onclick="toggleAutoConsume()" aria-pressed="true" aria-label="Auto: work out AC and use up consumables automatically" title="Auto on: AC is worked out from your equipped armor and shield, and consumables are used up by themselves — an arrow or bolt per bow/crossbow shot, potions, torches, candles, lantern oil, holy water and other Equipment items when used, a scroll when cast, and a wand marked spent on a failed check (broken on a natural 1). Click to handle AC and these items by hand."><span class="lk-ico">🎒</span></button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div>
+    <div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div>
   </div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid var(--rule);" title="Link this sheet to a campaign" aria-label="Campaign">Link</button>
@@ -1816,7 +1817,7 @@ var _sdTurn = { move: false, action: false, second: false, focus: '' };
 // be ticked by hand, as they can when on.
 var _sdTurnBased = true;
 function turnOn(){ return _sdTurnBased !== false; }
-function toggleTurnMode(){ _sdTurnBased = !turnOn(); _sdTurn = { move: false, action: false, second: false, focus: _sdTurn.focus || '' }; addLog('Turn-based mode', turnOn() ? 'On' : 'Off', turnOn() ? 'Actions are spent automatically' : 'Actions aren\'t spent automatically — tick the pips by hand', 'normal'); sdAfter(); }
+function toggleTurnMode(){ _sdTurnBased = !turnOn(); _sdTurn = { move: false, action: false, second: false, focus: _sdTurn.focus || '' }; if(window.SheetSettings) SheetSettings.refresh(); sdAfter(); }
 function turnModeBtn(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: your action is spent automatically (one per turn). Click to tick it by hand instead.' : 'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.') + '"><span class="tm-sw"></span></button>'; }
 // The pips are buttons: tick or untick by hand (both modes). 'move' = the HeroDark 2nd pip.
 function sdTogglePip(k){ if(k === 'move'){ _sdTurn.move = !_sdTurn.move; _sdTurn.second = _sdTurn.move; } else _sdTurn.action = !_sdTurn.action; sdAfter(); }
@@ -1967,7 +1968,7 @@ const SD_ITEM_USE = [
   { rx: /^lantern$/i, kind: 'action', cons: false, needs: /^oil,? flask$|^flasks? of oil$/i,
     sub: () => 'Light: double near · burns one oil flask per hour',
     use: c => { const oil = sdItemRefs().find(x => /^oil,? flask$|^flasks? of oil$/i.test(x.name));
-      if(!oil){ addLog('Light ' + c.name, '✗', 'No oil — a lantern needs an oil flask', 'fumble'); return false; }
+      if(!oil){ sheetToast('No oil — a lantern needs an oil flask'); return false; }
       if(_autoConsume) sdConsumeItem(oil); addTracker('Light');
       addLog('Light ' + c.name, 'Lit', 'Light out to a double near distance for 1 hour of real time' + (_autoConsume ? ' · −1 Oil flask' : ''), 'normal'); } },
   { rx: /^oil,? flask$|^flasks? of oil$/i, kind: 'action', cons: true, sub: () => 'Spill & light: close area, 1d4 dmg/round for 4 rounds',
@@ -2067,8 +2068,8 @@ function sdTurnTog(i, k){
 function sdTurnDo(i, k){
   const o0 = _sdTurnOpts[i]; if(!o0) return;
   const o = (k != null && o0.pre && o0.pre[k]) ? Object.assign({}, o0, { run: o0.pre[k].run }) : o0;   // e.g. Backstab
-  if(o.blocked){ addLog(o.name, '✗', o.blocked, 'fumble'); return; }
-  if(!sdCan(o.kind, o.sec)){ addLog('Turn', 'Nothing left', 'You have already used your action — End Turn to reset', 'normal'); return; }
+  if(o.blocked){ sheetToast(o.name + ': ' + o.blocked); return; }
+  if(!sdCan(o.kind, o.sec)){ sheetToast('You have already used your action — End Turn to reset'); return; }
   // HeroDark second action (move given up for it): roll at disadvantage.
   const second = o.kind === 'action' && sdSecondAction(o.sec);
   const prev = advState;
@@ -2083,7 +2084,7 @@ function sdTurnDo(i, k){
 function sdEndTurn(){ _sdTurn = { move: false, action: false, second: false, focus: _sdTurn.focus || '' }; sdAfter(); }
 function sdSpendLuck(){
   const el = document.getElementById('lk-val'); const n = parseInt(el && el.value) || 0;
-  if(n < 1){ addLog('Luck', '✗', 'No luck tokens to spend', 'fumble'); return; }
+  if(n < 1){ sheetToast('No luck tokens to spend'); return; }
   adjustLuck(-1);
   addLog('Luck spent', '✦', 'Reroll any one roll you just made · ' + (n - 1) + ' left', 'crit');
   sdAfter();
@@ -2181,8 +2182,8 @@ function getStatMod(id) {
 //   shield +2 · enchanted "+N <armor/shield>" adds N. Best body armor wins;
 //   one shield stacks. Disabled (struck-out) gear slots don't count. When the AC
 //   Bonus toggle is on, its value is folded in here too.
-// Auto-AC is driven by the gear-area Auto switch (_autoConsume) — no separate
-// toggle. When that switch is off, AC is edited by hand.
+// Auto-AC is the ⚙ "Auto-calculated stats" switch (_sdAuto.stats). When it's
+// off, AC is edited by hand.
 // Body-armor definitions (lower-cased match). base = AC, dex = adds DEX mod.
 const AC_ARMOR = [
   { match:'mithral plate mail', base:15, dex:false, soak:5 },
@@ -2293,10 +2294,11 @@ function computeAC() {
 // HeroDark Armor-soak + Evade (on) are recomputed; the mode class chooses which
 // tile is visible. (Name kept as refreshAutoAC so builder/level-up keep calling it.)
 function refreshAutoAC() {
+  const man = !autoOn('stats');   // Auto-calculated stats off (⚙): AC / Armor are the player's own
   const ac = document.getElementById('ac-val');
-  if(ac) ac.value = String(computeAC());
+  if(ac && !man) ac.value = String(computeAC());
   const a = document.getElementById('armor-val');
-  if(a) a.value = String(computeSoak());
+  if(a && !man) a.value = String(computeSoak());
   const em = document.getElementById('evade-mod');
   if(em) em.textContent = fmtMod(evadeMod());
   const im = document.getElementById('init-mod');
@@ -2723,7 +2725,6 @@ function addTracker(name) {
   if(!n || _trackers.some(t => t.toLowerCase() === n.toLowerCase())) return;
   _trackers.push(n);
   renderTrackers();
-  addLog('Tracker', '●', n, SD_TRACKERS_GOOD.includes(n) ? 'normal' : 'fumble');
   saveSheet(false);
 }
 
@@ -2733,7 +2734,6 @@ function removeTracker(name) {
   _trackers.splice(i, 1);
   renderTrackers();
   renderTrackerPicker();
-  addLog('Tracker Cleared', '○', name, 'normal');
   saveSheet(false);
 }
 
@@ -2765,7 +2765,6 @@ function deleteCustomTracker(name) {
   if(i >= 0) {
     _trackers.splice(i, 1);
     renderTrackers();
-    addLog('Tracker Cleared', '○', name, 'normal');
   }
   renderTrackerPicker();
   saveSheet(false);
@@ -3389,9 +3388,9 @@ function invEquip(idx){
   const open = [...document.querySelectorAll('#gear-list .gear-slot')].filter(row =>
     !row.classList.contains('gear-slot-disabled') && !(row.querySelector('.gear-name')?.value || '').trim());
   if(open.length < cost){
-    addLog('Equipment', 'Full', cost > 1
+    sheetToast(cost > 1
       ? (item.name + ' needs ' + cost + ' open Equipment slots — not enough room')
-      : 'No open Equipment slots — your carry limit is full', 'fumble');
+      : 'No open Equipment slots — your carry limit is full');
     return;
   }
   const target = open[0];
@@ -3486,7 +3485,8 @@ function onHPChange(){
   if(!heroDarkOn()) return;
   const cur = parseInt(document.getElementById('hp-current')?.value);
   const at0 = !isNaN(cur) && cur <= 0;
-  if(at0 && !isDyingActive()) addTracker('Dying');
+  if(!autoOn('dying')) return;
+  if(at0 && !isDyingActive()){ addTracker('Dying'); addLog('Dying', '☠', 'HeroDark: 0 HP — one action a turn, disadvantage on all rolls until healed', 'fumble'); }
   else if(!at0 && isDyingActive()) removeTracker('Dying');
 }
 // HeroDark rules — folded into the Quick Rules panel while HeroDark mode is on.
@@ -3567,10 +3567,6 @@ function setStress(n){
   const prev = _stress; _stress = n;
   renderStress();
   if(n !== prev){
-    const pen = stressPenalty();
-    addLog('Stress', n === 0 ? 'Clear' : (n >= STRESS_MAX ? 'OUT' : String(n)),
-      n === 0 ? 'No stress' : (n >= STRESS_MAX ? 'Stress 6 — out of the fight' : ('Stress ' + n + ' · ' + pen + ' to all d20 rolls')),
-      n === 0 ? 'normal' : 'fumble');
     if(typeof scheduleAutosave === 'function') scheduleAutosave();
   }
 }
@@ -3644,12 +3640,34 @@ let _charSpellSources = [];
 // failed check. Off = effects still happen, nothing is taken from your gear.
 let _autoConsume = true;
 function autoUse(){ return _autoConsume !== false; }
+// SHEET SETTINGS (⚙) — sheet-settings.js draws these; values save in _sheet.auto
+// ({spend,stats,dying}, default ON). turnBased and autoConsume keep their own keys.
+if(typeof window.sheetToast!=='function') window.sheetToast=function(t){ if(window.console) console.log(t); };
+var _sdAuto = {};
+function autoOn(k){ return !(_sdAuto && _sdAuto[k] === false); }
+function setAuto(k, on){ _sdAuto[k] = !!on; if(k === 'stats'){ sdApplyStatsMode(); if(on) refreshAutoAC(); } if(typeof renderSDTurn === 'function') renderSDTurn(); saveSheet(false); }
+// Stats off: AC (and HeroDark Armor) become plain fields the player types in, like Max HP.
+function sdApplyStatsMode(){
+  const man = !autoOn('stats');
+  [['ac-val','.sd-vital-ac .sv-lbl','AC'],['armor-val','.def-cell .def-mini','Armor']].forEach(([id, lblSel, lbl]) => {
+    const el = document.getElementById(id); if(!el) return;
+    if(man){ el.setAttribute('data-nolock',''); if(el.getAttribute('data-lk-ro')){ el.readOnly = false; el.removeAttribute('data-lk-ro'); } el.title = 'Your own number — type it in (Auto-calculated stats are off under ⚙)'; }
+    else { el.removeAttribute('data-nolock'); el.title = id === 'ac-val' ? 'Armor Class — from your equipped armor and shield' : ''; }
+    const l = document.querySelector(lblSel); if(l) l.textContent = lbl + (man ? ' ✎' : '');
+  });
+  if(!man && typeof applySheetLock === 'function') try { applySheetLock(); } catch(e) {}
+}
+window.SHEET_SETTINGS = function(){ return [
+  { key:'turn', group:'auto', label:'Turn-based actions', hint:'Attacks, spells and items spend your action on the Action tab; off: tick the pips yourself', get:turnOn, set:function(on){ if(on !== turnOn()) toggleTurnMode(); } },
+  { key:'use', group:'auto', label:'Use up consumables', hint:'Arrows and bolts per shot, potions, torches, oil and other Equipment when used, scrolls when cast, wands spent or broken on a failed check', get:autoUse, set:function(on){ if(on !== autoUse()) toggleAutoConsume(); } },
+  { key:'spend', group:'auto', label:'Mark spells lost automatically', hint:'A failed spellcasting check marks the spell lost until you rest; off: mark it yourself', get:function(){ return autoOn('spend'); }, set:function(on){ setAuto('spend', on); } },
+  { key:'stats', group:'auto', label:'Auto-calculated stats', hint:'AC (HeroDark: Armor) from equipped armor, shield, DEX and bonuses; off: type your own', get:function(){ return autoOn('stats'); }, set:function(on){ setAuto('stats', on); } },
+  { key:'dying', group:'auto', label:'Dying status', hint:'HeroDark: dropping to 0 HP adds Dying, healing above 0 clears it', show:function(){ return heroDarkOn(); }, get:function(){ return autoOn('dying'); }, set:function(on){ setAuto('dying', on); } }
+]; };
 function toggleAutoConsume() {
   _autoConsume = !_autoConsume;
   _autoConsumeVisual(_autoConsume);
-  addLog('Auto-use', _autoConsume ? 'On' : 'Off', _autoConsume ? 'AC and consumables are handled automatically' : 'Handle AC and consumables yourself', 'normal');
   applyAutoLock(_autoConsume);
-  if(_autoConsume && typeof refreshAutoAC === 'function') refreshAutoAC();
   if(typeof saveSheet === 'function') saveSheet(false);
 }
 function _autoConsumeVisual(on) {
@@ -3891,11 +3909,11 @@ function rollSpell(btn, opts) {
   const wandSpent  = row.dataset.wandspent === '1';
 
   if(isLost) {
-    addLog(`${name}`, '✗ LOST', 'This spell is lost until you rest', 'fumble');
+    sheetToast(name + ' is lost until you rest');
     return { success: false, roll: 0 };
   }
   if(wandSpent && !opts.focus) {
-    addLog(`${name}`, '✗ WAND SPENT', 'This wand stops working until you rest', 'fumble');
+    sheetToast(name + ': the wand stops working until you rest');
     return { success: false, roll: 0 };
   }
 
@@ -3924,7 +3942,7 @@ function rollSpell(btn, opts) {
   // Healing spells make the same spellcasting check, but "HIT"/"MISS" reads
   // oddly when nothing is being attacked — call it SUCCESS/FAILED instead.
   const healing = isHealingSpell(name);
-  const failNote = (opts.focus && roll !== 1) ? ' — focus ends' : (source === 'scroll' ? '' : source === 'wand' ? '' : ' — spell lost!');
+  const failNote = (opts.focus && roll !== 1) ? ' — focus ends' : (source === 'scroll' ? '' : source === 'wand' ? '' : autoOn('spend') ? ' — spell lost!' : '');
   const verdict = success ? `✓ ${opts.focus ? 'FOCUS HELD' : healing ? 'SUCCESS' : 'HIT'} (DC ${dc})${roll===20 ? ' ✷ crit — double one numerical effect' : ''}`
                           : `✗ ${opts.focus ? 'FOCUS LOST' : healing ? 'FAILED' : 'MISS'} (DC ${dc})${roll===1 ? ' ✗ NAT 1' : ''}${failNote}`;
   const bonusPart = [bonus !== 0 ? `${bonus>=0?'+':''}${bonus}` : '', castMod !== 0 ? `${castMod>=0?'+':''}${castMod} (${castStat.toUpperCase()})` : '', gBonus !== 0 ? `${gBonus>=0?'+':''}${gBonus}` : '', exh !== 0 ? `${exh} exhausted` : '', str !== 0 ? `${str} stress` : ''].filter(Boolean).join(' ');
@@ -3932,7 +3950,7 @@ function rollSpell(btn, opts) {
   // Mark as lost if failed — but only for spells you know. A scroll is consumed
   // whether it hits or misses; a wand is handled below (spent until rest on a fail).
   // Maintaining focus: a plain failure only ends the spell (Core p.50).
-  if(!success && !source && !(opts.focus && roll !== 1)) {
+  if(!success && !source && !(opts.focus && roll !== 1) && autoOn('spend')) {
     row.querySelector('.spell-lost-btn')?.classList.add('on');
     row.classList.add('lost');
   }
@@ -4044,7 +4062,7 @@ function updateDicePoolDisplay(){
   el.innerHTML=Object.entries(c).sort((a,b)=>b[0]-a[0]).map(([s,n])=>`<span>${n}d${s}</span>`).join(' + ');
 }
 function rollDicePool(){
-  if(!dicePool.length){addLog('Dice Tray','—','No dice in pool');return;}
+  if(!dicePool.length){sheetToast('No dice in the pool');return;}
   const rolls=dicePool.map(s=>{
     if(s===20&&advState){const r=rollWithAdv(20);return{sides:s,result:r.result,detail:r.detail};}
     return{sides:s,result:d(s),detail:null};
@@ -4293,6 +4311,7 @@ function collectSheet(){
       extraWeapons: Array.isArray(_charExtraWeapons) ? _charExtraWeapons : [],
       extraArmor: Array.isArray(_charExtraArmor) ? _charExtraArmor : [],
       autoConsume: _autoConsume,
+      auto: Object.assign({}, _sdAuto),
       innateAC: _innateAC,
       hbBonusSlots: _hbBonusSlots,
       hbFeatureCharges: _hbFeatureChargeBonus,
@@ -4442,6 +4461,10 @@ function _applySDData(d){
     if(typeof refreshGearSlots === 'function') refreshGearSlots();
     _innateAC = parseInt(d._sheet?.innateAC) || 0;
     _autoConsume = (d._sheet?.autoConsume === undefined) ? true : !!d._sheet.autoConsume;
+    // Auto-AC used to ride on the Auto switch: an old save with it off keeps AC by hand.
+    _sdAuto = (d._sheet && d._sheet.auto && typeof d._sheet.auto === 'object') ? Object.assign({}, d._sheet.auto) : {};
+    if(_sdAuto.stats === undefined && _autoConsume === false) _sdAuto.stats = false;
+    sdApplyStatsMode(); if(window.SheetSettings) SheetSettings.refresh();
     if(typeof _autoConsumeVisual==='function') _autoConsumeVisual(_autoConsume);
     if(typeof applyAutoLock==='function') applyAutoLock(_autoConsume);
     _charSpellSources = Array.isArray(d._sheet?.spellSources) ? d._sheet.spellSources.slice() : [];
@@ -4640,7 +4663,7 @@ function importShadowdarklings(input) {
       const charName = d.name || 'Character';
       const charClass = d.class || '';
       const charLevel = d.level || 1;
-      addLog('Imported', '↑', `${charName} — Lvl ${charLevel} ${charClass}`, 'normal');
+      sheetToast(`Imported ${charName} — Lvl ${charLevel} ${charClass}`);
     } catch(err) { alert('Import failed: ' + err.message); }
     input.value = '';
   };
@@ -4777,7 +4800,7 @@ function _saveSheetNow(manual=false){
   const json = JSON.stringify(toSave);
   try { localStorage.setItem('sd_sheet', json); } catch(e) {}
   if(window.__ddSave) window.__ddSave({ sd_sheet: json });
-  if(manual) addLog('Sheet Saved','<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 9.5a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v1H4Z"/><path d="M3.6 12h16.8v6a1.5 1.5 0 0 1-1.5 1.5H5.1A1.5 1.5 0 0 1 3.6 18Zm7.1 0v2.2a1.3 1.3 0 0 0 2.6 0V12Z"/></svg>','Saved','normal');
+  if(manual) sheetToast('Sheet saved');
 }
 
 // Debounced wrapper: ~36 interactive call sites invoke saveSheet() directly
@@ -4935,7 +4958,7 @@ async function exportPDF() {
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
 
-    addLog('Sheet Exported', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7 3.5h10v4H7z"/><path d="M5 8.5h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2v-3H7v3H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2Zm12.6 2.2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M8 16h8v4.5H8z"/></svg>', 'Official sheet PDF', 'normal');
+    sheetToast('Sheet exported (official PDF)');
   } catch(err) {
     console.warn('Fillable-form export failed, falling back to print view:', err);
     exportPrintable();
@@ -5176,7 +5199,7 @@ function exportPrintable() {
   if(fdoc.readyState === 'complete') setTimeout(go, 120);
   else frame.onload = () => setTimeout(go, 120);
 
-  addLog('Sheet Exported', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7 3.5h10v4H7z"/><path d="M5 8.5h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2v-3H7v3H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2Zm12.6 2.2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M8 16h8v4.5H8z"/></svg>', 'Print / Save as PDF', 'normal');
+  sheetToast('Sheet exported (print / save as PDF)');
 }
 
 function exportSheet(){
@@ -5187,7 +5210,7 @@ function exportSheet(){
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href=url; a.download=filename; a.click();
   URL.revokeObjectURL(url);
-  addLog('Exported','↓ JSON', filename, 'normal');
+  sheetToast('Exported ' + filename);
 }
 function importSheet(input){
   // All imports now go through the Shadowdarklings-compatible importer
@@ -6147,7 +6170,6 @@ function confirmEnchant() {
   // (armor) is applied correctly and stays linked to the slot.
   if(!shopAddToGear({ name: itemName })) return;
   equipShopWeapon(itemName);                     // works for weapon or armor names
-  addLog('Enchanted Item','<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M10.2 3.4h3.6l-1 2.3h-1.6zM12 6.6c-3.4 0-6.4 3.6-6.4 8 0 3.6 2.9 5.9 6.4 5.9s6.4-2.3 6.4-5.9c0-4.4-3-8-6.4-8Zm0 5.1a2.9 2.9 0 0 1 2.9 2.9.9.9 0 0 1-1.8 0 1.1 1.1 0 0 0-1.1-1.1.9.9 0 0 1 0-1.8Z"/></svg>',itemName,'normal');
   saveSheet(false);
   closeEnchantPicker();
   closeShop();
@@ -6410,7 +6432,6 @@ function learnSpell(name, caster) {
       if(ab) ab.classList.add('on');
     }
   }
-  addLog('Spell Learned','<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M11.2 5.3C9.6 4.3 7.5 3.8 5 3.8a1 1 0 0 0-1 1v11.6a1 1 0 0 0 1 1c2.2 0 4 .4 5.4 1.2a1.2 1.2 0 0 0 .8.2V5.6a1 1 0 0 0-.0-.3Zm1.6 0V18a1.2 1.2 0 0 0 .8-.2c1.4-.8 3.2-1.2 5.4-1.2a1 1 0 0 0 1-1V4.8a1 1 0 0 0-1-1c-2.5 0-4.6.5-6.2 1.5Z"/><path d="M11.2 19.4c-1.5-.9-3.4-1.4-5.9-1.4a1 1 0 0 0 0 2c2.2 0 3.9.4 5.1 1.2a1.5 1.5 0 0 0 1.6 0c1.2-.8 2.9-1.2 5.1-1.2a1 1 0 0 0 0-2c-2.5 0-4.4.5-5.9 1.4a.5.5 0 0 1-.1 0Z" opacity=".55"/></svg>',s.name+' (Tier '+s.tier+')','normal');
   saveSheet(false);
   closeSpellShop();
 }
@@ -6423,7 +6444,6 @@ function unlearnSpell(name) {
   if(!row) return;
   row.remove();
   _spellCount = Math.max(0, _spellCount - 1);
-  addLog('Spell Unlearned','<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M11.2 5.3C9.6 4.3 7.5 3.8 5 3.8a1 1 0 0 0-1 1v11.6a1 1 0 0 0 1 1c2.2 0 4 .4 5.4 1.2a1.2 1.2 0 0 0 .8.2V5.6a1 1 0 0 0-.0-.3Zm1.6 0V18a1.2 1.2 0 0 0 .8-.2c1.4-.8 3.2-1.2 5.4-1.2a1 1 0 0 0 1-1V4.8a1 1 0 0 0-1-1c-2.5 0-4.6.5-6.2 1.5Z"/><path d="M11.2 19.4c-1.5-.9-3.4-1.4-5.9-1.4a1 1 0 0 0 0 2c2.2 0 3.9.4 5.1 1.2a1.5 1.5 0 0 0 1.6 0c1.2-.8 2.9-1.2 5.1-1.2a1 1 0 0 0 0-2c-2.5 0-4.4.5-5.9 1.4a.5.5 0 0 1-.1 0Z" opacity=".55"/></svg>',name,'normal');
   saveSheet(false);
   spellShopRender();
 }
@@ -6449,7 +6469,6 @@ function inscribeSpell(name, caster) {
     // Make sure it's equipped (spell row present)
     const cb = existing.querySelector('.gear-equip');
     if(cb && !cb.checked) { cb.checked = true; addEquipSpell(existing, kind); }
-    addLog(label + ' Added','<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M10.2 3.4h3.6l-1 2.3h-1.6zM12 6.6c-3.4 0-6.4 3.6-6.4 8 0 3.6 2.9 5.9 6.4 5.9s6.4-2.3 6.4-5.9c0-4.4-3-8-6.4-8Zm0 5.1a2.9 2.9 0 0 1 2.9 2.9.9.9 0 0 1-1.8 0 1.1 1.1 0 0 0-1.1-1.1.9.9 0 0 1 0-1.8Z"/></svg>',s.name+' (now ' + (have + 1) + ')','normal');
     saveSheet(false); closeSpellShop(); closeShop();
     return;
   }
@@ -6464,7 +6483,6 @@ function inscribeSpell(name, caster) {
     if(cb) { cb.checked = true; addEquipSpell(slot, kind); }
   }
 
-  addLog(label + ' Added','<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M10.2 3.4h3.6l-1 2.3h-1.6zM12 6.6c-3.4 0-6.4 3.6-6.4 8 0 3.6 2.9 5.9 6.4 5.9s6.4-2.3 6.4-5.9c0-4.4-3-8-6.4-8Zm0 5.1a2.9 2.9 0 0 1 2.9 2.9.9.9 0 0 1-1.8 0 1.1 1.1 0 0 0-1.1-1.1.9.9 0 0 1 0-1.8Z"/></svg>',s.name+' (Tier '+s.tier+')','normal');
   saveSheet(false); closeSpellShop(); closeShop();
 }
 
@@ -6592,7 +6610,7 @@ function campaignConnected() {
   campaignUpdateBtn();
   campaignRenderModal();
   campaignStartPolling();
-  addLog('Campaign', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg>', 'Connected to "'+_campaign.name+'" ('+_campaign.code+')', 'normal');
+  sheetToast('Linked to "'+_campaign.name+'"');
   saveSheet(false);
   syncSharedHomebrew();
 }
@@ -6604,7 +6622,7 @@ function campaignLeave() {
   _campaignLastId = 0;
   campaignUpdateBtn();
   campaignRenderModal();
-  addLog('Campaign', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg>', 'Left "'+name+'"', 'normal');
+  sheetToast('Left "'+name+'"');
   saveSheet(false);
   syncSharedHomebrew();
 }
@@ -7567,13 +7585,13 @@ function campaignRestore(saved) {
 </script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js (injects CSS + audio + 2D/3D engine). Extracted from the per-sheet inline copy. -->
 <script src="/tools-data/dice-anim.js"></script>
+<!-- Sheet Settings (⚙ in the roll log) — shared asset: /tools-data/sheet-settings.js -->
+<script src="/tools-data/sheet-settings.js"></script>
 <style id="dd-lock-style">
 .log-lock{display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:6px;padding:2px 7px;cursor:pointer;line-height:1;transition:background .12s,border-color .12s;}
 .log-lock:hover{background:rgba(255,255,255,.35);}
 .log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
 .log-lock .lk-ico{font-size:15px;line-height:1;}
-.log-auto:not(.on){opacity:.55;}
-.log-auto:not(.on) .lk-ico{filter:grayscale(1);}
 .log-x{font-size:13px;line-height:1;padding:3px 7px;}
 .lk-ro-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none!important;pointer-events:none;}
 input.no-spin{-moz-appearance:textfield;}

@@ -614,7 +614,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <!-- Roll Log -->
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
-  <div class="log-header"><span class="log-title" aria-hidden="true"></span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
+  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #2a3b36;background:transparent;color:#7d938c;" title="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="COB.launch()" title="Character Builder">Create</button>
@@ -644,6 +644,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 </div>
 
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">Candela Obscura — Quick Rules</div><button class="x" onclick="closeRules()">✕</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
+<div id="stats-overlay" class="ov" onclick="if(event.target===this)closeStats()"><div class="modal"><div class="modal-hd"><div class="ttl">Your stats</div><button class="x" onclick="closeStats()">✕</button></div><div class="modal-bd" id="stats-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">✕</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
 <div id="advance-overlay" class="ov" onclick="if(event.target===this)closeAdvance()"><div class="modal"><div class="modal-hd"><div class="ttl">✦ Advancement</div><button class="x" onclick="closeAdvance()">✕</button></div><div class="modal-bd" id="advance-body"></div></div></div>
 
@@ -681,7 +682,8 @@ function blankState(){
   MARKS.forEach(function(m){ st.marks[m.name]=0; });
   return st;
 }
-function resTotal(d){ return Math.floor((S.drives[d].max||0)/3); }
+function resTotalCalc(d){ return Math.floor((S.drives[d].max||0)/3); }
+function resTotal(d){ return manual('res'+d)?clamp(num(S.man['res'+d]),0,3):resTotalCalc(d); }
 
 // ── Header selects ──
 // Role & Specialty are set at character creation (the Create wizard) and shown
@@ -712,7 +714,7 @@ function renderDriveBlocks(){
     var el=document.createElement('div'); el.className='drive-block';
     el.innerHTML='<div class="drive-head">'
       +'<span class="dv-staged'+(staged(d.name)>0?'':' empty')+'" title="staged as bonus dice for your next '+d.name+' action">'+(staged(d.name)>0?'+'+staged(d.name)+'d':'')+'</span>'
-      +'<span class="dv-name">'+d.name+'</span>'
+      +'<span class="dv-name">'+d.name+(autoOn('stats')?'':'<span style="cursor:pointer;" title="Your own resistance — click to change" onclick="editStats()"> ✎</span>')+'</span>'
       +'<div class="dv-track"><div class="dv-tlabel">Drives<br>Max</div><div class="dv-groups">'+cols+'</div></div>'
       +'<span class="dv-avail" title="available / max">'+st.cur+'/<b>'+st.max+'</b></span></div>'
       +'<div class="drive-body">'+ACTIONS.filter(function(a){return a.drive===d.name;}).map(function(a){
@@ -810,12 +812,14 @@ function abTools(d,i){
 function setAbUsed(i,k){ var d=S.abilities[i]; if(!d)return; d.used=((d.used||0)===k)?k-1:k; renderRows('abil'); scheduleAutosave(); }
 function useAbility(i){
   var d=S.abilities[i]; if(!d)return; var u=d.uses||null, max=u?(u.per==='between'?1:(u.n||1)):0;
-  if(u&&(d.used||0)>=max){ addLog(d.name||'Ability','No uses left',abUsesLabel(u),'fumble'); return; }
   var cost=G(d.cost), paid=[], notes=[];
+  // ⚙ Pay ability costs automatically off: the ability is used, nothing is taken or checked.
+  if(!autoOn('spend')){ var hand=cost.map(abCostLabel).concat(u?[abUsesLabel(u)]:[]); addLog(d.name||'Ability','Used',hand.length?'pay by hand: '+hand.join(', '):'no cost','normal'); return; }
+  if(u&&(d.used||0)>=max){ sheetToast((d.name||'Ability')+': no uses left ('+abUsesLabel(u)+')'); return; }
   // Check drive / resistance first so a failed use pays nothing.
   for(var c=0;c<cost.length;c++){ var x=cost[c], n=x.amount||1;
-    if(x.kind==='drive'&&x.target!=='any'&&S.drives[x.target]&&S.drives[x.target].cur<n){ addLog(d.name||'Ability','Not enough '+x.target,'needs '+n+', have '+S.drives[x.target].cur,'fumble'); return; }
-    if(x.kind==='resist'&&x.target!=='any'&&S.drives[x.target]&&resTotal(x.target)-(S.resUsed[x.target]||0)<n){ addLog(d.name||'Ability','No '+x.target+' resistance left','','fumble'); return; } }
+    if(x.kind==='drive'&&x.target!=='any'&&S.drives[x.target]&&S.drives[x.target].cur<n){ sheetToast((d.name||'Ability')+': not enough '+x.target+' — needs '+n+', have '+S.drives[x.target].cur); return; }
+    if(x.kind==='resist'&&x.target!=='any'&&S.drives[x.target]&&resTotal(x.target)-(S.resUsed[x.target]||0)<n){ sheetToast((d.name||'Ability')+': no '+x.target+' resistance left'); return; } }
   cost.forEach(function(x){ var n=x.amount||1;
     if(x.kind==='drive'&&S.drives[x.target]){ S.drives[x.target].cur-=n; paid.push('-'+n+' '+x.target); }
     else if(x.kind==='resist'&&S.drives[x.target]){ S.resUsed[x.target]=(S.resUsed[x.target]||0)+n; paid.push('burned '+n+' '+x.target+' resistance'); }
@@ -830,7 +834,7 @@ function useAbility(i){
 function rowEdit(kind,i,f,v){ var list=kind==='abil'?S.abilities:S.gear; if(list[i]){ list[i][f]=v; scheduleAutosave(); } }
 function rowDel(kind,i){ var list=kind==='abil'?S.abilities:S.gear; list.splice(i,1); renderRows(kind); scheduleAutosave(); }
 function addRow(kind,d){ var list=kind==='abil'?S.abilities:S.gear;
-  if(kind==='gear' && list.length>=3){ addLog('Gear','3 max','You can carry up to three pieces of gear','fumble'); return false; }
+  if(kind==='gear' && list.length>=3){ sheetToast('You can carry up to three pieces of gear'); return false; }
   list.push(abRow({name:(d&&d.name)||'',tag:(d&&d.tag)||'',note:(d&&d.note)||''},d)); renderRows(kind); return true; }
 // Copy a homebrew ability's structured uses / cost / actions (+ used count) onto a row.
 function abRow(row,d){ if(!d)return row;
@@ -1043,6 +1047,7 @@ function showRollToast(label,result,detail,type){
   if(_toastTimer)clearTimeout(_toastTimer); _toastTimer=setTimeout(function(){ t.className=''; },3500);
 }
 function addLog(label,result,detail,type){
+  if(label==='Character Built'){ sheetToast('Character ready — '+(result||'')); return; }   // builder housekeeping — not roll-log material
   type=type||'normal';
   var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint)hint.remove();
   var div=document.createElement('div'); div.className='log-entry'+(type==='crit'?' crit':type==='fumble'?' fumble':'');
@@ -1080,6 +1085,7 @@ function applySheet(d){
   if(Array.isArray(d.illumination)){ S.illumination=d.illumination.slice(0,3); while(S.illumination.length<3)S.illumination.push(''); }
   if(Array.isArray(d.relationships)) S.relationships=d.relationships.map(function(r){ return {name:r.name||'',type:r.type||''}; });
   if(d.advancements!=null) S.advancements=d.advancements;
+  if(d.auto&&typeof d.auto==='object') S.auto=d.auto; if(d.man&&typeof d.man==='object') S.man=d.man;
   _staged={Nerve:0,Cunning:0,Intuition:0}; _pendingGild=null;
   renderAll();
   if(typeof campaignRestore==='function' && d.campaign!==undefined) campaignRestore(d.campaign);
@@ -1096,15 +1102,33 @@ function saveSheet(quiet){
   var data=collectSheet(), json=JSON.stringify(data);
   try{ localStorage.setItem('co_sheet',json); }catch(e){}
   if(window.__ddSave) window.__ddSave({ co_sheet:json });
-  if(!quiet) addLog('Sheet Saved','✓',data.name||'Unnamed','normal');
+  if(!quiet) sheetToast('Sheet saved');
 }
+// SHEET SETTINGS (⚙) — sheet-settings.js draws these; the values live in S and save with the sheet.
+// S.auto.{spend,stats} default ON (a missing key reads as ON).
+if(typeof window.sheetToast!=='function') window.sheetToast=function(t){ if(window.console) console.log(t); };
+function autoOn(k){ return !(S&&S.auto&&S.auto[k]===false); }
+function setAuto(k,on){ S.auto=S.auto||{}; S.auto[k]=!!on; renderDriveBlocks(); renderMarks(); renderRows('abil'); scheduleAutosave(); }
+window.SHEET_SETTINGS=function(){ return [
+  {key:'spend',group:'auto',label:'Pay ability costs automatically',hint:'Using an ability takes its Drive, resistance, marks and uses; off: pay them yourself',get:function(){ return autoOn('spend'); },set:function(on){ setAuto('spend',on); }},
+  {key:'stats',group:'auto',label:'Auto-calculated stats',hint:'Resistance from Drive max (one per 3); off: set your own',get:function(){ return autoOn('stats'); },set:function(on){ if(!on){ S.man=S.man||{}; DRIVE_NAMES.forEach(function(dn){ if(S.man['res'+dn]==null) S.man['res'+dn]=resTotalCalc(dn); }); } setAuto('stats',on); }}
+]; };
+// Auto-calculated stats off: the player's own numbers (S.man) replace the computed ones.
+function manual(k){ return !autoOn('stats')&&S.man&&S.man[k]!=null&&S.man[k]!==''; }
+function closeStats(){ var o=$('stats-overlay'); if(o) o.classList.remove('open'); }
+function editStats(){ S.man=S.man||{}; var o=$('stats-overlay'); if(!o) return;
+  var f=function(dn){ var k='res'+dn; return '<label style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0;"><span>'+dn+' resistance</span><input class="m-input" style="width:90px" type="number" min="0" max="3" data-man="'+k+'" value="'+esc(S.man[k]!=null?S.man[k]:resTotalCalc(dn))+'"></label>'; };
+  $('stats-body').innerHTML='<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). Resistance per Drive, 0–3.</p>'+DRIVE_NAMES.map(f).join('')
+    +'<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;"><button class="m-btn ghost" onclick="closeStats()">Cancel</button><button class="m-btn" onclick="saveStats()">Save</button></div>';
+  o.classList.add('open'); }
+function saveStats(){ [].forEach.call(document.querySelectorAll('#stats-body [data-man]'),function(i){ var v=i.value.trim(); S.man[i.dataset.man]=v===''?null:clamp(num(v),0,3); }); DRIVE_NAMES.forEach(function(dn){ if(S.resUsed[dn]>resTotal(dn)) S.resUsed[dn]=resTotal(dn); }); closeStats(); renderDriveBlocks(); scheduleAutosave(); }
 function syncDocTitle(){ var name=($('f-name').value||'').trim(); if(name&&window.__ddSaveTitle) window.__ddSaveTitle(name); }
 function exportSheet(){
   var data=collectSheet(), blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=((data.name||'candela-investigator').replace(/[^a-z0-9]+/gi,'_').toLowerCase()||'candela-investigator')+'.json'; a.click();
-  setTimeout(function(){ URL.revokeObjectURL(a.href); },1000); addLog('Sheet Exported','↓',a.download,'normal');
+  setTimeout(function(){ URL.revokeObjectURL(a.href); },1000); sheetToast('Exported '+a.download);
 }
-function importSheet(input){ var f=input.files&&input.files[0]; if(!f)return; var r=new FileReader(); r.onload=function(){ try{ applySheet(JSON.parse(r.result)); saveSheet(true); addLog('Imported','↑',f.name,'normal'); }catch(e){ addLog('Import failed','✗','Not a valid sheet file','fumble'); } }; r.readAsText(f); input.value=''; }
+function importSheet(input){ var f=input.files&&input.files[0]; if(!f)return; var r=new FileReader(); r.onload=function(){ try{ applySheet(JSON.parse(r.result)); saveSheet(true); sheetToast('Imported '+f.name); }catch(e){ sheetToast('Import failed — not a valid sheet file'); } }; r.readAsText(f); input.value=''; }
 var _pageReady=false; setTimeout(function(){ _pageReady=true; },2500);
 function autoSaveOnExit(){ if(!_pageReady)return; try{ saveSheet(true); }catch(e){} try{ syncDocTitle(); }catch(e){} }
 window.addEventListener('beforeunload',autoSaveOnExit); window.addEventListener('pagehide',autoSaveOnExit);
@@ -1132,9 +1156,9 @@ function campaignRenderModal(){
 }
 function campaignError(msg){ var el=$('campaign-error'); if(el)el.textContent=msg; }
 async function campaignJoin(){ var code=(($('campaign-code-input')||{}).value||'').trim().toUpperCase(); if(!code){ campaignError('Enter a join code.'); return; } try{ var r=await fetch('/api/campaigns?code='+encodeURIComponent(code),{credentials:'same-origin'}); if(r.status === 429){ campaignError('Too many tries — wait a few minutes and try again.'); return; } if(r.status===404){ campaignError('No campaign found with that code.'); return; } if(!r.ok)throw new Error(r.status); _campaign=await r.json(); campaignConnected(); }catch(e){ campaignError('Could not join — are you signed in to the app?'); } }
-function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign','Link','Connected to "'+_campaign.name+'" ('+_campaign.code+')','normal'); saveSheet(true); }
+function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); sheetToast('Linked to "'+_campaign.name+'"'); saveSheet(true); }
 function campaignLeaveSilent(){ if(_campaignTimer){ clearInterval(_campaignTimer); _campaignTimer=null; } _campaign=null; _campaignLastId=0; campaignUpdateBtn(); }
-function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign','Link','Left "'+name+'"','normal'); saveSheet(true); }
+function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); sheetToast('Left "'+name+'"'); saveSheet(true); }
 function campaignBroadcast(label,result,detail,type){ if(!_campaign||CAMPAIGN_SKIP_LABELS.has(String(label)))return; fetch('/api/campaigns/'+_campaign.id+'/rolls',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({clientKey:_campaignClientKey,source:campaignPlayerName(),label:String(label),result:String(result),detail:String(detail||''),type:type||'normal'})}).catch(function(){}); }
 function campaignAddRemote(roll){
   roll = _sniffRollType(roll);
@@ -1287,6 +1311,8 @@ autoLoad();
 <script src="/tools-data/co-homebrew.js"></script>
 <script src="/tools-data/co-sheet-builder.js"></script>
 <script src="/tools-data/dice-anim.js"></script>
+<!-- Sheet Settings (⚙ in the roll log) — shared asset: /tools-data/sheet-settings.js -->
+<script src="/tools-data/sheet-settings.js"></script>
 <script>
 // Pull the viewer's homebrew into the Abilities/Gear pickers once the loader is
 // available, then refresh the picker if it happens to be open.
@@ -1298,6 +1324,7 @@ if(window.COHomebrew){ try{ window.COHomebrew.load(function(){ if(typeof _pk!=='
 .log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
 .log-lock .lk-ico{font-size:15px;line-height:1;}
 .log-x{font-size:13px;line-height:1;padding:3px 7px;}
+body.log-compact .log-entry .roll-detail{display:none;}
 .lk-ro-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none!important;pointer-events:none;}
 input.no-spin{-moz-appearance:textfield;}
 input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}

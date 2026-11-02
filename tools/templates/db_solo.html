@@ -303,18 +303,22 @@ function render(){
   r.innerHTML=h; renderJournal(); renderHeroTabs();
   if(!S.m||!S.party.length) loadChars();
 }
+// The party is chosen in the New Solo Campaign pop-up and stays fixed for the campaign.
+// Only an older campaign that never chose anyone gets a one-time picker here.
 function partyCard(first){
-  var h='<div class="card"><div class="card-h"><h3>'+(first?'Choose your heroes':'Your party')+'</h3><span class="tiny muted">'+S.party.length+' of 4</span></div><div class="card-b">';
-  h+='<p class="small">Up to four of your Dragonbane characters. A lone hero follows the solo rules (one extra heroic ability; Army of One and Sole Survivor make sense). A party plays it more like the book: fights grow with the party.</p>';
-  if(S.party.length) h+='<div class="row" style="margin-top:6px">'+S.party.map(function(p){ return '<span class="chip">'+esc(heroName(p.id))+'<button type="button" class="x" data-a="hero-out" data-id="'+esc(p.id)+'" aria-label="Remove '+esc(heroName(p.id))+'">✕</button></span>'; }).join('')+'</div>';
-  h+='<div class="lbl" style="margin-top:10px">Add a hero</div><div id="so-chars" class="row" style="margin-top:4px">'+charButtons()+'</div>';
-  h+='<p class="tiny muted" style="margin-top:8px">The party is set here, between adventures. No Dragonbane character yet? Create one from the Characters page.</p>';
+  if(!first){ return '<div class="card"><div class="card-h"><h3>'+(solo()?'Your hero':'Your party')+'</h3><span class="tiny muted">'+(solo()?'Solo rules':S.party.length+' heroes')+'</span></div><div class="card-b"><div class="row">'+
+    S.party.map(function(p){ return '<span class="chip">'+esc(heroName(p.id))+'</span>'; }).join('')+'</div><p class="tiny muted" style="margin-top:6px">Set when the campaign was created.</p></div></div>'; }
+  UI.pick=UI.pick||[];
+  var h='<div class="card"><div class="card-h"><h3>Choose your heroes</h3><span class="tiny muted">'+UI.pick.length+' of 4</span></div><div class="card-b">';
+  h+='<p class="small">Up to four of your Dragonbane characters, chosen once for this campaign. One hero plays by the solo rules; a party plays like the book: fights grow with the party.</p>';
+  h+='<div id="so-chars" class="row" style="margin-top:8px">'+charButtons()+'</div>';
+  h+='<div class="row" style="margin-top:10px"><button class="btn pri" data-a="party-set"'+(UI.pick.length?'':' disabled')+'>Set the party</button></div>';
   return h+'</div></div>';
 }
 var CH_LIST=null;
-function charButtons(){ if(!CH_LIST) return '<span class="muted small">Loading your characters…</span>'; if(!CH_LIST.length) return '<span class="muted small">You have no Dragonbane characters yet.</span>';
-  var full=S.party.length>=4; return CH_LIST.map(function(c){ var inP=S.party.some(function(p){ return p.id===c.id; }); return '<button class="btn'+(inP?' ghost':'')+'" data-a="hero-in" data-id="'+esc(c.id)+'" data-name="'+esc(c.title)+'"'+(inP||full?' disabled':'')+'>'+(inP?'✓ ':'+ ')+esc(c.title)+'</button>'; }).join(''); }
-function loadChars(){ if(CH_LIST) return;
+function charButtons(){ if(!CH_LIST) return '<span class="muted small">Loading your characters…</span>'; if(!CH_LIST.length) return '<span class="muted small">You have no Dragonbane characters yet. Create one from the Characters page.</span>';
+  var pk=UI.pick||[], full=pk.length>=4; return CH_LIST.map(function(c){ var on=pk.indexOf(c.id)>=0; return '<button class="btn'+(on?' pri':'')+'" data-a="pick" data-id="'+esc(c.id)+'" data-name="'+esc(c.title)+'" aria-pressed="'+on+'"'+(!on&&full?' disabled':'')+'>'+(on?'✓ ':'+ ')+esc(c.title)+'</button>'; }).join(''); }
+function loadChars(){ if(CH_LIST||S.party.length) return;
   fetch('/api/documents?tool=db-character',{credentials:'same-origin'}).then(function(r){ return r.ok?r.json():[]; }).then(function(list){ CH_LIST=A(list); var el=$('so-chars'); if(el) el.innerHTML=charButtons(); }).catch(function(){}); }
 function hubCard(){
   var h='<div class="card"><div class="card-h"><h3>'+esc(MOD.intro.title)+'</h3></div><div class="card-b">';
@@ -867,8 +871,8 @@ document.addEventListener('click',function(e){
     case 'close': closeDlg(); break;
     case 'brief': startBriefing(+t.dataset.i); break;
     case 'hero': setActing(t.dataset.id); break;
-    case 'hero-in': if(S.m||S.party.length>=4||S.party.some(function(p){ return p.id===t.dataset.id; })) break; S.party.push({id:t.dataset.id,name:t.dataset.name}); if(!S.acting) S.acting=t.dataset.id; syncChar(); jlog('note','Joins the party: '+t.dataset.name,''); mountSheets(); save(); render(); break;
-    case 'hero-out': if(S.m) break; S.party=S.party.filter(function(p){ return p.id!==t.dataset.id; }); if(S.acting===t.dataset.id) S.acting=S.party[0]?S.party[0].id:null; if(S.marks) delete S.marks[t.dataset.id]; syncChar(); mountSheets(); save(); render(); break;
+    case 'pick': { if(S.party.length) break; UI.pick=UI.pick||[]; var pid2=t.dataset.id, at=UI.pick.indexOf(pid2); if(at>=0) UI.pick.splice(at,1); else if(UI.pick.length<4){ UI.pick.push(pid2); UI.pickNames=UI.pickNames||{}; UI.pickNames[pid2]=t.dataset.name; } render(); break; }
+    case 'party-set': { if(S.party.length||!(UI.pick||[]).length) break; S.party=UI.pick.map(function(id){ return {id:id,name:UI.pickNames[id]||'Hero'}; }); S.acting=S.party[0].id; syncChar(); UI.pick=null; mountSheets(); save(); render(); break; }
     case 'sneak': { var Dn=dangerHere(); if(!Dn||Dn.type!=='fight') break; var en=findEncounter(Dn.enc);
       rollEach(aliveHeroes(),{skill:'Sneaking',label:'Sneak past: '+en.label},function(rs){ var bad=rs.filter(function(r){ return !r.ok; });
         rs.forEach(function(r){ jlog('roll',(solo()?'':heroName(r.hero)+': ')+'Sneak past — '+word(r),'Sneaking '+r.roll+' vs '+r.target); });
