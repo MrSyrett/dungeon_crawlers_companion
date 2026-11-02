@@ -816,7 +816,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
-  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
+  <div class="log-header"><span class="log-title" aria-hidden="true"></span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button type="button" id="auto-toggle" class="log-lock log-auto on" onclick="toggleAutoUse()" aria-pressed="true" aria-label="Use up consumables automatically" title="Auto-use on: black-powder shot and darts per attack, potions, grog, smoked meat, bombs, ASH, torches, candles, lantern oil, medical-kit uses and single-use relics come off by themselves. Click to count them by hand."><span class="lk-ico">🎒</span></button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn campaign" onclick="openCampaign()" title="Campaign" aria-label="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="if(window.PBB)PBB.launch()" title="Character creation">Create</button>
@@ -1438,6 +1438,7 @@ function refreshWizardButtons(){ var built=!!(S.built||S.classId); var bb=$('bui
 function renderPlay(){
   syncItemBonuses(); refreshWizardButtons(); renderAbilities(); renderLuck(); renderStatus(); renderShip(); renderClass(); renderGear();
   if(typeof renderTurn==='function') renderTurn();
+  if(typeof renderAutoBtn==='function') renderAutoBtn();
   if(window.applySheetLock) try{ window.applySheetLock(); }catch(e){}   // freshly drawn fields follow the lock
 }
 function renderAll(){ renderHeader(); renderBackground(); renderPlay(); }
@@ -1713,11 +1714,14 @@ var DX={breath:0};   // Hold-your-breath round count (not saved)
 function inCombat(){ return true; }
 function incapacitated(){ return S.dead||num(S.cond.out)>0||S.hp<0||timedHas('paralyzed'); }
 function actsMax(){ return timedHas('acts')?2:1; }
-// TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = free
-// play: no action economy — nothing is spent or greyed out; being out, paralyzed or dead still limits you.
+// TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = actions
+// aren't spent automatically and nothing greys out for "no action left" — the Action pip stays and
+// can be ticked by hand (as it can when on); being out, paralyzed or dead still limits you.
 function turnOn(){ return S.turnBased!==false; }
-function toggleTurnMode(){ S.turnBased=!turnOn(); S.turn=blankTurn(); addLog('Turn-based mode',turnOn()?'On':'Off',turnOn()?'Actions are tracked per turn':'Free play — actions aren\'t tracked','normal'); changed(); }
-function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" onclick="toggleTurnMode()" title="'+(on?'Turn-based: one action per turn, End Turn brings it back. Click for free play.':'Free play: actions aren\'t tracked. Click to count actions per turn (combat).')+'"><span class="tm-sw"></span>Turn-based</button>'; }
+function toggleTurnMode(){ S.turnBased=!turnOn(); S.turn=blankTurn(); addLog('Turn-based mode',turnOn()?'On':'Off',turnOn()?'Actions are spent automatically':'Actions aren\'t spent automatically — tick the pip by hand','normal'); changed(); }
+function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: your action is spent automatically (one per turn). Click to tick it by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
+// the Action pips are buttons: tick or untick one by hand (both modes); they fill left to right
+function togglePip(i){ var a=num(S.turn.acts); S.turn.acts=Math.max(0,Math.min(actsMax(),i<a?a-1:a+1)); changed(); }
 function canAct(){ return !incapacitated()&&(!turnOn()||num(S.turn.acts)<actsMax()); }
 function useAction(){ if(!turnOn()) return; S.turn.acts=num(S.turn.acts)+1; }
 // Which allowance an attack with w would use: 'knave' | 'extra' | 'pistol' | 'bayonet' | 'action' | ''.
@@ -1791,9 +1795,9 @@ function isKnave(w){ return has('knife-knave')&&w.wtype==='melee'&&/knife|dagger
 function doAttack(u,opt){ opt=opt||{}; var w=weaponByUid(u); if(!w) return; var g=opt.second?'':attackGate(w); if(g){ addLog('Attack · '+w.name,'—',g,'normal'); return; }
   var sit=attackSituations(w); var chosen=opt.chosen||(opt.opt!=null&&sit.opts[opt.opt]?[sit.opts[opt.opt]]:[]); var close=chosen.some(function(c){ return c.close; }), thrown=chosen.some(function(c){ return c.thrown; });
   var how=opt.second?'second knife':spendAttack(w);
-  if(w.blackPowder){ var sh=ammoRow('shot'); if(sh){ sh.qty=num(sh.qty)-1; } w.loaded=false; w.prog=0; }
+  if(w.blackPowder){ var sh=ammoRow('shot'); if(sh&&autoUse()){ sh.qty=num(sh.qty)-1; } w.loaded=false; w.prog=0; }
   if(S.cond.invisible&&!opt.second){ S.cond.invisible=false; addLog('Invisible','Ends','You attacked','normal'); }
-  var dart=null; if(w.damageFromAmmo){ dart=S.items.find(function(x){ return x.kind==='ammo'&&x.dart&&num(x.qty)>0; }); if(dart) dart.qty=num(dart.qty)-1; }
+  var dart=null; if(w.damageFromAmmo){ dart=S.items.find(function(x){ return x.kind==='ammo'&&x.dart&&num(x.qty)>0; }); if(dart&&autoUse()) dart.qty=num(dart.qty)-1; }
   var ab=attackAbility(w,{thrown:thrown}); var knave=isKnave(w)&&!opt.second;
   var o={label:'Attack · '+w.name+(how?' ('+how+')':'')+(chosen.length?' — '+chosen.map(function(c){ return c.l; }).join(', '):''),ability:ab,kind:'attack',wuid:w.uid,ask:'The GM sets the target\'s DR: did you hit?'};
   o.note=function(res){ return (res.crit?'Critical: double damage, and the target\'s armor drops one tier.'+(/broken mast/i.test(w.name)?' Broken mast: +d6.':''):res.fumble?(w.blackPowder?'Misfire! Roll on the misfire table.':w.trusted?'Your trusted weapon never breaks — but you drop it.':w.noFumble?'Tavern Boxer: your fists ignore fumbles.':'Your weapon breaks or is lost.'):'')+(knave?' Knife Knave: if it hits, your second knife hits automatically; if not, attack again with it.':''); };
@@ -1991,7 +1995,7 @@ function useRelic(u){ var x=S.relics.find(function(r){ return r.uid===u; }); var
   if(p.tempHp){ var pr=d(6); if(pr%2){ var th=rollExpr(p.tempHp); S.tempHp=num(S.tempHp)+th.total; out.push('odd ('+pr+'): +'+th.total+' temporary HP'); } else { var eb=rollExpr('d8'); out.push('even ('+pr+'): a creature of your choice gets +'+eb.total+' on its next damage roll'); } }
   if(p.extraArmor) S.prot.push({die:p.extraArmor,label:p.name});
   if(p.attackDR) S.cond.invisible=true;
-  if(p.singleUse||p.consumable){ x.destroyed=true; out.push(p.singleUse?'used up':'one consumed'); }
+  if((p.singleUse||p.consumable)&&autoUse()){ x.destroyed=true; out.push(p.singleUse?'used up':'one consumed'); }
   addLog('Relic · '+p.name,'Activated',(out.length?out.join(' · ')+' · ':'')+p.text+(block?' · WARNING: '+block:''),'normal');
   var hv=x._heal; delete x._heal;
   var o={label:'After the relic (SPIRIT)',ability:'SPIRIT',kind:'relic',ask:'The GM sets the DR (normally 12): did you pass?'};
@@ -2006,13 +2010,18 @@ function useRelic(u){ var x=S.relics.find(function(r){ return r.uid===u; }); var
   else after(); }
 
 // ── equipment (consumables with one set effect) ──
-function consumeOne(x){ x.qty=num(x.qty,1)-1; if(x.qty<=0) S.items.splice(S.items.indexOf(x),1); }
+// AUTO-USE (roll-log switch, saved on the sheet; on unless turned off): consumables come off by
+// themselves. Off = the effect still happens, nothing is taken from your gear.
+function autoUse(){ return S.autoUse!==false; }
+function toggleAutoUse(){ S.autoUse=!autoUse(); renderAutoBtn(); addLog('Auto-use',autoUse()?'On':'Off',autoUse()?'Consumables are used up automatically':'Count consumables yourself','normal'); changed(); }
+function renderAutoBtn(){ var b=document.getElementById('auto-toggle'); if(!b) return; var on=autoUse(); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); b.title=on?'Auto-use on: black-powder shot and darts per attack, potions, grog, smoked meat, bombs, ASH, torches, candles, lantern oil, medical-kit uses and single-use relics come off by themselves. Click to count them by hand.':'Auto-use off: using an item applies its effect but nothing is taken from your gear — count consumables yourself. Click to turn it back on.'; }
+function consumeOne(x){ if(!autoUse()) return; x.qty=num(x.qty,1)-1; if(x.qty<=0) S.items.splice(S.items.indexOf(x),1); }
 function isMeat(x){ return x.ref==='smoked-meat'||/smoked meat/i.test(x.name); }
 function useMedKit(u){ var x=itemBy(u); if(!x) return; if(!canAct()){ addLog(x.name,'—','No action left','normal'); return; } useAction(); var h=rollExpr('d6');
-  x.uses=num(x.uses)-1; if(x.uses<=0){ addLog(x.name,'Used up','','normal'); S.items.splice(S.items.indexOf(x),1); }
+  if(autoUse()){ x.uses=num(x.uses)-1; if(x.uses<=0){ addLog(x.name,'Used up','','normal'); S.items.splice(S.items.indexOf(x),1); } }
   openDlg('Medical kit — '+h.total+' HP','<p class="m-hint">'+esc(h.text)+' · stops bleeding, poison or infection.</p>',[{t:'On me',f:function(){ closeDlg(true); S.cond.infected=false; S.cond.hemorrhage=0; healHp(h.total,'Medical kit ('+h.text+')'); }},{t:'On an ally',f:function(){ closeDlg(true); addLog('Medical kit','+'+h.total+' HP to an ally',h.text+' · bleeding, poison and infection stopped','normal'); changed(); }}],true); changed(); }
 function drink(u,brewed){ var x=brewed?null:itemBy(u); var name=brewed?'Potent grog':x&&x.name; if(!name) return; if(!canAct()){ addLog('Drink','—','No action left','normal'); return; } useAction();
-  if(brewed) S.grog.brewed--; else consumeOne(x);
+  if(brewed){ if(autoUse()) S.grog.brewed--; } else consumeOne(x);
   var n0=num(S.grog.drinks); var o={label:'Drink · '+name,ability:'TOUGHNESS',kind:'test',ask:'The GM sets the DR (8 + '+n0+' drink'+(n0===1?'':'s')+' this hour): do you keep it down?'};
   o.note=function(res){ return 'Pass: heal d4 HP. Fail: you vomit for d2 rounds. Either way AGILITY −1 for an hour.'; };
   var after=function(ok){ S.grog.drinks=num(S.grog.drinks)+1; S.day.breath=false;
@@ -2192,13 +2201,12 @@ function renderTurn(){
   var el=$('pb-turn'); if(!el) return; var c=S.combat, t=S.turn; var act=canAct(); var parts=[];
   // the action economy and End Turn, then the badges (as on the Dragonbane sheet)
   var h='<div class="pb-top"><div class="pb-row1"><div class="pb-econ">', mx=actsMax(), inc=incapacitated();
-  if(!turnOn()) h+='<span class="turn-free">Free play — actions aren\'t tracked</span>'; else {
-  for(var i=0;i<mx;i++) h+='<span class="pb-pip'+(inc||i<num(t.acts)?' used':'')+'" title="Move and take one action: attack, reload, cast, pray, use a relic or an item">Action'+(mx>1?' '+(i+1):'')+'</span>';
-  if(!inc){ if(num(t.extra)>0) h+='<span class="pb-pip extra" title="A free attack (defense critical'+(c.eldritch==='panic'?' or Eldritch Mind panic':'')+')">+'+num(t.extra)+' attack</span>';
+  for(var i=0;i<mx;i++) h+='<button type="button" class="pb-pip'+(inc||i<num(t.acts)?' used':'')+'" onclick="togglePip('+i+')" aria-pressed="'+!!(inc||i<num(t.acts))+'" title="Move and take one action: attack, reload, cast, pray, use a relic or an item — click to tick it by hand">Action'+(mx>1?' '+(i+1):'')+'</button>';
+  if(!inc&&turnOn()){ if(num(t.extra)>0) h+='<span class="pb-pip extra" title="A free attack (defense critical'+(c.eldritch==='panic'?' or Eldritch Mind panic':'')+')">+'+num(t.extra)+' attack</span>';
     if(num(t.knave)>0&&has('knife-knave')) h+='<span class="pb-pip extra" title="Knife Knave: attack with your second knife">+ second knife</span>';
     if(has('flintlock-fanatic')&&num(t.pistols)>0&&num(t.pistols)<3) h+='<span class="pb-pip extra" title="Flintlock Fanatic: up to three pistols a turn">+'+(3-num(t.pistols))+' pistol'+(3-num(t.pistols)>1?'s':'')+'</span>';
-    if(has('fix-bayonets')&&t.reloaded&&!t.bayonet&&attackList().some(function(w){ return w.ref==='bayonet'; })) h+='<span class="pb-pip extra" title="Fix Bayonets!: attack with the bayonet on a turn spent reloading">+ bayonet</span>'; } }
-  h+='</div>'+(turnOn()?tbtn('⟳ End Turn','endTurn()','end','Start a new turn — your action comes back'):'')+turnModeBtn()+'</div><div class="pb-badges">';
+    if(has('fix-bayonets')&&t.reloaded&&!t.bayonet&&attackList().some(function(w){ return w.ref==='bayonet'; })) h+='<span class="pb-pip extra" title="Fix Bayonets!: attack with the bayonet on a turn spent reloading">+ bayonet</span>'; }
+  h+='</div>'+turnModeBtn()+tbtn('⟳ End Turn','endTurn()','end','Start a new turn — your action comes back')+'</div><div class="pb-badges">';
   if(S.dead) h+='<span class="pb-badge warn">Dead</span>'; else if(S.hp===0) h+='<span class="pb-badge warn">Broken</span>';
   if(num(S.cond.out)) h+='<span class="pb-badge warn">Out '+num(S.cond.out)+' rounds</span>'; if(S.cond.stunned) h+='<span class="pb-badge warn">Stunned</span>';
   if(num(S.cond.hemorrhage)) h+='<span class="pb-badge warn">Hemorrhage'+(S.cond.hemorrhage===2?': last hour':'')+'</span>';
@@ -2738,13 +2746,14 @@ body.dark .pb-top{background:#1a1111;}
 .pb-pip{font-family:var(--f-label);font-size:13px;letter-spacing:.06em;text-transform:uppercase;border:1.5px solid var(--acc);color:var(--acc-dk);background:transparent;border-radius:14px;padding:3px 13px;}
 .pb-pip.used{background:var(--rule);border-color:var(--rule);color:var(--muted);text-decoration:line-through;}
 .pb-pip.extra{border-color:#c9a14a;color:#c9a14a;}
-.turn-mode{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:var(--f-label);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--acc-dk);white-space:nowrap;}
+.turn-mode{display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:var(--f-label);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--acc-dk);white-space:nowrap;}
 .turn-mode .tm-sw{position:relative;width:34px;height:19px;border-radius:999px;border:1.5px solid var(--acc);background:transparent;flex:0 0 auto;transition:background .15s;}
 .turn-mode .tm-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--acc);transition:left .15s,background .15s;}
 .turn-mode.on .tm-sw{background:var(--acc);}
 .turn-mode.on .tm-sw::after{left:17px;background:#fff;}
 .turn-mode:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:6px;}
-.turn-free{font-family:var(--f-label);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 0;}
+button.pb-pip{cursor:pointer;line-height:inherit;}
+.pb-pip:focus-visible{outline:2px solid var(--acc);outline-offset:2px;}
 .pb-do{flex:0 0 auto;background:var(--acc);color:#fff;border:none;border-radius:7px;padding:6px 12px;font-family:var(--f-label);font-size:14px;letter-spacing:.01em;cursor:pointer;white-space:nowrap;}
 .pb-do:hover{filter:brightness(1.15);}
 .pb-do.ghost{background:transparent;color:var(--acc-dk);border:1px solid var(--acc);}
@@ -2792,6 +2801,9 @@ body.sheet-locked .lk-hide{display:none;}
 .log-lock:hover{background:rgba(255,255,255,.35);}
 .log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
 .log-lock .lk-ico{font-size:15px;line-height:1;}
+.log-auto:not(.on){opacity:.55;}
+.log-auto:not(.on) .lk-ico{filter:grayscale(1);}
+.log-x{font-size:13px;line-height:1;padding:3px 7px;}
 .lk-ro-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none!important;pointer-events:none;}
 input.no-spin{-moz-appearance:textfield;}
 input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}

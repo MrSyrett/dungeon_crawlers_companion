@@ -205,7 +205,7 @@
                 success: "The ghost boy drifts to the wreck and lays a hand on her rail. He smiles at you — and fades, for good.", onSuccess: { flag: "orvild-done", score: { n: 2, label: "Helped Orvild to the wreck" } } }
             ],
             encounters: [
-              { id: "eel", label: "Monster eel", hidden: true, underwater: true, time: 1, note: "Under water: hold your breath each round, melee at a bane.", onWin: { score: { n: 1, label: "Defeated the monster eel" } },
+              { id: "eel", noSneak: true, label: "Monster eel", hidden: true, underwater: true, time: 1, note: "Under water: hold your breath each round, melee at a bane.", onWin: { score: { n: 1, label: "Defeated the monster eel" } },
                 foes: [{ monster: EEL, count: 1, solo: 1 }] }
             ],
             exits: [{ to: "statue-gallery", label: "Swim back up to the gallery", main: true, swim: true }]
@@ -246,7 +246,7 @@
             encounters: [
               { id: "ghost", label: "The librarian's ghost", hidden: true, time: 1,
                 note: "Only magic and fire hurt him. Spend a turn silent and still and he goes back to his writing.",
-                onStart: { flag: "ghost-fought" }, onWin: { score: { n: 1, label: "Defeated the librarian's ghost" }, flag: "ghost-gone" },
+                onStart: { flag: "ghost-fought" }, onEvade: { unflag: "shushed" }, onWin: { score: { n: 1, label: "Defeated the librarian's ghost" }, flag: "ghost-gone" },
                 endable: { label: "Stand silent and still", note: "Spend your turn motionless and quiet: he returns to his desk (no points).", fx: { unflag: "shushed", say: "You freeze. After a long moment the ghost drifts back to his desk, and the quill begins to scratch again." } },
                 foes: [{ monster: GHOST, count: 1, solo: 1 }] }
             ],
@@ -286,7 +286,7 @@
                 onSuccess: { flag: "alberic-saved", score: { n: 1, label: "Saved Alberic Gleamheart" }, treasure: 1 } }
             ],
             encounters: [
-              { id: "skeletons", label: "Skeleton guards", hidden: true, time: 1, note: "Plate armour (6), tridents.", onWin: { score: { n: 1, label: "Defeated the skeleton guards" } },
+              { id: "skeletons", noSneak: true, label: "Skeleton guards", hidden: true, time: 1, note: "Plate armour (6), tridents.", onWin: { score: { n: 1, label: "Defeated the skeleton guards" } },
                 foes: [{ npc: SKELETON, name: "Skeleton Guard", count: 5, solo: 2, role: "melee" }] }
             ],
             exits: [
@@ -353,7 +353,7 @@
             ],
             secrets: [{ id: "corpse", text: "Kamandur's body lies on the bed, preserved like wax." }],
             encounters: [
-              { id: "figureheads", label: "Enchanted figureheads", hidden: true, time: 1, reduceBy: "drapes",
+              { id: "figureheads", noSneak: true, label: "Enchanted figureheads", hidden: true, time: 1, reduceBy: "drapes",
                 note: "Each drape pulled freezes one. Fire deals double damage.",
                 combatActions: [
                   { id: "drape", label: "Pull aside a drape (your action)", max: 4, hideIf: "stair-7", freezeFoe: true, freezeWord: "freezes in the daylight",
@@ -380,20 +380,20 @@
                 options: [
                   { id: "west", label: "The west stone", hideIf: "demon-stone", fx: { flag: "demon-stone", sink: true, say: "Under it, a demon is carved into the podium. Click. Far below, something gives — and the whole tower lurches and begins to slide into the sea." } },
                   { id: "east", label: "The east stone", firstTry: { n: 1, label: "Twin stones solved on the first attempt" },
-                    fx: { flag: "emerald", item: { name: "Krakul's emerald", note: "The lindworm's stolen eye." },
+                    fx: { flag: "emerald", item: { name: "Krakul's emerald", note: "The lindworm's stolen eye." }, ifFlag: "!promised", then: { encounter: "krakul" },
                       say: "Under it, a lindworm is carved into the podium. The tower shudders. Beyond the glass a vast shadow rises from the sea: a lindworm, one eye socket empty — and the old man's voice in your head." } }
                 ] },
               { id: "give", label: "Hand Krakul his eye, as promised", choice: true, button: "Give it", requires: ["emerald", "promised"], hideIf: "krakul-done", noCheck: true,
                 success: "He takes the emerald gently in his jaws. \"As promised.\" He dips his great head to you — and dives beneath the waves.",
                 onSuccess: { flag: "krakul-done", score: { n: 3, label: "Gave the emerald to Krakul" } } },
-              { id: "throw", label: "Throw Krakul the emerald to save your skin", choice: true, button: "Give it up", requires: ["emerald", "!promised"], hideIf: "krakul-done", noCheck: true,
+              { id: "throw", danger: "krakul", label: "Throw Krakul the emerald to save your skin", choice: true, button: "Give it up", requires: ["emerald", "!promised"], hideIf: "krakul-done", noCheck: true,
                 success: "He snatches it from the air, considers you with his one good eye, and lets you live.",
                 onSuccess: { flag: "krakul-done", score: { n: 3, label: "Gave the emerald to Krakul" } } },
-              { id: "shrink", label: "Hurl the shrinking elixir into his mouth", best: ["Knives", "Slings", "Bows", "Crossbows", "Spears", "Staves"], bane: true, requires: ["elixir", "emerald"], hideIf: "krakul-done",
+              { id: "shrink", danger: "krakul", label: "Hurl the shrinking elixir into his mouth", best: ["Knives", "Slings", "Bows", "Crossbows", "Spears", "Staves"], bane: true, requires: ["elixir", "emerald"], hideIf: "krakul-done",
                 note: "The book: an AGL weapon skill, with a bane.",
                 success: "It goes straight down his throat. With a squeal he dwindles to a little snake — until he next touches water.", onSuccess: { flag: "krakul-done", unflag: "elixir" },
                 failure: "It shatters on his scales.", onFail: { unflag: "elixir" } },
-              { id: "spider", label: "Smash the spider jar at Krakul", choice: true, button: "Smash it", requires: ["spider", "emerald"], hideIf: ["krakul-done", "krakul-busy"],
+              { id: "spider", danger: "krakul", label: "Smash the spider jar at Krakul", choice: true, button: "Smash it", requires: ["spider", "emerald"], hideIf: ["krakul-done", "krakul-busy"],
                 success: "The giant spider swells to full size and leaps on the lindworm. They thrash across the dome — that will keep him busy for a while.",
                 onSuccess: { flag: "krakul-busy", unflag: "spider" } },
               { id: "lid", label: "Lift the sarcophagus lid", attr: "STR", bane: true, repeat: true, hideIf: "lid",
@@ -407,7 +407,7 @@
                 success: "The iron cracks and falls away.", onSuccess: { unflag: "manacled" } }
             ],
             encounters: [
-              { id: "krakul", label: "Krakul the lindworm", requires: ["emerald", "!promised"], unless: ["krakul-done", "krakul-busy"], time: 1,
+              { id: "krakul", label: "Krakul the lindworm", hidden: true, noSneak: true, requires: ["emerald", "!promised"], unless: ["krakul-done", "krakul-busy"], time: 1,
                 note: "He goes for whoever carries the emerald, but spares anyone who hands it over.",
                 onWin: { flag: "krakul-done", score: { n: 4, label: "Defeated Krakul" } },
                 foes: [{ monster: KRAKUL, count: 1, solo: 1 }] }

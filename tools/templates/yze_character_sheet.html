@@ -513,6 +513,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .act-row1{display:flex;align-items:center;gap:8px;padding:9px 10px 6px;flex-wrap:wrap;}
 .act-econ{display:flex;gap:6px;flex:1 1 auto;min-width:0;flex-wrap:wrap;}
 .act-pip{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.05em;text-transform:uppercase;border:1.5px solid var(--yz-dk);color:var(--yz-dk);border-radius:12px;padding:3px 12px;background:transparent;}
+.act-pip{cursor:pointer;}
 .act-pip.used{background:var(--rule);border-color:var(--rule);color:var(--muted);text-decoration:line-through;}
 .act-end{flex:0 0 auto;background:var(--yz-dk);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .act-end:hover{filter:brightness(1.12);}
@@ -551,13 +552,12 @@ body.dark .act-subtab.on{color:var(--yz);}
 .act-card.disabled .ac-name{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px;}
 .act-empty{font-size:12px;color:var(--muted);padding:10px 2px;line-height:1.5;}
 body.dark .act-pip{color:#5fd6ea;border-color:#5fd6ea;}
-.turn-mode{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--yz-dk);white-space:nowrap;}
+.turn-mode{display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--yz-dk);white-space:nowrap;}
 .turn-mode .tm-sw{position:relative;width:34px;height:19px;border-radius:999px;border:1.5px solid var(--yz-dk);background:transparent;flex:0 0 auto;transition:background .15s;}
 .turn-mode .tm-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--yz-dk);transition:left .15s,background .15s;}
 .turn-mode.on .tm-sw{background:var(--yz-dk);}
 .turn-mode.on .tm-sw::after{left:17px;background:#fff;}
 .turn-mode:focus-visible{outline:2px solid var(--yz-dk);outline-offset:2px;border-radius:6px;}
-.turn-free{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 0;}
 body.dark .turn-mode{color:#5fd6ea;}
 body.dark .turn-mode .tm-sw{border-color:#5fd6ea;}
 body.dark .turn-mode .tm-sw::after{background:#5fd6ea;}
@@ -570,7 +570,6 @@ body.dark .act-mini{color:var(--yz);border-color:var(--yz);}
   .act-row1{flex-wrap:nowrap;justify-content:space-between;align-items:center;gap:6px;}
   .act-econ{flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-start;gap:4px;}
   .act-econ > *{padding:3px 8px;font-size:11px;white-space:nowrap;flex:0 1 auto;min-width:0;}
-  .act-econ > .turn-free{padding:0;white-space:normal;line-height:1.2;}
   .act-row2 .act-badges{order:-1;flex-basis:100%;justify-content:center;}
   .act-row2 .act-badges:empty{display:none;}
   .act-card .ac-do{padding:9px 12px;font-size:12px;}
@@ -826,7 +825,7 @@ body.dark .act-mini{color:var(--yz);border-color:var(--yz);}
 <!-- Roll Log -->
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
-  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
+  <div class="log-header"><span class="log-title" aria-hidden="true"></span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button type="button" id="auto-toggle" class="log-lock log-auto on" onclick="toggleAutoUse()" aria-pressed="true" aria-label="Use up consumables automatically" title="Auto-use on: medkits, drugs, coffee, meals, booze and power cells come off your gear when you use them on the Action tab. Click to count them by hand."><span class="lk-ico">🎒</span></button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #274449;background:transparent;color:#8ba3a8;" title="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="if(window.YZEB)YZEB.launch();" title="Character Builder">Create</button>
@@ -1684,7 +1683,7 @@ function applySheet(d){
   S.gear=inv;
   S.crits = Array.isArray(d.crits) ? d.crits.map(function(c){ return {name:c.name||'',effect:c.effect||'',mod:num(c.mod)}; }) : [];
   if(Array.isArray(d.relationships)) S.relationships=d.relationships.map(function(r){ return {name:r.name||'',note:r.note||r.type||''}; });
-  S.turnBased=d.turnBased!==false;
+  S.turnBased=d.turnBased!==false; S.autoUse=d.autoUse!==false;
   if(d.act && typeof d.act==='object') S.act={full:!!d.act.full,quick:num(d.act.quick),used:num(d.act.used),sub:d.act.sub==='quick'?'quick':'full'};
   _lastRoll=null;
   renderAll();
@@ -1699,7 +1698,7 @@ function renderAll(){
   { var fa=$('f-agenda'); if(fa)fa.value=S.agenda||''; var fs=$('f-signature'); if(fs)fs.value=S.signature||''; }
   { var fb=$('f-buddy'); if(fb)fb.value=S.buddy||''; var fr=$('f-rival'); if(fr)fr.value=S.rival||''; var fcash=$('f-cash'); if(fcash)fcash.value=S.cash||''; }
   renderKeyDisp(); renderCareerDisp();
-  renderAttrSkills(); renderVitals(); renderConds(); renderTraits(); renderRelationships(); renderInventory(); renderAttacks(); renderCrits(); renderTalents(); renderCareer(); updateFoot(); refreshWizardButtons();
+  renderAttrSkills(); renderVitals(); renderConds(); renderTraits(); renderRelationships(); renderInventory(); renderAttacks(); renderCrits(); renderTalents(); renderCareer(); updateFoot(); refreshWizardButtons(); renderAutoBtn();
 }
 function saveSheet(quiet){
   var data=collectSheet(), json=JSON.stringify(data);
@@ -1781,11 +1780,18 @@ function actLogOnly(label, result, detail){ return function(){ addLog(label, res
 // QUICK actions (the second forfeits the full action). Quick actions include
 // movement, and Defend / Dodge can interrupt out of turn — but they still need a
 // quick action, so save one if you expect to be attacked.
-// TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = free
-// play: no action economy — nothing is spent or greyed out; Broken still limits you.
+// TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = nothing
+// is spent automatically and nothing greys out — the pips stay and can be ticked by hand (as they
+// can when on); Broken still limits you.
 function turnOn(){ return !S||S.turnBased!==false; }
-function toggleTurnMode(){ S.turnBased=!turnOn(); var a=actState(); a.full=false; a.quick=0; a.used=0; addLog('Turn-based mode',turnOn()?'On':'Off',turnOn()?'Actions are tracked per round':'Free play — actions aren\'t tracked','normal'); renderAction(); scheduleAutosave(); }
-function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" onclick="toggleTurnMode()" title="'+(on?'Turn-based: one full and one quick action per round, End Turn brings them back. Click for free play.':'Free play: actions aren\'t tracked. Click to count actions per round (combat).')+'"><span class="tm-sw"></span>Turn-based</button>'; }
+function toggleTurnMode(){ S.turnBased=!turnOn(); var a=actState(); a.full=false; a.quick=0; a.used=0; addLog('Turn-based mode',turnOn()?'On':'Off',turnOn()?'Actions are tracked per round':'Actions aren\'t spent automatically — tick them by hand','normal'); renderAction(); scheduleAutosave(); }
+function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: your full and quick actions are spent automatically. Click to tick them by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
+// the pips are buttons: tick or untick them by hand (both modes). Pip 1 = the full action (or the
+// second quick action that forfeits it), pip 2 = the quick action.
+function actTogglePip(k){ var a=actState();
+  if(k==='full'){ if(a.quick>=2) a.quick=1; else a.full=!a.full; }
+  else { if(a.quick>=2){ a.quick=0; a.full=true; } else a.quick=a.quick?0:1; }
+  renderAction(); scheduleAutosave(); }
 function actCan(kind){
   var a=actState();
   if(kind==='free'||!turnOn()) return true;
@@ -1809,7 +1815,12 @@ function actSpend(kind,label){
 function eqBaseName(g){ return String((g&&g.name)||'').replace(/\s*×\s*\d+\s*$/,'').replace(/\s+x\d+\s*$/i,'').trim(); }
 function eqQty(g){ var m=String((g&&g.name)||'').match(/×\s*(\d+)\s*$/)||String((g&&g.name)||'').match(/\sx(\d+)\s*$/i); return m?Math.max(0,parseInt(m[1],10)):1; }
 // Use one up: lower the count, or remove the item when it was the last one.
-function eqConsume(i){ var g=S.gear[i]; if(!g) return; var q=eqQty(g);
+// AUTO-USE (roll-log switch, saved on the sheet; on unless turned off): a used item comes off
+// by itself. Off = the effect still happens, nothing is taken away.
+function autoUse(){ return !S||S.autoUse!==false; }
+function toggleAutoUse(){ S.autoUse=!autoUse(); renderAutoBtn(); addLog('Auto-use',autoUse()?'On':'Off',autoUse()?'Consumables are used up automatically':'Count consumables yourself','normal'); scheduleAutosave(); }
+function renderAutoBtn(){ var b=document.getElementById('auto-toggle'); if(!b) return; var on=autoUse(); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); b.title=on?'Auto-use on: medkits, drugs, coffee, meals, booze and power cells come off your gear when you use them on the Action tab. Click to count them by hand.':'Auto-use off: nothing is taken from your gear — count consumables yourself. Click to turn it back on.'; }
+function eqConsume(i){ var g=S.gear[i]; if(!g||!autoUse()) return; var q=eqQty(g);
   if(q>1){ g.name=eqBaseName(g)+(q-1>1?' ×'+(q-1):''); } else S.gear.splice(i,1);
   renderInventory(); }
 function eqStress(d, label){ return function(){ if(actSynth()){ addLog(label,'—','Synthetics have no Stress','normal'); return false; }
@@ -1900,7 +1911,7 @@ function renderAction(){
     else o.blocked='Broken — you can only move';
   });
   var fullUsed=a.full||a.quick>=2, quickUsed=a.quick>=1;
-  var pips='<span class="act-pip'+(fullUsed?' used':'')+'">'+(a.quick>=2?'Quick':'Full')+'</span><span class="act-pip'+(quickUsed?' used':'')+'">Quick</span>';
+  var pips='<button type="button" class="act-pip'+(fullUsed?' used':'')+'" onclick="actTogglePip(\'full\')" aria-pressed="'+fullUsed+'" title="Click to tick or untick it by hand">'+(a.quick>=2?'Quick':'Full')+'</button><button type="button" class="act-pip'+(quickUsed?' used':'')+'" onclick="actTogglePip(\'quick\')" aria-pressed="'+quickUsed+'" title="Click to tick or untick it by hand">Quick</button>';
   var stress=clamp(num(S.stress),0,10), synth=actSynth();
   var badges=(!synth && stress>0)?'<span class="act-badge warn" title="Each Stress Die that shows a 1 triggers a Stress Response, and you can\'t push that roll">⚠ Stress Response risk</span>':'';
   if(broken) badges='<span class="act-badge warn" title="At zero Health you can make a single move action per round and nothing else (p.68)">Broken</span>'+badges;
@@ -1908,8 +1919,8 @@ function renderAction(){
   var eqFull=O.equip.filter(function(o){ return o.kind==='full'; }), eqQuick=O.equip.filter(function(o){ return o.kind!=='full'; });
   var tabs='<div class="act-subtabs"><button class="act-subtab'+(sub==='full'?' on':'')+'" onclick="actSetSub(\'full\')">Full Actions</button>'
     +'<button class="act-subtab'+(sub==='quick'?' on':'')+'" onclick="actSetSub(\'quick\')">Quick Actions</button></div>';
-  host.innerHTML='<div class="act-top"><div class="act-row1"><div class="act-econ">'+(turnOn()?pips:'<span class="turn-free">Free play — actions aren\'t tracked</span>')+'</div>'
-    +(turnOn()?'<button class="act-end" onclick="actEndTurn()" title="Reset this round\'s actions">End Turn</button>':'')+turnModeBtn()+'</div>'
+  host.innerHTML='<div class="act-top"><div class="act-row1"><div class="act-econ">'+pips+'</div>'
+    +turnModeBtn()+'<button class="act-end" onclick="actEndTurn()" title="Reset this round\'s actions">End Turn</button></div>'
     +(badges?'<div class="act-row2"><div class="act-badges">'+badges+'</div></div>':'')+tabs+'</div>'
     +(sub==='full'
       ? actSec('attacks','Attacks',O.attacks,'')
@@ -2101,6 +2112,9 @@ if(window.YZEHomebrew){ try{ window.YZEHomebrew.load(function(){ if(typeof _pk!=
 .log-lock:hover{background:rgba(255,255,255,.35);}
 .log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
 .log-lock .lk-ico{font-size:15px;line-height:1;}
+.log-auto:not(.on){opacity:.55;}
+.log-auto:not(.on) .lk-ico{filter:grayscale(1);}
+.log-x{font-size:13px;line-height:1;padding:3px 7px;}
 .lk-ro-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none!important;pointer-events:none;}
 input.no-spin{-moz-appearance:textfield;}
 input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}

@@ -1028,9 +1028,9 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   <!-- Toggle button — desktop: fixed tab; mobile: absolute on log top edge via CSS -->
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
   <div class="log-header">
-    <span class="log-title">Roll Log</span>
+    <span class="log-title" aria-hidden="true"></span>
     <div style="display:flex;align-items:center;gap:6px;">
-      <button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear" onclick="clearLog()">Clear</button>
+      <button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button type="button" id="auto-toggle" class="log-lock log-auto on" onclick="toggleAutoUse()" aria-pressed="true" aria-label="Use up consumables automatically" title="Auto-use on: Hotlist potions, scrolls, tomes, bandages, antidotes, dynamite and torches come off your Inventory when you Use them. Click to count them by hand."><span class="lk-ico">🎒</span></button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button>
     </div>
   </div>
   <div class="log-actions">
@@ -1987,13 +1987,21 @@ function buildInventory() { /* no blank rows — items come from + Items */ }
 let _turn = { round: 1, used: 0, extra: 0, extraUsed: 0, aiSpent: false, moves: 0, potionRound: 0, evading: false, done: [] };
 let _turnOpts = [];
 const TURN_ACTIONS = 2;
-// TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = free
-// play: no Action count, no +1 Action, no potion timing; Dying / Paralyzed / Debuff gates still apply.
+// TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = Actions
+// aren't spent automatically and nothing greys out for "no Actions left" — the pips stay and can be
+// ticked by hand (as they can when on); Dying / Paralyzed / Debuff gates still apply.
 let _turnBased = true;
 function turnOn(){ return _turnBased !== false; }
 function turnFresh(){ Object.assign(_turn, { used: 0, extra: 0, extraUsed: 0, aiSpent: false, moves: 0, evading: false, done: [] }); }
-function toggleTurnMode(){ _turnBased = !turnOn(); turnFresh(); _turn.potionRound = 0; addLog('Turn-based mode', turnOn() ? 'On' : 'Off', turnOn() ? 'Actions are tracked per turn' : 'Free play — actions aren\'t tracked', 'normal'); turnAfter(); }
-function turnModeBtn(){ const on = turnOn(); return `<button type="button" class="turn-mode${on ? ' on' : ''}" role="switch" aria-checked="${on}" onclick="toggleTurnMode()" title="${on ? 'Turn-based: 2 Actions per turn, End Turn brings them back. Click for free play.' : 'Free play: Actions aren\'t tracked. Click to count Actions per turn (combat).'}"><span class="tm-sw"></span>Turn-based</button>`; }
+function toggleTurnMode(){ _turnBased = !turnOn(); turnFresh(); _turn.potionRound = 0; addLog('Turn-based mode', turnOn() ? 'On' : 'Off', turnOn() ? 'Actions are spent automatically' : 'Actions aren\'t spent automatically — tick the pips by hand', 'normal'); turnAfter(); }
+function turnModeBtn(){ const on = turnOn(); return `<button type="button" class="turn-mode${on ? ' on' : ''}" role="switch" aria-checked="${on}" aria-label="Turn-based: spend Actions automatically" onclick="toggleTurnMode()" title="${on ? 'Turn-based: Actions are spent automatically (2 per turn). Click to tick them by hand instead.' : 'Manual: Actions aren\'t spent automatically — tick the pips yourself. Click to spend them automatically.'}"><span class="tm-sw"></span></button>`; }
+// The pips are buttons: tick or untick an Action by hand (both modes). Pips fill left to right,
+// so a used pip takes one off the count and an open one adds one.
+function turnTogglePip(k){
+  if(k === 'ai') _turn.extraUsed = _turn.extraUsed >= _turn.extra ? 0 : _turn.extra;
+  else _turn.used = Math.max(0, Math.min(TURN_ACTIONS, k < _turn.used ? _turn.used - 1 : _turn.used + 1));
+  turnAfter();
+}
 const _turnCollapsed = { checks: true };
 function turnEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function turnNum(id, dflt){ const v = parseInt(String(document.getElementById(id)?.value || '').replace(/[^0-9-]/g,''), 10); return isNaN(v) ? dflt : v; }
@@ -2045,7 +2053,7 @@ function sheetRollStat(id, name){
 // round (p.81) — the first roll spends the Action, later ones are free (same as the tab).
 function sheetRollEvade(){
   rollEvade();
-  if(!_turn.evading && turnSpendQuiet('other', 'Evade') && turnOn()) { _turn.evading = true; turnAfter(); }
+  if(!_turn.evading && turnSpendQuiet('other', 'Evade')) { _turn.evading = true; turnAfter(); }
 }
 
 // A Skill / Spell / Attack rolled from its Skills-tab row is a "Use a Skill" (or
@@ -2158,7 +2166,7 @@ function turnBuildOpts(){
     if(!(window.DCCHotlist && DCCHotlist.isPinned(u.name))) return;
     const si = hslots.findIndex(ta => { const t = String(ta.value || '').trim(); if(!t) return false;
       const ln = turnHotSplit(t).name.replace(/\s[×x]\s?\d+\s*$/, '').trim(); return norm(ln) === norm(u.name) || norm(t.split(/\s[×x]\s?\d+|\s[—–]\s/)[0]) === norm(u.name); });
-    add('hotlist', turnItemOpt({ name: u.name, qty: String(u.qty || 1), sub: u.sub, tr, slot: si < 0 ? 99 : si, use: () => DCCFx.useRow(tr) }));
+    add('hotlist', turnItemOpt({ name: u.name, qty: String(u.qty || 1), sub: u.sub, tr, slot: si < 0 ? 99 : si, use: () => autoUse() ? DCCFx.useRow(tr) : dccUseKeep(tr) }));
   });
   O.hotlist.sort((a, b) => (a.slot ?? 99) - (b.slot ?? 99));   // spells and items in Hotlist slot order
   // Attacks — weapon / attack skills (Dmg in their Notes). Attack spells are cast from the Hotlist.
@@ -2182,7 +2190,7 @@ function turnBuildOpts(){
   // Actions (Table 3 / Table 4)
   const move = turnMove();
   add('actions', { name: 'Move', kind: 'other', move: true, sub: 'Move up to ' + move + ' ft (on top of the free Step)' + (move < turnNum('evade-move', 20) ? ' · halved (Fatigued)' : ''), btn: 'Move',
-    run: () => { if(turnOn()) _turn.moves++; addLog('Move', move + ' ft', 'Move Action — up to ' + move + ' ft', 'normal'); return true; } });
+    run: () => { _turn.moves++; addLog('Move', move + ' ft', 'Move Action — up to ' + move + ' ft', 'normal'); return true; } });
   add('actions', { name: 'Help', kind: 'other', sub: 'Before an ally\'s non-combat Check: +1d2 (no Ranks in it) or +1d6 (with Ranks)',
     btns: [['+1d2', () => { const n = d(2); addLog('Help', '+' + n, 'd2(' + n + ') — no Skill Ranks', 'normal'); return true; }],
            ['+1d6', () => { const n = d(6); addLog('Help', '+' + n, 'd6(' + n + ') — with Skill Ranks', 'normal'); return true; }]] });
@@ -2198,7 +2206,7 @@ function turnBuildOpts(){
   // Evade Check for each (Core p.81) — so once you're Evading, more rolls are free.
   add('interrupts', { name: 'Evade', kind: _turn.evading ? 'free' : 'other',
     sub: _turn.evading ? 'Already Evading this round — roll the Check for another Attack (no Action)' : 'Evade Check vs. each Attack aimed at you this round', btn: 'Roll',
-    run: () => { rollEvade(); if(turnOn()) _turn.evading = true; return true; } });
+    run: () => { rollEvade(); _turn.evading = true; return true; } });
   add('interrupts', { name: 'Intervene', kind: 'other', sub: 'Add 1d6 to another crawler\'s d20 Check after it\'s announced (not Stat Checks)', btn: 'Roll',
     run: () => { const n = d(6); addLog('Intervene', '+' + n, 'd6(' + n + ') added to an ally\'s Check', 'normal'); return true; } });
   // Skill-gated Interrupts only show when the crawler has the skill.
@@ -2215,12 +2223,12 @@ function turnBuildOpts(){
 // Potions: a second one within two rounds gives Potion Sickness (Core p.99).
 function turnItemOpt(x){
   const potion = /potion/i.test(x.name);
-  const sick = turnOn() && potion && _turn.potionRound && (_turn.round - _turn.potionRound) < 2;
+  const sick = potion && _turn.potionRound && (_turn.round - _turn.potionRound) < 2;
   const useFn = () => {
     x.use();
     if(potion) {
       if(sick) turnAddDebuff('Potion Sickness', 'Two potions within two rounds — Poisoned for 15 seconds (Core p.99)');
-      if(turnOn()) _turn.potionRound = _turn.round;
+      _turn.potionRound = _turn.round;
     }
     return true;
   };
@@ -2238,8 +2246,35 @@ function turnDo(i, j){
   turnSpend(o.kind, o.name);
   turnAfter();
 }
+// AUTO-USE (roll-log switch, saved on the sheet; on unless turned off): a Hotlist item you Use
+// comes off the Inventory. Off = the effect still happens, the count is left alone.
+let _autoUse = true;
+function autoUse(){ return _autoUse !== false; }
+function toggleAutoUse(){ _autoUse = !autoUse(); renderAutoBtn(); addLog('Auto-use', autoUse() ? 'On' : 'Off', autoUse() ? 'Consumables are used up automatically' : 'Count consumables yourself', 'normal'); if(typeof scheduleAutosave === 'function') scheduleAutosave(); }
+function renderAutoBtn(){ const b = document.getElementById('auto-toggle'); if(!b) return; const on = autoUse(); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.title = on ? 'Auto-use on: Hotlist potions, scrolls, tomes, bandages, antidotes, dynamite and torches come off your Inventory when you Use them. Click to count them by hand.' : 'Auto-use off: using an item applies its effect but nothing is taken from your Inventory — count consumables yourself. Click to turn it back on.'; }
+// Use an Inventory row without using it up: DCCFx takes one off the Qty box (and the Hotlist
+// "×n"), so bump the box first and put both back once the effect (and any chooser) is done.
+function dccUseKeep(tr){
+  const q = tr.querySelectorAll('input[type="text"]')[1];
+  if(!q) return DCCFx.useRow(tr);
+  const was = q.value, hot = [...document.querySelectorAll('#hotlist-grid textarea')].map(t => t.value);
+  q.value = String((parseInt(was, 10) || 1) + 1);
+  const settle = () => {
+    if(!tr.isConnected) return;
+    q.value = was;
+    document.querySelectorAll('#hotlist-grid textarea').forEach((t, i) => { if(hot[i] != null) t.value = hot[i]; });
+    try { if(window.DCCHotlist) DCCHotlist.refresh(); } catch(e) {}
+    if(typeof scheduleAutosave === 'function') scheduleAutosave();
+    renderTurn();
+  };
+  DCCFx.useRow(tr);
+  const ov = document.getElementById('dccfx-overlay');
+  if(ov && ov.isConnected) { const mo = new MutationObserver(() => { if(!ov.isConnected) { mo.disconnect(); setTimeout(settle, 0); } }); mo.observe(document.body, { childList: true }); }
+  else settle();
+  return true;
+}
 function turnSpendAiFavor(){
-  if(_turn.aiSpent || !turnOn()) return;
+  if(_turn.aiSpent) return;
   const el = document.getElementById('dr-aifavor');
   const cur = turnNum('dr-aifavor', 0);
   if(cur < 1) { addLog('AI Favor', 'none to spend', 'You need at least 1 AI Favor', 'normal'); return; }
@@ -2290,10 +2325,10 @@ function turnToggleSec(key){ _turnCollapsed[key] = !_turnCollapsed[key]; renderT
 function renderTurn(){
   const host = document.getElementById('dcc-turn'); if(!host) return;
   const O = turnBuildOpts();
-  const pip = (on, lbl, cls) => `<span class="turn-pip${on ? ' used' : ''}${cls ? ' ' + cls : ''}">${lbl}</span>`;
+  const pip = (on, lbl, cls, k, tip) => `<button type="button" class="turn-pip${on ? ' used' : ''}${cls ? ' ' + cls : ''}" onclick="turnTogglePip(${k})" aria-pressed="${!!on}" title="${tip} — click to tick it by hand">${lbl}</button>`;
   let pips = '';
-  for(let k = 0; k < TURN_ACTIONS; k++) pips += pip(k < _turn.used, 'Action ' + (k + 1));
-  if(_turn.extra) pips += pip(_turn.extraUsed >= _turn.extra, 'AI Favor<span class="pip-long"> Action</span>', 'bonus');
+  for(let k = 0; k < TURN_ACTIONS; k++) pips += pip(k < _turn.used, 'Action ' + (k + 1), '', k, 'Two Actions per turn');
+  if(_turn.extra) pips += pip(_turn.extraUsed >= _turn.extra, 'AI Favor<span class="pip-long"> Action</span>', 'bonus', "'ai'", 'The extra non-Attack Action from AI Favor');
   const ai = turnNum('dr-aifavor', 0);
   const card = o => {
     const can = !o.blocked && turnCan(o.kind);
@@ -2312,18 +2347,15 @@ function renderTurn(){
   const manaEl = document.getElementById('turn-mana');
   if(manaEl && manaEl.parentNode) manaEl.parentNode.removeChild(manaEl);
   const hlSlots = [...document.querySelectorAll('#hotlist-grid textarea')], hlMax = hlSlots.length || 10, hlUsed = hlSlots.filter(t => t.value.trim()).length;
-  const potionHot = turnOn() && _turn.potionRound && (_turn.round - _turn.potionRound) < 2;
+  const potionHot = _turn.potionRound && (_turn.round - _turn.potionRound) < 2;
   const badges = potionHot ? `<span class="turn-badge warn" title="You drank a potion this turn or last — another one now causes Potion Sickness (Core p.99)">⚠ Potion Sickness risk</span>` : '';
   host.innerHTML = `
     <div class="turn-top">
       <div class="turn-row1">
-${turnOn() ? `
         <div class="turn-econ">${pips}</div>
         <button class="turn-mini" onclick="turnSpendAiFavor()" ${_turn.aiSpent || ai < 1 ? 'disabled' : ''} title="Once per turn: spend 1 AI Favor (you have ${ai}) for an extra non-Attack Action">+1 Action</button>
-        <button class="turn-end-btn" onclick="endTurn()" title="Clear this turn's Actions and take any damage-over-time from Debuffs">End Turn</button>` : `
-        <div class="turn-econ"><span class="turn-free">Free play — actions aren't tracked</span></div>
-        <button class="turn-end-btn" onclick="endTurn()" title="Free play still ends turns for Debuffs: take any damage-over-time">End Turn</button>`}
         ${turnModeBtn()}
+        <button class="turn-end-btn" onclick="endTurn()" title="Clear this turn's Actions and take any damage-over-time from Debuffs">End Turn</button>
       </div>
       <div class="turn-row2">
         <span id="turn-mana-slot"></span>
@@ -2928,6 +2960,7 @@ function collectSheet() {
   data.skillPotions = parseInt(window.__dccSkillPotions || 0, 10) || 0;
   data.turn = Object.assign({}, _turn, { done: (_turn.done || []).slice(-12) });
   data.turnBased = _turnBased;
+  data.autoUse = _autoUse;
 
   // Pinned inventory sections (always at the top of the tab)
   data.gold = document.getElementById('f-gold')?.value || '';
@@ -3094,6 +3127,8 @@ function applySheet(data) {
   window.__dccSkillPotions = parseInt(data.skillPotions || 0, 10) || 0;
   if(data.turn && typeof data.turn === 'object') { Object.assign(_turn, data.turn); if(!Array.isArray(_turn.done)) _turn.done = []; }
   _turnBased = data.turnBased !== false;
+  _autoUse = data.autoUse !== false;
+  if(typeof renderAutoBtn === 'function') renderAutoBtn();
   if(typeof renderTurn === 'function') renderTurn();
   if(typeof refreshSpellManaState === 'function') refreshSpellManaState();
   // Keep each attack skill's Dmg in step with its Rank (Rank 5/10/15 upgrades).
@@ -4021,6 +4056,7 @@ if(typeof renderTurn === 'function') setTimeout(() => switchTab('turn'), 0);
   /* ── Bigger touch targets + type for all buttons (min 44px tap area) ── */
   .evade-roll-btn { min-height: 46px; font-size: 15px !important; padding: 11px 14px !important; }
   .log-clear { min-height: 42px; font-size: 13px !important; padding: 9px 12px !important; }
+  .log-clear.log-x { min-height: 0; font-size: 15px !important; padding: 4px 9px !important; }
   .log-action-btn { min-height: 46px; font-size: 13px !important; }
   .dice-roll-btn { min-height: 48px; font-size: 16px !important; }
   .dice-clear-btn { min-height: 46px; font-size: 14px !important; }
@@ -4932,13 +4968,17 @@ body.dark .dcc-list input.dl-name{color:var(--ink);}
 .turn-mini:hover:not([disabled]){background:var(--dcc-lt);}
 .turn-mini[disabled]{opacity:.45;cursor:default;}
 .turn-mini.ghost{border-color:var(--rule);color:var(--muted);margin-left:auto;}
-.turn-mode{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--red);white-space:nowrap;}
+.turn-mode{display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--red);white-space:nowrap;}
 .turn-mode .tm-sw{position:relative;width:34px;height:19px;border-radius:999px;border:1.5px solid var(--red);background:transparent;flex:0 0 auto;transition:background .15s;}
 .turn-mode .tm-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--red);transition:left .15s,background .15s;}
 .turn-mode.on .tm-sw{background:var(--red);}
 .turn-mode.on .tm-sw::after{left:17px;background:#fff;}
 .turn-mode:focus-visible{outline:2px solid var(--red);outline-offset:2px;border-radius:6px;}
-.turn-free{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 0;}
+button.turn-pip{cursor:pointer;line-height:inherit;}
+.turn-pip:focus-visible{outline:2px solid var(--red);outline-offset:2px;}
+.log-auto:not(.on){opacity:.55;}
+.log-auto:not(.on) .lk-ico{filter:grayscale(1);}
+.log-x{font-size:13px;line-height:1;padding:3px 7px;}
 .turn-sec{border-bottom:1px solid var(--rule);}
 .turn-sec-hd{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--box);cursor:pointer;user-select:none;}
 .turn-sec-hd .tsh-caret{color:var(--red);font-size:10px;transition:transform .12s;flex-shrink:0;}

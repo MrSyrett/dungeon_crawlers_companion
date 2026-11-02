@@ -496,13 +496,15 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .turn-pip.used{background:var(--rule);border-color:var(--rule);color:var(--muted);text-decoration:line-through;}
 .turn-end-btn{flex:0 0 auto;background:var(--mv);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;margin-left:auto;}
 .turn-end-btn:hover{filter:brightness(1.1);}
-.turn-mode{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mv-dk);white-space:nowrap;}
+.turn-mode{display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mv-dk);white-space:nowrap;}
 .turn-mode .tm-sw{position:relative;width:34px;height:19px;border-radius:999px;border:1.5px solid var(--mv);background:transparent;flex:0 0 auto;transition:background .15s;}
 .turn-mode .tm-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--mv);transition:left .15s,background .15s;}
 .turn-mode.on .tm-sw{background:var(--mv);}
 .turn-mode.on .tm-sw::after{left:17px;background:#fff;}
 .turn-mode:focus-visible{outline:2px solid var(--mv);outline-offset:2px;border-radius:6px;}
-.turn-free{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 0;}
+button.turn-pip{background:transparent;cursor:pointer;line-height:normal;}
+button.turn-pip.used{background:var(--rule);}
+body.dark button.turn-pip.used{background:#2a2c33;}
 body.dark .turn-mode{color:#f4a6a8;}
 .turn-row2{display:flex;align-items:center;gap:10px;padding:0 10px 8px;flex-wrap:wrap;}
 .turn-subtabs{display:flex;gap:0;border-top:1px solid var(--rule);}
@@ -798,7 +800,7 @@ body.dark .turn-badge.gold,body.dark .turn-badge.warn{color:#f0c060;}
 <!-- Roll Log -->
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
-  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
+  <div class="log-header"><span class="log-title" aria-hidden="true"></span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button type="button" id="auto-toggle" class="log-lock log-auto on" onclick="toggleAutoUse()" aria-pressed="true" aria-label="Use up consumables automatically" title="Auto-use on: grenades and Spider-Grenades come off your equipment when thrown. Click to count them by hand."><span class="lk-ico">🎒</span></button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #34272b;background:transparent;color:#b8a0a2;" title="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="if(window.MMRPGB)MMRPGB.launch();" title="Character Builder">Create</button>
@@ -1427,11 +1429,14 @@ var _turnOpts=[];
 var _turnCollapsed={checks:true};
 function turnState(){ if(!S.turn) S.turn={std:false,move:false,react:false,dodge:0}; return S.turn; }
 function tEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-// TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = free
-// play: no action economy — nothing is spent or greyed out; conditions that stop you still apply.
+// TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = nothing
+// is spent automatically and nothing greys out — the pips stay and can be ticked by hand (as
+// they can when on); conditions that stop you still apply.
 function turnOn(){ return S.turnBased!==false; }
-function toggleTurnMode(){ S.turnBased=!turnOn(); var t=turnState(); t.std=t.move=t.react=false; t.dodge=0; addLog('Turn-based mode',turnOn()?'On':'Off',turnOn()?'Actions are tracked per turn':'Free play — actions aren\'t tracked','normal'); renderTurn(); scheduleAutosave(); }
-function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" onclick="toggleTurnMode()" title="'+(on?'Turn-based: one action and one reaction per turn, End Turn brings them back. Click for free play.':'Free play: actions aren\'t tracked. Click to count actions per turn (combat).')+'"><span class="tm-sw"></span>Turn-based</button>'; }
+function toggleTurnMode(){ S.turnBased=!turnOn(); var t=turnState(); t.std=t.move=t.react=false; t.dodge=0; addLog('Turn-based mode',turnOn()?'On':'Off',turnOn()?'Actions are tracked per turn':'Actions aren\'t spent automatically','normal'); renderTurn(); scheduleAutosave(); }
+function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" onclick="toggleTurnMode()" aria-label="Turn-based: spend actions automatically" title="'+(on?'Turn-based: actions are spent automatically. Click to tick them by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
+// the Action / Reaction pips are buttons: tick or untick them by hand (both modes)
+function togglePip(k){ var t=turnState(); t[k]=!t[k]; renderTurn(); scheduleAutosave(); }
 function turnCan(kind){ var t=turnState();
   if(kind==='free'||!turnOn()) return true;
   if(kind==='std') return !t.std;
@@ -1475,7 +1480,13 @@ function usePower(p, kind){
 // action that rolls its attack and uses it up. Quantity = entries with that name ×
 // each entry's qty. A grenade launcher stays a weapon in Attacks.
 function isGrenade(w){ return !!w && !!w.name && /grenade/i.test(w.name) && !/launcher/i.test(w.name); }
+// AUTO-USE (roll-log switch, saved on the sheet; on unless turned off): thrown grenades come off
+// the Equipment list by themselves. Off = the throw still happens, the count is left alone.
+function autoUse(){ return S.autoUse!==false; }
+function toggleAutoUse(){ S.autoUse=!autoUse(); renderAutoBtn(); addLog('Auto-use',autoUse()?'On':'Off',autoUse()?'Consumables are used up automatically':'Count consumables yourself','normal'); scheduleAutosave(); }
+function renderAutoBtn(){ var b=document.getElementById('auto-toggle'); if(!b) return; var on=autoUse(); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); b.title=on?'Auto-use on: grenades and Spider-Grenades come off your equipment when thrown. Click to count them by hand.':'Auto-use off: nothing is taken from your equipment — count consumables yourself. Click to turn it back on.'; }
 function eqSpendItem(name){
+  if(!autoUse()) return;
   var n=String(name||'').toLowerCase().trim(), i;
   for(i=S.attacks.length-1;i>=0;i--){ var w=S.attacks[i]; if(String(w.name||'').toLowerCase().trim()!==n) continue;
     if(num(w.qty)>1) w.qty=num(w.qty)-1; else S.attacks.splice(i,1);
@@ -1537,7 +1548,7 @@ function turnBuildOpts(){
   // Actions
   var run=runSpeed(), hv=speedHalvedByCond()?Math.floor(run/2):run, nm=condNoMove(), nmB=nm?nm+' — can’t move':'';
   add('actions',{name:'Move Again', sub:'Spend your action to move a second time', blocked:nmB, btns:[{label:'Move',kind:'std',run:function(){ addLog('Move Again','Run '+hv,'Action spent on movement','normal'); return true; }}]});
-  add('actions',{name:'Dodge', sub:'Attacks against you have trouble until your next turn', btns:[{label:'Dodge',kind:'std',run:function(){ if(turnOn()) turnState().dodge=2; addLog('Dodge','Dodging','Attacks against you have trouble until your next turn','normal'); return true; }}]});
+  add('actions',{name:'Dodge', sub:'Attacks against you have trouble until your next turn', btns:[{label:'Dodge',kind:'std',run:function(){ turnState().dodge=2; addLog('Dodge','Dodging','Attacks against you have trouble until your next turn','normal'); return true; }}]});
   add('actions',{name:'Grab', sub:'Melee check vs Melee defense — a Fantastic also pins', blocked:condDisabled('melee',true), btns:[{label:'Roll',kind:'std',run:function(){ doCheck('Grab','melee',{attack:true}); return true; }}]});
   add('actions',{name:'Escape', sub:'Melee check vs the grabber’s Melee defense (or the Narrator’s TN — 20 webbing/chains, 16 rope)', btns:[{label:'Roll',kind:'std',run:function(){ doCheck('Escape','melee',{}); return true; }}]});
   add('actions',{name:'Help', sub:'Give an ally (or yourself) an edge on their next action', btns:[{label:'Use',kind:'std',run:function(){ addLog('Help','Edge','An ally gets an edge on their next action','normal'); return true; }}]});
@@ -1567,7 +1578,7 @@ function setTurnSub(sub){ turnState().sub=sub; renderTurn(); scheduleAutosave();
 function renderTurn(){
   var host=$('mm-turn'); if(!host||!S) return;
   var O=turnBuildOpts(), t=turnState();
-  var pip=function(on,lbl){ return '<span class="turn-pip'+(on?' used':'')+'">'+lbl+'</span>'; };
+  var pip=function(on,lbl,k){ return '<button type="button" class="turn-pip'+(on?' used':'')+'" onclick="togglePip(\''+k+'\')" aria-pressed="'+!!on+'" title="Click to tick it by hand">'+lbl+'</button>'; };
   var badges=(t.dodge>0?'<span class="turn-badge">Dodging</span>':'')
     +activeConds().map(function(n){ return '<span class="turn-badge warn">'+tEsc(n)+'</span>'; }).join('');
   var sub=turnSub();
@@ -1586,8 +1597,8 @@ function renderTurn(){
     return '<div class="turn-sec'+(col?' collapsed':'')+'"><div class="turn-sec-hd" onclick="turnToggleSec(\''+key+'\')"><span class="tsh-caret">▼</span><span class="tsh-title">'+title+'</span></div>'
       +'<div class="turn-sec-body">'+(list.length?list.map(card).join(''):'<div class="turn-empty">'+empty+'</div>')+'</div></div>'; };
   host.innerHTML='<div class="turn-top">'
-    +'<div class="turn-row1"><div class="turn-econ">'+(turnOn()?pip(t.std,'Action')+pip(t.react,'Reaction'):'<span class="turn-free">Free play — actions aren\'t tracked</span>')+'</div>'
-    +(turnOn()?'<button class="turn-end-btn" onclick="endTurn()" title="Reset your actions for the next turn">End Turn</button>':'')+turnModeBtn()+'</div>'
+    +'<div class="turn-row1"><div class="turn-econ">'+pip(t.std,'Action','std')+pip(t.react,'Reaction','react')+'</div>'
+    +turnModeBtn()+'<button class="turn-end-btn" onclick="endTurn()" title="Reset your actions for the next turn">End Turn</button></div>'
     +'<div class="turn-row2">'
     +'<button class="turn-mini'+(karmaArmed?' on':'')+'" onclick="toggleKarma();renderTurn()" '+(num(S.karma.cur)<=0&&!karmaArmed?'disabled':'')+' title="Spend 1 Karma for an edge on your next roll">Karma Edge</button>'
     +'<div class="turn-badges">'+badges+'</div>'
@@ -1919,7 +1930,7 @@ function applySheet(d){
   S.conditions={}; if(d.conditions) CONDITIONS.forEach(function(c){ if(d.conditions[c.name])S.conditions[c.name]=true; });
   if(Array.isArray(d.powers)) S.powers=d.powers.map(function(p){ return {name:p.name||'',powerSet:p.powerSet||'',action:p.action||'',duration:p.duration||'',cost:p.cost||'',range:p.range||'',prerequisites:p.prerequisites||'',effect:p.effect||'',fantastic:p.fantastic||'',from:p.from||''}; });
   if(Array.isArray(d.iconics)) S.iconics=d.iconics.slice();
-  S.turnBased=d.turnBased!==false;
+  S.turnBased=d.turnBased!==false; S.autoUse=d.autoUse!==false;
   S.turn={std:false, move:false, react:false, dodge:0};
   if(d.turn&&typeof d.turn==='object') ['std','move','react','dodge','sub'].forEach(function(k){ if(d.turn[k]!=null) S.turn[k]=d.turn[k]; });
   if(Array.isArray(d.traits)) S.traits=d.traits.map(function(t){ return {name:t.name||'',description:t.description||''}; });
@@ -1939,7 +1950,7 @@ function renderAll(){
   setDisp('d-size',S.size||'Average'); setDisp('d-teams',S.teams); setDisp('d-origin',S.origin); setDisp('d-occupation',S.occupation);
   $('f-history').value=S.history||''; $('f-personality').value=S.personality||''; $('f-features').value=S.features||''; $('f-base').value=S.base||''; $('f-notes').value=S.notes||'';
   if(!S.health.max)S.health.max=healthMax(); if(!S.focus.max)S.focus.max=focusMax();
-  renderAbilities(); renderVitals(); renderDerived(); renderConditions(); renderPowers(); renderTraitsTags(); renderAttacks(); renderDamage(); renderTray(); updateFoot(); refreshWizardButtons();
+  renderAbilities(); renderVitals(); renderDerived(); renderConditions(); renderPowers(); renderTraitsTags(); renderAttacks(); renderDamage(); renderTray(); updateFoot(); refreshWizardButtons(); renderAutoBtn();
   if(typeof renderTurn==='function') renderTurn();
 }
 function updateFoot(){ var f=$('foot-build'); if(f) f.textContent='Rank '+rank(); }
@@ -2183,6 +2194,9 @@ try{ syncMmrpgHomebrew(); }catch(e){}
 .log-lock:hover{background:rgba(255,255,255,.35);}
 .log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
 .log-lock .lk-ico{font-size:15px;line-height:1;}
+.log-auto:not(.on){opacity:.55;}
+.log-auto:not(.on) .lk-ico{filter:grayscale(1);}
+.log-x{font-size:13px;line-height:1;padding:3px 7px;}
 .lk-ro-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none!important;pointer-events:none;}
 input.no-spin{-moz-appearance:textfield;}
 input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}

@@ -820,7 +820,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
-  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
+  <div class="log-header"><span class="log-title" aria-hidden="true"></span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button type="button" id="auto-toggle" class="log-lock log-auto on" onclick="toggleAutoUse()" aria-pressed="true" aria-label="Use up consumables automatically" title="Auto-use on: healing potions, torches, spell scrolls, one-time magic items and wand charges come off your inventory by themselves. Click to count them by hand."><span class="lk-ico">🎒</span></button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #333;background:transparent;color:#888;" title="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="NIMB.launch()" title="Hero Builder" aria-label="Hero Builder">Create</button>
@@ -898,9 +898,16 @@ const D = {
 };
 let saveAdv = '', saveDis = '';
 let wounds = 0, actions = 3, advState = 0;
-// TURN-BASED MODE (Action tab switch, saved as turnBased; on unless turned off). Off = free play: actions aren't spent or counted.
+// TURN-BASED MODE (Action tab switch, saved as turnBased; on unless turned off). Off = actions aren't spent
+// automatically (tick the Action pips by hand) and nothing is refused for "not enough actions" / "used this round".
 let _nimTB = true;
 function turnOn() { return _nimTB !== false; }
+// AUTO-USE (roll-log switch, saved as autoUse; on unless turned off): consumables come off the inventory
+// by themselves. Off = the item still works, only the count / charges are left alone.
+let _nimAuto = true;
+function autoUse() { return _nimAuto !== false; }
+function toggleAutoUse() { _nimAuto = !autoUse(); renderAutoBtn(); addLog('Auto-use', autoUse() ? 'On' : 'Off', autoUse() ? 'Consumables are used up automatically' : 'Count consumables yourself', 'normal'); scheduleAutosave(); }
+function renderAutoBtn() { const b = document.getElementById('auto-toggle'); if(!b) return; const on = autoUse(); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.title = on ? 'Auto-use on: healing potions, torches, spell scrolls, one-time magic items and wand charges come off your inventory by themselves. Click to count them by hand.' : 'Auto-use off: nothing is taken from your inventory — count consumables and charges yourself. Click to turn it back on.'; }
 let conditions = [];
 
 // ═══ LOOKUPS ══════════════════════════════════════════════════════════════
@@ -1659,7 +1666,7 @@ function collectSheet() {
     stats, saveAdv, saveDis, skillPts, skillTotals,
     hp: { cur: num(v('hp-cur')), max: num(v('hp-max')), temp: num(v('hp-temp')) }, wounds, woundsMax: num(v('wounds-max')),
     hitDice: { cur: num(v('hd-cur')), max: num(v('hd-max')) }, mana: { cur: num(v('mana-cur')), max: num(v('mana-max')) },
-    armor: v('f-armor'), shield: v('f-shield'), armorBonus: num(v('armor-bonus')), armorScore: armorValue(), initBonus: num(v('init-bonus')), speedBonus: num(v('speed-bonus')), size: v('f-size'), actions, turnBased: turnOn(),
+    armor: v('f-armor'), shield: v('f-shield'), armorBonus: num(v('armor-bonus')), armorScore: armorValue(), initBonus: num(v('init-bonus')), speedBonus: num(v('speed-bonus')), size: v('f-size'), actions, turnBased: turnOn(), autoUse: autoUse(),
     attacks: [...document.querySelectorAll('#attacks-body tr')].map(tr => ({ name: tr.querySelector('.atk-name').value, damage: tr.querySelector('.atk-dmg').value, props: tr.querySelector('.atk-props').value, link: tr.dataset.link || '', fixed: tr.dataset.fixed ? true : undefined })).filter(a => a.name || a.damage),
     picks: [...document.querySelectorAll('#picks-body tr')].map(tr => tr.dataset.pick),
     spells: [...document.querySelectorAll('#spells-body tr')].map(tr => ({ name: tr.querySelector('.sp-name').value, tier: num(tr.querySelector('.sp-tier').value), fromRid: tr.dataset.fromRid || undefined, from: tr.dataset.fromRid ? tr.dataset.from : undefined })).filter(s => s.name),
@@ -1680,7 +1687,7 @@ function applySheet(d) {
   wounds = d.wounds || 0; set('wounds-max', d.woundsMax || 6); if(d.woundsMax) $('wounds-max').dataset.manual = '1'; else delete $('wounds-max').dataset.manual;
   const hd = d.hitDice || {}; set('hd-cur', hd.cur ?? 1); set('hd-max', hd.max ?? 1); if(hd.max) $('hd-max').dataset.manual = '1'; else delete $('hd-max').dataset.manual;
   const mn = d.mana || {}; set('mana-cur', mn.cur || 0); set('mana-max', mn.max || 0); if(mn.max) $('mana-max').dataset.manual = '1'; else delete $('mana-max').dataset.manual;
-  set('f-armor', d.armor); set('f-shield', d.shield); set('armor-bonus', d.armorBonus || 0); set('init-bonus', d.initBonus || 0); set('speed-bonus', d.speedBonus || 0); set('f-size', d.size || 'Medium'); actions = typeof d.actions === 'number' ? d.actions : 3; _nimTB = d.turnBased !== false;
+  set('f-armor', d.armor); set('f-shield', d.shield); set('armor-bonus', d.armorBonus || 0); set('init-bonus', d.initBonus || 0); set('speed-bonus', d.speedBonus || 0); set('f-size', d.size || 'Medium'); actions = typeof d.actions === 'number' ? d.actions : 3; _nimTB = d.turnBased !== false; _nimAuto = d.autoUse !== false; renderAutoBtn();
   $('attacks-body').innerHTML = ''; (d.attacks || []).forEach(addAttackRow); ensureUnarmed();
   fillPoolPick(); $('picks-body').innerHTML = ''; (d.picks || []).forEach(p => addPick(p));
   $('spells-body').innerHTML = ''; (d.spells || []).forEach(addSpellRow);
@@ -1928,6 +1935,9 @@ autoLoad();
 .log-lock:hover{background:rgba(255,255,255,.35);}
 .log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
 .log-lock .lk-ico{font-size:15px;line-height:1;}
+.log-auto:not(.on){opacity:.55;}
+.log-auto:not(.on) .lk-ico{filter:grayscale(1);}
+.log-x{font-size:13px;line-height:1;padding:3px 7px;}
 .lk-ro-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none!important;pointer-events:none;}
 input.no-spin{-moz-appearance:textfield;}
 input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
@@ -2018,8 +2028,10 @@ function nimMaxActions(){ return nimDying() ? 1 : 3; }
 function nimSpellCost(sp){ if(!sp || !sp.actions) return { n: 1, timed: '' }; const m = /(\d+)\s*Actions?/i.exec(sp.actions); if(m) return { n: +m[1], timed: '' }; const t = /Casting Time:\s*([^.;]+)/i.exec(sp.actions); return { n: 0, timed: t ? t[1].trim() : sp.actions }; }
 function nimAfter(){ renderActions(); renderNimTurn(); if(typeof scheduleAutosave === 'function') scheduleAutosave(); }
 function nimSpend(n){ if(!turnOn()) return; actions = Math.max(0, actions - n); }
-function toggleTurnMode(){ _nimTB = !turnOn(); actions = nimMaxActions(); _nturn.attacks = 0; _nturn.moves = 0; _nturn.reacted = {}; addLog('Turn-based mode', turnOn() ? 'On' : 'Off', turnOn() ? 'Actions are tracked per turn' : 'Free play — actions aren\'t tracked', 'normal'); nimAfter(); }
-function turnModeBtn(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: 3 actions per turn, End Turn recharges them. Click for free play.' : 'Free play: actions aren\'t tracked. Click to count actions per turn (combat).') + '"><span class="tm-sw"></span>Turn-based</button>'; }
+function toggleTurnMode(){ _nimTB = !turnOn(); actions = nimMaxActions(); _nturn.attacks = 0; _nturn.moves = 0; _nturn.reacted = {}; addLog('Turn-based mode', turnOn() ? 'On' : 'Off', turnOn() ? 'Actions are spent automatically' : 'Tick actions by hand', 'normal'); nimAfter(); }
+function turnModeBtn(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: actions are spent automatically (3 per turn), End Turn recharges them. Click to tick them by hand instead.' : 'Manual: actions aren\'t spent automatically — tick the pips yourself. Click to spend them automatically.') + '"><span class="tm-sw"></span></button>'; }
+// An Action pip, by hand (both modes): an unspent pip spends one action, a spent one gives one back.
+function nimTogglePip(k){ const max = nimMaxActions(); if(k > max) return; actions = k > actions ? Math.min(max, actions + 1) : Math.max(0, actions - 1); nimAfter(); }
 
 function nimBuild(){
   const O = { attacks: [], spells: [], equip: [], reactions: [], actions: [], checks: [] };
@@ -2157,6 +2169,7 @@ function nimEqOf(tr){
 // Use one up: count "×N" down (in the note), or remove the row (and a linked attack row) on the last one.
 function nimEqTakeOne(o){
   const tr = o.row.tr; if(!tr || !tr.isConnected) return 'gone';
+  if(!autoUse()) return 'not counted (auto-use off)';
   if(o.qty <= 1) { removeInvRow(tr.querySelector('.row-x') || tr); return 'used up'; }
   const left = o.qty - 1, note = tr.querySelector('.inv-note'), nm = tr.querySelector('.inv-name'), qf = tr.querySelector('.inv-qty');
   if(qf && invQty(tr) > 1) qf.value = left;
@@ -2166,6 +2179,7 @@ function nimEqTakeOne(o){
   return left + ' left';
 }
 function nimEqSpendCharge(o){
+  if(!autoUse()) return 'charge not counted (auto-use off)';
   const note = o.row.tr.querySelector('.inv-note'), left = Math.max(0, o.charges - 1);
   if(/\d+\s*charges?\b/i.test(note.value)) note.value = note.value.replace(/\d+\s*charges?\b/i, left + ' charge' + (left === 1 ? '' : 's'));
   else note.value = (note.value ? note.value + ' · ' : '') + left + ' charge' + (left === 1 ? '' : 's');
@@ -2237,7 +2251,7 @@ function renderNimTurn(){
   const host = document.getElementById('nim-turn'); if(!host) return;
   const max = nimMaxActions(); if(actions > max) actions = max;
   const O = nimBuild();
-  let pips = ''; for(let k = 1; k <= 3; k++) pips += '<span class="nturn-pip' + (k > actions ? ' used' : '') + (k > max ? ' locked' : '') + '">Action ' + k + '</span>';
+  let pips = ''; for(let k = 1; k <= 3; k++) pips += '<button type="button" class="nturn-pip' + (k > actions ? ' used' : '') + (k > max ? ' locked' : '') + '" onclick="nimTogglePip(' + k + ')" aria-pressed="' + (k > actions) + '"' + (k > max ? ' disabled title="Dying: actions are limited to 1"' : ' title="Click to tick this action used / unused by hand"') + '>Action ' + k + '</button>';
   const mana = num($('mana-cur').value), manaMax = num($('mana-max').value);
   const badges = (nimDying() ? '<span class="nturn-badge warn" title="Dying: actions are limited to 1">Dying · 1 action</span>' : '')
     + (turnOn() && _nturn.attacks ? '<span class="nturn-badge" title="Rushed Attacks: each attack after the first this turn has cumulative disadvantage">Rushed · next attack dis ×' + _nturn.attacks + '</span>' : '');
@@ -2251,9 +2265,9 @@ function renderNimTurn(){
   const sec = (k, title, list, empty) => '<div class="nturn-sec' + (_nturnCollapsed[k] ? ' collapsed' : '') + '"><div class="nturn-sec-hd" onclick="nimToggleSec(\'' + k + '\')"><span class="nc-caret">▼</span><span class="nc-title">' + title + '</span></div><div class="nturn-sec-body">' + (list.length ? list.map(card).join('') : '<div class="nturn-empty">' + empty + '</div>') + '</div></div>';
   host.innerHTML =
     '<div class="nturn-top"><div class="nturn-row1">'
-    + (turnOn() ? '<div class="nturn-econ">' + pips + '</div>'
-    + '<button class="nturn-end" onclick="nimEndTurn()" title="All actions recharge at the end of your turn">End Turn</button>' : '<span class="turn-free">Free play — actions aren\'t tracked</span>')
-    + turnModeBtn() + '</div>'
+    + '<div class="nturn-econ">' + pips + '</div>' + turnModeBtn()
+    + '<button class="nturn-end" onclick="nimEndTurn()" title="All actions recharge at the end of your turn">End Turn</button>'
+    + '</div>'
     + '<div class="nturn-row2">'
     + (manaMax || mana ? '<span class="nturn-stat"><span class="nl">Mana</span> <b>' + mana + '</b>/' + manaMax + '</span>' : '')
     + '<div class="nturn-badges">' + badges + '</div>'
@@ -2314,18 +2328,18 @@ function gtRoll(){
 .nturn-top{background:var(--box);border-bottom:1px solid var(--rule);}
 .nturn-row1{display:flex;align-items:center;gap:8px;padding:9px 10px 6px;flex-wrap:wrap;}
 .nturn-econ{display:flex;gap:6px;flex:1 1 auto;min-width:0;flex-wrap:wrap;}
-.nturn-pip{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.04em;text-transform:uppercase;border:1.5px solid var(--nim);color:var(--nim-dk);border-radius:12px;padding:3px 11px;}
+.nturn-pip{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.04em;text-transform:uppercase;border:1.5px solid var(--nim);color:var(--nim-dk);border-radius:12px;padding:3px 11px;background:transparent;cursor:pointer;line-height:normal;}
+.nturn-pip:disabled{cursor:default;}
 .nturn-pip.used{background:var(--rule);border-color:var(--rule);color:var(--muted);text-decoration:line-through;}
 .nturn-pip.locked{opacity:.35;}
 .nturn-end{flex:0 0 auto;background:var(--nim);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .nturn-end:hover{filter:brightness(1.1);}
-.turn-mode{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--nim-dk);white-space:nowrap;}
+.turn-mode{display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--nim-dk);white-space:nowrap;}
 .turn-mode .tm-sw{position:relative;width:34px;height:19px;border-radius:999px;border:1.5px solid var(--nim);background:transparent;flex:0 0 auto;transition:background .15s;}
 .turn-mode .tm-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--nim);transition:left .15s,background .15s;}
 .turn-mode.on .tm-sw{background:var(--nim);}
 .turn-mode.on .tm-sw::after{left:17px;background:#fff;}
 .turn-mode:focus-visible{outline:2px solid var(--nim);outline-offset:2px;border-radius:6px;}
-.turn-free{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 0;}
 .nturn-row2{display:flex;align-items:center;gap:12px;padding:0 10px 9px;flex-wrap:wrap;}
 .nturn-stat{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--muted);font-size:12px;white-space:nowrap;}
 .nturn-stat .nl{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
@@ -2360,8 +2374,7 @@ body.dark .nturn-badge.warn{color:#f0c060;}
   .nturn-row1 .nturn-econ{flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-start;gap:4px;}
   .nturn-row1 .nturn-econ > *{padding:3px 8px;font-size:11px;white-space:nowrap;flex:0 1 auto;min-width:0;}
   .nturn-row1{flex-wrap:nowrap;justify-content:space-between;align-items:center;gap:6px;}
-  .nturn-row1:has(.turn-mode){flex-wrap:wrap;}
-  .nturn-row1 .nturn-econ:has(+ .nturn-end){flex-basis:calc(100% - 100px);}
+  .nturn-row1 .nturn-econ:has(+ .turn-mode){flex-basis:calc(100% - 140px);}
   .nturn-row2 .nturn-badges{order:-1;flex-basis:100%;justify-content:center;}
   .nturn-row2 .nturn-badges:empty{display:none;}
   .nturn-card .nc-do{padding:9px 12px;font-size:12px;}

@@ -515,13 +515,13 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .act-card.disabled .ac-name{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px;}
 .act-empty{font-size:12px;color:var(--muted);padding:10px 2px;line-height:1.5;}
 body.dark .act-pip{color:#d8cfbf;}
-.turn-mode{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:var(--act-font);font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--yz-dk);white-space:nowrap;}
+.turn-mode{display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:var(--act-font);font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--yz-dk);white-space:nowrap;}
 .turn-mode .tm-sw{position:relative;width:34px;height:19px;border-radius:999px;border:1.5px solid var(--yz);background:transparent;flex:0 0 auto;transition:background .15s;}
 .turn-mode .tm-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--yz);transition:left .15s,background .15s;}
 .turn-mode.on .tm-sw{background:var(--yz);}
 .turn-mode.on .tm-sw::after{left:17px;background:#fff;}
 .turn-mode:focus-visible{outline:2px solid var(--yz);outline-offset:2px;border-radius:6px;}
-.turn-free{font-family:var(--act-font);font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 0;}
+button.act-pip{cursor:pointer;line-height:normal;}
 body.dark .turn-mode{color:#d8cfbf;}
 body.dark .act-sec-hd .ttl{color:#d8cfbf;}
 .act-subtabs{display:flex;gap:0;border-top:1px solid var(--rule);}
@@ -534,15 +534,9 @@ body.dark .act-badge.warn{color:#f0c060;}
   .act-row1{flex-wrap:nowrap;justify-content:space-between;align-items:center;gap:6px;}
   .act-econ{flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-start;gap:4px;}
   .act-econ > *{padding:3px 8px;font-size:11px;white-space:nowrap;flex:0 1 auto;min-width:0;}
-  .act-econ > .turn-free{padding:0;white-space:normal;line-height:1.2;}
   .act-end{margin-left:0;}
   .act-row2{justify-content:flex-end;}
   .act-card .ac-do{padding:9px 12px;font-size:12px;}
-}
-/* Narrow phones: the serif pips + End Turn leave no room, so the switch drops to its own line. */
-@media (max-width:440px){
-  .act-row1{flex-wrap:wrap;row-gap:4px;}
-  .act-end + .turn-mode{flex-basis:100%;justify-content:flex-end;}
 }
 /* Mobile Gear header: Resources / Capital chips drop under the title instead of overflowing the card. */
 @media (max-width:600px){
@@ -794,7 +788,7 @@ body.dark .act-badge.warn{color:#f0c060;}
 <!-- Roll Log -->
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
-  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
+  <div class="log-header"><span class="log-title" aria-hidden="true"></span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button type="button" id="auto-toggle" class="log-lock log-auto on" onclick="toggleAutoUse()" aria-pressed="true" aria-label="Use up consumables automatically" title="Auto-use on: poison doses and used-up magic items (Nisse's porridge, homebrew one-use items) come off your inventory by themselves. Click to count them by hand."><span class="lk-ico">🎒</span></button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #2e3645;background:transparent;color:#a89f93;" title="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="if(window.YZEB)YZEB.launch();" title="Character Builder">Create</button>
@@ -1287,11 +1281,14 @@ var _actCollapsed={};
 var _actSub='slow';   // Action-tab subtab: 'slow' | 'fast' (saved as actSub)
 function actSetSub(k){ _actSub=k==='fast'?'fast':'slow'; renderAction(); scheduleAutosave(); }
 var _actFromTab=false;
-// TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = free
-// play: no action economy — nothing is spent or greyed out; Broken still limits you.
+// TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = nothing
+// is spent automatically and nothing greys out — the Slow / Fast pips stay and can be ticked by
+// hand (as they can when on); Broken still limits you.
 function turnOn(){ return !S||S.turnBased!==false; }
-function toggleTurnMode(){ S.turnBased=!turnOn(); _act=actFresh(); addLog('Turn-based mode',turnOn()?'On':'Off',turnOn()?'Actions are tracked per round':'Free play — actions aren\'t tracked','normal'); renderAction(); scheduleAutosave(); }
-function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" onclick="toggleTurnMode()" title="'+(on?'Turn-based: one slow and one fast action per round, End Turn brings them back. Click for free play.':'Free play: actions aren\'t tracked. Click to count actions per round (combat).')+'"><span class="tm-sw"></span>Turn-based</button>'; }
+function toggleTurnMode(){ S.turnBased=!turnOn(); _act=actFresh(); addLog('Turn-based mode',turnOn()?'On':'Off',turnOn()?'Actions are tracked per round':'Actions aren\'t spent automatically','normal'); renderAction(); scheduleAutosave(); }
+function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: actions are spent automatically. Click to tick them by hand instead.':'Manual: actions aren\'t spent automatically — tick the pips yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
+// the Slow / Fast pips are buttons: tick or untick them by hand (both modes)
+function togglePip(k){ _act[k]=!_act[k]; if(k==='slow'&&!_act.slow) _act.slowAsFast=false; renderAction(); scheduleAutosave(); }
 function actMainRoll(){ if(!turnOn()) return; if(_actFromTab||typeof _act==='undefined'||!_act) return; if(!_act.slow){ _act.slow=true; if(typeof renderAction==='function') renderAction(); if(typeof scheduleAutosave==='function') scheduleAutosave(); } }
 var _actOpts=[];
 function actCan(kind){ if(!turnOn()) return true; if(kind==='slow') return !_act.slow; if(kind==='fast') return !_act.fast||!_act.slow; return true; }
@@ -1323,7 +1320,12 @@ function actKindLabel(k){ return k==='slow'?'Slow':k==='fast'?'Fast':'Free'; }
 // Quantity rides on the item name; poison doses on g.charges.
 function eqBaseName(g){ return String((g&&g.name)||'').replace(/\s*×\s*\d+\s*$/,'').replace(/\s+x\d+\s*$/i,'').trim(); }
 function eqQty(g){ var m=String((g&&g.name)||'').match(/×\s*(\d+)\s*$/)||String((g&&g.name)||'').match(/\sx(\d+)\s*$/i); return m?Math.max(0,parseInt(m[1],10)):1; }
-function eqConsume(i){ var g=S.gear[i]; if(!g) return; var q=eqQty(g);
+// AUTO-USE (roll-log switch, saved on the sheet; on unless turned off): poison doses and used-up
+// magic items come off the inventory by themselves. Off = the effect happens, the count stays.
+function autoUse(){ return !S||S.autoUse!==false; }
+function toggleAutoUse(){ S.autoUse=!autoUse(); renderAutoBtn(); addLog('Auto-use',autoUse()?'On':'Off',autoUse()?'Consumables are used up automatically':'Count consumables yourself','normal'); scheduleAutosave(); }
+function renderAutoBtn(){ var b=document.getElementById('auto-toggle'); if(!b) return; var on=autoUse(); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); b.title=on?'Auto-use on: poison doses and used-up magic items (Nisse\'s porridge, homebrew one-use items) come off your inventory by themselves. Click to count them by hand.':'Auto-use off: nothing is taken from your inventory — count consumables yourself. Click to turn it back on.'; }
+function eqConsume(i){ if(!autoUse()) return; var g=S.gear[i]; if(!g) return; var q=eqQty(g);
   if(q>1){ g.name=eqBaseName(g)+(q-1>1?' ×'+(q-1):''); delete g.charges; } else S.gear.splice(i,1);
   renderInventory(); }
 function eqNorm(s){ return String(s||'').toLowerCase().replace(/\s*\(.*?\)\s*/g,' ').replace(/[^a-z0-9]+/g,' ').trim(); }
@@ -1339,6 +1341,7 @@ function eqBuild(add){
       var tox=(String((gd&&gd.comment)||g.note||'').match(/toxicity\s*(\d+)/i)||[])[1];
       var start=num((nm.match(/\((\d+)\s*doses?\)/i)||[])[1])||1, left=(g.charges!=null&&g.charges!=='')?num(g.charges):start;
       add('equip',{ name:nm+qs, kind:'slow', sub:left+' dose'+(left===1?'':'s')+' left · poison someone'+(tox?' · toxicity '+tox:''), btn:'Use', run:function(){
+        if(!autoUse()){ addLog(nm,'Poison given',(tox?'Toxicity '+tox+': the victim resists, and the GM applies the effect. ':'')+'Dose not counted (auto-use off).','normal'); return; }
         if(g.charges==null||g.charges==='') g.charges=start; g.charges=Math.max(0,num(g.charges)-1); var rem=g.charges;
         addLog(nm,'Poison given','One dose used'+(tox?' — toxicity '+tox+': the victim resists, and the GM applies the effect':'')+'. '+rem+' dose'+(rem===1?'':'s')+' left.','normal');
         if(rem<=0) eqConsume(i); else renderInventory(); } });
@@ -1393,14 +1396,14 @@ function renderAction(){
   var mine=function(list){ return list.filter(function(o){ return sub==='fast' ? o.kind==='fast' : o.kind!=='fast'; }); };
   var tabs='<div class="act-subtabs"><button class="act-subtab'+(sub==='slow'?' on':'')+'" onclick="actSetSub(\'slow\')">Slow Actions</button>'
     +'<button class="act-subtab'+(sub==='fast'?' on':'')+'" onclick="actSetSub(\'fast\')">Fast Actions</button></div>';
-  var pip=function(on,lbl){ return '<span class="act-pip'+(on?' used':'')+'">'+lbl+'</span>'; };
-  var pips=pip(_act.slow, _act.slowAsFast?'Slow → Fast':'Slow')+pip(_act.fast,'Fast');
+  var pip=function(on,lbl,k){ return '<button type="button" class="act-pip'+(on?' used':'')+'" onclick="togglePip(\''+k+'\')" aria-pressed="'+!!on+'" title="Click to tick it by hand">'+lbl+'</button>'; };
+  var pips=pip(_act.slow, _act.slowAsFast?'Slow → Fast':'Slow','slow')+pip(_act.fast,'Fast','fast');
   var card=function(o){ var can=!o.blocked&&actCan(o.kind);
     var sub=[o.blocked, actKindLabel(o.kind), o.sub].filter(Boolean).join(' · ');
     return '<div class="act-card'+(can?'':' disabled')+'"><div class="ac-main"><div class="ac-name">'+esc(o.name)+'</div>'+(sub?'<div class="ac-sub">'+esc(sub)+'</div>':'')+'</div><button class="ac-do" onclick="actDo('+o.i+')">'+esc(o.btn||'Use')+'</button></div>'; };
   var sec=function(key,title,list,empty){ var col=!!_actCollapsed[key];
     return '<div class="act-sec'+(col?' collapsed':'')+'"><div class="act-sec-hd" onclick="actToggleSec(\''+key+'\')"><span class="caret">▼</span><span class="ttl">'+title+'</span></div><div class="act-sec-body">'+(list.length?list.map(card).join(''):'<div class="act-empty">'+empty+'</div>')+'</div></div>'; };
-  host.innerHTML='<div class="act-top"><div class="act-row1"><div class="act-econ">'+(turnOn()?pips:'<span class="turn-free">Free play — actions aren\'t tracked</span>')+'</div>'+(turnOn()?'<button class="act-end" onclick="actEndTurn()" title="Clear this round\'s slow and fast actions">End Turn</button>':'')+turnModeBtn()+'</div>'
+  host.innerHTML='<div class="act-top"><div class="act-row1"><div class="act-econ">'+pips+'</div>'+turnModeBtn()+'<button class="act-end" onclick="actEndTurn()" title="Clear this round\'s slow and fast actions">End Turn</button></div>'
     +(function(r){ return r?'<div class="act-row2">'+r+'</div>':''; })(actRow2())+tabs+'</div>'
     +(sub==='slow'
       ? sec('attacks','Attacks',O.attacks,'No weapons equipped — equip one on the Gear tab.')
@@ -1567,7 +1570,7 @@ function applySheet(d){
   S.crits=Array.isArray(d.crits)?d.crits.map(function(c){ return {name:c.name||'',effect:c.effect||'',mod:num(c.mod)}; }):[];
   if(Array.isArray(d.relationships)) S.relationships=d.relationships.map(function(r){ return {name:r.name||'',note:r.note||''}; });
   _act=actFresh(); if(d.act&&typeof d.act==='object'){ ['slow','fast','slowAsFast','brokeFree'].forEach(function(k){ _act[k]=!!d.act[k]; }); }
-  _actSub=d.actSub==='fast'?'fast':'slow'; S.turnBased=d.turnBased!==false;
+  _actSub=d.actSub==='fast'?'fast':'slow'; S.turnBased=d.turnBased!==false; S.autoUse=d.autoUse!==false;
   _lastRoll=null; renderAll();
   if(typeof campaignRestore==='function' && d.campaign!==undefined) campaignRestore(d.campaign);
   if(window.__ddSaveTitle && S.name) try{ window.__ddSaveTitle(S.name); }catch(e){}
@@ -1577,7 +1580,7 @@ function renderAll(){
   $('f-name').value=S.name||''; $('f-pronouns').value=S.pronouns||''; $('f-age').value=S.age||'';
   $('f-appearance').value=S.appearance||''; $('f-notes').value=S.notes||''; $('f-xp').value=num(S.xp); $('f-memento').value=S.memento||'';
   ['motivation','trauma','secret'].forEach(function(k){ var el=$('f-'+k); if(el)el.value=S[k]||''; });
-  renderArchDisp(); renderAttrSkills(); renderConds(); renderRes(); renderTalents(); renderRelationships(); renderInventory(); renderAttacks(); renderCrits(); updateFoot(); refreshWizardButtons();
+  renderArchDisp(); renderAttrSkills(); renderConds(); renderRes(); renderTalents(); renderRelationships(); renderInventory(); renderAttacks(); renderCrits(); updateFoot(); refreshWizardButtons(); renderAutoBtn();
 }
 function saveSheet(quiet){ var data=collectSheet(), json=JSON.stringify(data); try{ localStorage.setItem('vae_sheet',json); }catch(e){} if(window.__ddSave) window.__ddSave({ vae_sheet:json }); if(!quiet) addLog('Sheet Saved','✓',data.name||'Unnamed','normal'); }
 function syncDocTitle(){ var name=($('f-name').value||'').trim(); if(name&&window.__ddSaveTitle) window.__ddSaveTitle(name); }
@@ -1776,6 +1779,9 @@ if(window.VAEHomebrew){ try{ window.VAEHomebrew.load(function(){ if(typeof _pk!=
 .log-lock:hover{background:rgba(255,255,255,.35);}
 .log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
 .log-lock .lk-ico{font-size:15px;line-height:1;}
+.log-auto:not(.on){opacity:.55;}
+.log-auto:not(.on) .lk-ico{filter:grayscale(1);}
+.log-x{font-size:13px;line-height:1;padding:3px 7px;}
 .lk-ro-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none!important;pointer-events:none;}
 input.no-spin{-moz-appearance:textfield;}
 input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}

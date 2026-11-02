@@ -61,13 +61,14 @@ export default function NewSoloCampaign({
                   </select>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className={label} htmlFor="solo-char">Hero</label>
+                  <label className={label} htmlFor="solo-char">First hero</label>
                   <select id="solo-char" name="character" className={field} defaultValue="">
                     <option value="">Choose later</option>
                     {characters.map((c) => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
                   </select>
+                  <p className="text-[11px] text-[var(--muted)]">Play solo, or add up to three more heroes on the solo page before you set out.</p>
                 </div>
                 <div className="flex flex-wrap items-center justify-end gap-2">
                   <button

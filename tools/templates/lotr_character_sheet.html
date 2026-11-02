@@ -210,14 +210,15 @@ body.dark .turn-pill.ready{color:#f0cf62;}
 body.dark .econ-chip.avail{background:rgba(90,200,120,.18);color:#7ad48a;}
 .turn-end-btn{flex:0 0 auto;background:var(--acc);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:var(--f-ui);font-weight:600;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .turn-end-btn:hover{background:#a8861d;}
-.turn-row1{flex-wrap:wrap;}   /* the Turn-based switch drops under End Turn when the row is narrow */
-.turn-mode{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:var(--f-ui);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--acc-dk);white-space:nowrap;}
+.turn-row1{flex-wrap:wrap;}   /* the Turn-based switch + End Turn drop under the chips together when the row is narrow */
+.turn-endgrp{display:flex;align-items:stretch;gap:8px;margin-left:auto;flex:0 0 auto;}
+.turn-endgrp .turn-mode{align-self:center;}
+.turn-mode{display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:var(--f-ui);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--acc-dk);white-space:nowrap;}
 .turn-mode .tm-sw{position:relative;width:34px;height:19px;border-radius:999px;border:1.5px solid var(--acc);background:transparent;flex:0 0 auto;transition:background .15s;}
 .turn-mode .tm-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--acc);transition:left .15s,background .15s;}
 .turn-mode.on .tm-sw{background:var(--acc);}
 .turn-mode.on .tm-sw::after{left:17px;background:#fff;}
 .turn-mode:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:6px;}
-.turn-free{font-family:var(--f-ui);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 0;align-self:center;}
 .turn-row2{display:flex;align-items:center;gap:14px;padding:0 10px 7px;flex-wrap:wrap;}
 .turn-slots{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1 1 auto;min-width:0;}
 .tslot{display:flex;align-items:center;gap:4px;}
@@ -1468,8 +1469,8 @@ body.dark{--scar-c:#3a1f48;}
         <div class="turn-top">
           <div class="turn-row1">
             <div class="turn-econ" id="turn-econ"></div>
-            <button class="turn-end-btn" id="turn-end-btn" onclick="endTurn()" title="Start a new turn — regain your action, bonus action, reaction and movement">⟳ End Turn</button>
-            <span id="turn-mode-slot" style="display:contents;"></span>
+            <span class="turn-endgrp"><span id="turn-mode-slot" style="display:contents;"></span>
+            <button class="turn-end-btn" id="turn-end-btn" onclick="endTurn()" title="Start a new turn — regain your action, bonus action, reaction and movement">⟳ End Turn</button></span>
           </div>
           <div class="turn-row2">
             <div class="turn-slots" id="turn-slots"></div>
@@ -1580,9 +1581,9 @@ body.dark{--scar-c:#3a1f48;}
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
   <div class="log-header">
-    <div class="log-title">Roll Log</div>
+    <div class="log-title" aria-hidden="true"></div>
     <div style="display:flex;align-items:center;gap:8px;">
-      <button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button id="lock-toggle" class="log-lock" onclick="toggleLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (automated). Click to unlock for manual editing."><span class="lk-ico">🔒</span></button><button class="log-clear" onclick="clearLog()">Clear</button>
+      <button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button type="button" id="auto-toggle" class="log-lock log-auto on" onclick="toggleAutoUse()" aria-pressed="true" aria-label="Use up consumables automatically" title="Auto-use on: torches, candles, flasks of oil (thrown or burned by a lamp or lantern), herbal remedies and healer&#39;s kit uses come off your inventory by themselves. Click to count them by hand."><span class="lk-ico">🎒</span></button><button id="lock-toggle" class="log-lock" onclick="toggleLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (automated). Click to unlock for manual editing."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button>
     </div>
   </div>
   <div class="log-actions">
@@ -2568,6 +2569,12 @@ function gearChargesMax(ref){ const g = gearUse(ref); return g ? (g.charges || g
 // The first Inventory row holding a lamp/lantern's fuel (a flask of oil), or null.
 function fuelRow(fuel){ return invRows().find(r => num(r.querySelector('.inv-qty').value) > 0 && [invRowRef(r), r.querySelector('.inv-name').value].some(x => gearUse(x) === GEAR_USES[fuel])) || null; }
 function invQty(tr){ return num(tr.querySelector('.inv-qty').value); }
+// AUTO-USE (roll-log switch, saved on the sheet; on unless turned off): consumables come off
+// the inventory by themselves. Off = the item still works, only the count / uses are left alone.
+let _autoUse = true;
+function autoUse(){ return _autoUse !== false; }
+function toggleAutoUse(){ _autoUse = !autoUse(); renderAutoBtn(); addLog('Auto-use', autoUse() ? 'On' : 'Off', autoUse() ? 'Consumables are used up automatically' : 'Count consumables yourself', 'normal'); scheduleAutosave(); }
+function renderAutoBtn(){ const b = $('auto-toggle'); if(!b) return; const on = autoUse(); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.title = on ? 'Auto-use on: torches, candles, flasks of oil (thrown or burned by a lamp or lantern), herbal remedies and healer\'s kit uses come off your inventory by themselves. Click to count them by hand.' : 'Auto-use off: nothing is taken from your inventory — count consumables and uses yourself. Click to turn it back on.'; }
 // Use one up: a bundle loses one of its contents (and one bundle when it's empty); anything else loses one.
 function consumeRow(tr){
   const q = tr.querySelector('.inv-qty'), max = gearChargesMax(invRowRef(tr)), g = gearUse(invRowRef(tr));
@@ -2619,9 +2626,12 @@ function useInvItem(rid){
   if(rollsOff()) return;
   itemSpendCost(u.cost);
   const bits = [ITEM_COST_LBL[u.cost], u.effect]; let result = '✦';
+  if(!autoUse()){ if(u.cmax || u.consume || u.pack || u.fuel) bits.push('not counted (auto-use off)'); }
+  else {
   if(u.cmax){ tr.dataset.charges = Math.max(0, u.charges - 1); renderInvUses(tr); bits.push((u.charges - 1) + '/' + u.cmax + ' uses left'); }
   if(u.consume || u.pack){ const c = consumeRow(tr); bits.push('used' + (c.left > 0 ? ' (' + c.left + ' ' + c.unit + ')' : ' (none left)')); }
   if(u.fuel){ const c = consumeRow(fuelRow(u.fuel)); bits.push('burned 1 flask of oil' + (c.left > 0 ? ' (' + c.left + ' left)' : ' (none left)')); }
+  }
   addLog((u.verb || 'Use') + ' ' + u.name, result, bits.join(' · '), 'normal');
   if(u.attack) d20Check(u.name + ' (improvised, ranged)', modOf('DEX'), { kind:'attack', abil:'DEX', note:'improvised weapon — no proficiency' });
   scheduleAutosave(); afterTurnAction();
@@ -3369,15 +3379,17 @@ function syncTabHeight(){
 // ═══ TURN HUB ═════════════════════════════════════════════════════════════
 let _turn = { action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0, sneakUsed:false };
 let _turnSub = 'action';
-// TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = free
-// play: no action economy — nothing is spent or greyed out; Incapacitated still stops you.
+// TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = actions
+// aren't spent automatically — tick the chips by hand (_turn.hand); nothing is greyed out for
+// "already used this turn". Dash / Dodge / Ready still last until End Turn; Incapacitated still stops you.
 let _turnBased = true;
 function turnOn(){ return _turnBased !== false; }
-function freshTurn(){ return { action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0, sneakUsed:false, dash:false, dodge:0, ready:0 }; }
-function toggleTurnMode(){ _turnBased = !turnOn(); _turn = freshTurn(); addLog('Turn-based mode', turnOn() ? 'On' : 'Off', turnOn() ? 'Actions are tracked per turn' : 'Free play — actions aren\'t tracked', 'normal'); renderTurn(); scheduleAutosave(); }
-function turnModeBtn(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: Action, Bonus Action and Reaction once per turn, End Turn brings them back. Click for free play.' : 'Free play: actions aren\'t tracked. Click to count actions per turn (combat).') + '"><span class="tm-sw"></span>Turn-based</button>'; }
-// Free play: whatever was just spent comes straight back, so nothing stays used.
-function freePlayClear(){ if(!turnOn()) _turn = freshTurn(); }
+function freshTurn(){ return { action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0, sneakUsed:false, dash:false, dodge:0, ready:0, hand:{} }; }
+function toggleTurnMode(){ _turnBased = !turnOn(); _turn = freshTurn(); addLog('Turn-based mode', turnOn() ? 'On' : 'Off', turnOn() ? 'Actions are spent automatically' : 'Tick actions by hand', 'normal'); renderTurn(); scheduleAutosave(); }
+function turnModeBtn(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: Action, Bonus Action and Reaction are spent automatically, End Turn brings them back. Click to tick them by hand instead.' : 'Manual: actions aren\'t spent automatically — tick the chips yourself. Click to spend them automatically.') + '"><span class="tm-sw"></span></button>'; }
+// Manual mode: whatever an action just spent comes straight back (only the hand-ticked chips,
+// _turn.hand, stay); Dash / Dodge / Ready and movement are kept until End Turn.
+function freePlayClear(){ if(turnOn()) return; const k = _turn; _turn = Object.assign(freshTurn(), { move:k.move||0, dash:!!k.dash, dodge:k.dodge||0, ready:k.ready||0, hand:k.hand||{} }); }
 let _turnOpts = [];
 let _turnCollapsed = {};
 const STANDARD_ACTIONS = [
@@ -3436,7 +3448,7 @@ function standardOpt(a, sub){
   const disabled = isAttack ? actionFullySpent() : (sub === 'action' ? _turn.action : _turn[sub]);
   if(sub === 'action' && a.name === 'Search') return { name: a.name, meta: a.desc, usesHTML: '', disabled, run(){ openSearchChoice(); } };
   if(sub === 'action' && a.name === 'Ready') return { name: a.name, meta: a.desc, usesHTML: '', disabled,
-    run(){ _turn.action = true; _turn.actionType = 'ready'; _turn.ready = 1; addLog('Ready', 'Waiting', turnOn() ? 'Readied action — click the yellow Action chip when the trigger happens (uses your Reaction)' : 'Readied action — take your response when the trigger happens', 'normal'); afterTurnAction(); } };
+    run(){ _turn.action = true; _turn.actionType = 'ready'; _turn.ready = 1; addLog('Ready', 'Waiting', 'Readied action — click the yellow Action chip when the trigger happens (uses your Reaction)', 'normal'); afterTurnAction(); } };
   return { name: a.name, meta: a.desc, usesHTML: '', disabled,
     run(){
       if(sub === 'action' && a.name === 'Hide' && rollsOff()) return;
@@ -3545,15 +3557,14 @@ function renderTurn(){
   const panel = $('tab-turn'); if(!panel) return;
   freePlayClear();
   const ms = $('turn-mode-slot'); if(ms) ms.innerHTML = turnModeBtn();
-  const eb = $('turn-end-btn'); if(eb) eb.style.display = turnOn() ? '' : 'none';
   const mv = turnMoveMax(); if(_turn.move > mv) _turn.move = mv;
   const mvl = $('turn-move-left'), mvm = $('turn-move-max'); if(mvl && document.activeElement !== mvl) mvl.textContent = Math.max(0, mv - _turn.move); if(mvm) mvm.textContent = mv;
   const slots = $('turn-slots'); if(slots){ const cr = allResources().find(r => r.craft); slots.innerHTML = cr ? '<span class="tslot"><span class="tslot-lbl">Craft slots</span>' + Array.from({ length: cr.max }, (_, j) => '<span class="tslot-pip' + (j >= cr.max - (resourceUsed[cr.key] || 0) ? ' used' : '') + '" onclick="toggleResource(\'' + jsq(cr.key) + '\',' + (cr.max - j) + ',' + cr.max + ')"></span>').join('') + '</span>' : ''; }
   const econ = $('turn-econ');
   if(econ){ const chip = (type, lbl) => (type === 'action' && _turn.ready)
       ? '<button class="econ-chip ready" onclick="toggleEcon(\'action\')" title="Readied — click when the trigger happens (uses your Reaction)">' + lbl + '</button>'
-      : '<button class="econ-chip ' + (econUsed(type) ? 'used' : 'avail') + '" onclick="toggleEcon(\'' + type + '\')" title="' + lbl + ' — click to toggle used / ready">' + lbl + '</button>';
-    econ.innerHTML = turnOn() ? chip('action', 'Action') + chip('bonus', 'Bonus Action') + chip('reaction', 'Reaction') : '<span class="turn-free">Free play — actions aren\'t tracked</span>';
+      : (u => '<button type="button" class="econ-chip ' + (u ? 'used' : 'avail') + '" onclick="toggleEcon(\'' + type + '\')" aria-pressed="' + u + '" title="' + lbl + ' — click to tick it used / ready by hand">' + lbl + '</button>')(turnOn() ? !!econUsed(type) : !!(_turn.hand || {})[type]);
+    econ.innerHTML = chip('action', 'Action') + chip('bonus', 'Bonus Action') + chip('reaction', 'Reaction');
     let st = $('turn-status'); if(!st){ st = document.createElement('div'); st.id = 'turn-status'; st.className = 'turn-status'; econ.parentNode.insertBefore(st, econ.nextSibling); }
     st.innerHTML = turnStatusHTML(); st.style.display = st.innerHTML ? '' : 'none'; }
   document.querySelectorAll('.turn-subtab').forEach(b => b.classList.toggle('on', b.dataset.sub === _turnSub));
@@ -3596,8 +3607,8 @@ function checkSpendsAction(){
 function sheetRollAbility(id){ rollAbility(id); checkSpendsAction(); }
 function sheetRollSkill(name){ rollSkill(name); checkSpendsAction(); }
 function toggleEcon(type){
-  if(!turnOn()) return;
   if(type === 'action' && _turn.ready){ fireReadied(); return; }
+  if(!turnOn()){ _turn.hand = _turn.hand || {}; _turn.hand[type] = !_turn.hand[type]; renderTurn(); scheduleAutosave(); return; }   // manual: tick by hand only
   startOfTurnClear();
   if(type === 'action'){ if(actionFullySpent()){ _turn.action = false; _turn.actionType = null; _turn.attacksMade = 0; } else { _turn.action = true; _turn.actionType = 'other'; } }
   else { _turn[type] = !_turn[type]; }
@@ -3610,7 +3621,7 @@ function endTurn(){
   // Dodge and a readied action last until the start of your next turn, so they
   // carry past End Turn once (2) and clear when you act again or end that turn.
   const carryDodge = _turn.dodge === 1 ? 2 : 0, carryReady = _turn.ready === 1 ? 2 : 0;
-  _turn = { action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0, sneakUsed:false, dash:false, dodge:carryDodge, ready:carryReady };
+  _turn = Object.assign(freshTurn(), { dodge:carryDodge, ready:carryReady });
   renderTurn(); scheduleAutosave();
 }
 
@@ -3883,7 +3894,7 @@ function collectSheet(){
     scores, saveProf, skillProf,
     speed: v('f-speed'), ac: v('f-ac'), acTemp: v('f-ac-temp'), hpCur: num(v('f-hp-cur')), hpMax: num(v('f-hp-max')), hpTemp: num(v('f-hp-temp')), hitdice: v('f-hitdice'), hdLeft: hdRemaining(), hdUsed,
     locked: _locked, ov: _ov,
-    turn: _turn, turnBased: _turnBased, turnSub: _turnSub, turnCollapsed: _turnCollapsed,
+    turn: _turn, turnBased: _turnBased, autoUse: _autoUse, turnSub: _turnSub, turnCollapsed: _turnCollapsed,
     inspiration: $('insp-btn').classList.contains('on'), deathSucc, deathFail, activeConditions, defenses, companions, exhaustion, tab: _tab,
     attacks, inventory, gp: num(v('f-gp')), sp: num(v('f-sp')), cp: num(v('f-cp')),
     proficiencies: v('f-proficiencies'), notes: v('f-notes'),
@@ -3901,6 +3912,7 @@ function applySheet(d){
   _ov = (d.ov && typeof d.ov === 'object') ? d.ov : {};
   _turn = Object.assign({ action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0, sneakUsed:false }, d.turn || {});
   _turnBased = d.turnBased !== false;
+  _autoUse = d.autoUse !== false; renderAutoBtn();
   _turnSub = d.turnSub || 'action';
   _turnCollapsed = (d.turnCollapsed && typeof d.turnCollapsed === 'object') ? d.turnCollapsed : {};
   const set = (id, val) => { const el = $(id); if(!el) return; const sv = (val == null ? '' : val); if('value' in el) el.value = sv; else el.textContent = sv; };
@@ -4208,6 +4220,9 @@ if(window.LOTRHB) LOTRHB.load(function(){
 .log-lock:hover{background:rgba(255,255,255,.35);}
 .log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
 .log-lock .lk-ico{font-size:15px;line-height:1;}
+.log-auto:not(.on){opacity:.55;}
+.log-auto:not(.on) .lk-ico{filter:grayscale(1);}
+.log-x{font-size:13px;line-height:1;padding:3px 7px;}
 .lk-ro-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none!important;pointer-events:none;}
 input.no-spin{-moz-appearance:textfield;}
 input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}

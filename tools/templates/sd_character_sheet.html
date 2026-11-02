@@ -403,15 +403,6 @@ body.hd-mode .sd-vital-ac{display:none;}
 .inv-del-btn{width:20px;flex:0 0 20px;padding:1px 0;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--muted);border-radius:2px;text-align:center;}
 .inv-del-btn:hover{border-color:#c8503a;color:#e0776f;}
 .inv-empty{padding:8px 10px;font-family:'Montserrat',sans-serif;font-size:10px;color:var(--muted);font-style:italic;}
-/* Auto-consume ammo toggle switch (next to + Add Item) */
-.sw-toggle{position:relative;display:inline-block;width:26px;height:14px;background:#4a4a4a;border:1px solid #2a2a2a;border-radius:8px;cursor:pointer;transition:background .12s;flex:0 0 auto;vertical-align:middle;}
-.sw-toggle.on{background:#7a5a00;border-color:#c8a020;}
-.sw-knob{position:absolute;top:2px;left:2px;width:10px;height:10px;border-radius:50%;background:#ddd;transition:left .12s;}
-.sw-toggle.on .sw-knob{left:13px;background:#f0d070;}
-.ammo-toggle-lbl{display:flex;align-items:center;gap:5px;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);user-select:none;}
-/* Auto toggle lives in the black title bar now — lighten it and bump the type */
-.title-auto{color:rgba(255,255,255,.72);font-size:10px;align-self:center;}
-.title-auto:hover{color:#fff;}
 .gear-disable-btn{width:20px;flex:0 0 20px;padding:1px 0;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;color:var(--muted);border-radius:2px;flex-shrink:0;text-align:center;}
 .gear-disable-btn.on{background:#3a1a1a;border-color:#7a2d2d;color:#df6a6a;}
 /* FREE TO CARRY */
@@ -501,7 +492,6 @@ body.dark .sheet{border-color:#444;}
 .lg-word{font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:34px;line-height:.9;color:#fff;}
 .lg-sub{font-family:'Montserrat',sans-serif;font-weight:800;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-top:4px;}
 .hdr-top .name-primary{flex:0 1 340px;}
-.hdr-top .title-auto{flex:0 0 auto;margin-left:auto;display:flex;align-items:center;gap:6px;color:#fff;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
 .hdr-metarow{display:flex;gap:7px;flex-wrap:wrap;align-items:stretch;}
 .hdr-field,.lockfield{border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.08);border-radius:7px;min-width:0;padding:4px 9px;}
 .hdr-metarow .lockfield{flex:1 1 0;}
@@ -540,8 +530,6 @@ body.dark .sl::after{background:#3a3320;}
   .main-body{padding:8px;gap:8px;align-items:stretch;}
   .hdr-top{gap:9px;}
   .hdr-top .name-primary{flex:1 1 100%;order:2;}
-  .hdr-top .title-auto{font-size:12px;}
-  .hdr-top .title-auto .sw-toggle{transform:scale(1.5);margin:0 4px;}
   .hdr-metarow > *{flex:1 1 31%!important;}
   .sd-vitals-card{order:1;}
   .sd-abilities{order:2;}
@@ -560,13 +548,14 @@ body.dark .sl::after{background:#3a3320;}
 .sdt-pip.hd{border-style:dashed;}
 .sdt-end{flex:0 0 auto;background:var(--gold);color:var(--on-gold);border:none;border-radius:7px;padding:7px 14px;font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .sdt-end:hover{filter:brightness(1.08);}
-.turn-mode{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-ink);white-space:nowrap;}
+.turn-mode{display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-ink);white-space:nowrap;}
 .turn-mode .tm-sw{position:relative;width:34px;height:19px;border-radius:999px;border:1.5px solid var(--gold);background:transparent;flex:0 0 auto;transition:background .15s;}
 .turn-mode .tm-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--gold);transition:left .15s,background .15s;}
 .turn-mode.on .tm-sw{background:var(--gold);}
 .turn-mode.on .tm-sw::after{left:17px;background:#fff;}
 .turn-mode:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px;}
-.turn-free{font-family:'Montserrat',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 0;}
+button.sdt-pip{background:transparent;cursor:pointer;line-height:inherit;}
+.sdt-pip:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 .sdt-row2{display:flex;align-items:center;gap:10px;padding:0 10px 9px;flex-wrap:wrap;}
 .sdt-luck{display:inline-flex;align-items:center;gap:6px;font-family:'Montserrat',sans-serif;font-size:12px;color:var(--ink);}
 .sdt-lbl{font-weight:800;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-ink);}
@@ -604,7 +593,6 @@ body.dark .sdt-badge.bad{color:#f08a84;border-color:#a8433d;}
 .sdt-empty{font-family:'Montserrat',sans-serif;font-size:11px;color:var(--muted);padding:10px 2px;}
 @media (max-width:600px){
   .sdt-row1{flex-wrap:nowrap;justify-content:space-between;align-items:center;gap:6px;}
-  .sdt-row1:has(.turn-mode){flex-wrap:wrap;}
   .sdt-econ{flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-start;gap:4px;}
   .sdt-econ > *{padding:3px 8px;font-size:11px;white-space:nowrap;flex:0 1 auto;min-width:0;}
   .sdt-row2{justify-content:space-between;}
@@ -796,7 +784,6 @@ body.dark .sdt-badge.bad{color:#f08a84;border-color:#a8433d;}
         <div class="lg-word">Shadowdark</div>
         <div class="lg-sub">Character Sheet</div>
       </div>
-      <span class="ammo-toggle-lbl title-auto" onclick="toggleAutoConsume()" title="Auto: computes AC from your equipped armor and shield, and auto-consumes ammo (bows spend an arrow, crossbows a bolt), uses up a scroll on casting, and marks a wand spent on a failed check (broken on a natural 1). Turn off to handle AC and these items by hand. Field editing is controlled by the Lock button, not Auto."><span>Auto</span><span class="sw-toggle on" id="ammo-switch"><span class="sw-knob"></span></span></span>
       <div class="hdr-field name-primary"><label>Name</label><input type="text" id="f-name" placeholder="Character Name"></div>
     </div>
     <div class="hdr-metarow">
@@ -975,14 +962,14 @@ body.dark .sdt-badge.bad{color:#f08a84;border-color:#a8433d;}
 <div class="roll-log" id="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
   <div class="log-header" id="log-header-bar">
-    <span class="log-title">Roll Log</span>
+    <span class="log-title" aria-hidden="true"></span>
     <!-- The buttons sit in one flex group, as they do on all thirteen other
          sheets. .log-header is justify-content:space-between, so without this
          wrapper every button added to the header became one more child for the
          free space to be dealt out between — first the dice gear, then the VTT
          button — which is where the gap beside Clear came from. Wrapped,
          space-between only ever sees two children: the title and the group. -->
-    <div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear" onclick="clearLog()">Clear</button></div>
+    <div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button type="button" id="ammo-switch" class="log-lock log-auto on" onclick="toggleAutoConsume()" aria-pressed="true" aria-label="Auto: work out AC and use up consumables automatically" title="Auto on: AC is worked out from your equipped armor and shield, and consumables are used up by themselves — an arrow or bolt per bow/crossbow shot, potions, torches, candles, lantern oil, holy water and other Equipment items when used, a scroll when cast, and a wand marked spent on a failed check (broken on a natural 1). Click to handle AC and these items by hand."><span class="lk-ico">🎒</span></button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div>
   </div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid var(--rule);" title="Link this sheet to a campaign" aria-label="Campaign">Link</button>
@@ -1824,12 +1811,15 @@ function setDefaultTab(){ setTab('action'); }   // sheets always open on the Act
 // (rollSpell() already handles lost spells, scrolls and wands — this tab just calls it).
 // End Turn clears the bubbles and writes nothing to the Roll Log. No round counter.
 var _sdTurn = { move: false, action: false, second: false, focus: '' };
-// TURN-BASED MODE (Action tab switch, saved as turnBased; on unless turned off). Off = free play:
-// your Action isn't spent or checked, and there's no HeroDark second action.
+// TURN-BASED MODE (Action tab switch, saved as turnBased; on unless turned off). Off = your Action
+// isn't spent or checked automatically (no HeroDark second action either) — the pips stay and can
+// be ticked by hand, as they can when on.
 var _sdTurnBased = true;
 function turnOn(){ return _sdTurnBased !== false; }
-function toggleTurnMode(){ _sdTurnBased = !turnOn(); _sdTurn = { move: false, action: false, second: false, focus: _sdTurn.focus || '' }; addLog('Turn-based mode', turnOn() ? 'On' : 'Off', turnOn() ? 'Actions are tracked per turn' : 'Free play — actions aren\'t tracked', 'normal'); sdAfter(); }
-function turnModeBtn(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: one action per turn, End Turn brings it back. Click for free play.' : 'Free play: actions aren\'t tracked. Click to count actions per turn (combat).') + '"><span class="tm-sw"></span>Turn-based</button>'; }
+function toggleTurnMode(){ _sdTurnBased = !turnOn(); _sdTurn = { move: false, action: false, second: false, focus: _sdTurn.focus || '' }; addLog('Turn-based mode', turnOn() ? 'On' : 'Off', turnOn() ? 'Actions are spent automatically' : 'Actions aren\'t spent automatically — tick the pips by hand', 'normal'); sdAfter(); }
+function turnModeBtn(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: your action is spent automatically (one per turn). Click to tick it by hand instead.' : 'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.') + '"><span class="tm-sw"></span></button>'; }
+// The pips are buttons: tick or untick by hand (both modes). 'move' = the HeroDark 2nd pip.
+function sdTogglePip(k){ if(k === 'move'){ _sdTurn.move = !_sdTurn.move; _sdTurn.second = _sdTurn.move; } else _sdTurn.action = !_sdTurn.action; sdAfter(); }
 var _sdTurnOpts = [];
 var _sdTurnCollapsed = { checks: true };
 var _sdFromTab = false;   // true while an Action-tab card is running its roll (it spends the turn itself)
@@ -1978,8 +1968,8 @@ const SD_ITEM_USE = [
     sub: () => 'Light: double near · burns one oil flask per hour',
     use: c => { const oil = sdItemRefs().find(x => /^oil,? flask$|^flasks? of oil$/i.test(x.name));
       if(!oil){ addLog('Light ' + c.name, '✗', 'No oil — a lantern needs an oil flask', 'fumble'); return false; }
-      sdConsumeItem(oil); addTracker('Light');
-      addLog('Light ' + c.name, 'Lit', 'Light out to a double near distance for 1 hour of real time · −1 Oil flask', 'normal'); } },
+      if(_autoConsume) sdConsumeItem(oil); addTracker('Light');
+      addLog('Light ' + c.name, 'Lit', 'Light out to a double near distance for 1 hour of real time' + (_autoConsume ? ' · −1 Oil flask' : ''), 'normal'); } },
   { rx: /^oil,? flask$|^flasks? of oil$/i, kind: 'action', cons: true, sub: () => 'Spill & light: close area, 1d4 dmg/round for 4 rounds',
     use: c => { const r = sdRollDice('1d4'); addLog('Burning oil', r.total + ' dmg', 'd4(' + r.rolls[0] + ') this round · the close area burns for 4 rounds, 1d4 each round', 'normal'); } },
   { rx: /^holy water/i, kind: 'action', cons: true, sub: () => '2d4 damage to an undead',
@@ -2062,7 +2052,7 @@ function sdUseItem(e){
   const ctx = { name: e.name };
   const ok = e.rule.use(ctx);
   if(ok === false) return false;
-  if(e.rule.cons){
+  if(e.rule.cons && _autoConsume){
     sdConsumeItem(e.refs[0]);
   }
   if(typeof saveSheet === 'function') saveSheet(false);
@@ -2103,10 +2093,10 @@ function sdToggleSec(k){ _sdTurnCollapsed[k] = !_sdTurnCollapsed[k]; renderSDTur
 function renderSDTurn(){
   const host = document.getElementById('sd-turn'); if(!host) return;
   const O = sdBuildOpts();
-  const pip = (on, lbl, cls) => `<span class="sdt-pip${on ? ' used' : ''}${cls ? ' ' + cls : ''}">${lbl}</span>`;
+  const pip = (on, lbl, cls, k, tip) => `<button type="button" class="sdt-pip${on ? ' used' : ''}${cls ? ' ' + cls : ''}" onclick="sdTogglePip('${k}')" aria-pressed="${!!on}" title="${tip} — click to tick it by hand">${lbl}</button>`;
   // HeroDark: a second bubble for the attack/cast taken in place of your move (at disadvantage).
   const second = sdHD() && !sdOneActionOnly()
-    ? `<span class="sdt-pip${_sdTurn.move ? ' used' : ''} hd" title="HeroDark: give up your move for a second attack or cast, made at disadvantage">2nd · Disadv.</span>` : '';
+    ? pip(_sdTurn.move, '2nd · Disadv.', 'hd', 'move', 'HeroDark: give up your move for a second attack or cast, made at disadvantage') : '';
   const card = o => {
     const can = !o.blocked && sdCan(o.kind, o.sec);
     const sub = [o.blocked, (o.kind === 'action' && sdSecondAction(o.sec) && can) ? '2nd action (instead of moving) · disadvantage' : '', o.sub].filter(Boolean).join(' · ');
@@ -2117,9 +2107,9 @@ function renderSDTurn(){
   host.innerHTML = `
     <div class="sdt-top">
       <div class="sdt-row1">
-        ${turnOn() ? `<div class="sdt-econ">${pip(_sdTurn.action, 'Action')}${second}</div>
-        <button class="sdt-end" onclick="sdEndTurn()" title="Clear this turn's action">End Turn</button>` : `<span class="turn-free">Free play — actions aren't tracked</span>`}
+        <div class="sdt-econ">${pip(_sdTurn.action, 'Action', '', 'action', 'One action per turn')}${second}</div>
         ${turnModeBtn()}
+        <button class="sdt-end" onclick="sdEndTurn()" title="Clear this turn's action">End Turn</button>
       </div>
     </div>
     ${sec('attacks', 'Attacks', O.attacks, 'No attacks yet — add weapons on the Equipment tab.')}
@@ -3648,18 +3638,24 @@ function rollInitiative() {
 // with the sheet so level-up starts with the same lists already ticked.
 let _charSpellSources = [];
 
-// ── AMMO: auto-consume arrows / crossbow bolts on ranged attacks ──────────
+// ── AUTO (roll-log 🎒 switch, saved as autoConsume; on unless turned off) ──
+// Works out AC from equipped armor/shield and uses consumables up by itself: ammo per
+// shot, Equipment items (potions, torches, oil…) on use, scrolls on casting, wands on a
+// failed check. Off = effects still happen, nothing is taken from your gear.
 let _autoConsume = true;
+function autoUse(){ return _autoConsume !== false; }
 function toggleAutoConsume() {
   _autoConsume = !_autoConsume;
   _autoConsumeVisual(_autoConsume);
+  addLog('Auto-use', _autoConsume ? 'On' : 'Off', _autoConsume ? 'AC and consumables are handled automatically' : 'Handle AC and consumables yourself', 'normal');
   applyAutoLock(_autoConsume);
   if(_autoConsume && typeof refreshAutoAC === 'function') refreshAutoAC();
   if(typeof saveSheet === 'function') saveSheet(false);
 }
 function _autoConsumeVisual(on) {
-  const sw = document.getElementById('ammo-switch');
-  if(sw) sw.classList.toggle('on', !!on);
+  const sw = document.getElementById('ammo-switch'); if(!sw) return;
+  sw.classList.toggle('on', !!on); sw.setAttribute('aria-pressed', !!on);
+  sw.title = on ? "Auto on: AC is worked out from your equipped armor and shield, and consumables are used up by themselves — an arrow or bolt per bow/crossbow shot, potions, torches, candles, lantern oil, holy water and other Equipment items when used, a scroll when cast, and a wand marked spent on a failed check (broken on a natural 1). Click to handle AC and these items by hand." : "Auto off: AC and consumables are yours to handle — using an item still applies its effect, but nothing is taken from your gear. Click to turn it back on.";
 }
 
 // Spell names, spell descriptions and attack names are all generated (by the
@@ -5274,7 +5270,6 @@ if(typeof applyAutoLock==='function') applyAutoLock(_autoConsume);   // lock der
   /* Header stacking + field grids */
   .hdr-top{gap:9px;}
   .hdr-top .name-primary{flex:1 1 100%;order:2;}
-  .hdr-top .title-auto{font-size:12px;}
   .hdr-metarow > *{flex:1 1 31%!important;}
   .hdr-fields,.hdr-fields-2{grid-template-columns:1fr 1fr;}
   .hdr-field:nth-child(2n){border-right:none;}
@@ -5401,6 +5396,7 @@ if(typeof applyAutoLock==='function') applyAutoLock(_autoConsume);   // lock der
   .atk-roll-btn{min-height:42px;font-size:16px!important;padding:8px 10px!important;}
   .atk-adv-btn{min-height:42px;font-size:12px!important;padding:6px 8px!important;}
   .log-clear{min-height:40px;font-size:13px!important;padding:8px 12px!important;}
+  .log-clear.log-x{min-height:0;font-size:15px!important;padding:4px 9px!important;}
   .log-action-btn{min-height:46px;font-size:13px!important;}
   .dice-btn{min-height:44px;font-size:14px!important;padding:10px 2px!important;}
   .dice-roll-btn{min-height:48px;font-size:15px!important;}
@@ -7576,6 +7572,9 @@ function campaignRestore(saved) {
 .log-lock:hover{background:rgba(255,255,255,.35);}
 .log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
 .log-lock .lk-ico{font-size:15px;line-height:1;}
+.log-auto:not(.on){opacity:.55;}
+.log-auto:not(.on) .lk-ico{filter:grayscale(1);}
+.log-x{font-size:13px;line-height:1;padding:3px 7px;}
 .lk-ro-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none!important;pointer-events:none;}
 input.no-spin{-moz-appearance:textfield;}
 input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}

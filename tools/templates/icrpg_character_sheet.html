@@ -827,7 +827,7 @@ body.dark .tabs-bar{background:#1a161a;}
 
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
-  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
+  <div class="log-header"><span class="log-title" aria-hidden="true"></span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button type="button" id="auto-toggle" class="log-lock log-auto on" onclick="toggleAutoUse()" aria-pressed="true" aria-label="Use up consumables automatically" title="Auto-use on: food, potions, scrolls, explosives, torches and other LOOT with uses lose a use (the row goes at the last one) when you USE them, and a kit that empties on a natural 1 is removed. Click to count them by hand."><span class="lk-ico">🎒</span></button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear log-x" onclick="clearLog()" title="Clear the log" aria-label="Clear the log">✕</button></div></div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #3a2c22;background:transparent;color:#9a8676;" title="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="ICRPGB.launch()" title="Character Builder">Create</button>
@@ -1191,12 +1191,19 @@ function setDefaultTab(){ setTab('action'); }   // sheets always open on the Act
 // regain CON + 1 HP. Management (adding loot, abilities, spells) stays in the other
 // tabs — this tab only performs. No round counter; End Turn logs nothing.
 var _icTurn = { move:false, action:false, far:false, mode:'normal' };
-// TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = free
-// play: Move/Action aren't tracked, nothing greys out — DYING still limits what you can do.
+// TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = Move/Action
+// aren't spent automatically and nothing greys out — the pips stay and can be ticked by hand (as
+// they can when on); DYING still limits what you can do.
 var _icTurnBased = true;
 function turnOn(){ return _icTurnBased!==false; }
-function toggleTurnMode(){ _icTurnBased=!turnOn(); addLog('Turn-based mode', turnOn()?'On':'Off', turnOn()?'Actions are tracked per turn':'Free play — actions aren\'t tracked', 'normal'); icEndTurn(); }
-function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" onclick="toggleTurnMode()" title="'+(on?'Turn-based: Move and one Action per TURN, End Turn brings them back. Click for free play.':'Free play: actions aren\'t tracked. Click to count Move and Action per TURN (combat).')+'"><span class="tm-sw"></span>Turn-based</button>'; }
+function toggleTurnMode(){ _icTurnBased=!turnOn(); addLog('Turn-based mode', turnOn()?'On':'Off', turnOn()?'Actions are spent automatically':'Actions aren\'t spent automatically — tick the pips by hand', 'normal'); icEndTurn(); }
+function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend Move and Action automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: Move and Action are spent automatically (one Action per TURN). Click to tick them by hand instead.':'Manual: Move and Action aren\'t spent automatically — tick the pips yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
+// AUTO-USE (roll-log switch, saved on the sheet; on unless turned off): LOOT you USE loses a use by
+// itself. Off = the effect still happens, nothing is counted down or removed.
+var _icAutoUse = true;
+function autoUse(){ return _icAutoUse!==false; }
+function toggleAutoUse(){ _icAutoUse=!autoUse(); renderAutoBtn(); addLog('Auto-use', autoUse()?'On':'Off', autoUse()?'Consumables are used up automatically':'Count consumables yourself', 'normal'); scheduleAutosave(); }
+function renderAutoBtn(){ var b=document.getElementById('auto-toggle'); if(!b) return; var on=autoUse(); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); b.title=on?'Auto-use on: food, potions, scrolls, explosives, torches and other LOOT with uses lose a use (the row goes at the last one) when you USE them, and a kit that empties on a natural 1 is removed. Click to count them by hand.':'Auto-use off: using LOOT applies its effect but no use is taken and nothing is removed — count them yourself. Click to turn it back on.'; }
 var _icCollapsed = { checks:true };
 var _icOpts = [];
 var IC_EFF = { d4:'Basic', d6:'WeaponsTools', d8:'Guns', d10:'MagicEnergy', d12:'Ultimate' };
@@ -1404,7 +1411,7 @@ function icUseItem(it){
     _icTurn.mode=md0;
     ok=c.hit; res.push(icVerdict(c)); det.push(icCheckDetail(c, it.check.stat)+(it.check.easy?' (EASY)':''));
     type=c.crit?'crit':c.fumble?'fumble':'normal';
-    if(it.emptyOnNat1 && c.d===1){ var tr=icLootRow(it.name); if(tr) icLootRemove(tr); det.push('natural 1 — the kit is empty'); }
+    if(it.emptyOnNat1 && c.d===1){ var tr=icLootRow(it.name); if(tr&&autoUse()) icLootRemove(tr); det.push('natural 1 — the kit is empty'); }
   }
   if(ok){
     if(it.heal){
@@ -1419,7 +1426,7 @@ function icUseItem(it){
     if(it.targetDown){ var t0=num($('f-target').value); if(t0>0){ $('f-target').value=t0-1; det.push('TARGET '+t0+' → '+(t0-1)); } }
     if(it.light) det.push('Lit');
   }
-  if(it.consumable) det.push(icSpendUse(it));
+  if(it.consumable && autoUse()) det.push(icSpendUse(it));
   det.push(it.desc.slice(0,110));
   addLog('Use '+it.name, res.join(' · ')||'Used', det.join(' · '), type);
 }
@@ -1533,7 +1540,7 @@ function icToggleSec(k){ _icCollapsed[k]=!_icCollapsed[k]; icRenderTurn(); }
 function icRenderTurn(){
   var host=$('ic-turn'); if(!host) return;
   var O=icBuildOpts();
-  var pip=function(on, lbl, slot, title){ return '<button class="ic-pip'+(on?' used':'')+'" onclick="icToggle(\''+slot+'\')" title="'+esc(title)+'">'+lbl+'</button>'; };
+  var pip=function(on, lbl, slot, title){ return '<button type="button" class="ic-pip'+(on?' used':'')+'" onclick="icToggle(\''+slot+'\')" aria-pressed="'+!!on+'" title="'+esc(title)+'">'+lbl+'</button>'; };
   var hp=num($('f-hp').value), max=num($('f-hpmax').value), coinOn=!$('coin-btn').classList.contains('on');
   var badges='';
   if($('f-dying').checked) badges+='<span class="ic-badge warn">Dying</span>';
@@ -1552,8 +1559,8 @@ function icRenderTurn(){
   };
   host.innerHTML=
     '<div class="ic-top">'+
-      '<div class="ic-row1">'+(turnOn()?'<div class="ic-econ">'+pip(_icTurn.move,'Move','move','Move NEAR (click to mark)')+pip(_icTurn.action,'Action','action','Your one roll this TURN (click to mark)')+'</div>'+
-        '<button class="ic-end" onclick="icEndTurn()" title="Reset Move and Action for your next TURN">End Turn</button>':'<span class="turn-free">Free play — actions aren\'t tracked</span>')+turnModeBtn()+'</div>'+
+      '<div class="ic-row1"><div class="ic-econ">'+pip(_icTurn.move,'Move','move','Move NEAR (click to mark)')+pip(_icTurn.action,'Action','action','Your one roll this TURN (click to mark)')+'</div>'+
+        turnModeBtn()+'<button class="ic-end" onclick="icEndTurn()" title="Reset Move and Action for your next TURN">End Turn</button></div>'+
       '<div class="ic-row2">'+
         '<span class="ic-stat"><span class="ic-lbl">HP</span> <b>'+hp+'</b>/'+max+'</span>'+
         '<span class="ic-stat"><span class="ic-lbl">Target</span> <b>'+icTarget()+'</b></span>'+
@@ -1687,7 +1694,7 @@ function collectSheet(){
     target:num(v('f-target')), dying:$('f-dying').checked, coin:$('coin-btn').classList.contains('on'),
     notes:v('f-notes'), stats:stats, effort:effort,
     abilities:collectRows('abil'), spells:collectRows('spell'), loot:collectRows('loot'),
-    turn:{ move:_icTurn.move, action:_icTurn.action, far:_icTurn.far, mode:_icTurn.mode }, turnBased:turnOn(),
+    turn:{ move:_icTurn.move, action:_icTurn.action, far:_icTurn.far, mode:_icTurn.mode }, turnBased:turnOn(), autoUse:autoUse(),
     campaign:(typeof _campaign!=='undefined' && _campaign)?{ id:_campaign.id, code:_campaign.code, name:_campaign.name }:null,
   };
 }
@@ -1709,6 +1716,7 @@ function applySheet(d){
   if(typeof campaignRestore==='function') campaignRestore(d.campaign);
   if(d.turn && typeof d.turn==='object'){ _icTurn.move=!!d.turn.move; _icTurn.action=!!d.turn.action; _icTurn.far=!!d.turn.far; _icTurn.mode=(['easy','hard'].indexOf(d.turn.mode)>=0)?d.turn.mode:'normal'; }
   _icTurnBased=d.turnBased!==false;
+  _icAutoUse=d.autoUse!==false; renderAutoBtn();
   recalc(); renderHearts(); setDefaultTab();
   if(window.__ddSaveTitle && d.name) try{ window.__ddSaveTitle(d.name); }catch(e){}
 }
@@ -1955,13 +1963,13 @@ window.openCampaign=openCampaign; window.closeCampaign=closeCampaign; window.cam
 .ic-pip.used{background:var(--rule);border-color:var(--rule);color:var(--muted);text-decoration:line-through;}
 .ic-end{flex:0 0 auto;margin-left:auto;background:var(--icrpg);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .ic-end:hover{filter:brightness(1.1);}
-.turn-mode{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--icrpg-dk);white-space:nowrap;}
+.turn-mode{display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;padding:2px 2px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--icrpg-dk);white-space:nowrap;}
 .turn-mode .tm-sw{position:relative;width:34px;height:19px;border-radius:999px;border:1.5px solid var(--icrpg);background:transparent;flex:0 0 auto;transition:background .15s;}
 .turn-mode .tm-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--icrpg);transition:left .15s,background .15s;}
 .turn-mode.on .tm-sw{background:var(--icrpg);}
 .turn-mode.on .tm-sw::after{left:17px;background:#fff;}
 .turn-mode:focus-visible{outline:2px solid var(--icrpg);outline-offset:2px;border-radius:6px;}
-.turn-free{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 0;}
+.ic-pip:focus-visible{outline:2px solid var(--icrpg);outline-offset:2px;}
 .ic-row2{display:flex;align-items:center;gap:10px;padding:0 10px 9px;flex-wrap:wrap;}
 .ic-stat{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--muted);font-size:12px;}
 .ic-stat .ic-lbl{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
@@ -2000,7 +2008,6 @@ body.dark .ic-coin{color:#f0cf62;}
   .ic-econ > *{padding:3px 8px;font-size:11px;white-space:nowrap;flex:0 1 auto;min-width:0;}
   .ic-row1{flex-wrap:nowrap;justify-content:space-between;align-items:center;gap:6px;}
   .ic-end{margin-left:0;}
-  .turn-mode{margin-left:auto;}
   .ic-badges{order:-1;flex-basis:100%;justify-content:center;}
   .ic-coin{margin-left:auto;}
   .ic-do{padding:9px 12px;font-size:12px;}
@@ -2011,6 +2018,9 @@ body.dark .ic-coin{color:#f0cf62;}
 .log-lock:hover{background:rgba(255,255,255,.35);}
 .log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
 .log-lock .lk-ico{font-size:15px;line-height:1;}
+.log-auto:not(.on){opacity:.55;}
+.log-auto:not(.on) .lk-ico{filter:grayscale(1);}
+.log-x{font-size:13px;line-height:1;padding:3px 7px;}
 .lk-ro-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none!important;pointer-events:none;}
 input.no-spin{-moz-appearance:textfield;}
 input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}

@@ -33,7 +33,7 @@ export default async function MyCharactersPage() {
   // SOLO PLAY: which Dragonbane hero plays in which solo campaign (only while the switch is on).
   const soloOn = soloEnabledFor(user.email);
   const soloBy = new Map<string, { id: string; name: string }>();
-  if (soloOn) for (const sc of await loadSoloCampaigns(user.id)) if (sc.character && !soloBy.has(sc.character.id)) soloBy.set(sc.character.id, { id: sc.id, name: sc.name });
+  if (soloOn) for (const sc of await loadSoloCampaigns(user.id)) for (const p of sc.party) if (!soloBy.has(p.id)) soloBy.set(p.id, { id: sc.id, name: sc.name });
   const bySystem = new Map<SystemKey, CharCardData[]>();
   for (const c of cards) {
     const list = bySystem.get(c.system);

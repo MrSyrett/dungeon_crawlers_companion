@@ -92,7 +92,7 @@ export default async function DashboardPage() {
 
   // SOLO PLAY: hero → solo campaign, only while the switch is on for this user.
   const soloLinks: Record<string, { id: string; name: string } | null> | null = soloEnabledFor(user.email) ? {} : null;
-  if (soloLinks) for (const sc of await loadSoloCampaigns(user.id)) if (sc.character && !soloLinks[sc.character.id]) soloLinks[sc.character.id] = { id: sc.id, name: sc.name };
+  if (soloLinks) for (const sc of await loadSoloCampaigns(user.id)) for (const p of sc.party) if (!soloLinks[p.id]) soloLinks[p.id] = { id: sc.id, name: sc.name };
 
   return <DashboardDocs soloLinks={soloLinks} panels={panels} hiddenKeys={hiddenSystems as SystemKey[]} initialSystem={initialSystem} initialView={initialView} />;
 }

@@ -44,7 +44,8 @@ export type SoloSummary = {
   module: string;
   mission: string;
   progress: string;
-  character: { id: string; name: string } | null;
+  character: { id: string; name: string } | null; // the first hero (older saves: the only one)
+  party: { id: string; name: string }[]; // 1–4 heroes
   updatedAt: number;
 };
 
@@ -59,13 +60,19 @@ export function readSoloSummary(doc: { id: string; title: string; data: unknown;
   const str = (v: unknown) => (typeof v === "string" ? v : "");
   const sum = (s.summary ?? {}) as Record<string, unknown>;
   const ch = (s.character ?? null) as { id?: unknown; name?: unknown } | null;
+  const hero = (x: unknown) => {
+    const o = (x ?? null) as { id?: unknown; name?: unknown } | null;
+    return o && typeof o.id === "string" ? { id: o.id, name: str(o.name) || "Character" } : null;
+  };
+  const party = (Array.isArray(s.party) ? s.party.map(hero) : [hero(ch)]).filter((p): p is { id: string; name: string } => !!p).slice(0, 4);
   return {
     id: doc.id,
     name: str(s.name) || doc.title || "Solo campaign",
     module: str(sum.module),
     mission: str(sum.mission),
     progress: str(sum.progress),
-    character: ch && typeof ch.id === "string" ? { id: ch.id, name: str(ch.name) || "Character" } : null,
+    character: party[0] ?? hero(ch),
+    party,
     updatedAt: doc.updatedAt.getTime(),
   };
 }

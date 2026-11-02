@@ -13,7 +13,11 @@ export default function SoloCampaignCard({ s }: { s: SoloSummary }) {
       <span className="roster-card-name">{s.name}</span>
       <span className="roster-card-meta">Solo · {s.module || "Solo campaign"}</span>
       <span className="roster-card-camp">
-        {s.character ? `Hero: ${s.character.name}` : "No character linked yet"}
+        {s.party.length > 1
+          ? `Party: ${s.party.map((p) => p.name).join(", ")}`
+          : s.character
+            ? `Hero: ${s.character.name}`
+            : "No heroes chosen yet"}
         {s.mission ? ` · ${s.mission}` : ""}
       </span>
       {s.progress ? <span className="roster-card-camp">{s.progress}</span> : null}
@@ -23,7 +27,7 @@ export default function SoloCampaignCard({ s }: { s: SoloSummary }) {
           Continue
         </a>
         {s.character ? (
-          <a href={`/tools/db-character/${s.character.id}`} className="roster-btn" title="Open your hero's sheet">
+          <a href={`/tools/db-character/${s.character.id}`} className="roster-btn" title={s.party.length > 1 ? `Open ${s.character.name}'s sheet` : "Open your hero's sheet"}>
             Sheet
           </a>
         ) : null}

@@ -32,6 +32,7 @@ export async function createSoloCampaign(formData: FormData): Promise<void> {
     name,
     moduleId,
     character: ch ? { id: ch.id, name: ch.title } : null,
+    party: ch ? [{ id: ch.id, name: ch.title }] : [],
     summary: { module: MODULES[moduleId], mission: "", progress: "Not started" },
   };
   const doc = await prisma.document.create({
