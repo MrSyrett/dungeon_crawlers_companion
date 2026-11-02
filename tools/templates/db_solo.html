@@ -32,6 +32,12 @@ body{font-family:var(--f-ui);font-variant-numeric:lining-nums;background:var(--b
 button,input,select,textarea{font-family:var(--f-ui);font-size:15px;}
 .so-app{flex:none;display:flex;min-height:0;height:calc(100vh - var(--dd-bar-h,52px));}
 .so-pane{width:460px;flex-shrink:0;overflow-y:auto;padding:14px 14px 40px;border-right:2px solid var(--acc);}
+/* in play: the top (progress, clock, Story) stays put; the actions scroll beneath it */
+body.playing .so-pane{display:flex;flex-direction:column;overflow:hidden;padding-bottom:14px;}
+body.playing #so-root{flex:1;min-height:0;display:flex;flex-direction:column;}
+body.playing .top-card{flex:none;}
+body.playing .act-card{flex:1;min-height:0;display:flex;flex-direction:column;margin-bottom:0;}
+body.playing .act-card .card-b{flex:1;min-height:0;overflow-y:auto;}
 .so-sheet{flex:1;min-width:0;position:relative;background:var(--bg);display:flex;flex-direction:column;}
 .so-frames{flex:1;position:relative;min-height:0;}
 .so-frames iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:var(--bg);}
@@ -51,6 +57,8 @@ button,input,select,textarea{font-family:var(--f-ui);font-size:15px;}
 @media (max-width:900px){
   .so-app{flex-direction:column;height:auto;min-height:calc(100vh - var(--dd-bar-h,52px));}
   .so-pane{width:100%;border-right:0;padding-bottom:90px;}
+  body.playing .so-pane{height:calc(100vh - var(--dd-bar-h,52px) - 56px);padding-bottom:10px;}
+  .top-card .jr{height:120px;}
   .so-sheet{height:calc(100vh - var(--dd-bar-h,52px) - 56px);}
   body.party .so-tabs button[data-tab="sheet"]::after{content:" · " attr(data-who);}
   body[data-tab="adventure"] .so-sheet{display:none;}
@@ -138,6 +146,17 @@ textarea{width:100%;min-height:54px;resize:vertical;}
 .hchip{cursor:pointer;font-family:var(--f-label);} .hchip.on{background:var(--acc);border-color:var(--acc);color:#fff;}
 .hchip.done{opacity:.55;text-decoration:line-through;cursor:default;}
 .tiny-btn{padding:3px 8px;font-size:12px;}
+.top-card .jr{height:190px;margin-top:8px;}
+.top-btns{margin-top:8px;justify-content:flex-end;}
+.bubbles{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 8px;}
+.bub{border:1px solid var(--rule);background:var(--box);color:var(--muted);border-radius:999px;padding:3px 10px;font-family:var(--f-label);font-size:12px;cursor:pointer;}
+.bub:hover{color:var(--acc-dk);border-color:var(--acc);} .bub.on{background:var(--acc);border-color:var(--acc);color:#fff;}
+.party-turns{margin:2px 0 6px;}
+.ch.act.move{border-left:3px solid var(--acc);} .ch.act.locked{opacity:.6;}
+.dlg-b.wide{max-width:900px;}
+.map-tabs{margin-bottom:8px;gap:5px;}
+.dlg-b figure.map img{max-height:65vh;}
+ul.jl{margin:4px 0 0 18px;display:flex;flex-direction:column;gap:5px;font-size:14px;}
 figure.map{margin:0 0 10px;border:1px solid var(--rule);border-radius:8px;overflow:hidden;background:var(--box);}
 figure.map img{display:block;width:100%;max-height:340px;object-fit:contain;background:#d8d2c2;}
 figure.map figcaption{font-family:var(--f-label);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:4px 8px;}
@@ -153,9 +172,6 @@ ul.disc{margin:4px 0 0 18px;font-size:13.5px;display:flex;flex-direction:column;
 .so-heroes .hero .act-dot{position:absolute;top:5px;left:6px;width:7px;height:7px;border-radius:50%;background:var(--gold-lt);box-shadow:0 0 0 2px rgba(0,0,0,.25);}
 .jr .ln.k-turn{border-color:var(--acc);color:var(--acc-dk);font-family:var(--f-label);letter-spacing:.04em;}
 .jr .ln.k-clue{border-color:var(--gold);} .jr .ln.k-clue b{color:var(--gold);}
-details.clues{margin-top:6px;border:1px dashed var(--gold-lt);border-radius:8px;padding:5px 9px;font-size:13.5px;}
-details.clues summary{cursor:pointer;font-family:var(--f-label);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);}
-details.clues ul{margin:6px 0 2px 18px;display:flex;flex-direction:column;gap:4px;}
 .danger{border:2px solid var(--red);border-radius:8px;padding:8px 10px;background:rgba(179,38,30,.07);display:flex;flex-direction:column;gap:6px;}
 .dg-h{font-family:var(--f-label);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--red);font-weight:700;}
 .jr .st{font-style:italic;line-height:1.5;margin:2px 0;padding-left:10px;border-left:3px solid var(--gold-lt);}
@@ -298,6 +314,8 @@ window.addEventListener('message',function(e){
     renderHeroTabs(); if(first&&id===S.acting) render(); return; }
   if(m.kind==='roll'){ onRoll(m,id); return; }
   if(m.kind==='damage'){ onPlayerDamage(m,id); return; }
+  // shared roll log: copy what one hero's sheet logged into every other hero's sheet
+  if(m.kind==='log'){ if(!solo()) S.party.forEach(function(p){ if(p.id!==id&&frames[p.id]&&frames[p.id].contentWindow) send('relay',{label:heroName(id)+' · '+m.label,result:m.result,detail:m.detail,type:m.type},null,p.id); }); return; }
 });
 function onRoll(m,pid){
   var cb=m.req&&reqs[m.req]; if(cb){ delete reqs[m.req]; lastReq={cb:cb,label:m.label}; cb(m); return; }
@@ -331,7 +349,8 @@ function render(){
   else if(!S.m) h+=hubCard()+partyCard(false);
   else if(S.m.status==='briefing') h+=briefingCard();
   else if(S.m.status==='won') h+=debriefCard();
-  else h+=statusBar()+sceneCard();
+  else h+=topCard()+actCard();
+  document.body.classList.toggle('playing', !!(S.party.length&&S.m&&S.m.status==='active'));
   r.innerHTML=h; renderJournal(); renderHeroTabs();
   if(!S.m||!S.party.length) loadChars();
 }
@@ -383,7 +402,7 @@ function wpName(w){ return w.unknown?(w.gen?w.gen.area:'Unknown waypoint'):w.nam
 // One bar for where you are: the mission, the route, the clock (or the sinking) and the
 // score. All of it runs itself — the page moves the clock and counts the points.
 function statusBar(){
-  var mi=curMission(), t=S.m.threat, h='<div class="card status"><div class="card-b">';
+  var mi=curMission(), t=S.m.threat, h='';
   h+='<div class="st-h"><b>'+esc(mTitle(S.m.idx))+'</b>'+(S.m.objective?'<span class="chip good">Objective done</span>':'')+'</div>';
   h+='<div class="tiny muted">'+esc(mi.objective)+'</div>';
   // A branching adventure (hideRoute) shows only the places you have been, in book order.
@@ -400,25 +419,40 @@ function statusBar(){
   h+='</div>';
   if(t&&!S.m.sink) h+='<div class="tiny muted" style="margin-top:4px">'+esc(t.text)+'</div>';
   var al=A(S.m.allies); if(al.length) h+='<div class="allies">With you: '+al.map(function(a){ return '<span class="chip'+(a.down?' bad':'')+'" title="'+esc(a.note||'')+'">'+esc(a.name)+' '+(a.down?'(down)':a.hp+'/'+a.hpMax+' HP')+'</span>'; }).join(' ')+'</div>';
-  var cl=A(S.m.clues); if(cl.length) h+='<details class="clues"'+(UI.cluesOpen?' open':'')+'><summary>Clues &amp; notes ('+cl.length+')</summary><ul>'+cl.map(function(x){ return '<li>'+esc(x.text)+(x.where?' <span class="tiny muted">— '+esc(x.where.replace(/^\d+\.\s*/,''))+'</span>':'')+'</li>'; }).join('')+'</ul></details>';
-  return h+'</div></div>';
+  return h;
 }
 // The scene: the Story (newest beat at the bottom, scroll up for the rest), then
 // "What do you do?" — the fight, an immediate danger, or what you can still do here.
-function sceneCard(){
+// TOP (pinned): where you are, the clock, the score and the Story, with the Journal (clues)
+// and the Map (every explored floor) one tap away in pop-ups.
+function topCard(){ var cl=A(S.m.clues), maps=visitedMaps();
+  return '<div class="card top-card"><div class="card-b">'+statusBar()+'<div class="jr" id="so-journal"></div>'+
+    '<div class="row top-btns"><button class="btn ghost tiny-btn" data-a="journal">📖 Journal'+(cl.length?' ('+cl.length+')':'')+'</button>'+(maps.length?'<button class="btn ghost tiny-btn" data-a="mapdlg">🗺 Map</button>':'')+'</div></div></div>'; }
+// ACTIONS (scrolls on its own): the place, who acts, then the fight, a danger, or what you can do.
+function actCard(){
   var w=curWp(); if(!w) return '';
-  var sunk=S.m.flags&&S.m.flags['sunk:'+w.def];
-  var def0=wpDef(w), map=def0&&def0.map, showMap=map&&mapOpen();
-  var h='<div class="card scene"><div class="card-h"><h3>'+esc(wpName(w))+'</h3><span class="row">'+(w.extra?'<span class="chip">'+esc(w.extra)+'</span>':'')+(sunk?'<span class="chip bad">Under water</span>':'')+(map?'<button class="btn ghost tiny-btn" data-a="map" aria-pressed="'+!!showMap+'" title="Show or hide the map">🗺 Map</button>':'')+'</span></div><div class="card-b">';
-  if(showMap) h+='<figure class="map"><img src="'+esc(map)+'" alt="Map of '+esc(wpName(w))+'" loading="lazy"><figcaption>'+esc(wpName(w))+'</figcaption></figure>';
-  h+='<div class="jr" id="so-journal"></div>';
-  h+='<div class="wyd">';
-  if(S.combat){ h+=combatBody(); return h+'</div></div></div>'; }
-  h+='<div class="wyd-h"><span>What do you do?</span><span class="row">'+heroChips()+(A(curMission().hints).length?'<button class="btn ghost tiny-btn" data-a="hint" title="A nudge from what you already know">💡 Hint</button>':'')+'</span></div>';
+  var sunk=S.m.flags&&S.m.flags['sunk:'+w.def], h='<div class="card act-card"><div class="card-h"><h3>'+esc(wpName(w))+'</h3><span class="row">'+(w.extra?'<span class="chip">'+esc(w.extra)+'</span>':'')+(sunk?'<span class="chip bad">Under water</span>':'')+'</span></div><div class="card-b">';
+  if(S.combat){ h+=combatBody(); return h+'</div></div>'; }
   var D=dangerHere();
+  h+='<div class="wyd-h"><span>What do you do?</span></div>'+heroChips()+bubbles(D);
   h+=D?dangerPanel(w,D):actionsHtml(w);
-  return h+'</div></div></div>';
-}
+  return h+'</div></div>'; }
+// the small bubbles under the heroes: not actions, just help (Hint, Rest, Skip turn)
+function bubbles(D){ var mi=curMission(), out=[];
+  if(A(mi.hints).length) out.push('<button class="bub" data-a="hint" title="A nudge from what you already know">💡 Hint</button>');
+  var acts=mi.actions||['search','scavenge','rest'];
+  if(!D&&!S.m.sink&&acts.indexOf('rest')>=0) out.push('<button class="bub" data-a="rest" title="Stretch rest · '+esc(L('threat','threat'))+' +1">⛺ Rest</button>');
+  if(!solo()) out.push('<button class="bub" data-a="skip-turn" title="'+esc(heroName(S.acting))+' has nothing to do: pass to the next hero">⏭ Skip turn</button>');
+  return out.length?'<div class="bubbles">'+out.join('')+'</div>':''; }
+function actRow(label,btn,note,cls){ return '<div class="ch act'+(cls?' '+cls:'')+'"><div class="ch-h"><b>'+label+'</b>'+btn+'</div>'+(note?'<div class="tiny muted">'+note+'</div>':'')+'</div>'; }
+function useRow(){ return actRow('Use an item from your pack','<button class="btn" data-a="use-item">Use…</button>'); }
+function visitedMaps(){ var mi=curMission(); if(!mi||!S.m.wps) return []; return S.m.wps.filter(function(w){ return w.visited||w===curWp(); }).map(function(w){ var d0=wpDef(w); return d0&&d0.map?{id:w.def,name:wpName(w),map:d0.map}:null; }).filter(Boolean); }
+function openMapDlg(id){ var maps=visitedMaps(); if(!maps.length) return; var cur=maps.find(function(m){ return m.id===(id||(curWp()||{}).def); })||maps[maps.length-1];
+  dlg('<h3>Map</h3><div class="row map-tabs">'+maps.map(function(m){ return '<button class="bub'+(m===cur?' on':'')+'" data-a="mapdlg" data-id="'+esc(m.id)+'">'+esc(m.name.replace(/^\d+\.\s*/,''))+(m.id===(curWp()||{}).def?' ·  you':'')+'</button>'; }).join('')+'</div><figure class="map"><img src="'+esc(cur.map)+'" alt="Map of '+esc(cur.name)+'"><figcaption>'+esc(cur.name)+'</figcaption></figure><div class="row"><button class="btn pri" data-a="close">Close</button></div>',true); }
+function openJournalDlg(){ var cl=A(S.m.clues), al=A(S.m.allies);
+  dlg('<h3>Journal</h3>'+(cl.length?'<div class="lbl">Clues &amp; notes</div><ul class="jl">'+cl.map(function(x){ return '<li>'+esc(x.text)+(x.where?' <span class="tiny muted">— '+esc(x.where.replace(/^\d+\.\s*/,''))+'</span>':'')+'</li>'; }).join('')+'</ul>':'<p class="small muted">Nothing noted yet. Examine things, talk to people — what you learn is kept here.</p>')+
+    (al.length?'<div class="lbl" style="margin-top:10px">Companions</div><p class="small">'+al.map(function(a){ return esc(a.name)+(a.down?' (down)':' — '+a.hp+'/'+a.hpMax+' HP')+(a.note?'<br><span class="tiny muted">'+esc(a.note)+'</span>':''); }).join('<br>')+'</p>':'')+
+    '<div class="row" style="margin-top:10px"><button class="btn pri" data-a="close">Close</button></div>'); }
 // PARTY TURNS outside combat: each hero takes one action, then the next hero is up;
 // once everyone has acted a new round starts. Moving to another place starts fresh.
 // Group actions (sneaking past, escaping, fleeing) involve everyone and take no turn.
@@ -430,12 +464,12 @@ function endTurn(){
   if(solo()||!S.m||S.m.status!=='active'||S.combat) return;
   S.m.acted=S.m.acted||{}; S.m.acted[S.acting]=true;
   var nx=nextUp();
-  if(!nx){ newPartyRound(); nx=aliveHeroes()[0]; jlog('turn','Round '+S.m.pround,'Everyone has had a turn'); }
-  if(nx&&nx!==S.acting){ setActing(nx,true); jlog('turn',heroName(nx)+'\'s turn',''); }
+  if(!nx){ newPartyRound(); nx=aliveHeroes()[0]; }
+  if(nx&&nx!==S.acting) setActing(nx,true);
 }
 function heroChips(){ if(solo()) return ''; var A2=acted();
-  return '<span class="row party-turns"><span class="tiny muted">Round '+(S.m.pround||1)+'</span>'+S.party.map(function(p){ var s=PCS[p.id], dead=s&&s.dead, done=!!A2[p.id], on=p.id===S.acting;
-    return '<button type="button" class="chip hchip'+(on?' on':'')+(done?' done':'')+'" data-a="hero" data-id="'+esc(p.id)+'" aria-pressed="'+on+'" title="'+esc(heroName(p.id))+(dead?' is dead':done?' has acted this round':on?' acts now':' — act next')+'"'+(dead||done?' disabled':'')+'>'+(done?'✓ ':on?'▶ ':'')+esc(heroName(p.id))+'</button>'; }).join('')+'</span>'; }
+  return '<div class="row party-turns">'+S.party.map(function(p){ var s=PCS[p.id], dead=s&&s.dead, done=!!A2[p.id], on=p.id===S.acting;
+    return '<button type="button" class="chip hchip'+(on?' on':'')+(done?' done':'')+'" data-a="hero" data-id="'+esc(p.id)+'" aria-pressed="'+on+'" title="'+esc(heroName(p.id))+(dead?' is dead':done?' has acted this round':on?' acts now':' — act next')+'"'+(dead||done?' disabled':'')+'>'+(done?'✓ ':on?'▶ ':'')+esc(heroName(p.id))+'</button>'; }).join('')+'</div>'; }
 // ── immediate dangers: monsters that have turned on you, a sprung trap, a threat come
 // due. Nothing else can be done here until it's dealt with.
 function dangerHere(){ var w=curWp(); if(!w||!w.danger) return null; var D=w.danger;
@@ -461,10 +495,11 @@ function dangerPanel(w,D){
   h+='</div>';
   var chs=A(def&&def.challenges).filter(function(c){ return c.danger===e.id&&chOpen(c,w); });
   if(chs.length) h+='<div class="stack" style="margin-top:8px">'+chs.map(function(c){ return chHtml(c,w,def); }).join('')+'</div>';
-  h+='<div class="row" style="margin-top:8px"><button class="btn" data-a="use-item">🎒 Use an item…</button></div>';
-  if(def&&def.exits&&S.m.trail&&S.m.trail.length){ var bw=S.m.wps[S.m.trail[S.m.trail.length-1]]; h+='<div class="row" style="margin-top:8px"><button class="btn ghost" data-a="retreat">Back off to '+esc(bw?wpName(bw):'where you came from')+'</button></div>'; }
+  h+='<div class="stack" style="margin-top:8px">'+useRow();
+  if(def&&def.exits&&S.m.trail&&S.m.trail.length){ var bw=S.m.wps[S.m.trail[S.m.trail.length-1]]; h+=actRow('Back off to '+esc(bw?wpName(bw):'where you came from'),'<button class="btn" data-a="retreat">Back off</button>','They\'ll still be here.'); }
   h+='</div>';
-  h+=escapesHtml(w,def);
+  h+='</div>';
+  var ex=escapesHtml(w,def); if(ex) h+='<div class="stack" style="margin-top:8px">'+ex+'</div>';
   return h;
 }
 // still to do: a challenge vanishes once it's done (its outcome is in the Story)
@@ -486,56 +521,58 @@ function chHtml(c,w,def){ var res=w.results[c.id];
   if(c.options) h+='<div class="row" style="margin-top:5px">'+chOptions(c,w).map(function(o){ return '<button class="btn" data-a="ch-opt" data-c="'+esc(c.id)+'" data-o="'+esc(o.id)+'">'+esc(o.label)+'</button>'; }).join('')+'</div>';
   return h+'</div>'; }
 function escapesHtml(w,def){ var list=def?A(def.escapes).filter(function(x){ return hasReq(x.requires,w)&&!anyOn(x.hideIf,w); }):[]; if(!list.length) return '';
-  return '<div class="sug" style="margin-top:10px">'+esc(L('escapes','Get out'))+'</div><div class="stack" style="margin-top:4px">'+list.map(function(x){ var i=A(def.escapes).indexOf(x);
-    return '<div class="ch"><div class="ch-h"><b>'+esc(x.label)+'</b><button class="btn'+(S.m.sink?' pri':'')+'" data-a="escape" data-i="'+i+'">'+esc(x.skill?'Roll '+x.skill.toUpperCase()+(x.bane?' · bane':''):(x.button||'Go'))+'</button></div>'+(x.note?'<div class="tiny muted">'+esc(x.note)+'</div>':'')+'</div>'; }).join('')+'</div>'; }
+  return list.map(function(x){ var i=A(def.escapes).indexOf(x);
+    return actRow(esc(x.label),'<button class="btn'+(S.m.sink?' pri':'')+'" data-a="escape" data-i="'+i+'">'+esc(x.skill?'Roll '+x.skill.toUpperCase()+(x.bane?' · bane':''):(x.button||'Go'))+'</button>',x.note?esc(x.note):''); }).join(''); }
 function actionsHtml(w){
-  var def=wpDef(w), mi=curMission(), h='';
+  var def=wpDef(w), mi=curMission(), h='', rows=[];
   if(w.unknown&&!w.gen){
-    h+='<p class="small">'+esc(L('unknownNote','Nobody knows what lies here. Reveal it with the exploration tables — or imagine it yourself.'))+'</p><div class="row" style="margin-top:6px"><button class="btn pri" data-a="gen">Reveal the waypoint</button><button class="btn" data-a="gen-own">I\'ll describe it</button></div>';
-    return h+navRow(w); }
-  if(w.gen) h+='<p class="small">'+genHtml(w.gen)+'</p><div class="row" style="margin-bottom:6px"><button class="btn ghost" data-a="gen">Re-roll</button>'+(w.gen.inhabitants?'':'<button class="btn ghost" data-a="inh">Who is here?</button>')+'</div>';
+    h+='<p class="small">'+esc(L('unknownNote','Nobody knows what lies here. Reveal it with the exploration tables — or imagine it yourself.'))+'</p>';
+    rows.push(actRow('Reveal the waypoint','<button class="btn pri" data-a="gen">Reveal</button>','Roll on the exploration tables'));
+    rows.push(actRow('Describe it yourself','<button class="btn" data-a="gen-own">Describe</button>'));
+    return h+'<div class="stack">'+rows.concat(navRows(w)).join('')+'</div>'; }
+  if(w.gen) h+='<p class="small">'+genHtml(w.gen)+'</p><div class="row" style="margin-bottom:6px"><button class="bub" data-a="gen">Re-roll</button>'+(w.gen.inhabitants?'':'<button class="bub" data-a="inh">Who is here?</button>')+'</div>';
   // notes that switch on with a flag (e.g. "this floor is now under water")
   if(def&&def.flagNotes) Object.keys(def.flagNotes).forEach(function(k){ if(flagOn(k,w)) h+='<div class="secret"><span class="sug">Now</span><br>'+esc(def.flagNotes[k])+'</div>'; });
   if(def&&def.everyRoll&&!anyOn(def.everyRoll.unless,w)) h+='<div class="trig small"><b>'+esc(def.everyRoll.label)+'.</b> '+esc(def.everyRoll.note||'Every action here starts with this roll.')+'</div>';
   var sec=def?A(def.secrets).filter(function(s){ return A(w.revealed).indexOf(s.id)>=0||(S.m.flags&&S.m.flags[s.id]&&s.global); }):[];
   if(sec.length) h+='<div class="stack" style="margin:6px 0">'+sec.map(function(s){ return '<div class="secret"><span class="sug">Known</span><br>'+esc(s.text)+'</div>'; }).join('')+'</div>';
   var blocked=def&&anyOn(def.blockIf,w);
-  var tk=blocked?[]:talksHere(); if(tk.length) h+='<div class="row" style="margin-bottom:6px">'+tk.map(function(t){ return '<button class="btn" data-a="talk" data-t="'+esc(t.id)+'">💬 '+esc(t.label||('Talk to '+t.name))+'</button>'; }).join('')+'</div>';
-  var chs=def?A(def.challenges).filter(function(c){ return (!blocked||c.unblock)&&chOpen(c,w); }):[];
-  if(chs.length) h+='<div class="stack">'+chs.map(function(c){ return chHtml(c,w,def); }).join('')+'</div>';
-  var encs=blocked?[]:encountersFor(w);
-  if(encs.length) h+='<div class="stack" style="margin-top:8px">'+encs.map(function(e){ var sc=foeTotal(e,false), full=foeTotal(e,true);
-    return '<div class="ch"><div class="ch-h"><b>'+esc(e.label)+'</b><span class="row"><button class="btn" data-a="fight" data-e="'+esc(e.id)+'">Fight ('+sc+')</button>'+(full!==sc?'<button class="btn ghost" data-a="fight" data-e="'+esc(e.id)+'" data-full="1" title="As written">As written ('+full+')</button>':'')+'</span></div><div class="tiny muted">'+esc(foeList(e))+(e.note?' · '+esc(e.note):'')+'</div></div>'; }).join('')+'</div>';
-  // the place's own actions (an adventure can limit them: mission.actions)
-  var acts=(S.m.sink?[]:(mi.actions||['search','scavenge','rest'])).filter(function(k){ return k!=='divert'&&k!=='trap'; });
-  var AB={search:'<button class="btn" data-a="search" title="SPOT HIDDEN · takes a stretch · '+esc(L('threat','threat'))+' +1">Search</button>',scavenge:'<button class="btn" data-a="scavenge" title="Rummage through something specific">Scavenge</button>',rest:'<button class="btn" data-a="rest" title="Stretch rest · '+esc(L('threat','threat'))+' +1">Stretch rest</button>'};
-  var sink=S.m.sink?'<button class="btn warn" data-a="sink-next" title="Moving to another floor takes your round instead">Stay and end the round</button>':'';
-  var useB='<button class="btn" data-a="use-item" title="Take something out of your pack and use it here">🎒 Use an item…</button>';
-  h+='<div class="row" style="margin-top:10px">'+useB+acts.map(function(k){ return AB[k]||''; }).join('')+sink+'</div>';
-  h+=blocked?'':escapesHtml(w,def);
-  return h+navRow(w);
+  (blocked?[]:talksHere()).forEach(function(t){ rows.push(actRow(esc(t.label||('Talk to '+t.name)),'<button class="btn pri" data-a="talk" data-t="'+esc(t.id)+'">Talk</button>')); });
+  (def?A(def.challenges).filter(function(c){ return (!blocked||c.unblock)&&chOpen(c,w); }):[]).forEach(function(c){ rows.push(chHtml(c,w,def)); });
+  (blocked?[]:encountersFor(w)).forEach(function(e){ var sc=foeTotal(e,false), full=foeTotal(e,true);
+    rows.push(actRow(esc(e.label),'<span class="row"><button class="btn" data-a="fight" data-e="'+esc(e.id)+'">Fight ('+sc+')</button>'+(full!==sc?'<button class="btn ghost" data-a="fight" data-e="'+esc(e.id)+'" data-full="1" title="As written">As written ('+full+')</button>':'')+'</span>',esc(foeList(e))+(e.note?' · '+esc(e.note):''))); });
+  // the place's own actions (an adventure can limit them: mission.actions); Rest is a bubble above
+  var acts=S.m.sink?[]:(mi.actions||['search','scavenge','rest']);
+  if(acts.indexOf('search')>=0) rows.push(actRow('Search the area','<button class="btn" data-a="search">Search</button>','SPOT HIDDEN · takes a stretch · '+esc(L('threat','threat'))+' +1'));
+  if(acts.indexOf('scavenge')>=0) rows.push(actRow('Scavenge through something specific','<button class="btn" data-a="scavenge">Scavenge</button>'));
+  rows.push(useRow());
+  if(S.m.sink) rows.push(actRow('Stay and act here this round','<button class="btn warn" data-a="sink-next">End the round</button>','Moving to another floor takes your round instead.'));
+  if(!blocked) rows.push(escapesHtml(w,def));
+  return h+'<div class="stack">'+rows.concat(navRows(w)).join('')+'</div>';
 }
 // Objective + continue: the places between waypoints offer nothing of note, so the
 // player can always move on (an unknown waypoint can simply be summarised).
 // A waypoint with `exits` is a branching place instead: one button per way on,
 // locked until its `requires` flags are set, and closed once the target has sunk.
-function navRow(w){
-  var def=wpDef(w), h='<div class="row" style="margin-top:12px">';
+function navRows(w){
+  var def=wpDef(w), out=[];
   if(def&&def.exits){
-    if(anyOn(def.blockIf,w)) return h+'<span class="tiny muted">'+esc(def.blockNote||'Deal with this first.')+'</span></div>';
+    if(anyOn(def.blockIf,w)) return ['<p class="tiny muted">'+esc(def.blockNote||'Deal with this first.')+'</p>'];
     A(def.exits).forEach(function(x,i){ if(anyOn(x.hideIf,w)) return;
       var tw=S.m.wps[wpIndex(x.to)]; var sunk=S.m.flags['sunk:'+x.to]; var lock=!hasReq(x.requires,w)?(x.locked||'Locked'):(sunk&&(S.m.sink||!x.swim))?'Under water':'';
-      h+='<button class="btn '+(lock?'ghost':(x.main?'pri':''))+'" data-a="exit" data-i="'+i+'"'+(lock?' disabled title="'+esc(lock)+'"':'')+'>'+esc(x.label||('To '+(tw?tw.name:x.to)))+(lock?' · '+esc(lock):'')+(sunk&&!lock?' (swim)':'')+'</button>'; });
-    return h+leaveBtn()+'</div>';
+      out.push(actRow(esc(x.label||('To '+(tw?tw.name:x.to))),'<button class="btn'+(lock?' ghost':(x.main?' pri':''))+'" data-a="exit" data-i="'+i+'"'+(lock?' disabled title="'+esc(lock)+'"':'')+'>'+(lock?esc(lock):sunk?'Swim':'Go')+'</button>','',lock?'locked':'move')); });
+    var lb=leaveBtn(); if(lb) out.push(actRow(esc(L('leave','Leave the Breach')),lb.replace('btn ghost','btn')));
+    return out;
   }
   var last=S.m.cur>=S.m.wps.length-1;
-  if(w.objective&&!S.m.objective) h+='<button class="btn pri" data-a="objective">Objective achieved</button>';
-  if(!last) h+='<button class="btn '+(w.unknown&&!w.gen?'':'pri')+'" data-a="next">Continue to waypoint '+(S.m.cur+2)+'</button>';
-  else if(S.m.objective||w.exit) h+='<button class="btn pri" data-a="leave">'+esc(L('return','Return to the chapel'))+'</button>';
-  if(S.m.cur>0) h+='<button class="btn ghost" data-a="back">Back</button>';
-  return h+(last&&(S.m.objective||w.exit)?'':leaveBtn())+'</div>';
+  if(w.objective&&!S.m.objective) out.push(actRow('The objective is done here','<button class="btn pri" data-a="objective">Mark it done</button>'));
+  if(!last) out.push(actRow('Continue to waypoint '+(S.m.cur+2),'<button class="btn'+(w.unknown&&!w.gen?'':' pri')+'" data-a="next">Go</button>','','move'));
+  else if(S.m.objective||w.exit) out.push(actRow(esc(L('return','Return to the chapel')),'<button class="btn pri" data-a="leave">Go</button>','','move'));
+  if(S.m.cur>0) out.push(actRow('Go back to the last waypoint','<button class="btn" data-a="back">Back</button>','','move'));
+  if(!(last&&(S.m.objective||w.exit))){ var lb2=leaveBtn(); if(lb2) out.push(actRow(esc(L('leave','Leave the Breach')),lb2.replace('btn ghost','btn'))); }
+  return out;
 }
-function leaveBtn(){ var mi=curMission(); return mi.leave===false?'':'<button class="btn ghost" data-a="leave">'+esc(L('leave','Leave the Breach'))+'</button>'; }
+function leaveBtn(){ var mi=curMission(); return mi.leave===false?'':'<button class="btn ghost" data-a="leave">Leave</button>'; }
 function scoreTotal(){ return S.m&&S.m.score?S.m.score.reduce(function(t,x){ return t+x.n; },0):0; }
 function addScore(n,label){ if(!S.m||!curMission()||!curMission().scoring||!n) return; S.m.score=S.m.score||[]; S.m.score.push({n:n,label:label||''}); jlog('score',(n>0?'+':'')+n+' point'+(Math.abs(n)===1?'':'s'),label||''); }
 function scoreHtml(all){ var list=A(S.m&&S.m.score); return (list.length?'<div class="small">'+(all?list:list.slice(-10)).slice().reverse().map(function(x){ return '<div>'+(x.n>0?'+':'')+x.n+' · '+esc(x.label)+'</div>'; }).join('')+'</div>':'<span class="muted small">No points yet.</span>'); }
@@ -749,7 +786,7 @@ function setInhabitants(w){ var r=inhabitant(); w.gen.inhabitants=r.name;
   if(w.genFoes) setDanger(w,{type:'fight',enc:w.genFoes.id}); }
 
 // ── dialogs ────────────────────────────────────────────────────────────────
-function dlg(html){ $('dlg-b').innerHTML=html; $('dlg').classList.add('open'); }
+function dlg(html,wide){ $('dlg-b').innerHTML=html; $('dlg-b').classList.toggle('wide',!!wide); $('dlg').classList.add('open'); }
 // Effects can raise several dialogs at once (a story beat, a treasure, a fight): queue them.
 var DLGQ=[];
 function dlgQ(html){ if($('dlg').classList.contains('open')) DLGQ.push(html); else dlg(html); }
@@ -949,7 +986,6 @@ function combatBody(){
   return h;
 }
 
-function mapOpen(){ try{ return localStorage.getItem('solo_map')!=='0'; }catch(e){ return true; } }
 // ═══ GAME FEATURES: items, conversations, companions, hints, endings ═══════════
 
 // ── "Use an item…": the acting hero's pack (from the sheet) against the place's `uses`
@@ -1067,7 +1103,9 @@ document.addEventListener('click',function(e){
   switch(a){
     case 'close': closeDlg(); break;
     case 'brief': startBriefing(+t.dataset.i); break;
-    case 'map': try{ localStorage.setItem('solo_map',mapOpen()?'0':'1'); }catch(x){} render(); break;
+    case 'mapdlg': openMapDlg(t.dataset.id); break;
+    case 'journal': openJournalDlg(); break;
+    case 'skip-turn': if(!solo()&&S.m){ endTurn(); save(); render(); } break;
     case 'hint': giveHint(); break;
     case 'use-item': openUseItem(); break;
     case 'use-pick': pickUseItem(+t.dataset.i); break;

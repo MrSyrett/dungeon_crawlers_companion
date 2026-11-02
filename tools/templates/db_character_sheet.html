@@ -2684,6 +2684,13 @@ var UTray = (function(){
       armyOfOne:hasAbility('Army of One'), soleSurvivor:hasAbility('Sole Survivor'), skills:sk,
       items:(S.inventory||[]).map(function(r){ return {name:r.name,qty:num(r.qty,1)}; }) };
   }
+  // shared roll log: every entry this sheet logs goes to the solo page, which copies it into the
+  // other party sheets (so all the logs read the same); copies coming in are not sent on again
+  var RELAY=false, _addLog=addLog;
+  addLog=function(label,result,detail,type){ var d=_addLog(label,result,detail,type); if(!RELAY) post({kind:'log',label:label,result:result,detail:detail,type:type||'normal'}); return d; };
+  function relayLog(m){ var cb=window.campaignBroadcast, tt=window.showRollToast; RELAY=true;
+    try{ window.campaignBroadcast=null; window.showRollToast=function(){}; addLog(m.label||'',m.result||'',m.detail||'',m.type||'normal'); }
+    finally{ RELAY=false; window.campaignBroadcast=cb; window.showRollToast=tt; } }
   var stT=null; function postState(){ if(stT) clearTimeout(stT); stT=setTimeout(function(){ stT=null; post(snapshot()); },80); }
   // wrap the sheet's own functions (reassigning the globals the rest of the sheet calls)
   var _resolve=resolveRoll;
@@ -2722,6 +2729,7 @@ var UTray = (function(){
         case 'addItem': { var k=addGearByName(m.name,num(m.qty,1),m.note||''); if(!k){ S.inventory.push({name:m.name,qty:num(m.qty,1),wt:m.wt==null?1:m.wt,note:m.note||''}); } addLog('Found',m.name,m.note||'','normal'); changed(); break; }
         case 'coins': { var c=S.coins||{gold:0,silver:0,copper:0}; c[m.unit]=num(c[m.unit])+num(m.n); S.coins=c; addLog('Found coins','+'+num(m.n)+' '+m.unit,'','normal'); changed(); break; }
         case 'log': addLog(m.label||'Solo',m.result||'',m.detail||'',m.type||'normal'); break;
+        case 'relay': relayLog(m); break;
       }
     }catch(err){ console.error('solo bridge', err); }
   });

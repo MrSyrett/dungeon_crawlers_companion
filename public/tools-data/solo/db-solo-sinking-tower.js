@@ -344,11 +344,11 @@
               { id: "read", label: "Leaf through one of the books", skill: "Languages",
                 success: "The Life and Untimely Death of Magdala, written by Kamandur with the scribe Arlidus: tributes to his sister and curses on the pirates who killed her. Every book on every shelf is the same.",
                 failure: "The swollen pages won't give up their words." },
-              { id: "books", label: "Open a book on the pedestals", requires: "seen-pedestals", hideIf: "door-e",
+              { id: "books", label: "Open a book on the pedestals", requires: "seen-pedestals",
                 options: [
-                  { id: "sword", label: "The sword book", fx: { flag: ["door-n", "books-wrong"], say: "A loud click — and from the north wall, the creak of a door swinging open." } },
-                  { id: "cross", label: "The cross book", fx: { flag: ["door-s", "books-wrong"], encounter: "ghost", say: "A loud click and a creak from the south wall — and the scratching of the quill stops dead." } },
-                  { id: "eye", label: "The eye book", firstTry: { n: 1, label: "Book puzzle solved on the first attempt" }, fx: { flag: "door-e", say: "A loud click and a creak from the east wall: a hidden door opens on a narrow stair going up. The scratching goes on, undisturbed." } }
+                  { id: "sword", label: "The sword book", hideIf: "door-n", fx: { flag: ["door-n", "books-wrong"], say: "A loud click — and from the north wall, the creak of a door swinging open." } },
+                  { id: "cross", label: "The cross book", hideIf: "door-s", fx: { flag: ["door-s", "books-wrong"], encounter: "ghost", say: "A loud click and a creak from the south wall — and the scratching of the quill stops dead." } },
+                  { id: "eye", label: "The eye book", hideIf: "door-e", firstTry: { n: 1, label: "Book puzzle solved on the first attempt" }, fx: { flag: "door-e", say: "A loud click and a creak from the east wall: a hidden door opens on a narrow stair going up. The scratching goes on, undisturbed." } }
                 ] },
               { id: "walls", label: "Search the walls for hidden doors", skill: "Spot Hidden", hideIf: "doors-found",
                 success: "Three seams in the panelling: hidden doors to the north, south and east.", onSuccess: { reveal: ["doors"], flag: "doors-found" },
@@ -551,16 +551,16 @@
             id: "observatory", map: "/tools-data/solo/maps/sinking-tower/observatory.jpg", name: "7. Observatory", short: "Observatory", floor: true,
             text: "A vast glass dome crowns the tower, drenched in green light, with grey sea on every side beyond a railed balcony. On a stone podium rest two identical, blazing emeralds. A black stone sarcophagus lies at the north end. And somewhere, a boy is crying.",
             challenges: [
-              { id: "peek-w", label: "Tilt the west stone to peek underneath", skill: "Sleight of Hand", requires: "!emerald", hideIf: ["peeked-w", "demon-stone"],
+              { id: "peek-w", label: "Tilt the west stone to peek underneath", skill: "Sleight of Hand", hideIf: ["peeked-w", "demon-stone"],
                 success: "A carving under it: a demon.", onSuccess: { flag: "peeked-w", clue: { id: "stone-w", text: "Under the west emerald: a carved demon." } },
                 failure: "It slips from your fingers — you're holding it.", onFail: { flag: "demon-stone", sink: true, say: "Under it, a demon is carved into the podium. Click. Far below something gives, and the whole tower lurches and begins to slide into the sea." } },
-              { id: "peek-e", label: "Tilt the east stone to peek underneath", skill: "Sleight of Hand", requires: "!emerald", hideIf: "peeked-e",
+              { id: "peek-e", label: "Tilt the east stone to peek underneath", skill: "Sleight of Hand", hideIf: ["peeked-e", "emerald"],
                 success: "A carving under it: a lindworm.", onSuccess: { flag: "peeked-e", clue: { id: "stone-e", text: "Under the east emerald: a carved lindworm." } },
                 failure: "It slips from your fingers — you're holding it.", onFail: { flag: "emerald", item: { name: "Krakul's emerald", note: "A blazing green stone, the size of a fist." }, ifFlag: "!promised", then: { encounter: "krakul" }, say: "Under it, a lindworm is carved into the podium. The tower shudders. Beyond the glass a vast shadow rises from the sea: a lindworm with one empty eye socket — and the old man's voice, hissing in your head." } },
-              { id: "stones", label: "Lift a stone from the podium", hideIf: "emerald",
+              { id: "stones", label: "Lift a stone from the podium",
                 options: [
                   { id: "west", label: "The west stone", hideIf: "demon-stone", fx: { flag: "demon-stone", sink: true, say: "Under it, a demon is carved into the podium. Click. Far below, something gives — and the whole tower lurches and begins to slide into the sea." } },
-                  { id: "east", label: "The east stone", firstTry: { n: 1, label: "Twin stones solved on the first attempt" },
+                  { id: "east", label: "The east stone", hideIf: "emerald", firstTry: { n: 1, label: "Twin stones solved on the first attempt" },
                     fx: { flag: "emerald", item: { name: "Krakul's emerald", note: "A blazing green stone, the size of a fist." }, ifFlag: "!promised", then: { encounter: "krakul" },
                       say: "Under it, a lindworm is carved into the podium. The tower shudders. Beyond the glass a vast shadow rises from the sea: a lindworm with one empty eye socket — and the old man's voice, hissing in your head." } }
                 ] },
