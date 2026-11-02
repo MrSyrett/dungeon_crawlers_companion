@@ -741,7 +741,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="lockfield" style="flex:.6 1 0;"><label>Size</label><input type="text" id="dr-size" placeholder="—" oninput="dccSizeCoerce(this)" title="Size (number only)" style="text-align:center;"></div>
       <div class="lockfield"><label>Crawler #</label><input type="text" id="f-crawler"></div>
       <div class="lockfield" style="flex:.6 1 0;"><label>Level</label><input type="text" id="f-level" data-nolock placeholder="1" title="Level (editable while locked)" style="text-align:center;"></div>
-      <div class="lockfield" style="flex:.6 1 0;"><label>Floor</label><input type="text" id="f-floor" placeholder="1" title="Current dungeon floor (F). Many effects read as ‘X + F’." style="text-align:center;"></div>
+      <div class="lockfield" style="flex:.6 1 0;"><label>Floor</label><input type="text" id="f-floor" data-nolock placeholder="1" title="Current dungeon floor (F). Many effects read as ‘X + F’." style="text-align:center;"></div>
       <div class="lockfield" style="flex:2 1 0;"><label>Rest</label>
         <div style="display:flex;gap:4px;">
           <button type="button" class="rest-btn" onclick="rest('short')" title="Short Rest (2 hrs): heal 5 Health Bar slots and regain half your Mana.">Short</button>
@@ -768,11 +768,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <!-- BUFFS / DEBUFFS (＋ buttons and chips injected by dcc-sheet-buffs.js / dcc-sheet-debuffs.js) -->
       <div class="card cond-card buffs-card">
         <div class="section-bar">Buffs</div>
-        <div class="cond-line cond-solo buffs-field"><input type="text" class="ext-buff-input" id="buffs" placeholder="add or type…"></div>
+        <div class="cond-line cond-solo buffs-field"><input type="text" class="ext-buff-input" id="buffs" data-nolock placeholder="add or type…"></div>
       </div>
       <div class="card cond-card debuffs-card">
         <div class="section-bar">Debuffs</div>
-        <div class="cond-line cond-solo"><input type="text" class="debuff-input" id="debuffs" placeholder=""></div>
+        <div class="cond-line cond-solo"><input type="text" class="debuff-input" id="debuffs" data-nolock placeholder=""></div>
       </div>
     </div>
 
@@ -1997,9 +1997,9 @@ const TURN_ACTIONS = 2;
 // aren't spent automatically and nothing greys out for "no Actions left" — the pips stay and can be
 // ticked by hand (as they can when on); Dying / Paralyzed / Debuff gates still apply.
 let _turnBased = true;
-function turnOn(){ return _turnBased !== false; }
+function turnOn(){ return isAuto() && _turnBased !== false; }
 function turnFresh(){ Object.assign(_turn, { used: 0, extra: 0, extraUsed: 0, aiSpent: false, moves: 0, evading: false, done: [] }); }
-function toggleTurnMode(){ _turnBased = !turnOn(); turnFresh(); _turn.potionRound = 0; turnAfter(); if(window.SheetSettings) SheetSettings.refresh(); }
+function toggleTurnMode(){ _turnBased = !(_turnBased !== false); turnFresh(); _turn.potionRound = 0; turnAfter(); if(window.SheetSettings) SheetSettings.refresh(); }
 // The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
 function turnModeBtn(){ return ''; }
 function turnModeBtnPill(){ const on = turnOn(); return `<button type="button" class="turn-mode${on ? ' on' : ''}" role="switch" aria-checked="${on}" aria-label="Turn-based: spend Actions automatically" onclick="toggleTurnMode()" title="${on ? 'Turn-based: Actions are spent automatically (2 per turn). Click to tick them by hand instead.' : 'Manual: Actions aren\'t spent automatically — tick the pips yourself. Click to spend them automatically.'}"><span class="tm-sw"></span></button>`; }
@@ -2257,39 +2257,54 @@ function turnDo(i, j){
 // AUTO-USE (roll-log switch, saved on the sheet; on unless turned off): a Hotlist item you Use
 // comes off the Inventory. Off = the effect still happens, the count is left alone.
 let _autoUse = true;
-function autoUse(){ return _autoUse !== false; }
-function toggleAutoUse(){ _autoUse = !autoUse(); renderAutoBtn(); if(typeof scheduleAutosave === 'function') scheduleAutosave(); }
-// SHEET SETTINGS (⚙) — sheet-settings.js draws these; values save as data.auto
-// ({spend,stats,light,dying}, default ON); turnBased and autoUse keep their own keys.
+function autoUse(){ return isAuto() && _autoUse !== false; }
+function toggleAutoUse(){ _autoUse = !(_autoUse !== false); renderAutoBtn(); if(typeof scheduleAutosave === 'function') scheduleAutosave(); }
+// SHEET SETTINGS (⚙) — sheet-settings.js draws these; turnBased and autoUse keep their own keys
+// (data.auto is kept as it was for old saves; the mode is data.manualMode).
 if(typeof window.sheetToast!=='function') window.sheetToast=function(t){ if(window.console) console.log(t); };
 var _dccAuto = {};
-function autoOn(k){ return !(_dccAuto && _dccAuto[k] === false); }
+// AUTO / MANUAL (⚙ in the roll log). The sheet lock IS the mode: locked = Auto, the sheet runs
+// the rules; unlocked = Manual, everything editable and nothing automated. In Auto, two switches
+// can still turn one automation off: Turn-Based Actions (_turnBased) and Auto-Consume (_autoUse).
+// Everything else (Mana / charge spending, computed stats, Debuff timers, Dying) follows the mode.
+function isAuto(){ if(window._sheetLocked === undefined) return true;   // lock script not ready yet: it starts locked (Auto)
+  return typeof window.sheetAuto === 'function' ? !!window.sheetAuto() : !!window._sheetLocked; }
+function autoOn(k){ return isAuto(); }
 function setAuto(k, on){ _dccAuto[k] = !!on;
   if(k === 'stats'){ dccApplyStatsMode(); if(on){ syncEvadeDex(); syncMana(); calcDR(); } }
   if(typeof refreshSpellManaState === 'function') refreshSpellManaState();
   if(typeof renderTurn === 'function') renderTurn();
   if(typeof scheduleAutosave === 'function') scheduleAutosave(); }
-// Stats off: Evade's DEX Mod, Max Mana and DR Total become plain fields the player types in
+// Manual mode: Evade's DEX Mod, Max Mana and DR Total become plain fields the player types in
 // (like current Mana); rolls and rests read those boxes, so the player's numbers are used.
 var DCC_MAN_FIELDS = [['evade-dex','DEX Mod'],['mana-max',''],['dr-total','DR Total']];
 function dccApplyStatsMode(man){
   const off = !autoOn('stats');
   DCC_MAN_FIELDS.forEach(([id, lbl]) => {
     const el = document.getElementById(id); if(!el) return;
-    if(off){ el.removeAttribute('readonly'); el.setAttribute('data-nolock', ''); if(man && man[id] != null) el.value = man[id]; el.title = 'Your own number — type it in (Auto-calculated stats are off under ⚙)'; }
+    if(off){ el.removeAttribute('readonly'); el.setAttribute('data-nolock', ''); if(man && man[id] != null) el.value = man[id]; el.title = 'Manual mode: your own number — type it in (Auto mode under ⚙ works it out again)'; }
     else { el.setAttribute('readonly', ''); el.removeAttribute('data-nolock'); el.removeAttribute('data-lk-ro'); el.title = id === 'mana-max' ? 'Max Mana — equals Enhanced INT' : ''; }
     const sl = el.parentNode && el.parentNode.querySelector('.formula-sublabel'); if(sl && lbl) sl.textContent = lbl + (off ? ' ✎' : '');
   });
   if(off) calcEvadeTotal();
 }
+// Entering Manual: DEX Mod, Max Mana and DR Total become boxes you can correct (they keep the
+// computed numbers). Back in Auto: your numbers are dropped and worked out again from the sheet.
+var _dccManual = false, _dccManSaved = null;
+document.addEventListener('sheetmode', function(e){ const auto = !!(e.detail && e.detail.auto);
+  _dccManual = !auto;
+  dccApplyStatsMode(auto ? null : _dccManSaved); _dccManSaved = null;
+  if(auto){ syncEvadeDex(); syncMana(); calcDR(); }
+  if(typeof refreshSpellManaState === 'function') refreshSpellManaState();
+  if(typeof renderTurn === 'function') renderTurn();
+  if(typeof renderAutoBtn === 'function') renderAutoBtn();
+  if(typeof scheduleAutosave === 'function') scheduleAutosave(); });
+// a sheet left in Manual opens in Manual (the lock script starts locked; switch once it's ready)
+window.addEventListener('load', function(){ setTimeout(function(){ if(_dccManual && window._sheetLocked && typeof window.toggleSheetLock === 'function') window.toggleSheetLock(); }, 420); });
 function dccManValues(){ const o = {}; DCC_MAN_FIELDS.forEach(([id]) => { const el = document.getElementById(id); if(el) o[id] = el.value; }); return o; }
 window.SHEET_SETTINGS = function(){ return [
-  { key:'turn', group:'auto', label:'Turn-based actions', hint:'Attacks, spells and items spend your two Actions on the Turn tab; off: tick them yourself', get:turnOn, set:function(on){ if(on !== turnOn()) toggleTurnMode(); } },
-  { key:'use', group:'auto', label:'Use up consumables', hint:'Hotlist potions, scrolls, tomes, bandages, antidotes, dynamite and torches come off your Inventory', get:autoUse, set:function(on){ if(on !== autoUse()) toggleAutoUse(); } },
-  { key:'spend', group:'auto', label:'Spend Mana automatically', hint:'Spells take their Mana and item spells a charge; off: no "not enough" checks — adjust Mana yourself', get:function(){ return autoOn('spend'); }, set:function(on){ setAuto('spend', on); } },
-  { key:'stats', group:'auto', label:'Auto-calculated stats', hint:'Evade DEX Mod, Max Mana (Enhanced INT) and DR Total (armor + buffs, Oakhide, Iron Skin); off: type your own', get:function(){ return autoOn('stats'); }, set:function(on){ setAuto('stats', on); } },
-  { key:'light', group:'auto', label:'Debuff timers', hint:'End Turn rolls damage-over-time Debuffs, and one-roll Debuffs (Stunned, Queasy…) end after that roll', get:function(){ return autoOn('light'); }, set:function(on){ setAuto('light', on); } },
-  { key:'dying', group:'auto', label:'Dying rules', hint:'An empty Health Bar adds the Dying Debuff (with its CON-Mod countdown); healing clears it', get:function(){ return autoOn('dying'); }, set:function(on){ setAuto('dying', on); } }
+  { key:'turn', group:'auto', label:'Turn-Based Actions', hint:'Attacks, spells and items spend your two Actions on the Turn tab', get:function(){ return _turnBased !== false; }, set:function(on){ if(on !== (_turnBased !== false)) toggleTurnMode(); } },
+  { key:'use', group:'auto', label:'Auto-Consume', hint:'Hotlist potions, scrolls, tomes, bandages, antidotes, dynamite and torches come off your Inventory', get:function(){ return _autoUse !== false; }, set:function(on){ if(on !== (_autoUse !== false)) toggleAutoUse(); } }
 ]; };
 function renderAutoBtn(){ const b = document.getElementById('auto-toggle'); if(!b) return; const on = autoUse(); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.title = on ? 'Auto-use on: Hotlist potions, scrolls, tomes, bandages, antidotes, dynamite and torches come off your Inventory when you Use them. Click to count them by hand.' : 'Auto-use off: using an item applies its effect but nothing is taken from your Inventory — count consumables yourself. Click to turn it back on.'; }
 // Use an Inventory row without using it up: DCCFx takes one off the Qty box (and the Hotlist
@@ -3005,6 +3020,7 @@ function collectSheet() {
   data.autoUse = _autoUse;
   data.auto = Object.assign({}, _dccAuto);
   if(!autoOn('stats')) data.man = dccManValues();
+  data.manualMode = !isAuto();
 
   // Pinned inventory sections (always at the top of the tab)
   data.gold = document.getElementById('f-gold')?.value || '';
@@ -3173,6 +3189,7 @@ function applySheet(data) {
   _turnBased = data.turnBased !== false;
   _autoUse = data.autoUse !== false;
   _dccAuto = (data.auto && typeof data.auto === 'object') ? Object.assign({}, data.auto) : {};
+  _dccManual = data.manualMode === true; _dccManSaved = _dccManual && isAuto() ? (data.man || null) : null;
   dccApplyStatsMode(data.man); if(autoOn('stats')) { syncEvadeDex(); syncMana(); calcDR(); }
   if(window.SheetSettings) SheetSettings.refresh();
   if(typeof renderAutoBtn === 'function') renderAutoBtn();

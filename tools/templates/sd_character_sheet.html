@@ -852,7 +852,7 @@ body.dark .sdt-badge.bad{color:#f08a84;border-color:#a8433d;}
         </div>
         <div class="sd-vital">
           <span class="sv-lbl">Luck</span>
-          <div class="sv-row"><button class="lk-btn" onclick="adjustLuck(-1)">−</button><input type="text" class="sv-big" id="lk-val" placeholder="0"><button class="lk-btn" onclick="adjustLuck(1)">+</button></div>
+          <div class="sv-row"><button class="lk-btn" onclick="adjustLuck(-1)">−</button><input type="text" class="sv-big" id="lk-val" data-nolock placeholder="0"><button class="lk-btn" onclick="adjustLuck(1)">+</button></div>
         </div>
       </div>
 
@@ -915,9 +915,9 @@ body.dark .sdt-badge.bad{color:#f08a84;border-color:#a8433d;}
       <!-- GEAR TAB (coins + gear + free to carry) -->
       <div class="tab-panel" id="tab-gear">
         <div class="coin-row">
-          <div class="coin-cell"><span class="coin-label">GP</span><input type="text" class="coin-input" id="coin-gp" placeholder="0"></div>
-          <div class="coin-cell"><span class="coin-label">SP</span><input type="text" class="coin-input" id="coin-sp" placeholder="0"></div>
-          <div class="coin-cell"><span class="coin-label">CP</span><input type="text" class="coin-input" id="coin-cp" placeholder="0"></div>
+          <div class="coin-cell"><span class="coin-label">GP</span><input type="text" class="coin-input" id="coin-gp" data-nolock placeholder="0"></div>
+          <div class="coin-cell"><span class="coin-label">SP</span><input type="text" class="coin-input" id="coin-sp" data-nolock placeholder="0"></div>
+          <div class="coin-cell"><span class="coin-label">CP</span><input type="text" class="coin-input" id="coin-cp" data-nolock placeholder="0"></div>
         </div>
         <div class="sl"><span>Equipment</span>
           <div style="display:flex;align-items:center;gap:10px;margin-left:auto;">
@@ -1816,8 +1816,8 @@ var _sdTurn = { move: false, action: false, second: false, focus: '' };
 // isn't spent or checked automatically (no HeroDark second action either) — the pips stay and can
 // be ticked by hand, as they can when on.
 var _sdTurnBased = true;
-function turnOn(){ return _sdTurnBased !== false; }
-function toggleTurnMode(){ _sdTurnBased = !turnOn(); _sdTurn = { move: false, action: false, second: false, focus: _sdTurn.focus || '' }; if(window.SheetSettings) SheetSettings.refresh(); sdAfter(); }
+function turnOn(){ return isAuto() && _sdTurnBased !== false; }
+function toggleTurnMode(){ _sdTurnBased = !(_sdTurnBased !== false); _sdTurn = { move: false, action: false, second: false, focus: _sdTurn.focus || '' }; if(window.SheetSettings) SheetSettings.refresh(); sdAfter(); }
 // The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
 function turnModeBtn(){ return ''; }
 function turnModeBtnPill(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: your action is spent automatically (one per turn). Click to tick it by hand instead.' : 'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.') + '"><span class="tm-sw"></span></button>'; }
@@ -1971,8 +1971,8 @@ const SD_ITEM_USE = [
     sub: () => 'Light: double near · burns one oil flask per hour',
     use: c => { const oil = sdItemRefs().find(x => /^oil,? flask$|^flasks? of oil$/i.test(x.name));
       if(!oil){ sheetToast('No oil — a lantern needs an oil flask'); return false; }
-      if(_autoConsume) sdConsumeItem(oil); addTracker('Light');
-      addLog('Light ' + c.name, 'Lit', 'Light out to a double near distance for 1 hour of real time' + (_autoConsume ? ' · −1 Oil flask' : ''), 'normal'); } },
+      if(autoUse()) sdConsumeItem(oil); addTracker('Light');
+      addLog('Light ' + c.name, 'Lit', 'Light out to a double near distance for 1 hour of real time' + (autoUse() ? ' · −1 Oil flask' : ''), 'normal'); } },
   { rx: /^oil,? flask$|^flasks? of oil$/i, kind: 'action', cons: true, sub: () => 'Spill & light: close area, 1d4 dmg/round for 4 rounds',
     use: c => { const r = sdRollDice('1d4'); addLog('Burning oil', r.total + ' dmg', 'd4(' + r.rolls[0] + ') this round · the close area burns for 4 rounds, 1d4 each round', 'normal'); } },
   { rx: /^holy water/i, kind: 'action', cons: true, sub: () => '2d4 damage to an undead',
@@ -2055,7 +2055,7 @@ function sdUseItem(e){
   const ctx = { name: e.name };
   const ok = e.rule.use(ctx);
   if(ok === false) return false;
-  if(e.rule.cons && _autoConsume){
+  if(e.rule.cons && autoUse()){
     sdConsumeItem(e.refs[0]);
   }
   if(typeof saveSheet === 'function') saveSheet(false);
@@ -2296,7 +2296,7 @@ function computeAC() {
 // HeroDark Armor-soak + Evade (on) are recomputed; the mode class chooses which
 // tile is visible. (Name kept as refreshAutoAC so builder/level-up keep calling it.)
 function refreshAutoAC() {
-  const man = !autoOn('stats');   // Auto-calculated stats off (⚙): AC / Armor are the player's own
+  const man = !isAuto();   // Manual mode (⚙): AC / Armor are the player's own
   const ac = document.getElementById('ac-val');
   if(ac && !man) ac.value = String(computeAC());
   const a = document.getElementById('armor-val');
@@ -2439,6 +2439,7 @@ function sheetLevel() {
 // current level (level 1 → 10, level 2 → 20, …). The "next" XP field is derived,
 // so it's kept read-only and refreshed whenever the level changes.
 function refreshXpNext() {
+  if(!isAuto()) return;   // Manual mode: the XP target is the player's
   const el = document.getElementById('xp-next');
   if(el) el.value = String(10 * sheetLevel());
 }
@@ -3324,7 +3325,7 @@ function buildGear() {
       <input type="checkbox" class="gear-equip" onchange="onGearEquipToggle(this)" style="display:none;">
       <span style="font-size:8px;font-weight:700;color:var(--muted);width:16px;flex:0 0 16px;">${i}.</span>
       <input type="text" class="gear-name" oninput="onGearNameInput(this)" title="An item here is equipped: weapons add an attack, armor sets your Armor (soak), magic items apply their bonuses" style="flex:1 1 auto;min-width:0;border:none;background:transparent;font-family:Montserrat,sans-serif;font-size:11px;color:var(--ink);outline:none;padding:3px 0;">
-      <input type="text" class="gear-qty" style="width:30px;flex:0 0 30px;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:2px 0;" placeholder="">
+      <input type="text" class="gear-qty" data-nolock style="width:30px;flex:0 0 30px;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:2px 0;" placeholder="">
       <button class="gear-stow-btn" onclick="stowGearRow(this)" title="Move to Inventory (unequip)">▽</button>
       <button class="gear-del-btn" onclick="deleteGearRow(this)" title="Delete item">✕</button>
       <div class="gear-lb" style="display:none"></div>
@@ -3432,7 +3433,7 @@ function renderInventory(){
   box.innerHTML = _inventory.map((it, i) =>
     '<div class="inv-row">'
     + '<input type="text" class="inv-name" value="' + _trkEsc(it.name) + '" oninput="onInvNameInput(' + i + ',this.value)">'
-    + '<input type="text" class="inv-qty" value="' + _trkEsc(it.qty || '') + '" oninput="onInvQtyInput(' + i + ',this.value)" placeholder="">'
+    + '<input type="text" class="inv-qty" data-nolock value="' + _trkEsc(it.qty || '') + '" oninput="onInvQtyInput(' + i + ',this.value)" placeholder="">'
     + '<button type="button" class="inv-eq-btn" onclick="invEquip(' + i + ')" title="Move to Equipment (equip)">△</button>'
     + '<button type="button" class="inv-del-btn" onclick="invDelete(' + i + ')" title="Delete item">✕</button>'
     + (it.benefits && it.benefits.length ? '<div class="inv-lb" data-i="' + i + '"></div>' : '')
@@ -3474,7 +3475,7 @@ function rollWithAdv(sides) {
 }
 // HeroDark: gain a Luck point on any natural 1 or 20 from a d20 roll.
 function heroDarkLuckOnNat(natRoll, source){
-  if(!heroDarkOn() || (natRoll !== 1 && natRoll !== 20)) return;
+  if(!isAuto() || !heroDarkOn() || (natRoll !== 1 && natRoll !== 20)) return;   // Manual mode: add Luck yourself
   const el = document.getElementById('lk-val');
   if(el) el.value = (parseInt(el.value) || 0) + 1;
   addLog('Luck +1', '✦', 'HeroDark: natural ' + natRoll + (source ? ' on ' + source : '') + ' — gain a Luck point', natRoll === 20 ? 'crit' : 'fumble');
@@ -3641,31 +3642,49 @@ let _charSpellSources = [];
 // shot, Equipment items (potions, torches, oil…) on use, scrolls on casting, wands on a
 // failed check. Off = effects still happen, nothing is taken from your gear.
 let _autoConsume = true;
-function autoUse(){ return _autoConsume !== false; }
-// SHEET SETTINGS (⚙) — sheet-settings.js draws these; values save in _sheet.auto
-// ({spend,stats,dying}, default ON). turnBased and autoConsume keep their own keys.
+function autoUse(){ return isAuto() && _autoConsume !== false; }
+// SHEET SETTINGS (⚙) — sheet-settings.js draws these. turnBased and autoConsume keep their own
+// keys; _sheet.auto is kept as it was for old saves; the mode is _sheet.manualMode.
 if(typeof window.sheetToast!=='function') window.sheetToast=function(t){ if(window.console) console.log(t); };
 var _sdAuto = {};
-function autoOn(k){ return !(_sdAuto && _sdAuto[k] === false); }
+// AUTO / MANUAL (⚙ in the roll log). The sheet lock IS the mode: locked = Auto, the sheet runs
+// the rules; unlocked = Manual, everything editable and nothing automated. In Auto, two switches
+// can still turn one automation off: Turn-Based Actions (turnBased) and Auto-Consume (autoConsume).
+// Everything else (lost spells, AC / Armor, XP target, HeroDark Luck and Dying) follows the mode.
+function isAuto(){ if(window._sheetLocked === undefined) return true;   // lock script not ready yet: it starts locked (Auto)
+  return typeof window.sheetAuto === 'function' ? !!window.sheetAuto() : !!window._sheetLocked; }
+function autoOn(k){ return isAuto(); }
 function setAuto(k, on){ _sdAuto[k] = !!on; if(k === 'stats'){ sdApplyStatsMode(); if(on) refreshAutoAC(); } if(typeof renderSDTurn === 'function') renderSDTurn(); saveSheet(false); }
-// Stats off: AC (and HeroDark Armor) become plain fields the player types in, like Max HP.
+// Manual mode: AC (and HeroDark Armor) and the XP target become plain fields the player types in, like Max HP.
 function sdApplyStatsMode(){
-  const man = !autoOn('stats');
+  const man = !isAuto();
+  const xn = document.getElementById('xp-next');
+  if(xn){ xn.readOnly = !man; if(man) xn.setAttribute('data-nolock',''); else xn.removeAttribute('data-nolock'); xn.title = man ? 'Manual mode: your own XP target' : 'Auto: 10 × current level'; }
   [['ac-val','.sd-vital-ac .sv-lbl','AC'],['armor-val','.def-cell .def-mini','Armor']].forEach(([id, lblSel, lbl]) => {
     const el = document.getElementById(id); if(!el) return;
-    if(man){ el.setAttribute('data-nolock',''); if(el.getAttribute('data-lk-ro')){ el.readOnly = false; el.removeAttribute('data-lk-ro'); } el.title = 'Your own number — type it in (Auto-calculated stats are off under ⚙)'; }
+    if(man){ el.setAttribute('data-nolock',''); if(el.getAttribute('data-lk-ro')){ el.readOnly = false; el.removeAttribute('data-lk-ro'); } el.title = 'Manual mode: your own number — type it in (Auto mode under ⚙ works it out again)'; }
     else { el.removeAttribute('data-nolock'); el.title = id === 'ac-val' ? 'Armor Class — from your equipped armor and shield' : ''; }
     const l = document.querySelector(lblSel); if(l) l.textContent = lbl + (man ? ' ✎' : '');
   });
   if(!man && typeof applySheetLock === 'function') try { applySheetLock(); } catch(e) {}
 }
 window.SHEET_SETTINGS = function(){ return [
-  { key:'turn', group:'auto', label:'Turn-based actions', hint:'Attacks, spells and items spend your action on the Action tab; off: tick the pips yourself', get:turnOn, set:function(on){ if(on !== turnOn()) toggleTurnMode(); } },
-  { key:'use', group:'auto', label:'Use up consumables', hint:'Arrows and bolts per shot, potions, torches, oil and other Equipment when used, scrolls when cast, wands spent or broken on a failed check', get:autoUse, set:function(on){ if(on !== autoUse()) toggleAutoConsume(); } },
-  { key:'spend', group:'auto', label:'Mark spells lost automatically', hint:'A failed spellcasting check marks the spell lost until you rest; off: mark it yourself', get:function(){ return autoOn('spend'); }, set:function(on){ setAuto('spend', on); } },
-  { key:'stats', group:'auto', label:'Auto-calculated stats', hint:'AC (HeroDark: Armor) from equipped armor, shield, DEX and bonuses; off: type your own', get:function(){ return autoOn('stats'); }, set:function(on){ setAuto('stats', on); } },
-  { key:'dying', group:'auto', label:'Dying status', hint:'HeroDark: dropping to 0 HP adds Dying, healing above 0 clears it', show:function(){ return heroDarkOn(); }, get:function(){ return autoOn('dying'); }, set:function(on){ setAuto('dying', on); } }
+  { key:'turn', group:'auto', label:'Turn-Based Actions', hint:'Attacks, spells and items spend your action on the Action tab', get:function(){ return _sdTurnBased !== false; }, set:function(on){ if(on !== (_sdTurnBased !== false)) toggleTurnMode(); } },
+  { key:'use', group:'auto', label:'Auto-Consume', hint:'Arrows and bolts per shot, potions, torches, oil and other Equipment when used, scrolls when cast, wands spent or broken on a failed check', get:function(){ return _autoConsume !== false; }, set:function(on){ if(on !== (_autoConsume !== false)) toggleAutoConsume(); } }
 ]; };
+// Entering Manual: AC / Armor / XP target keep their numbers for you to correct. Back in Auto:
+// they are worked out again from your gear, DEX and level.
+var _sdManual = false, _sdManSaved = null;
+document.addEventListener('sheetmode', function(e){ const auto = !!(e.detail && e.detail.auto);
+  _sdManual = !auto;
+  if(!auto && _sdManSaved){ const m = _sdManSaved; [['ac-val','ac'],['armor-val','armor'],['xp-next','xpNext']].forEach(([id,k]) => { const el = document.getElementById(id); if(el && m[k] != null && m[k] !== '') el.value = m[k]; }); }
+  _sdManSaved = null;
+  sdApplyStatsMode();
+  if(auto){ refreshAutoAC(); refreshXpNext(); }
+  if(typeof renderSDTurn === 'function') renderSDTurn();
+  saveSheet(false); });
+// a sheet left in Manual opens in Manual (the lock script starts locked; switch once it's ready)
+window.addEventListener('load', function(){ setTimeout(function(){ if(_sdManual && window._sheetLocked && typeof window.toggleSheetLock === 'function') window.toggleSheetLock(); }, 420); });
 function toggleAutoConsume() {
   _autoConsume = !_autoConsume;
   _autoConsumeVisual(_autoConsume);
@@ -3855,9 +3874,9 @@ function rollAttack(btn) {
     ? `Hit: ${hitTotal}  |  Dmg: ${dmgTotal}`
     : `Hit: ${hitTotal}`;
 
-  // Ammo: bows spend an arrow, crossbows a bolt (unless Auto-Ammo is off)
+  // Ammo: bows spend an arrow, crossbows a bolt (unless Auto-Consume is off / Manual mode)
   let ammoNote = '';
-  if(_autoConsume) {
+  if(autoUse()) {
     const at = ammoTypeFor(name);
     if(at) {
       const res = consumeAmmo(at);
@@ -3984,7 +4003,7 @@ function rollSpell(btn, opts) {
   const ret = { success, roll };
 
   // ── Scroll / Wand consumption ── (only when Auto is on; off = track by hand)
-  if(source && _autoConsume) {
+  if(source && autoUse()) {
    if(source === 'scroll') {
     // A spell scroll is expended on use. Players can hold several copies (tracked
     // in the gear item's quantity): spend one, and only remove the spell row when
@@ -4306,7 +4325,7 @@ function collectSheet(){
       spellGBonus: document.getElementById('spell-gbonus')?.value || '',
       tab: _tab,
       turn: Object.assign({}, _sdTurn),
-      turnBased: turnOn(),
+      turnBased: _sdTurnBased !== false,
       campaign: _campaign ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
       mastery: Array.isArray(_charMastery) ? _charMastery : [],
       trusty: _charTrusty || null,
@@ -4314,6 +4333,8 @@ function collectSheet(){
       extraArmor: Array.isArray(_charExtraArmor) ? _charExtraArmor : [],
       autoConsume: _autoConsume,
       auto: Object.assign({}, _sdAuto),
+      manualMode: !isAuto(),
+      man: isAuto() ? null : { ac: document.getElementById('ac-val')?.value || '', armor: document.getElementById('armor-val')?.value || '', xpNext: document.getElementById('xp-next')?.value || '' },
       innateAC: _innateAC,
       hbBonusSlots: _hbBonusSlots,
       hbFeatureCharges: _hbFeatureChargeBonus,
@@ -4465,7 +4486,7 @@ function _applySDData(d){
     _autoConsume = (d._sheet?.autoConsume === undefined) ? true : !!d._sheet.autoConsume;
     // Auto-AC used to ride on the Auto switch: an old save with it off keeps AC by hand.
     _sdAuto = (d._sheet && d._sheet.auto && typeof d._sheet.auto === 'object') ? Object.assign({}, d._sheet.auto) : {};
-    if(_sdAuto.stats === undefined && _autoConsume === false) _sdAuto.stats = false;
+    _sdManual = !!(d._sheet && d._sheet.manualMode === true); _sdManSaved = (_sdManual && isAuto() && d._sheet.man) ? d._sheet.man : null;
     sdApplyStatsMode(); if(window.SheetSettings) SheetSettings.refresh();
     if(typeof _autoConsumeVisual==='function') _autoConsumeVisual(_autoConsume);
     if(typeof applyAutoLock==='function') applyAutoLock(_autoConsume);

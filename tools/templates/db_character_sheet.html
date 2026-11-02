@@ -1551,8 +1551,8 @@ function inCombat(){ return true; }
 // TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = nothing
 // is spent automatically and nothing greys out — the Action pip stays and can be ticked by hand
 // (as it can when on); dying and death still limit you.
-function turnOn(){ return S.turnBased!==false; }
-function toggleTurnMode(){ S.turnBased=!turnOn(); S.turn.action=false; S.turn.done=false; S.turn.extra=0; S.turn.dual=false; changed(); }
+function turnOn(){ return isAuto()&&S.turnBased!==false; }
+function toggleTurnMode(){ S.turnBased=!(S.turnBased!==false); S.turn.action=false; S.turn.done=false; S.turn.extra=0; S.turn.dual=false; changed(); }
 // The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
 function turnModeBtn(){ return ''; }
 function turnModeBtnPill(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: actions are spent automatically. Click to tick them by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
@@ -1698,29 +1698,38 @@ function doDash(){ if(!canAct()){ addLog('Dash','—','No action left','normal')
 function doHelp(){ if(!canAct()){ addLog('Help','—','No action left','normal'); return; } useAction(); addLog('Help','Action','Your ally gets a boon on the roll you help with','normal'); changed(); }
 // AUTO-USE (roll-log switch, saved on the sheet; on unless turned off): consumables come off
 // the inventory by themselves. Off: their effects still happen, the counting is yours.
-function autoUse(){ return S.autoUse!==false; }
+function autoUse(){ return isAuto()&&S.autoUse!==false; }
 // SHEET SETTINGS (⚙) — sheet-settings.js draws these; the values live in S and save with the sheet.
 // S.auto.{spend,stats,enc,light,dying} default ON; S.turnBased and S.autoUse keep their own keys.
 if(typeof window.sheetToast!=='function') window.sheetToast=function(t){ if(window.console) console.log(t); };
-function autoOn(k){ return !(S.auto&&S.auto[k]===false); }
+// AUTO / MANUAL (⚙ in the roll log). The sheet lock IS the mode: locked = Auto, the sheet runs
+// the rules; unlocked = Manual, everything editable and nothing automated. In Auto, three
+// switches can still turn one automation off: Turn-Based Actions (S.turnBased), Auto-Consume
+// (S.autoUse) and Use Encumbrance (S.auto.enc). Everything else follows the mode.
+function isAuto(){ if(typeof window._sheetLocked==='undefined') return !S.manualMode; return !!window._sheetLocked; }   // before the lock script runs, go by the saved mode
+function autoOn(k){ if(!isAuto()) return false; if(k==='enc') return !(S.auto&&S.auto.enc===false); return true; }
 function setAuto(k,on){ S.auto=S.auto||{}; S.auto[k]=!!on; changed(); }
 window.SHEET_SETTINGS=function(){ return [
-  {key:'turn',group:'auto',label:'Turn-based actions',hint:'Attacks and actions tick off your action and reaction; off: tick them yourself',get:turnOn,set:function(on){ if(on!==turnOn()) toggleTurnMode(); }},
-  {key:'use',group:'auto',label:'Use up consumables',hint:'Potions, bandages, lamp oil and burnt-out torches come off your inventory',get:autoUse,set:function(on){ if(on!==autoUse()) toggleAutoUse(); }},
-  {key:'spend',group:'auto',label:'Spend WP automatically',hint:'Spells, heroic abilities, Fast Healer and Sole Survivor take their WP; off: adjust WP yourself',get:function(){ return autoOn('spend'); },set:function(on){ setAuto('spend',on); }},
-  {key:'stats',group:'auto',label:'Auto-calculated stats',hint:'HP and WP max, armor, movement and damage bonuses from attributes and gear; off: type your own',get:function(){ return autoOn('stats'); },set:function(on){ if(!on){ S.man=S.man||{}; ['hp','wp','armor','move','dbSTR','dbAGL'].forEach(function(k){ if(S.man[k]==null) S.man[k]=manCalc(k); }); } setAuto('stats',on); }},
-  {key:'enc',group:'auto',label:'Encumbrance warning',hint:'Flag when you carry more than your capacity',get:function(){ return autoOn('enc'); },set:function(on){ setAuto('enc',on); }},
-  {key:'light',group:'auto',label:'Light burns out',hint:'A tallow candle rolls its light die each time you attack',get:function(){ return autoOn('light'); },set:function(on){ setAuto('light',on); }},
-  {key:'dying',group:'auto',label:'Dying rules',hint:'Damage at 0 HP counts as a failed death roll; dropping to minus your max HP kills you',get:function(){ return autoOn('dying'); },set:function(on){ setAuto('dying',on); }}
+  {key:'turn',group:'auto',label:'Turn-Based Actions',hint:'Attacks and actions tick off your action and reaction',get:function(){ return S.turnBased!==false; },set:function(on){ if(on!==(S.turnBased!==false)) toggleTurnMode(); }},
+  {key:'use',group:'auto',label:'Auto-Consume',hint:'Potions, bandages, lamp oil and burnt-out torches come off your inventory',get:function(){ return S.autoUse!==false; },set:function(on){ if(on!==(S.autoUse!==false)) toggleAutoUse(); }},
+  {key:'enc',group:'auto',label:'Use Encumbrance',hint:'Flag when you carry more than your capacity',get:function(){ return !(S.auto&&S.auto.enc===false); },set:function(on){ setAuto('enc',on); }}
 ]; };
+// Entering Manual: the computed numbers become yours to correct (✎ opens the editor). Back in
+// Auto: your typed numbers are dropped and everything is worked out again from the sheet.
+document.addEventListener('sheetmode',function(e){ var auto=!!(e.detail&&e.detail.auto);
+  if(auto){ S.man=null; S.manualMode=false; }
+  else { S.man=S.man||{}; ['hp','wp','armor','move','dbSTR','dbAGL'].forEach(function(k){ if(S.man[k]==null||S.man[k]==='') S.man[k]=manCalc(k); }); S.manualMode=true; }   // only fill gaps: reopening in Manual keeps your numbers
+  changed(); });
+// a sheet left in Manual opens in Manual (the lock script starts locked; switch once it's ready)
+window.addEventListener('load',function(){ setTimeout(function(){ if(S.manualMode&&window._sheetLocked&&typeof window.toggleSheetLock==='function') window.toggleSheetLock(); },420); });
 // Auto-calculated stats off: the player's own numbers (S.man) replace the computed ones.
 function manCalc(k){ return k==='hp'?hpMaxCalc():k==='wp'?wpMaxCalc():k==='armor'?armorCalc():k==='move'?movementCalc():k==='dbSTR'?(dmgBonus(attr('STR'))||''):k==='dbAGL'?(dmgBonus(attr('AGL'))||''):''; }
 function manual(k){ return !autoOn('stats')&&S.man&&S.man[k]!=null&&S.man[k]!==''; }
 function dbFor(a){ var k='db'+a; if(manual(k)) return String(S.man[k]).trim()||null; return dmgBonus(attr(a)); }
 function editStats(){ S.man=S.man||{}; var f=function(k,l,hint){ return '<label class="m-row" style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0;"><span>'+l+'</span><input class="m-input" style="width:90px" data-man="'+k+'" value="'+esc(S.man[k]!=null?S.man[k]:manCalc(k))+'" placeholder="'+esc(hint)+'"></label>'; };
-  openDlg('Your stats','<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). These numbers are used for rolls, damage and armor.</p>'+f('hp','Max HP','')+f('wp','Max WP','')+f('armor','Armor','')+f('move','Movement','')+f('dbSTR','Damage bonus STR','e.g. D4')+f('dbAGL','Damage bonus AGL','e.g. D4'),
+  openDlg('Your stats','<p class="m-hint">Manual mode: these numbers are yours. They are used for rolls, damage and armor until you switch back to Auto (⚙ in the roll log), which works them out again.</p>'+f('hp','Max HP','')+f('wp','Max WP','')+f('armor','Armor','')+f('move','Movement','')+f('dbSTR','Damage bonus STR','e.g. D4')+f('dbAGL','Damage bonus AGL','e.g. D4'),
     [{t:'Save',f:function(){ [].forEach.call(document.querySelectorAll('[data-man]'),function(i){ var k=i.dataset.man, v=i.value.trim(); S.man[k]=/^db/.test(k)?v.toUpperCase():(v===''?null:num(v)); }); closeDlg(); changed(); }}]); }
-function toggleAutoUse(){ S.autoUse=!autoUse(); renderAutoBtn(); changed(); }
+function toggleAutoUse(){ S.autoUse=!(S.autoUse!==false); renderAutoBtn(); changed(); }
 function renderAutoBtn(){ var b=document.getElementById('auto-toggle'); if(!b) return; var on=autoUse(); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); b.title=on?'Auto-use on: potions, bandages, lamp oil and burnt-out torches come off your inventory by themselves. Click to count them by hand.':'Auto-use off: nothing is taken from your inventory — count consumables yourself. Click to turn it back on.'; }
 function bandageRow(){ return S.inventory.find(function(r){ return /bandage/i.test(r.name)&&(r.uses==null?num(r.qty,1)>0:num(r.uses)>0); })||null; }
 function useBandage(){ var b=bandageRow(); if(!b) return false; if(!autoUse()) return true; if(b.uses!=null){ b.uses=num(b.uses)-1; if(b.uses<=0){ if(num(b.qty,1)>1){ b.qty=num(b.qty,1)-1; b.uses=10; } else S.inventory.splice(S.inventory.indexOf(b),1); } } else { b.qty=num(b.qty,1)-1; if(b.qty<=0) S.inventory.splice(S.inventory.indexOf(b),1); } if(!bandageRow()) markGone('bandage',b); return true; }

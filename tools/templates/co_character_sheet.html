@@ -746,7 +746,7 @@ function renderMarks(){
     for(var i=1;i<=3;i++){ boxes+='<button class="mbox'+(i<=val?' on':'')+'" onclick="setMark(\''+m.name+'\','+i+')">'+(i<=val?'✗':'')+'</button>'; }
     var el=document.createElement('div'); el.className='mtrack'+(m.name==='Bleed'?' bleed':'');
     el.innerHTML='<h3>'+m.name+'</h3><div class="mboxes">'+boxes+'</div>'
-      +'<input class="scarslot" placeholder="Scar…" value="'+esc(S.scars[m.name]||'')+'" oninput="S.scars[\''+m.name+'\']=this.value;scheduleAutosave()">';
+      +'<input class="scarslot" data-nolock placeholder="Scar…" value="'+esc(S.scars[m.name]||'')+'" oninput="S.scars[\''+m.name+'\']=this.value;scheduleAutosave()">';
     host.appendChild(el);
   });
 }
@@ -813,7 +813,7 @@ function setAbUsed(i,k){ var d=S.abilities[i]; if(!d)return; d.used=((d.used||0)
 function useAbility(i){
   var d=S.abilities[i]; if(!d)return; var u=d.uses||null, max=u?(u.per==='between'?1:(u.n||1)):0;
   var cost=G(d.cost), paid=[], notes=[];
-  // ⚙ Pay ability costs automatically off: the ability is used, nothing is taken or checked.
+  // Manual mode (⚙): the ability is used, nothing is taken or checked.
   if(!autoOn('spend')){ var hand=cost.map(abCostLabel).concat(u?[abUsesLabel(u)]:[]); addLog(d.name||'Ability','Used',hand.length?'pay by hand: '+hand.join(', '):'no cost','normal'); return; }
   if(u&&(d.used||0)>=max){ sheetToast((d.name||'Ability')+': no uses left ('+abUsesLabel(u)+')'); return; }
   // Check drive / resistance first so a failed use pays nothing.
@@ -1085,7 +1085,7 @@ function applySheet(d){
   if(Array.isArray(d.illumination)){ S.illumination=d.illumination.slice(0,3); while(S.illumination.length<3)S.illumination.push(''); }
   if(Array.isArray(d.relationships)) S.relationships=d.relationships.map(function(r){ return {name:r.name||'',type:r.type||''}; });
   if(d.advancements!=null) S.advancements=d.advancements;
-  if(d.auto&&typeof d.auto==='object') S.auto=d.auto; if(d.man&&typeof d.man==='object') S.man=d.man;
+  if(d.auto&&typeof d.auto==='object') S.auto=d.auto; S.manualMode=!!d.manualMode; S.man=(S.manualMode&&d.man&&typeof d.man==='object')?d.man:null;   // typed numbers only count in Manual
   _staged={Nerve:0,Cunning:0,Intuition:0}; _pendingGild=null;
   renderAll();
   if(typeof campaignRestore==='function' && d.campaign!==undefined) campaignRestore(d.campaign);
@@ -1104,21 +1104,28 @@ function saveSheet(quiet){
   if(window.__ddSave) window.__ddSave({ co_sheet:json });
   if(!quiet) sheetToast('Sheet saved');
 }
-// SHEET SETTINGS (⚙) — sheet-settings.js draws these; the values live in S and save with the sheet.
-// S.auto.{spend,stats} default ON (a missing key reads as ON).
+// AUTO / MANUAL (⚙ in the roll log). The sheet lock IS the mode: locked = Auto, the sheet runs
+// the rules (ability costs paid, resistance worked out from Drive max); unlocked = Manual,
+// everything editable and nothing automated. Candela has none of the three per-feature
+// switches, so its automation simply follows the mode.
 if(typeof window.sheetToast!=='function') window.sheetToast=function(t){ if(window.console) console.log(t); };
-function autoOn(k){ return !(S&&S.auto&&S.auto[k]===false); }
-function setAuto(k,on){ S.auto=S.auto||{}; S.auto[k]=!!on; renderDriveBlocks(); renderMarks(); renderRows('abil'); scheduleAutosave(); }
-window.SHEET_SETTINGS=function(){ return [
-  {key:'spend',group:'auto',label:'Pay ability costs automatically',hint:'Using an ability takes its Drive, resistance, marks and uses; off: pay them yourself',get:function(){ return autoOn('spend'); },set:function(on){ setAuto('spend',on); }},
-  {key:'stats',group:'auto',label:'Auto-calculated stats',hint:'Resistance from Drive max (one per 3); off: set your own',get:function(){ return autoOn('stats'); },set:function(on){ if(!on){ S.man=S.man||{}; DRIVE_NAMES.forEach(function(dn){ if(S.man['res'+dn]==null) S.man['res'+dn]=resTotalCalc(dn); }); } setAuto('stats',on); }}
-]; };
+function isAuto(){ if(window._sheetLocked===undefined) return true; return typeof window.sheetAuto==='function'?!!window.sheetAuto():!!window._sheetLocked; }   // before the lock script runs the sheet starts in Auto
+function autoOn(k){ return isAuto(); }
+window.SHEET_SETTINGS=function(){ return []; };
+// Entering Manual: resistance becomes yours to correct (✎ opens the editor). Back in Auto: your
+// typed numbers are dropped and everything is worked out again from the sheet.
+document.addEventListener('sheetmode',function(e){ var auto=!!(e.detail&&e.detail.auto);
+  if(auto){ S.man=null; S.manualMode=false; DRIVE_NAMES.forEach(function(dn){ if(S.resUsed[dn]>resTotal(dn)) S.resUsed[dn]=resTotal(dn); }); }
+  else { S.man=S.man||{}; DRIVE_NAMES.forEach(function(dn){ var k='res'+dn; if(S.man[k]==null||S.man[k]==='') S.man[k]=resTotalCalc(dn); }); S.manualMode=true; }   // keeps numbers already typed (a sheet reopened in Manual)
+  renderDriveBlocks(); renderMarks(); renderRows('abil'); scheduleAutosave(); });
+// a sheet left in Manual opens in Manual (the lock script starts locked; switch once it's ready)
+window.addEventListener('load',function(){ setTimeout(function(){ if(S.manualMode&&window._sheetLocked&&typeof window.toggleSheetLock==='function') window.toggleSheetLock(); },420); });
 // Auto-calculated stats off: the player's own numbers (S.man) replace the computed ones.
-function manual(k){ return !autoOn('stats')&&S.man&&S.man[k]!=null&&S.man[k]!==''; }
+function manual(k){ return !isAuto()&&S.man&&S.man[k]!=null&&S.man[k]!==''; }
 function closeStats(){ var o=$('stats-overlay'); if(o) o.classList.remove('open'); }
 function editStats(){ S.man=S.man||{}; var o=$('stats-overlay'); if(!o) return;
   var f=function(dn){ var k='res'+dn; return '<label style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0;"><span>'+dn+' resistance</span><input class="m-input" style="width:90px" type="number" min="0" max="3" data-man="'+k+'" value="'+esc(S.man[k]!=null?S.man[k]:resTotalCalc(dn))+'"></label>'; };
-  $('stats-body').innerHTML='<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). Resistance per Drive, 0–3.</p>'+DRIVE_NAMES.map(f).join('')
+  $('stats-body').innerHTML='<p class="m-hint">Manual mode: resistance per Drive (0–3) is yours until you switch back to Auto (⚙ in the roll log), which works it out again.</p>'+DRIVE_NAMES.map(f).join('')
     +'<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;"><button class="m-btn ghost" onclick="closeStats()">Cancel</button><button class="m-btn" onclick="saveStats()">Save</button></div>';
   o.classList.add('open'); }
 function saveStats(){ [].forEach.call(document.querySelectorAll('#stats-body [data-man]'),function(i){ var v=i.value.trim(); S.man[i.dataset.man]=v===''?null:clamp(num(v),0,3); }); DRIVE_NAMES.forEach(function(dn){ if(S.resUsed[dn]>resTotal(dn)) S.resUsed[dn]=resTotal(dn); }); closeStats(); renderDriveBlocks(); scheduleAutosave(); }

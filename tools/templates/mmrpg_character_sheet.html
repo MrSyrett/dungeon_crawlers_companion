@@ -1437,8 +1437,8 @@ function tEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g
 // TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = nothing
 // is spent automatically and nothing greys out — the pips stay and can be ticked by hand (as
 // they can when on); conditions that stop you still apply.
-function turnOn(){ return S.turnBased!==false; }
-function toggleTurnMode(){ S.turnBased=!turnOn(); var t=turnState(); t.std=t.move=t.react=false; t.dodge=0; renderTurn(); scheduleAutosave(); try{ SheetSettings.refresh(); }catch(e){} }
+function turnOn(){ return isAuto()&&S.turnBased!==false; }
+function toggleTurnMode(){ S.turnBased=!(S.turnBased!==false); var t=turnState(); t.std=t.move=t.react=false; t.dodge=0; renderTurn(); scheduleAutosave(); try{ SheetSettings.refresh(); }catch(e){} }
 // The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
 function turnModeBtn(){ return ''; }
 function turnModeBtnPill(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" onclick="toggleTurnMode()" aria-label="Turn-based: spend actions automatically" title="'+(on?'Turn-based: actions are spent automatically. Click to tick them by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
@@ -1490,20 +1490,29 @@ function usePower(p, kind){
 function isGrenade(w){ return !!w && !!w.name && /grenade/i.test(w.name) && !/launcher/i.test(w.name); }
 // AUTO-USE (roll-log switch, saved on the sheet; on unless turned off): thrown grenades come off
 // the Equipment list by themselves. Off = the throw still happens, the count is left alone.
-function autoUse(){ return S.autoUse!==false; }
-function toggleAutoUse(){ S.autoUse=!autoUse(); renderAutoBtn(); scheduleAutosave(); }
+function autoUse(){ return isAuto()&&S.autoUse!==false; }
+function toggleAutoUse(){ S.autoUse=!(S.autoUse!==false); renderAutoBtn(); scheduleAutosave(); }
 // SHEET SETTINGS (⚙) — sheet-settings.js draws these; the values live in S and save with the sheet.
-// S.auto.{spend,stats} default ON; S.turnBased and S.autoUse keep their own keys.
+// AUTO / MANUAL: the sheet lock IS the mode. Locked = Auto, the sheet runs the rules; unlocked =
+// Manual, everything editable and nothing automated. In Auto, Turn-Based Actions (S.turnBased) and
+// Auto-Consume (S.autoUse) can still be turned off; spending Focus/Karma and the computed stats
+// follow the mode alone.
 if(typeof window.sheetToast!=='function') window.sheetToast=function(t){ if(window.console) console.log(t); };
-function autoOn(k){ return !(S&&S.auto&&S.auto[k]===false); }
-function setAuto(k,on){ S.auto=S.auto||{}; S.auto[k]=!!on; renderStatsAll(); scheduleAutosave(); }
+function isAuto(){ if(window._sheetLocked===undefined) return true; return typeof window.sheetAuto==='function'?!!window.sheetAuto():!!window._sheetLocked; }   // the sheet opens in Auto
+function autoOn(k){ return isAuto(); }
 function renderStatsAll(){ renderAbilities(); renderVitals(); renderDerived(); renderDamage(); renderAttacks(); if(typeof renderTurn==='function') renderTurn(); }
 window.SHEET_SETTINGS=function(){ return [
-  {key:'turn',group:'auto',label:'Turn-based actions',hint:'Actions, reactions and ability rolls tick off your turn; off: nothing is spent',get:turnOn,set:function(on){ if(on!==turnOn()) toggleTurnMode(); }},
-  {key:'use',group:'auto',label:'Use up consumables',hint:'Thrown grenades and Spider-Grenades come off your equipment',get:autoUse,set:function(on){ if(on!==autoUse()) toggleAutoUse(); }},
-  {key:'spend',group:'auto',label:'Spend Focus & Karma automatically',hint:'Powers take their Focus; recovery checks and the Karma edge take Karma; off: adjust them yourself',get:function(){ return autoOn('spend'); },set:function(on){ setAuto('spend',on); }},
-  {key:'stats',group:'auto',label:'Auto-calculated stats',hint:'Health, Focus and Karma max, defenses, Run Speed, initiative and damage multiplier; off: type your own',get:function(){ return autoOn('stats'); },set:function(on){ if(!on){ S.man=S.man||{}; MAN_KEYS.forEach(function(k){ if(S.man[k]==null) S.man[k]=manCalc(k); }); } setAuto('stats',on); }}
+  {key:'turn',group:'auto',label:'Turn-Based Actions',hint:'Actions, reactions and ability rolls tick off your turn',get:function(){ return S.turnBased!==false; },set:function(on){ if(on!==(S.turnBased!==false)) toggleTurnMode(); }},
+  {key:'use',group:'auto',label:'Auto-Consume',hint:'Thrown grenades and Spider-Grenades come off your equipment',get:function(){ return S.autoUse!==false; },set:function(on){ if(on!==(S.autoUse!==false)) toggleAutoUse(); }}
 ]; };
+// Entering Manual: the computed numbers become yours to correct (✎ opens the editor; numbers
+// you saved in Manual are kept). Back in Auto: your typed numbers are dropped and everything is worked out again from the sheet.
+document.addEventListener('sheetmode',function(e){ var auto=!!(e.detail&&e.detail.auto);
+  if(auto){ S.man=null; S.manualMode=false; }
+  else { S.man=S.man||{}; MAN_KEYS.forEach(function(k){ if(S.man[k]==null||S.man[k]==='') S.man[k]=manCalc(k); }); S.manualMode=true; }
+  renderStatsAll(); scheduleAutosave(); });
+// a sheet left in Manual opens in Manual (the lock script starts locked; switch once it's ready)
+window.addEventListener('load',function(){ setTimeout(function(){ if(S.manualMode&&window._sheetLocked&&typeof window.toggleSheetLock==='function') window.toggleSheetLock(); },420); });
 // Auto-calculated stats off: the player's own numbers (S.man) replace the computed ones.
 var MAN_KEYS=['hp','focus','karma','def_melee','def_agility','def_resilience','def_vigilance','def_ego','def_logic','run','init','mult'];
 function manCalc(k){ if(/^def_/.test(k)) return defenseCalc(k.slice(4)); return k==='hp'?healthMaxCalc():k==='focus'?focusMaxCalc():k==='karma'?rank():k==='run'?runSpeedCalc():k==='init'?ab('vigilance'):k==='mult'?rank():''; }
@@ -1511,7 +1520,7 @@ function manual(k){ return !autoOn('stats')&&S.man&&S.man[k]!=null&&S.man[k]!=='
 function editStats(){ S.man=S.man||{}; var L={hp:'Max Health',focus:'Max Focus',karma:'Max Karma',run:'Run Speed',init:'Initiative bonus',mult:'Damage multiplier (base)'};
   ABILITIES.forEach(function(a){ L['def_'+a.key]=a.name+' Defense'; });
   var f=function(k){ return '<label style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0;"><span>'+esc(L[k])+'</span><input class="m-input" style="width:90px" type="number" data-man="'+k+'" value="'+esc(S.man[k]!=null?S.man[k]:manCalc(k))+'"></label>'; };
-  showInfo('Your stats','<p>Auto-calculated stats are off (⚙ in the roll log). These numbers are used for rolls, damage and the trackers.</p>'+MAN_KEYS.map(f).join('')+'<div style="text-align:right;margin-top:10px;"><button class="hdr-btn" onclick="saveStats()">Save</button></div>'); }
+  showInfo('Your stats','<p>Manual mode: these numbers are yours. They are used for rolls, damage and the trackers until you switch back to Auto (⚙ in the roll log), which works them out again.</p>'+MAN_KEYS.map(f).join('')+'<div style="text-align:right;margin-top:10px;"><button class="hdr-btn" onclick="saveStats()">Save</button></div>'); }
 function saveStats(){ [].forEach.call(document.querySelectorAll('#info-body [data-man]'),function(i){ var v=i.value.trim(); S.man[i.dataset.man]=v===''?null:num(v); }); closeInfo(); renderStatsAll(); scheduleAutosave(); }
 function renderAutoBtn(){ var b=document.getElementById('auto-toggle'); if(!b) return; var on=autoUse(); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); b.title=on?'Auto-use on: grenades and Spider-Grenades come off your equipment when thrown. Click to count them by hand.':'Auto-use off: nothing is taken from your equipment — count consumables yourself. Click to turn it back on.'; }
 function eqSpendItem(name){
@@ -1959,7 +1968,7 @@ function applySheet(d){
   S.conditions={}; if(d.conditions) CONDITIONS.forEach(function(c){ if(d.conditions[c.name])S.conditions[c.name]=true; });
   if(Array.isArray(d.powers)) S.powers=d.powers.map(function(p){ return {name:p.name||'',powerSet:p.powerSet||'',action:p.action||'',duration:p.duration||'',cost:p.cost||'',range:p.range||'',prerequisites:p.prerequisites||'',effect:p.effect||'',fantastic:p.fantastic||'',from:p.from||''}; });
   if(Array.isArray(d.iconics)) S.iconics=d.iconics.slice();
-  S.turnBased=d.turnBased!==false; S.autoUse=d.autoUse!==false;
+  S.turnBased=d.turnBased!==false; S.autoUse=d.autoUse!==false; S.manualMode=d.manualMode===true;
   S.auto=(d.auto&&typeof d.auto==='object')?Object.assign({},d.auto):{}; S.man=(d.man&&typeof d.man==='object')?Object.assign({},d.man):{};
   S.turn={std:false, move:false, react:false, dodge:0};
   if(d.turn&&typeof d.turn==='object') ['std','move','react','dodge','sub'].forEach(function(k){ if(d.turn[k]!=null) S.turn[k]=d.turn[k]; });

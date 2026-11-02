@@ -768,7 +768,7 @@ body.dark #d6-action .turn-badge.warn{color:#f0c060;}
 
       <div class="tab-panel" id="tab-gear">
         <div class="section-bar"><span>Gear &amp; Equipment</span><span class="hdr-right"><button class="hdr-btn" onclick="openGearPicker()">＋ Add</button></span></div>
-        <div class="blk" style="border-bottom:none;padding-bottom:2px;"><div class="fld" style="max-width:180px;"><label>Funds</label><input type="number" id="f-wealth" placeholder="0" class="num" style="font-family:'Share Tech Mono',monospace;"></div></div>
+        <div class="blk" style="border-bottom:none;padding-bottom:2px;"><div class="fld" style="max-width:180px;"><label>Funds</label><input type="number" id="f-wealth" data-nolock placeholder="0" class="num" style="font-family:'Share Tech Mono',monospace;"></div></div>
         <table class="tbl">
           <thead><tr><th style="width:38%;">Item</th><th>Notes</th><th style="width:26px;"></th></tr></thead>
           <tbody id="gear-body"></tbody>
@@ -1433,10 +1433,10 @@ function renderAdvancementPanel() {
   let body = '';
   if(mode === 'xp') {
     const xpNow = $('f-cp') ? num($('f-cp').value) : num(options.xp);
-    body = '<div class="trk-row"><label>Experience Points</label><input type="number" min="0" class="trk-num" value="' + esc(xpNow) + '" oninput="optField(\'xp\', num(this.value)); if($(\'f-cp\')) $(\'f-cp\').value = num(this.value);"></div>'
+    body = '<div class="trk-row"><label>Experience Points</label><input type="number" min="0" class="trk-num" data-nolock value="' + esc(xpNow) + '" oninput="optField(\'xp\', num(this.value)); if($(\'f-cp\')) $(\'f-cp\').value = num(this.value);"></div>'
       + '<div class="trk-ref">Same pool as the XP box — spend it with Level Up. Raise a skill = its own current rating in XP (min 1; advanced skills ×2); raise an attribute = 10× its dice. ' + (pipsOn() ? 'With pips, buy +1/+2 before the next die. ' : '') + 'Session awards: slow 2–3, moderate 4–6, fast 7–10 (+3 with Classic Hero Points).</div>';
   } else if(mode === 'milestone') {
-    body = '<div class="trk-row"><label>Milestones reached</label><input type="number" min="0" class="trk-num" value="' + esc(options.milestones) + '" oninput="optField(\'milestones\', num(this.value))"></div>'
+    body = '<div class="trk-row"><label>Milestones reached</label><input type="number" min="0" class="trk-num" data-nolock value="' + esc(options.milestones) + '" oninput="optField(\'milestones\', num(this.value))"></div>'
       + '<div class="trk-ref">Each milestone = +1 attribute die and +3 skill dice' + (pipsOn() ? ' (or +9 pips)' : '') + ', or a new/raised Perk instead.</div>';
   } else {
     body = (options.arcs || []).map((a, i) =>
@@ -1738,8 +1738,8 @@ var _actOpts = [];
 // take action slots or raise the Multi-Action Penalty by themselves (tick the Action pips and declare
 // by hand), nothing greys out; Run and Full Defense still last until End Turn.
 var _turnBased = true;
-function turnOn() { return _turnBased !== false; }
-function toggleTurnMode() { _turnBased = !turnOn(); actEndTurn(); if(window.SheetSettings) SheetSettings.refresh(); }
+function turnOn() { return isAuto() && _turnBased !== false; }
+function toggleTurnMode() { _turnBased = !(_turnBased !== false); actEndTurn(); if(window.SheetSettings) SheetSettings.refresh(); }
 // The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
 function turnModeBtn(){ return ''; }
 function turnModeBtnPill(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: each roll takes an action slot (declaring more raises the Multi-Action Penalty), End Turn clears them. Click to tick them by hand instead.' : 'Manual: rolls don\'t take action slots — tick the pips and declare actions yourself. Click to spend them automatically.') + '"><span class="tm-sw"></span></button>'; }
@@ -1852,30 +1852,40 @@ function eqParse(name) {
 // AUTO-USE (roll-log switch, saved on the sheet; on unless turned off): consumables come off the
 // gear list by themselves. Off = the item still works, only the count / uses are left alone.
 var _autoUse = true;
-function autoUse() { return _autoUse !== false; }
-function toggleAutoUse() { _autoUse = !autoUse(); renderAutoBtn(); scheduleAutosave(); }
+function autoUse() { return isAuto() && _autoUse !== false; }
+function toggleAutoUse() { _autoUse = !(_autoUse !== false); renderAutoBtn(); scheduleAutosave(); }
 function renderAutoBtn() { const b = $('auto-toggle'); if(!b) return; const on = autoUse(); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.title = on ? 'Auto-use on: healing potions, blessed water, torches, candles and healer’s pack uses come off your gear by themselves. Click to count them by hand.' : 'Auto-use off: nothing is taken from your gear — count consumables and uses yourself. Click to turn it back on.'; }
-// SHEET SETTINGS (⚙) — sheet-settings.js draws these; saved on the sheet as auto:{spend,stats}
-// (default on) and man:{dodge,parry}. turnBased and autoUse keep their own keys.
+// SHEET SETTINGS (⚙) — sheet-settings.js draws these. AUTO / MANUAL: the sheet lock IS the mode —
+// locked = Auto, the sheet runs the rules; unlocked = Manual, everything editable and nothing automated.
+// In Auto two switches can still turn one automation off: Turn-Based Actions (turnBased) and
+// Auto-Consume (autoUse). Everything else (Hero Point / Asset spending, Dodge & Parry) follows the
+// mode. Manual numbers are saved as man:{dodge,parry}.
 if(typeof window.sheetToast !== 'function') window.sheetToast = function(t) { if(window.console) console.log(t); };
-var _auto = {}, _man = {};
-function autoOn(k) { return _auto[k] !== false; }
+var _auto = {}, _man = {}, _manualMode = false;
+function isAuto() { return typeof window.sheetAuto === 'function' ? !!window.sheetAuto() : window._sheetLocked !== false; }   // the lock script loads later and starts locked (Auto)
+function autoOn(k) { return isAuto(); }
 function setAuto(k, on) { _auto[k] = !!on; recalc(); if(typeof renderAction === 'function') renderAction(); scheduleAutosave(); }
 window.SHEET_SETTINGS = function() { return [
-  { key:'turn', group:'auto', label:'Turn-based actions', hint:'Each roll takes an action slot and raises the Multi-Action Penalty; off: tick them yourself', get: turnOn, set: on => { if(on !== turnOn()) toggleTurnMode(); } },
-  { key:'use', group:'auto', label:'Use up consumables', hint:'Healing potions, blessed water, torches, candles and healer’s pack uses come off your gear', get: autoUse, set: on => { if(on !== autoUse()) toggleAutoUse(); } },
-  { key:'spend', group:'auto', label:'Spend Hero Points automatically', hint:'An armed Hero Point comes off your total when you roll; Asset uses count to 2 a session; off: adjust them yourself', get: () => autoOn('spend'), set: on => setAuto('spend', on) },
-  { key:'stats', group:'auto', label:'Auto-calculated stats', hint:'Dodge and Parry (5 × Perception / Agility dice); off: type your own', get: () => autoOn('stats'), set: on => { if(!on) { if(_man.dodge == null) _man.dodge = dodgeCalc(); if(_man.parry == null) _man.parry = parryCalc(); } setAuto('stats', on); } }
+  { key:'turn', group:'auto', label:'Turn-Based Actions', hint:'Each roll takes an action slot and raises the Multi-Action Penalty', get: () => _turnBased !== false, set: on => { if(on !== (_turnBased !== false)) toggleTurnMode(); } },
+  { key:'use', group:'auto', label:'Auto-Consume', hint:'Healing potions, blessed water, torches, candles and healer’s pack uses come off your gear', get: () => _autoUse !== false, set: on => { if(on !== (_autoUse !== false)) toggleAutoUse(); } }
 ]; };
-// Auto-calculated stats off: the player's own numbers (_man) replace the computed ones.
-function manual(k) { return !autoOn('stats') && _man[k] != null && _man[k] !== ''; }
+// Manual mode: the player's own numbers (_man) replace the computed ones.
+function manual(k) { return !isAuto() && _man[k] != null && _man[k] !== ''; }
+// Entering Manual: Dodge and Parry become yours to correct (✎ opens the editor). Back in Auto: your
+// typed numbers are dropped and they're worked out again from Perception / Agility.
+document.addEventListener('sheetmode', function(e) { const auto = !!(e.detail && e.detail.auto);
+  if(auto) { _man = {}; _manualMode = false; }
+  else { const c = { dodge: dodgeCalc(), parry: parryCalc() }; Object.keys(c).forEach(k => { if(_man[k] == null || _man[k] === '') _man[k] = c[k]; }); _manualMode = true; }
+  recalc(); if(typeof renderAction === 'function') renderAction(); scheduleAutosave(); });
+// a sheet left in Manual opens in Manual (the lock script starts locked; switch once it's ready)
+window.addEventListener('load', function() { setTimeout(function() { if(_manualMode && window._sheetLocked && typeof window.toggleSheetLock === 'function') window.toggleSheetLock(); }, 420); });
 function dodgeCalc() { return 5 * diceOf(attr('Perception')); }
 function parryCalc() { return 5 * diceOf(attr('Agility')); }
 function dodgeVal() { return manual('dodge') ? num(_man.dodge) : dodgeCalc(); }
 function parryVal() { return manual('parry') ? num(_man.parry) : parryCalc(); }
 function editStats() {
   const f = (k, l, v) => '<div class="m-lbl">' + l + '</div><input class="m-input" type="number" data-man="' + k + '" value="' + esc(v) + '">';
-  $('stats-body').innerHTML = '<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). These numbers are shown on the sheet and used for Full Defense.</p>' + f('dodge', 'Dodge', _man.dodge != null ? _man.dodge : dodgeCalc()) + f('parry', 'Parry', _man.parry != null ? _man.parry : parryCalc());
+  $('stats-body').innerHTML = '<p class="m-hint">Manual mode: these numbers are yours. They are shown on the sheet and used for Full Defense until you switch back to Auto (⚙ in the roll log), which works them out again.</p>' + f('dodge', 'Dodge', _man.dodge != null ? _man.dodge : dodgeCalc()) + f('parry', 'Parry', _man.parry != null ? _man.parry : parryCalc());
   $('stats-overlay').classList.add('open');
 }
 function closeStats() { $('stats-overlay').classList.remove('open'); }
@@ -2141,7 +2151,7 @@ function collectSheet() {
     system: 'D62E', name: v('f-name'), genre: v('f-genre'), template: v('f-template'), archetype: v('f-archetype'),
     attrs: attrs,
     skills: skillRows().map(tr => ({ name: tr.querySelector('.sk-name-in').value.trim(), attribute: tr.dataset.attr, pips: codeOrZero(tr.querySelector('.sk-adds').value), adv: tr.dataset.adv === '1', spec: !!(tr.querySelector('.sk-spec') && tr.querySelector('.sk-spec').checked), specName: (tr.querySelector('.sk-specname') && tr.querySelector('.sk-specname').value.trim()) || '' })).filter(s => s.name),
-    heroPoints: num(v('f-hero')), characterPoints: num(v('f-cp')), map: num(v('f-map')), actionTurn: _act, turnBased: turnOn(), autoUse: autoUse(), auto: _auto, man: _man,
+    heroPoints: num(v('f-hero')), characterPoints: num(v('f-cp')), map: num(v('f-map')), actionTurn: _act, turnBased: _turnBased !== false, autoUse: _autoUse !== false, auto: _auto, man: _man, manualMode: _manualMode,
     move: v('f-move'),
     wound: wound,
     weapons: [...document.querySelectorAll('#weapons-body tr')].map(tr => ({ name: tr.querySelector('.wp-name').value, damage: tr.querySelector('.wp-dmg').value, range: tr.querySelector('.wp-range').value, skill: tr.querySelector('.wp-skill').value, notes: tr.querySelector('.wp-notes').value, link: tr.dataset.link || '', fixed: tr.dataset.fixed ? true : undefined })).filter(w => w.name || w.damage),
@@ -2174,7 +2184,7 @@ function applySheet(d) {
   buildStats(d.attrs && typeof d.attrs === 'object' ? d.attrs : { Agility:9, Brawn:9, Knowledge:9, Perception:9 });
   $('skills-body').innerHTML = ''; (d.skills || []).forEach(s => addSkillRow(s));
   wound = WOUND_PEN[d.wound] !== undefined ? d.wound : 'none'; heroArmed = 0; assetBonusPips = 0; renderWoundTrack();
-  set('f-hero', d.heroPoints != null ? d.heroPoints : 1); set('f-cp', d.characterPoints || 0); set('f-map', d.map || 0); if(d.actionTurn && typeof d.actionTurn === 'object') Object.assign(_act, d.actionTurn); _turnBased = d.turnBased !== false; _autoUse = d.autoUse !== false; renderAutoBtn(); _auto = (d.auto && typeof d.auto === 'object') ? d.auto : {}; _man = (d.man && typeof d.man === 'object') ? d.man : {}; if(window.SheetSettings) SheetSettings.refresh(); _act.declared = Math.max(1, num(d.map || 0) + 1, _act.used || 0);
+  set('f-hero', d.heroPoints != null ? d.heroPoints : 1); set('f-cp', d.characterPoints || 0); set('f-map', d.map || 0); if(d.actionTurn && typeof d.actionTurn === 'object') Object.assign(_act, d.actionTurn); _turnBased = d.turnBased !== false; _autoUse = d.autoUse !== false; renderAutoBtn(); _auto = (d.auto && typeof d.auto === 'object') ? d.auto : {}; _man = (d.man && typeof d.man === 'object') ? d.man : {}; _manualMode = !!d.manualMode; if(window.SheetSettings) SheetSettings.refresh(); _act.declared = Math.max(1, num(d.map || 0) + 1, _act.used || 0);
   set('f-move', d.move != null ? d.move : '10');
   const ar = d.armor || {}; set('f-armor', ar.name); set('f-armor-prot', ar.protection);
   $('weapons-body').innerHTML = ''; (d.weapons || []).forEach(addWeaponRow); ensureUnarmed();

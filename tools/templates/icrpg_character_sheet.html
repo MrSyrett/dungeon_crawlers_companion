@@ -1008,7 +1008,7 @@ function addRow(kind, d){
   d=d||{}; var body=$(kind+'-body'); var tr=document.createElement('tr');
   var nameCell='<td><input class="it-name" value="'+esc(d.name||'')+'" oninput="scheduleAutosave()" placeholder="Name"></td>';
   var typeCell='<td><input class="it-tag" value="'+esc(d.tag||'')+'" oninput="scheduleAutosave()" placeholder="'+(kind==='abil'?'Ability':kind==='spell'?'School':'Type')+'"></td>';
-  var noteCell='<td><input class="it-note" value="'+esc(d.note||'')+'" oninput="scheduleAutosave()" placeholder="note"></td>';
+  var noteCell='<td><input class="it-note" value="'+esc(d.note||'')+'"'+(kind==='loot'?' data-nolock title="Note — uses left are counted here"':'')+' oninput="scheduleAutosave()" placeholder="note"></td>';   // LOOT notes hold the uses left: editable in Auto
   var masteryCell = kind==='abil' ? '<td>'+masteryHtml(num(d.mastery))+'</td>' : '';
   var del='<td style="text-align:right;"><button class="row-x" onclick="'+(kind==='loot'?'icLootRemove(this.closest(\'tr\'))':kind==='abil'?'var t=this.closest(\'tr\'),b=t.dataset.bv;t.remove();if(b)icItemsChanged()':'this.closest(\'tr\').remove()')+';scheduleAutosave();">✕</button></td>';
   // A spell an equipped LOOT item grants: rebuilt from the item (never saved), badge after its info.
@@ -1198,31 +1198,44 @@ var _icTurn = { move:false, action:false, far:false, mode:'normal' };
 // aren't spent automatically and nothing greys out — the pips stay and can be ticked by hand (as
 // they can when on); DYING still limits what you can do.
 var _icTurnBased = true;
-function turnOn(){ return _icTurnBased!==false; }
-function toggleTurnMode(){ _icTurnBased=!turnOn(); icEndTurn(); if(window.SheetSettings) SheetSettings.refresh(); }
+function turnOn(){ return isAuto()&&_icTurnBased!==false; }
+function toggleTurnMode(){ _icTurnBased=!(_icTurnBased!==false); icEndTurn(); if(window.SheetSettings) SheetSettings.refresh(); }
 // The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
 function turnModeBtn(){ return ''; }
 function turnModeBtnPill(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend Move and Action automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: Move and Action are spent automatically (one Action per TURN). Click to tick them by hand instead.':'Manual: Move and Action aren\'t spent automatically — tick the pips yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
 // AUTO-USE (roll-log switch, saved on the sheet; on unless turned off): LOOT you USE loses a use by
 // itself. Off = the effect still happens, nothing is counted down or removed.
 var _icAutoUse = true;
-function autoUse(){ return _icAutoUse!==false; }
-function toggleAutoUse(){ _icAutoUse=!autoUse(); renderAutoBtn(); scheduleAutosave(); }
+function autoUse(){ return isAuto()&&_icAutoUse!==false; }
+function toggleAutoUse(){ _icAutoUse=!(_icAutoUse!==false); renderAutoBtn(); scheduleAutosave(); }
 // SHEET SETTINGS (⚙) — sheet-settings.js draws these; values save with the sheet.
-// _icAuto.stats defaults ON; turnBased and autoUse keep their own keys.
+// turnBased and autoUse keep their own keys (auto is kept as it was for old saves).
+// AUTO / MANUAL (⚙ in the roll log). The sheet lock IS the mode: locked = Auto, the sheet runs
+// the rules; unlocked = Manual, everything editable and nothing automated. In Auto, two switches
+// can still turn one automation off: Turn-Based Actions (turnBased) and Auto-Consume (autoUse).
+// Everything else (Defense, Max HP from HEART LOOT) follows the mode.
+function isAuto(){ if(window._sheetLocked===undefined) return true;   // lock script not ready yet: it starts locked (Auto)
+  return typeof window.sheetAuto==='function'?!!window.sheetAuto():!!window._sheetLocked; }
 if(typeof window.sheetToast!=='function') window.sheetToast=function(t){ if(window.console) console.log(t); };
-var _icAuto={}, _icMan={};
-function autoOn(k){ return !(_icAuto&&_icAuto[k]===false); }
+var _icAuto={}, _icMan={}, _icManual=false;
+function autoOn(k){ return isAuto(); }
 function setAuto(k,on){ _icAuto[k]=!!on; recalc(); icMaybeRender(); scheduleAutosave(); }
 window.SHEET_SETTINGS=function(){ return [
-  {key:'turn',group:'auto',label:'Turn-based actions',hint:'Move and Action are spent per TURN on the Action tab; off: tick the pips yourself',get:turnOn,set:function(on){ if(on!==turnOn()) toggleTurnMode(); }},
-  {key:'use',group:'auto',label:'Use up consumables',hint:'Food, potions, scrolls, torches and other LOOT with uses lose a use; a kit that empties on a natural 1 is removed',get:autoUse,set:function(on){ if(on!==autoUse()) toggleAutoUse(); }},
-  {key:'stats',group:'auto',label:'Auto-calculated stats',hint:'Defense from CON + armor + LOOT, and Max HP from HEART LOOT you equip; off: type your own',get:function(){ return autoOn('stats'); },set:function(on){ if(!on && _icMan.def==null) _icMan.def=icDefenseCalc(); setAuto('stats',on); }}
+  {key:'turn',group:'auto',label:'Turn-Based Actions',hint:'Move and Action are spent per TURN on the Action tab',get:function(){ return _icTurnBased!==false; },set:function(on){ if(on!==(_icTurnBased!==false)) toggleTurnMode(); }},
+  {key:'use',group:'auto',label:'Auto-Consume',hint:'Food, potions, scrolls, torches and other LOOT with uses lose a use; a kit that empties on a natural 1 is removed',get:function(){ return _icAutoUse!==false; },set:function(on){ if(on!==(_icAutoUse!==false)) toggleAutoUse(); }}
 ]; };
-// Auto-calculated stats off: the player's own Defense (_icMan.def) replaces the computed one.
+// Entering Manual: Defense becomes yours to correct (✎ opens the editor). Back in Auto: your
+// number is dropped and Defense is worked out again from CON, armor and LOOT.
+document.addEventListener('sheetmode',function(e){ var auto=!!(e.detail&&e.detail.auto);
+  if(auto){ _icMan={}; _icManual=false; }
+  else { _icMan=_icMan||{}; if(_icMan.def==null||_icMan.def==='') _icMan.def=icDefenseCalc(); _icManual=true; }   // only fill what's missing: reopening in Manual keeps your number
+  recalc(); icMaybeRender(); scheduleAutosave(); });
+// a sheet left in Manual opens in Manual (the lock script starts locked; switch once it's ready)
+window.addEventListener('load',function(){ setTimeout(function(){ if(!_icManual) _icMan={}; if(_icManual&&window._sheetLocked&&typeof window.toggleSheetLock==='function') window.toggleSheetLock(); },420); });
+// Manual mode: the player's own Defense (_icMan.def) replaces the computed one.
 function manual(k){ return !autoOn('stats')&&!!_icMan&&_icMan[k]!=null&&_icMan[k]!==''; }
 function editStats(){ var cur=_icMan.def!=null?_icMan.def:icDefenseCalc();
-  $('stats-body').innerHTML='<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). This Defense is used for Defense rolls and on the sheet.</p><div class="m-lbl">Defense</div><input id="man-def" class="m-input" type="number" value="'+esc(cur)+'"><div style="display:flex;justify-content:flex-end;margin-top:12px;"><button class="m-btn" onclick="_icMan.def=num($(\'man-def\').value);closeStats();recalc();icMaybeRender();">Save</button></div>';
+  $('stats-body').innerHTML='<p class="m-hint">Manual mode: this Defense is yours. It is used for Defense rolls and on the sheet until you switch back to Auto (⚙ in the roll log), which works it out again.</p><div class="m-lbl">Defense</div><input id="man-def" class="m-input" type="number" value="'+esc(cur)+'"><div style="display:flex;justify-content:flex-end;margin-top:12px;"><button class="m-btn" onclick="_icMan.def=num($(\'man-def\').value);closeStats();recalc();icMaybeRender();">Save</button></div>';
   $('stats-overlay').classList.add('open'); }
 function closeStats(){ $('stats-overlay').classList.remove('open'); }
 function renderAutoBtn(){ var b=document.getElementById('auto-toggle'); if(!b) return; var on=autoUse(); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); b.title=on?'Auto-use on: food, potions, scrolls, explosives, torches and other LOOT with uses lose a use (the row goes at the last one) when you USE them, and a kit that empties on a natural 1 is removed. Click to count them by hand.':'Auto-use off: using LOOT applies its effect but no use is taken and nothing is removed — count them yourself. Click to turn it back on.'; }
@@ -1716,7 +1729,7 @@ function collectSheet(){
     target:num(v('f-target')), dying:$('f-dying').checked, coin:$('coin-btn').classList.contains('on'),
     notes:v('f-notes'), stats:stats, effort:effort,
     abilities:collectRows('abil'), spells:collectRows('spell'), loot:collectRows('loot'),
-    turn:{ move:_icTurn.move, action:_icTurn.action, far:_icTurn.far, mode:_icTurn.mode }, turnBased:turnOn(), autoUse:autoUse(), auto:_icAuto, man:_icMan,
+    turn:{ move:_icTurn.move, action:_icTurn.action, far:_icTurn.far, mode:_icTurn.mode }, turnBased:_icTurnBased!==false, autoUse:_icAutoUse!==false, auto:_icAuto, man:_icMan, manualMode:!isAuto(),
     campaign:(typeof _campaign!=='undefined' && _campaign)?{ id:_campaign.id, code:_campaign.code, name:_campaign.name }:null,
   };
 }
@@ -1739,7 +1752,7 @@ function applySheet(d){
   if(d.turn && typeof d.turn==='object'){ _icTurn.move=!!d.turn.move; _icTurn.action=!!d.turn.action; _icTurn.far=!!d.turn.far; _icTurn.mode=(['easy','hard'].indexOf(d.turn.mode)>=0)?d.turn.mode:'normal'; }
   _icTurnBased=d.turnBased!==false;
   _icAutoUse=d.autoUse!==false; renderAutoBtn();
-  _icAuto=(d.auto&&typeof d.auto==='object')?d.auto:{}; _icMan=(d.man&&typeof d.man==='object')?d.man:{}; if(window.SheetSettings) SheetSettings.refresh();
+  _icAuto=(d.auto&&typeof d.auto==='object')?d.auto:{}; _icMan=(d.man&&typeof d.man==='object')?d.man:{}; _icManual=d.manualMode===true; if(window.SheetSettings) SheetSettings.refresh();
   recalc(); renderHearts(); setDefaultTab();
   if(window.__ddSaveTitle && d.name) try{ window.__ddSaveTitle(d.name); }catch(e){}
 }

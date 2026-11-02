@@ -745,14 +745,19 @@ document.querySelector('.log-header').addEventListener('click',function(e){ if(w
 function setDarkMode(on){ document.body.classList.toggle('dark',on); try{ localStorage.setItem('gb_dark',on?'1':'0'); }catch(e){} }
 function toggleDarkMode(){ setDarkMode(!document.body.classList.contains('dark')); }
 
-// SHEET SETTINGS (⚙) — sheet-settings.js draws these; S.auto.{spend,enc} default ON and save with the sheet.
+// SHEET SETTINGS (⚙) — sheet-settings.js draws these. AUTO / MANUAL: the sheet lock IS the mode —
+// locked = Auto (the sheet spends BP and flags carrying), unlocked = Manual (nothing automated).
+// In Auto one switch remains: Use Encumbrance (S.auto.enc, default ON). BP spending follows the mode.
 if(typeof window.sheetToast!=='function') window.sheetToast=function(t){ if(window.console) console.log(t); };
-function autoOn(k){ return !(S.auto&&S.auto[k]===false); }
+function isAuto(){ if(typeof window._sheetLocked==='undefined') return !(S&&S.manualMode); return typeof window.sheetAuto==='function'?!!window.sheetAuto():!!window._sheetLocked; }   // before the lock script is up: the saved mode
+function autoOn(k){ if(!isAuto()) return false; if(k==='enc') return !(S.auto&&S.auto.enc===false); return true; }
 function setAuto(k,on){ S.auto=S.auto||{}; S.auto[k]=!!on; renderAll(); scheduleAutosave(); }
 window.SHEET_SETTINGS=function(){ return [
-  {key:'spend',group:'auto',label:'Spend Brownie Points automatically',hint:'BP you add to a roll come off your total; off: the dice still count, adjust BP yourself',get:function(){ return autoOn('spend'); },set:function(on){ setAuto('spend',on); }},
-  {key:'enc',group:'auto',label:'Carrying warning',hint:'Flag when your tools weigh more than your Muscles',get:function(){ return autoOn('enc'); },set:function(on){ setAuto('enc',on); }}
+  {key:'enc',group:'auto',label:'Use Encumbrance',hint:'Flag when your tools weigh more than your Muscles',get:function(){ return !(S.auto&&S.auto.enc===false); },set:function(on){ setAuto('enc',on); }}
 ]; };
+// No computed stats here: switching mode just re-renders and remembers it (a sheet left in Manual opens in Manual).
+document.addEventListener('sheetmode',function(e){ S.manualMode=!(e.detail&&e.detail.auto); renderAll(); scheduleAutosave(); });
+window.addEventListener('load',function(){ setTimeout(function(){ if(S.manualMode&&window._sheetLocked&&typeof window.toggleSheetLock==='function') window.toggleSheetLock(); },420); });
 
 /* ═══ Rules ═══ */
 function openRules(){

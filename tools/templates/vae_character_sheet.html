@@ -1287,8 +1287,8 @@ var _actFromTab=false;
 // TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = nothing
 // is spent automatically and nothing greys out — the Slow / Fast pips stay and can be ticked by
 // hand (as they can when on); Broken still limits you.
-function turnOn(){ return !S||S.turnBased!==false; }
-function toggleTurnMode(){ S.turnBased=!turnOn(); _act=actFresh(); renderAction(); scheduleAutosave(); try{ SheetSettings.refresh(); }catch(e){} }
+function turnOn(){ return isAuto()&&(!S||S.turnBased!==false); }
+function toggleTurnMode(){ S.turnBased=!(S.turnBased!==false); _act=actFresh(); renderAction(); scheduleAutosave(); try{ SheetSettings.refresh(); }catch(e){} }
 // The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
 function turnModeBtn(){ return ''; }
 function turnModeBtnPill(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: actions are spent automatically. Click to tick them by hand instead.':'Manual: actions aren\'t spent automatically — tick the pips yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
@@ -1327,24 +1327,33 @@ function eqBaseName(g){ return String((g&&g.name)||'').replace(/\s*×\s*\d+\s*$/
 function eqQty(g){ var m=String((g&&g.name)||'').match(/×\s*(\d+)\s*$/)||String((g&&g.name)||'').match(/\sx(\d+)\s*$/i); return m?Math.max(0,parseInt(m[1],10)):1; }
 // AUTO-USE (roll-log switch, saved on the sheet; on unless turned off): poison doses and used-up
 // magic items come off the inventory by themselves. Off = the effect happens, the count stays.
-function autoUse(){ return !S||S.autoUse!==false; }
-function toggleAutoUse(){ S.autoUse=!autoUse(); renderAutoBtn(); scheduleAutosave(); }
+function autoUse(){ return isAuto()&&(!S||S.autoUse!==false); }
+function toggleAutoUse(){ S.autoUse=!(S.autoUse!==false); renderAutoBtn(); scheduleAutosave(); }
 // SHEET SETTINGS (⚙) — sheet-settings.js draws these; the values live in S and save with the sheet.
-// S.auto.{spend,stats} default ON; S.turnBased and S.autoUse keep their own keys.
+// AUTO / MANUAL: the sheet lock IS the mode. Locked = Auto, the sheet runs the rules; unlocked =
+// Manual, everything editable and nothing automated. In Auto, Turn-Based Actions (S.turnBased) and
+// Auto-Consume (S.autoUse) can still be turned off; the Condition from pushing and the computed
+// armor stats follow the mode alone.
 if(typeof window.sheetToast!=='function') window.sheetToast=function(t){ if(window.console) console.log(t); };
-function autoOn(k){ return !(S&&S.auto&&S.auto[k]===false); }
-function setAuto(k,on){ S.auto=S.auto||{}; S.auto[k]=!!on; renderAttrSkills(); renderArmorVal(); scheduleAutosave(); }
+function isAuto(){ if(window._sheetLocked===undefined) return true; return typeof window.sheetAuto==='function'?!!window.sheetAuto():!!window._sheetLocked; }   // the sheet opens in Auto
+function autoOn(k){ return isAuto(); }
 window.SHEET_SETTINGS=function(){ return [
-  {key:'turn',group:'auto',label:'Turn-based actions',hint:'Rolls and Action-tab moves take your slow and fast actions; off: tick them yourself',get:turnOn,set:function(on){ if(on!==turnOn()) toggleTurnMode(); }},
-  {key:'use',group:'auto',label:'Use up consumables',hint:'Poison doses and used-up magic items (Nisse\'s porridge, one-use items) come off your inventory',get:autoUse,set:function(on){ if(on!==autoUse()) toggleAutoUse(); }},
-  {key:'spend',group:'auto',label:'Take a Condition when pushing',hint:'Pushing marks the next free Condition (Broken when full); off: mark it yourself',get:function(){ return autoOn('spend'); },set:function(on){ setAuto('spend',on); }},
-  {key:'stats',group:'auto',label:'Auto-calculated stats',hint:'Armor protection and armor\'s Agility penalty from your equipped armor; off: type your own',get:function(){ return autoOn('stats'); },set:function(on){ if(!on){ S.man=S.man||{}; ['armor','agiPen'].forEach(function(k){ if(S.man[k]==null) S.man[k]=manCalc(k); }); } setAuto('stats',on); }}
+  {key:'turn',group:'auto',label:'Turn-Based Actions',hint:'Rolls and Action-tab moves take your slow and fast actions',get:function(){ return S.turnBased!==false; },set:function(on){ if(on!==(S.turnBased!==false)) toggleTurnMode(); }},
+  {key:'use',group:'auto',label:'Auto-Consume',hint:'Poison doses and used-up magic items (Nisse\'s porridge, one-use items) come off your inventory',get:function(){ return S.autoUse!==false; },set:function(on){ if(on!==(S.autoUse!==false)) toggleAutoUse(); }}
 ]; };
+// Entering Manual: the computed numbers become yours to correct (✎ opens the editor; numbers
+// you saved in Manual are kept). Back in Auto: your typed numbers are dropped and everything is worked out again from the sheet.
+document.addEventListener('sheetmode',function(e){ var auto=!!(e.detail&&e.detail.auto);
+  if(auto){ S.man=null; S.manualMode=false; }
+  else { S.man=S.man||{}; ['armor','agiPen'].forEach(function(k){ if(S.man[k]==null||S.man[k]==='') S.man[k]=manCalc(k); }); S.manualMode=true; }
+  renderAttrSkills(); renderArmorVal(); try{ renderAction(); }catch(err){} scheduleAutosave(); });
+// a sheet left in Manual opens in Manual (the lock script starts locked; switch once it's ready)
+window.addEventListener('load',function(){ setTimeout(function(){ if(S&&S.manualMode&&window._sheetLocked&&typeof window.toggleSheetLock==='function') window.toggleSheetLock(); },420); });
 // Auto-calculated stats off: the player's own numbers (S.man) replace the computed ones.
 function manCalc(k){ return k==='armor'?armorRatingCalc():k==='agiPen'?armorAgiPenaltyCalc():''; }
 function manual(k){ return !autoOn('stats')&&S.man&&S.man[k]!=null&&S.man[k]!==''; }
 function editStats(){ S.man=S.man||{}; var f=function(k,l){ return '<label style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0;"><span>'+l+'</span><input class="m-input" style="width:90px" type="number" data-man="'+k+'" value="'+esc(S.man[k]!=null?S.man[k]:manCalc(k))+'"></label>'; };
-  $('stats-body').innerHTML='<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). These numbers are used for armor rolls and Agility.</p>'+f('armor','Armor protection')+f('agiPen','Agility penalty (armor)')+'<div style="text-align:right;margin-top:10px;"><button class="m-btn" onclick="saveStats()">Save</button></div>';
+  $('stats-body').innerHTML='<p class="m-hint">Manual mode: these numbers are yours. They are used for armor rolls and Agility until you switch back to Auto (⚙ in the roll log), which works them out again.</p>'+f('armor','Armor protection')+f('agiPen','Agility penalty (armor)')+'<div style="text-align:right;margin-top:10px;"><button class="m-btn" onclick="saveStats()">Save</button></div>';
   $('stats-overlay').classList.add('open'); }
 function closeStats(){ $('stats-overlay').classList.remove('open'); }
 function saveStats(){ [].forEach.call(document.querySelectorAll('#stats-body [data-man]'),function(i){ var v=i.value.trim(); S.man[i.dataset.man]=v===''?null:num(v); }); closeStats(); renderAttrSkills(); renderArmorVal(); scheduleAutosave(); }
@@ -1365,7 +1374,7 @@ function eqBuild(add){
       var tox=(String((gd&&gd.comment)||g.note||'').match(/toxicity\s*(\d+)/i)||[])[1];
       var start=num((nm.match(/\((\d+)\s*doses?\)/i)||[])[1])||1, left=(g.charges!=null&&g.charges!=='')?num(g.charges):start;
       add('equip',{ name:nm+qs, kind:'slow', sub:left+' dose'+(left===1?'':'s')+' left · poison someone'+(tox?' · toxicity '+tox:''), btn:'Use', run:function(){
-        if(!autoUse()){ addLog(nm,'Poison given',(tox?'Toxicity '+tox+': the victim resists, and the GM applies the effect. ':'')+'Dose not counted (auto-use off).','normal'); return; }
+        if(!autoUse()){ addLog(nm,'Poison given',(tox?'Toxicity '+tox+': the victim resists, and the GM applies the effect. ':'')+'Dose not counted (Auto-Consume off).','normal'); return; }
         if(g.charges==null||g.charges==='') g.charges=start; g.charges=Math.max(0,num(g.charges)-1); var rem=g.charges;
         addLog(nm,'Poison given','One dose used'+(tox?' — toxicity '+tox+': the victim resists, and the GM applies the effect':'')+'. '+rem+' dose'+(rem===1?'':'s')+' left.','normal');
         if(rem<=0) eqConsume(i); else renderInventory(); } });
@@ -1594,7 +1603,7 @@ function applySheet(d){
   S.crits=Array.isArray(d.crits)?d.crits.map(function(c){ return {name:c.name||'',effect:c.effect||'',mod:num(c.mod)}; }):[];
   if(Array.isArray(d.relationships)) S.relationships=d.relationships.map(function(r){ return {name:r.name||'',note:r.note||''}; });
   _act=actFresh(); if(d.act&&typeof d.act==='object'){ ['slow','fast','slowAsFast','brokeFree'].forEach(function(k){ _act[k]=!!d.act[k]; }); }
-  _actSub=d.actSub==='fast'?'fast':'slow'; S.turnBased=d.turnBased!==false; S.autoUse=d.autoUse!==false;
+  _actSub=d.actSub==='fast'?'fast':'slow'; S.turnBased=d.turnBased!==false; S.autoUse=d.autoUse!==false; S.manualMode=d.manualMode===true;
   S.auto=(d.auto&&typeof d.auto==='object')?Object.assign({},d.auto):{}; S.man=(d.man&&typeof d.man==='object')?Object.assign({},d.man):{};
   _lastRoll=null; renderAll();
   if(typeof campaignRestore==='function' && d.campaign!==undefined) campaignRestore(d.campaign);

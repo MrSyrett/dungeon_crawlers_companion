@@ -1721,8 +1721,8 @@ function actsMax(){ return timedHas('acts')?2:1; }
 // TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = actions
 // aren't spent automatically and nothing greys out for "no action left" — the Action pip stays and
 // can be ticked by hand (as it can when on); being out, paralyzed or dead still limits you.
-function turnOn(){ return S.turnBased!==false; }
-function toggleTurnMode(){ S.turnBased=!turnOn(); S.turn=blankTurn(); changed(); if(window.SheetSettings) SheetSettings.refresh(); }
+function turnOn(){ return isAuto()&&S.turnBased!==false; }
+function toggleTurnMode(){ S.turnBased=!(S.turnBased!==false); S.turn=blankTurn(); changed(); if(window.SheetSettings) SheetSettings.refresh(); }
 // The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
 function turnModeBtn(){ return ''; }
 function turnModeBtnPill(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: your action is spent automatically (one per turn). Click to tick it by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
@@ -2018,27 +2018,39 @@ function useRelic(u){ var x=S.relics.find(function(r){ return r.uid===u; }); var
 // ── equipment (consumables with one set effect) ──
 // AUTO-USE (roll-log switch, saved on the sheet; on unless turned off): consumables come off by
 // themselves. Off = the effect still happens, nothing is taken from your gear.
-function autoUse(){ return S.autoUse!==false; }
-function toggleAutoUse(){ S.autoUse=!autoUse(); renderAutoBtn(); changed(); }
+function autoUse(){ return isAuto()&&S.autoUse!==false; }
+function toggleAutoUse(){ S.autoUse=!(S.autoUse!==false); renderAutoBtn(); changed(); }
 // SHEET SETTINGS (⚙) — sheet-settings.js draws these; the values live in S and save with the sheet.
-// S.auto.{spend,stats,enc,light,dying} default ON; S.turnBased and S.autoUse keep their own keys.
+// S.auto.enc defaults ON; S.turnBased and S.autoUse keep their own keys.
+// AUTO / MANUAL (⚙ in the roll log). The sheet lock IS the mode: locked = Auto, the sheet runs
+// the rules; unlocked = Manual, everything editable and nothing automated. In Auto, three
+// switches can still turn one automation off: Turn-Based Actions (S.turnBased), Auto-Consume
+// (S.autoUse) and Use Encumbrance (S.auto.enc). Everything else (daily uses, armor tier and
+// Carry Capacity, light & timers, Broken & death) follows the mode.
+function isAuto(){ if(window._sheetLocked===undefined) return true;   // lock script not ready yet: it starts locked (Auto)
+  return typeof window.sheetAuto==='function'?!!window.sheetAuto():!!window._sheetLocked; }
 if(typeof window.sheetToast!=='function') window.sheetToast=function(t){ if(window.console) console.log(t); };
-function autoOn(k){ return !(S&&S.auto&&S.auto[k]===false); }
+function autoOn(k){ if(!isAuto()) return false; if(k==='enc') return !(S&&S.auto&&S.auto.enc===false); return true; }
 function setAuto(k,on){ S.auto=S.auto||{}; S.auto[k]=!!on; changed(); }
 function noUses(k){ return autoOn('spend')&&num((S[k]||{}).left)<=0; }   // spending off: never "none left"
 window.SHEET_SETTINGS=function(){ return [
-  {key:'turn',group:'auto',label:'Turn-based actions',hint:'Attacks, spells and items use your action each round; off: tick the pip yourself',get:turnOn,set:function(on){ if(on!==turnOn()) toggleTurnMode(); }},
-  {key:'use',group:'auto',label:'Use up consumables',hint:'Shot, darts, potions, grog, meat, bombs, ASH, torches, lantern oil, medical kits and single-use relics come off your gear',get:autoUse,set:function(on){ if(on!==autoUse()) toggleAutoUse(); }},
-  {key:'spend',group:'auto',label:'Spend daily uses automatically',hint:'Prayers, spells and rituals come off today\'s uses; off: track them yourself',get:function(){ return autoOn('spend'); },set:function(on){ setAuto('spend',on); }},
-  {key:'stats',group:'auto',label:'Auto-calculated stats',hint:'Armor tier (and its die) from what you wear, and Carry Capacity (8 + STRENGTH); off: type your own',get:function(){ return autoOn('stats'); },set:function(on){ if(!on){ S.man=S.man||{}; if(S.man.armor==null) S.man.armor=armorTierCalc(); if(S.man.carry==null) S.man.carry=carryCapCalc(); } setAuto('stats',on); }},
-  {key:'enc',group:'auto',label:'Encumbrance warning',hint:'Flag when you carry more than your Carry Capacity',get:function(){ return autoOn('enc'); },set:function(on){ setAuto('enc',on); }},
-  {key:'light',group:'auto',label:'Light & timers',hint:'Torches and lanterns burn out, grog and protection wear off, hemorrhage advances and timed effects count down as time passes',get:function(){ return autoOn('light'); },set:function(on){ setAuto('light',on); }},
-  {key:'dying',group:'auto',label:'Broken & death rules',hint:'Dropping to 0 HP rolls on the Broken table; below 0 you die',get:function(){ return autoOn('dying'); },set:function(on){ setAuto('dying',on); }}
+  {key:'turn',group:'auto',label:'Turn-Based Actions',hint:'Attacks, spells and items use your action each round',get:function(){ return S.turnBased!==false; },set:function(on){ if(on!==(S.turnBased!==false)) toggleTurnMode(); }},
+  {key:'use',group:'auto',label:'Auto-Consume',hint:'Shot, darts, potions, grog, meat, bombs, ASH, torches, lantern oil, medical kits and single-use relics come off your gear',get:function(){ return S.autoUse!==false; },set:function(on){ if(on!==(S.autoUse!==false)) toggleAutoUse(); }},
+  {key:'enc',group:'auto',label:'Use Encumbrance',hint:'Over your Carry Capacity: flagged, and STRENGTH and AGILITY tests +2 DR',get:function(){ return !(S.auto&&S.auto.enc===false); },set:function(on){ setAuto('enc',on); }}
 ]; };
-// Auto-calculated stats off: the player's own numbers (S.man) replace the computed ones.
+// Entering Manual: the computed numbers become yours to correct (✎ opens the editor). Back in
+// Auto: your typed numbers are dropped and everything is worked out again from the sheet.
+document.addEventListener('sheetmode',function(e){ var auto=!!(e.detail&&e.detail.auto);
+  if(auto){ S.man=null; S.manualMode=false; }
+  else { S.man=S.man||{}; var calc={armor:armorTierCalc(),carry:carryCapCalc()};   // only fill what's missing: reopening in Manual keeps your numbers
+    Object.keys(calc).forEach(function(k){ if(S.man[k]==null||S.man[k]==='') S.man[k]=calc[k]; }); S.manualMode=true; }
+  changed(); });
+// a sheet left in Manual opens in Manual (the lock script starts locked; switch once it's ready)
+window.addEventListener('load',function(){ setTimeout(function(){ if(!S.manualMode) S.man=null; if(S.manualMode&&window._sheetLocked&&typeof window.toggleSheetLock==='function') window.toggleSheetLock(); },420); });
+// Manual mode: the player's own numbers (S.man) replace the computed ones.
 function manual(k){ return !autoOn('stats')&&S.man&&S.man[k]!=null&&S.man[k]!==''; }
 function editStats(){ S.man=S.man||{}; var f=function(k,l,v){ return '<label class="m-row" style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0;"><span>'+l+'</span><input class="m-input" style="width:90px" type="number" data-man="'+k+'" value="'+esc(S.man[k]!=null?S.man[k]:v)+'"></label>'; };
-  openDlg('Your stats','<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). These numbers are used for armor rolls and carrying.</p>'+f('armor','Armor tier (0–3)',armorTierCalc())+f('carry','Carry Capacity',carryCapCalc()),
+  openDlg('Your stats','<p class="m-hint">Manual mode: these numbers are yours. They are used for armor rolls and carrying until you switch back to Auto (⚙ in the roll log), which works them out again.</p>'+f('armor','Armor tier (0–3)',armorTierCalc())+f('carry','Carry Capacity',carryCapCalc()),
     [{t:'Save',f:function(){ [].forEach.call(document.querySelectorAll('[data-man]'),function(i){ var v=i.value.trim(); S.man[i.dataset.man]=v===''?null:num(v); }); closeDlg(); changed(); }}]); }
 function renderAutoBtn(){ var b=document.getElementById('auto-toggle'); if(!b) return; var on=autoUse(); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); b.title=on?'Auto-use on: black-powder shot and darts per attack, potions, grog, smoked meat, bombs, ASH, torches, candles, lantern oil, medical-kit uses and single-use relics come off by themselves. Click to count them by hand.':'Auto-use off: using an item applies its effect but nothing is taken from your gear — count consumables yourself. Click to turn it back on.'; }
 function consumeOne(x){ if(!autoUse()) return; x.qty=num(x.qty,1)-1; if(x.qty<=0) S.items.splice(S.items.indexOf(x),1); }

@@ -15,7 +15,8 @@
        …
      ]; };
 
-   group: 'sheet' (top) · 'auto' (Automation) · 'log' (Roll log). An item may
+   group: 'sheet' (top) · 'auto' (Automation) · 'log' (Roll log). 'auto' items are greyed out
+   in Manual mode (the lock off), when nothing is automated anyway. An item may
    have show() → false to hide it (e.g. a rule that doesn't apply right now).
    get/set belong to the sheet, which saves the value with the character.
 
@@ -45,7 +46,7 @@
   var css = ''
     + '.ss-gear{width:26px;height:22px;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px solid #3a3a3a;border-radius:5px;color:#aaa;cursor:pointer;font-size:14px;line-height:1;padding:0;flex:none;}'
     + '.ss-gear:hover,.ss-gear[aria-expanded="true"]{color:#e8c84a;border-color:#e8c84a;}'
-    + '.ss-gear.ss-locked::after{content:"";width:6px;height:6px;border-radius:50%;background:#e8c84a;margin-left:-4px;margin-top:-12px;}'
+    + '.ss-gear.ss-locked::after{content:"";width:7px;height:7px;border-radius:50%;background:#e0614f;box-shadow:0 0 0 1.5px #111;margin-left:-4px;margin-top:-12px;}'
     + '.ss-pop{position:fixed;z-index:2147483100;background:#17181d;border:1px solid #3a3d47;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.6);padding:14px;width:290px;max-width:calc(100vw - 16px);max-height:calc(100vh - 16px);overflow-y:auto;font-family:system-ui,sans-serif;color:#e8e6df;}'
     + '.ss-pop h4{margin:0 0 8px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8a8f98;font-weight:700;}'
     + '.ss-pop h5{margin:12px 0 2px;padding-top:10px;border-top:1px solid #2a2d35;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6f7580;font-weight:700;}'
@@ -58,6 +59,9 @@
     + '.ss-sw::after{content:"";position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:#7c8494;transition:.18s;}'
     + '.ss-sw[aria-checked="true"]::after{left:22px;background:#e8c84a;}'
     + '.ss-sw:focus-visible{outline:2px solid #e8c84a;outline-offset:2px;}'
+    + '.ss-row.ss-off{opacity:.42;cursor:default;} .ss-row.ss-off .ss-sw{cursor:default;}'
+    + '.ss-note{font-size:10.5px;line-height:1.35;color:#c9a14a;margin:2px 0 4px;}'
+    + '.ss-light .ss-note{color:#8a6a1f;}'
     + '.ss-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(8px);z-index:2147483101;background:#17181d;color:#e8e6df;border:1px solid #3a3d47;border-radius:9px;padding:8px 14px;font:13px/1.35 system-ui,sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.5);opacity:0;transition:opacity .18s,transform .18s;pointer-events:none;max-width:min(92vw,420px);text-align:center;}'
     + '.ss-toast.ss-light{background:#fbfaf7;color:#2a2722;border-color:#d6d2c8;box-shadow:0 8px 28px rgba(0,0,0,.18);}'
     + '.ss-toast.on{opacity:1;transform:translateX(-50%) translateY(0);}'
@@ -75,7 +79,7 @@
     var src = window.SHEET_SETTINGS; var list = [];
     try { list = typeof src === 'function' ? (src() || []) : (Array.isArray(src) ? src : []); } catch(e){ list = []; }
     if (typeof window.toggleSheetLock === 'function' && !list.some(function(it){ return it && it.key==='lock'; }))
-      list.unshift({ key:'lock', group:'sheet', label:'Lock the sheet', hint:'Fields are read-only; rolls, pips and trackers still work',
+      list.unshift({ key:'lock', group:'sheet', label:'Auto mode', hint:'On: fields locked, the sheet runs the rules. Off (Manual): everything editable, nothing automated',
         get:function(){ return !!window._sheetLocked; },
         set:function(on){ if(!!window._sheetLocked !== !!on) window.toggleSheetLock(); } });
     list = list.filter(function(it){ try { return it && it.key && (!it.show || it.show()); } catch(e){ return false; } });
@@ -92,11 +96,13 @@
     cur = items(); var h='<h4>Sheet Settings</h4>';
     GROUPS.forEach(function(g){ var rows=cur.filter(function(it){ return (it.group||'auto')===g[0]; }); if(!rows.length) return;
       if(g[1]) h+='<h5>'+g[1]+'</h5>';
+      var manual=g[0]==='auto'&&!sheetAuto();
+      if(manual) h+='<div class="ss-note">Manual mode: nothing is automated. Turn Auto mode on to use these.</div>';
       rows.forEach(function(it){ var i=cur.indexOf(it), on=false; try{ on=!!it.get(); }catch(e){}
-        h+='<div class="ss-row" data-i="'+i+'"><span class="ss-t"><span class="k" id="ss-k-'+i+'">'+esc(it.label)+'</span>'+(it.hint?'<span class="h">'+esc(it.hint)+'</span>':'')+'</span>'
-          +'<button type="button" class="ss-sw" role="switch" aria-checked="'+on+'" aria-labelledby="ss-k-'+i+'" data-i="'+i+'"></button></div>'; }); });
+        h+='<div class="ss-row'+(manual?' ss-off':'')+'" data-i="'+i+'"'+(manual?' aria-disabled="true"':'')+'><span class="ss-t"><span class="k" id="ss-k-'+i+'">'+esc(it.label)+'</span>'+(it.hint?'<span class="h">'+esc(it.hint)+'</span>':'')+'</span>'
+          +'<button type="button" class="ss-sw" role="switch" aria-checked="'+(on&&!manual)+'" aria-labelledby="ss-k-'+i+'" data-i="'+i+'"'+(manual?' disabled':'')+'></button></div>'; }); });
     pop.innerHTML=h; }
-  function flip(i){ var it=cur[i]; if(!it) return; var on=false; try{ on=!!it.get(); }catch(e){}
+  function flip(i){ var it=cur[i]; if(!it) return; if((it.group||'auto')==='auto'&&!sheetAuto()) return; var on=false; try{ on=!!it.get(); }catch(e){}
     try{ it.set(!on); }catch(e){ if(window.console) console.error('[sheet-settings] '+it.key, e); }
     refresh(); }
   function build(){ addCss(); pop=document.createElement('div'); pop.className='ss-pop'; pop.style.display='none'; pop.setAttribute('role','dialog'); pop.setAttribute('aria-label','Sheet settings');
@@ -113,9 +119,18 @@
   function outside(e){ if(pop && !pop.contains(e.target) && !(gear && gear.contains(e.target))) close(); }
   function onKey(e){ if(e.key==='Escape'){ close(); if(gear) gear.focus(); } }
   function refresh(){ if(pop && pop.style.display!=='none'){ draw(); place(); } markLock(); }
-  // a small dot on the ⚙ while the sheet is locked, so the state stays visible
-  function markLock(){ if(!gear) return; var it=items().find(function(x){ return x.key==='lock'; }); var on=false; try{ on=!!(it&&it.get()); }catch(e){}
-    gear.classList.toggle('ss-locked', on); gear.title = 'Sheet settings' + (on ? ' — sheet locked' : ''); }
+  // AUTO / MANUAL: the lock is the sheet's mode. Locked = Auto (the sheet runs the rules);
+  // unlocked = Manual (everything editable, nothing automated). A sheet with its own lock
+  // can define window.sheetAuto() itself; otherwise it follows window._sheetLocked.
+  function sheetAuto(){ try{ if(typeof window.sheetAuto==='function'&&window.sheetAuto!==defAuto) return !!window.sheetAuto(); }catch(e){} return !!window._sheetLocked; }
+  function defAuto(){ return !!window._sheetLocked; }
+  if(typeof window.sheetAuto!=='function') window.sheetAuto=defAuto;
+  // a small dot on the ⚙ in Manual mode, so the unusual state stays visible
+  function markLock(){ if(!gear) return; var manual=!sheetAuto();
+    gear.classList.toggle('ss-locked', manual); gear.title = 'Sheet settings — ' + (manual ? 'Manual mode' : 'Auto mode'); }
+  // tell the sheet when the mode changes ('sheetmode' event, detail.auto) so it can drop or seed hand-typed numbers
+  var lastMode=null;
+  function modeChanged(){ var a=sheetAuto(); if(lastMode===null){ lastMode=a; return; } if(a!==lastMode){ lastMode=a; try{ document.dispatchEvent(new CustomEvent('sheetmode',{detail:{auto:a}})); }catch(e){} } }
   function mount(){ applyCompact(); hookLock(); var host=document.querySelector('.log-header'); if(!host || host.querySelector('.ss-gear')) return;
     addCss(); gear=document.createElement('button'); gear.type='button'; gear.className='ss-gear'; gear.textContent='⚙'; gear.setAttribute('aria-label','Sheet settings'); gear.setAttribute('aria-haspopup','dialog'); gear.setAttribute('aria-expanded','false'); gear.title='Sheet settings';
     gear.addEventListener('click',function(e){ e.preventDefault(); if(pop&&pop.style.display!=='none') close(); else open(); });
@@ -128,8 +143,8 @@
     toastEl.classList.toggle('ss-light', isLight()); toastEl.textContent=String(t||''); toastEl.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(function(){ toastEl.classList.remove('on'); },2800); }
   window.sheetToast = toast;
   // the lock can change from elsewhere (the GM, a sheet shortcut): keep the ⚙ dot in step
-  function hookLock(){ var f=window.applySheetLock; if(typeof f!=='function'||f._ss) return; var w=function(){ var r=f.apply(this,arguments); try{ refresh(); }catch(e){} return r; }; w._ss=true; window.applySheetLock=w; }
-  window.SheetSettings = { _v:1, toast:toast, refresh:refresh, open:function(){ if(gear) open(); }, close:close, mount:mount };
+  function hookLock(){ var f=window.applySheetLock; if(typeof f!=='function'||f._ss) return; var w=function(){ var r=f.apply(this,arguments); try{ modeChanged(); refresh(); }catch(e){} return r; }; w._ss=true; window.applySheetLock=w; }
+  window.SheetSettings = { _v:1, toast:toast, modeChanged:function(){ modeChanged(); refresh(); }, refresh:refresh, open:function(){ if(gear) open(); }, close:close, mount:mount };
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', function(){ mount(); setTimeout(markLock,0); });
   else { mount(); setTimeout(markLock,0); }
   window.addEventListener('load', function(){ hookLock(); setTimeout(markLock,400); });

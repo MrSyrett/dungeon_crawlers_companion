@@ -1049,7 +1049,7 @@ function renderDev(){
   var keys=['Food','Culture','Technology','Warfare'];
   host.innerHTML=keys.map(function(k){ var v=num((S.dev||{})[k]);
     return '<div class="dev-item"><span class="dev-lbl">'+k+'</span>'
-      +'<input type="number" class="no-spin dev-in" min="0" value="'+v+'" oninput="S.dev[\''+k+'\']=num(this.value);scheduleAutosave()"></div>'; }).join('');
+      +'<input type="number" class="no-spin dev-in" data-nolock min="0" value="'+v+'" oninput="S.dev[\''+k+'\']=num(this.value);scheduleAutosave()"></div>'; }).join('');
 }
 
 // ── Render: mutations ──
@@ -1441,8 +1441,8 @@ var _actFromTab=false;
 // TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = nothing
 // is spent automatically and nothing greys out — the pips stay and can be ticked by hand (as they
 // can when on); Aim/Defend still last until End Turn; Broken still limits you.
-function turnOn(){ return !S||S.turnBased!==false; }
-function toggleTurnMode(){ S.turnBased=!turnOn(); if(_act.aimed){ var t=$('tray-mod'); if(t&&num(t.value)>0) t.value=String(num(t.value)-1); } _act=actFresh(false); renderAction(); scheduleAutosave(); if(window.SheetSettings) SheetSettings.refresh(); }
+function turnOn(){ return isAuto()&&(!S||S.turnBased!==false); }
+function toggleTurnMode(){ S.turnBased=!(S.turnBased!==false); if(_act.aimed){ var t=$('tray-mod'); if(t&&num(t.value)>0) t.value=String(num(t.value)-1); } _act=actFresh(false); renderAction(); scheduleAutosave(); if(window.SheetSettings) SheetSettings.refresh(); }
 // The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
 function turnModeBtn(){ return ''; }
 function turnModeBtnPill(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: your action and maneuver are spent automatically. Click to tick them by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
@@ -1499,30 +1499,38 @@ function eqBaseName(g){ return String((g&&g.name)||'').replace(/\s*×\s*\d+\s*$/
 function eqQty(g){ var m=String((g&&g.name)||'').match(/×\s*(\d+)\s*$/)||String((g&&g.name)||'').match(/\sx(\d+)\s*$/i); return m?Math.max(0,parseInt(m[1],10)):1; }
 // AUTO-USE (roll-log switch, saved on the sheet; on unless turned off): bullets per gunshot and
 // used items come off by themselves. Off = the effect still happens, nothing is taken away.
-function autoUse(){ return !S||S.autoUse!==false; }
-function toggleAutoUse(){ S.autoUse=!autoUse(); renderAutoBtn(); scheduleAutosave(); }
-// SHEET SETTINGS (⚙) — sheet-settings.js draws these; the values live in S and save with the sheet.
-// S.auto.{spend,stats,enc,prompts} default ON; S.turnBased and S.autoUse keep their own keys.
+function autoUse(){ return isAuto()&&(!S||S.autoUse!==false); }
+function toggleAutoUse(){ S.autoUse=!(S.autoUse!==false); renderAutoBtn(); scheduleAutosave(); }
+// AUTO / MANUAL (⚙ in the roll log). The sheet lock IS the mode: locked = Auto, the sheet runs
+// the rules; unlocked = Manual, everything editable and nothing automated. In Auto, three
+// switches can still turn one automation off: Turn-Based Actions (S.turnBased), Auto-Consume
+// (S.autoUse) and Use Encumbrance (S.auto.enc). MP spending, armor/carry limit and Rot checks follow the mode.
 if(typeof window.sheetToast!=='function') window.sheetToast=function(t){ if(window.console) console.log(t); };
-function autoOn(k){ return !(S&&S.auto&&S.auto[k]===false); }
+function isAuto(){ if(window._sheetLocked===undefined) return true; return typeof window.sheetAuto==='function'?!!window.sheetAuto():!!window._sheetLocked; }   // before the lock script runs the sheet starts in Auto
+function autoOn(k){ if(!isAuto()) return false; if(k==='enc') return !(S&&S.auto&&S.auto.enc===false); return true; }
 function setAuto(k,on){ S.auto=S.auto||{}; S.auto[k]=!!on; renderArmorVal(); renderEnc(); scheduleAutosave(); }
 window.SHEET_SETTINGS=function(){ return [
-  {key:'turn',group:'auto',label:'Turn-based actions',hint:'Rolls and Action-tab moves tick off your action and maneuver; off: tick them yourself',get:turnOn,set:function(on){ if(on!==turnOn()) toggleTurnMode(); }},
-  {key:'use',group:'auto',label:'Use up consumables',hint:'A Bullet per gunshot, med and booze doses, soda, REGEN and grenades come off your gear',get:autoUse,set:function(on){ if(on!==autoUse()) toggleAutoUse(); }},
-  {key:'spend',group:'auto',label:'Spend MP automatically',hint:'Using a mutation takes its MP (and misfires take or refund MP); off: adjust MP yourself',get:function(){ return autoOn('spend'); },set:function(on){ setAuto('spend',on); }},
-  {key:'stats',group:'auto',label:'Auto-calculated stats',hint:'Armor rating from equipped armor and carry limit (Strength × 2); off: type your own',get:function(){ return autoOn('stats'); },set:function(on){ if(!on){ S.man=S.man||{}; ['armor','carry'].forEach(function(k){ if(S.man[k]==null) S.man[k]=manCalc(k); }); } setAuto('stats',on); }},
-  {key:'enc',group:'auto',label:'Encumbrance warning',hint:'Flag the load in red when you carry more than your limit',get:function(){ return autoOn('enc'); },set:function(on){ setAuto('enc',on); }},
-  {key:'prompts',group:'auto',label:'Automatic Rot checks',hint:'Ticking a new Rot pip rolls a Rot check and applies the Damage; off: use Roll Rot yourself',get:function(){ return autoOn('prompts'); },set:function(on){ setAuto('prompts',on); }}
+  {key:'turn',group:'auto',label:'Turn-Based Actions',hint:'Rolls and Action-tab moves tick off your action and maneuver',get:function(){ return S.turnBased!==false; },set:function(on){ if(on!==(S.turnBased!==false)) toggleTurnMode(); }},
+  {key:'use',group:'auto',label:'Auto-Consume',hint:'A Bullet per gunshot, med and booze doses, soda, REGEN and grenades come off your gear',get:function(){ return S.autoUse!==false; },set:function(on){ if(on!==(S.autoUse!==false)) toggleAutoUse(); }},
+  {key:'enc',group:'auto',label:'Use Encumbrance',hint:'Flag the load in red when you carry more than your limit',get:function(){ return !(S.auto&&S.auto.enc===false); },set:function(on){ setAuto('enc',on); }}
 ]; };
+// Entering Manual: armor and carry limit become yours to correct (✎ opens the editor). Back in
+// Auto: your typed numbers are dropped and everything is worked out again from the sheet.
+document.addEventListener('sheetmode',function(e){ var auto=!!(e.detail&&e.detail.auto);
+  if(auto){ S.man=null; S.manualMode=false; }
+  else { S.man=S.man||{}; ['armor','carry'].forEach(function(k){ if(S.man[k]==null||S.man[k]==='') S.man[k]=manCalc(k); }); S.manualMode=true; }   // keeps numbers already typed (a sheet reopened in Manual)
+  renderAction(); renderArmorVal(); renderEnc(); if(typeof renderAttacks==='function') renderAttacks(); scheduleAutosave(); });
+// a sheet left in Manual opens in Manual (the lock script starts locked; switch once it's ready)
+window.addEventListener('load',function(){ setTimeout(function(){ if(S.manualMode&&window._sheetLocked&&typeof window.toggleSheetLock==='function') window.toggleSheetLock(); },420); });
 // Auto-calculated stats off: the player's own numbers (S.man) replace the computed ones.
 function carryLimitCalc(){ return attrBase('STR')*2; }
 function carryLimit(){ return manual('carry')?Math.max(0,num(S.man.carry)):carryLimitCalc(); }
 function manCalc(k){ return k==='armor'?armorCalc():k==='carry'?carryLimitCalc():''; }
-function manual(k){ return !autoOn('stats')&&S.man&&S.man[k]!=null&&S.man[k]!==''; }
+function manual(k){ return !isAuto()&&S.man&&S.man[k]!=null&&S.man[k]!==''; }
 function closeStats(){ var o=$('stats-overlay'); if(o) o.classList.remove('open'); }
 function editStats(){ S.man=S.man||{}; var o=$('stats-overlay'); if(!o) return;
   var f=function(k,l){ return '<label style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0;"><span class="m-lbl" style="margin:0;">'+l+'</span><input class="m-input" style="width:90px" type="number" min="0" data-man="'+k+'" value="'+esc(S.man[k]!=null?S.man[k]:manCalc(k))+'"></label>'; };
-  $('stats-body').innerHTML='<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). These numbers are used for the armor roll and your carry limit.</p>'+f('armor','Armor rating')+f('carry','Carry limit')
+  $('stats-body').innerHTML='<p class="m-hint">Manual mode: these numbers are yours. They are used for the armor roll and your carry limit until you switch back to Auto (⚙ in the roll log), which works them out again.</p>'+f('armor','Armor rating')+f('carry','Carry limit')
     +'<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;"><button class="m-btn ghost" onclick="closeStats()">Cancel</button><button class="m-btn" onclick="saveStats()">Save</button></div>';
   o.classList.add('open'); }
 function saveStats(){ [].forEach.call(document.querySelectorAll('#stats-body [data-man]'),function(i){ var v=i.value.trim(); S.man[i.dataset.man]=v===''?null:Math.max(0,num(v)); }); closeStats(); renderArmorVal(); renderEnc(); scheduleAutosave(); }
@@ -1825,7 +1833,7 @@ function applySheet(d){
   S.crits = Array.isArray(d.crits) ? d.crits.map(function(c){ return {name:c.name||'',effect:c.effect||'',mod:num(c.mod)}; }) : [];
   if(Array.isArray(d.relationships)) S.relationships=d.relationships.map(function(r){ return {name:r.name||'',note:r.note||''}; });
   _act=actFresh(false); if(d.act&&typeof d.act==='object'){ ['slow','fast','slowAsFast','owed','defended','defendOwed','aimed'].forEach(function(k){ _act[k]=!!d.act[k]; }); }
-  _actSub=d.actSub==='fast'?'fast':'slow'; S.turnBased=d.turnBased!==false; S.autoUse=d.autoUse!==false; S.auto=(d.auto&&typeof d.auto==='object')?d.auto:{}; S.man=(d.man&&typeof d.man==='object')?d.man:{};
+  _actSub=d.actSub==='fast'?'fast':'slow'; S.turnBased=d.turnBased!==false; S.autoUse=d.autoUse!==false; S.auto=(d.auto&&typeof d.auto==='object')?d.auto:{}; S.manualMode=!!d.manualMode; S.man=(S.manualMode&&d.man&&typeof d.man==='object')?d.man:null;   // typed numbers only count in Manual
   _lastRoll=null; renderAll();
   if(typeof campaignRestore==='function' && d.campaign!==undefined) campaignRestore(d.campaign);
   if(window.__ddSaveTitle && S.name) try{ window.__ddSaveTitle(S.name); }catch(e){}

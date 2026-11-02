@@ -731,13 +731,13 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="vitals">
         <div class="vital vc">
           <div class="vlbl"><span>Hit Dice</span><small id="hd-lbl"></small></div>
-          <div class="vbig"><input type="number" id="hd-cur" data-nolock value="1" oninput="recalc()"><span class="sep">/</span><input type="number" id="hd-max" data-nolock value="1" oninput="recalc()"></div>
+          <div class="vbig"><input type="number" id="hd-cur" data-nolock value="1" oninput="recalc()"><span class="sep">/</span><input type="number" id="hd-max" value="1" oninput="recalc()"></div>
           <div class="vline"><button class="small-btn" onclick="catchBreath()" title="Spend 1 Hit Die: roll it + STR">Catch Breath</button><button class="small-btn" onclick="makeCamp()" title="Spend 1 Hit Die at max value + STR">Make Camp</button><button class="small-btn green" onclick="safeRest()" title="Recover all HP, Hit Dice, mana; heal 1 Wound">Safe Rest</button></div>
         </div>
         <div class="vital vc">
           <div class="vlbl"><span>Wounds</span></div>
           <div class="pips" id="wound-pips"></div>
-          <div class="vline">max <input type="number" id="wounds-max" data-nolock value="6" oninput="recalc()"></div>
+          <div class="vline">max <input type="number" id="wounds-max" value="6" oninput="recalc()"></div>
         </div>
         <div class="vital vc">
           <div class="vlbl"><span>Hit Points</span></div>
@@ -780,7 +780,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       </div>
 
       <div class="tab-panel" id="tab-spells">
-        <div class="section-bar"><span>Spells</span><span class="hdr-right"><span class="mana-hdr" title="Spell points — spent when casting tiered spells, restored on a Safe Rest">Mana <input type="number" id="mana-cur" data-nolock value="0" oninput="recalc()"><span class="msep">/</span><input type="number" id="mana-max" data-nolock value="0" oninput="recalc()"><small id="mana-lbl"></small></span><button class="hdr-btn" onclick="openSpellbook()">Spellbook</button></span></div>
+        <div class="section-bar"><span>Spells</span><span class="hdr-right"><span class="mana-hdr" title="Spell points — spent when casting tiered spells, restored on a Safe Rest">Mana <input type="number" id="mana-cur" data-nolock value="0" oninput="recalc()"><span class="msep">/</span><input type="number" id="mana-max" value="0" oninput="recalc()"><small id="mana-lbl"></small></span><button class="hdr-btn" onclick="openSpellbook()">Spellbook</button></span></div>
         <table class="tbl">
           <thead><tr><th style="width:30%;">Spell</th><th style="width:60px;">Tier</th><th>Effect</th><th style="width:96px;"></th></tr></thead>
           <tbody id="spells-body"></tbody>
@@ -903,30 +903,39 @@ let wounds = 0, actions = 3, advState = 0;
 // TURN-BASED MODE (Action tab switch, saved as turnBased; on unless turned off). Off = actions aren't spent
 // automatically (tick the Action pips by hand) and nothing is refused for "not enough actions" / "used this round".
 let _nimTB = true;
-function turnOn() { return _nimTB !== false; }
+function turnOn() { return isAuto() && _nimTB !== false; }
 // AUTO-USE (roll-log switch, saved as autoUse; on unless turned off): consumables come off the inventory
 // by themselves. Off = the item still works, only the count / charges are left alone.
 let _nimAuto = true;
-function autoUse() { return _nimAuto !== false; }
-function toggleAutoUse() { _nimAuto = !autoUse(); renderAutoBtn(); scheduleAutosave(); }
-// SHEET SETTINGS (⚙) — sheet-settings.js draws these; saved on the sheet as auto:{spend,stats,prompts}
-// (default on) and man:{armor,init,speed}. turnBased and autoUse keep their own keys.
+function autoUse() { return isAuto() && _nimAuto !== false; }
+function toggleAutoUse() { _nimAuto = !(_nimAuto !== false); renderAutoBtn(); scheduleAutosave(); }
+// SHEET SETTINGS (⚙) — sheet-settings.js draws these. AUTO / MANUAL: the sheet lock IS the mode —
+// locked = Auto, the sheet runs the rules; unlocked = Manual, everything editable and nothing automated.
+// In Auto two switches can still turn one automation off: Turn-Based Actions (turnBased) and
+// Auto-Consume (autoUse). Everything else (mana & Hit Dice spending, Armor / Initiative / Speed and the
+// max boxes, Dying rules) follows the mode. Manual numbers are saved as man:{armor,init,speed}.
 if(typeof window.sheetToast !== 'function') window.sheetToast = function(t) { if(window.console) console.log(t); };
-let _auto = {}, _man = {};
-function autoOn(k) { return _auto[k] !== false; }
+let _auto = {}, _man = {}, _manualMode = false;
+function isAuto() { return typeof window.sheetAuto === 'function' ? !!window.sheetAuto() : window._sheetLocked !== false; }   // the lock script loads later and starts locked (Auto)
+function autoOn(k) { return isAuto(); }
 function setAuto(k, on) { _auto[k] = !!on; recalc(); if(typeof renderNimTurn === 'function') renderNimTurn(); scheduleAutosave(); }
 window.SHEET_SETTINGS = function() { return [
-  { key:'turn', group:'auto', label:'Turn-based actions', hint:'Attacks, spells and items spend your 3 actions; off: tick the pips yourself', get: turnOn, set: on => { if(on !== turnOn()) toggleTurnMode(); } },
-  { key:'use', group:'auto', label:'Use up consumables', hint:'Potions, torches, scrolls, one-time items and wand charges come off your inventory', get: autoUse, set: on => { if(on !== autoUse()) toggleAutoUse(); } },
-  { key:'spend', group:'auto', label:'Spend mana & Hit Dice automatically', hint:'Tiered spells take their mana; Catch Breath and Make Camp take a Hit Die; off: adjust them yourself', get: () => autoOn('spend'), set: on => setAuto('spend', on) },
-  { key:'stats', group:'auto', label:'Auto-calculated stats', hint:'Armor, Initiative, Speed, and max Hit Dice, Wounds and mana; off: type your own', get: () => autoOn('stats'), set: on => { if(!on) { if(_man.armor == null) _man.armor = armorCalc(); if(_man.init == null) _man.init = initCalc(); if(_man.speed == null) _man.speed = speedCalc(); } setAuto('stats', on); } },
-  { key:'prompts', group:'auto', label:'Dying rules', hint:'While Dying: 1 action a turn, and attacking or casting rolls the DC 10 STR save (fail = 1 Wound)', get: () => autoOn('prompts'), set: on => { setAuto('prompts', on); if(typeof renderActions === 'function') renderActions(); } }
+  { key:'turn', group:'auto', label:'Turn-Based Actions', hint:'Attacks, spells and items spend your 3 actions', get: () => _nimTB !== false, set: on => { if(on !== (_nimTB !== false)) toggleTurnMode(); } },
+  { key:'use', group:'auto', label:'Auto-Consume', hint:'Potions, torches, scrolls, one-time items and wand charges come off your inventory', get: () => _nimAuto !== false, set: on => { if(on !== (_nimAuto !== false)) toggleAutoUse(); } }
 ]; };
-// Auto-calculated stats off: the player's own numbers (_man) replace the computed ones.
-function manual(k) { return !autoOn('stats') && _man[k] != null && _man[k] !== ''; }
+// Manual mode: the player's own numbers (_man) replace the computed ones.
+function manual(k) { return !isAuto() && _man[k] != null && _man[k] !== ''; }
+// Entering Manual: the computed numbers become yours to correct (✎ opens the editor). Back in Auto:
+// your typed numbers are dropped and everything (incl. the max boxes) is worked out again from the sheet.
+document.addEventListener('sheetmode', function(e) { const auto = !!(e.detail && e.detail.auto);
+  if(auto) { _man = {}; _manualMode = false; ['hd-max', 'wounds-max', 'mana-max'].forEach(id => { const el = $(id); if(el) delete el.dataset.manual; }); }
+  else { const c = { armor: armorCalc(), init: initCalc(), speed: speedCalc() }; Object.keys(c).forEach(k => { if(_man[k] == null || _man[k] === '') _man[k] = c[k]; }); _manualMode = true; }
+  recalc(); if(typeof renderNimTurn === 'function') renderNimTurn(); scheduleAutosave(); });
+// a sheet left in Manual opens in Manual (the lock script starts locked; switch once it's ready)
+window.addEventListener('load', function() { setTimeout(function() { if(_manualMode && window._sheetLocked && typeof window.toggleSheetLock === 'function') window.toggleSheetLock(); }, 420); });
 function editStats() {
   const f = (k, l, v) => '<div class="m-lbl">' + l + '</div><input class="m-input" type="number" data-man="' + k + '" value="' + esc(v) + '">';
-  $('stats-body').innerHTML = '<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). These numbers are used for rolls and the Action tab. Max Hit Dice, Wounds and mana are typed in their own boxes.</p>'
+  $('stats-body').innerHTML = '<p class="m-hint">Manual mode: these numbers are yours. They are used for rolls and the Action tab until you switch back to Auto (⚙ in the roll log), which works them out again. Max Hit Dice, Wounds and mana are typed in their own boxes.</p>'
     + f('armor', 'Armor', _man.armor != null ? _man.armor : armorCalc()) + f('init', 'Initiative bonus', _man.init != null ? _man.init : initCalc()) + f('speed', 'Speed', _man.speed != null ? _man.speed : speedCalc());
   $('stats-overlay').classList.add('open');
 }
@@ -1025,13 +1034,13 @@ function recalc() {
     ['armor-val', 'init-val', 'speed-val'].forEach(id => { const el = $(id); el.onclick = man ? editStats : null; el.style.cursor = man ? 'pointer' : ''; if(man) el.title = 'Your own number — click to change'; }); }
   const c = cls();
   $('hd-lbl').textContent = c ? 'd' + c.hitDie : '';
-  if(autoOn('stats') && num($('hd-max').value) !== hdMax() && !$('hd-max').dataset.manual) $('hd-max').value = hdMax();
+  if(autoOn('stats') && num($('hd-max').value) !== hdMax()) $('hd-max').value = hdMax();
   const wm = 6 + ancG('wounds') + (/\+1 max Wounds/i.test(ancestryText()) ? 1 : 0) - (/–1 max Wounds|-1 max Wounds/.test(D.backgrounds().find(b => norm(b.name) === norm($('f-background').value))?.description || '') ? 1 : 0);
-  if(autoOn('stats') && !$('wounds-max').dataset.manual) $('wounds-max').value = wm;
+  if(autoOn('stats')) $('wounds-max').value = wm;
   renderWounds(); renderActions();
   const mm = manaMax();
   $('mana-lbl').textContent = '';
-  if(autoOn('stats') && mm !== null && !$('mana-max').dataset.manual) $('mana-max').value = mm;
+  if(autoOn('stats') && mm !== null) $('mana-max').value = mm;
   $('slots-note').textContent = 'slots ' + slotsUsed() + ' / ' + (10 + stat('STR'));
   const hp = num($('hp-cur').value);
   $('ko-flag').innerHTML = hp <= 0 ? '<span class="ko-banner">Dying — 1 action, DC 10 STR save to attack</span>' : '';
@@ -1315,7 +1324,7 @@ function addInvRow(i) {
   if(i.bv === 2 && i.benefits != null && window.LootBonus) { const bl = LootBonus.normalize(LB_SYS, i.benefits); if(bl.length) { tr.dataset.bv = '2'; tr.dataset.benefits = JSON.stringify(bl); tr.dataset.rid = i.rid || newRid(); } }
   if(i.equipped && i.applied && i.applied.v === 2 && tr.dataset.benefits) tr.dataset.applied = JSON.stringify(i.applied);
   const q = Math.max(1, parseInt(i.qty, 10) || 1);
-  tr.innerHTML = `<td><div class="inv-name-line"><span class="inv-eq-slot"></span><input type="text" class="inv-name" value="${esc(i.name)}" placeholder="Item" oninput="invAttachHb(this.closest('tr'));refreshInvEquip(this.closest('tr'))"></div><div class="inv-bon"></div></td><td><input type="number" class="num inv-qty" value="${q}" step="1" min="1" oninput="recalc()"></td><td><input type="number" class="num inv-slots" value="${esc(i.slots)}" step="0.5" min="0" oninput="recalc()"></td><td><input type="text" class="inv-note" value="${esc(i.note)}"></td><td><button class="row-x" onclick="removeInvRow(this)">✕</button></td>`;
+  tr.innerHTML = `<td><div class="inv-name-line"><span class="inv-eq-slot"></span><input type="text" class="inv-name" value="${esc(i.name)}" placeholder="Item" oninput="invAttachHb(this.closest('tr'));refreshInvEquip(this.closest('tr'))"></div><div class="inv-bon"></div></td><td><input type="number" class="num inv-qty" data-nolock value="${q}" step="1" min="1" oninput="recalc()"></td><td><input type="number" class="num inv-slots" value="${esc(i.slots)}" step="0.5" min="0" oninput="recalc()"></td><td><input type="text" class="inv-note" value="${esc(i.note)}"></td><td><button class="row-x" onclick="removeInvRow(this)">✕</button></td>`;
   $('inv-body').appendChild(tr);
   refreshInvEquip(tr); renderInvBonus(tr);
   if(tr.dataset.benefits && invEquipped(tr) && !tr.dataset.applied) invApplyBonus(tr, true);   // an equipped save with no record: snapshot, don't re-apply HP / spells
@@ -1696,7 +1705,7 @@ function collectSheet() {
     stats, saveAdv, saveDis, skillPts, skillTotals,
     hp: { cur: num(v('hp-cur')), max: num(v('hp-max')), temp: num(v('hp-temp')) }, wounds, woundsMax: num(v('wounds-max')),
     hitDice: { cur: num(v('hd-cur')), max: num(v('hd-max')) }, mana: { cur: num(v('mana-cur')), max: num(v('mana-max')) },
-    armor: v('f-armor'), shield: v('f-shield'), armorBonus: num(v('armor-bonus')), armorScore: armorValue(), initBonus: num(v('init-bonus')), speedBonus: num(v('speed-bonus')), size: v('f-size'), actions, turnBased: turnOn(), autoUse: autoUse(), auto: _auto, man: _man,
+    armor: v('f-armor'), shield: v('f-shield'), armorBonus: num(v('armor-bonus')), armorScore: armorValue(), initBonus: num(v('init-bonus')), speedBonus: num(v('speed-bonus')), size: v('f-size'), actions, turnBased: _nimTB !== false, autoUse: _nimAuto !== false, auto: _auto, man: _man, manualMode: _manualMode,
     attacks: [...document.querySelectorAll('#attacks-body tr')].map(tr => ({ name: tr.querySelector('.atk-name').value, damage: tr.querySelector('.atk-dmg').value, props: tr.querySelector('.atk-props').value, link: tr.dataset.link || '', fixed: tr.dataset.fixed ? true : undefined })).filter(a => a.name || a.damage),
     picks: [...document.querySelectorAll('#picks-body tr')].map(tr => tr.dataset.pick),
     spells: [...document.querySelectorAll('#spells-body tr')].map(tr => ({ name: tr.querySelector('.sp-name').value, tier: num(tr.querySelector('.sp-tier').value), fromRid: tr.dataset.fromRid || undefined, from: tr.dataset.fromRid ? tr.dataset.from : undefined })).filter(s => s.name),
@@ -1717,7 +1726,7 @@ function applySheet(d) {
   wounds = d.wounds || 0; set('wounds-max', d.woundsMax || 6); if(d.woundsMax) $('wounds-max').dataset.manual = '1'; else delete $('wounds-max').dataset.manual;
   const hd = d.hitDice || {}; set('hd-cur', hd.cur ?? 1); set('hd-max', hd.max ?? 1); if(hd.max) $('hd-max').dataset.manual = '1'; else delete $('hd-max').dataset.manual;
   const mn = d.mana || {}; set('mana-cur', mn.cur || 0); set('mana-max', mn.max || 0); if(mn.max) $('mana-max').dataset.manual = '1'; else delete $('mana-max').dataset.manual;
-  set('f-armor', d.armor); set('f-shield', d.shield); set('armor-bonus', d.armorBonus || 0); set('init-bonus', d.initBonus || 0); set('speed-bonus', d.speedBonus || 0); set('f-size', d.size || 'Medium'); actions = typeof d.actions === 'number' ? d.actions : 3; _nimTB = d.turnBased !== false; _nimAuto = d.autoUse !== false; renderAutoBtn(); _auto = (d.auto && typeof d.auto === 'object') ? d.auto : {}; _man = (d.man && typeof d.man === 'object') ? d.man : {}; if(window.SheetSettings) SheetSettings.refresh();
+  set('f-armor', d.armor); set('f-shield', d.shield); set('armor-bonus', d.armorBonus || 0); set('init-bonus', d.initBonus || 0); set('speed-bonus', d.speedBonus || 0); set('f-size', d.size || 'Medium'); actions = typeof d.actions === 'number' ? d.actions : 3; _nimTB = d.turnBased !== false; _nimAuto = d.autoUse !== false; renderAutoBtn(); _auto = (d.auto && typeof d.auto === 'object') ? d.auto : {}; _man = (d.man && typeof d.man === 'object') ? d.man : {}; _manualMode = !!d.manualMode; if(window.SheetSettings) SheetSettings.refresh();
   $('attacks-body').innerHTML = ''; (d.attacks || []).forEach(addAttackRow); ensureUnarmed();
   fillPoolPick(); $('picks-body').innerHTML = ''; (d.picks || []).forEach(p => addPick(p));
   $('spells-body').innerHTML = ''; (d.spells || []).forEach(addSpellRow);
@@ -2060,7 +2069,7 @@ function nimDyingRules(){ return autoOn('prompts') && nimDying(); }   // Dying r
 function nimSpellCost(sp){ if(!sp || !sp.actions) return { n: 1, timed: '' }; const m = /(\d+)\s*Actions?/i.exec(sp.actions); if(m) return { n: +m[1], timed: '' }; const t = /Casting Time:\s*([^.;]+)/i.exec(sp.actions); return { n: 0, timed: t ? t[1].trim() : sp.actions }; }
 function nimAfter(){ renderActions(); renderNimTurn(); if(typeof scheduleAutosave === 'function') scheduleAutosave(); }
 function nimSpend(n){ if(!turnOn()) return; actions = Math.max(0, actions - n); }
-function toggleTurnMode(){ _nimTB = !turnOn(); actions = nimMaxActions(); _nturn.attacks = 0; _nturn.moves = 0; _nturn.reacted = {}; nimAfter(); if(window.SheetSettings) SheetSettings.refresh(); }
+function toggleTurnMode(){ _nimTB = !(_nimTB !== false); actions = nimMaxActions(); _nturn.attacks = 0; _nturn.moves = 0; _nturn.reacted = {}; nimAfter(); if(window.SheetSettings) SheetSettings.refresh(); }
 // The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
 function turnModeBtn(){ return ''; }
 function turnModeBtnPill(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: actions are spent automatically (3 per turn), End Turn recharges them. Click to tick them by hand instead.' : 'Manual: actions aren\'t spent automatically — tick the pips yourself. Click to spend them automatically.') + '"><span class="tm-sw"></span></button>'; }

@@ -727,7 +727,7 @@ function attrBase(k){return num(S.attrs[k]);}                          // bought
 function attrVal(k){return attrBase(k)+originAttrBonus(k);}            // effective (tests / combat)
 function condPenalty(){ if(S.condLevel===2)return -2; if(S.condLevel===3)return -4; return 0; }
 function condDisadv(){return S.condLevel>=4;}
-// xxxCalc = the formula; the plain getter returns the player's own number while ⚙ Auto-calculated stats is off.
+// xxxCalc = the formula; the plain getter returns the player's own number in Manual mode.
 function resolveMaxCalc(){var t=tierObj(S.tier);return num(t.resolve)+attrVal('spirit')+num(S.resBuy);}
 function defenseCalc(){var t=tierObj(S.tier);return num(t.defense)+num(S.defMod);}
 function attackCalc(){var t=tierObj(S.tier);return num(t.attackBonus)+attrVal('accuracy')+num(S.atkMod)+originAttackBonus();}
@@ -935,20 +935,28 @@ function renderAll(){
 function bumpResolve(d){if(!S.tier)return;S.resCur=clamp(S.resCur+d,0,resolveMax());renderResolve();scheduleAutosave();}
 function restResolve(){if(!S.tier)return;S.resCur=resolveMax();renderResolve();scheduleAutosave();addLog('Resolve','full','recovered to '+resolveMax(),'normal');}
 
-// SHEET SETTINGS (⚙) — sheet-settings.js draws these; S.auto.stats defaults ON and saves with the sheet.
+// SHEET SETTINGS (⚙) — sheet-settings.js draws these. AUTO / MANUAL: the sheet lock IS the mode —
+// locked = Auto (Resolve max, Defense, Attack, Block, Dodge and DR are worked out), unlocked = Manual
+// (those numbers are yours, ✎ to correct). No automation switches of its own: everything follows the mode.
 if(typeof window.sheetToast!=='function') window.sheetToast=function(t){ if(window.console) console.log(t); };
-function autoOn(k){ return !(S.auto&&S.auto[k]===false); }
+function isAuto(){ if(typeof window._sheetLocked==='undefined') return !(S&&S.manualMode); return typeof window.sheetAuto==='function'?!!window.sheetAuto():!!window._sheetLocked; }   // before the lock script is up: the saved mode
+function autoOn(k){ return isAuto(); }
 function setAuto(k,on){ S.auto=S.auto||{}; S.auto[k]=!!on; renderAll(); scheduleAutosave(); }
-window.SHEET_SETTINGS=function(){ return [
-  {key:'stats',group:'auto',label:'Auto-calculated stats',hint:'Resolve max, Defense, Attack, Block, Dodge and DR from Tier, Origin and Attributes; off: type your own',get:function(){ return autoOn('stats'); },
-   set:function(on){ if(!on){ S.man=S.man||{}; MAN_KEYS.forEach(function(k){ if(S.man[k]==null) S.man[k]=manCalc(k); }); } setAuto('stats',on); }}
-]; };
-// Auto-calculated stats off: the player's own numbers (S.man) replace the computed ones.
+window.SHEET_SETTINGS=function(){ return []; };
+// Entering Manual: the computed numbers become yours to correct (✎ opens the editor). Back in
+// Auto: your typed numbers are dropped and everything is worked out again from Tier, Origin and Attributes.
+document.addEventListener('sheetmode',function(e){ var auto=!!(e.detail&&e.detail.auto);
+  if(auto){ S.man={}; S.manualMode=false; }
+  else { S.man=S.man||{}; MAN_KEYS.forEach(function(k){ if(S.man[k]==null||S.man[k]==='') S.man[k]=manCalc(k); }); S.manualMode=true; }   // keeps numbers already typed (a sheet reopened in Manual)
+  renderAll(); scheduleAutosave(); });
+// a sheet left in Manual opens in Manual (the lock script starts locked; switch once it's ready)
+window.addEventListener('load',function(){ setTimeout(function(){ if(S.manualMode&&window._sheetLocked&&typeof window.toggleSheetLock==='function') window.toggleSheetLock(); },420); });
+// Manual mode: the player's own numbers (S.man) replace the computed ones.
 var MAN_KEYS=['res','def','atk','blk','dod','dr'], MAN_LBL={res:'Resolve max',def:'Defense',atk:'Attack bonus',blk:'Block',dod:'Dodge',dr:'Damage Reduction'};
 function manCalc(k){ return k==='res'?resolveMaxCalc():k==='def'?defenseCalc():k==='atk'?attackCalc():k==='blk'?blockCalc():k==='dod'?dodgeCalc():k==='dr'?drCalc():0; }
 function manual(k){ return !autoOn('stats')&&S.man&&S.man[k]!=null&&S.man[k]!==''; }
 function editStats(){ S.man=S.man||{};
-  $('stats-body').innerHTML='<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). These numbers are used for your rolls and shown to the GM.</p>'+
+  $('stats-body').innerHTML='<p class="m-hint">Manual mode: these numbers are yours. They are used for your rolls and shown to the GM until you switch back to Auto (⚙ in the roll log), which works them out again.</p>'+
     MAN_KEYS.map(function(k){ return '<label style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0;"><span>'+MAN_LBL[k]+'</span><input class="m-input" style="width:90px" type="number" data-man="'+k+'" value="'+esc(S.man[k]!=null?S.man[k]:manCalc(k))+'"></label>'; }).join('');
   $('stats-overlay').classList.add('open'); }
 function closeStats(){ $('stats-overlay').classList.remove('open'); }

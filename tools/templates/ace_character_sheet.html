@@ -709,7 +709,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="section-bar"><span>Gear</span><span class="hdr-right"><button class="hdr-btn" onclick="openGearPicker()">Gear Store</button></span></div>
         <table class="gear-table"><tbody id="gear-body"></tbody></table>
         <div class="wealth-row">
-          Buy <select id="wealth-tn"><option value="10">10 — up to 1,000</option><option value="20">20 — up to 10,000</option><option value="30">30 — up to 100,000</option><option value="40">40 — up to 1,000,000</option></select>
+          Buy <select id="wealth-tn" data-nolock><option value="10">10 — up to 1,000</option><option value="20">20 — up to 10,000</option><option value="30">30 — up to 100,000</option><option value="40">40 — up to 1,000,000</option></select>
           <button class="small-btn" onclick="rollWealth()" title="Roll Style (+Wealth) — costs 1 Karma">🎲</button>
         </div>
       </div>
@@ -834,7 +834,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
 <script>
 // ═══ CORE STATE ═══════════════════════════════════════════════════════════
-var _auto = {}, _man = {}, _calc = {};   // ⚙ Sheet Settings: switches (default ON), your own stats, the computed ones
+var _auto = {}, _man = {}, _calc = {}, _manualMode = false;   // ⚙ Sheet Settings: switches (default ON), your own stats (Manual mode), the computed ones, the saved mode
 const STATS = [
   { id:'smarts', name:'Smarts', hint:'clever · perceptive' },
   { id:'moves',  name:'Moves',  hint:'quick · accurate' },
@@ -1022,7 +1022,7 @@ function renderKarma() {
 }
 function karmaSpend(why, n) {
   n = n || 1;
-  if(!autoOn('spend')) return true;   // ⚙ Spend Karma automatically off: the player adjusts Karma by hand
+  if(!autoOn('spend')) return true;   // Manual mode (⚙): the player adjusts Karma by hand
   if(karma < n) { sheetToast('No Karma left — play your Trait to earn some back!'); return false; }
   karma -= n;
   renderKarma();
@@ -1038,23 +1038,29 @@ function karmaGain() {
   scheduleAutosave();
 }
 
-// SHEET SETTINGS (⚙) — sheet-settings.js draws these; saved with the sheet as auto / man.
-// _auto.{spend,stats} default ON (a missing key reads as ON).
+// AUTO / MANUAL (⚙ in the roll log). The sheet lock IS the mode: locked = Auto, the sheet runs
+// the rules (Karma spending, Defence and Health worked out from your Stats and gear); unlocked =
+// Manual, everything editable and nothing automated. ACE has none of the three per-feature
+// switches, so its automation simply follows the mode.
 if(typeof window.sheetToast !== 'function') window.sheetToast = function(t) { if(window.console) console.log(t); };
-function autoOn(k) { return !(_auto && _auto[k] === false); }
-function setAuto(k, on) { _auto[k] = !!on; recalc(); scheduleAutosave(); }
-window.SHEET_SETTINGS = function() { return [
-  { key:'spend', group:'auto', label:'Spend Karma automatically', hint:'Using Power, a Power attack, a buy roll or a +1 Karma die takes 1 Karma; off: adjust Karma yourself', get:() => autoOn('spend'), set:on => setAuto('spend', on) },
-  { key:'stats', group:'auto', label:'Auto-calculated stats', hint:'Defence (Moves × 3, Dodging, gear) and Health (Brawn, Tough, bonus); off: type your own', get:() => autoOn('stats'),
-    set:on => { if(!on) { ['def','hp'].forEach(k => { if(_man[k] == null) _man[k] = _calc[k]; }); } setAuto('stats', on); } },
-]; };
+function isAuto() { if(window._sheetLocked === undefined) return true; return typeof window.sheetAuto === 'function' ? !!window.sheetAuto() : !!window._sheetLocked; }   // before the lock script runs the sheet starts in Auto
+function autoOn(k) { return isAuto(); }
+window.SHEET_SETTINGS = function() { return []; };
+// Entering Manual: Defence and Max Health become yours to correct (✎ opens the editor). Back in
+// Auto: your typed numbers are dropped and everything is worked out again from the sheet.
+document.addEventListener('sheetmode', function(e) { const auto = !!(e.detail && e.detail.auto);
+  if(auto) { _man = {}; _manualMode = false; }
+  else { recalc(); ['def','hp'].forEach(k => { if(_man[k] == null || _man[k] === '') _man[k] = _calc[k]; }); _manualMode = true; }   // keeps numbers already typed (a sheet reopened in Manual)
+  recalc(); scheduleAutosave(); });
+// a sheet left in Manual opens in Manual (the lock script starts locked; switch once it's ready)
+window.addEventListener('load', function() { setTimeout(function() { if(_manualMode && window._sheetLocked && typeof window.toggleSheetLock === 'function') window.toggleSheetLock(); }, 420); });
 // Auto-calculated stats off: the player's own numbers (_man) replace the computed ones.
-function manual(k) { return !autoOn('stats') && _man && _man[k] != null && _man[k] !== ''; }
+function manual(k) { return !isAuto() && _man && _man[k] != null && _man[k] !== ''; }
 function manMark(id) { const m = $(id); if(!m) return; const on = autoOn('stats'); m.textContent = on ? '' : ' ✎'; m.onclick = on ? null : editStats; m.style.cursor = on ? '' : 'pointer'; m.title = on ? '' : 'Your own number — click to change'; }
 function closeStats() { $('stats-overlay').classList.remove('open'); }
 function editStats() {
   const f = (k, l) => '<label style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0;"><span class="m-lbl" style="margin:0;">' + l + '</span><input class="m-input" style="width:90px" type="number" min="0" data-man="' + k + '" value="' + esc(_man[k] != null ? _man[k] : _calc[k]) + '"></label>';
-  $('stats-body').innerHTML = '<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). These numbers replace the formulas and the bonus boxes.</p>' + f('def', 'Defence') + f('hp', 'Max Health');
+  $('stats-body').innerHTML = '<p class="m-hint">Manual mode: these numbers are yours. They replace the formulas and the bonus boxes until you switch back to Auto (⚙ in the roll log), which works them out again.</p>' + f('def', 'Defence') + f('hp', 'Max Health');
   $('stats-overlay').classList.add('open');
 }
 function saveStats() { document.querySelectorAll('#stats-body [data-man]').forEach(i => { const v = i.value.trim(); _man[i.dataset.man] = v === '' ? null : Math.max(0, num(v)); }); closeStats(); recalc(); scheduleAutosave(); }
@@ -1179,7 +1185,7 @@ function onWeaponPick(input) {
   // Typing a known weapon name fills in its damage + kind from the gear data.
   const n = norm(input.value);
   const g = D.gear().find(x => norm(x.name) === n && x.damage != null);
-  if(g) {
+  if(g && isAuto()) {   // Manual mode: never overwrite what the player typed
     const tr = input.closest('tr');
     tr.querySelector('.atk-dmg').value = g.damage;
     tr.querySelector('.atk-kind').value = weaponIsRanged(g) ? 'ranged' : 'melee';
@@ -1527,7 +1533,7 @@ function collectSheet() {
     attacks: [...document.querySelectorAll('#attacks-body tr')].map(tr => ({ name: tr.querySelector('.atk-name').value, kind: tr.querySelector('.atk-kind').value, damage: tr.querySelector('.atk-dmg').value, link: tr.dataset.link || undefined })),
     gear: [...document.querySelectorAll('#gear-body tr')].map(tr => ({ name: tr.querySelector('.gear-name').value, note: tr.querySelector('.gear-note').value, link: tr.dataset.link || undefined, stowed: tr.dataset.stowed === '1' || undefined })).filter(g => g.name || g.note),
     gearDefAuto: true,
-    auto: _auto, man: _man,
+    auto: _auto, man: _man, manualMode: _manualMode,
     tab: _tab,
     campaign: (typeof _campaign !== 'undefined' && _campaign) ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
   };
@@ -1547,7 +1553,7 @@ function applySheet(d) {
   $('def-bonus').value = d.defBonus || 0; $('hp-bonus').value = d.hpBonus || 0;
   hpCur = (typeof d.hpCur === 'number') ? d.hpCur : null;
   karma = (typeof d.karma === 'number') ? d.karma : CREATION.karma;
-  _auto = (d.auto && typeof d.auto === 'object') ? d.auto : {}; _man = (d.man && typeof d.man === 'object') ? d.man : {};
+  _auto = (d.auto && typeof d.auto === 'object') ? d.auto : {}; _manualMode = !!d.manualMode; _man = (_manualMode && d.man && typeof d.man === 'object') ? d.man : {};   // typed numbers only count in Manual
   $('f-ability').value = d.ability || ''; $('f-trait-notes').value = d.traitNotes || ''; $('f-notes').value = d.notes || '';
   $('attacks-body').innerHTML = '';
   (d.attacks && d.attacks.length ? d.attacks : [{ name:'Unarmed', kind:'melee', damage:'', unarmed:true }]).forEach(a => addAttackRow(a));

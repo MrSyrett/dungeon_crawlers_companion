@@ -1417,7 +1417,7 @@ body.dark{--scar-c:#3a1f48;}
           </div>
           <div class="hp-sub">
             <label>Temp <input id="f-hp-temp" type="number" value="0" data-nolock oninput="scheduleAutosave()"></label>
-            <span class="hd-inline">Hit Dice <input id="f-hd-left" type="number" value="1" readonly data-nolock onchange="onHDTyped(this)" title="Hit Dice remaining — spend them on a Short Rest (unlock the sheet to correct the count)">/<span id="hd-total">1</span> <span class="hd-die" id="hd-die">d8</span></span>
+            <span class="hd-inline">Hit Dice <input id="f-hd-left" type="number" value="1" data-nolock onchange="onHDTyped(this)" title="Hit Dice remaining — spend them on a Short Rest, or correct the count here">/<span id="hd-total">1</span> <span class="hd-die" id="hd-die">d8</span></span>
             <input id="f-hitdice" type="hidden">
           </div>
         </div>
@@ -1913,7 +1913,7 @@ function applyLock(){
   ABILITIES.forEach(a => { const el = $('sc-' + a.id); if(el){ el.readOnly = locked; el.tabIndex = locked ? -1 : 0; } });
   ['f-culture','f-subculture','f-background'].forEach(id => { const el = $(id); if(el) el.readOnly = locked; });
   ['f-ac','f-speed','f-hp-max','c-init','c-prof'].forEach(id => { const el = $(id); if(el) el.contentEditable = locked ? 'false' : 'true'; });
-  const hdl = $('f-hd-left'); if(hdl) hdl.readOnly = locked;
+  // (Hit Dice left is a live tracker — editable in Auto mode too)
   document.querySelectorAll('.skill-row .sk-val').forEach(el => { el.contentEditable = locked ? 'false' : 'true'; });
   document.querySelectorAll('.atk-name, .atk-bonus, .atk-dmg, .atk-dtype').forEach(el => { el.readOnly = locked; });
   document.querySelectorAll('.atk-abil').forEach(el => { el.style.pointerEvents = locked ? 'none' : ''; el.tabIndex = locked ? -1 : 0; });
@@ -1930,7 +1930,7 @@ function applyLock(){
   if(window.SheetSettings) SheetSettings.refresh();
 }
 function syncSharedLock(){ try { window._sheetLocked = _locked; if(typeof window.applySheetLock === 'function') window.applySheetLock(); } catch(e){} }
-function setLocked(v){ _locked = !!v; applyLock(); recalc(); renderShadow(); scheduleAutosave(); }
+function setLocked(v){ _locked = !!v; applyLock(); if(window.SheetSettings) SheetSettings.modeChanged(); recalc(); renderShadow(); scheduleAutosave(); }
 function toggleLock(){ setLocked(!_locked); }
 window.toggleLock = toggleLock;
 function onStatInput(){ recalc(); scheduleAutosave(); }
@@ -2011,7 +2011,8 @@ function d20Check(label, mod, opts){
   addLog(label, opts.plain ? String(total) : misFail ? 'Fail (' + total + ')' : sgn(total), detail, type);   // opts.plain: bare integer (Initiative → GM Screen)
   return { total, nat: r.nat, type, autoFail: misFail, mode: r.mode };
 }
-function rollsOff(){ if(_locked) return false; sheetToast('Lock the sheet (⚙ in the roll log) to roll'); return true; }
+// Rolling works in both modes: unlocked is Manual mode now (your numbers, nothing automated), not "editing only".
+function rollsOff(){ return false; }
 function rollAbility(id){ if(rollsOff()) return; const er = errandRunner(); d20Check(id + ' check', modOf(id) + er, { kind:'check', abil:id, adv: (id === 'STR' && hasFeature('War-Hardened')) ? 'War-Hardened' : '', note: er ? 'Errand Runner +' + er : '' }); }
 const AUTOFAIL_STRDEX = ['Paralyzed','Petrified','Stunned','Unconscious'];
 function rollSave(id, extra){
@@ -2027,7 +2028,7 @@ function rollSkill(name){
   const row = [...document.querySelectorAll('.skill-row')].find(r => r.dataset.skill === name); if(!row) return null;
   const ab = row.dataset.abil, lvl = skillProf[name] || 0;
   const key = 'skv-' + cssId(name);
-  const base = (_ov[key] != null && String(_ov[key]) !== '' && !isNaN(parseInt(_ov[key],10))) ? parseInt(_ov[key],10) : skillValue(name, ab);
+  const ov = OV(), base = (ov[key] != null && String(ov[key]) !== '' && !isNaN(parseInt(ov[key],10))) ? parseInt(ov[key],10) : skillValue(name, ab);
   const notes = [];
   if(lvl === 2) notes.push('expertise');
   if(lvl === 0 && errandRunner()) notes.push('Errand Runner +' + errandRunner());
@@ -2578,34 +2579,41 @@ function invQty(tr){ return num(tr.querySelector('.inv-qty').value); }
 // AUTO-USE (roll-log switch, saved on the sheet; on unless turned off): consumables come off
 // the inventory by themselves. Off = the item still works, only the count / uses are left alone.
 let _autoUse = true;
-function autoUse(){ return _autoUse !== false; }
-function toggleAutoUse(){ _autoUse = !autoUse(); renderAutoBtn(); scheduleAutosave(); }
-// SHEET SETTINGS (⚙) — sheet-settings.js draws these; saved on the sheet as auto:{spend,stats,enc,prompts}
-// (default on) and man:{ac,speed,init,prof}. locked, turnBased and autoUse keep their own keys.
+function autoUse(){ return isAuto() && _autoUse !== false; }
+function toggleAutoUse(){ _autoUse = !(_autoUse !== false); renderAutoBtn(); scheduleAutosave(); }
+// SHEET SETTINGS (⚙) — sheet-settings.js draws these. AUTO / MANUAL: the sheet lock IS the mode —
+// locked = Auto, the sheet runs the rules (fields read-only except live trackers); unlocked = Manual,
+// everything editable and nothing automated (rolling still works). In Auto three switches can still turn
+// one automation off: Turn-Based Actions (turnBased), Auto-Consume (autoUse) and Use Encumbrance
+// (auto.enc). Everything else (feature uses, dying rules, Stone-Hard) follows the mode.
+// Manual numbers are the override boxes (_ov: AC, Speed, Init, Prof, skills…).
 if(typeof window.sheetToast !== 'function') window.sheetToast = function(t){ if(window.console) console.log(t); };
 let _sheetAuto = {}, _man = {};
-function autoOn(k){ return _sheetAuto[k] !== false; }
+function isAuto(){ return !!_locked; }
+window.sheetAuto = isAuto;   // this sheet has its own lock — tell sheet-settings.js which mode it's in
+function autoOn(k){ if(!isAuto()) return false; if(k === 'enc') return _sheetAuto.enc !== false; return true; }
 function setOpt(k, on){ _sheetAuto[k] = !!on; recalc(); scheduleAutosave(); }
 window.SHEET_SETTINGS = function(){ return [
-  { key:'lock', group:'sheet', label:'Lock the sheet', hint:'Automated and read-only; unlock to type over any number (rolling pauses while unlocked)', get: () => _locked, set: on => { if(on !== _locked) setLocked(on); } },
-  { key:'turn', group:'auto', label:'Turn-based actions', hint:'Attacks and features spend your action, bonus action and reaction; off: tick them yourself', get: turnOn, set: on => { if(on !== turnOn()) toggleTurnMode(); } },
-  { key:'use', group:'auto', label:'Use up consumables', hint:'Torches, candles, flasks of oil, herbal remedies and healer’s kit uses come off your inventory', get: autoUse, set: on => { if(on !== autoUse()) toggleAutoUse(); } },
-  { key:'spend', group:'auto', label:'Spend feature uses automatically', hint:'Calling and virtue features (and Pipe-smoking) tick off their uses per rest; off: mark them yourself', get: () => autoOn('spend'), set: on => setOpt('spend', on) },
-  { key:'stats', group:'auto', label:'Auto-calculated stats', hint:'AC, Speed, Initiative and Proficiency Bonus; off: type your own', get: () => autoOn('stats'), set: on => { if(!on) seedMan(); setOpt('stats', on); } },
-  { key:'enc', group:'auto', label:'Encumbrance penalties', hint:'Over 5× STR lb: −10 speed, disadvantage on Athletics/Acrobatics; over 10×: −20, disadvantage on STR/DEX/CON', get: () => autoOn('enc'), set: on => setOpt('enc', on) },
-  { key:'prompts', group:'auto', label:'Dying rules', hint:'0 HP knocks you out and starts death saves, damage at 0 HP adds failures, massive damage kills; Stone-Hard', get: () => autoOn('prompts'), set: on => setOpt('prompts', on) }
+  { key:'lock', group:'sheet', label:'Auto mode', hint:'On: fields locked, the sheet runs the rules. Off (Manual): everything editable, nothing automated', get: () => _locked, set: on => { if(on !== _locked) setLocked(on); } },
+  { key:'turn', group:'auto', label:'Turn-Based Actions', hint:'Attacks and features spend your action, bonus action and reaction', get: () => _turnBased !== false, set: on => { if(on !== (_turnBased !== false)) toggleTurnMode(); } },
+  { key:'use', group:'auto', label:'Auto-Consume', hint:'Torches, candles, flasks of oil, herbal remedies and healer’s kit uses come off your inventory', get: () => _autoUse !== false, set: on => { if(on !== (_autoUse !== false)) toggleAutoUse(); } },
+  { key:'enc', group:'auto', label:'Use Encumbrance', hint:'Over 5× STR lb: −10 speed, disadvantage on Athletics/Acrobatics; over 10×: −20, disadvantage on STR/DEX/CON', get: () => _sheetAuto.enc !== false, set: on => setOpt('enc', on) }
 ]; };
-// Auto-calculated stats off: the player's own numbers (_man) sit on top of any unlocked-sheet overrides (_ov).
+// The numbers shown in the computed boxes: in Manual, the ones you typed (_ov); in Auto, none — everything is worked out.
 const MAN_STATS = [['ac','f-ac','Armour Class'],['speed','f-speed','Speed'],['init','c-init','Initiative'],['prof','c-prof','Proficiency Bonus']];
 const MAN_SIGNED = { init:1, prof:1 };
-function OV(){ if(autoOn('stats')) return _ov; const o = Object.assign({}, _ov); MAN_STATS.forEach(([k]) => { if(_man[k] != null && _man[k] !== '') o[k] = _man[k]; }); return o; }
+function OV(){ return isAuto() ? {} : _ov; }
 function manFmt(k, v){ return MAN_SIGNED[k] ? sgn(v) : String(v); }
 function manRead(id){ const el = $(id); const v = el ? parseInt(String(el.textContent).replace(/−/g, '-').replace(/[^\d-]/g, ''), 10) : NaN; return isNaN(v) ? null : v; }
-function seedMan(){ MAN_STATS.forEach(([k, id]) => { if(_man[k] == null){ const v = manRead(id); if(v != null) _man[k] = manFmt(k, v); } }); }
-function renderStatsMan(){ const man = !autoOn('stats');
-  MAN_STATS.forEach(([k, id]) => { const el = $(id); if(!el) return; el.classList.toggle('stat-man', man); el.contentEditable = (!man && !_locked) ? 'true' : 'false';
-    el.onclick = man ? (e => { e.stopPropagation(); editStats(); }) : null; el.style.cursor = man ? 'pointer' : '';
-    if(man) el.title = 'Your own number — click to change'; else if(k !== 'ac' && k !== 'speed') el.title = ''; }); }
+// Entering Manual: the computed numbers become yours (type over them in their boxes). Back in Auto:
+// your typed numbers are dropped and everything is worked out again from the sheet (scores, gear, level).
+function seedMan(){ MAN_STATS.forEach(([k, id]) => { if(_ov[k] == null || String(_ov[k]) === ''){ const v = _man[k] != null && _man[k] !== '' ? parseInt(_man[k], 10) : manRead(id); if(v != null && !isNaN(v)) _ov[k] = manFmt(k, v); } }); _man = {}; }
+document.addEventListener('sheetmode', function(e){ const auto = !!(e.detail && e.detail.auto);
+  if(auto){ _ov = {}; _man = {}; } else seedMan();
+  recalc(); if(typeof refreshTurnHub === 'function') refreshTurnHub(); else if(typeof renderTurn === 'function') renderTurn(); scheduleAutosave(); });
+// (sheet-settings.js learns the starting mode on load; the mode itself is saved as `locked`)
+window.addEventListener('load', function(){ setTimeout(function(){ if(window.SheetSettings) SheetSettings.modeChanged(); }, 0); });
+function renderStatsMan(){ MAN_STATS.forEach(([k, id]) => { const el = $(id); if(!el) return; el.classList.remove('stat-man'); el.contentEditable = _locked ? 'false' : 'true'; el.onclick = null; el.style.cursor = ''; }); }
 function editStats(){
   $('stats-body').innerHTML = '<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). These numbers are shown on the sheet and used for rolls.</p>'
     + MAN_STATS.map(([k, id, l]) => '<div class="m-lbl">' + l + '</div><input class="m-input" type="number" data-man="' + k + '" value="' + esc(_man[k] != null ? parseInt(_man[k], 10) : (manRead(id) != null ? manRead(id) : '')) + '">').join('');
@@ -3422,9 +3430,9 @@ let _turnSub = 'action';
 // aren't spent automatically — tick the chips by hand (_turn.hand); nothing is greyed out for
 // "already used this turn". Dash / Dodge / Ready still last until End Turn; Incapacitated still stops you.
 let _turnBased = true;
-function turnOn(){ return _turnBased !== false; }
+function turnOn(){ return isAuto() && _turnBased !== false; }
 function freshTurn(){ return { action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0, sneakUsed:false, dash:false, dodge:0, ready:0, hand:{} }; }
-function toggleTurnMode(){ _turnBased = !turnOn(); _turn = freshTurn(); renderTurn(); scheduleAutosave(); if(window.SheetSettings) SheetSettings.refresh(); }
+function toggleTurnMode(){ _turnBased = !(_turnBased !== false); _turn = freshTurn(); renderTurn(); scheduleAutosave(); if(window.SheetSettings) SheetSettings.refresh(); }
 // The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
 function turnModeBtn(){ return ''; }
 function turnModeBtnPill(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: Action, Bonus Action and Reaction are spent automatically, End Turn brings them back. Click to tick them by hand instead.' : 'Manual: actions aren\'t spent automatically — tick the chips yourself. Click to spend them automatically.') + '"><span class="tm-sw"></span></button>'; }

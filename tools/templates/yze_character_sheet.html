@@ -787,7 +787,7 @@ body.dark .act-mini{color:var(--yz);border-color:var(--yz);}
       <div class="tab-panel" id="tab-combat"><div id="act-hub"></div></div>
 
       <div class="tab-panel" id="tab-gear">
-        <div class="enc-bar"><span class="e-lbl">Carry limit</span><span class="e-val" id="enc-limit">0</span><span class="e-lbl">Carried</span><span class="e-val" id="enc-load">0</span><span class="e-lbl" style="margin-left:auto;">Cash $</span><input id="f-cash" class="armor-in" style="width:76px;text-align:right;" placeholder="0" oninput="S.cash=this.value;scheduleAutosave()"></div>
+        <div class="enc-bar"><span class="e-lbl">Carry limit</span><span class="e-val" id="enc-limit">0</span><span class="e-lbl">Carried</span><span class="e-val" id="enc-load">0</span><span class="e-lbl" style="margin-left:auto;">Cash $</span><input id="f-cash" data-nolock class="armor-in" style="width:76px;text-align:right;" placeholder="0" oninput="S.cash=this.value;scheduleAutosave()"></div>
         <div class="section-bar"><span>Inventory</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('gear')">＋ Add Gear</button></span></div>
         <table class="tbl" id="inv-tbl"><thead><tr><th style="width:30px;" title="Equip weapons &amp; armor">Eq</th><th style="width:30%;">Item</th><th>Details</th><th style="width:9%;">Wt</th><th style="width:26px;"></th></tr></thead><tbody id="inv-body"></tbody></table>
         <div id="inv-empty" class="tbl-empty">No gear yet. Tap ＋ Add Gear to add general gear, weapons, or armor.</div>
@@ -1690,7 +1690,7 @@ function applySheet(d){
   S.gear=inv;
   S.crits = Array.isArray(d.crits) ? d.crits.map(function(c){ return {name:c.name||'',effect:c.effect||'',mod:num(c.mod)}; }) : [];
   if(Array.isArray(d.relationships)) S.relationships=d.relationships.map(function(r){ return {name:r.name||'',note:r.note||r.type||''}; });
-  S.turnBased=d.turnBased!==false; S.autoUse=d.autoUse!==false; S.auto=(d.auto&&typeof d.auto==='object')?d.auto:{}; S.man=(d.man&&typeof d.man==='object')?d.man:{};
+  S.turnBased=d.turnBased!==false; S.autoUse=d.autoUse!==false; S.auto=(d.auto&&typeof d.auto==='object')?d.auto:{}; S.manualMode=!!d.manualMode; S.man=(S.manualMode&&d.man&&typeof d.man==='object')?d.man:null;   // typed numbers only count in Manual
   if(d.act && typeof d.act==='object') S.act={full:!!d.act.full,quick:num(d.act.quick),used:num(d.act.used),sub:d.act.sub==='quick'?'quick':'full'};
   _lastRoll=null;
   renderAll();
@@ -1790,8 +1790,8 @@ function actLogOnly(label, result, detail){ return function(){ addLog(label, res
 // TURN-BASED MODE (Action tab switch, saved on the sheet; on unless turned off). Off = nothing
 // is spent automatically and nothing greys out — the pips stay and can be ticked by hand (as they
 // can when on); Broken still limits you.
-function turnOn(){ return !S||S.turnBased!==false; }
-function toggleTurnMode(){ S.turnBased=!turnOn(); var a=actState(); a.full=false; a.quick=0; a.used=0; renderAction(); scheduleAutosave(); if(window.SheetSettings) SheetSettings.refresh(); }
+function turnOn(){ return isAuto()&&(!S||S.turnBased!==false); }
+function toggleTurnMode(){ S.turnBased=!(S.turnBased!==false); var a=actState(); a.full=false; a.quick=0; a.used=0; renderAction(); scheduleAutosave(); if(window.SheetSettings) SheetSettings.refresh(); }
 // The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
 function turnModeBtn(){ return ''; }
 function turnModeBtnPill(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: your full and quick actions are spent automatically. Click to tick them by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
@@ -1826,31 +1826,40 @@ function eqQty(g){ var m=String((g&&g.name)||'').match(/×\s*(\d+)\s*$/)||String
 // Use one up: lower the count, or remove the item when it was the last one.
 // AUTO-USE (roll-log switch, saved on the sheet; on unless turned off): a used item comes off
 // by itself. Off = the effect still happens, nothing is taken away.
-function autoUse(){ return !S||S.autoUse!==false; }
-function toggleAutoUse(){ S.autoUse=!autoUse(); renderAutoBtn(); scheduleAutosave(); }
-// SHEET SETTINGS (⚙) — sheet-settings.js draws these; the values live in S and save with the sheet.
-// S.auto.{spend,stats,enc,prompts} default ON; S.turnBased and S.autoUse keep their own keys.
+function autoUse(){ return isAuto()&&(!S||S.autoUse!==false); }
+function toggleAutoUse(){ S.autoUse=!(S.autoUse!==false); renderAutoBtn(); scheduleAutosave(); }
+// AUTO / MANUAL (⚙ in the roll log). The sheet lock IS the mode: locked = Auto, the sheet runs
+// the rules; unlocked = Manual, everything editable and nothing automated. In Auto, three
+// switches can still turn one automation off: Turn-Based Actions (S.turnBased), Auto-Consume
+// (S.autoUse) and Use Encumbrance (S.auto.enc). Stress for pushing, Health/Resolve/armor/carry
+// limit and the Stress-response and radiation rolls follow the mode.
 if(typeof window.sheetToast!=='function') window.sheetToast=function(t){ if(window.console) console.log(t); };
-function autoOn(k){ return !(S&&S.auto&&S.auto[k]===false); }
-function setAuto(k,on){ S.auto=S.auto||{}; S.auto[k]=!!on; if(k==='stats'&&isAlien()) syncHealthMax(); renderVitals(); renderArmorVal(); renderEnc(); scheduleAutosave(); }
+function isAuto(){ if(window._sheetLocked===undefined) return true; return typeof window.sheetAuto==='function'?!!window.sheetAuto():!!window._sheetLocked; }   // before the lock script runs the sheet starts in Auto
+function autoOn(k){ if(!isAuto()) return false; if(k==='enc') return !(S&&S.auto&&S.auto.enc===false); return true; }
+function setAuto(k,on){ S.auto=S.auto||{}; S.auto[k]=!!on; renderVitals(); renderArmorVal(); renderEnc(); scheduleAutosave(); }
 window.SHEET_SETTINGS=function(){ return [
-  {key:'turn',group:'auto',label:'Turn-based actions',hint:'Rolls and Action-tab moves tick off your full and quick actions; off: tick them yourself',get:turnOn,set:function(on){ if(on!==turnOn()) toggleTurnMode(); }},
-  {key:'use',group:'auto',label:'Use up consumables',hint:'Medkits, drugs, coffee, meals, booze and power cells come off your gear when used on the Action tab',get:autoUse,set:function(on){ if(on!==autoUse()) toggleAutoUse(); }},
-  {key:'spend',group:'auto',label:'Take Stress for pushing',hint:'Pushing a roll raises your Stress Level by one; off: add it yourself',get:function(){ return autoOn('spend'); },set:function(on){ setAuto('spend',on); },show:isAlien},
-  {key:'stats',group:'auto',label:'Auto-calculated stats',hint:isAlien()?'Health max, Resolve, armor from equipped armor and carry limit (Strength × 2); off: type your own':'Armor from equipped armor and carry limit (Strength × 2); off: type your own',get:function(){ return autoOn('stats'); },set:function(on){ if(!on){ S.man=S.man||{}; ['armor','carry','resolve','hp'].forEach(function(k){ if(S.man[k]==null) S.man[k]=manCalc(k); }); } setAuto('stats',on); }},
-  {key:'enc',group:'auto',label:'Encumbrance warning',hint:'Flag the load in red when you carry more than your limit',get:function(){ return autoOn('enc'); },set:function(on){ setAuto('enc',on); }},
-  {key:'prompts',group:'auto',label:'Automatic Stress & radiation rolls',hint:'A 1 on a Stress Die rolls a Stress Response; ticking a rad rolls for radiation damage',get:function(){ return autoOn('prompts'); },set:function(on){ setAuto('prompts',on); },show:isAlien}
+  {key:'turn',group:'auto',label:'Turn-Based Actions',hint:'Rolls and Action-tab moves tick off your full and quick actions',get:function(){ return S.turnBased!==false; },set:function(on){ if(on!==(S.turnBased!==false)) toggleTurnMode(); }},
+  {key:'use',group:'auto',label:'Auto-Consume',hint:'Medkits, drugs, coffee, meals, booze and power cells come off your gear when used on the Action tab',get:function(){ return S.autoUse!==false; },set:function(on){ if(on!==(S.autoUse!==false)) toggleAutoUse(); }},
+  {key:'enc',group:'auto',label:'Use Encumbrance',hint:'Flag the load in red when you carry more than your limit',get:function(){ return !(S.auto&&S.auto.enc===false); },set:function(on){ setAuto('enc',on); }}
 ]; };
+// Entering Manual: the computed numbers become yours to correct (✎ opens the editor). Back in
+// Auto: your typed numbers are dropped and everything is worked out again from the sheet.
+document.addEventListener('sheetmode',function(e){ var auto=!!(e.detail&&e.detail.auto);
+  if(auto){ S.man=null; S.manualMode=false; }
+  else { S.man=S.man||{}; ['armor','carry','resolve','hp'].forEach(function(k){ if(S.man[k]==null||S.man[k]==='') S.man[k]=manCalc(k); }); S.manualMode=true; }   // keeps numbers already typed (a sheet reopened in Manual)
+  if(isAlien()) syncHealthMax(); renderAction(); renderVitals(); renderArmorVal(); renderEnc(); scheduleAutosave(); });
+// a sheet left in Manual opens in Manual (the lock script starts locked; switch once it's ready)
+window.addEventListener('load',function(){ setTimeout(function(){ if(S.manualMode&&window._sheetLocked&&typeof window.toggleSheetLock==='function') window.toggleSheetLock(); },420); });
 // Auto-calculated stats off: the player's own numbers (S.man) replace the computed ones.
 function carryLimitCalc(){ return attrVal('STR')*2; }
 function carryLimit(){ return manual('carry')?Math.max(0,num(S.man.carry)):carryLimitCalc(); }
 function manCalc(k){ return k==='armor'?armorCalc():k==='carry'?carryLimitCalc():k==='resolve'?resolveRatingCalc():k==='hp'?derivedMax('health'):''; }
-function manual(k){ return !autoOn('stats')&&S.man&&S.man[k]!=null&&S.man[k]!==''; }
+function manual(k){ return !isAuto()&&S.man&&S.man[k]!=null&&S.man[k]!==''; }
 function manMark(id){ var m=$(id); if(!m) return; var on=autoOn('stats'); m.textContent=on?'':' ✎'; m.onclick=on?null:function(e){ e.stopPropagation(); editStats(); }; m.style.cursor=on?'':'pointer'; m.title=on?'':'Your own number — click to change'; }
 function closeStats(){ var o=$('stats-overlay'); if(o) o.classList.remove('open'); }
 function editStats(){ S.man=S.man||{}; var o=$('stats-overlay'); if(!o) return;
   var f=function(k,l){ return '<label style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0;"><span class="m-lbl" style="margin:0;">'+l+'</span><input class="m-input" style="width:90px" type="number" min="0" data-man="'+k+'" value="'+esc(S.man[k]!=null?S.man[k]:manCalc(k))+'"></label>'; };
-  $('stats-body').innerHTML='<p class="m-hint">Auto-calculated stats are off (⚙ in the roll log). These numbers are used on the sheet and in your rolls.</p>'+(isAlien()?f('hp','Max Health')+f('resolve','Resolve'):'')+f('armor','Armor')+f('carry','Carry limit')
+  $('stats-body').innerHTML='<p class="m-hint">Manual mode: these numbers are yours. They are used on the sheet and in your rolls until you switch back to Auto (⚙ in the roll log), which works them out again.</p>'+(isAlien()?f('hp','Max Health')+f('resolve','Resolve'):'')+f('armor','Armor')+f('carry','Carry limit')
     +'<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;"><button class="m-btn ghost" onclick="closeStats()">Cancel</button><button class="m-btn" onclick="saveStats()">Save</button></div>';
   o.classList.add('open'); }
 function saveStats(){ [].forEach.call(document.querySelectorAll('#stats-body [data-man]'),function(i){ var v=i.value.trim(); S.man[i.dataset.man]=v===''?null:Math.max(0,num(v)); }); closeStats(); if(isAlien()) syncHealthMax(); renderVitals(); renderArmorVal(); renderEnc(); scheduleAutosave(); }
