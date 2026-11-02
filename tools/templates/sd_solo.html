@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- SOLO PLAY — Shadowdark solo campaign page (SoloDark rules). Part of the removable
+     Solo Play feature (see SOLO-REMOVAL.md). Served by app/solo/[id]/route.ts for a
+     solo campaign whose module is a Shadowdark one; saved as a Document of tool
+     "db-solo" under the "db_solo" key, like the Dragonbane campaigns. No Google
+     Fonts: the faces come from /tokens.css via the injected head. -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Shadowdark Solo Campaign</title>
+<script src="/tools-data/sd-monsters.js"></script>
+<script src="/tools-data/solo/sd-solo-tables.js"></script>
+<script src="/tools-data/solo/sd-solo-dusk-queen.js"></script>
+<style>
+:root{
+  --f-disp:"JSL Blackletter","UnifrakturMaguntia",ui-serif,Georgia,serif;
+  --f-label:"Montserrat",ui-sans-serif,system-ui,sans-serif;
+  --f-ui:"Montserrat",ui-sans-serif,system-ui,sans-serif;
+  --bg:#e7e5e0;--card:#fbfaf7;--box:#f0eee9;--ink:#141414;--muted:#5e5b55;--rule:#cdc9c1;
+  --acc:#1a1a1a;--acc-dk:#111;--acc-lt:#ece6d2;--on-acc:#fff;--gold:#8a6a10;--gold-lt:#c8a020;--red:#b3261e;--green:#2f7a46;
+  --input-bg:#fff;--input-border:#aaa49a;--shadow:0 2px 8px rgba(20,20,20,.08);--light:#d98a1c;
+}
+body.dark{
+  --bg:#0c0c0e;--card:#17171b;--box:#1f1f24;--ink:#ece9e2;--muted:#9a978f;--rule:#34343b;
+  --acc:#c8a020;--acc-dk:#e2bf4a;--acc-lt:#2a2614;--on-acc:#141414;--gold:#c8a020;--gold-lt:#e2c37a;--red:#e0614f;--green:#5fae76;
+  --input-bg:#141417;--input-border:#3a3a41;--shadow:0 2px 8px rgba(0,0,0,.45);--light:#f0a640;
+}
+/* the site's Shadowdark ground would win over a plain body rule */
+:root[data-themed][data-system="SD"] body.so{background:var(--bg);background-image:none;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--f-ui);font-variant-numeric:lining-nums;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;font-size:15px;}
+button,input,select,textarea{font-family:var(--f-ui);font-size:15px;}
+.so-app{flex:none;display:flex;min-height:0;height:calc(100vh - var(--dd-bar-h,52px));}
+.so-pane{width:460px;flex-shrink:0;overflow-y:auto;padding:14px 14px 40px;border-right:2px solid var(--acc);}
+/* in play: the top (progress, clock, Story) stays put; the actions scroll beneath it */
+body.playing .so-pane{display:flex;flex-direction:column;overflow:hidden;padding-bottom:14px;}
+body.playing #so-root{flex:1;min-height:0;display:flex;flex-direction:column;}
+body.playing .top-card{flex:none;}
+body.playing .act-card{flex:1;min-height:0;display:flex;flex-direction:column;margin-bottom:0;}
+body.playing .act-card .card-b{flex:1;min-height:0;overflow-y:auto;}
+.so-sheet{flex:1;min-width:0;position:relative;background:var(--bg);display:flex;flex-direction:column;}
+.so-frames{flex:1;position:relative;min-height:0;}
+.so-frames iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:var(--bg);}
+/* party tabs hang down from the top edge over the sheet (no bar of their own) */
+.so-heroes{position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:4px;max-width:calc(100% - 24px);overflow-x:auto;pointer-events:none;scrollbar-width:none;}
+.so-heroes::-webkit-scrollbar{display:none;}
+.so-heroes .hero{pointer-events:auto;position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:88px;padding:4px 12px 6px;border:1px solid var(--rule);border-top:0;border-radius:0 0 9px 9px;background:var(--box);color:var(--muted);cursor:pointer;font-family:var(--f-label);font-size:12.5px;letter-spacing:.03em;box-shadow:0 3px 8px rgba(0,0,0,.28);opacity:.92;}
+.so-heroes .hero:hover{opacity:1;color:var(--ink);}
+.so-heroes .hero.on{background:var(--acc);color:var(--on-acc);border-color:var(--acc-dk);font-weight:700;opacity:1;padding-top:7px;}
+.so-heroes .hero i{display:block;height:3px;width:100%;border-radius:2px;background:linear-gradient(90deg,var(--green) var(--hp),var(--rule) var(--hp));}
+.so-heroes .hero.on i{background:linear-gradient(90deg,#9be3b2 var(--hp),rgba(255,255,255,.3) var(--hp));}
+.so-heroes .hero em{font-style:normal;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--red);}
+.so-heroes .hero.on em{color:#ffd2cc;}
+.so-heroes .hero.dead{opacity:.6;}
+.so-sheet .so-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:30px;text-align:center;color:var(--muted);}
+.so-tabs{display:none;}
+@media (max-width:900px){
+  .so-app{flex-direction:column;height:auto;min-height:calc(100vh - var(--dd-bar-h,52px));}
+  .so-pane{width:100%;border-right:0;padding-bottom:90px;}
+  body.playing .so-pane{height:calc(100vh - var(--dd-bar-h,52px) - 56px);padding-bottom:10px;}
+  .top-card .jr{height:120px;}
+  .so-sheet{height:calc(100vh - var(--dd-bar-h,52px) - 56px);}
+  body.party .so-tabs button[data-tab="sheet"]::after{content:" · " attr(data-who);}
+  body[data-tab="adventure"] .so-sheet{display:none;}
+  body[data-tab="sheet"] .so-pane{display:none;}
+  .so-tabs{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--card);border-top:2px solid var(--acc);}
+  .so-tabs button{flex:1;padding:14px 4px;background:none;border:0;color:var(--muted);font-family:var(--f-label);letter-spacing:.08em;text-transform:uppercase;font-size:13px;}
+  .so-tabs button.on{color:var(--acc-dk);font-weight:700;}
+}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:10px;box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden;}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px 7px;border-bottom:1px solid var(--rule);}
+.card-h h2,.card-h h3{font-family:var(--f-disp);font-weight:400;color:var(--acc-dk);letter-spacing:.04em;}
+.card-h h2{font-size:24px;} .card-h h3{font-size:20px;}
+.card-b{padding:10px 12px 12px;}
+.lbl{font-family:var(--f-label);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.muted{color:var(--muted);} .small{font-size:13.5px;} .tiny{font-size:12px;}
+.read{font-family:"EB Garamond",Georgia,serif;font-size:16.5px;font-style:italic;line-height:1.5;border-left:3px solid var(--gold-lt);padding:2px 0 2px 10px;margin:6px 0 8px;}
+p{line-height:1.45;margin:4px 0;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;border:1px solid var(--acc);background:transparent;color:var(--acc-dk);border-radius:7px;padding:6px 11px;cursor:pointer;font-family:var(--f-label);font-size:13px;letter-spacing:.03em;line-height:1.1;}
+.btn:hover{background:var(--acc-lt);}
+.btn.pri{background:var(--acc);color:var(--on-acc);border-color:var(--acc-dk);} .btn.pri:hover{filter:brightness(1.12);}
+.btn.warn{border-color:var(--red);color:var(--red);} .btn.warn:hover{background:rgba(179,38,30,.1);}
+.btn.ghost{border-color:var(--rule);color:var(--muted);}
+.btn:disabled{opacity:.45;cursor:default;}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.stack{display:flex;flex-direction:column;gap:8px;}
+.chip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--rule);border-radius:999px;padding:1px 9px;font-size:13px;background:var(--box);}
+.chip.bad{border-color:var(--red);color:var(--red);}
+.chip .x{border:0;background:none;color:var(--muted);cursor:pointer;font-size:11px;line-height:1;padding:0 0 0 3px;}
+.chip .x:hover{color:var(--red);}
+.chip.good{border-color:var(--green);color:var(--green);}
+/* character strip */
+.pc{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.pc-name{font-weight:700;font-size:18px;}
+.bar{position:relative;height:20px;border-radius:5px;background:var(--box);border:1px solid var(--rule);overflow:hidden;min-width:96px;flex:1;}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--green);} .bar.wp i{background:#3f7fbf;}
+.bar span{position:relative;z-index:1;font-size:12px;padding-left:6px;line-height:19px;font-weight:600;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);white-space:nowrap;}
+/* route */
+.route{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0 10px;}
+.route .wp{flex:1 1 0;min-width:34px;text-align:center;font-size:11px;font-family:var(--f-label);padding:5px 2px;border-radius:6px;border:1px solid var(--rule);background:var(--box);color:var(--muted);cursor:default;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.route .wp.done{background:var(--acc-lt);color:var(--acc-dk);}
+.route .wp.cur{border-color:var(--acc);border-width:2px;color:var(--ink);font-weight:700;}
+.route .wp.obj{border-style:double;border-width:3px;}
+.route .wp.sunk{background:repeating-linear-gradient(135deg,rgba(63,127,191,.28) 0 6px,transparent 6px 12px);}
+.sink{background:rgba(63,127,191,.12);border:1px solid #3f7fbf;border-radius:8px;padding:8px 10px;margin:6px 0;}
+.score-big{font-family:var(--f-disp);font-size:26px;color:var(--acc-dk);}
+/* challenges */
+.ch{border:1px solid var(--rule);border-radius:8px;padding:8px 10px;background:var(--box);}
+.ch.ok{border-color:var(--green);} .ch.fail{border-color:var(--red);}
+.ch-h{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.ch-h b{font-weight:700;}
+.res{margin-top:5px;font-size:14px;}
+.res.ok{color:var(--green);} .res.fail{color:var(--red);}
+.secret{border:1px dashed var(--gold-lt);border-radius:8px;padding:7px 10px;font-size:14px;}
+.sug{font-family:var(--f-label);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);}
+/* threat clock */
+.clock{display:flex;gap:5px;margin:6px 0;}
+.clock span{width:30px;height:30px;border-radius:7px;border:2px solid var(--rule);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--muted);}
+.clock span.on{background:var(--red);border-color:var(--red);color:#fff;}
+.trig{background:rgba(179,38,30,.12);border:1px solid var(--red);border-radius:8px;padding:8px 10px;margin:6px 0;}
+/* tools */
+.tabs{display:flex;gap:2px;flex-wrap:wrap;margin-bottom:8px;}
+.tabs button{border:1px solid var(--rule);background:var(--box);color:var(--muted);border-radius:6px;padding:4px 8px;font-family:var(--f-label);font-size:12px;cursor:pointer;}
+.tabs button.on{background:var(--acc);border-color:var(--acc);color:var(--on-acc);}
+.out{margin-top:8px;padding:8px 10px;border-radius:8px;background:var(--box);border:1px solid var(--rule);min-height:20px;}
+.out b.big{font-size:20px;}
+select,input[type=text],input[type=number],textarea{background:var(--input-bg);color:var(--ink);border:1px solid var(--input-border);border-radius:6px;padding:5px 8px;}
+textarea{width:100%;min-height:54px;resize:vertical;}
+/* journal */
+.jr{display:flex;flex-direction:column;gap:6px;height:240px;overflow-y:auto;padding:2px 4px 2px 0;}
+.jr .new{background:var(--acc-lt);border-radius:0 6px 6px 0;padding-top:4px;padding-bottom:4px;}
+.jr .st.new{font-size:16.5px;}
+/* status bar */
+.status .card-b{padding:9px 12px 10px;}
+.st-h{display:flex;align-items:center;justify-content:space-between;gap:8px;font-family:var(--f-disp);font-size:17px;color:var(--acc-dk);}
+.st-h b{font-weight:400;letter-spacing:.04em;}
+.status .route{margin:6px 0 6px;}
+.st-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px;}
+.st-cell{display:flex;flex-direction:column;gap:2px;}
+.st-cell .clock{margin:0;gap:4px;} .st-cell .clock span{width:24px;height:24px;font-size:13px;border-radius:6px;}
+.st-score{margin-left:auto;align-items:flex-end;} .st-score .score-big{line-height:1;}
+.sink-n{font-size:14px;color:#3f7fbf;font-weight:600;}
+/* the scene */
+.wyd{margin-top:10px;padding-top:10px;border-top:1px solid var(--rule);display:flex;flex-direction:column;gap:6px;}
+.wyd-h{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-family:var(--f-disp);font-size:17px;color:var(--acc-dk);letter-spacing:.04em;}
+.hchip{cursor:pointer;font-family:var(--f-label);} .hchip.on{background:var(--acc);border-color:var(--acc);color:var(--on-acc);}
+.hchip.done{opacity:.55;text-decoration:line-through;cursor:default;}
+.tiny-btn{padding:3px 8px;font-size:12px;}
+.top-card .jr{height:190px;margin-top:8px;}
+.top-btns{margin-top:8px;justify-content:flex-end;}
+.bubbles{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 8px;}
+.bub{border:1px solid var(--rule);background:var(--box);color:var(--muted);border-radius:999px;padding:3px 10px;font-family:var(--f-label);font-size:12px;cursor:pointer;}
+.bub:hover{color:var(--acc-dk);border-color:var(--acc);} .bub.on{background:var(--acc);border-color:var(--acc);color:var(--on-acc);}
+.party-turns{margin:2px 0 6px;}
+.ch.act.move{border-left:3px solid var(--acc);} .ch.act.locked{opacity:.6;}
+.dlg-b.wide{max-width:900px;}
+.map-tabs{margin-bottom:8px;gap:5px;}
+.dlg-b figure.map img{max-height:65vh;}
+ul.jl{margin:4px 0 0 18px;display:flex;flex-direction:column;gap:5px;font-size:14px;}
+figure.map{margin:0 0 10px;border:1px solid var(--rule);border-radius:8px;overflow:hidden;background:var(--box);}
+figure.map img{display:block;width:100%;max-height:340px;object-fit:contain;background:#d8d2c2;}
+figure.map figcaption{font-family:var(--f-label);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:4px 8px;}
+.allies{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:13px;color:var(--muted);}
+.intent{font-size:12px;color:#b56a1f;font-style:italic;}
+.rsum{border:1px dashed var(--rule);border-radius:8px;padding:6px 9px;margin:6px 0;font-size:13.5px;background:var(--box);}
+ul.disc{margin:4px 0 0 18px;font-size:13.5px;display:flex;flex-direction:column;gap:2px;} ul.disc li{color:var(--muted);} ul.disc li.on{color:var(--ink);}
+.ach{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin-top:4px;}
+.ach .a{border:1px solid var(--rule);border-radius:8px;padding:6px 8px;font-size:12.5px;color:var(--muted);background:var(--box);display:flex;flex-direction:column;gap:2px;}
+.ach .a.on{color:var(--ink);border-color:var(--gold-lt);} .ach .a.new{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,161,74,.35);} .ach .a span{font-size:11.5px;color:var(--muted);}
+.jr .ln.k-talk{border-color:var(--acc);font-style:italic;} .jr .ln.k-hint{border-color:var(--gold-lt);} .jr .ln.k-ach{border-color:var(--gold);} .jr .ln.k-ach b{color:var(--gold);}
+.party-turns{gap:5px;}
+.so-heroes .hero .act-dot{position:absolute;top:5px;left:6px;width:7px;height:7px;border-radius:50%;background:var(--gold-lt);box-shadow:0 0 0 2px rgba(0,0,0,.25);}
+.jr .ln.k-turn{border-color:var(--acc);color:var(--acc-dk);font-family:var(--f-label);letter-spacing:.04em;}
+.jr .ln.k-clue{border-color:var(--gold);} .jr .ln.k-clue b{color:var(--gold);}
+.danger{border:2px solid var(--red);border-radius:8px;padding:8px 10px;background:rgba(179,38,30,.07);display:flex;flex-direction:column;gap:6px;}
+.dg-h{font-family:var(--f-label);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--red);font-weight:700;}
+.jr .st{font-family:"EB Garamond",Georgia,serif;font-size:15.5px;font-style:italic;line-height:1.5;margin:2px 0;padding-left:10px;border-left:3px solid var(--gold-lt);}
+.jr .sh{font-family:var(--f-label);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--acc-dk);margin-top:8px;padding-top:6px;border-top:1px solid var(--rule);}
+.jr .sh span{text-transform:none;letter-spacing:0;color:var(--muted);font-family:var(--f-ui);font-size:13px;}
+.jr .ln{font-size:12.5px;color:var(--muted);padding-left:10px;border-left:3px solid var(--rule);}
+.jr .ln b{font-weight:600;color:var(--ink);}
+.jr .ln.k-score{border-color:var(--gold);color:var(--gold);} .jr .ln.k-score b{color:var(--gold);}
+.jr .ln.k-roll{border-color:var(--acc);} .jr .ln.k-threat{border-color:var(--red);} .jr .ln.k-combat{border-color:#b56a1f;} .jr .ln.k-note{border-color:var(--gold-lt);}
+/* scroll bars in the page's colours */
+*{scrollbar-width:thin;scrollbar-color:var(--acc) transparent;}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--acc);border-radius:8px;border:2px solid var(--bg);}
+::-webkit-scrollbar-thumb:hover{background:var(--acc-dk);}
+::-webkit-scrollbar-corner{background:transparent;}
+/* combat */
+.foe{border:1px solid var(--rule);border-radius:8px;padding:7px 9px;background:var(--box);}
+.foe.dead{opacity:.45;} .foe.turn{border-color:#b56a1f;border-width:2px;}
+.foe-h{display:flex;justify-content:space-between;gap:6px;align-items:center;}
+.cards{display:inline-flex;gap:3px;}
+.cardn{display:inline-flex;align-items:center;justify-content:center;width:20px;height:26px;border-radius:3px;background:#f1e7cc;color:#1b1a17;border:1px solid #b89a4e;font-weight:700;font-size:13px;}
+.cardn.used{opacity:.35;}
+.order{display:flex;flex-direction:column;gap:3px;margin:6px 0;}
+.order div{display:flex;gap:8px;align-items:center;padding:3px 6px;border-radius:6px;font-size:14px;}
+.order div.cur{background:rgba(181,106,31,.16);font-weight:700;}
+.order div.past{opacity:.5;}
+.attack{border:1px solid #b56a1f;border-radius:8px;padding:8px 10px;margin:6px 0;background:rgba(181,106,31,.08);}
+.dlg{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:14px;}
+.dlg.open{display:flex;}
+.dlg-b{background:var(--card);color:var(--ink);border-radius:12px;max-width:520px;width:100%;max-height:85vh;overflow-y:auto;padding:16px;border:1px solid var(--rule);}
+.dlg-b h3{font-family:var(--f-disp);font-weight:400;color:var(--acc-dk);font-size:20px;margin-bottom:8px;}
+.list{display:flex;flex-direction:column;gap:6px;}
+.list button{text-align:left;justify-content:flex-start;}
+.mission{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--rule);border-radius:8px;padding:8px 10px;background:var(--box);}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1f1f24;color:#eee;padding:8px 14px;border-radius:8px;font-size:14px;z-index:120;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;}
+.toast.on{opacity:1;}
+/* ── Shadowdark: the light, the crawl, luck ── */
+.lightbar{display:flex;gap:3px;align-items:center;}
+.lightbar span{width:9px;height:18px;border-radius:2px;border:1px solid var(--rule);background:var(--box);}
+.lightbar span.on{background:var(--light);border-color:var(--light);box-shadow:0 0 6px rgba(240,166,64,.55);}
+.lightbar span.low{background:#a33;border-color:#a33;box-shadow:none;}
+.dark-badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--f-label);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#000;border:1px solid #444;border-radius:6px;padding:3px 8px;}
+.st-row{align-items:flex-start;} .st-cell{min-height:44px;} .st-cell .big{font-family:var(--f-label);font-weight:700;font-size:18px;line-height:1.1;}
+.luck{display:inline-flex;gap:3px;} .luck i{width:12px;height:12px;border-radius:50%;border:1px solid var(--gold-lt);display:inline-block;} .luck i.on{background:var(--gold-lt);}
+.darkness{background:#0b0b0d;color:#e9e6de;border:1px solid #333;border-radius:8px;padding:8px 10px;font-size:13.5px;}
+.darkness b{color:#f0a640;}
+.oracle-out{margin-top:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--rule);background:var(--box);}
+.oracle-out .ans{font-family:var(--f-disp);font-size:30px;line-height:1;color:var(--acc-dk);}
+.oracle-q{width:100%;margin:6px 0 8px;}
+.hp-mini{font-size:11px;color:var(--muted);}
+.cond{font-size:11px;border-radius:4px;padding:0 5px;background:rgba(179,38,30,.12);color:var(--red);margin-left:4px;}
+.sidebar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0;font-family:var(--f-label);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+.sidebar b{color:var(--ink);}
+.mapwrap{position:relative;border:1px solid var(--rule);border-radius:8px;overflow:hidden;background:#000;}
+.mapwrap svg{display:block;width:100%;height:auto;max-height:70vh;}
+.loot-row{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--rule);border-radius:8px;padding:6px 9px;background:var(--box);flex-wrap:wrap;}
+.loot-row select{font-size:13px;padding:3px 6px;}
+</style>
+</head>
+<body class="so" data-tab="adventure">
+<div class="so-app">
+  <section class="so-pane" id="so-pane"><div id="so-root"></div></section>
+  <section class="so-sheet" id="so-sheet"><div class="so-frames" id="so-frames"><div class="so-heroes" id="so-heroes" style="display:none" role="tablist" aria-label="Party sheets"></div><div class="so-empty" id="so-sheet-empty">No heroes in this campaign.</div></div></section>
+</div>
+<nav class="so-tabs"><button data-tab="adventure" class="on">Adventure</button><button data-tab="sheet">Character Sheet</button></nav>
+<div class="dlg" id="dlg"><div class="dlg-b" id="dlg-b"></div></div>
+<div class="toast" id="toast"></div>
+<script>
+/* ═══ Shadowdark SOLO CAMPAIGN ══════════════════════════════════════════════
+   SoloDark-style solo play in the browser, built on the same page as the
+   Dragonbane solo campaign (db_solo.html): an adventure's places, what you can
+   do there, its people, items and endings come from a module file
+   (window.SD_SOLO_MODULES). Shadowdark's own rules run the rest:
+   - checks are d20 + ability modifier against the DC the adventure gives (set
+     when the adventure was converted), with advantage/disadvantage;
+   - the CRAWL: every action takes a crawling round; light sources last 10 rounds
+     (SoloDark); a random-encounter check every N rounds by the danger level, and
+     every round in total darkness (where every check has disadvantage);
+   - LUCK (SoloDark): a natural 20 earns a luck token, up to one per hero in the
+     party; new heroes start with one; spend one to re-roll a failed roll;
+   - the ORACLE (d20: 1–9 No, 10 Twist, 11–20 Yes; odd = "but"; 1/20 extreme) and
+     the verb + noun PROMPTS;
+   - COMBAT with group initiative (one roll per side; Chaos Mode re-rolls it each
+     round), automatic monster turns against your AC, the dying rules and morale;
+   - XP from treasure.
+   The heroes' own Shadowdark sheets are embedded on the right (?embed=1&solo=1)
+   and talk to this page through postMessage (the SOLO PLAY BRIDGE block at the
+   end of sd_character_sheet.html), so every roll is the sheet's real roll.
+   Saved as a "db-solo" document under the "db_solo" key, like the Dragonbane
+   campaigns (the key names the solo feature, not the system).
+   Part of the removable Solo Play feature — see SOLO-REMOVAL.md. */
+(function(){
+"use strict";
+var T=window.SD_SOLO_TABLES||{}, MODS=window.SD_SOLO_MODULES||[];
+var $=function(id){ return document.getElementById(id); };
+var A=function(x){ return Array.isArray(x)?x:[]; };
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function d(n){ return 1+Math.floor(Math.random()*n); }
+function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+function rollExpr(expr,crit){ // "2d6", "1d4+2", "1d8+1d4", "3"
+  var total=0, parts=[]; String(expr||'').toLowerCase().replace(/\s+/g,'').replace(/-/g,'+-').split('+').forEach(function(t){ if(!t) return;
+    var neg=t.charAt(0)==='-'; if(neg) t=t.slice(1);
+    var m=/^(\d*)d(\d+)$/.exec(t); if(m){ var n=+(m[1]||1)*(crit?2:1), s=+m[2], r=[]; for(var i=0;i<n;i++) r.push(d(s)); var sum=r.reduce(function(a,b){ return a+b; },0); total+=neg?-sum:sum; parts.push((neg?'−':'')+n+'d'+s+'('+r.join(',')+')'); }
+    else if(/^\d+$/.test(t)){ total+=neg?-(+t):+t; parts.push((neg?'−':'')+t); } });
+  return {total:Math.max(0,total),text:parts.join(' + ')}; }
+function toast(t){ var el=$('toast'); el.textContent=t; el.classList.add('on'); clearTimeout(toast._t); toast._t=setTimeout(function(){ el.classList.remove('on'); },2600); }
+function uid(){ return Math.random().toString(36).slice(2,9); }
+function sgn(n){ n=+n||0; return (n>=0?'+':'')+n; }
+var STATN={str:'STR',dex:'DEX',con:'CON',int:'INT',wis:'WIS',cha:'CHA'};
+function statKey(x){ var k=String(x||'').toLowerCase(); return STATN[k]?k:null; }
+
+// ── state ──────────────────────────────────────────────────────────────────
+var KEY='db_solo';
+var S=(function(){ var raw=(window.__ddState||{})[KEY]; var o={}; try{ o=typeof raw==='string'?JSON.parse(raw):(raw||{}); }catch(e){ o={}; } return o; })();
+S.v=1; S.system='SD'; S.name=S.name||'Solo campaign'; S.moduleId=S.moduleId||(MODS[0]&&MODS[0].id);
+S.journal=A(S.journal); S.done=S.done||{}; S.m=S.m||null; S.combat=S.combat||null; S.summary=S.summary||{};
+S.favor=S.favor||{}; S.dead=S.dead||{}; S.chaos=S.chaos!==false;
+var MOD=MODS.find(function(m){ return m.id===S.moduleId; })||MODS[0];
+function L(k,def){ return (MOD&&MOD.labels&&MOD.labels[k])||def; }
+function mTitle(i){ var mi=MOD.missions[i]; return MOD.missions.length>1?'Part '+(i+1)+': '+mi.title:mi.title; }
+// ── party (1–4 heroes) ──────────────────────────────────────────────────────
+var PCS={}, PC=null;
+if(!Array.isArray(S.party)) S.party=S.character?[S.character]:[];
+S.party=S.party.filter(function(p){ return p&&p.id; }).slice(0,4);
+if(!S.acting||!S.party.some(function(p){ return p.id===S.acting; })) S.acting=S.party[0]?S.party[0].id:null;
+function syncChar(){ S.character=S.party[0]||null; }
+syncChar();
+function solo(){ return S.party.length<=1; }
+function heroName(id){ var p=S.party.find(function(x){ return x.id===id; }); var s=PCS[id]; return (s&&s.name)||(p&&p.name)||'Hero'; }
+function isDead(id){ return !!S.dead[id]; }
+function petrified(id){ return !!(S.m&&S.m.stone&&S.m.stone[id]); }
+function aliveHeroes(){ return S.party.map(function(p){ return p.id; }).filter(function(id){ return !isDead(id)&&!petrified(id); }); }
+function hpOf(id){ var s=PCS[id]; return s?s.hp:1; }
+function dyingOf(id){ return S.m&&S.m.dying&&S.m.dying[id]; }
+function standing(id){ return !isDead(id)&&!petrified(id)&&hpOf(id)>0; }
+function standingHeroes(){ return aliveHeroes().filter(standing); }
+var saveT=null;
+function save(){ refreshSummary(); if(saveT) clearTimeout(saveT); saveT=setTimeout(function(){ saveT=null; try{ if(window.__ddSave){ var o={}; o[KEY]=JSON.stringify(S); window.__ddSave(o); } }catch(e){} },500); }
+function refreshSummary(){
+  var mi=S.m?MOD.missions[S.m.idx]:null, one=MOD.missions.length===1, cw=S.m&&S.m.wps&&S.m.wps[S.m.cur];
+  S.summary={ system:'SD', module:MOD?MOD.title:'', mission:mi&&!one?mTitle(S.m.idx):'', party:S.party.map(function(p){ return p.name; }),
+    progress: !S.party.length?'No heroes chosen': !S.m? (one?(S.done[MOD.missions[0].id]==='won'?'Adventure complete':S.done[MOD.missions[0].id]==='lost'?'Party lost':'Not started'):(Object.keys(S.done).length+' of '+MOD.missions.length+' parts done')) :
+      S.m.status==='briefing'?'Preparing': S.m.status==='won'?(S.m.lost?'Party lost':'Adventure complete'):
+      ((cw?'At '+cw.name.replace(/^\d+\.\s*/,''):'')+' · round '+(S.m.crawl||0)+(S.combat?' · in combat':'')) };
+}
+function jlog(k,h,x){ S.journal.unshift({t:Date.now(),k:k,h:h,x:x||''}); if(S.journal.length>1000) S.journal.length=1000; }
+function story(x){ if(x) jlog('story','',String(x)); }
+
+// ── the embedded sheets (one per hero, bridge) ─────────────────────────────
+var frames={}, reqs={}, ORIGIN=window.location.origin;
+function mountSheets(){
+  var host=$('so-frames'), ids=S.party.map(function(p){ return p.id; });
+  Object.keys(frames).forEach(function(id){ if(ids.indexOf(id)<0){ frames[id].remove(); delete frames[id]; delete PCS[id]; } });
+  $('so-sheet-empty').style.display=ids.length?'none':'';
+  ids.forEach(function(id){ if(frames[id]) return; var f=document.createElement('iframe'); f.title='Character sheet'; f.src='/tools/sd-character/'+encodeURIComponent(id)+'?embed=1&solo=1'; host.appendChild(f); frames[id]=f; });
+  PC=PCS[S.acting]||null; showSheet(); renderHeroTabs(); }
+var VIEW=null;
+function showSheet(){ var vis=VIEW&&frames[VIEW]?VIEW:S.acting; Object.keys(frames).forEach(function(id){ var on=id===vis; frames[id].style.visibility=on?'visible':'hidden'; frames[id].style.zIndex=on?'1':'0'; }); }
+function setActing(id,quiet){ if(!id||!frames[id]) return; S.acting=id; VIEW=null; PC=PCS[id]||null; showSheet(); renderHeroTabs(); if(!quiet) render(); }
+function renderHeroTabs(){ var el=$('so-heroes'); if(!el) return;
+  if(solo()){ el.style.display='none'; document.body.classList.remove('party'); return; }
+  document.body.classList.add('party'); el.style.display=''; var tb=document.querySelector('.so-tabs [data-tab="sheet"]'); if(tb) tb.dataset.who=heroName(S.acting);
+  el.innerHTML=S.party.map(function(p){ var s=PCS[p.id], hp=s&&s.hpMax?Math.max(0,Math.min(100,s.hp/s.hpMax*100)):100;
+    var vis=VIEW&&frames[VIEW]?VIEW:S.acting, dead=isDead(p.id);
+    return '<button type="button" role="tab" aria-selected="'+(p.id===vis)+'" class="hero'+(p.id===vis?' on':'')+(dead?' dead':'')+'" data-a="view" data-id="'+esc(p.id)+'" title="Show '+esc(heroName(p.id))+'\'s sheet'+(p.id===S.acting&&!solo()?' — acting now':'')+'">'+(p.id===S.acting&&!solo()?'<b class="act-dot" aria-label="acting now"></b>':'')+'<span>'+esc(heroName(p.id))+'</span><i style="--hp:'+hp+'%"></i>'+(dead?'<em>dead</em>':petrified(p.id)?'<em>stone</em>':dyingOf(p.id)?'<em>dying</em>':'')+'</button>'; }).join(''); }
+function send(cmd,extra,cb,who){ var f=frames[who||S.acting]; if(!f||!f.contentWindow){ toast('The character sheet is still loading'); return; }
+  var m=Object.assign({src:'sd-solo',cmd:cmd},extra||{}); if(cb){ m.req=uid(); reqs[m.req]=cb; }
+  f.contentWindow.postMessage(m, ORIGIN); }
+window.addEventListener('message',function(e){
+  if(e.origin!==ORIGIN) return; var id=Object.keys(frames).find(function(k){ return frames[k].contentWindow===e.source; }); if(!id) return;
+  var m=e.data||{}; if(m.src!=='sd-sheet') return;
+  if(m.kind==='state'){ var first=!PCS[id], was=PCS[id]; PCS[id]=m; if(id===S.acting) PC=m;
+    var p=S.party.find(function(x){ return x.id===id; }); if(p&&m.name&&p.name!==m.name){ p.name=m.name; syncChar(); save(); }
+    hpWatch(id,was,m); renderHeroTabs(); if(first&&id===S.acting) render(); else if(S.m&&S.m.status==='active'&&!$('dlg').classList.contains('open')) renderSoon(); return; }
+  if(m.kind==='roll'){ onRoll(m,id); return; }
+  if(m.kind==='light'){ onLight(id,m.source); return; }
+  if(m.kind==='useFailed'){ toast(heroName(id)+' has no '+m.name); return; }
+  if(m.kind==='log'){ if(!solo()) S.party.forEach(function(p){ if(p.id!==id&&frames[p.id]&&frames[p.id].contentWindow) send('relay',{label:heroName(id)+' · '+m.label,result:m.result,detail:m.detail,type:m.type},null,p.id); }); return; }
+});
+var rsT=null; function renderSoon(){ if(rsT) return; rsT=setTimeout(function(){ rsT=null; render(); },150); }
+
+// ── rolls through the sheets ───────────────────────────────────────────────
+// A Shadowdark check: d20 + modifier vs DC. A natural 20 always succeeds, a natural 1 always fails.
+function checkOk(r,dc){ if(r.nat===20) return true; if(r.nat===1) return false; return (+r.total||0)>=(+dc||10); }
+function rollWord(r,dc){ return (r.nat===20?'Natural 20! ':r.nat===1?'Natural 1. ':'')+(checkOk(r,dc)?'Success':'Failure'); }
+// advantage + disadvantage cancel; total darkness gives disadvantage on everything
+function advMode(adv,dis){ var a=!!adv, b=!!dis||isDark(); return a&&b?null:a?'advantage':b?'disadvantage':null; }
+function onRoll(m,pid){
+  if(m.nat===20) grantLuck(pid,'Natural 20'+(m.label?' — '+m.label:''));
+  var cb=m.req&&reqs[m.req]; if(cb){ delete reqs[m.req]; cb(m); return; }
+  if(m.none) return;
+  // a roll the player made on the sheet themselves
+  var c=S.combat, P=c&&c.pending;
+  if(c&&P&&P.type==='pc'&&P.pid===pid&&(m.type==='attack'||m.type==='spell')){ pcAction(m,pid); return; }
+  if(m.type==='spell'&&m.success&&/^light$/i.test(m.label||'')){ setLight(pid,'Light spell'); jlog('roll',heroName(pid)+' casts Light',m.total+''); actionDone(); save(); render(); return; }
+  if(c&&alive().length&&(m.type==='attack'||m.type==='spell')){ toast(P&&P.type==='pc'?'It\'s '+heroName(P.pid)+'\'s turn':'Wait for your side\'s turn'); jlog('combat',heroName(pid)+' acts out of turn','The roll is ignored'); save(); renderJournal(); return; }
+  if(m.type==='spell'&&m.success&&m.healing&&m.dmg) { offerHeal(pid,m); return; }
+  if(m.type==='check') jlog('roll',(solo()?'':heroName(pid)+': ')+m.label+' check',m.total+' (d20 '+m.nat+')');
+  save(); renderJournal();
+}
+// spec: {stat, dc, adv, dis, label}; who = a hero id (default: the acting hero)
+function rollSheet(spec,cb,who){ who=who||S.acting;
+  if(!PCS[who]){ toast('Waiting for '+heroName(who)+'\'s sheet…'); return; }
+  if(who!==S.acting) setActing(who,true);
+  var st=statKey(spec.stat)||'wis';
+  send('roll',{stat:st,adv:advMode(spec.adv,spec.dis),label:spec.label?spec.label+' ('+STATN[st]+')':STATN[st]},function(r){ r.hero=who; cb&&cb(r); },who);
+}
+function rollEach(ids,spec,done){ var out=[], i=0; (function next(){ if(i>=ids.length){ done(out); return; } var id=ids[i++]; rollSheet(spec,function(r){ out.push(r); setTimeout(next,400); },id); })(); }
+function specLine(c){ var st=statKey(c.stat); return (st?STATN[st]:'')+(c.dc?' DC '+c.dc:''); }
+
+// ── LUCK (SoloDark): a natural 20 earns a token, up to one per hero in the party ──
+function luckOf(id){ var s=PCS[id]; return s?(+s.luck||0):0; }
+function partyLuck(){ return S.party.reduce(function(t,p){ return t+(isDead(p.id)?0:luckOf(p.id)); },0); }
+function luckCap(){ return Math.max(1,aliveHeroes().length); }
+function grantLuck(pid,why){ if(!S.m||S.m.status!=='active'||isDead(pid)) return; if(partyLuck()>=luckCap()) return;
+  if(PCS[pid]) PCS[pid].luck=luckOf(pid)+1; send('luck',{add:1,why:why},null,pid); jlog('luck','Luck token'+(solo()?'':' — '+heroName(pid)),why); toast('Luck token! '+why); }
+function spendLuck(pid){ if(luckOf(pid)<=0) return false; if(PCS[pid]) PCS[pid].luck=luckOf(pid)-1; send('luck',{add:-1},null,pid); jlog('luck','Luck token spent'+(solo()?'':' — '+heroName(pid)),'Re-roll'); return true; }
+// Fortune's Favor: a hero new to the campaign starts with a luck token
+function fortunesFavor(){ S.party.forEach(function(p){ if(S.favor[p.id]) return; var s=PCS[p.id]; if(!s) return; S.favor[p.id]=true; if(luckOf(p.id)<1){ s.luck=1; send('luck',{set:1,why:'Fortune\'s Favor — a new hero starts with a luck token'},null,p.id); } }); }
+
+// ── rendering ──────────────────────────────────────────────────────────────
+var UI={};
+function render(){
+  var r=$('so-root'); var h='';
+  if(!S.party.length) h+=partyCard(true);
+  else if(!S.m) h+=hubCard()+partyCard(false);
+  else if(S.m.status==='briefing') h+=briefingCard();
+  else if(S.m.status==='won') h+=debriefCard();
+  else h+=topCard()+actCard();
+  document.body.classList.toggle('playing', !!(S.party.length&&S.m&&S.m.status==='active'));
+  r.innerHTML=h; renderJournal(); renderHeroTabs();
+}
+function partyCard(first){
+  if(!first) return '<div class="card"><div class="card-h"><h3>'+(solo()?'Your hero':'Your party')+'</h3><span class="tiny muted">'+(solo()?'One hero':S.party.length+' heroes')+'</span></div><div class="card-b"><div class="row">'+
+    S.party.map(function(p){ return '<span class="chip'+(isDead(p.id)?' bad':'')+'">'+esc(heroName(p.id))+(isDead(p.id)?' (dead)':'')+'</span>'; }).join('')+'</div><p class="tiny muted" style="margin-top:6px">Set when the campaign was created.</p></div></div>';
+  return '<div class="card"><div class="card-h"><h3>No heroes</h3></div><div class="card-b"><p class="small">This campaign has no heroes. Start a new solo campaign from the Campaigns page and choose your Shadowdark characters there.</p></div></div>';
+}
+function hubCard(){
+  var h='<div class="card"><div class="card-h"><h3>'+esc(MOD.intro.title)+'</h3></div><div class="card-b">';
+  h+='<p class="read">'+esc(MOD.intro.text)+'</p>';
+  if(MOD.hub) h+='<div class="lbl" style="margin-top:8px">'+esc(MOD.hub.name)+'</div><p class="small">'+esc(MOD.hub.text)+'</p>';
+  h+='<div class="lbl" style="margin-top:10px">'+esc(L('missions','Adventure'))+'</div><div class="stack" style="margin-top:4px">';
+  MOD.missions.forEach(function(mi,i){ var st=S.done[mi.id];
+    h+='<div class="mission"><div><b>'+(MOD.missions.length>1?(i+1)+'. ':'')+esc(mi.title)+'</b><div class="tiny muted">'+esc(mi.objective)+'</div>'+bestHtml(mi)+'</div>'+
+      '<div class="row">'+(st==='won'?'<span class="chip good">Done</span>':st==='lost'?'<span class="chip bad">Lost</span>':'')+'<button class="btn '+(st?'ghost':'pri')+'" data-a="brief" data-i="'+i+'">'+(st?'Play again':'Begin')+'</button></div></div>'; });
+  h+='</div>';
+  if(Object.keys(S.dead).length) h+='<p class="small" style="margin-top:8px"><b>Fallen:</b> '+esc(Object.keys(S.dead).map(heroName).join(', '))+'. Dead heroes stay dead; play again with the others, or start a new campaign with a fresh hero.</p>';
+  return h+'</div></div>';
+}
+function briefingCard(){
+  var mi=MOD.missions[S.m.idx];
+  var h='<div class="card"><div class="card-h"><h3>'+esc(mTitle(S.m.idx))+'</h3><button class="btn ghost" data-a="hub">Back</button></div><div class="card-b">';
+  h+='<p class="read">'+esc(mi.briefing)+'</p><p><b>Goal:</b> '+esc(mi.objective)+'</p>';
+  if(mi.level) h+='<p class="small"><b>For</b> '+esc(mi.level)+(solo()?' — alone, it will be deadly. SoloDark suggests a lone hero start a few levels higher.':'.')+'</p>';
+  if(mi.danger) h+='<p class="small"><b>Danger level: '+esc(mi.danger.label)+'.</b> A random-encounter check every '+mi.danger.every+' crawling rounds — and every round in total darkness.</p>';
+  h+='<p class="small"><b>Light.</b> A torch, candle or lantern flask burns for 10 rounds; every action is a round. Light one as you go in — in the dark every check has disadvantage.</p>';
+  h+='<p class="small"><b>Luck.</b> A natural 20 earns a luck token (the party holds up to one per hero); spend one to re-roll a failed roll.</p>';
+  A(mi.notes).forEach(function(n){ h+='<p class="small"><b>'+esc(n[0])+'.</b> '+esc(n[1])+'</p>'; });
+  if(A(mi.rumors).length){
+    h+='<div class="lbl" style="margin-top:10px">Rumors</div>';
+    var got=A(S.m.rumors);
+    if(got.length) h+='<ul class="jl">'+got.map(function(n){ var r=mi.rumors.find(function(x){ return x.roll===n; }); return r?'<li>'+esc(r.text)+'</li>':''; }).join('')+'</ul><p class="tiny muted" style="margin-top:4px">They\'re in your Journal. Not every rumor is true.</p>';
+    else h+='<p class="small">Before you set out, each hero asks around: one rumor each (d6).</p><div class="row" style="margin-top:6px"><button class="btn" data-a="rumors">Ask around (roll '+(solo()?'a rumor':S.party.length+' rumors')+')</button></div>';
+  }
+  h+='<div class="row" style="margin-top:12px"><button class="btn pri" data-a="enter">'+esc(L('enter','Enter the dungeon'))+'</button></div>';
+  return h+'</div></div>';
+}
+function curMission(){ return S.m?MOD.missions[S.m.idx]:null; }
+function curWp(){ return S.m&&S.m.wps&&S.m.wps[S.m.cur]; }
+function wpDef(w){ var mi=curMission(); return w&&w.def?mi.waypoints.find(function(x){ return x.id===w.def; }):null; }
+function wpName(w){ return w.name; }
+function lightPips(){ var lt=S.m.light||{}; var n=lt.lit?lt.left:0; var out=''; for(var i=1;i<=10;i++) out+='<span class="'+(i<=n?(n<=2?'on low':'on'):'')+'"></span>'; return out; }
+function statusBar(){
+  var mi=curMission(), h='';
+  h+='<div class="st-h"><b>'+esc(mTitle(S.m.idx))+'</b>'+(S.m.objective?'<span class="chip good">Goal done</span>':'')+'</div>';
+  h+='<div class="tiny muted">'+esc(mi.objective)+'</div>';
+  // where you've been is on the Map; here just how much of the dungeon you've seen
+  var seen=S.m.wps.filter(function(w){ return w.visited; }).length;
+  h+='<div class="tiny muted" style="margin-bottom:6px">'+seen+' of '+S.m.wps.length+' places explored'+(mi.map?' · the Map shows them':'')+'</div>';
+  h+='<div class="st-row">';
+  var lt=S.m.light||{};
+  h+='<div class="st-cell" title="'+esc(lt.lit?(lt.src||'Light')+(lt.who?' — '+heroName(lt.who):'')+': '+lt.left+' round'+(lt.left===1?'':'s')+' left':'Total darkness: disadvantage on every check, and an encounter check every round')+'"><span class="lbl">Light</span>'+(lt.lit?'<span class="lightbar">'+lightPips()+'</span>':'<span class="dark-badge">● Dark</span>')+'</div>';
+  var every=(mi.danger&&mi.danger.every)||3, cr=S.m.crawl||0, nextIn=isDark()?1:every-(cr%every);
+  h+='<div class="st-cell" title="Crawling rounds so far · rounds until the next random-encounter check"><span class="lbl">Round</span><span class="big">'+cr+'</span><span class="tiny muted">check in '+nextIn+'</span></div>';
+  h+='<div class="st-cell" title="Luck tokens: the party holds up to one per living hero"><span class="lbl">Luck</span><span class="luck">'+(function(){ var o='', n=partyLuck(), cap=luckCap(); for(var i=0;i<cap;i++) o+='<i class="'+(i<n?'on':'')+'"></i>'; return o; })()+'</span></div>';
+  h+='<div class="st-cell st-score" title="XP each hero has earned this adventure"><span class="lbl">XP</span><span class="score-big">'+(S.m.xp||0)+'</span></div>';
+  h+='</div>';
+  var al=A(S.m.allies); if(al.length) h+='<div class="allies">With you: '+al.map(function(a){ return '<span class="chip'+(a.down?' bad':'')+'" title="'+esc(a.note||'')+'">'+esc(a.name)+' '+(a.down?'(down)':a.hp+'/'+a.hpMax+' HP')+'</span>'; }).join(' ')+'</div>';
+  return h;
+}
+function topCard(){ var cl=A(S.m.clues), mi=curMission();
+  return '<div class="card top-card"><div class="card-b">'+statusBar()+'<div class="jr" id="so-journal"></div>'+
+    '<div class="row top-btns"><button class="btn ghost tiny-btn" data-a="journal">📖 Journal'+(cl.length?' ('+cl.length+')':'')+'</button>'+(mi.map?'<button class="btn ghost tiny-btn" data-a="mapdlg">🗺 Map</button>':'')+'</div></div></div>'; }
+function actCard(){
+  var w=curWp(); if(!w) return '';
+  var h='<div class="card act-card"><div class="card-h"><h3>'+esc(wpName(w))+'</h3><span class="row">'+(isDark()?'<span class="dark-badge">Dark</span>':'')+'</span></div><div class="card-b">';
+  if(S.combat){ h+=combatBody(); return h+'</div></div>'; }
+  var D=dangerHere();
+  h+='<div class="wyd-h"><span>What do you do?</span></div>'+heroChips()+bubbles(D);
+  h+=dyingPanel();
+  h+=D?dangerPanel(w,D):actionsHtml(w);
+  return h+'</div></div>'; }
+function bubbles(D){ var mi=curMission(), out=[];
+  if(A(mi.hints).length) out.push('<button class="bub" data-a="hint" title="A nudge from what you already know">💡 Hint</button>');
+  out.push('<button class="bub" data-a="oracle" title="Ask the Oracle a yes-or-no question (SoloDark)">🔮 Oracle</button>');
+  var acts=mi.actions||['search','rest'];
+  if(!D&&acts.indexOf('rest')>=0) out.push('<button class="bub" data-a="rest" title="Make camp for a rest: a ration each, and one encounter check">⛺ Rest</button>');
+  if(!solo()) out.push('<button class="bub" data-a="skip-turn" title="'+esc(heroName(S.acting))+' has nothing to do: pass to the next hero">⏭ Skip turn</button>');
+  return '<div class="bubbles">'+out.join('')+'</div>'; }
+function actRow(label,btn,note,cls){ return '<div class="ch act'+(cls?' '+cls:'')+'"><div class="ch-h"><b>'+label+'</b>'+btn+'</div>'+(note?'<div class="tiny muted">'+note+'</div>':'')+'</div>'; }
+function useRow(){ return actRow('Use an item from your pack','<button class="btn" data-a="use-item">Use…</button>'); }
+function lightRow(){ var lt=S.m.light||{}; if(lt.lit&&lt.left>2) return '';
+  return actRow(lt.lit?'Light a fresh torch before this one dies':'Light a torch, candle or lantern','<button class="btn'+(lt.lit?'':' pri')+'" data-a="light">Light…</button>',lt.lit?'Only '+lt.left+' round'+(lt.left===1?'':'s')+' of light left.':'Total darkness: disadvantage on every check, and an encounter check every round.'); }
+
+// ── the map: one plan of the whole dungeon, showing only the places you have been ──
+function openMapDlg(){ var mi=curMission(), mp=mi&&mi.map; if(!mp) return;
+  var vis={}; S.m.wps.forEach(function(w){ if(w.visited) vis[w.def]=true; });
+  var holes=[]; Object.keys(mp.areas||{}).forEach(function(k){ if(vis[k]) A(mp.areas[k]).forEach(function(r){ holes.push('<rect x="'+r[0]+'" y="'+r[1]+'" width="'+r[2]+'" height="'+r[3]+'" fill="#fff"/>'); }); });
+  var here=(mp.areas||{})[curWp().def], mark='';
+  if(here&&here[0]){ var r0=here[0]; mark='<circle cx="'+(r0[0]+r0[2]/2)+'" cy="'+(r0[1]+r0[3]/2)+'" r="'+Math.max(14,Math.min(r0[2],r0[3])/4)+'" fill="none" stroke="#d98a1c" stroke-width="5"/>'; }
+  var W=mp.w, H=mp.h;
+  dlg('<h3>Map</h3><p class="tiny muted" style="margin-bottom:6px">Only the places you have been. The ring is where you stand.</p><div class="mapwrap"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Map of the places explored"><defs><mask id="fog"><rect width="'+W+'" height="'+H+'" fill="#000"/>'+holes.join('')+'</mask></defs><rect width="'+W+'" height="'+H+'" fill="#000"/><image href="'+esc(mp.src)+'" width="'+W+'" height="'+H+'" mask="url(#fog)"/>'+mark+'</svg></div><div class="row" style="margin-top:10px"><button class="btn pri" data-a="close">Close</button></div>',true); }
+function openJournalDlg(){ var cl=A(S.m.clues), al=A(S.m.allies);
+  dlg('<h3>Journal</h3>'+(cl.length?'<div class="lbl">Clues, rumors &amp; notes</div><ul class="jl">'+cl.map(function(x){ return '<li>'+esc(x.text)+(x.where?' <span class="tiny muted">— '+esc(x.where.replace(/^\d+\.\s*/,''))+'</span>':'')+'</li>'; }).join('')+'</ul>':'<p class="small muted">Nothing noted yet. Examine things, talk to people — what you learn is kept here.</p>')+
+    (al.length?'<div class="lbl" style="margin-top:10px">Companions</div><p class="small">'+al.map(function(a){ return esc(a.name)+(a.down?' (down)':' — '+a.hp+'/'+a.hpMax+' HP')+(a.note?'<br><span class="tiny muted">'+esc(a.note)+'</span>':''); }).join('<br>')+'</p>':'')+
+    '<div class="row" style="margin-top:10px"><button class="btn pri" data-a="close">Close</button></div>'); }
+
+// ── PARTY TURNS and the CRAWL. Every action is a crawling round for a lone hero; in a
+// party each hero acts once, then the round ends. Moving on is the party's round.
+function acted(){ return (S.m&&S.m.acted)||{}; }
+function canAct(id){ return solo()||!S.m||!acted()[id]; }
+function canActNow(id){ return standing(id)&&!(S.m.stable&&S.m.stable[id]); }
+function nextUp(){ var A2=acted(); return aliveHeroes().filter(canActNow).find(function(id){ return !A2[id]; }); }
+function newPartyRound(){ if(!S.m) return; S.m.acted={}; }
+function actionDone(){
+  if(!S.m||S.m.status!=='active'||S.combat) return;
+  if(solo()){ tick(1); return; }
+  S.m.acted=S.m.acted||{}; S.m.acted[S.acting]=true;
+  var nx=nextUp();
+  if(!nx){ newPartyRound(); tick(1); nx=aliveHeroes().filter(canActNow)[0]; }
+  if(nx&&nx!==S.acting) setActing(nx,true);
+}
+function heroChips(){ if(solo()) return ''; var A2=acted();
+  return '<div class="row party-turns">'+S.party.map(function(p){ var dead=isDead(p.id)||petrified(p.id), down=!dead&&!canActNow(p.id), done=!!A2[p.id], on=p.id===S.acting, s=PCS[p.id];
+    return '<button type="button" class="chip hchip'+(on?' on':'')+(done?' done':'')+'" data-a="hero" data-id="'+esc(p.id)+'" aria-pressed="'+on+'" title="'+esc(heroName(p.id))+(dead?' is out':down?' is down':done?' has acted this round':on?' acts now':' — act next')+'"'+(dead||done||down?' disabled':'')+'>'+(done?'✓ ':on?'▶ ':'')+esc(heroName(p.id))+(s?' <span class="hp-mini">'+s.hp+'/'+s.hpMax+'</span>':'')+'</button>'; }).join('')+'</div>'; }
+
+// ── LIGHT. A light source burns 10 rounds (SoloDark). Combat rounds burn it too.
+function isDark(){ return !!(S.m&&S.m.status==='active'&&!(S.m.light&&S.m.light.lit)); }
+function setLight(pid,src){ if(!S.m) return; var was=isDark(); S.m.light={lit:true,left:10,src:src||'Torch',who:pid||null};
+  jlog('light',(src||'Light')+' lit'+(solo()||!pid?'':' by '+heroName(pid)),'10 rounds of light'); if(was) story('Light flares up — the shadows draw back.'); }
+function onLight(pid,src){ if(!S.m||S.m.status!=='active') return; setLight(pid,src); if(UI.lighting){ UI.lighting=false; closeDlg(); if(S.combat) pcTurnDone(); else actionDone(); } save(); render(); }
+function burnLight(n){ var lt=S.m&&S.m.light; if(!lt||!lt.lit) return; lt.left=Math.max(0,lt.left-n);
+  if(lt.left===2) toast('The '+String(lt.src||'light').toLowerCase()+' is guttering — 2 rounds left');
+  if(lt.left<=0){ lt.lit=false; jlog('light','The '+String(lt.src||'light').toLowerCase()+' goes out',''); story('The '+String(lt.src||'light').toLowerCase()+' sputters and dies. Total darkness.'); toast('Darkness! Your light is out.'); } }
+function lightOut(why){ if(S.m&&S.m.light&&S.m.light.lit){ S.m.light.lit=false; S.m.light.left=0; jlog('light','All light goes out',why||''); } }
+function openLight(){
+  var opts=[]; aliveHeroes().filter(canActNow).forEach(function(id){ var s=PCS[id]; if(!s) return;
+    A(s.items).forEach(function(it){ if(/^torch(es)?$|^candles?$/i.test(it.name)) opts.push({id:id,kind:'item',name:it.name,label:'Light a '+it.name.replace(/es$|s$/,'').toLowerCase()+' ('+it.qty+' left)'});
+      else if(/^lantern$/i.test(it.name)&&A(s.items).some(function(x){ return /^oil,? flask$|^flasks? of oil$/i.test(x.name); })) opts.push({id:id,kind:'item',name:it.name,label:'Fill and light the lantern (uses an oil flask)'}); });
+    A(s.spells).forEach(function(sp){ if(/^light$/i.test(sp.name)&&!sp.lost) opts.push({id:id,kind:'spell',name:sp.name,label:'Cast Light (spellcasting check)'}); }); });
+  UI.lightOpts=opts;
+  dlg('<h3>Light</h3>'+(opts.length?'<p class="small muted">Lighting takes an action. Who lights what?</p><div class="list">'+opts.map(function(o,i){ return '<button class="btn" data-a="light-do" data-i="'+i+'">'+(solo()?'':esc(heroName(o.id))+': ')+esc(o.label)+'</button>'; }).join('')+'</div>':'<p class="small">Nobody carries a torch, a candle, a lantern with oil, or the Light spell. Without light, every check has disadvantage and the dark draws things to you.</p>')+'<div class="row" style="margin-top:10px"><button class="btn ghost" data-a="close">Never mind</button></div>'); }
+function doLight(o){ if(!o) return; setActing(o.id,true); UI.lighting=true;
+  if(o.kind==='spell'){ send('cast',{name:o.name,adv:null},function(r){ UI.lighting=false; closeDlg(); if(r.none){ toast('No such spell on the sheet'); return; }
+      if(r.success){ setLight(o.id,'Light spell'); } else { jlog('roll',heroName(o.id)+': Light fails',r.total+''); story('The spell fizzles.'); }
+      if(S.combat) pcTurnDone(); else actionDone(); save(); render(); },o.id); return; }
+  send('useItem',{name:o.name},null,o.id);
+  setTimeout(function(){ if(UI.lighting){ UI.lighting=false; } },3000); }
+
+// ── the CRAWL clock: rounds pass; light burns; random-encounter checks by the danger level
+function tick(n,why){ if(!S.m||S.m.status!=='active') return; var mi=curMission(), every=(mi.danger&&mi.danger.every)||3;
+  for(var i=0;i<(n||1);i++){ S.m.crawl=(S.m.crawl||0)+1; burnLight(1);
+    // timed blocks (golden roots) wear off
+    if(S.m.blocks){ Object.keys(S.m.blocks).forEach(function(k){ S.m.blocks[k]--; if(S.m.blocks[k]<=0){ delete S.m.blocks[k]; jlog('note','The way opens again',''); } }); }
+    // out of a fight, the dying roll each round
+    if(!S.combat&&S.m.dying) Object.keys(S.m.dying).forEach(function(id){ if(!isDead(id)) deathRoll(id); });
+    if(S.combat||dangerHere()) continue;
+    if(isDark()||S.m.crawl%every===0) encounterCheck(); }
+}
+function encounterCheck(){ var mi=curMission(), r=d(6), hit=r<=((mi.danger&&mi.danger.chance)||1);
+  jlog('check','Encounter check'+(isDark()?' (darkness)':''),'d6 '+r+(hit?' — something comes!':' — quiet'));
+  if(hit) randomEncounter(); }
+function randomEncounter(force){ var mi=curMission(), tbl=A(mi.randomEncounters); if(!tbl.length) return;
+  var n=force||d(tbl.length), e=tbl.find(function(x){ return x.roll===n; })||tbl[n-1]; if(!e) return;
+  var alt=e.unless&&anyOn(e.unless)?e.otherwise:null; if(e.requires&&!hasReq(e.requires)) alt=e.otherwise||{text:e.quiet||'Something stirs in the dark, then is gone.'};
+  var x=alt||e; jlog('threat','Random encounter ('+n+')',x.label||e.label||'');
+  story(x.text||e.text); toast(x.label||e.label||'Random encounter!');
+  if(x.fx) applyEffects(x.fx,curWp(),wpDef(curWp()),{label:x.label||e.label});
+  if(x.enc){ var en=findEncounter(x.enc); if(en){ if(S.m.flags) delete S.m.flags['won:'+en.id]; if(A(S.m.shown).indexOf(en.id)<0) S.m.shown.push(en.id); setDanger(curWp(),{type:'fight',enc:en.id,random:true,ambush:!!x.ambush}); } }
+  if(x.event) setDanger(curWp(),{type:'event',ev:x.event,label:x.label||e.label}); }
+
+// ── DYING (Shadowdark): at 0 HP a hero is dying — a death timer of 1d4 + CON rounds;
+// a natural 20 on the d20 each turn brings them back with 1 HP. Another hero can
+// stabilize them (DC 15 INT). Healing ends it.
+function hpWatch(id,was,m){ if(!S.m||S.m.status!=='active'||isDead(id)) return;
+  S.m.dying=S.m.dying||{}; S.m.stable=S.m.stable||{};
+  if(m.hp<=0&&!S.m.dying[id]&&!S.m.stable[id]&&(!was||was.hp>0||was.hp==null)){
+    var t=Math.max(1,d(4)+((m.mods&&m.mods.con)||0)); S.m.dying[id]={left:t};
+    jlog('combat',heroName(id)+' is dying','Death timer: '+t+' round'+(t===1?'':'s')); story(heroName(id)+' falls.'); toast(heroName(id)+' is dying!'); save(); }
+  if(m.hp>0&&(S.m.dying[id]||S.m.stable[id])){ delete S.m.dying[id]; delete S.m.stable[id]; jlog('combat',heroName(id)+' is back on their feet',m.hp+' HP'); save(); }
+}
+function deathRoll(id){ var dy=dyingOf(id); if(!dy) return; var r=d(20);
+  if(r===20){ jlog('combat',heroName(id)+': natural 20!','Back up with 1 HP'); delete S.m.dying[id]; send('heal',{n:1,why:'Natural 20 on the death roll'},null,id); story(heroName(id)+' drags themself up.'); return 'up'; }
+  dy.left--; jlog('combat',heroName(id)+': death roll '+r,dy.left>0?dy.left+' round'+(dy.left===1?'':'s')+' left':'');
+  if(dy.left<=0){ killHero(id); return 'dead'; } return 'down'; }
+function killHero(id){ delete S.m.dying[id]; S.dead[id]=true; jlog('mission',heroName(id)+' is dead',''); story(heroName(id)+' breathes their last.'); toast(heroName(id)+' is dead.');
+  send('tracker',{name:'Dead',on:true},null,id); checkWipe(); }
+// The party is lost when nobody is left standing — in a fight, or with no one dying who might still get up.
+function checkWipe(){ if(!S.m||S.m.status!=='active') return false; if(aliveHeroes().some(standing)) return false;
+  if(!S.combat&&aliveHeroes().some(function(id){ return dyingOf(id); })) return false;
+  S.m.lost=true; S.combat=null; jlog('mission','The party is lost',''); setTimeout(finishMission,200); return true; }
+function dyingPanel(){ if(!S.m.dying) return ''; var ids=Object.keys(S.m.dying).filter(function(id){ return !isDead(id); }); if(!ids.length) return '';
+  var helpers=standingHeroes(); var h='<div class="danger"><div class="dg-h">Dying</div>';
+  ids.forEach(function(id){ var dy=S.m.dying[id]; h+='<p class="small"><b>'+esc(heroName(id))+'</b> — '+dy.left+' round'+(dy.left===1?'':'s')+' left. Each round passing brings a death roll (d20: a natural 20 and they get up).</p>';
+    h+='<div class="row">'+helpers.map(function(hid){ return '<button class="btn pri" data-a="stabilize" data-id="'+esc(id)+'" data-h="'+esc(hid)+'">'+(solo()?'':esc(heroName(hid))+': ')+'Stabilize (INT DC 15)</button>'; }).join('')+'</div>'; });
+  return h+'<p class="tiny muted">Healing — a potion, a spell — brings them straight back.</p></div>'; }
+
+// ── immediate dangers: foes that have turned on you, an event that needs an answer.
+function dangerHere(){ var w=curWp(); if(!w||!w.danger) return null; var D=w.danger;
+  if(D.type==='fight'){ var e=findEncounter(D.enc); if(!e||!encVisible(e,w)){ w.danger=null; return null; } }
+  return D; }
+function setDanger(w,D){ if(!w) return; if(D.type==='fight'&&w.evaded) delete w.evaded[D.enc]; w.danger=D; }
+function clearDanger(){ var w=curWp(); if(w) w.danger=null; }
+// a group written for a full party shrinks for fewer heroes: `solo` is the number for one hero
+function scaledN(spec,full){ var all=spec.count||1; if(typeof all==='string') all=rollExpr(all).total||1; if(full||spec.solo==null) return all; var n=Math.max(1,Math.min(4,S.party.length||1)); return Math.max(1,Math.round(spec.solo+(all-spec.solo)*(n-1)/3)); }
+function foeTotal(e,full){ return A(e.foes).reduce(function(t,f){ return t+(typeof f.count==='string'&&!full&&f.solo==null?0:scaledN(f,full)); },0); }
+function countLabel(e,full){ var anyDice=A(e.foes).some(function(f){ return typeof f.count==='string'; }); if(anyDice&&full) return A(e.foes).map(function(f){ return typeof f.count==='string'?f.count:String(f.count||1); }).join('+'); return String(foeTotal(e,full)); }
+function dangerPanel(w,D){
+  var def=wpDef(w), h='';
+  if(D.type==='event'){ var ev=D.ev||{};
+    h+='<div class="danger"><div class="dg-h">'+esc(ev.title||D.label||'Something happens')+'</div>'+(ev.text?'<p class="small">'+esc(ev.text)+'</p>':'')+'<div class="list">'+A(ev.options).map(function(o,i){ var r=o.reaction?'2d6 + CHA':o.stat?specLine(o):''; return '<button class="btn'+(i===0?' pri':'')+'" data-a="ev-opt" data-i="'+i+'">'+esc(o.label)+(r?' <span class="tiny muted">· '+esc(r)+'</span>':'')+'</button>'; }).join('')+'</div></div>';
+    return h; }
+  var e=findEncounter(D.enc), full=foeTotal(e,true), sc=foeTotal(e,false);
+  h+='<div class="danger"><div class="dg-h">'+esc(e.label)+'</div><p class="small">'+esc(foeList(e))+(e.note?' — <span class="muted">'+esc(e.note)+'</span>':'')+'</p>';
+  h+='<div class="row"><button class="btn pri" data-a="fight" data-e="'+esc(e.id)+'"'+(D.spotted?' data-first="party" title="You saw them first: your side acts first"':'')+'>Fight ('+countLabel(e,false)+')</button>'+(full!==sc?'<button class="btn" data-a="fight" data-e="'+esc(e.id)+'" data-full="1" title="The numbers in the book">As written ('+countLabel(e,true)+')</button>':'');
+  if(e.endable&&hasReq(e.endable.requires,w)) h+='<button class="btn" data-a="d-calm" title="'+esc(e.endable.note||'')+'">'+esc(e.endable.label)+'</button>';
+  if(!e.noSneak&&!D.noSneak) h+='<button class="btn" data-a="sneak" title="'+(solo()?'DEX check':'Every hero makes a DEX check — one failure and they notice you')+' DC '+(e.sneakDc||12)+'">Sneak past</button>';
+  h+='</div>';
+  var chs=A(def&&def.challenges).filter(function(c){ return c.danger===e.id&&chOpen(c,w); });
+  if(chs.length) h+='<div class="stack" style="margin-top:8px">'+chs.map(function(c){ return chHtml(c,w,def); }).join('')+'</div>';
+  h+='<div class="stack" style="margin-top:8px">'+useRow()+lightRow();
+  if(def&&def.exits&&S.m.trail&&S.m.trail.length){ var bw=S.m.wps[S.m.trail[S.m.trail.length-1]]; h+=actRow('Back off to '+esc(bw?wpName(bw):'where you came from'),'<button class="btn" data-a="retreat">Back off</button>','They\'ll still be here.'); }
+  h+='</div></div>';
+  var ex=escapesHtml(w,def); if(ex) h+='<div class="stack" style="margin-top:8px">'+ex+'</div>';
+  return h;
+}
+// still to do: a challenge vanishes once it's done (its outcome is in the Story)
+function chOpen(c,w){ if(!hasReq(c.requires,w)||anyOn(c.hideIf,w)) return false; var res=w.results[c.id];
+  if(c.options) return chOptions(c,w).length>0;
+  if(!res) return true; if(res.pendingFail) return true;
+  return !!(c.repeat&&!(res.ok&&!c.repeatOk)); }
+function chOptions(c,w){ var used=w.used||{}; return A(c.options).filter(function(o){ return hasReq(o.requires,w)&&!anyOn(o.hideIf,w)&&(o.repeat||!used[c.id+':'+o.id]); }); }
+function chAdv(c,w){ return !!(c.adv||(c.advIf&&anyOn(c.advIf,w))||allyHelp(c.stat)); }
+function chDis(c,w){ return !!(c.dis||(c.disIf&&anyOn(c.disIf,w))); }
+function sumStat(c){ var k=statKey(c.sumStat.stat); var t=standingHeroes().reduce(function(s,id){ var p=PCS[id]; return s+((p&&p.scores&&p.scores[k])||10); },0); allies().forEach(function(a){ t+=(a.scores&&a.scores[k])||10; }); return t; }
+function chHtml(c,w,def){ var res=w.results[c.id], again=res&&!res.pendingFail;
+  var h='<div class="ch"><div class="ch-h"><b>'+esc(c.label)+'</b>';
+  if(res&&res.pendingFail){ var lh=res.hero||S.acting; h+='<span class="row">'+(luckOf(lh)>0?'<button class="btn pri" data-a="ch-luck" data-c="'+esc(c.id)+'" title="Spend one of '+esc(heroName(lh))+'\'s luck tokens">🍀 Re-roll</button>':'')+'<button class="btn warn" data-a="ch-accept" data-c="'+esc(c.id)+'">Accept</button></span>'; }
+  else if(c.sumStat){ var tot=sumStat(c), ok=tot>=c.sumStat.need; h+='<button class="btn'+(ok?' pri':' ghost')+'" data-a="ch-choice" data-c="'+esc(c.id)+'"'+(ok?'':' disabled title="Not strong enough together"')+'>'+esc(c.button||'Do it')+'</button>'; }
+  else if(c.choice) h+='<button class="btn pri" data-a="ch-choice" data-c="'+esc(c.id)+'">'+esc(c.button||'Do it')+'</button>';
+  else if(!c.options){ var ad=chAdv(c,w), di=chDis(c,w)||isDark(); h+='<button class="btn pri" data-a="ch" data-c="'+esc(c.id)+'">'+(again?'Again: ':'')+(c.all&&!solo()?'Everyone: ':'')+esc(specLine(c))+(ad&&!di?' · adv':di&&!ad?' · dis':'')+'</button>'; }
+  h+='</div>';
+  if(res&&res.pendingFail) h+='<div class="tiny muted">Failed ('+esc(res.detail||'')+'). Spend a luck token to re-roll, or accept it.</div>';
+  else if(c.sumStat) h+='<div class="tiny muted">Combined '+esc(String(c.sumStat.stat).toUpperCase())+' '+sumStat(c)+' of '+c.sumStat.need+' needed'+(c.note?' · '+esc(c.note):'')+'</div>';
+  else if(c.note) h+='<div class="tiny muted">'+esc(c.note)+'</div>';
+  if(c.options) h+='<div class="row" style="margin-top:5px">'+chOptions(c,w).map(function(o){ return '<button class="btn" data-a="ch-opt" data-c="'+esc(c.id)+'" data-o="'+esc(o.id)+'">'+esc(o.label)+(o.stat?' <span class="tiny muted">· '+esc(specLine(o))+'</span>':'')+'</button>'; }).join('')+'</div>';
+  return h+'</div>'; }
+function escapesHtml(w,def){ var list=def?A(def.escapes).filter(function(x){ return hasReq(x.requires,w)&&!anyOn(x.hideIf,w); }):[]; if(!list.length) return '';
+  return list.map(function(x){ var i=A(def.escapes).indexOf(x);
+    return actRow(esc(x.label),'<button class="btn'+(x.main?' pri':'')+'" data-a="escape" data-i="'+i+'">'+esc(x.stat?specLine(x):(x.button||'Go'))+'</button>',x.note?esc(x.note):''); }).join(''); }
+function searchLeft(w,def){ return A(def&&def.search).filter(function(x){ return hasReq(x.requires,w)&&!anyOn(x.hideIf,w)&&!(w.found&&w.found[x.id]); }); }
+function actionsHtml(w){
+  var def=wpDef(w), mi=curMission(), h='', rows=[];
+  if(def&&def.flagNotes) Object.keys(def.flagNotes).forEach(function(k){ if(flagOn(k,w)) h+='<div class="secret"><span class="sug">Now</span><br>'+esc(def.flagNotes[k])+'</div>'; });
+  if(isDark()) h+='<div class="darkness"><b>Total darkness.</b> You can barely make anything out: every check has disadvantage, and every round brings an encounter check. Light something.</div>';
+  var sec=def?A(def.secrets).filter(function(s){ return A(w.revealed).indexOf(s.id)>=0||(S.m.flags&&S.m.flags[s.id]&&s.global); }):[];
+  if(sec.length) h+='<div class="stack" style="margin:6px 0">'+sec.map(function(s){ return '<div class="secret"><span class="sug">Known</span><br>'+esc(s.text)+'</div>'; }).join('')+'</div>';
+  var lr=lightRow(); if(lr&&isDark()) rows.push(lr);
+  var blocked=def&&anyOn(def.blockIf,w);
+  (blocked?[]:talksHere()).forEach(function(t){ rows.push(actRow(esc(t.label||('Talk to '+t.name)),'<button class="btn pri" data-a="talk" data-t="'+esc(t.id)+'">Talk</button>')); });
+  (def?A(def.challenges).filter(function(c){ return (!blocked||c.unblock)&&!c.danger&&chOpen(c,w); }):[]).forEach(function(c){ rows.push(chHtml(c,w,def)); });
+  (blocked?[]:encountersFor(w)).forEach(function(e){
+    rows.push(actRow(esc(e.label),'<span class="row"><button class="btn" data-a="fight" data-e="'+esc(e.id)+'">Fight ('+countLabel(e,false)+')</button>'+(foeTotal(e,true)!==foeTotal(e,false)?'<button class="btn ghost" data-a="fight" data-e="'+esc(e.id)+'" data-full="1" title="As written">As written ('+countLabel(e,true)+')</button>':'')+'</span>',esc(foeList(e))+(e.note?' · '+esc(e.note):''))); });
+  var acts=mi.actions||['search','rest'];
+  if(acts.indexOf('search')>=0&&!blocked) rows.push(actRow('Search the area','<button class="btn" data-a="search">Search</button>','A crawling round of careful looking'+(searchLeft(w,def).length?'':' · nothing obvious left to find')));
+  rows.push(useRow());
+  if(lr&&!isDark()) rows.push(lr);
+  if(!blocked) rows.push(escapesHtml(w,def));
+  return h+'<div class="stack">'+rows.concat(navRows(w)).join('')+'</div>';
+}
+function exitBlocked(w,i){ return !!(S.m.blocks&&S.m.blocks['x:'+w.def+':'+i]); }
+function navRows(w){
+  var def=wpDef(w), out=[];
+  if(!def||!def.exits) return out;
+  if(anyOn(def.blockIf,w)) return ['<p class="tiny muted">'+esc(def.blockNote||'Deal with this first.')+'</p>'];
+  A(def.exits).forEach(function(x,i){ if(anyOn(x.hideIf,w)||!hasReq(x.showIf,w)) return;
+    var lock=!hasReq(x.requires,w)?(x.locked||'Locked'):exitBlocked(w,i)?'Sealed by roots':'';
+    out.push(actRow(esc(x.label),'<button class="btn'+(lock?' ghost':(x.main?' pri':''))+'" data-a="exit" data-i="'+i+'"'+(lock?' disabled title="'+esc(lock)+'"':'')+'>'+(lock?esc(lock):esc(x.button||'Go'))+'</button>',x.note&&!lock?esc(x.note):'',lock?'locked':'move')); });
+  return out;
+}
+function bestHtml(mi){ var b=S.best&&S.best[mi.id], dd=S.bestDisc&&S.bestDisc[mi.id], ach=A(mi.achievements), mine=S.achievements||{}, n=ach.filter(function(a){ return mine[a.id]; }).length, parts=[];
+  if(b!=null) parts.push('Best XP '+b); if(A(mi.discoveries).length&&dd) parts.push('Secrets '+dd+'/'+mi.discoveries.length); if(ach.length) parts.push('Achievements '+n+'/'+ach.length);
+  return parts.length?'<div class="tiny muted" style="margin-top:2px">'+esc(parts.join(' · '))+'</div>':''; }
+function debriefCard(){
+  var mi=curMission(), lost=S.m.lost;
+  var h='<div class="card"><div class="card-h"><h3>'+esc(lost?(mi.lostTitle||'Lost in the dark'):mi.title)+'</h3></div><div class="card-b">';
+  if(lost) h+='<p class="read">'+esc(mi.lostText||'No one walks out of the dark.')+'</p>';
+  else if(mi.reward) h+='<p class="read">'+esc(mi.reward.text)+'</p>';
+  var fallen=S.party.filter(function(p){ return isDead(p.id)||petrified(p.id); });
+  if(fallen.length&&!lost) h+='<p class="small"><b>Lost along the way:</b> '+esc(fallen.map(function(p){ return heroName(p.id)+(petrified(p.id)?' (turned to stone)':''); }).join(', '))+'</p>';
+  h+='<div class="lbl" style="margin-top:8px">Experience</div><div class="score-big">'+(S.m.xp||0)+' XP</div><p class="small">'+(solo()?'Your hero earned':'Each surviving hero earned')+' this from the treasure carried out; it\'s already on the sheet'+(solo()?'':'s')+'. A hero whose XP reaches the next level levels up on their sheet.</p>';
+  var got=A(S.m.carried); if(got.length) h+='<div class="lbl" style="margin-top:8px">Treasure</div><ul class="jl">'+got.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ul>';
+  h+=endingHtml();
+  h+='<div class="row" style="margin-top:10px"><button class="btn pri" data-a="hub">'+esc(L('back','Back'))+'</button></div>';
+  return h+'</div></div>';
+}
+function renderJournal(){ var el=$('so-journal'); if(!el) return;
+  var list=S.journal.slice(0,300).reverse();
+  el.innerHTML=list.map(function(j){ var dt=new Date(j.t), tt=esc(dt.toLocaleDateString()+' '+dt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
+    if(j.k==='story') return '<p class="st" title="'+tt+'">'+esc(j.x)+'</p>';
+    if(j.k==='mission') return '<div class="sh" title="'+tt+'">'+esc(j.h)+(j.x?' <span>'+esc(j.x)+'</span>':'')+'</div>';
+    return '<div class="ln k-'+esc(j.k)+'" title="'+tt+'"><b>'+esc(j.h)+'</b>'+(j.x?' — '+esc(j.x):'')+'</div>'; }).join('')||'<span class="muted small">Your story begins when you set out.</span>';
+  var last=el.lastElementChild; if(last) last.classList.add('new');
+  el.scrollTop=el.scrollHeight; }
+
+// ── the ORACLE (SoloDark) and the PROMPTS ─────────────────────────────────
+function rollPrompt(){ var v=T.promptVerbs||[], n=T.promptNouns||[]; return (v[d(100)-1]||'Reveal')+' · '+(n[d(100)-1]||'Secret'); }
+function openOracle(){ UI.oq=UI.oq||''; dlg('<h3>The Oracle</h3><p class="small muted">Ask a yes-or-no question the rules can\'t answer. Phrase it as a yes; how likely is it?</p><input type="text" class="oracle-q" id="oracle-q" placeholder="e.g. Is the door barred from the other side?" value="'+esc(UI.oq)+'"><div class="row"><button class="btn" data-a="oracle-roll" data-o="low">Unlikely</button><button class="btn pri" data-a="oracle-roll" data-o="even">Even chance</button><button class="btn" data-a="oracle-roll" data-o="high">Likely</button><button class="btn ghost" data-a="prompt" title="A verb and a noun to spark an idea">Prompt</button></div><div id="oracle-out"></div><div class="row" style="margin-top:10px"><button class="btn ghost" data-a="close">Done</button></div>'); }
+function oracleRoll(odds){ var q=($('oracle-q')||{}).value||''; UI.oq=q; var a=d(20), b=odds==='even'?null:d(20), n=b==null?a:odds==='high'?Math.max(a,b):Math.min(a,b);
+  var r=T.oracle?T.oracle(n):{n:n,result:n<=9?'No':n===10?'Twist':'Yes',but:false,extreme:false};
+  var ans=(r.extreme?(r.result==='Yes'?'Yes, and…':'No, and…'):r.result+(r.but?', but…':'')), tw=r.result==='Twist'?rollPrompt():'';
+  jlog('oracle','Oracle'+(q?': '+q:''),ans+(tw?' ('+tw+')':'')+' · d20 '+(b==null?a:a+','+b)+' → '+n);
+  var out=$('oracle-out'); if(out) out.innerHTML='<div class="oracle-out"><div class="ans">'+esc(ans)+'</div><p class="small" style="margin-top:6px">'+(r.extreme?'The most extreme version possible.':r.result==='Twist'?'Something unexpected happens. The prompt: <b>'+esc(tw)+'</b>.':r.but?'A turnabout alters the answer without undoing it.':'')+'</p><p class="tiny muted">d20 '+(b==null?a:a+', '+b+' ('+(odds==='high'?'advantage':'disadvantage')+')')+' → '+n+'</p></div>';
+  save(); renderJournal(); }
+
+// ── mission flow ───────────────────────────────────────────────────────────
+function startBriefing(i){ S.m={idx:i,status:'briefing'}; save(); render(); }
+function rollRumors(){ var mi=curMission(), tbl=A(mi.rumors); if(!tbl.length) return; S.m.rumors=[]; S.party.forEach(function(){ var free=tbl.filter(function(r){ return S.m.rumors.indexOf(r.roll)<0; }); if(!free.length) return; var r=d(6), x=tbl.find(function(t){ return t.roll===r; }); if(!x||S.m.rumors.indexOf(x.roll)>=0) x=pick(free); S.m.rumors.push(x.roll); }); save(); render(); }
+function enterMission(){
+  var mi=curMission(), rum=A(S.m.rumors);
+  S.m.wps=mi.waypoints.map(function(w){ return {def:w.id,name:w.name,short:w.short||null,results:{},revealed:[],done:false}; });
+  S.m.cur=Math.max(0,mi.waypoints.findIndex(function(w){ return w.start; })); S.m.status='active'; S.m.objective=false; S.m.flags={}; S.m.shown=[]; S.m.trail=[];
+  S.m.crawl=0; S.m.light={lit:false,left:0}; S.m.xp=0; S.m.carried=[]; S.m.clues=[]; S.m.dying={}; S.m.stable={}; S.m.stone={}; S.m.lost=false; S.m.allies=[]; S.m.blocks={};
+  jlog('mission',mTitle(S.m.idx),mi.danger?'Danger level: '+mi.danger.label:''); story(mi.briefing); if(mi.startLog) story(mi.startLog);
+  rum.forEach(function(n){ var r=A(mi.rumors).find(function(x){ return x.roll===n; }); if(r){ S.m.flags['rumor:'+n]=true; S.m.clues.push({id:'rumor'+n,text:'Rumor: '+r.text,where:''}); } });
+  fortunesFavor();
+  var w0=curWp(); w0.visited=true; enterFx(w0,wpDef(w0),true);
+  save(); render();
+}
+function flagOn(x,w){ if(!x) return true; var neg=x.charAt(0)==='!'; var k=neg?x.slice(1):x; var on;
+  if(k==='lit') on=!isDark(); else if(k.indexOf('has:')===0) on=partyHas(k.slice(4)); else on=!!(S.m&&S.m.flags&&S.m.flags[k])||!!(w&&A(w.revealed).indexOf(k)>=0);
+  return neg?!on:on; }
+function partyHas(name){ var n=String(name).toLowerCase(); return aliveHeroes().some(function(id){ return A(PCS[id]&&PCS[id].items).some(function(it){ return String(it.name).toLowerCase().indexOf(n)>=0; }); }); }
+function whoHas(name){ var n=String(name).toLowerCase(); return aliveHeroes().find(function(id){ return A(PCS[id]&&PCS[id].items).some(function(it){ return String(it.name).toLowerCase().indexOf(n)>=0; }); })||null; }
+function hasReq(req,w){ if(!req) return true; return (Array.isArray(req)?req:[req]).every(function(x){ return flagOn(x,w); }); }
+function anyOn(list,w){ if(!list) return false; return (Array.isArray(list)?list:[list]).some(function(x){ return flagOn(x,w); }); }
+function arr1(x){ return x==null?[]:Array.isArray(x)?x:[x]; }
+function wpIndex(id){ for(var i=0;i<S.m.wps.length;i++) if(S.m.wps[i].def===id) return i; return -1; }
+function goTo(id,noTick){ var i=wpIndex(id); if(i<0) return; var from=curWp(); if(from) from.done=true;
+  if(!solo()&&S.m.cur!==i){ newPartyRound(); var f0=aliveHeroes().filter(canActNow)[0]; if(f0) setActing(f0,true); }
+  if(S.m.cur!==i) S.m.trail.push(S.m.cur); S.m.cur=i; var w=curWp(), def=wpDef(w);
+  jlog('mission',(w.visited?'Back to ':'')+w.name,''); var first=!w.visited; if(first) w.visited=true;
+  if(!noTick) tick(1);
+  if(first) enterFx(w,def,false); }
+function enterFx(w,def,first){ if(!def) return;
+  if(def.text&&!w.told){ w.told=true; story(def.text); }
+  if(def.onEnter) applyEffects(def.onEnter,w,def,{label:w.name});
+  if(def.ambush&&!w.ambushed&&!(S.m.flags['won:'+def.ambush.enc])){ w.ambushed=true; ambushFlow(w,def.ambush); } }
+// Something lies in wait: the hero with the best WIS may notice it first (a WIS check);
+// spotted, you choose — fight with the first move, or back off; missed, they strike first.
+function ambushFlow(w,am){ var e=findEncounter(am.enc); if(!e) return; if(A(S.m.shown).indexOf(e.id)<0) S.m.shown.push(e.id);
+  if(!am.notice){ setDanger(w,{type:'fight',enc:e.id}); if(am.text) story(am.text); return; }
+  var who=bestAt(am.notice.stat||'wis'); UI.ambushPending=true;
+  setTimeout(function(){ rollSheet({stat:am.notice.stat||'wis',label:am.notice.label||'Notice'},function(r){ UI.ambushPending=false; var ok=checkOk(r,am.notice.dc);
+    jlog('roll',(solo()?'':heroName(r.hero)+': ')+(am.notice.label||'Notice')+' — '+rollWord(r,am.notice.dc),r.total+' vs DC '+am.notice.dc);
+    if(ok){ story(am.notice.success||'You spot it before it moves.'); setDanger(w,{type:'fight',enc:e.id,spotted:true}); save(); render(); }
+    else { story(am.notice.failure||'It is upon you before you see it.'); save(); startFight(e,false,{first:'foes'}); } },who); },350); }
+function bestAt(stat){ var k=statKey(stat)||'wis'; var ids=standingHeroes(); var b=ids[0], bv=-99; ids.forEach(function(id){ var v=(PCS[id]&&PCS[id].mods&&PCS[id].mods[k])||0; if(v>bv){ bv=v; b=id; } }); return b||S.acting; }
+function encountersFor(w){ var def=wpDef(w); return def?A(def.encounters).filter(function(e){ return encVisible(e,w); }):[]; }
+function encVisible(e,w){ if(S.m.flags&&S.m.flags['won:'+e.id]) return false; if(e.hidden&&A(S.m.shown).indexOf(e.id)<0) return false; return hasReq(e.requires,w)&&!anyOn(e.unless,w); }
+function findEncounter(id){ var mi=curMission(); if(!mi) return null; var all=A(mi.encountersShared).slice(); mi.waypoints.forEach(function(w){ all=all.concat(A(w.encounters)); }); return all.find(function(e){ return e.id===id; })||null; }
+function foeList(e){ return A(e.foes).map(function(f){ var b=refDef(f); var c=f.count||1; return (c!==1?c+'× ':'')+(f.name||(b&&b.name)||'Foe'); }).join(', '); }
+// foes: an adventure's own stat block (`monster: {...}`) or one from the bestiary (`ref: 'Ghost'`)
+function refDef(f){ if(f.monster) return f.monster; if(f.ref){ var n=String(f.ref).toLowerCase(); return A(typeof SD_MONSTERS!=='undefined'?SD_MONSTERS:window.SD_MONSTERS).find(function(x){ return String(x.name).toLowerCase()===n; })||null; } return null; }
+
+// Effects of a challenge, an option, a conversation, an escape or a won fight.
+function applyEffects(fx,w,def,c){
+  if(!fx) return;
+  if(fx.say) story(fx.say);
+  arr1(fx.join).forEach(function(id){ joinAlly(id); });
+  arr1(fx.leave).forEach(function(id){ S.m.allies=A(S.m.allies).filter(function(a){ return a.id!==id; }); });
+  arr1(fx.take).forEach(function(nm){ var who=whoHas(nm)||S.acting; send('removeItem',{name:nm,qty:1},null,who); if(S.m.carried){ var ci=S.m.carried.indexOf(nm); if(ci>=0) S.m.carried.splice(ci,1); } });
+  arr1(fx.clue).forEach(function(cl){ S.m.flags['clue:'+cl.id]=true; S.m.clues=S.m.clues||[]; if(!S.m.clues.some(function(x){ return x.id===cl.id; })){ S.m.clues.push({id:cl.id,text:cl.text,where:(w&&w.name)||''}); jlog('clue','New clue',cl.text); } });
+  if(fx.ifFlag!=null){ applyEffects(hasReq(fx.ifFlag,w)?fx.then:fx.else,w,def,c); }
+  if(fx.reveal) fx.reveal.forEach(function(s){ if(A(w.revealed).indexOf(s)<0) w.revealed.push(s); });
+  arr1(fx.flag).forEach(function(k){ S.m.flags[k]=true; });
+  arr1(fx.unflag).forEach(function(k){ delete S.m.flags[k]; });
+  arr1(fx.item).forEach(function(it){ send('addItem',{name:it.name,note:it.note||'',qty:it.qty||1}); jlog('mission','Gained: '+it.name,it.note||''); });
+  if(fx.gold){ send('gold',{n:fx.gold,why:c?c.label:''}); }
+  if(fx.xp) awardXp(fx.xp,c?c.label:'');
+  if(fx.loot) setTimeout(function(){ offerLoot(fx.loot,c?c.label:'Treasure'); },60);
+  if(fx.heal) (fx.all?aliveHeroes():[S.acting]).forEach(function(id){ if(fx.heal==='full') send('heal',{full:true,why:c?c.label:'Healed'},null,id); else { var hr=rollExpr(fx.heal); send('heal',{n:hr.total,why:c?c.label:'Healed'},null,id); } });
+  if(fx.restoreSpells) aliveHeroes().forEach(function(id){ send('restoreSpells',{why:c?c.label:''},null,id); });
+  if(fx.damage) (fx.all?standingHeroes():[S.acting]).forEach(function(id){ var r=rollExpr(fx.damage); jlog('roll','Harm'+(solo()?'':' ('+heroName(id)+')')+': '+r.total,fx.damage+' · '+r.text); send('damage',{n:r.total,label:(c?c.label:'Harm')+' ('+fx.damage+')'},null,id); });
+  if(fx.statLoss) (fx.all?standingHeroes():[S.acting]).forEach(function(id){ var r=rollExpr(fx.statLoss.dice); send('stat',{id:fx.statLoss.stat,delta:-r.total,why:c?c.label:''},null,id); });
+  if(fx.lightOut) lightOut(c?c.label:'');
+  if(fx.roots) blockExit(fx.roots);
+  if(fx.cond) arr1(fx.cond).forEach(function(cn){ send('tracker',{name:cn,on:true},null,S.acting); });
+  if(fx.oracleOnce) S.m.flags[fx.oracleOnce]=true;
+  if(fx.count){ S.m.counters=S.m.counters||{}; arr1(fx.count).forEach(function(cn){ var ck=cn.key; S.m.counters[ck]=(S.m.counters[ck]||0)+(cn.by||1); if(cn.at&&S.m.counters[ck]===cn.at) applyEffects(cn.fx,w,def,c); }); }
+  if(fx.objective){ S.m.objective=true; jlog('mission','Goal achieved',curMission().objective); }
+  arr1(fx.show).forEach(function(id){ if(A(S.m.shown).indexOf(id)<0) S.m.shown.push(id); });
+  if(fx.goto) goTo(fx.goto,!!fx.noTick);
+  if(fx.encounter){ var e=findEncounter(fx.encounter); if(e&&!S.m.flags['won:'+e.id]){ if(A(S.m.shown).indexOf(e.id)<0) S.m.shown.push(e.id); if(fx.now) setTimeout(function(){ startFight(e,false,{first:fx.now}); },60); else setDanger(w||curWp(),{type:'fight',enc:e.id}); } }
+  if(fx.attack){ var at=fx.attack, ac=heroAc(S.acting), r=d(20), tot=r+(at.bonus||0), hit=r===20||(r!==1&&tot>=ac);
+    if(hit){ var dm=rollExpr(at.dmg||'1d6',r===20); jlog('roll',(at.name||'Trap')+' hits'+(solo()?'':' '+heroName(S.acting)),tot+' vs AC '+ac+' · '+dm.total+' damage'); send('damage',{n:dm.total,label:at.name||'Trap'},null,S.acting); if(at.hitText) story(at.hitText); }
+    else { jlog('roll',(at.name||'Trap')+' misses',tot+' vs AC '+ac); if(at.missText) story(at.missText); } }
+  if(fx.kill){ killHero(S.acting); }
+  if(fx.saveAll) setTimeout(function(){ saveAll(fx.saveAll,w,def,c); },80);
+  if(fx.event) setDanger(w||curWp(),{type:'event',ev:fx.event,label:fx.event.title});
+  if(fx.escape) setTimeout(function(){ escapeDungeon(typeof fx.escape==='string'?fx.escape:'You got out'); },80);
+}
+// Everyone present makes the same check or save (a volley of arrows, a heat that swells…)
+function saveAll(sa,w,def,c){ var ids=standingHeroes(); if(!ids.length) return;
+  rollEach(ids,{stat:sa.stat,adv:!!(sa.advIf&&anyOn(sa.advIf,w)),label:sa.label||'Save'},function(rs){ rs.forEach(function(r){ var ok=checkOk(r,sa.dc);
+      jlog('roll',(solo()?'':heroName(r.hero)+': ')+(sa.label||'Save')+' — '+(ok?'safe':'fails'),r.total+' vs DC '+sa.dc);
+      if(!ok){ setActing(r.hero,true); var f=sa.onFail||{}; if(f.damage&&(!f.needsLight||!isDark())){ var dm=rollExpr(f.damage); send('damage',{n:dm.total,label:sa.label||'Harm'},null,r.hero); jlog('roll','Harm ('+heroName(r.hero)+'): '+dm.total,f.damage); }
+        if(f.flagEach) S.m.flags[f.flagEach+':'+r.hero]=true; if(f.flag) S.m.flags[f.flag]=true; if(f.kill) killHero(r.hero); if(f.say) story(f.say.replace('{name}',heroName(r.hero))); } });
+    if(sa.after) applyEffects(sa.after,w,def,c); if(sa.fails!=null) {}
+    save(); render(); }); }
+function blockExit(n){ var w=curWp(), def=wpDef(w); var list=A(def&&def.exits).map(function(x,i){ return {x:x,i:i}; }).filter(function(o){ return hasReq(o.x.requires,w)&&!anyOn(o.x.hideIf,w)&&!exitBlocked(w,o.i); }); if(!list.length) return;
+  var o=pick(list); S.m.blocks=S.m.blocks||{}; S.m.blocks['x:'+w.def+':'+o.i]=n; jlog('threat','Roots seal a way out',o.x.label+' — for '+n+' rounds'); }
+function awardXp(n,why){ if(!n) return; S.m.xp=(S.m.xp||0)+n; aliveHeroes().forEach(function(id){ send('xp',{n:n,why:why||'Treasure'},null,id); }); jlog('xp','+'+n+' XP'+(solo()?'':' each'),why||''); }
+// Treasure: each piece goes to the hero you choose; its XP goes to everyone (Shadowdark).
+function offerLoot(list,label){ UI.loot=A(list).filter(function(t){ return A(S.m.carried).indexOf(t.name)<0; }); if(!UI.loot.length) return;
+  var heroes=aliveHeroes(), def=S.acting;
+  dlgQ('<h3>'+esc(label||'Treasure')+'</h3><div class="stack">'+UI.loot.map(function(t,i){ return '<div class="loot-row"><div><b>'+esc(t.name)+'</b>'+(t.note?'<div class="tiny muted">'+esc(t.note)+'</div>':'')+'<div class="tiny muted">'+[t.gp?t.gp+' gp':'',t.xp?t.xp+' XP':''].filter(Boolean).join(' · ')+'</div></div>'+(solo()?'':'<select data-loot="'+i+'">'+heroes.map(function(id){ return '<option value="'+esc(id)+'"'+(id===def?' selected':'')+'>'+esc(heroName(id))+'</option>'; }).join('')+'</select>')+'</div>'; }).join('')+'</div><div class="row" style="margin-top:10px"><button class="btn pri" data-a="loot-take">Take '+(UI.loot.length>1?'it all':'it')+'</button><button class="btn ghost" data-a="close">Leave it</button></div>'); save(); render(); }
+function takeLoot(){ var xp=0; A(UI.loot).forEach(function(t,i){ var sel=document.querySelector('select[data-loot="'+i+'"]'), to=sel?sel.value:S.acting;
+    if(t.coins){ send('gold',{n:t.coins,why:t.name},null,to); } else send('addItem',{name:t.name,note:t.note||'',qty:t.qty||1},null,to);
+    S.m.carried.push(t.name); if(t.flag) S.m.flags[t.flag]=true; xp+=(+t.xp||0); jlog('mission','Taken: '+t.name,solo()?'':heroName(to)); });
+  UI.loot=null; closeDlg(); if(xp) awardXp(xp,'Treasure'); save(); render(); }
+
+// ── CHALLENGES ─────────────────────────────────────────────────────────────
+// A check: d20 + modifier vs the DC set when the adventure was converted. A failure waits:
+// spend a luck token to re-roll, or accept it. `all` = everyone rolls (a trap, a save).
+function doChallenge(cid,luck){
+  var w=curWp(), def=wpDef(w); var c=A(def&&def.challenges).find(function(x){ return x.id===cid; }); if(!c) return;
+  if(c.all&&!solo()){ var ids=standingHeroes(); rollEach(ids,{stat:c.stat,adv:chAdv(c,w),dis:chDis(c,w),label:c.label},function(rs){ var fails=rs.filter(function(r){ return !checkOk(r,c.dc); });
+      rs.forEach(function(r){ jlog('roll',heroName(r.hero)+': '+c.label+' — '+rollWord(r,c.dc),r.total+' vs DC '+c.dc); });
+      w.results[c.id]={ok:!fails.length,word:fails.length?'Some failed':'Everyone made it',text:''};
+      if(!fails.length){ story(c.success); applyEffects(c.onSuccess,w,def,c); }
+      else { story(c.failure); fails.forEach(function(r){ setActing(r.hero,true); applyEffects(c.onFail,w,def,c); }); if(fails.length<rs.length&&c.onSuccess&&c.eachSuccess) rs.filter(function(r){ return checkOk(r,c.dc); }).forEach(function(r){ setActing(r.hero,true); applyEffects(c.onSuccess,w,def,c); }); }
+      actionDone(); save(); render(); }); return; }
+  if(!luck){ w.tries=w.tries||{}; w.tries[c.id]=(w.tries[c.id]||0)+1; }
+  var attempt=(w.tries&&w.tries[c.id])||1, who=S.acting;
+  rollSheet({stat:c.stat,adv:chAdv(c,w),dis:chDis(c,w),label:c.label},function(r){
+    var prev=w.results[c.id]; if(prev&&prev.ok&&!c.repeatOk) return;
+    var ok=checkOk(r,c.dc), res={ok:ok,word:rollWord(r,c.dc),text:ok?c.success:(c.failure||''),pendingFail:!ok,hero:r.hero,detail:r.total+' vs DC '+c.dc};
+    w.results[c.id]=res;
+    jlog('roll',(solo()?'':heroName(r.hero)+': ')+c.label+' — '+res.word,r.total+' vs DC '+c.dc+(luck?' (luck re-roll)':''));
+    if(ok){ if(c.success) story(c.success); if(c.firstTry&&attempt===1&&!w.failedOnce) addAch(c.firstTry); applyEffects(c.onSuccess,w,def,c); actionDone(); }
+    save(); render(); },who);
+}
+function luckReroll(cid){ var w=curWp(), res=w.results[cid]; if(!res) return; var hero=res.hero||S.acting; if(!spendLuck(hero)){ toast('No luck token'); return; } setActing(hero,true); delete w.results[cid]; doChallenge(cid,true); }
+function addAch(x){ if(!x) return; S.m.flags[x.flag||('ft:'+(x.label||''))]=true; }
+function doChoice(cid){ var w=curWp(), def=wpDef(w); var c=A(def&&def.challenges).find(function(x){ return x.id===cid; }); if(!c) return;
+  if(c.sumStat&&sumStat(c)<c.sumStat.need){ toast('Not strong enough together ('+sumStat(c)+' of '+c.sumStat.need+')'); return; }
+  w.tries=w.tries||{}; w.tries[c.id]=(w.tries[c.id]||0)+1;
+  w.results[c.id]={ok:true,word:c.resultWord||'Done',text:c.success||''}; jlog('note',c.label,''); story(c.success);
+  applyEffects(c.onSuccess,w,def,c); if(!c.free) actionDone(); save(); render(); }
+// A card of options (each once): open a coffin, reach into the obelisk… An option may need a check.
+function doOption(cid,oid,luck){ var w=curWp(), def=wpDef(w); var c=A(def&&def.challenges).find(function(x){ return x.id===cid; }); if(!c) return; var o=A(c.options).find(function(x){ return x.id===oid; }); if(!o) return;
+  w.used=w.used||{}; if(w.used[cid+':'+oid]&&!o.repeat&&!luck) return;
+  var fin=function(ok){ w.used[cid+':'+oid]=(w.used[cid+':'+oid]||0)+1; story(ok?(o.text||o.success):o.failure);
+    if(ok) applyEffects(o.fx||o.onSuccess,w,def,{label:c.label+': '+o.label}); else applyEffects(o.onFail,w,def,{label:c.label+': '+o.label});
+    w.results[c.id]={ok:true,word:o.label,text:''}; actionDone(); save(); render(); };
+  jlog('note',c.label+': '+o.label,'');
+  if(!o.stat) return fin(true);
+  rollSheet({stat:o.stat,adv:!!o.adv,dis:!!o.dis,label:o.label},function(r){ var ok=checkOk(r,o.dc); jlog('roll',(solo()?'':heroName(r.hero)+': ')+o.label+' — '+rollWord(r,o.dc),r.total+' vs DC '+o.dc);
+    if(!ok&&luckOf(r.hero)>0){ UI.optLuck={cid:cid,oid:oid,hero:r.hero}; dlg('<h3>'+esc(o.label)+'</h3><p class="small">Failed ('+r.total+' vs DC '+o.dc+').</p><div class="row" style="margin-top:8px"><button class="btn pri" data-a="opt-luck">🍀 Spend a luck token: re-roll</button><button class="btn warn" data-a="opt-fail">Accept it</button></div>'); UI.optFin=fin; return; }
+    fin(ok); }); }
+function acceptFail(cid){ var w=curWp(), def=wpDef(w); var c=A(def&&def.challenges).find(function(x){ return x.id===cid; }); var res=w.results[cid]; if(!c||!res) return;
+  res.pendingFail=false; w.failedOnce=true; jlog('roll',c.label+': failure accepted',''); story(c.failure); applyEffects(c.onFail,w,def,c); actionDone(); save(); render(); }
+function escapeDungeon(how){ if(!S.m||S.m.status!=='active') return; closeDlg(); S.m.escaped=true; jlog('mission',how||'You got out',''); finishMission(); }
+
+// ── dialogs ────────────────────────────────────────────────────────────────
+function dlg(html,wide){ $('dlg-b').innerHTML=html; $('dlg-b').classList.toggle('wide',!!wide); $('dlg').classList.add('open'); }
+var DLGQ=[];
+function dlgQ(html){ if($('dlg').classList.contains('open')) DLGQ.push(html); else dlg(html); }
+function closeDlg(){ $('dlg').classList.remove('open'); if(DLGQ.length){ var nx=DLGQ.shift(); setTimeout(function(){ dlg(nx); },30); } }
+
+// ═══ COMBAT (Shadowdark) ════════════════════════════════════════════════════
+// Group initiative (SoloDark): the quickest hero rolls DEX for the party, the foes roll
+// d20 + their best DEX; ties go to the heroes. Chaos Mode re-rolls it every round.
+// On the party's turn each hero acts once (you choose the order); on the foes' turn
+// every foe acts by itself: an attack is d20 + its bonus against the hero's AC.
+// Attack lines read like the book: "2 claw +4 (1d6)", "1 bite +3 (1d6) and 1 tentacle
+// +3 (toxin)", "2 death touch +5 (1d8 + life drain) or 1 possess".
+function parseRider(name,notes,riders){ var key=String(name||'').toLowerCase().trim(); if(!key) return null;
+  if(riders&&riders[key]) return riders[key];
+  var rx=new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*[.:]\\s*(?:DC\\s*(\\d+)\\s*(STR|DEX|CON|INT|WIS|CHA)\\s*or\\s*)?([^.]+)','i'), m=rx.exec(notes||'');
+  if(!m) return {name:name,text:name};
+  return riderFrom({name:name,dc:m[1]?+m[1]:0,stat:m[2]?m[2].toLowerCase():null,text:m[3].trim()}); }
+function riderFrom(r){ var t=String(r.text||'').toLowerCase(), m;
+  if((m=/paraly[sz]ed\s+(\d*d?\d+)\s+rounds?/.exec(t))) r.para=m[1];
+  else if(/stone|petrif/.test(t)) r.petrify=true;
+  else if((m=/(\d*d\d+)\s+(str|dex|con|int|wis|cha)\s+damage/.exec(t))) r.statLoss={dice:m[1],stat:m[2]};
+  else if(/charm/.test(t)) r.charm=1;
+  return r; }
+// split on a word (" or ", " and ") only outside brackets: "(DC 15 CON or 1d4 STR damage)" stays whole
+function splitTop(str,word){ var out=[], depth=0, cur='', low=str.toLowerCase(), w=' '+word+' ';
+  for(var i=0;i<str.length;i++){ var ch=str.charAt(i); if(ch==='(') depth++; else if(ch===')') depth=Math.max(0,depth-1);
+    if(depth===0&&low.substr(i,w.length)===w){ out.push(cur); cur=''; i+=w.length-1; continue; } cur+=ch; }
+  out.push(cur); return out.map(function(x){ return x.trim(); }).filter(Boolean); }
+function parseAtk(str,notes,riders){
+  return splitTop(String(str||''),'or').map(function(alt){ return splitTop(alt,'and').map(function(part){ part=part.trim();
+    var m=/^(\d+)\s+(.+?)\s*(?:\(([^)]*)\))?\s*([+-]\d+)\s*\(([^)]*)\)\s*$/.exec(part);
+    if(m){ var inner=m[5], a={n:+m[1],name:m[2].trim(),range:m[3]||'',bonus:+m[4],dmg:'',riders:[]};
+      var sv=/DC\s*(\d+)\s*(STR|DEX|CON|INT|WIS|CHA)\s*or\s*(.+)/i.exec(inner);
+      if(sv) a.riders.push(riderFrom({name:a.name,dc:+sv[1],stat:sv[2].toLowerCase(),text:sv[3]}));
+      else inner.split('+').map(function(x){ return x.trim(); }).forEach(function(tk){ if(/^\d*d\d+$/i.test(tk)||/^\d+$/.test(tk)) a.dmg=a.dmg?a.dmg+'+'+tk:tk; else if(tk) a.riders.push(parseRider(tk,notes,riders)); });
+      return a; }
+    var m2=/^(\d+)\s+(.+?)(?:\s*\(([^)]*)\))?$/.exec(part);
+    var nm=m2?m2[2].trim():part, rd=parseRider(nm,notes,riders);
+    return {n:m2?+m2[1]:1,name:nm,range:m2&&m2[3]||'',auto:true,riders:rd?[rd]:[]}; }); }); }
+function buildFoe(spec,i,total){
+  var base=refDef(spec)||{}; var tag=total>1?' '+(i+1):'';
+  var mods=function(k){ var v=spec[k]!=null?spec[k]:base[k]!=null?base[k]:base[k.charAt(0)]; return parseInt(v,10)||0; };
+  var notes=[base.notes,spec.notes].filter(Boolean).join(' ');
+  var f={uid:uid(),name:(spec.name||base.name||'Foe')+tag,ac:+(spec.ac||base.ac)||12,hp:0,defeated:false,fled:false,
+    routines:spec.routines||base.routines||parseAtk(spec.atk||base.atk,notes,spec.riders||base.riders),
+    dex:mods('dex'),wis:mods('wis'),cha:mods('cha'),fearless:!!(spec.fearless||base.fearless||/immune to morale/i.test(notes)),
+    resist:spec.resist||base.resist||null,lv:+(spec.lv||base.lv)||1,note:spec.note||'',images:0,spells:spec.spells||base.spells||null,
+    rend:!!(spec.rend||base.rend),at:spec.at||base.at||null,elite:spec.elite||base.elite||0,scoreEach:spec.scoreEach||null};
+  f.hp=f.hpMax=+(spec.hp||base.hp)||10;
+  if(f.resist==null&&/only damaged by silver or magical/i.test(notes)) f.resist={only:'silver|magic'};
+  if(f.resist==null&&/only damaged by magical/i.test(notes)) f.resist={only:'magic'};
+  return f;
+}
+function startFight(e,full,opts){
+  opts=opts||{}; closeDlg(); var foes=[], D=dangerHere(); if(D&&D.enc!==e.id) D=null; if(D) clearDanger();
+  A(e.foes).forEach(function(spec){ var n=scaledN(spec,full); for(var i=0;i<n;i++) foes.push(buildFoe(spec,i,n)); });
+  if(e.onStart&&S.m) applyEffects(e.onStart,curWp(),wpDef(curWp()),{label:e.label});
+  S.combat={enc:e.id,label:e.label,objective:!!e.objective,round:0,foes:foes,first:null,phase:0,done:{},pending:null,cond:{},danger:D||null,fq:[],sum:null};
+  jlog('combat','Fight: '+e.label,foes.map(function(f){ return f.name; }).join(', ')); if(e.note) story(e.note);
+  if(opts.first==='foes'||(D&&D.ambush)){ S.combat.first='foes'; jlog('combat','Surprise!','They act first'); save(); newRound(true); return; }
+  if(opts.first==='party'){ S.combat.first='party'; jlog('combat','You have the drop on them','Your side acts first'); save(); newRound(true); return; }
+  rollInitiative(function(){ newRound(true); });
+}
+function rollInitiative(done){ var c=S.combat; var lead=bestAt('dex'); var fd=c.foes.filter(function(f){ return !f.defeated&&!f.fled; }).reduce(function(m,f){ return Math.max(m,f.dex); },-5);
+  var fr=d(20), ft=fr+fd;
+  rollSheet({stat:'dex',label:'Initiative'},function(r){ var pt=+r.total||0; c.first=pt>=ft?'party':'foes';
+    jlog('combat','Initiative: '+(c.first==='party'?(solo()?'you go first':'the party goes first'):'they go first'),(solo()?'':heroName(r.hero)+' ')+pt+' vs '+ft+' (d20 '+fr+' '+sgn(fd)+')'); save(); done&&done(); },lead); }
+function alive(){ return S.combat.foes.filter(function(f){ return !f.defeated&&!f.fled; }); }
+function foeBy(id){ return S.combat.foes.find(function(f){ return f.uid===id; }); }
+function newRound(firstOne){ var c=S.combat; if(!c) return;
+  var go=function(){ c.round++; c.phase=0; c.done={}; c.pending=null; c.sum={dealt:0,taken:{},down:[]};
+    if(c.round>1) burnLight(1);
+    jlog('combat','Round '+c.round,(c.first==='party'?(solo()?'You':'The party'):'They')+' act first');
+    var e=findEncounter(c.enc)||{};
+    // the fight's own goings-on each round (stones thrown from the dark…)
+    if(e.chaos&&c.round>=(e.chaos.from||1)&&alive().length&&(!e.chaos.chance||d(e.chaos.chance[1])<=e.chaos.chance[0])){ var ev=pick(e.chaos.events); if(ev){ story(ev.text);
+      if(ev.heroSave) standingHeroes().forEach(function(hid2){ var hs=ev.heroSave, md=(PCS[hid2]&&PCS[hid2].mods&&PCS[hid2].mods[hs.stat])||0, rr=d(20), ok2=rr===20||(rr!==1&&rr+md>=hs.dc); jlog('combat',heroName(hid2)+': '+(hs.label||'Save')+' — '+(ok2?'resists':'fails'),'d20 '+rr+' '+sgn(md)+' vs DC '+hs.dc); if(!ok2&&hs.flagEach){ S.m.flags[hs.flagEach+':'+hid2]=true; if(hs.failText) story(hs.failText.replace('{name}',heroName(hid2))); } });
+      if(ev.hero){ var tg=pick(standingHeroes()); if(tg){ var hd=rollExpr(ev.hero); send('damage',{n:hd.total,label:ev.label||'Hit'},null,tg); sumAdd('taken',hd.total,tg); jlog('combat',heroName(tg)+' takes '+hd.total,ev.label||''); } }
+      if(ev.foe){ var fo=pick(alive()); if(fo){ var fd=rollExpr(ev.foe); hurtFoe(fo,fd.total,{plain:true,why:ev.label||''}); } } } }
+    save(); startSide(); };
+  if(!firstOne&&S.chaos){ rollInitiative(go); } else go(); }
+function sideNow(){ var c=S.combat; var order=c.first==='foes'?['foes','party']:['party','foes']; return order[c.phase]; }
+function startSide(){ var c=S.combat; if(!c) return; if(!alive().length){ save(); render(); return; }
+  if(c.phase>1){ c.pending=null; save(); render(); return; }   // round over → "Next round"
+  if(sideNow()==='party'){
+    allies().forEach(function(a){ allyTurn(a); });
+    // the dying make their death roll; the paralysed and charmed lose their turn
+    aliveHeroes().forEach(function(id){ var cd=c.cond[id]||{};
+      if(dyingOf(id)){ c.done[id]=true; var res=deathRoll(id); if(res==='up') c.done[id]=false; }
+      else if(!standing(id)||(S.m.stable&&S.m.stable[id])) c.done[id]=true;
+      else if(cd.para>0){ c.done[id]=true; cd.para--; jlog('combat',heroName(id)+' is paralysed','Loses the turn'+(cd.para?' ('+cd.para+' more)':'')); }
+      else if(cd.charm>0){ c.done[id]=true; cd.charm--; jlog('combat',heroName(id)+' is charmed','Stands entranced'+(cd.charm?' ('+cd.charm+' more)':'')); } });
+    if(checkWipe()) return;
+    nextHero(); return; }
+  c.fq=alive().map(function(f){ return f.uid; }); c.fi=0; foeNext(); }
+function nextHero(){ var c=S.combat; var id=aliveHeroes().find(function(x){ return !c.done[x]; });
+  if(!id){ endSide(); return; }
+  c.pending={type:'pc',pid:id}; setActing(id,true); send('endTurn',{},null,id);
+  if(isDark()) send('adv',{mode:'disadvantage'},null,id);
+  save(); render(); }
+function pcTurnDone(){ var c=S.combat; if(!c) return; var P=c.pending; if(P&&P.type==='pc') c.done[P.pid]=true; c.pending=null; UI.atk=null;
+  if(!alive().length){ save(); render(); return; } nextHero(); }
+function endSide(){ var c=S.combat; c.phase++; c.pending=null; if(c.phase>1){ save(); render(); return; } startSide(); }
+// a foe's turn: pick one of its routines (the "or" choices), then make each attack
+function foeNext(){ var c=S.combat; if(!c) return;
+  while(c.fi<c.fq.length){ var f=foeBy(c.fq[c.fi++]); if(!f||f.defeated||f.fled) continue;
+    var tg=pickTarget(); if(!tg){ if(checkWipe()) return; break; }
+    foeAct(f,tg); return; }
+  endSide(); }
+function pickTarget(){ var hs=standingHeroes(), as=allies(); var pool=hs.map(function(id){ return {hero:id}; }).concat(as.map(function(a){ return {ally:a.id}; })); return pool.length?pick(pool):null; }
+function heroAc(id){ var s=PCS[id]; return s?(+s.ac||10):10; }
+function foeAct(f,tg){ var c=S.combat;
+  var ally=tg.ally?allies().find(function(a){ return a.id===tg.ally; }):null, hid=tg.hero||null;
+  // a sensible foe doesn't re-cast what is still working: no charm on someone charmed, no new images while it has some
+  var charmed=hid&&c.cond[hid]&&c.cond[hid].charm>0;
+  var ok=f.routines.filter(function(r){ return !r.some(function(a){ var n=String(a.name).toLowerCase(); return (/charm/.test(n)&&(charmed||!hid))||(/mirror|image/.test(n)&&f.images>0); }); });
+  var pool=ok.length?ok:f.routines; var rt=pool.length>1?pick(pool):pool[0]||[];
+  var tname=ally?ally.name:heroName(hid), ac=ally?(ally.ac||11):heroAc(hid);
+  var P={type:'foe',foe:f.uid,hero:hid,ally:ally?ally.id:null,title:f.name+' → '+(solo()&&hid?'you':tname),lines:[],saves:[],total:0};
+  var hitsOn={}, paraT=hid&&c.cond[hid]&&c.cond[hid].para>0;
+  rt.forEach(function(a){
+    for(var k=0;k<(a.n||1);k++){
+      if(a.auto){ // a gaze, a curse, a spell: no attack roll — the target saves, or the foe casts
+        if(a.spell||/charm|mirror|image|summon|snake/i.test(a.name)) { foeSpell(f,a,P); continue; }
+        a.riders.forEach(function(rd){ if(rd&&rd.dc&&hid) P.saves.push({stat:rd.stat||'con',dc:rd.dc,rider:rd,label:a.name}); else if(rd) P.lines.push(a.name+': '+rd.text); });
+        if(!a.riders.length) P.lines.push(f.name+' uses '+a.name+'.'); continue; }
+      var r1=d(20), r2=paraT?d(20):null, r=r2!=null?Math.max(r1,r2):r1, tot=r+(a.bonus||0), hit=r===20||(r!==1&&tot>=ac);
+      if(paraT&&/engulf|touch/i.test(a.name)) hit=true;
+      if(!hit){ P.lines.push(a.name+': miss ('+tot+' vs AC '+ac+')'); continue; }
+      var dm=a.dmg?rollExpr(a.dmg,r===20):{total:0,text:''};
+      P.total+=dm.total; hitsOn[a.name]=(hitsOn[a.name]||0)+1;
+      P.lines.push(a.name+': '+(r===20?'CRITICAL ':'')+'hit ('+tot+' vs AC '+ac+')'+(a.dmg?' — '+dm.total+' damage ('+dm.text+')':''));
+      a.riders.forEach(function(rd){ if(!rd) return; if(rd.dc&&hid) P.saves.push({stat:rd.stat||'con',dc:rd.dc,rider:rd,label:a.name}); else if(hid&&(rd.statLoss||rd.para||rd.petrify)) applyRider(rd,hid,a.name,P); else if(rd.text&&rd.text!==a.name) P.lines.push(rd.name+': '+rd.text); }); } });
+  if(f.rend&&Object.keys(hitsOn).some(function(k){ return hitsOn[k]>=2; })){ var rd2=rollExpr('1d6'); P.total+=rd2.total; P.lines.push('Rend! +'+rd2.total+' damage'); }
+  if(P.total>0){ if(ally){ ally.hp=Math.max(0,ally.hp-P.total); if(ally.hp<=0){ ally.down=true; P.lines.push(ally.name+' goes down.'); story(ally.name+' goes down.'); } }
+    else { send('damage',{n:P.total,label:f.name},null,hid); sumAdd('taken',P.total,hid); } }
+  if(!P.lines.length) P.lines.push(f.name+' hesitates.');
+  jlog('combat',P.title,P.lines.join(' · ')); c.pending=P; if(hid) setActing(hid,true); save(); render(); }
+function foeSpell(f,a,P){ var nm=String(a.name).toLowerCase(), sp=(f.spells||{})[nm]||{};
+  var dc=sp.dc||11, r=d(20), tot=r+(f.cha||0), ok=r===20||(r!==1&&tot>=dc);
+  if(!ok){ P.lines.push(f.name+' tries '+a.name+' — it fails ('+tot+' vs DC '+dc+')'); return; }
+  if(sp.say) story(sp.say);
+  if(/mirror|image/.test(nm)){ f.images=3; P.lines.push(f.name+' casts '+a.name+': three illusory copies'); return; }
+  if(/charm/.test(nm)&&P.hero){ var n=sp.rounds||1; if(sp.longFlag&&S.m.flags[sp.longFlag+':'+P.hero]) n=sp.longRounds||3; S.combat.cond[P.hero]=S.combat.cond[P.hero]||{}; S.combat.cond[P.hero].charm=n; P.lines.push(f.name+' casts '+a.name+': '+heroName(P.hero)+' is charmed for '+n+' round'+(n===1?'':'s')); return; }
+  P.lines.push(f.name+' casts '+a.name+'.'); }
+function applyRider(rd,hid,label,P){ var c=S.combat;
+  if(rd.para){ var n=rollExpr(rd.para).total||1; c.cond[hid]=c.cond[hid]||{}; c.cond[hid].para=n; P.lines.push(heroName(hid)+' is paralysed for '+n+' round'+(n===1?'':'s')); send('tracker',{name:'Paralyzed',on:true},null,hid); }
+  else if(rd.petrify){ S.m.stone[hid]=true; P.lines.push(heroName(hid)+' turns to stone!'); story(heroName(hid)+' slows, greys and stiffens — stone.'); send('tracker',{name:'Petrified',on:true},null,hid); }
+  else if(rd.statLoss){ var lv=rollExpr(rd.statLoss.dice).total; var sc=(PCS[hid]&&PCS[hid].scores)||{}; if(scarabSoak(hid,lv,P)) return; send('stat',{id:rd.statLoss.stat,delta:-lv,why:label},null,hid); P.lines.push(heroName(hid)+' loses '+lv+' '+rd.statLoss.stat.toUpperCase());
+    if((sc[rd.statLoss.stat]||10)-lv<=0&&/con/.test(rd.statLoss.stat)){ killHero(hid); } }
+  else if(rd.text) P.lines.push(rd.text); }
+// the scarab of drain resistance soaks 10 points of life drain, then turns to sand
+function scarabSoak(hid,n,P){ var s=PCS[hid]; if(!s||!A(s.items).some(function(it){ return /scarab of drain/i.test(it.name); })) return false;
+  S.m.scarab=S.m.scarab||{}; var left=10-(S.m.scarab[hid]||0); if(left<=0) return false; var soak=Math.min(left,n); S.m.scarab[hid]=(S.m.scarab[hid]||0)+soak;
+  P.lines.push('The jade scarab drinks '+soak+' of the drain'); if(S.m.scarab[hid]>=10){ send('removeItem',{name:'Scarab of drain resistance',qty:1},null,hid); P.lines.push('— and crumbles to sand'); }
+  if(soak<n) send('stat',{id:'con',delta:-(n-soak),why:'Life drain'},null,hid); return true; }
+function rollSave(i){ var c=S.combat, P=c&&c.pending; if(!P||P.type!=='foe') return; var sv=P.saves[i]; if(!sv||sv.done) return;
+  rollSheet({stat:sv.stat,label:sv.label+' save'},function(r){ var ok=checkOk(r,sv.dc); sv.done=true; sv.ok=ok;
+    jlog('roll',(solo()?'':heroName(P.hero)+': ')+sv.label+' — '+(ok?'saved':'failed'),r.total+' vs DC '+sv.dc);
+    if(ok) P.lines.push(sv.label+': saved'); else { P.lines.push(sv.label+': failed'); applyRider(sv.rider,P.hero,sv.label,P); }
+    save(); render(); },P.hero); }
+function foeDone(){ var c=S.combat, P=c&&c.pending; if(P&&P.saves&&P.saves.some(function(s){ return !s.done; })){ toast('Roll the save first'); return; }
+  c.pending=null; if(checkWipe()) return; setTimeout(function(){ if(S.combat) foeNext(); },120); }
+// The hero's attack or spell, rolled on the sheet: choose the target. Hit or miss is the roll
+// against the foe's AC; a natural 20 always hits (the sheet doubled the dice), a natural 1 misses.
+function pcAction(m,pid){ var c=S.combat; UI.atk={m:m,pid:pid};
+  if(m.type==='spell'){
+    if(!m.success){ jlog('combat',heroName(pid)+': '+m.label+' fails',m.total+''); return missDlg(m,pid,'The spell fails.'); }
+    if(/^light$/i.test(m.label||'')){ setLight(pid,'Light spell'); jlog('combat',heroName(pid)+' casts Light',''); pcTurnDone(); return; }
+    if(m.healing&&m.dmg){ offerHeal(pid,m,true); return; }
+    if(!m.dmg){ jlog('combat',heroName(pid)+' casts '+m.label,'Apply its effect: mark foes out of the fight, or adjust their HP'); story((solo()?'You cast ':heroName(pid)+' casts ')+m.label+'.');
+      dlg('<h3>'+esc(m.label)+'</h3><p class="small">The spell works. Apply what it does — the foe buttons let you mark one fled or change its HP.</p><div class="row" style="margin-top:8px"><button class="btn pri" data-a="pc-done-dlg">Done — end the turn</button></div>'); save(); render(); return; } }
+  var foes=alive(); var magic=m.type==='spell'||/^\+\d|\benchanted\b|\bmagic/i.test(m.weapon||''), silver=/silver/i.test(m.weapon||'');
+  var hitOf=function(f){ return m.type==='spell'?true:m.nat===20?true:m.nat===1?false:(+m.total||0)>=f.ac; };
+  if(m.type==='attack'&&foes.every(function(f){ return !hitOf(f); })&&luckOf(pid)>0){ return missDlg(m,pid,'Miss — '+m.total+' doesn\'t beat any foe\'s AC.'); }
+  dlg('<h3>'+esc(m.label||'Attack')+(m.type==='spell'?' — the spell lands':' — '+m.total+' to hit')+'</h3><p class="small muted">'+(m.dmg!=null?(m.crit?'Critical! ':'')+m.dmg+' damage':'')+(magic?' · magic':'')+(silver?' · silver':'')+'</p><div class="list" style="margin-top:8px">'+
+    foes.map(function(f){ var h=hitOf(f), rs=resistNote(f,magic,silver), n=h?dmgAfter(f,m.dmg||0,magic,silver):0;
+      return '<button class="btn'+(h?' pri':'')+'" data-a="hit" data-f="'+f.uid+'" data-n="'+n+'" data-h="'+(h?1:0)+'">'+esc(f.name)+' (AC '+f.ac+', '+f.hp+'/'+f.hpMax+' HP) — '+(h?(f.images?'HIT (an illusion first)':'HIT for '+n+(rs?' · '+rs:'')):'MISS')+'</button>'; }).join('')+'</div>'+
+    (m.type==='attack'&&luckOf(pid)>0&&foes.some(function(f){ return !hitOf(f); })?'<div class="row" style="margin-top:8px"><button class="btn" data-a="pc-luck">🍀 Spend a luck token: re-roll the attack</button></div>':'')+'<div class="row" style="margin-top:8px"><button class="btn ghost" data-a="pc-done-dlg">No target — end the turn</button></div>');
+}
+function missDlg(m,pid,txt){ dlg('<h3>'+esc(m.label||'Attack')+'</h3><p class="small">'+esc(txt)+'</p><div class="row" style="margin-top:8px">'+(luckOf(pid)>0?'<button class="btn pri" data-a="pc-luck">🍀 Spend a luck token: re-roll</button>':'')+'<button class="btn" data-a="pc-done-dlg">End the turn</button></div>'); save(); render(); }
+function resistNote(f,magic,silver){ var r=f.resist; if(!r) return ''; if(r.only){ var ok=(/magic/.test(r.only)&&magic)||(/silver/.test(r.only)&&silver); return ok?'':'no effect: only '+r.only.replace('|',' or ')+' hurts it'; } if(r.half){ var ok2=(/magic/.test(r.unless||'')&&magic)||(/silver/.test(r.unless||'')&&silver); return ok2?'':'half: not '+String(r.unless||'magic').replace('|',' or '); } return ''; }
+function dmgAfter(f,n,magic,silver){ var r=f.resist; if(!r) return n; if(r.only){ return ((/magic/.test(r.only)&&magic)||(/silver/.test(r.only)&&silver))?n:0; } if(r.half){ return ((/magic/.test(r.unless||'')&&magic)||(/silver/.test(r.unless||'')&&silver))?n:Math.floor(n/2); } return n; }
+function hitChosen(uid2,n,hit){ var f=foeBy(uid2); closeDlg(); var a=UI.atk; if(!f||!a){ pcTurnDone(); return; }
+  var who=solo()?'You':heroName(a.pid);
+  if(!hit){ jlog('combat',who+' miss'+(solo()?'':'es')+' '+f.name,(a.m.total||'')+' vs AC '+f.ac); pcTurnDone(); return; }
+  if(f.images>0){ f.images--; jlog('combat',who+' strike'+(solo()?'':'s')+' an illusion','One of '+f.name+'\'s images bursts ('+f.images+' left)'); story('The blow passes through a mirror-image, which bursts like a soap bubble.'); pcTurnDone(); return; }
+  hurtFoe(f,n,{why:(a.m.label||'')}); pcTurnDone(); }
+function hurtFoe(f,n,o){ f.hp=Math.max(0,f.hp-n); sumAdd('dealt',n); jlog('combat',f.name+' takes '+n,(o&&o.why?o.why+' · ':'')+f.hp+'/'+f.hpMax);
+  if(f.at&&!f.atDone&&f.hp>0&&f.hp<=f.at.hp){ f.atDone=true; if(f.at.say) story(f.at.say); if(f.at.summon){ var sp=f.at.summon, k=sp.count||1; for(var i=0;i<k;i++) S.combat.foes.push(buildFoe(sp,i,k)); jlog('combat',f.name+': '+(f.at.label||'reinforcements'),sp.name||''); } }
+  if(f.hp<=0&&!f.defeated){ f.defeated=true; sumDown(f.name); jlog('combat',f.name+' is down',''); toast(f.name+' is down!'); checkMorale(); } }
+// Morale (Shadowdark): when half a group is down — or a lone foe is at half its HP — the rest
+// make a DC 15 WIS check or flee. The undead and the like are immune.
+function checkMorale(){ var c=S.combat; if(!c||c.morale) return; var tot=c.foes.length, down=c.foes.filter(function(f){ return f.defeated||f.fled; }).length, al=alive();
+  var lone=tot===1&&al[0]&&al[0].hp*2<=al[0].hpMax; if(!(tot>1&&down*2>=tot)&&!lone) return; c.morale=true;
+  al.forEach(function(f){ if(f.fearless) return; var r=d(20), t=r+f.wis; if(t<15){ f.fled=true; jlog('combat',f.name+' breaks and flees','Morale: '+t+' vs DC 15'); story(f.name+' turns and flees.'); } else jlog('combat',f.name+' holds','Morale: '+t+' vs DC 15'); }); }
+function offerHeal(pid,m,inFight){ UI.heal={pid:pid,n:m.dmg,fight:!!inFight};
+  dlg('<h3>'+esc(m.label)+' — heals '+m.dmg+'</h3><div class="list" style="margin-top:8px">'+aliveHeroes().map(function(id){ var s=PCS[id]; return '<button class="btn" data-a="heal-to" data-id="'+esc(id)+'">'+esc(heroName(id))+(s?' ('+s.hp+'/'+s.hpMax+' HP)':'')+'</button>'; }).join('')+'</div>'); }
+function sumAdd(k,n,pid){ var c=S.combat; if(!c) return; c.sum=c.sum||{dealt:0,taken:{},down:[]}; if(k==='dealt') c.sum.dealt+=n; else c.sum.taken[pid]=(c.sum.taken[pid]||0)+n; }
+function sumDown(name){ var c=S.combat; if(!c) return; c.sum=c.sum||{dealt:0,taken:{},down:[]}; c.sum.down.push(name); }
+function roundSummary(){ var c=S.combat, s=c&&c.sum; if(!s) return ''; var tk=Object.keys(s.taken).filter(function(k){ return s.taken[k]; });
+  var parts=[(solo()?'You dealt ':'Your side dealt ')+s.dealt+' damage'];
+  if(tk.length) parts.push('took '+tk.map(function(k){ return (solo()?'':heroName(k)+' ')+s.taken[k]; }).join(', ')); else parts.push('took nothing');
+  if(s.down.length) parts.push(s.down.join(', ')+' down');
+  return '<div class="rsum"><b>Round '+c.round+':</b> '+esc(parts.join(' · '))+'.</div>'; }
+function combatBody(){
+  var c=S.combat, enc=findEncounter(c.enc)||{};
+  var h='<div class="wyd-h"><span>'+esc(c.label)+' — round '+c.round+'</span><label class="chip tiny" title="Chaos Mode (SoloDark): re-roll initiative at the start of every round"><input type="checkbox" data-a="chaos"'+(S.chaos?' checked':'')+'> Chaos</label></div>';
+  var side=c.first?sideNow():null;
+  h+='<div class="sidebar">'+(c.first?'<span>'+(c.first==='party'?'<b>Heroes</b> → foes':'<b>Foes</b> → heroes')+'</span>':'<span>Rolling initiative…</span>')+(side&&c.phase<2?'<span>now: <b>'+(side==='party'?(solo()?'you':'the party'):'the foes')+'</b></span>':'')+'</div>';
+  if(isDark()) h+='<div class="darkness"><b>Fighting in the dark:</b> attacks and checks have disadvantage.</div>';
+  var P=c.pending;
+  if(!alive().length) h+='<div class="attack"><b>Victory!</b> Every foe is down or gone.</div><div class="row"><button class="btn pri" data-a="end-fight">End the fight</button></div>';
+  else if(P&&P.type==='pc'){
+    if(!solo()){ h+='<div class="row party-turns">'+aliveHeroes().map(function(id){ var dn=!!c.done[id], on=id===P.pid; return '<button type="button" class="chip hchip'+(on?' on':'')+(dn?' done':'')+'" data-a="c-hero" data-id="'+esc(id)+'"'+(dn?' disabled':'')+'>'+(dn?'✓ ':on?'▶ ':'')+esc(heroName(id))+' <span class="hp-mini">'+(PCS[id]?PCS[id].hp+'/'+PCS[id].hpMax:'')+'</span></button>'; }).join('')+'</div>'; }
+    h+='<div class="attack"><b>'+(solo()?'Your turn.':esc(heroName(P.pid))+'\'s turn.')+'</b> Attack or cast on the sheet — then pick the target here. Anything else: do it and end the turn.</div>';
+    var acts=A(enc.combatActions).filter(function(x){ return hasReq(x.requires,curWp())&&!anyOn(x.hideIf,curWp())&&(!x.max||((c.acts||{})[x.id]||0)<x.max); });
+    h+='<div class="stack" style="margin:6px 0">';
+    acts.forEach(function(x){ h+=actRow(esc(x.label),'<button class="btn" data-a="c-act" data-i="'+A(enc.combatActions).indexOf(x)+'">'+esc(x.button||'Do it')+'</button>',x.note?esc(x.note):''); });
+    var lr=lightRow(); if(lr) h+=lr; h+=useRow();
+    h+='</div><div class="row"><button class="btn pri" data-a="pc-done">End '+(solo()?'my':esc(heroName(P.pid))+'\'s')+' turn</button>'+(enc.endable&&hasReq(enc.endable.requires,curWp())?'<button class="btn" data-a="calm" title="'+esc(enc.endable.note||'')+'">'+esc(enc.endable.label)+'</button>':'')+(enc.noFlee?'':'<button class="btn warn" data-a="flee" title="Back to where you came from — they\'ll still be here">Flee</button>')+'</div>'; }
+  else if(P&&P.type==='foe'){
+    h+='<div class="attack"><b>'+esc(P.title)+'</b>'+P.lines.map(function(x){ return '<p class="small">'+esc(x)+'</p>'; }).join('')+(P.total?'<p><b class="big">'+P.total+'</b> damage — taken off '+(P.ally?'their':solo()?'your':esc(heroName(P.hero))+'\'s')+' HP.</p>':'')+'</div><div class="row">';
+    P.saves.forEach(function(sv,i){ if(!sv.done) h+='<button class="btn pri" data-a="save" data-i="'+i+'">'+(solo()?'':esc(heroName(P.hero))+': ')+esc(sv.label)+' — '+esc(String(sv.stat).toUpperCase())+' save DC '+sv.dc+'</button>'; });
+    h+='<button class="btn'+(P.saves.some(function(s){ return !s.done; })?' ghost':' pri')+'" data-a="foe-done">Continue</button></div>'; }
+  else if(c.first&&c.phase>1) h+=roundSummary()+'<div class="row"><button class="btn pri" data-a="round">Next round'+(S.chaos?' (re-roll initiative)':'')+'</button></div>';
+  if(!alive().length) h+=roundSummary();
+  h+='<div class="stack" style="margin-top:10px">'+c.foes.map(function(f){ var isTurn=P&&P.type==='foe'&&P.foe===f.uid;
+    return '<div class="foe'+(f.defeated||f.fled?' dead':'')+(isTurn?' turn':'')+'"><div class="foe-h"><b>'+esc(f.name)+'</b><span class="small">'+f.hp+'/'+f.hpMax+' HP · AC '+f.ac+(f.images?' · '+f.images+' images':'')+'</span></div>'+
+      '<div class="row tiny" style="margin-top:4px">'+(f.defeated?'<span class="chip bad">Down</span>':f.fled?'<span class="chip">Fled</span>':'<button class="btn ghost" data-a="foe-hp" data-f="'+f.uid+'" data-d="-1">−1</button><button class="btn ghost" data-a="foe-hp" data-f="'+f.uid+'" data-d="1">+1</button><button class="btn ghost" data-a="foe-out" data-f="'+f.uid+'" title="Turned, charmed, fled — out of the fight">Out</button>')+
+      '<span class="muted">'+esc(f.routines.map(function(rt){ return rt.map(function(a){ return (a.n>1?a.n+' ':'')+a.name+(a.auto?'':' '+sgn(a.bonus)+(a.dmg?' ('+a.dmg+')':'')); }).join(' + '); }).join(' or '))+'</span></div>'+(f.note&&!f.defeated&&!f.fled?'<div class="tiny muted" style="margin-top:3px">'+esc(f.note)+'</div>':'')+(f.resist&&!f.defeated?'<div class="tiny muted">'+esc(f.resist.only?'Only '+f.resist.only.replace('|',' or ')+' hurts it.':'Half damage unless '+String(f.resist.unless||'magic').replace('|',' or ')+'.')+'</div>':'')+'</div>'; }).join('')+'</div>';
+  return h;
+}
+
+// ═══ GAME FEATURES: items, conversations, companions, hints, endings ═══════════
+function heroItems(id){ var s=PCS[id||S.acting]; return A(s&&s.items); }
+function usesHere(D){ var mi=curMission(), w=curWp(), def=wpDef(w);
+  return A(def&&def.uses).concat(A(mi.uses)).filter(function(u){ return hasReq(u.requires,w)&&!anyOn(u.hideIf,w)&&(D?(!!u.danger&&D.enc===u.danger)||!!u.anytime:(S.combat?!!u.combat||!!u.anytime:!u.danger)); }); }
+function itemMatches(u,name){ var n=String(name||'').toLowerCase(); return arr1(u.item).some(function(k){ return n.indexOf(String(k).toLowerCase())>=0; }); }
+function openUseItem(){ if(!PCS[S.acting]){ toast('The sheet is still loading'); return; } var items=heroItems(); UI.useItems=items;
+  dlg('<h3>Use an item'+(solo()?'':' — '+esc(heroName(S.acting)))+'</h3>'+(items.length?'<p class="small muted">What do you take out? (Potions and the like: use them on the sheet.)</p><div class="list">'+items.map(function(it,i){ return '<button class="btn" data-a="use-pick" data-i="'+i+'">'+esc(it.name)+(it.qty>1?' ×'+it.qty:'')+'</button>'; }).join('')+'</div>':'<p class="small muted">Your pack is empty.</p>')+'<div class="row" style="margin-top:10px"><button class="btn ghost" data-a="close">Never mind</button></div>'); }
+function pickUseItem(i){ var it=A(UI.useItems)[i]; if(!it) return; var opts=usesHere(dangerHere()).filter(function(u){ return itemMatches(u,it.name); });
+  if(!opts.length){ closeDlg(); story('You try the '+String(it.name).toLowerCase()+' on everything within reach. Nothing comes of it.'); save(); render(); return; }
+  if(opts.length===1){ closeDlg(); doUse(opts[0],it); return; }
+  UI.useOpts=opts; UI.useIt=it; dlg('<h3>'+esc(it.name)+'</h3><p class="small">On what?</p><div class="list">'+opts.map(function(u,k){ return '<button class="btn" data-a="use-do" data-i="'+k+'">'+esc(u.label)+'</button>'; }).join('')+'</div><div class="row" style="margin-top:10px"><button class="btn ghost" data-a="close">Never mind</button></div>'); }
+function doUse(u,it){ var w=curWp(), def=wpDef(w), who=S.acting; jlog('note','Used '+it.name,u.label);
+  var fin=function(ok){ if(ok?u.success:u.failure) story(ok?u.success:u.failure);
+    if((ok&&u.consume)||(!ok&&u.consumeOnFail)) send('removeItem',{name:it.name,qty:1},null,who);
+    applyEffects(ok?(u.onSuccess||u.fx):u.onFail,w,def,{label:u.label}); if(!u.free){ if(S.combat) pcTurnDone(); else actionDone(); } save(); render(); };
+  if(u.stat) rollSheet({stat:u.stat,adv:!!u.adv,dis:!!u.dis,label:u.label},function(r){ var ok=checkOk(r,u.dc); jlog('roll',u.label+' — '+rollWord(r,u.dc),r.total+' vs DC '+u.dc); fin(ok); });
+  else fin(true); }
+// ── Conversations: { id, name, requires, hideIf, start:'start', nodes:{ id:{ text, fx, end,
+// options:[{ id, label, to, requires, hideIf, once, fx, stat, dc, reaction, success, failure }] } } }.
+function talksHere(){ var w=curWp(), def=wpDef(w); return A(def&&def.talk).filter(function(t){ return hasReq(t.requires,w)&&!anyOn(t.hideIf,w); }); }
+function talkDef(tid){ var def=wpDef(curWp()); return A(def&&def.talk).find(function(x){ return x.id===tid; }); }
+function optKey(tid,o){ return tid+':'+(o.id||o.label); }
+function openTalk(tid,node){ var t=talkDef(tid); if(!t) return; var w=curWp(), def=wpDef(w); node=node||t.start||'start'; var n=t.nodes[node]; if(!n) return;
+  UI.talk={id:tid,node:node}; if(n.fx) applyEffects(n.fx,w,def,{label:t.name}); if(n.text) story(n.text);
+  var said=S.m.saidOpts||{}, opts=A(n.options).filter(function(o){ return hasReq(o.requires,w)&&!anyOn(o.hideIf,w)&&!(o.once&&said[optKey(tid,o)]); }); UI.talkOpts=opts;
+  var h='<h3>'+esc(t.name)+'</h3>'+(n.text?'<p class="read">'+esc(n.text)+'</p>':'');
+  if(n.end||!opts.length) h+='<div class="row" style="margin-top:10px"><button class="btn pri" data-a="talk-end">'+esc(n.endLabel||'Done')+'</button></div>';
+  else h+='<div class="list" style="margin-top:8px">'+opts.map(function(o,i){ var r=o.stat?specLine(o):''; return '<button class="btn" data-a="talk-opt" data-i="'+i+'">'+esc(o.label)+(r?' <span class="tiny muted">· '+esc(r)+'</span>':'')+'</button>'; }).join('')+'</div>'+(n.noLeave?'':'<div class="row" style="margin-top:8px"><button class="btn ghost" data-a="talk-end">Leave it there</button></div>');
+  dlg(h); save(); renderJournal(); }
+function talkOpt(i){ var o=A(UI.talkOpts)[i]; if(!o||!UI.talk) return; var tid=UI.talk.id, w=curWp(), def=wpDef(w);
+  S.m.saidOpts=S.m.saidOpts||{}; S.m.saidOpts[optKey(tid,o)]=true; jlog('talk','“'+o.label+'”','');
+  if(o.fx) applyEffects(o.fx,w,def,{label:o.label});
+  if(o.stat){ closeDlg(); rollSheet({stat:o.stat,adv:!!o.adv,dis:!!o.dis,label:o.label},function(r){ var ok=checkOk(r,o.dc); jlog('roll',o.label+' — '+rollWord(r,o.dc),r.total+' vs DC '+o.dc); openTalk(tid,ok?o.success:o.failure); }); return; }
+  if(o.to) openTalk(tid,o.to); else talkEnd(); }
+function talkEnd(){ closeDlg(); if(UI.talk){ UI.talk=null; actionDone(); } save(); render(); }
+// Reaction (Shadowdark): 2d6 + CHA — 2–6 hostile, 7–8 suspicious, 9 neutral, 10–11 curious, 12+ friendly.
+function reactionBand(n){ return n<=6?'hostile':n<=8?'suspicious':n===9?'neutral':n<=11?'curious':'friendly'; }
+function evOption(i){ var w=curWp(), D=dangerHere(); if(!D||D.type!=='event') return; var o=A(D.ev.options)[i]; if(!o) return; var def=wpDef(w);
+  var fin=function(fx,txt){ clearDanger(); if(txt) story(txt); applyEffects(fx,w,def,{label:o.label}); if(!o.free) actionDone(); save(); render(); };
+  if(o.reaction){ var s=PCS[S.acting], ch=(s&&s.mods&&s.mods.cha)||0, r=d(6)+d(6), t=r+ch, band=reactionBand(t); jlog('roll','Reaction: '+band,'2d6 '+r+' '+sgn(ch)+' CHA = '+t); var b=(o.bands||{})[band]||{}; fin(b.fx,b.text); return; }
+  if(o.stat){ rollSheet({stat:o.stat,label:o.label},function(r){ var ok=checkOk(r,o.dc); jlog('roll',o.label+' — '+rollWord(r,o.dc),r.total+' vs DC '+o.dc); fin(ok?o.onSuccess:o.onFail,ok?o.success:o.failure); }); return; }
+  fin(o.fx,o.text); }
+// ── Companions: mission.companions = { id:{ name, hp, ac, atk:'1 dagger +2 (1d4)', helps:['dex'], note } }.
+// They fight on your side's turn; out of a fight they give advantage on the checks they're good at.
+function allies(){ return A(S.m&&S.m.allies).filter(function(a){ return !a.down; }); }
+function joinAlly(id){ var mi=curMission(), d0=(mi.companions||{})[id]; if(!d0||!S.m||A(S.m.allies).some(function(a){ return a.id===id; })) return;
+  S.m.allies=A(S.m.allies); S.m.allies.push({id:id,name:d0.name,hp:d0.hp,hpMax:d0.hp,ac:d0.ac||11,atk:d0.atk||'1 dagger +1 (1d4)',helps:A(d0.helps),note:d0.note||''});
+  jlog('mission',d0.name+' joins you',d0.note||''); }
+function allyHelp(stat){ var k=statKey(stat); var a=allies().find(function(x){ return k&&x.helps.indexOf(k)>=0; }); return a?'Help from '+a.name:null; }
+function allyTurn(a){ var foes=alive(); if(!foes.length) return; var f=pick(foes), at=(parseAtk(a.atk)[0]||[])[0]||{bonus:1,dmg:'1d4',name:'dagger'};
+  var r=d(20), t=r+(at.bonus||0), hit=r===20||(r!==1&&t>=f.ac);
+  if(!hit){ jlog('combat',a.name+' attacks '+f.name,'Miss ('+t+' vs AC '+f.ac+')'); return; }
+  var dm=rollExpr(at.dmg||'1d4',r===20); var n=dmgAfter(f,dm.total,false,false);
+  if(f.images>0){ f.images--; jlog('combat',a.name+' strikes an illusion',''); return; }
+  jlog('combat',a.name+' hits '+f.name,at.name+' '+dm.text); hurtFoe(f,n,{why:a.name}); }
+// ── Hints: mission.hints = [{ at, requires, unless, text }] — only what you've earned.
+function hintFor(){ var mi=curMission(), w=curWp(); if(!mi||!w) return null;
+  return A(mi.hints).find(function(hn){ return (!hn.at||arr1(hn.at).indexOf(w.def)>=0)&&hasReq(hn.requires,w)&&!anyOn(hn.unless,w); })||null; }
+function giveHint(){ var hn=hintFor(); S.m.hints=(S.m.hints||0)+1;
+  var txt=hn?hn.text:'Nothing you know yet points anywhere. Look closer at what\'s around you — and what you\'ve heard.';
+  jlog('hint','Hint',txt); dlgQ('<h3>A thought</h3><p class="read">'+esc(txt)+'</p><div class="row" style="margin-top:10px"><button class="btn pri" data-a="close">Thanks</button></div>'); save(); renderJournal(); }
+// ── Endings ──
+function epilogueLines(){ var mi=curMission(); return A(mi.epilogue).filter(function(e){ return hasReq(e.requires)&&!anyOn(e.unless); }).map(function(e){ return e.text; }); }
+function discoveriesFound(){ var mi=curMission(); return A(mi.discoveries).filter(function(x){ return flagOn(x.flag); }); }
+function settleEnding(){ var mi=curMission(); if(!mi) return;
+  S.best=S.best||{}; S.bestDisc=S.bestDisc||{}; S.achievements=S.achievements||{};
+  S.best[mi.id]=Math.max(S.best[mi.id]==null?-1:S.best[mi.id],S.m.xp||0);
+  S.bestDisc[mi.id]=Math.max(S.bestDisc[mi.id]||0,discoveriesFound().length);
+  S.m.newAch=[]; A(mi.achievements).forEach(function(a){ if(!S.achievements[a.id]&&hasReq(a.requires)&&!anyOn(a.unless)){ S.achievements[a.id]=Date.now(); S.m.newAch.push(a.id); jlog('ach','Achievement: '+a.label,a.desc||''); } }); }
+function endingHtml(){ var mi=curMission(), h='';
+  var ep=S.m.lost?[]:epilogueLines(); if(ep.length) h+='<div class="lbl" style="margin-top:10px">Epilogue</div>'+ep.map(function(t){ return '<p class="read">'+esc(t)+'</p>'; }).join('');
+  var all=A(mi.discoveries), got=discoveriesFound(); if(all.length) h+='<div class="lbl" style="margin-top:10px">Secrets found: '+got.length+' of '+all.length+'</div><ul class="disc">'+all.map(function(x){ var on=got.indexOf(x)>=0; return '<li class="'+(on?'on':'')+'">'+(on?'✓ '+esc(x.label):'? ? ?')+'</li>'; }).join('')+'</ul>';
+  var ach=A(mi.achievements); if(ach.length){ var mine=S.achievements||{}; h+='<div class="lbl" style="margin-top:10px">Achievements: '+ach.filter(function(a){ return mine[a.id]; }).length+' of '+ach.length+'</div><div class="ach">'+ach.map(function(a){ var on=!!mine[a.id], nu=A(S.m.newAch).indexOf(a.id)>=0; return '<div class="a'+(on?' on':'')+(nu?' new':'')+'" title="'+esc(on?a.desc||'':'Not yet')+'"><b>'+(nu?'★ ':'')+esc(on?a.label:'Locked')+'</b>'+(on&&a.desc?'<span>'+esc(a.desc)+'</span>':'')+'</div>'; }).join('')+'</div>'; }
+  if(S.m.hints) h+='<p class="tiny muted" style="margin-top:6px">Hints used: '+S.m.hints+'</p>';
+  return h; }
+
+// ── events ─────────────────────────────────────────────────────────────────
+document.addEventListener('click',function(e){
+  var t=e.target.closest('[data-a]'); if(!t) return; var a=t.dataset.a;
+  if(e.target.closest('.so-tabs')) return;
+  switch(a){
+    case 'close': closeDlg(); break;
+    case 'brief': startBriefing(+t.dataset.i); break;
+    case 'rumors': rollRumors(); break;
+    case 'mapdlg': openMapDlg(); break;
+    case 'journal': openJournalDlg(); break;
+    case 'skip-turn': if(!solo()&&S.m){ actionDone(); save(); render(); } break;
+    case 'hint': giveHint(); break;
+    case 'oracle': openOracle(); break;
+    case 'oracle-roll': oracleRoll(t.dataset.o); break;
+    case 'prompt': { var pr=rollPrompt(); jlog('oracle','Prompt',pr); var out=$('oracle-out'); if(out) out.innerHTML='<div class="oracle-out"><div class="ans" style="font-size:24px">'+esc(pr)+'</div><p class="tiny muted">Verb + noun — what does it suggest?</p></div>'; save(); renderJournal(); break; }
+    case 'light': openLight(); break;
+    case 'light-do': { var lo=A(UI.lightOpts)[+t.dataset.i]; closeDlg(); doLight(lo); break; }
+    case 'use-item': openUseItem(); break;
+    case 'use-pick': pickUseItem(+t.dataset.i); break;
+    case 'use-do': { var uo=A(UI.useOpts)[+t.dataset.i]; closeDlg(); if(uo) doUse(uo,UI.useIt); break; }
+    case 'talk': openTalk(t.dataset.t); break;
+    case 'talk-opt': talkOpt(+t.dataset.i); break;
+    case 'talk-end': talkEnd(); break;
+    case 'ev-opt': evOption(+t.dataset.i); break;
+    case 'hero': if(!canAct(t.dataset.id)){ toast(heroName(t.dataset.id)+' has already acted this round'); break; } setActing(t.dataset.id); break;
+    case 'c-hero': { var c0=S.combat; if(c0&&c0.pending&&c0.pending.type==='pc'&&!c0.done[t.dataset.id]){ c0.pending.pid=t.dataset.id; setActing(t.dataset.id,true); if(isDark()) send('adv',{mode:'disadvantage'},null,t.dataset.id); save(); render(); } break; }
+    case 'view': VIEW=t.dataset.id===S.acting?null:t.dataset.id; showSheet(); renderHeroTabs(); break;
+    case 'stabilize': { var sid=t.dataset.id, hid=t.dataset.h; rollSheet({stat:'int',label:'Stabilize '+heroName(sid)},function(r){ var ok=checkOk(r,15); jlog('roll',heroName(hid)+' tries to stabilize '+heroName(sid)+' — '+(ok?'stable':'not yet'),r.total+' vs DC 15');
+        if(ok){ delete S.m.dying[sid]; S.m.stable[sid]=true; story(heroName(sid)+' is stable — unconscious, but no longer dying. Healing or a rest brings them round.'); } actionDone(); save(); render(); },hid); break; }
+    case 'sneak': { var Dn=dangerHere(); if(!Dn||Dn.type!=='fight') break; var en=findEncounter(Dn.enc), dc=en.sneakDc||12;
+      rollEach(standingHeroes(),{stat:'dex',label:'Sneak past: '+en.label},function(rs){ var bad=rs.filter(function(r){ return !checkOk(r,dc); });
+        rs.forEach(function(r){ jlog('roll',(solo()?'':heroName(r.hero)+': ')+'Sneak past — '+rollWord(r,dc),r.total+' vs DC '+dc); });
+        if(bad.length){ story((solo()?'They':'They spot '+heroName(bad[0].hero)+' — they')+' notice you.'); save(); startFight(en,false); return; }
+        var wv=curWp(); wv.evaded=wv.evaded||{}; wv.evaded[en.id]=true; clearDanger(); story(solo()?'You slip past unseen.':'The party slips past unseen.'); if(en.onEvade) applyEffects(en.onEvade,wv,wpDef(wv),{label:en.label}); actionDone(); save(); render(); }); break; }
+    case 'd-calm': { var Dc=dangerHere(); var ecl=Dc&&findEncounter(Dc.enc); if(!ecl||!ecl.endable) break; clearDanger(); jlog('note',ecl.endable.label,''); applyEffects(ecl.endable.fx,curWp(),wpDef(curWp()),{label:ecl.label}); S.m.flags['won:'+ecl.id]=true; save(); render(); break; }
+    case 'retreat': { if(!S.m.trail.length) break; var from=curWp(); S.m.cur=S.m.trail.pop(); jlog('mission','Back to '+curWp().name,'Backing away'); tick(1); save(); render(); break; }
+    case 'hub': S.m=null; S.combat=null; save(); render(); break;
+    case 'enter': enterMission(); break;
+    case 'ch': doChallenge(t.dataset.c); break;
+    case 'ch-luck': luckReroll(t.dataset.c); break;
+    case 'ch-accept': acceptFail(t.dataset.c); break;
+    case 'ch-choice': doChoice(t.dataset.c); break;
+    case 'ch-opt': doOption(t.dataset.c,t.dataset.o); break;
+    case 'opt-luck': { var ol=UI.optLuck; closeDlg(); if(ol&&spendLuck(ol.hero)){ setActing(ol.hero,true); doOption(ol.cid,ol.oid,true); } break; }
+    case 'opt-fail': { closeDlg(); if(UI.optFin){ var f0=UI.optFin; UI.optFin=null; f0(false); } break; }
+    case 'loot-take': takeLoot(); break;
+    case 'c-act': { var c1=S.combat; if(!c1) break; var enc1=findEncounter(c1.enc)||{}; var x=A(enc1.combatActions)[+t.dataset.i]; if(!x) break; c1.acts=c1.acts||{}; c1.acts[x.id]=(c1.acts[x.id]||0)+1; jlog('combat',x.label,'');
+      if(x.chance&&d(x.chance[1])>x.chance[0]){ story(x.miss||'Nothing.'); pcTurnDone(); save(); render(); break; }
+      applyEffects(x.fx,curWp(),wpDef(curWp()),{label:x.label}); pcTurnDone(); save(); render(); break; }
+    case 'calm': { var ec=findEncounter(S.combat.enc); jlog('combat','The fight ends',ec&&ec.endable?ec.endable.label:''); var fxc=ec&&ec.endable&&ec.endable.fx; S.combat=null; if(ec) S.m.flags['won:'+ec.id]=true; if(fxc) applyEffects(fxc,curWp(),wpDef(curWp()),{label:'Fight'}); save(); render(); break; }
+    case 'exit': { if(dangerHere()){ toast('Deal with the danger first'); break; } var dx=wpDef(curWp()), ex=A(dx&&dx.exits)[+t.dataset.i]; if(!ex) break; if(ex.fx) applyEffects(ex.fx,curWp(),dx,{label:ex.label}); goTo(ex.to); save(); render(); break; }
+    case 'escape': { var de=wpDef(curWp()), es=A(de&&de.escapes)[+t.dataset.i]; if(!es) break;
+      if(!es.stat){ applyEffects(es.fx,curWp(),de,{label:es.label}); escapeDungeon(es.done||es.label); break; }
+      rollEach(standingHeroes(),{stat:es.stat,label:es.label},function(rs){ var fails=rs.filter(function(r){ return !checkOk(r,es.dc); }).length;
+        if(fails&&es.mustPass){ toast('Not everyone makes it'); save(); render(); return; } setTimeout(function(){ escapeDungeon(es.done||es.label); },300); }); break; }
+    case 'search': { var ws=curWp(), dfs=wpDef(ws), left=searchLeft(ws,dfs);
+      if(!left.length){ story('You search carefully. Nothing more here.'); jlog('note','Search','Nothing found'); actionDone(); save(); render(); break; }
+      var tgt=left[0], fin2=function(ok,r){ if(ok){ ws.found=ws.found||{}; ws.found[tgt.id]=true; story(tgt.text); applyEffects(tgt.fx,ws,dfs,{label:'Search'}); } else story(tgt.failure||'You search, but find nothing you can make sense of.'); actionDone(); save(); render(); };
+      if(!tgt.dc){ fin2(true); break; }
+      rollSheet({stat:tgt.stat||'wis',label:'Search'},function(r){ var ok=checkOk(r,tgt.dc); jlog('roll',(solo()?'':heroName(r.hero)+': ')+'Search — '+rollWord(r,tgt.dc),r.total+' vs DC '+tgt.dc); fin2(ok,r); }); break; }
+    case 'rest': if(dangerHere()) break; dlg('<h3>Make camp</h3><p class="small">A rest takes the night: each hero eats a ration (their sheet does it), then regains their hit points and spells. You snuff the light while you sleep. One random-encounter check — trouble cuts the rest short.</p><div class="row" style="margin-top:8px"><button class="btn pri" data-a="rest-go">Make camp</button><button class="btn ghost" data-a="close">Not now</button></div>'); break;
+    case 'rest-go': { closeDlg(); var rr=d(6); jlog('check','Encounter check (rest)','d6 '+rr+(rr===1?' — interrupted!':' — quiet'));
+      if(rr===1){ story('Something finds your camp in the night.'); randomEncounter(); save(); render(); break; }
+      aliveHeroes().forEach(function(id){ send('rest',{},null,id); }); if(S.m.stable) S.m.stable={}; story('You rest in the dark, taking turns at watch. Morning, or what passes for it down here, comes.'); jlog('note','Rest','Hit points and spells restored on the sheets'); newPartyRound(); save(); render(); break; }
+    case 'heal-to': { var hl=UI.heal; closeDlg(); if(!hl) break; send('heal',{n:hl.n,why:'Healed by '+heroName(hl.pid)},null,t.dataset.id); jlog('roll',heroName(hl.pid)+' heals '+heroName(t.dataset.id),'+'+hl.n+' HP'); UI.heal=null; if(hl.fight) pcTurnDone(); else actionDone(); save(); render(); break; }
+    case 'fight': { var e2=findEncounter(t.dataset.e); if(e2) startFight(e2,t.dataset.full==='1',{first:t.dataset.first||null}); break; }
+    case 'round': newRound(false); break;
+    case 'pc-done': pcTurnDone(); break;
+    case 'pc-done-dlg': closeDlg(); pcTurnDone(); break;
+    case 'pc-luck': { var at=UI.atk; closeDlg(); if(!at||!spendLuck(at.pid)) break; var cmd=at.m.type==='spell'?'cast':'attack';
+      send(cmd,{name:at.m.label||at.m.weapon,adv:isDark()?'disadvantage':null},function(r2){ if(r2.none){ toast('Roll it again on the sheet'); return; } pcAction(r2,at.pid); },at.pid); break; }
+    case 'hit': hitChosen(t.dataset.f,+t.dataset.n,t.dataset.h==='1'); break;
+    case 'save': rollSave(+t.dataset.i); break;
+    case 'foe-done': foeDone(); break;
+    case 'foe-hp': { var f3=foeBy(t.dataset.f); f3.hp=Math.max(0,Math.min(f3.hpMax,f3.hp+(+t.dataset.d))); if(f3.hp<=0){ f3.defeated=true; checkMorale(); } save(); render(); break; }
+    case 'foe-out': { var f4=foeBy(t.dataset.f); f4.fled=true; jlog('combat',f4.name+' is out of the fight',''); save(); render(); break; }
+    case 'flee': { var cf=S.combat; S.combat=null; if(!S.m||S.m.status!=='active'){ save(); render(); break; }
+      var fw=curWp(); fw.danger={type:'fight',enc:cf.enc}; if(S.m.trail.length){ S.m.cur=S.m.trail.pop(); jlog('combat',solo()?'You flee!':'The party flees!','Back to '+curWp().name+' — they\'re still there'); } else jlog('combat','You break off','They\'re still there');
+      story('You run.'); tick(1); save(); render(); break; }
+    case 'end-fight': { var obj=S.combat.objective, won=!alive().length, eid=S.combat.enc; jlog('combat','Fight over',S.combat.label); S.combat=null; if(obj&&S.m&&!S.m.objective){ S.m.objective=true; jlog('mission','Goal achieved',curMission().objective); }
+      if(won&&S.m&&S.m.flags){ S.m.flags['won:'+eid]=true; var ew=findEncounter(eid); if(ew&&ew.onWin) applyEffects(ew.onWin,curWp(),wpDef(curWp()),{label:ew.label}); }
+      aliveHeroes().forEach(function(id){ send('tracker',{name:'Paralyzed',on:false},null,id); }); newPartyRound(); tick(1); save(); render(); break; }
+  }
+});
+document.addEventListener('change',function(e){ if(e.target.dataset&&e.target.dataset.a==='chaos'){ S.chaos=e.target.checked; save(); } });
+document.addEventListener('keydown',function(e){ if(e.key==='Enter'&&e.target&&e.target.id==='oracle-q'){ e.preventDefault(); oracleRoll('even'); } });
+document.querySelector('.so-tabs').addEventListener('click',function(e){ var b=e.target.closest('button[data-tab]'); if(!b) return; document.body.dataset.tab=b.dataset.tab; [].forEach.call(this.children,function(x){ x.classList.toggle('on',x===b); }); });
+$('dlg').addEventListener('click',function(e){ if(e.target===this) closeDlg(); });
+function finishMission(){
+  closeDlg(); var mi=curMission(); if(!mi||!S.m) return;
+  settleEnding();
+  if(S.m.lost){ S.done[mi.id]=S.done[mi.id]==='won'?'won':'lost'; S.m.status='won'; story(mi.lostText); jlog('mission','Lost: '+mi.title,''); }
+  else { S.done[mi.id]='won'; S.m.status='won'; if(mi.reward) story(mi.reward.text); jlog('mission','Adventure complete: '+mi.title,(S.m.xp||0)+' XP'); }
+  S.combat=null; save(); render();
+}
+
+// ── boot ──────────────────────────────────────────────────────────────────
+try{ if(localStorage.getItem('sd_dark')==='1') document.body.classList.add('dark'); }catch(e){}
+if(!S.journal.length) jlog('note','Solo campaign started',MOD?MOD.title:'');
+mountSheets(); render();
+window.addEventListener('beforeunload',function(){ if(saveT){ clearTimeout(saveT); saveT=null; try{ var o={}; o[KEY]=JSON.stringify(S); window.__ddSave&&window.__ddSave(o); }catch(e){} } });
+})();
+</script>
+</body>
+</html>

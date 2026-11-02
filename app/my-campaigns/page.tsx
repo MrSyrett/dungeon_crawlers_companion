@@ -34,9 +34,9 @@ export default async function MyCampaignsPage() {
     if (list) list.push(c);
     else bySystem.set(c.system, [c]);
   }
-  // SOLO PLAY: solo campaigns sit in their system's group (Dragonbane).
+  // SOLO PLAY: solo campaigns sit in their system's group (Dragonbane or Shadowdark).
   const solo: SoloSummary[] = soloEnabledFor(user.email) ? await loadSoloCampaigns(user.id) : [];
-  const systems = SYSTEMS.filter((s) => bySystem.has(s.key) || (s.key === "DB" && solo.length > 0));
+  const systems = SYSTEMS.filter((s) => bySystem.has(s.key) || solo.some((x) => x.system === s.key));
 
   return (
     <div className="home-roster mx-auto w-full max-w-5xl px-5 py-10">
@@ -62,13 +62,13 @@ export default async function MyCampaignsPage() {
                   <CampaignCard c={c} />
                 </li>
               ))}
-              {s.key === "DB"
-                ? solo.map((x) => (
-                    <li key={x.id} className="min-w-0">
-                      <SoloCampaignCard s={x} />
-                    </li>
-                  ))
-                : null}
+              {solo
+                .filter((x) => x.system === s.key)
+                .map((x) => (
+                  <li key={x.id} className="min-w-0">
+                    <SoloCampaignCard s={x} />
+                  </li>
+                ))}
             </ul>
           </section>
         ))

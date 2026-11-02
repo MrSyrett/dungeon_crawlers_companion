@@ -8,18 +8,21 @@
 import { useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { createSoloCampaign } from "@/app/actions/solo";
-import { SOLO_MODULES } from "@/lib/solo-modules";
+import { SOLO_MODULES, SOLO_SYSTEM_NAME, type SoloSystem } from "@/lib/solo-modules";
 
 const noopSubscribe = () => () => {};
 const MAX_PARTY = 4;
 
 export default function NewSoloCampaign({
+  system = "DB",
   characters,
   className,
 }: {
+  system?: SoloSystem;
   characters: { id: string; name: string }[];
   className?: string;
 }) {
+  const modules = SOLO_MODULES.filter((m) => m.system === system);
   const ref = useRef<HTMLDialogElement>(null);
   const [pending, setPending] = useState(false);
   const [party, setParty] = useState<string[]>([]);
@@ -59,8 +62,8 @@ export default function NewSoloCampaign({
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className={label} htmlFor="solo-module">Adventure</label>
-                  <select id="solo-module" name="module" className={field} defaultValue={SOLO_MODULES[0]?.id}>
-                    {SOLO_MODULES.map((m) => (
+                  <select id="solo-module" name="module" className={field} defaultValue={modules[0]?.id}>
+                    {modules.map((m) => (
                       <option key={m.id} value={m.id}>{m.label}</option>
                     ))}
                   </select>
@@ -98,9 +101,13 @@ export default function NewSoloCampaign({
                       })}
                     </div>
                   ) : (
-                    <p className="text-sm text-[var(--muted)]">You have no Dragonbane characters yet. Create one from the Characters page first.</p>
+                    <p className="text-sm text-[var(--muted)]">You have no {SOLO_SYSTEM_NAME[system]} characters yet. Create one from the Characters page first.</p>
                   )}
-                  <p className="text-[11px] text-[var(--muted)]">One hero plays by the solo rules; a party of up to four plays like the book. The party is set for the whole campaign.</p>
+                  <p className="text-[11px] text-[var(--muted)]">
+                    {system === "SD"
+                      ? "Play by the SoloDark rules: one hero alone, or a party of up to four. The party is set for the whole campaign."
+                      : "One hero plays by the solo rules; a party of up to four plays like the book. The party is set for the whole campaign."}
+                  </p>
                 </fieldset>
                 <div className="flex flex-wrap items-center justify-end gap-2">
                   <button

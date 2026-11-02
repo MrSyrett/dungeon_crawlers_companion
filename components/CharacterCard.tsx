@@ -26,7 +26,7 @@ import { createSoloCampaign } from "@/app/actions/solo";
 // Plain <a> for the sheet and the VTT: both are route handlers serving whole
 // standalone HTML pages, which <Link> would prefetch for nothing.
 /** SOLO PLAY: `solo` is passed only while the solo switch is on for this user, and
- *  only for Dragonbane characters. `campaignId` is the solo campaign this character
+ *  only for Dragonbane and Shadowdark characters. `campaignId` is the solo campaign this character
  *  already plays in, if any. */
 export default function CharacterCard({ c, solo }: { c: CharCardData; solo?: { campaignId: string | null; campaignName?: string } }) {
   const router = useRouter();
@@ -110,7 +110,8 @@ export default function CharacterCard({ c, solo }: { c: CharCardData; solo?: { c
             // SOLO PLAY: start a solo campaign with this hero.
             <form action={createSoloCampaign} className="contents">
               <input type="hidden" name="character" value={c.id} />
-              <button className="roster-btn" title="Play Alone in Deepfall Breach solo with this hero">Solo</button>
+              <input type="hidden" name="module" value={c.system === "SD" ? "sd-dusk-queen" : "db-deepfall"} />
+              <button className="roster-btn" title={c.system === "SD" ? "Play Tomb of the Dusk Queen solo with this hero" : "Play Alone in Deepfall Breach solo with this hero"}>Solo</button>
             </form>
           ) : null}
           <form action={deleteDocument} className="contents">

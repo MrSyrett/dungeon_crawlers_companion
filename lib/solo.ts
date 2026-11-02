@@ -13,10 +13,11 @@
 import { isAdminEmail } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import type { ToolDef } from "@/lib/tools";
+import { SOLO_CHAR_TOOL, soloSystemOfModule, type SoloSystem } from "@/lib/solo-modules";
 
 export const SOLO_TOOL = "db-solo";
 export const SOLO_KEY = "db_solo";
-export const SOLO_SYSTEMS = ["DB"] as const;
+export const SOLO_SYSTEMS = ["DB", "SD"] as const;
 
 export function soloEnabledFor(email: string | null | undefined): boolean {
   if ((process.env.SOLO_PLAY || "").toLowerCase() === "off") return false;
@@ -36,10 +37,35 @@ export const SOLO_DEF = {
   file: "db_solo.html",
   keys: [SOLO_KEY],
 } as unknown as ToolDef;
+// Shadowdark solo campaigns: same document type and key, their own page and skin.
+export const SOLO_DEF_SD = {
+  id: SOLO_TOOL,
+  system: "SD",
+  systemName: "Shadowdark",
+  kind: "character",
+  label: "Solo Campaign",
+  file: "sd_solo.html",
+  keys: [SOLO_KEY],
+} as unknown as ToolDef;
+export function soloDefFor(system: SoloSystem): ToolDef {
+  return system === "SD" ? SOLO_DEF_SD : SOLO_DEF;
+}
+// Which system a saved solo campaign plays (older saves have no system: Dragonbane).
+export function soloSystemOf(data: unknown): SoloSystem {
+  try {
+    const raw = (data as Record<string, unknown> | null)?.[SOLO_KEY];
+    const s = (typeof raw === "string" ? JSON.parse(raw) : {}) as Record<string, unknown>;
+    if (s.system === "SD" || s.system === "DB") return s.system;
+    return soloSystemOfModule(typeof s.moduleId === "string" ? s.moduleId : "");
+  } catch {
+    return "DB";
+  }
+}
 
 // The parts of a saved solo campaign the Campaigns page and the cards show.
 export type SoloSummary = {
   id: string;
+  system: SoloSystem;
   name: string;
   module: string;
   mission: string;
@@ -67,6 +93,7 @@ export function readSoloSummary(doc: { id: string; title: string; data: unknown;
   const party = (Array.isArray(s.party) ? s.party.map(hero) : [hero(ch)]).filter((p): p is { id: string; name: string } => !!p).slice(0, 4);
   return {
     id: doc.id,
+    system: soloSystemOf(doc.data),
     name: str(s.name) || doc.title || "Solo campaign",
     module: str(sum.module),
     mission: str(sum.mission),
@@ -89,8 +116,12 @@ export async function loadSoloCampaigns(userId: string): Promise<SoloSummary[]> 
 }
 
 export async function loadDbCharacters(userId: string): Promise<{ id: string; name: string; linked: boolean }[]> {
+  return loadSoloCharacters(userId, "DB");
+}
+// The user's own sheets of a solo system, for the New Solo Campaign party picker.
+export async function loadSoloCharacters(userId: string, system: SoloSystem): Promise<{ id: string; name: string; linked: boolean }[]> {
   const docs = (await prisma.document.findMany({
-    where: { userId, tool: "db-character" },
+    where: { userId, tool: SOLO_CHAR_TOOL[system] },
     orderBy: { updatedAt: "desc" },
     select: { id: true, title: true, linkedCampaignId: true },
   })) as { id: string; title: string; linkedCampaignId: string | null }[];

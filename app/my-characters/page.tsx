@@ -66,7 +66,7 @@ export default async function MyCharactersPage() {
                 <li key={c.id} className="min-w-0">
                   <CharacterCard
                     c={c}
-                    solo={soloOn && c.system === "DB" ? { campaignId: soloBy.get(c.id)?.id ?? null, campaignName: soloBy.get(c.id)?.name } : undefined}
+                    solo={soloOn && (c.system === "DB" || c.system === "SD") ? { campaignId: soloBy.get(c.id)?.id ?? null, campaignName: soloBy.get(c.id)?.name } : undefined}
                   />
                 </li>
               ))}

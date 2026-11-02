@@ -97,7 +97,7 @@ function DocList({
               <li key={c.id} className="min-w-0">
                 <CharacterCard
                   c={c}
-                  solo={soloLinks && c.system === "DB" ? { campaignId: soloLinks[c.id]?.id ?? null, campaignName: soloLinks[c.id]?.name } : undefined}
+                  solo={soloLinks && (c.system === "DB" || c.system === "SD") ? { campaignId: soloLinks[c.id]?.id ?? null, campaignName: soloLinks[c.id]?.name } : undefined}
                 />
               </li>
             ))}

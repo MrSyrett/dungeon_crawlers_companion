@@ -3601,6 +3601,7 @@ function rollStat(id, name) {
     `${base} + Mod(${fmtMod(statMod)})${exh?' '+fmtMod(exh)+' exhausted':''}${str?' '+fmtMod(str)+' stress':''} = ${total}`, type);
   heroDarkLuckOnNat(roll, name + ' check');
   if(typeof sdSheetCheckSpend === 'function') sdSheetCheckSpend();
+  if(window.__sdRollOut) window.__sdRollOut({ type:'check', stat:id, label:name, total, nat:roll });   // Solo Play bridge
 }
 
 // Evade: roll d20 + DEX against the attacker's Attack DC (the GM sets the DC).
@@ -3894,6 +3895,7 @@ function rollAttack(btn) {
   addLog(`${name}`+(hitRoll===20?' ★ NAT 20':hitRoll===1?' ✗ NAT 1':''),
     resultStr, detailStr, type);
   heroDarkLuckOnNat(hitRoll, name);
+  if(window.__sdRollOut) window.__sdRollOut({ type:'attack', label:name, weapon:name, total:hitTotal, nat:hitRoll, dmg:dmgTotal, crit:type==='crit', ranged:/far|near/i.test(f.range?.value||'') });   // Solo Play bridge
 }
 
 // Critical failure (natural 1) on a spellcasting check — Core p.45: the spell
@@ -4001,6 +4003,7 @@ function rollSpell(btn, opts) {
   if(roll === 1) sdSpellCritFail(name, spellLevel);
   heroDarkLuckOnNat(roll, name);
   const ret = { success, roll };
+  if(window.__sdRollOut) window.__sdRollOut({ type:'spell', label:name, tier:spellLevel, total, nat:roll, success, dmg:dmgTotal, healing, focus:!!opts.focus, src:source });   // Solo Play bridge
 
   // ── Scroll / Wand consumption ── (only when Auto is on; off = track by hand)
   if(source && autoUse()) {
@@ -7744,6 +7747,90 @@ var UTray = (function(){
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   return { add: add, sub: sub, adv: adv, clear: clear, roll: roll, render: render };
+})();
+</script>
+<script>
+/* ═══ SOLO PLAY BRIDGE (Shadowdark) ═══════════════════════════════════════════
+   Part of the removable Solo Play feature (see SOLO-REMOVAL.md) — delete this
+   whole <script> block (and the three "Solo Play bridge" lines in rollStat,
+   rollAttack and rollSpell) to remove it. It does NOTHING unless the sheet is
+   opened by the solo page: framed, with ?solo=1 on the URL.
+   It reports the sheet's rolls (checks, attacks, spells), HP, luck, XP, gear and
+   lit lights to the solo page (tools/templates/sd_solo.html), and lets the solo
+   page ask for a check, an attack, a spell, damage, healing, a luck token, XP,
+   loot, a used-up item, a lit torch or a rest — always through the sheet's own
+   functions, so modifiers, advantage, ammo and auto-consume work as usual. */
+(function(){
+  if(window.parent===window || !/[?&]solo=1(&|$)/.test(window.location.search)) return;
+  var ORIGIN=window.location.origin, pendingReq=null, STATS=['str','dex','con','int','wis','cha'];
+  var FULL={str:'Strength',dex:'Dexterity',con:'Constitution',int:'Intelligence',wis:'Wisdom',cha:'Charisma'};
+  function post(m){ try{ m.src='sd-sheet'; window.parent.postMessage(m, ORIGIN); }catch(e){} }
+  function el(id){ return document.getElementById(id); }
+  function int(v,dflt){ var n=parseInt(String(v==null?'':v).replace(/[^\d-]/g,''),10); return isNaN(n)?(dflt||0):n; }
+  function save(){ try{ saveSheet(false); }catch(e){} }
+  function snapshot(){
+    var mods={}, scores={}; STATS.forEach(function(k){ mods[k]=getStatMod(k); scores[k]=int((el(k+'-val')||{}).value,10); });
+    var items=[]; try{ sdItemRefs().forEach(function(r){ items.push({name:r.name,qty:r.qty}); }); }catch(e){}
+    var spells=[]; document.querySelectorAll('.spell-row').forEach(function(r){ var n=((r.querySelector('.spell-input')||{}).value||'').trim(); if(!n) return; var lb=r.querySelector('.spell-lost-btn');
+      spells.push({name:n,tier:int((r.querySelector('.spell-level')||{}).value,1),lost:!!(lb&&lb.classList.contains('on')),src:r.dataset.src||''}); });
+    var attacks=[]; document.querySelectorAll('.atk-roll-btn').forEach(function(b){ var tr=b.closest('tr'); var n=tr?((atkFields(tr).name||{}).value||'').trim():''; if(n) attacks.push(n); });
+    var trackers=[]; try{ trackers=_trackers.slice(); }catch(e){}
+    return { kind:'state', name:((el('f-name')||{}).value||'').trim(), cls:((el('f-class')||{}).value||'').trim(), ancestry:((el('f-ancestry')||{}).value||'').trim(),
+      level:int((el('f-level')||{}).value,1), hp:int((el('hp-current')||{}).value,0), hpMax:int((el('hp-max')||{}).value,0), ac:int((el('ac-val')||{}).value,10),
+      luck:int((el('lk-val')||{}).value,0), xp:int((el('xp-current')||{}).value,0), xpNext:int((el('xp-next')||{}).value,10), gold:int((el('coin-gp')||{}).value,0),
+      mods:mods, scores:scores, items:items, spells:spells, attacks:attacks, trackers:trackers };
+  }
+  var stT=null; function postState(){ if(stT) clearTimeout(stT); stT=setTimeout(function(){ stT=null; post(snapshot()); },80); }
+  // every check, attack and spell the sheet rolls goes to the solo page (with the request id, if it asked)
+  window.__sdRollOut=function(r){ var req=pendingReq; pendingReq=null; r.kind='roll'; r.req=req; post(r); postState(); };
+  // shared roll log: every entry goes to the solo page, which copies it into the other party sheets
+  var RELAY=false, _addLog=addLog;
+  addLog=function(label,result,detail,type){ var d=_addLog(label,result,detail,type); if(!RELAY) post({kind:'log',label:String(label),result:String(result),detail:String(detail||''),type:type||'normal'}); return d; };
+  function relayLog(m){ var cb=window.campaignBroadcast, tt=window.showRollToast, adv=null; try{ adv=advState; }catch(e){} RELAY=true;
+    try{ window.campaignBroadcast=null; window.showRollToast=function(){}; _addLog(m.label||'',m.result||'',m.detail||'',m.type||'normal'); }
+    finally{ RELAY=false; window.campaignBroadcast=cb; window.showRollToast=tt; try{ if(adv) toggleAdv(adv); }catch(e){} } }
+  var _save=saveSheet; saveSheet=function(q){ var r=_save(q); postState(); return r; };
+  // a light the hero lights on the sheet (torch, candle, lantern) starts the solo page's light
+  var _use=sdUseItem; sdUseItem=function(e){ var ok=_use(e); if(ok!==false&&e&&/torch|candle|lantern/i.test(e.name)) post({kind:'light',source:e.name}); postState(); return ok; };
+  function setAdv(mode){ try{ if(mode!=='advantage'&&mode!=='disadvantage') mode=null; if(advState!==mode){ if(mode) toggleAdv(mode); else clearAdv(); } }catch(e){} }
+  function findRef(name){ var n=String(name||'').toLowerCase(); var refs=[]; try{ refs=sdItemRefs(); }catch(e){}
+    return refs.find(function(r){ return r.name.toLowerCase()===n; })||refs.find(function(r){ return r.name.toLowerCase().indexOf(n)>=0; })||null; }
+  window.addEventListener('message', function(e){
+    if(e.origin!==ORIGIN || e.source!==window.parent) return; var m=e.data||{}; if(m.src!=='sd-solo') return;
+    try{
+      switch(m.cmd){
+        case 'state': post(snapshot()); break;
+        case 'adv': setAdv(m.mode); break;
+        case 'roll': { var st=String(m.stat||'').toLowerCase(); if(STATS.indexOf(st)<0) break; pendingReq=m.req||null; setAdv(m.adv); rollStat(st, m.label||FULL[st]); if(pendingReq===m.req) pendingReq=null; break; }
+        case 'attack': { var btns=[].slice.call(document.querySelectorAll('.atk-roll-btn')); var nm=String(m.name||'').toLowerCase();
+          var b=btns.find(function(x){ var tr=x.closest('tr'); return tr&&((atkFields(tr).name||{}).value||'').trim().toLowerCase()===nm; })||(nm?null:btns[0]);
+          if(!b){ post({kind:'roll',req:m.req,type:'attack',none:true}); break; } pendingReq=m.req||null; setAdv(m.adv); rollAttack(b); if(pendingReq===m.req) pendingReq=null; break; }
+        case 'cast': { var rows=[].slice.call(document.querySelectorAll('.spell-row')); var sn=String(m.name||'').toLowerCase();
+          var row=rows.find(function(r){ return ((r.querySelector('.spell-input')||{}).value||'').trim().toLowerCase()===sn; });
+          var cb2=row&&row.querySelector('.spell-cast-btn'); if(!cb2){ post({kind:'roll',req:m.req,type:'spell',none:true}); break; } pendingReq=m.req||null; setAdv(m.adv); rollSpell(cb2); if(pendingReq===m.req){ pendingReq=null; post({kind:'roll',req:m.req,type:'spell',none:true}); } break; }
+        case 'damage': { var cu=el('hp-current'); if(!cu) break; var before=int(cu.value,0), n=Math.max(0,int(m.n,0)); cu.value=String(Math.max(0,before-n)); try{ onHPChange(); }catch(x){}
+          _addLog(m.label||'Damage taken','−'+n+' HP','HP '+sdHPText(),'fumble'); if(!RELAY) post({kind:'log',label:String(m.label||'Damage taken'),result:'−'+n+' HP',detail:'HP '+sdHPText(),type:'fumble'}); save(); break; }
+        case 'heal': { var g=m.full?sdHealHP(9999):sdHealHP(Math.max(0,int(m.n,0))); addLog(m.why||'Healed','+'+g+' HP','HP '+sdHPText(),'crit'); save(); break; }
+        case 'luck': { var lk=el('lk-val'); if(!lk) break; var cur=int(lk.value,0), nv=m.set!=null?int(m.set,0):cur+int(m.add,0); lk.value=String(Math.max(0,nv));
+          if(nv>cur) addLog('Luck token','+'+(nv-cur),m.why||'',m.why&&/20/.test(m.why)?'crit':'normal'); save(); break; }
+        case 'xp': { var xe=el('xp-current'); if(!xe) break; xe.value=String(int(xe.value,0)+int(m.n,0)); try{ xe.dispatchEvent(new Event('input',{bubbles:true})); }catch(x){} addLog('XP','+'+int(m.n,0),m.why||'','normal'); save(); break; }
+        case 'gold': { sdAddGold(int(m.n,0)); addLog('Found coins','+'+int(m.n,0)+' gp',m.why||'','normal'); break; }
+        case 'addItem': { var okA=sdAddGearItem(m.name,m.qty||1); if(!okA){ try{ addInvItem(m.name,m.qty||1); }catch(x){} } addLog('Found',m.name,m.note||'','normal'); save(); break; }
+        case 'removeItem': { var q=Math.max(1,int(m.qty,1)); for(var i=0;i<q;i++){ var rf=findRef(m.name); if(!rf) break; sdConsumeItem(rf); } save(); break; }
+        case 'useItem': { var list=[]; try{ list=sdUsableItems(); }catch(x){} var un=String(m.name||'').toLowerCase(); var it=list.find(function(x){ return x.name.toLowerCase()===un; })||list.find(function(x){ return x.name.toLowerCase().indexOf(un)>=0; });
+          if(it) sdUseItem(it); else post({kind:'useFailed',name:m.name}); break; }
+        case 'tracker': { if(m.on) addTracker(m.name); else removeTracker(m.name); break; }
+        case 'stat': { var se=el(String(m.id||'').toLowerCase()+'-val'); if(!se) break; se.value=String(Math.max(0,int(se.value,10)+int(m.delta,0))); try{ onStatChange(String(m.id).toLowerCase()); }catch(x){} addLog(String(m.id).toUpperCase()+' '+(int(m.delta,0)<0?'damage':'restored'),(int(m.delta,0)>0?'+':'')+int(m.delta,0),m.why||'','fumble'); save(); break; }
+        case 'rest': { var cf=window.confirm; window.confirm=function(){ return true; }; try{ takeRest(); } finally{ window.confirm=cf; } break; }
+        case 'restoreSpells': { document.querySelectorAll('.spell-row').forEach(function(r){ var lb=r.querySelector('.spell-lost-btn'); if(lb) lb.classList.remove('on'); r.classList.remove('lost'); delete r.dataset.wandspent; }); addLog('Spells restored','✓',m.why||'','crit'); save(); break; }
+        case 'endTurn': { try{ if(turnOn()) sdEndTurn(); }catch(x){} break; }
+        case 'log': addLog(m.label||'Solo',m.result||'',m.detail||'',m.type||'normal'); break;
+        case 'relay': relayLog(m); break;
+      }
+    }catch(err){ console.error('solo bridge', err); }
+  });
+  function ready(){ post({kind:'ready'}); post(snapshot()); }
+  if(document.readyState==='complete') setTimeout(ready,300); else window.addEventListener('load', function(){ setTimeout(ready,300); });
 })();
 </script>
 </body>

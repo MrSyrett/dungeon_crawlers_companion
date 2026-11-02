@@ -1,7 +1,7 @@
 "use client";
 
 // SOLO PLAY — one solo campaign as a card, in the same tile look as the campaign
-// and character cards (.roster-card; the parent carries data-sys="DB").
+// and character cards (.roster-card; the parent carries data-sys="DB" or "SD").
 // Part of the removable Solo Play feature — see SOLO-REMOVAL.md.
 import type { SoloSummary } from "@/lib/solo";
 import { deleteSoloCampaign } from "@/app/actions/solo";
@@ -27,7 +27,7 @@ export default function SoloCampaignCard({ s }: { s: SoloSummary }) {
           Continue
         </a>
         {s.character ? (
-          <a href={`/tools/db-character/${s.character.id}`} className="roster-btn" title={s.party.length > 1 ? `Open ${s.character.name}'s sheet` : "Open your hero's sheet"}>
+          <a href={`/tools/${s.system === "SD" ? "sd" : "db"}-character/${s.character.id}`} className="roster-btn" title={s.party.length > 1 ? `Open ${s.character.name}'s sheet` : "Open your hero's sheet"}>
             Sheet
           </a>
         ) : null}

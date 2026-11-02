@@ -10,7 +10,7 @@ import { isAdminEmail } from "@/lib/admin";
 import { loadToolTemplate } from "@/lib/tools";
 import { renderToolPage } from "@/lib/inject";
 import { getHiddenSystemKeys } from "@/lib/systems";
-import { SOLO_DEF, SOLO_TOOL, soloEnabledFor } from "@/lib/solo";
+import { SOLO_TOOL, soloDefFor, soloEnabledFor, soloSystemOf } from "@/lib/solo";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -23,10 +23,12 @@ export async function GET(_req: Request, ctx: Ctx) {
   const doc = await prisma.document.findFirst({ where: { id, userId: user.id, tool: SOLO_TOOL } });
   if (!doc) return new Response("Solo campaign not found", { status: 404 });
 
-  const template = await loadToolTemplate(SOLO_DEF.file);
+  // Dragonbane and Shadowdark campaigns are the same document type; each plays on its own page.
+  const def = soloDefFor(soloSystemOf(doc.data));
+  const template = await loadToolTemplate(def.file);
   const html = renderToolPage(template, {
     docId: doc.id,
-    def: SOLO_DEF,
+    def,
     data: doc.data,
     title: doc.title,
     rev: doc.updatedAt.getTime(),

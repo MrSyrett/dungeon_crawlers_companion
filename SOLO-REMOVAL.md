@@ -1,6 +1,6 @@
 # Solo Play — how to switch it off or remove it
 
-Solo Play (Dragonbane solo campaigns, "Alone in Deepfall Breach") was built to be
+Solo Play (Dragonbane and Shadowdark solo campaigns) was built to be
 removable. Nothing else on the site depends on it.
 
 ## Switch it off (no code changes)
@@ -21,8 +21,8 @@ and page checks it.
 - `app/solo/` (the `/solo/[id]` page route)
 - `app/actions/solo.ts`
 - `components/solo/` (`SoloCampaignCard.tsx`, `NewSoloCampaign.tsx`)
-- `tools/templates/db_solo.html`
-- `public/tools-data/solo/` (`db-solo-tables.js`, `db-solo-deepfall.js`, `db-solo-sinking-tower.js`)
+- `tools/templates/db_solo.html`, `tools/templates/sd_solo.html`
+- `public/tools-data/solo/` (`db-solo-tables.js`, `db-solo-deepfall.js`, `db-solo-sinking-tower.js`, `sd-solo-tables.js`, `sd-solo-dusk-queen.js`, `maps/`)
 - `SOLO-REMOVAL.md` (this file)
 
 ### 2. Remove the marked hooks in shared files
@@ -31,6 +31,7 @@ Each one is commented `SOLO PLAY`:
 | File | What to remove |
 |---|---|
 | `tools/templates/db_character_sheet.html` | The whole `<script>` block headed `SOLO PLAY BRIDGE`, just before `</body>`. |
+| `tools/templates/sd_character_sheet.html` | The `<script>` block headed `SOLO PLAY BRIDGE (Shadowdark)` just before `</body>`, and the three lines marked `// Solo Play bridge` in `rollStat`, `rollAttack` and `rollSpell`. |
 | `components/CampaignsList.tsx` | The `solo` imports, the `solo` prop and the `{/* SOLO PLAY … */}` "Solo" panel at the end. |
 | `app/campaigns/page.tsx` | The `@/lib/solo` import, the `solo` const and the `solo={solo}` prop. |
 | `app/my-campaigns/page.tsx` | The `@/lib/solo` / `SoloCampaignCard` imports, the `solo` const (restore `const systems = SYSTEMS.filter((s) => bySystem.has(s.key));` and `cards.length` in the subtitle) and the `s.key === "DB" ? solo.map(...)` block. |
@@ -52,8 +53,8 @@ a reference to its hero's sheet.
 
 ### 4. Check
 Run `npx tsc --noEmit` and `npm run build`. Nothing should still reference `@/lib/solo`,
-`components/solo` or `db_solo`:
+`components/solo`, `db_solo` or `sd_solo`:
 
 ```sh
-grep -rn "lib/solo\|components/solo\|db_solo\|SOLO PLAY" app components lib tools public
+grep -rn "lib/solo\|components/solo\|db_solo\|sd_solo\|SOLO PLAY\|Solo Play bridge" app components lib tools public
 ```
