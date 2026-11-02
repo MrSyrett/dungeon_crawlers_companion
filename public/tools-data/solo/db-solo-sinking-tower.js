@@ -74,7 +74,7 @@
       { roll: 6, name: "Devouring Attack", damage: "2D6", type: "bludgeoning", dodge: true, text: "He swallows you whole: 2D6 bludgeoning. Inside you can attack him at armor 0 but take D6 (armor doesn't help) each turn; you're freed when he dies." }
     ]
   };
-  var SKELETON = { name: "Skeleton Guard", hp: 8, armor: 6, weapons: [{ name: "Trident", skill: 12, damage: "D10" }], skills: { Awareness: 8, Evade: 6 } };
+  var SKELETON = { name: "Skeleton Guard", hp: 8, armor: 6, fearless: true, weapons: [{ name: "Trident", skill: 12, damage: "D10" }], skills: { Awareness: 8, Evade: 6 } };
 
   // The book draws treasure cards; this is our own sea-wreck table, drawn without repeats.
   var TREASURES = [
@@ -158,6 +158,64 @@
           order: ["statue-gallery", "library", "treasure", "laboratory", "sorcerer", "observatory"],
           drown: "Water fills the floor you're standing on. Anyone still inside drowns unless they get out."
         },
+        companions: {
+          alberic: { name: "Alberic Gleamheart", hp: 14, armor: 0, weapon: { name: "Dagger", skill: 12, damage: "D8" }, helps: ["Awareness", "Spot Hidden", "Sneaking", "Persuasion", "Bluffing"], note: "A dwarf treasure hunter. Dagger 12 (D8). Helps with Awareness, Spot Hidden, Sneaking and talking." },
+          betrix: { name: "Betrix Farsail", hp: 12, armor: 0, weapon: { name: "Scimitar", skill: 12, damage: "2D6" }, helps: ["Acrobatics", "Swimming", "Sleight of Hand", "Spot Hidden", "Crafting"], note: "A sea captain. Scimitar 12 (2D6). Helps with Acrobatics, Swimming, Sleight of Hand and Spot Hidden." }
+        },
+        // Hints only point back at what you've already learned (clues are flags "clue:<id>").
+        hints: [
+          { at: "statue-gallery", unless: ["seen-sw", "seen-se", "seen-plates"], text: "You haven't looked closely at anything yet. Statues, a mural, something under the water — start with what you can see." },
+          { at: "statue-gallery", requires: ["seen-plates"], unless: ["stair-3"], text: "Six plates and a sorcerer who did everything for two people. What would two people press?" },
+          { at: "statue-gallery", requires: ["clue:two", "seen-plates"], unless: ["stair-3"], text: "Pairs. Everything in this tower comes in pairs." },
+          { at: "cellar", unless: ["cellar-known"], text: "You can't see a thing down here. Feel your way around before anything else." },
+          { at: "library", unless: ["seen-pedestals", "door-e"], text: "Something in here hates noise. The pedestals and the doors are deeper in the maze — and every move is a risk." },
+          { at: "library", requires: ["seen-pedestals", "clue:eye"], unless: ["door-e"], text: "You saw an eye carved below the hand in the cellar. One of these books has an eye on it." },
+          { at: "library", requires: ["seen-pedestals"], unless: ["door-e", "clue:eye"], text: "Three books, three symbols. Was anything like them carved somewhere below?" },
+          { at: "treasure", unless: ["seen-chests", "stair-5"], text: "Before you touch anything, look at how the chests are laid out." },
+          { at: "treasure", requires: ["clue:chests", "clue:statue-w", "clue:statue-e"], unless: ["stair-5"], text: "Two hands of chests, west and east. Two statues downstairs — the man on the west, the woman on the east — each holding up certain fingers. Count from the thumbs." },
+          { at: "treasure", requires: ["clue:chests"], unless: ["stair-5", "clue:statue-w"], text: "Two hands of five. Did anyone in this tower hold their fingers in a particular way?" },
+          { at: "laboratory", unless: ["seen-shelves"], text: "So much broken glass — but not all of it is broken. Look along the shelves." },
+          { at: "laboratory", requires: ["seen-shelves"], unless: ["ship"], text: "The library floor had a ship carved into it, two floors below this one." },
+          { at: "sorcerer", unless: ["stair-7"], text: "The room is smothered in darkness. What would happen if you let the daylight in?" },
+          { at: "observatory", requires: ["clue:lindworm"], unless: ["emerald", "demon-stone"], text: "A lindworm was carved into the floor two storeys down. Which stone would that point to?" },
+          { at: "observatory", unless: ["emerald", "demon-stone", "clue:lindworm"], text: "Two identical stones. Something two floors down would tell them apart — or you could risk a peek." },
+          { at: "observatory", requires: ["emerald", "!promised", "!krakul-done"], text: "He wants his eye. He'll spare whoever gives it back — or something you carry might keep him busy." }
+        ],
+        epilogue: [
+          { requires: "krakul-done", unless: "won:krakul", text: "Far out in the bay, something vast rolls in the swell — and for the first time in years, it looks back at the shore with two eyes." },
+          { requires: "won:krakul", text: "Krakul's body sinks with the tower. The fishers will sing about whoever slew the lindworm of the bay for a long time." },
+          { requires: ["emerald", "!krakul-done"], text: "The emerald glows in your pack all the way home. Some nights you'd swear you hear hissing out on the water." },
+          { requires: "orvild-done", text: "On calm nights, the fishers say, you can see a small figure on the deck of a wreck beneath the waves, smiling." },
+          { requires: "alberic-saved", text: "Alberic Gleamheart tells the story of his rescue in every tavern on the coast, and it grows a little each time." },
+          { requires: "betrix", text: "Captain Betrix Farsail owes you a favour. She is not the kind to forget it — for better or worse." },
+          { requires: "ghost-pass", text: "Somewhere under the sea, a ghostly scribe writes on, never knowing you passed by." }
+        ],
+        discoveries: [
+          { flag: "stair-3", label: "The copper plates opened the stair" },
+          { flag: "wreck", label: "Found the wreck of the Blue Medusa" },
+          { flag: "clue:serpent", label: "Saw through the one-eyed man" },
+          { flag: "door-e", label: "The eye book opened the way up" },
+          { flag: "looted-n", label: "Searched the library's north alcove" },
+          { flag: "looted-s", label: "Searched the library's south alcove" },
+          { flag: "stair-5", label: "Solved the chests" },
+          { flag: "alberic-saved", label: "Rescued Alberic Gleamheart" },
+          { flag: "betrix", label: "Freed Betrix Farsail" },
+          { flag: "knows-water", label: "Learned how the shrinking breaks" },
+          { flag: "looted-k", label: "Found what Kamandur took to his grave" },
+          { flag: "orvild-done", label: "Brought Orvild home" },
+          { flag: "emerald", label: "Claimed the lindworm's eye" },
+          { flag: "lid", label: "Opened Magdala's sarcophagus" }
+        ],
+        achievements: [
+          { id: "st-silent", label: "Not a Sound", desc: "Got past the librarian's ghost without a fight.", requires: "ghost-pass" },
+          { id: "st-firsttry", label: "Kamandur's Equal", desc: "Solved the plates, books and chests on the first try.", requires: ["stair-3", "door-e", "stair-5", "!plates-wrong", "!books-wrong", "!chest-wrong"] },
+          { id: "st-promise", label: "A Promise Kept", desc: "Gave Krakul back his eye, as promised.", requires: ["promised", "krakul-done", "!won:krakul"] },
+          { id: "st-slayer", label: "Lindworm Slayer", desc: "Defeated Krakul.", requires: "won:krakul" },
+          { id: "st-orvild", label: "Homeward Bound", desc: "Brought Orvild home to the Blue Medusa.", requires: "orvild-done" },
+          { id: "st-rescuer", label: "No One Left Behind", desc: "Rescued both Alberic and Betrix.", requires: ["alberic-saved", "betrix"] },
+          { id: "st-sail", label: "Sailing Home", desc: "Escaped on the ship from the bottle.", requires: "sailed" },
+          { id: "st-tiny", label: "Small Problems", desc: "Shrank Krakul down to size.", requires: ["krakul-done", "clue:potion", "!won:krakul", "!promised"] }
+        ],
         reward: { text: "You bob in the cold swell, clutching what you carried out. Behind you the green light flickers, and the drowned tower settles back into the sea for another twenty years." },
         waypoints: [
           // ─────────────────────────────────────────── THE ROWBOAT
@@ -165,14 +223,6 @@
             id: "rowboat", name: "The Rowboat Landing", short: "Rowboat",
             text: "Salt wind and the reek of kelp. At the tower's foot a second boat rocks on the swell. In it sits an old man in a brown robe, a black patch over one eye, holding up a little bottle of green liquid. He wants, he says, only one thing from the tower: the green emerald at its top, stolen from him long ago. Bring it to him and he'll give you this — an elixir of life. Everything else you find is yours.",
             challenges: [
-              { id: "study", label: "Study the old man", skill: "Awareness", note: "Suggested: is he what he seems?",
-                success: "His one eye has a slit pupil, like a snake's, and the boat rides oddly low for one old man. He is not what he seems.", onSuccess: { reveal: ["serpent"] },
-                failure: "Just a strange old man in a boat." },
-              { id: "accept", label: "Accept the elixir — promise him the emerald", choice: true, button: "Accept", noCheck: true, hideIf: ["promised", "refused"],
-                success: "He presses the bottle into your hand. \"The green stone. Only that.\" Then he says nothing more.",
-                onSuccess: { flag: "promised", item: { name: "Elixir of Life", note: "One dose. At 0 HP you recover automatically and stop making death rolls (no help against instantly fatal wounds)." } } },
-              { id: "refuse", label: "Refuse the bargain", choice: true, button: "Refuse", noCheck: true, hideIf: ["promised", "refused"],
-                success: "He lowers the bottle and stares at the tower, silent.", onSuccess: { flag: "refused" } },
               { id: "legend", label: "Recall what the fishers say about the tower", skill: "Myths & Legends",
                 success: "A brother and sister, Kamandur and Magdala, inseparable since childhood. Pirates burned their cottage and killed her; he built this tower for her and lured ships to their deaths with its green light. They say he built everything in it in pairs — two of everything, for the two of them.",
                 onSuccess: { clue: { id: "two", text: "The legend: Kamandur built the tower in pairs — two of everything, for himself and his sister Magdala." } },
@@ -187,12 +237,31 @@
                 failure: "Your grip goes and you plunge into the sea. Mark a condition of your choice on your sheet.", onFail: { threat: 1 } }
             ],
             secrets: [{ id: "serpent", text: "Whatever the old man is, he isn't human. Bargains with such things tend to matter later." }],
+            talk: [{ id: "oldman", name: "The one-eyed man", label: "Speak with the one-eyed man", hideIf: ["promised", "refused"],
+              nodes: {
+                start: { text: "\"You are not the first to come for what isn't yours,\" the old man rasps, \"but I hope you'll be the last. Up there is a green emerald that was stolen from me long ago. Bring it to me — keep whatever else you find — and this is yours.\" He holds up a bottle of green liquid. \"An elixir of life. It brings the drinker back from the threshold of death.\"",
+                  options: [
+                    { id: "who", label: "\"Who are you?\"", once: true, to: "who" },
+                    { id: "why", label: "\"Why don't you fetch it yourself?\"", once: true, to: "why" },
+                    { id: "study", label: "Watch him closely as he speaks", once: true, skill: "Awareness", success: "seen", failure: "unseen" },
+                    { id: "yes", label: "\"Deal. The emerald is yours.\" (take the elixir)", to: "deal" },
+                    { id: "no", label: "\"Find someone else.\"", to: "refuse" }
+                  ] },
+                who: { text: "\"Who I am does not matter.\" His single eye doesn't leave the green light at the top of the tower.", options: [{ label: "Back to his offer", to: "start" }] },
+                why: { text: "\"The tower will not have me.\" He says it flatly, as if it were the simplest thing in the world.", options: [{ label: "Back to his offer", to: "start" }] },
+                seen: { text: "When he turns his head, his one eye catches the light — and the pupil is a slit, like a snake's. The boat rides low in the water, far too low for one old man.", fx: { reveal: ["serpent"], clue: { id: "serpent", text: "The one-eyed man has a snake's slit pupil, and his boat rides far too low. He isn't what he seems." } }, options: [{ label: "Back to his offer", to: "start" }] },
+                unseen: { text: "Just a weathered old man in a brown robe, staring at the tower.", options: [{ label: "Back to his offer", to: "start" }] },
+                deal: { text: "He presses the cold bottle into your hand. \"The green stone. Only that.\" Then he says nothing more.", end: true,
+                  fx: { flag: "promised", item: { name: "Elixir of Life", note: "One dose. At 0 HP you recover by yourself and stop making death rolls (no help against instantly fatal wounds)." } } },
+                refuse: { text: "He lowers the bottle and goes back to staring at the tower, silent.", end: true, fx: { flag: "refused" } }
+              } }],
             exits: [{ to: "statue-gallery", label: "Through the front door", main: true, swim: true }],
             escapes: [{ label: "Row back to shore", button: "Row away", done: "You rowed away from the tower", note: "Ends the adventure and tallies your score." }]
           },
           // ─────────────────────────────────────────── 1. STATUE GALLERY
           {
-            id: "statue-gallery", name: "1. Statue Gallery", short: "Gallery", floor: true,
+            onEnter: { unflag: "shrunk" },
+            id: "statue-gallery", map: "/tools-data/solo/maps/sinking-tower/statue-gallery.jpg", name: "1. Statue Gallery", short: "Gallery", floor: true,
             text: "The heavy door groans inward and the stench of seaweed rolls out. Beyond lies a great stone hall, grand once, now a sad ruin: the floor sits a handspan under seawater, and a mural on the north wall is smothered in rotting weed. Two tall stone statues face you from the middle of the room, and between them something glints under the water. At the far end, a stair goes down into black water.",
             flagNotes: { "sunk:statue-gallery": "The tower has settled: this hall is under water now. You can still swim through it, holding your breath." },
             challenges: [
@@ -228,17 +297,17 @@
           },
           // ─────────────────────────────────────────── 2. CELLAR
           {
-            id: "cellar", name: "2. Cellar", short: "Cellar", floor: true,
+            id: "cellar", map: "/tools-data/solo/maps/sinking-tower/cellar.jpg", name: "2. Cellar", short: "Cellar", floor: true,
             text: "Cold, dark, murky water. In the gloom you can just make out the walls of what was once a cellar — and carved into the stone floor below you, a great eye staring back up.",
             everyRoll: { attr: "CON", label: "Hold your breath", note: "Under water: roll CON before every action here (it isn't an action). Failure: D6 drowning damage, armor doesn't help.", onFail: { damage: "D6", ignoreArmor: true } },
-            onEnter: { encounter: "eel", clue: { id: "eye", text: "An eye is carved into the cellar floor — right below where the hand is carved in the gallery." }, say: "Something longer than a rowboat uncoils from the far corner and comes at you, jaws wide." },
+            onEnter: { unflag: "shrunk", encounter: "eel", clue: { id: "eye", text: "An eye is carved into the cellar floor — right below where the hand is carved in the gallery." }, say: "Something longer than a rowboat uncoils from the far corner and comes at you, jaws wide." },
             challenges: [
               { id: "explore", label: "Feel your way around the flooded cellar", skill: "Swimming", repeat: true, hideIf: "cellar-known",
                 success: "Corner by corner: a dozen rotten figureheads leaning in the north-west, a stack of twenty broken barrels in the south-east, and in the south-west a gap in the wall opening on the sea — with the dark ribs of a shipwreck just beyond.",
                 onSuccess: { flag: "cellar-known" }, failure: "You lose your bearings in the black water and drift back to the stair." },
               { id: "faces", label: "Swim close to the grinning figureheads", attr: "WIL", requires: "cellar-known", hideIf: "faces-done",
                 success: "Rotten wood and painted grins. You hold your nerve; there's nothing else there.", onSuccess: { flag: "faces-done" },
-                failure: "The faces seem to leer and lunge in the murk. Panic grips you: you are Scared (mark it on your sheet).", onFail: { flag: "faces-done" } },
+                failure: "The faces seem to leer and lunge at you through the murk. Panic grips you: you are Scared.", onFail: { flag: "faces-done", cond: "Scared" } },
               { id: "barrels", label: "Search the broken barrels", skill: "Spot Hidden", requires: "cellar-known", hideIf: "barrels-done",
                 success: "Wedged between two staves: something worth keeping.", onSuccess: { flag: "barrels-done", treasure: 1 },
                 failure: "Rot and silt. The clock doesn't wait.", onFail: { threat: 1 } },
@@ -259,10 +328,10 @@
           },
           // ─────────────────────────────────────────── 3. LIBRARY
           {
-            id: "library", name: "3. Library", short: "Library", floor: true,
+            id: "library", map: "/tools-data/solo/maps/sinking-tower/library.jpg", name: "3. Library", short: "Library", floor: true,
             text: "Bookcases stretch floor to ceiling, packed into a cramped little maze. The shelves sag under swollen leather volumes and the air smells of paper and mould. From somewhere in the middle comes a faint, steady scratching.",
             everyRoll: { skill: "Sneaking", label: "Keep quiet", note: "Something in here hushes every sound. Roll SNEAKING before each action: the first failure brings a fear attack, the second brings it down on you.",
-              unless: ["won:ghost", "ghost-gone"],
+              unless: ["won:ghost", "ghost-gone"], boonIf: "shrunk", boonWhy: "Tiny (the red potion)",
               onFail: { ifFlag: "shushed", then: { encounter: "ghost", say: "\"SILENCE!\" The scratching stops. All around you, books lift from the shelves." },
                 else: { flag: "shushed", fear: true, say: "A furious, echoing SHHHH! fills the maze and a cold dread grips you. (Make the fear roll on your sheet.)" } } },
             challenges: [
@@ -311,7 +380,7 @@
           },
           // ─────────────────────────────────────────── 4. TREASURE CHAMBER
           {
-            id: "treasure", name: "4. Treasure Chamber", short: "Treasure", floor: true,
+            id: "treasure", map: "/tools-data/solo/maps/sinking-tower/treasure.jpg", name: "4. Treasure Chamber", short: "Treasure", floor: true,
             text: "Ten wooden chests fan out across the hall, five on each side. Along the walls stand five suits of plate armour holding tridents — and through the gaps in the plates, grinning skeletons look out. A worn mural covers the north wall.",
             blockIf: "in-sea", blockNote: "You're in the sea below the tower.",
             challenges: [
@@ -333,17 +402,34 @@
                 success: "You haul yourself out onto the rocks and run back up the stairs.",
                 onSuccess: { unflag: "in-sea", threat: 1, ifFlag: ["skel-awake", "!won:skeletons"], then: { encounter: "skeletons", say: "The skeleton guards are waiting for you, tridents levelled." } },
                 failure: "The swell drags you away from the rocks." },
-              { id: "voice", label: "Follow the muffled sound under one of the untouched chests", choice: true, button: "Investigate", requires: "won:skeletons", hideIf: "alberic-found", noCheck: true,
+              { id: "voice", label: "Follow the muffled sound under one of the untouched chests", choice: true, button: "Investigate", requires: "won:skeletons", hideIf: "alberic-found", noCheck: true, note: "Something long would let you open it from a safe distance.",
                 success: "You lift the lid with a trident from arm's length. The floor beside it drops away — and a deep voice booms up the shaft: \"Hello there! I could use some help down here!\" A dwarf clings to the wall below: Alberic Gleamheart.",
                 onSuccess: { flag: "alberic-found" } },
-              { id: "pull", label: "Climb down and help Alberic up", skill: "Acrobatics", requires: "alberic-found", hideIf: "alberic-saved", repeat: true, note: "Have a rope? Lower it instead — no roll.",
-                success: "You drag him over the lip. Grateful, he presses a trinket on you and climbs down to wait in the rowboat.",
+              { id: "pull", label: "Climb down and help Alberic up", skill: "Acrobatics", requires: "alberic-found", hideIf: "alberic-saved", repeat: true, note: "Or find something in your pack to lower to him.",
+                success: "You brace yourself in the shaft and haul him over the lip. Grateful, he presses a trinket into your hand.",
                 onSuccess: { flag: "alberic-saved", score: { n: 1, label: "Saved Alberic Gleamheart" }, treasure: 1 },
                 failure: "He slips back down. Try again." },
-              { id: "rope", label: "Lower a rope to Alberic", choice: true, button: "Use a rope", requires: "alberic-found", hideIf: "alberic-saved", noCheck: true,
-                success: "He climbs up hand over hand, presses a trinket on you in thanks, and heads down to the rowboat.",
-                onSuccess: { flag: "alberic-saved", score: { n: 1, label: "Saved Alberic Gleamheart" }, treasure: 1 } }
             ],
+            uses: [
+              { item: ["rope", "grappling"], label: "Lower it to Alberic", requires: "alberic-found", hideIf: "alberic-saved",
+                success: "He climbs up hand over hand, beard first, and presses a trinket into your hand in thanks.",
+                fx: { flag: "alberic-saved", score: { n: 1, label: "Saved Alberic Gleamheart" }, treasure: 1 } },
+              { item: ["spear", "staff", "trident", "pole", "rope"], label: "Prod the untouched chests from a distance", requires: "won:skeletons", hideIf: ["alberic-found"], free: true,
+                success: "From arm's length you lift a lid — the floor beside it drops away, and a deep voice booms up the shaft: \"Hello there! I could use some help down here!\"", fx: { flag: "alberic-found" } }
+            ],
+            talk: [{ id: "alberic", name: "Alberic Gleamheart", label: "Talk to Alberic", requires: "alberic-saved", hideIf: ["ally:alberic", "alberic-gone"],
+              nodes: {
+                start: { text: "The dwarf wrings out his beard. \"Alberic Gleamheart, treasure hunter — and very nearly a skeleton. I've had about enough of this tower. I'll wait in your boat, if it's all the same.\"",
+                  options: [
+                    { id: "betrix", label: "\"Did you come here alone?\"", once: true, to: "betrix" },
+                    { id: "join", label: "\"Come with us. We could use you.\"", skill: "Persuasion", success: "joins", failure: "declines" },
+                    { id: "bye", label: "\"Go on, then. Mind the stairs.\"", to: "leaves" }
+                  ] },
+                betrix: { text: "\"Captain Betrix Farsail came in with me. We split up two floors back — she went on up. If you see her, tell her I'm in the boat.\"", fx: { clue: { id: "betrix", text: "Alberic came with Captain Betrix Farsail; she went on up ahead of him." } }, options: [{ label: "Something else", to: "start" }] },
+                joins: { text: "He hefts his dagger and grins through the beard. \"Ach. Someone has to keep you alive. Lead on.\"", end: true, fx: { flag: "ally:alberic", join: "alberic" } },
+                declines: { text: "\"No. No, no. I've seen what's in this place.\" He's already heading for the stairs.", end: true, fx: { flag: "alberic-gone" } },
+                leaves: { text: "\"Good luck to you.\" He clatters off down the stairs.", end: true, fx: { flag: "alberic-gone" } }
+              } }],
             encounters: [
               { id: "skeletons", noSneak: true, label: "Skeleton guards", hidden: true, time: 1, note: "Plate armour (6), tridents.", onWin: { score: { n: 1, label: "Defeated the skeleton guards" } },
                 foes: [{ npc: SKELETON, name: "Skeleton Guard", count: 5, solo: 2, role: "melee" }] }
@@ -356,17 +442,11 @@
           },
           // ─────────────────────────────────────────── 5. LABORATORY
           {
-            id: "laboratory", name: "5. Laboratory", short: "Laboratory", floor: true,
+            id: "laboratory", map: "/tools-data/solo/maps/sinking-tower/laboratory.jpg", name: "5. Laboratory", short: "Laboratory", floor: true,
             text: "Wooden shelves and workbenches run all around the room, littered with broken glass and the remains of old experiments. In the middle stands a two-metre arched iron cage — and from the darkness inside it, a figure watches you.",
             challenges: [
-              { id: "talk", label: "Talk to the prisoner", choice: true, button: "Talk", hideIf: "met-betrix",
-                success: "\"Captain Betrix Farsail — and you'll get me out of here.\" She threatens, then flatters, then tries to scare you, then offers a share of treasure she plainly doesn't have. The cage dropped on her from the ceiling; she's not going down with this tower.",
-                onSuccess: { flag: "met-betrix" } },
-              { id: "floor", label: "Ask Betrix what's under her feet", choice: true, button: "Ask", requires: "met-betrix", hideIf: ["betrix", "seen-lindworm"],
-                success: "\"A lizard. A big one — a lindworm, carved right in the floor. Now LIFT THIS CAGE.\"",
-                onSuccess: { flag: "seen-lindworm", clue: { id: "lindworm", text: "A lindworm is carved into the laboratory floor, under the cage." } } },
               { id: "cage", label: "Lift the iron cage", attr: "STR", bane: true, repeat: true, hideIf: "betrix", note: "Others can help.",
-                success: "With a groan of iron the cage comes up. Betrix rolls free, thanks you with a crooked grin and goes off to make her own way out. Where the cage stood, a lindworm is carved into the floor.",
+                success: "With a groan of iron the cage comes up and the prisoner rolls free. Where the cage stood, a lindworm is carved into the floor.",
                 onSuccess: { flag: ["betrix", "seen-lindworm"], score: { n: 1, label: "Saved Betrix Farsail" }, clue: { id: "lindworm", text: "A lindworm is carved into the laboratory floor, under the cage." } },
                 failure: "It doesn't budge." },
               { id: "shelves", label: "Look along the shelves", choice: true, button: "Look", hideIf: "seen-shelves",
@@ -394,6 +474,39 @@
             secrets: [
               { id: "recipe", text: "A stained parchment from the workbench: part of a magical formula in an old, cramped hand." }
             ],
+            talk: [
+              { id: "caged", name: "The prisoner", label: "Talk to the prisoner in the cage", hideIf: "betrix",
+                nodes: {
+                  start: { text: "\"About time somebody came up those stairs. Captain Betrix Farsail — and you are going to get me out of here.\" The cage came down on her from the ceiling; she rattles the bars to show you.",
+                    options: [
+                      { id: "what", label: "\"What happened to you?\"", once: true, to: "what" },
+                      { id: "floor", label: "\"What's that under your feet?\"", once: true, to: "floor" },
+                      { id: "know", label: "\"What do you know about this tower?\"", once: true, skill: "Persuasion", success: "knows", failure: "sulks" },
+                      { id: "threat", label: "\"Why should I help you?\"", once: true, to: "threat" }
+                    ] },
+                  what: { text: "\"Touched the wrong bench. Down it came. My partner fell through a trapdoor on the floor below before that — chests, skeletons, the lot. Some treasure hunters we are.\"", fx: { clue: { id: "trapdoor", text: "Betrix: her partner fell through a trapdoor by the chests on the floor below." } }, options: [{ label: "Something else", to: "start" }] },
+                  floor: { text: "She glances down. \"A lizard. A big one — a lindworm, carved right into the stone. Now LIFT THIS CAGE.\"", fx: { flag: "seen-lindworm", clue: { id: "lindworm", text: "A lindworm is carved into the laboratory floor, under the cage." } }, options: [{ label: "Something else", to: "start" }] },
+                  knows: { text: "She drops the bluster for a moment. \"Every floor's a puzzle, and the old mage never did anything once. Two statues, two hands... whatever he built, he built in pairs. Lift the cage and I'll tell you the rest over a drink.\"", fx: { clue: { id: "two", text: "Betrix: the old mage built everything in pairs." } }, options: [{ label: "Something else", to: "start" }] },
+                  sulks: { text: "\"I know I'm in a cage, and you're not lifting it.\" She folds her arms.", options: [{ label: "Something else", to: "start" }] },
+                  threat: { text: "First threats, then flattery, then promises of treasure she plainly doesn't have. It's quite a performance.", options: [{ label: "Something else", to: "start" }] }
+                } },
+              { id: "betrix", name: "Captain Betrix Farsail", label: "Talk to Betrix", requires: "betrix", hideIf: ["ally:betrix", "betrix-gone"],
+                nodes: {
+                  start: { text: "Betrix stretches until her back cracks. \"I owe you one. Now — I'm going to have a good look around before this pile of stones goes under.\"",
+                    options: [
+                      { id: "join", label: "\"Look around with us instead.\"", skill: "Persuasion", success: "joins", failure: "declines" },
+                      { id: "bye", label: "\"Good luck, Captain.\"", to: "leaves" }
+                    ] },
+                  joins: { text: "\"With you? Fine — but I get first pick of anything shiny.\" She draws her scimitar.", end: true, fx: { flag: "ally:betrix", join: "betrix" } },
+                  declines: { text: "\"I work alone. Mostly.\" She's gone up the stairs before you can argue.", end: true, fx: { flag: "betrix-gone" } },
+                  leaves: { text: "She gives you a two-fingered salute and slips away.", end: true, fx: { flag: "betrix-gone" } }
+                } }
+            ],
+            uses: [
+              { item: ["red liquid", "red potion"], label: "Drink it", hideIf: "shrunk", consume: true,
+                success: "It tastes of iron and sea salt. The room swells around you — no, you shrink, down to the height of a hand. Water would undo it.",
+                fx: { flag: ["shrunk", "elixir-known"], unflag: "elixir", clue: { id: "potion", text: "The red potion shrinks whoever drinks it to a hand's height, until they touch water. (Tiny: a boon to SNEAKING; at most 1 damage per attack.)" } } }
+            ],
             exits: [
               { to: "treasure", label: "Down to the Treasure Chamber" },
               { to: "sorcerer", label: "Up the stair from the ceiling", requires: "stair-6", locked: "No way up yet", main: true }
@@ -402,7 +515,7 @@
           },
           // ─────────────────────────────────────────── 6. SORCERER'S CHAMBER
           {
-            id: "sorcerer", name: "6. Sorcerer's Chamber", short: "Sorcerer", floor: true,
+            id: "sorcerer", map: "/tools-data/solo/maps/sinking-tower/sorcerer.jpg", name: "6. Sorcerer's Chamber", short: "Sorcerer", floor: true,
             text: "Heavy, dark drapes cover the windows and the whole floor sits in shadow. Against the north wall stands a grand four-poster bed, its curtains closed. In the four corners loom the shapes of huge carved figureheads — beasts with grinning jaws.",
             challenges: [
               { id: "drapes", label: "Pull aside a drape", hideIf: "stair-7", note: "Heavy work: a rope in each corner, one drape per action.",
@@ -435,15 +548,9 @@
           },
           // ─────────────────────────────────────────── 7. OBSERVATORY
           {
-            id: "observatory", name: "7. Observatory", short: "Observatory", floor: true,
+            id: "observatory", map: "/tools-data/solo/maps/sinking-tower/observatory.jpg", name: "7. Observatory", short: "Observatory", floor: true,
             text: "A vast glass dome crowns the tower, drenched in green light, with grey sea on every side beyond a railed balcony. On a stone podium rest two identical, blazing emeralds. A black stone sarcophagus lies at the north end. And somewhere, a boy is crying.",
             challenges: [
-              { id: "boy", label: "Kneel and speak gently to the crying boy", choice: true, button: "Speak to him", hideIf: "orvild", noCheck: true,
-                success: "He is a ghost — Orvild, cabin boy of the Blue Medusa. He doesn't know where he is, or how he got here, or where his ship has gone.",
-                onSuccess: { flag: "orvild" } },
-              { id: "offer", label: "Tell Orvild where the Blue Medusa lies, and offer to lead him", choice: true, button: "Lead him", requires: ["orvild", "wreck"], hideIf: "orvild-follows", noCheck: true,
-                success: "His face lights up. \"You'll show me? I don't know the way…\" He follows close behind you. (Swim down to the cellar and through to the wreck.)",
-                onSuccess: { flag: "orvild-follows" } },
               { id: "peek-w", label: "Tilt the west stone to peek underneath", skill: "Sleight of Hand", requires: "!emerald", hideIf: ["peeked-w", "demon-stone"],
                 success: "A carving under it: a demon.", onSuccess: { flag: "peeked-w", clue: { id: "stone-w", text: "Under the west emerald: a carved demon." } },
                 failure: "It slips from your fingers — you're holding it.", onFail: { flag: "demon-stone", sink: true, say: "Under it, a demon is carved into the podium. Click. Far below something gives, and the whole tower lurches and begins to slide into the sea." } },
@@ -459,17 +566,10 @@
                 ] },
               { id: "give", label: "Hand Krakul his eye, as promised", choice: true, button: "Give it", requires: ["emerald", "promised"], hideIf: "krakul-done", noCheck: true,
                 success: "He takes the emerald gently in his jaws. \"As promised.\" He dips his great head to you — and dives beneath the waves.",
-                onSuccess: { flag: "krakul-done", score: { n: 3, label: "Gave the emerald to Krakul" } } },
+                onSuccess: { flag: "krakul-done", take: "Krakul's emerald", score: { n: 3, label: "Gave the emerald to Krakul" } } },
               { id: "throw", danger: "krakul", label: "Throw Krakul the emerald to save your skin", choice: true, button: "Give it up", requires: ["emerald", "!promised"], hideIf: "krakul-done", noCheck: true,
                 success: "He snatches it from the air, considers you with his one good eye, and lets you live.",
-                onSuccess: { flag: "krakul-done", score: { n: 3, label: "Gave the emerald to Krakul" } } },
-              { id: "shrink", danger: "krakul", label: "Hurl the red potion into his gaping mouth", best: ["Knives", "Slings", "Bows", "Crossbows", "Spears", "Staves"], bane: true, requires: ["elixir", "emerald"], hideIf: "krakul-done",
-                note: "The book: an AGL weapon skill, with a bane.",
-                success: "It goes straight down his throat. With a squeak he dwindles into a harmless little snake — though one touch of water would undo it.", onSuccess: { flag: "krakul-done", unflag: "elixir", clue: { id: "potion", text: "The red potion shrinks whoever swallows it." } },
-                failure: "It shatters on his scales.", onFail: { unflag: "elixir" } },
-              { id: "spider", danger: "krakul", label: "Smash the spider jar at Krakul", choice: true, button: "Smash it", requires: ["spider", "emerald"], hideIf: ["krakul-done", "krakul-busy"],
-                success: "The jar shatters on his wet scales — and the little spider swells to the size of a horse and leaps on him. They thrash across the dome; that will keep him busy for a while.",
-                onSuccess: { flag: "krakul-busy", unflag: "spider" } },
+                onSuccess: { flag: "krakul-done", take: "Krakul's emerald", score: { n: 3, label: "Gave the emerald to Krakul" } } },
               { id: "lid", label: "Lift the sarcophagus lid", attr: "STR", bane: true, repeat: true, hideIf: "lid",
                 success: "A young woman in an ankle-length tunic is carved on the lid — the girl from the murals, grown. As it grinds aside, a skeletal hand drops to the floor, as if it had been caught between lid and coffin. Inside lie her bones, the skull turned on its side, jaw open.", onSuccess: { flag: "lid" },
                 failure: "It's far too heavy." },
@@ -480,6 +580,31 @@
                 note: "Iron, armor 10: it breaks after 20 slashing or bludgeoning damage gets through. Roll your weapon damage on the sheet until it does.",
                 success: "The iron cracks and falls away.", onSuccess: { unflag: "manacled" } }
             ],
+            talk: [{ id: "orvild", name: "The crying boy", label: "Speak gently to the crying boy", hideIf: "orvild-follows",
+              nodes: {
+                start: { text: "Behind the podium a boy sits with his head in his hands, sobbing. He's grey and a little transparent, like breath on a cold window.",
+                  options: [
+                    { id: "kind", label: "Kneel beside him and speak kindly", to: "talks" },
+                    { id: "press", label: "\"Who are you? What happened here?\"", skill: "Persuasion", success: "talks", failure: "hides" }
+                  ] },
+                talks: { text: "\"Orvild,\" he sniffs. \"Cabin boy on the Blue Medusa. I don't know where I am, or how I got here, or where my ship's gone. They all left me.\"", fx: { flag: "orvild", clue: { id: "orvild", text: "Orvild, a ghost cabin boy of the Blue Medusa, is lost and looking for his ship." } },
+                  options: [
+                    { id: "lead", label: "\"I know where the Blue Medusa lies. Follow me.\"", requires: "wreck", to: "follows" },
+                    { id: "find", label: "\"I'll look for her.\"", hideIf: "wreck", to: "hope" }
+                  ] },
+                hides: { text: "He shrinks away from you and buries his face again. Perhaps a gentler word.", options: [{ label: "Try again, gently", to: "talks" }] },
+                follows: { text: "His face lights up. \"You'll show me? I don't know the way...\" He drifts close behind you. (Swim down to the cellar and through to the wreck.)", end: true, fx: { flag: "orvild-follows" } },
+                hope: { text: "\"You will? Really?\" He wipes his eyes and almost smiles.", end: true }
+              } }],
+            uses: [
+              { item: "spider", danger: "krakul", label: "Smash the jar against Krakul's wet scales", hideIf: ["krakul-done", "krakul-busy"], consume: true,
+                success: "The jar shatters on his streaming scales — and the little spider swells to the size of a horse and leaps on him. They thrash across the dome; that will keep him busy for a while.",
+                fx: { flag: "krakul-busy", unflag: "spider", clue: { id: "water", text: "The shrinking breaks when the shrunken thing touches water." } } },
+              { item: ["red liquid", "red potion"], danger: "krakul", label: "Hurl it into his gaping mouth", best: ["Knives", "Slings", "Bows", "Crossbows", "Spears", "Staves"], bane: true, hideIf: "krakul-done", consume: true, consumeOnFail: true,
+                success: "It goes straight down his throat. With a squeak he dwindles into a harmless little snake — though one touch of water would undo it.",
+                failure: "It shatters against his scales.",
+                onSuccess: { flag: "krakul-done", unflag: "elixir", clue: { id: "potion", text: "The red potion shrinks whoever swallows it." } }, onFail: { unflag: "elixir" } }
+            ],
             encounters: [
               { id: "krakul", label: "Krakul the lindworm", hidden: true, noSneak: true, requires: ["emerald", "!promised"], unless: ["krakul-done", "krakul-busy"], time: 1,
                 note: "He goes for whoever carries the emerald, but spares anyone who hands it over.",
@@ -489,8 +614,8 @@
             exits: [{ to: "sorcerer", label: "Down to the sorcerer's chamber" }],
             escapes: [
               { label: "Jump from the balcony into the sea", skill: "Swimming", failDamage: "D6", damageType: "bludgeoning", hideIf: "manacled", done: "Jumped from the observatory balcony", note: "Fail the SWIMMING roll and the fall deals D6 bludgeoning — but you're out." },
-              { label: "Throw the ship in a bottle into the sea and climb aboard", requires: ["ship", "knows-water"], hideIf: "manacled", button: "Set sail", done: "Sailed away on Kamandur's shrunken ship, restored by the sea", note: "The water will break the shrinking. Jump down to her." },
-              { label: "Smash the bottle and drop the little ship into the sea", requires: "ship", hideIf: ["manacled", "knows-water"], button: "Drop it", done: "The little ship hit the waves and grew into a real one — you jumped aboard and sailed away", note: "A wild idea. What's the worst that could happen?" }
+              { label: "Throw the ship in a bottle into the sea and climb aboard", requires: ["ship", "knows-water"], hideIf: "manacled", button: "Set sail", fx: { flag: "sailed" }, done: "Sailed away on Kamandur's shrunken ship, restored by the sea", note: "The water will break the shrinking. Jump down to her." },
+              { label: "Smash the bottle and drop the little ship into the sea", requires: "ship", hideIf: ["manacled", "knows-water"], button: "Drop it", fx: { flag: "sailed" }, done: "The little ship hit the waves and grew into a real one — you jumped aboard and sailed away", note: "A wild idea. What's the worst that could happen?" }
             ]
           }
         ]

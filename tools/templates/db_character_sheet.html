@@ -2681,7 +2681,8 @@ var UTray = (function(){
     return { kind:'state', name:(S.name||'').trim(), kin:S.kin, profession:S.profession, hp:num(S.hp), hpMax:hpMax(), wp:num(S.wp), wpMax:wpMax(),
       cond:conds, attrs:attrs, dead:!!S.death.dead, rallied:!!S.death.rallied, death:{s:S.death.s,f:S.death.f}, built:!!S.built,
       armor:(function(){ try{ return armorRating(); }catch(e){ return 0; } })(),
-      armyOfOne:hasAbility('Army of One'), soleSurvivor:hasAbility('Sole Survivor'), skills:sk };
+      armyOfOne:hasAbility('Army of One'), soleSurvivor:hasAbility('Sole Survivor'), skills:sk,
+      items:(S.inventory||[]).map(function(r){ return {name:r.name,qty:num(r.qty,1)}; }) };
   }
   var stT=null; function postState(){ if(stT) clearTimeout(stT); stT=setTimeout(function(){ stT=null; post(snapshot()); },80); }
   // wrap the sheet's own functions (reassigning the globals the rest of the sheet calls)
@@ -2714,6 +2715,10 @@ var UTray = (function(){
         case 'fear': rollFear(); break;
         case 'endTurn': endTurn(); break;
         case 'mark': (m.skills||[]).forEach(function(n){ skRec(n).mark=true; }); addLog('Advancement marks','+'+(m.skills||[]).length,(m.skills||[]).join(', ')+' · roll advancement between missions','normal'); changed(); break;
+        // the solo page takes an item (handed over, smashed, used up): by name, case-insensitive
+        case 'removeItem': { var nm=String(m.name||'').toLowerCase(), q=num(m.qty,1); var ri=S.inventory.findIndex(function(r){ return String(r.name).toLowerCase()===nm; }); if(ri>=0){ var rr=S.inventory[ri]; rr.qty=num(rr.qty,1)-q; if(rr.qty<=0) S.inventory.splice(ri,1); changed(); } break; }
+        // the solo page marks a condition (a fright, a fall in the sea)
+        case 'cond': { if(m.name&&S.cond&&(m.name in S.cond)&&!S.cond[m.name]){ S.cond[m.name]=true; addLog(m.name,'Gained',m.why||'','normal'); changed(); } break; }
         case 'addItem': { var k=addGearByName(m.name,num(m.qty,1),m.note||''); if(!k){ S.inventory.push({name:m.name,qty:num(m.qty,1),wt:m.wt==null?1:m.wt,note:m.note||''}); } addLog('Found',m.name,m.note||'','normal'); changed(); break; }
         case 'coins': { var c=S.coins||{gold:0,silver:0,copper:0}; c[m.unit]=num(c[m.unit])+num(m.n); S.coins=c; addLog('Found coins','+'+num(m.n)+' '+m.unit,'','normal'); changed(); break; }
         case 'log': addLog(m.label||'Solo',m.result||'',m.detail||'',m.type||'normal'); break;
