@@ -1792,7 +1792,9 @@ function actLogOnly(label, result, detail){ return function(){ addLog(label, res
 // can when on); Broken still limits you.
 function turnOn(){ return !S||S.turnBased!==false; }
 function toggleTurnMode(){ S.turnBased=!turnOn(); var a=actState(); a.full=false; a.quick=0; a.used=0; renderAction(); scheduleAutosave(); if(window.SheetSettings) SheetSettings.refresh(); }
-function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: your full and quick actions are spent automatically. Click to tick them by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
+// The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
+function turnModeBtn(){ return ''; }
+function turnModeBtnPill(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: your full and quick actions are spent automatically. Click to tick them by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
 // the pips are buttons: tick or untick them by hand (both modes). Pip 1 = the full action (or the
 // second quick action that forfeits it), pip 2 = the quick action.
 function actTogglePip(k){ var a=actState();

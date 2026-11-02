@@ -1723,7 +1723,9 @@ function actsMax(){ return timedHas('acts')?2:1; }
 // can be ticked by hand (as it can when on); being out, paralyzed or dead still limits you.
 function turnOn(){ return S.turnBased!==false; }
 function toggleTurnMode(){ S.turnBased=!turnOn(); S.turn=blankTurn(); changed(); if(window.SheetSettings) SheetSettings.refresh(); }
-function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: your action is spent automatically (one per turn). Click to tick it by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
+// The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
+function turnModeBtn(){ return ''; }
+function turnModeBtnPill(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: your action is spent automatically (one per turn). Click to tick it by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
 // the Action pips are buttons: tick or untick one by hand (both modes); they fill left to right
 function togglePip(i){ var a=num(S.turn.acts); S.turn.acts=Math.max(0,Math.min(actsMax(),i<a?a-1:a+1)); changed(); }
 function canAct(){ return !incapacitated()&&(!turnOn()||num(S.turn.acts)<actsMax()); }

@@ -2000,7 +2000,9 @@ let _turnBased = true;
 function turnOn(){ return _turnBased !== false; }
 function turnFresh(){ Object.assign(_turn, { used: 0, extra: 0, extraUsed: 0, aiSpent: false, moves: 0, evading: false, done: [] }); }
 function toggleTurnMode(){ _turnBased = !turnOn(); turnFresh(); _turn.potionRound = 0; turnAfter(); if(window.SheetSettings) SheetSettings.refresh(); }
-function turnModeBtn(){ const on = turnOn(); return `<button type="button" class="turn-mode${on ? ' on' : ''}" role="switch" aria-checked="${on}" aria-label="Turn-based: spend Actions automatically" onclick="toggleTurnMode()" title="${on ? 'Turn-based: Actions are spent automatically (2 per turn). Click to tick them by hand instead.' : 'Manual: Actions aren\'t spent automatically — tick the pips yourself. Click to spend them automatically.'}"><span class="tm-sw"></span></button>`; }
+// The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
+function turnModeBtn(){ return ''; }
+function turnModeBtnPill(){ const on = turnOn(); return `<button type="button" class="turn-mode${on ? ' on' : ''}" role="switch" aria-checked="${on}" aria-label="Turn-based: spend Actions automatically" onclick="toggleTurnMode()" title="${on ? 'Turn-based: Actions are spent automatically (2 per turn). Click to tick them by hand instead.' : 'Manual: Actions aren\'t spent automatically — tick the pips yourself. Click to spend them automatically.'}"><span class="tm-sw"></span></button>`; }
 // The pips are buttons: tick or untick an Action by hand (both modes). Pips fill left to right,
 // so a used pip takes one off the count and an open one adds one.
 function turnTogglePip(k){

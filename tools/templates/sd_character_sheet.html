@@ -1818,7 +1818,9 @@ var _sdTurn = { move: false, action: false, second: false, focus: '' };
 var _sdTurnBased = true;
 function turnOn(){ return _sdTurnBased !== false; }
 function toggleTurnMode(){ _sdTurnBased = !turnOn(); _sdTurn = { move: false, action: false, second: false, focus: _sdTurn.focus || '' }; if(window.SheetSettings) SheetSettings.refresh(); sdAfter(); }
-function turnModeBtn(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: your action is spent automatically (one per turn). Click to tick it by hand instead.' : 'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.') + '"><span class="tm-sw"></span></button>'; }
+// The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
+function turnModeBtn(){ return ''; }
+function turnModeBtnPill(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: your action is spent automatically (one per turn). Click to tick it by hand instead.' : 'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.') + '"><span class="tm-sw"></span></button>'; }
 // The pips are buttons: tick or untick by hand (both modes). 'move' = the HeroDark 2nd pip.
 function sdTogglePip(k){ if(k === 'move'){ _sdTurn.move = !_sdTurn.move; _sdTurn.second = _sdTurn.move; } else _sdTurn.action = !_sdTurn.action; sdAfter(); }
 var _sdTurnOpts = [];

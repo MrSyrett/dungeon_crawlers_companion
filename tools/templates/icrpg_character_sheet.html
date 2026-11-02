@@ -1200,7 +1200,9 @@ var _icTurn = { move:false, action:false, far:false, mode:'normal' };
 var _icTurnBased = true;
 function turnOn(){ return _icTurnBased!==false; }
 function toggleTurnMode(){ _icTurnBased=!turnOn(); icEndTurn(); if(window.SheetSettings) SheetSettings.refresh(); }
-function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend Move and Action automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: Move and Action are spent automatically (one Action per TURN). Click to tick them by hand instead.':'Manual: Move and Action aren\'t spent automatically — tick the pips yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
+// The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
+function turnModeBtn(){ return ''; }
+function turnModeBtnPill(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend Move and Action automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: Move and Action are spent automatically (one Action per TURN). Click to tick them by hand instead.':'Manual: Move and Action aren\'t spent automatically — tick the pips yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
 // AUTO-USE (roll-log switch, saved on the sheet; on unless turned off): LOOT you USE loses a use by
 // itself. Off = the effect still happens, nothing is counted down or removed.
 var _icAutoUse = true;

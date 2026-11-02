@@ -1740,7 +1740,9 @@ var _actOpts = [];
 var _turnBased = true;
 function turnOn() { return _turnBased !== false; }
 function toggleTurnMode() { _turnBased = !turnOn(); actEndTurn(); if(window.SheetSettings) SheetSettings.refresh(); }
-function turnModeBtn() { const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: each roll takes an action slot (declaring more raises the Multi-Action Penalty), End Turn clears them. Click to tick them by hand instead.' : 'Manual: rolls don\'t take action slots — tick the pips and declare actions yourself. Click to spend them automatically.') + '"><span class="tm-sw"></span></button>'; }
+// The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
+function turnModeBtn(){ return ''; }
+function turnModeBtnPill(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: each roll takes an action slot (declaring more raises the Multi-Action Penalty), End Turn clears them. Click to tick them by hand instead.' : 'Manual: rolls don\'t take action slots — tick the pips and declare actions yourself. Click to spend them automatically.') + '"><span class="tm-sw"></span></button>'; }
 // An Action pip, by hand (both modes): an unticked pip ticks one more action used, a ticked one gives one back.
 function actTogglePip(k) { const used = _act.used || 0; _act.used = k < used ? used - 1 : Math.min(_act.declared, used + 1); renderAction(); scheduleAutosave(); }
 function actMap() { return Math.max(0, (_act.declared || 1) - 1); }

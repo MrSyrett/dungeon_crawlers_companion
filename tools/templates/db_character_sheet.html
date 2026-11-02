@@ -1553,7 +1553,9 @@ function inCombat(){ return true; }
 // (as it can when on); dying and death still limit you.
 function turnOn(){ return S.turnBased!==false; }
 function toggleTurnMode(){ S.turnBased=!turnOn(); S.turn.action=false; S.turn.done=false; S.turn.extra=0; S.turn.dual=false; changed(); }
-function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: actions are spent automatically. Click to tick them by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
+// The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
+function turnModeBtn(){ return ''; }
+function turnModeBtnPill(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: actions are spent automatically. Click to tick them by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
 // the Action pip is a button: tick or untick it by hand (both modes)
 function togglePip(){ S.turn.action=!(S.turn.action||S.turn.done); if(!S.turn.action) S.turn.done=false; changed(); }
 function canAct(){ if(S.death.dead) return false; if(S.hp<=0&&!S.death.rallied) return false; return !turnOn()||(!S.turn.action&&!S.turn.done); }
@@ -1840,8 +1842,8 @@ function castSpell(i,c){
   var s=S.spells[i]; var def=spellDef(s.name)||{name:s.name,school:'General',powerLevels:true,castingTime:'action'}; var sk=spellSchoolSkill(def);
   var cost=spellCost(def,c.pl,c.indoors); var bodyGain=0, bodyTxt='';
   if(c.body){ var br=rollExpr(c.body); bodyGain=br.total; bodyTxt=br.text; }
-  if(S.wp+bodyGain<cost){ addLog(def.name,'Not enough WP','Costs '+cost+' WP, you have '+S.wp+(bodyGain?' + '+bodyGain+' from the body':''),'fumble'); if(bodyGain) takeDamage(bodyGain,{ignoreArmor:true,label:'Power from the body'}); return; }
-  var fromWp=Math.max(0,cost-bodyGain); S.wp-=fromWp;
+  if(autoOn('spend')&&S.wp+bodyGain<cost){ sheetToast(def.name+': not enough WP — costs '+cost+', you have '+S.wp+(bodyGain?' + '+bodyGain+' from the body':'')); if(bodyGain) takeDamage(bodyGain,{ignoreArmor:true,label:'Power from the body'}); return; }
+  var fromWp=autoOn('spend')?Math.max(0,cost-bodyGain):0; S.wp-=fromWp;
   var reaction=def.castingTime==='reaction', freeCast=/doesn't use up your action|not an action/i.test(def.text||'');
   if(reaction&&!freeCast) useReaction(); else if(!freeCast&&def.castingTime==='action') useAction();
   changed();
@@ -1861,6 +1863,7 @@ function spellEffect(def,c,r,cost,fromWp){
     var lvlDice=function(dd){ var per=dd&&dd.perLevel; return dd.base+(pl>1&&per&&/^\d*D\d+$/i.test(String(per))?'+'+(pl-1)+String(per).replace(/^1/,''):''); };
     if(def.damage&&def.damage.base){ var e=lvlDice(def.damage); if(opt.double) e=diceTimes(e,2); var x=rollExpr(e);
       var chain=A(def.damage.chain).map(function(ce){ var cr=rollExpr(ce+(pl>1?'+'+(pl-1)+String(ce).replace(/^\d*/,''):'')); return cr.total+' ('+cr.text+')'; });
+      if(typeof window.__sheetDamageOut==='function'){ window.__sheetDamageOut({label:'Spell · '+def.name,total:x.total,weapon:def.name,types:['magic'].concat(/fire|flame|burn|inferno|heat/i.test(def.name+' '+(def.text||''))?['fire']:[]),magic:true,ignoresArmor:!!def.ignoreArmor}); }
       addLog('Spell damage · '+def.name,String(x.total),x.text+(chain.length?' · chain: '+chain.join(', '):'')+(def.dodge?' · can be dodged':'')+(def.parry?' / parried as a ranged attack':'')+(def.metalArmorNoEffect?' · metal armor doesn\'t protect':''),opt.double?'crit':'normal'); }
     if(def.healing&&def.healing.base){ var he=lvlDice(def.healing); var hx=rollExpr(he); if(c.self) healHp(hx.total,def.name+' ('+hx.text+')'); else addLog('Healing · '+def.name,'+'+hx.total+' HP',hx.text,'normal'); }
     if(!(def.damage&&def.damage.base)&&!(def.healing&&def.healing.base)) addLog(def.name,'Takes effect','Power level '+pl+(opt.double?' · range doubled':'')+' · '+(def.duration||''),'normal');
@@ -2682,6 +2685,8 @@ var UTray = (function(){
     var types=dd?A(dd.features).filter(function(f){ return /^(Bludgeoning|Slashing|Piercing)$/.test(f); }).map(function(f){ return f.toLowerCase(); }):[];
     post({kind:'damage',label:label||'Damage',total:num(total),weapon:dd?dd.name:'',types:types,ranged:!!(dd&&dd.ranged),ignoresArmor:!!((ch&&ch.armor)||(o&&o.weak)),self:/self/i.test(label||'')});
     return total; };
+  // spells: spellEffect hands its damage here so the solo page can pick a target, like a weapon hit
+  window.__sheetDamageOut=function(d){ post({kind:'damage',label:d.label,total:num(d.total),weapon:d.weapon||'',types:d.types||[],magic:!!d.magic,ranged:true,ignoresArmor:!!d.ignoresArmor,self:false}); };
   var _changed=changed; changed=function(){ _changed(); postState(); };
   function firstMelee(){ var i=-1; S.inventory.some(function(r,k){ if(kindOf(r)==='weapon'&&r.equipped){ var d=wDef(r); if(d&&!d.ranged){ i=k; return true; } } return false; }); return i; }
   window.addEventListener('message', function(e){

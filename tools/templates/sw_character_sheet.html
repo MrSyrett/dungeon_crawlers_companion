@@ -1414,7 +1414,9 @@ var _actOpts = [];
 var _turnBased = true;
 function turnOn() { return _turnBased !== false; }
 function toggleTurnMode() { _turnBased = !turnOn(); actEndTurn(); try { SheetSettings.refresh(); } catch(e) {} }
-function turnModeBtn() { const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: actions are spent automatically. Click to tick them by hand instead.' : 'Manual: actions aren\'t spent automatically — tick the pips yourself. Click to spend them automatically.') + '"><span class="tm-sw"></span></button>'; }
+// The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
+function turnModeBtn(){ return ''; }
+function turnModeBtnPill(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: actions are spent automatically. Click to tick them by hand instead.' : 'Manual: actions aren\'t spent automatically — tick the pips yourself. Click to spend them automatically.') + '"><span class="tm-sw"></span></button>'; }
 // the action pips are buttons: tick or untick them by hand (both modes)
 function actPip(k) { const u = _act.used || 0; _act.used = k < u ? k : k + 1; renderAction(); scheduleAutosave(); }
 function actMap() { return Math.max(0, (_act.declared || 1) - 1); }

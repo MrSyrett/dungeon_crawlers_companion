@@ -1692,7 +1692,9 @@ function editStats(){ S.man=S.man||{}; var f=function(k,l){ return '<label style
 function closeStats(){ $('stats-overlay').classList.remove('open'); }
 function saveStats(){ [].forEach.call(document.querySelectorAll('#stats-body [data-man]'),function(i){ var v=i.value.trim(); S.man[i.dataset.man]=v===''?null:num(v); }); closeStats(); renderAttrSkills(); renderArmorVal(); renderEnc(); scheduleAutosave(); }
 function toggleTurnMode(){ S.turnBased=!turnOn(); var a=actState(); a.full=false; a.quick=0; a.used=0; a.overwatch=false; renderAction(); scheduleAutosave(); try{ SheetSettings.refresh(); }catch(e){} }
-function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: actions are spent automatically. Click to tick them by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
+// The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
+function turnModeBtn(){ return ''; }
+function turnModeBtnPill(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: actions are spent automatically. Click to tick them by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
 // the Action pip is a button: tick or untick it by hand (both modes); unticking it when
 // turn-based also drops an Overwatch that spent it
 function togglePip(){ var a=actState(); a.used=a.used?0:1; if(!a.used&&turnOn()) a.overwatch=false; renderAction(); scheduleAutosave(); }

@@ -35,11 +35,16 @@ button,input,select,textarea{font-family:var(--f-ui);font-size:15px;}
 .so-sheet{flex:1;min-width:0;position:relative;background:var(--bg);display:flex;flex-direction:column;}
 .so-frames{flex:1;position:relative;min-height:0;}
 .so-frames iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:var(--bg);}
-.so-heroes{display:flex;gap:4px;padding:6px 8px 0;background:var(--bg);border-bottom:2px solid var(--acc);overflow-x:auto;flex:none;}
-.so-heroes .hero{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:96px;padding:6px 12px 7px;border:1px solid var(--rule);border-bottom:0;border-radius:8px 8px 0 0;background:var(--box);color:var(--muted);cursor:pointer;font-family:var(--f-label);font-size:13px;letter-spacing:.03em;}
-.so-heroes .hero.on{background:var(--card);color:var(--acc-dk);border-color:var(--acc);font-weight:700;}
+/* party tabs hang down from the top edge over the sheet (no bar of their own) */
+.so-heroes{position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:4px;max-width:calc(100% - 24px);overflow-x:auto;pointer-events:none;scrollbar-width:none;}
+.so-heroes::-webkit-scrollbar{display:none;}
+.so-heroes .hero{pointer-events:auto;position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:88px;padding:4px 12px 6px;border:1px solid var(--rule);border-top:0;border-radius:0 0 9px 9px;background:var(--box);color:var(--muted);cursor:pointer;font-family:var(--f-label);font-size:12.5px;letter-spacing:.03em;box-shadow:0 3px 8px rgba(0,0,0,.28);opacity:.92;}
+.so-heroes .hero:hover{opacity:1;color:var(--ink);}
+.so-heroes .hero.on{background:var(--acc);color:#fff;border-color:var(--acc-dk);font-weight:700;opacity:1;padding-top:7px;}
 .so-heroes .hero i{display:block;height:3px;width:100%;border-radius:2px;background:linear-gradient(90deg,var(--green) var(--hp),var(--rule) var(--hp));}
+.so-heroes .hero.on i{background:linear-gradient(90deg,#9be3b2 var(--hp),rgba(255,255,255,.3) var(--hp));}
 .so-heroes .hero em{font-style:normal;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--red);}
+.so-heroes .hero.on em{color:#ffd2cc;}
 .so-heroes .hero.dead{opacity:.6;}
 .so-sheet .so-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:30px;text-align:center;color:var(--muted);}
 .so-tabs{display:none;}
@@ -131,6 +136,14 @@ textarea{width:100%;min-height:54px;resize:vertical;}
 .wyd{margin-top:10px;padding-top:10px;border-top:1px solid var(--rule);display:flex;flex-direction:column;gap:6px;}
 .wyd-h{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-family:var(--f-disp);font-size:17px;color:var(--acc-dk);letter-spacing:.04em;}
 .hchip{cursor:pointer;font-family:var(--f-label);} .hchip.on{background:var(--acc);border-color:var(--acc);color:#fff;}
+.hchip.done{opacity:.55;text-decoration:line-through;cursor:default;}
+.party-turns{gap:5px;}
+.so-heroes .hero .act-dot{position:absolute;top:5px;left:6px;width:7px;height:7px;border-radius:50%;background:var(--gold-lt);box-shadow:0 0 0 2px rgba(0,0,0,.25);}
+.jr .ln.k-turn{border-color:var(--acc);color:var(--acc-dk);font-family:var(--f-label);letter-spacing:.04em;}
+.jr .ln.k-clue{border-color:var(--gold);} .jr .ln.k-clue b{color:var(--gold);}
+details.clues{margin-top:6px;border:1px dashed var(--gold-lt);border-radius:8px;padding:5px 9px;font-size:13.5px;}
+details.clues summary{cursor:pointer;font-family:var(--f-label);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);}
+details.clues ul{margin:6px 0 2px 18px;display:flex;flex-direction:column;gap:4px;}
 .danger{border:2px solid var(--red);border-radius:8px;padding:8px 10px;background:rgba(179,38,30,.07);display:flex;flex-direction:column;gap:6px;}
 .dg-h{font-family:var(--f-label);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--red);font-weight:700;}
 .jr .st{font-style:italic;line-height:1.5;margin:2px 0;padding-left:10px;border-left:3px solid var(--gold-lt);}
@@ -173,7 +186,7 @@ textarea{width:100%;min-height:54px;resize:vertical;}
 <body data-tab="adventure">
 <div class="so-app">
   <section class="so-pane" id="so-pane"><div id="so-root"></div></section>
-  <section class="so-sheet" id="so-sheet"><div class="so-heroes" id="so-heroes" style="display:none"></div><div class="so-frames" id="so-frames"><div class="so-empty" id="so-sheet-empty">Choose your heroes to play.</div></div></section>
+  <section class="so-sheet" id="so-sheet"><div class="so-frames" id="so-frames"><div class="so-heroes" id="so-heroes" style="display:none" role="tablist" aria-label="Party sheets"></div><div class="so-empty" id="so-sheet-empty">Choose your heroes to play.</div></div></section>
 </div>
 <nav class="so-tabs"><button data-tab="adventure" class="on">Adventure</button><button data-tab="sheet">Character Sheet</button></nav>
 <div class="dlg" id="dlg"><div class="dlg-b" id="dlg-b"></div></div>
@@ -251,13 +264,16 @@ function mountSheets(){
   $('so-sheet-empty').style.display=ids.length?'none':'';
   ids.forEach(function(id){ if(frames[id]) return; var f=document.createElement('iframe'); f.title='Character sheet'; f.src='/tools/db-character/'+encodeURIComponent(id)+'?embed=1&solo=1'; host.appendChild(f); frames[id]=f; });
   PC=PCS[S.acting]||null; showSheet(); renderHeroTabs(); }
-function showSheet(){ Object.keys(frames).forEach(function(id){ var on=id===S.acting; frames[id].style.visibility=on?'visible':'hidden'; frames[id].style.zIndex=on?'1':'0'; }); }
-function setActing(id,quiet){ if(!id||!frames[id]) return; S.acting=id; PC=PCS[id]||null; showSheet(); renderHeroTabs(); if(!quiet) render(); }
+// The tabs over the sheet only SHOW a hero's sheet (VIEW); who acts is S.acting.
+var VIEW=null;
+function showSheet(){ var vis=VIEW&&frames[VIEW]?VIEW:S.acting; Object.keys(frames).forEach(function(id){ var on=id===vis; frames[id].style.visibility=on?'visible':'hidden'; frames[id].style.zIndex=on?'1':'0'; }); }
+function setActing(id,quiet){ if(!id||!frames[id]) return; S.acting=id; VIEW=null; PC=PCS[id]||null; showSheet(); renderHeroTabs(); if(!quiet) render(); }
 function renderHeroTabs(){ var el=$('so-heroes'); if(!el) return;
   if(solo()){ el.style.display='none'; document.body.classList.remove('party'); return; }
   document.body.classList.add('party'); el.style.display=''; var tb=document.querySelector('.so-tabs [data-tab="sheet"]'); if(tb) tb.dataset.who=heroName(S.acting);
   el.innerHTML=S.party.map(function(p){ var s=PCS[p.id], hp=s&&s.hpMax?Math.max(0,Math.min(100,s.hp/s.hpMax*100)):100;
-    return '<button type="button" class="hero'+(p.id===S.acting?' on':'')+(s&&s.dead?' dead':'')+'" data-a="hero" data-id="'+esc(p.id)+'" title="Show '+esc(heroName(p.id))+'\'s sheet"><span>'+esc(heroName(p.id))+'</span><i style="--hp:'+hp+'%"></i>'+(s&&s.dead?'<em>dead</em>':s&&s.hp<=0?'<em>dying</em>':'')+'</button>'; }).join(''); }
+    var vis=VIEW&&frames[VIEW]?VIEW:S.acting;
+    return '<button type="button" role="tab" aria-selected="'+(p.id===vis)+'" class="hero'+(p.id===vis?' on':'')+(s&&s.dead?' dead':'')+'" data-a="view" data-id="'+esc(p.id)+'" title="Show '+esc(heroName(p.id))+'\'s sheet'+(p.id===S.acting&&!solo()?' — acting now':'')+'">'+(p.id===S.acting&&!solo()?'<b class="act-dot" aria-label="acting now"></b>':'')+'<span>'+esc(heroName(p.id))+'</span><i style="--hp:'+hp+'%"></i>'+(s&&s.dead?'<em>dead</em>':s&&s.hp<=0?'<em>dying</em>':'')+'</button>'; }).join(''); }
 function send(cmd,extra,cb,who){ var f=frames[who||S.acting]; if(!f||!f.contentWindow){ toast('The character sheet is still loading'); return; }
   var m=Object.assign({src:'db-solo',cmd:cmd},extra||{}); if(cb){ m.req=uid(); reqs[m.req]=cb; }
   f.contentWindow.postMessage(m, ORIGIN); }
@@ -268,14 +284,18 @@ window.addEventListener('message',function(e){
     var p=S.party.find(function(x){ return x.id===id; }); if(p&&m.name&&p.name!==m.name){ p.name=m.name; syncChar(); save(); }
     if(solo()&&m.armyOfOne&&!S.army){ S.army=true; save(); }
     renderHeroTabs(); if(first&&id===S.acting) render(); return; }
-  if(m.kind==='roll'){ onRoll(m); return; }
+  if(m.kind==='roll'){ onRoll(m,id); return; }
   if(m.kind==='damage'){ onPlayerDamage(m,id); return; }
 });
-function onRoll(m){
+function onRoll(m,pid){
   var cb=m.req&&reqs[m.req]; if(cb){ delete reqs[m.req]; lastReq={cb:cb,label:m.label}; cb(m); return; }
   // a push re-rolls the last requested roll: hand the new result to the same handler
   if(m.pushed&&lastReq&&lastReq.label===m.label.replace(/^Push · /,'')){ lastReq.cb(m); return; }
-  if(m.label&&!/^(Death Roll|Fear)/.test(m.label)) { jlog('roll',m.label,(m.dragon?'Dragon!':m.demon?'Demon!':m.ok?'Success':'Failure')+' ('+m.roll+' vs '+m.target+')'); save(); renderJournal(); }
+  if(m.label&&!/^(Death Roll|Fear)/.test(m.label)) { jlog('roll',(S.combat&&!solo()?heroName(pid)+': ':'')+m.label,(m.dragon?'Dragon!':m.demon?'Demon!':m.ok?'Success':'Failure')+' ('+m.roll+' vs '+m.target+')'); }
+  // in a fight, an attack or a spell IS the hero's action: a miss can still be pushed, a hit waits for its damage
+  var c=S.combat, P=c&&c.pending;
+  if(P&&P.type==='pc'&&P.pid===pid&&(m.weapon||/^Cast · /.test(m.label||''))){ P.attacked=true; P.missed=!m.ok; }
+  save(); render();
 }
 var lastReq=null;
 // spec: {skill|attr, boons, banes, label}; who = a hero id (default: the acting hero, whose sheet is shown)
@@ -367,6 +387,7 @@ function statusBar(){
   if(mi.scoring) h+='<div class="st-cell st-score" title="'+esc(A(S.m.score).slice(-6).reverse().map(function(x){ return (x.n>0?'+':'')+x.n+' '+x.label; }).join('\n')||'No points yet')+'"><span class="lbl">Score</span><span class="score-big">'+scoreTotal()+'</span></div>';
   h+='</div>';
   if(t&&!S.m.sink) h+='<div class="tiny muted" style="margin-top:4px">'+esc(t.text)+'</div>';
+  var cl=A(S.m.clues); if(cl.length) h+='<details class="clues"'+(UI.cluesOpen?' open':'')+'><summary>Clues &amp; notes ('+cl.length+')</summary><ul>'+cl.map(function(x){ return '<li>'+esc(x.text)+(x.where?' <span class="tiny muted">— '+esc(x.where.replace(/^\d+\.\s*/,''))+'</span>':'')+'</li>'; }).join('')+'</ul></details>';
   return h+'</div></div>';
 }
 // The scene: the Story (newest beat at the bottom, scroll up for the rest), then
@@ -383,7 +404,23 @@ function sceneCard(){
   h+=D?dangerPanel(w,D):actionsHtml(w);
   return h+'</div></div></div>';
 }
-function heroChips(){ if(solo()) return ''; return '<span class="row">'+S.party.map(function(p){ var s=PCS[p.id]; return '<button type="button" class="chip hchip'+(p.id===S.acting?' on':'')+'" data-a="hero" data-id="'+esc(p.id)+'" title="'+esc(heroName(p.id))+' acts"'+(s&&s.dead?' disabled':'')+'>'+esc(heroName(p.id))+'</button>'; }).join('')+'</span>'; }
+// PARTY TURNS outside combat: each hero takes one action, then the next hero is up;
+// once everyone has acted a new round starts. Moving to another place starts fresh.
+// Group actions (sneaking past, escaping, fleeing) involve everyone and take no turn.
+function acted(){ return (S.m&&S.m.acted)||{}; }
+function canAct(id){ return solo()||!S.m||!acted()[id]; }
+function nextUp(){ var A2=acted(); return aliveHeroes().find(function(id){ return !A2[id]; }); }
+function newPartyRound(quiet){ if(!S.m) return; S.m.acted={}; S.m.pround=(S.m.pround||1)+(quiet?0:1); }
+function endTurn(){
+  if(solo()||!S.m||S.m.status!=='active'||S.combat) return;
+  S.m.acted=S.m.acted||{}; S.m.acted[S.acting]=true;
+  var nx=nextUp();
+  if(!nx){ newPartyRound(); nx=aliveHeroes()[0]; jlog('turn','Round '+S.m.pround,'Everyone has had a turn'); }
+  if(nx&&nx!==S.acting){ setActing(nx,true); jlog('turn',heroName(nx)+'\'s turn',''); }
+}
+function heroChips(){ if(solo()) return ''; var A2=acted();
+  return '<span class="row party-turns"><span class="tiny muted">Round '+(S.m.pround||1)+'</span>'+S.party.map(function(p){ var s=PCS[p.id], dead=s&&s.dead, done=!!A2[p.id], on=p.id===S.acting;
+    return '<button type="button" class="chip hchip'+(on?' on':'')+(done?' done':'')+'" data-a="hero" data-id="'+esc(p.id)+'" aria-pressed="'+on+'" title="'+esc(heroName(p.id))+(dead?' is dead':done?' has acted this round':on?' acts now':' — act next')+'"'+(dead||done?' disabled':'')+'>'+(done?'✓ ':on?'▶ ':'')+esc(heroName(p.id))+'</button>'; }).join('')+'</span>'; }
 // ── immediate dangers: monsters that have turned on you, a sprung trap, a threat come
 // due. Nothing else can be done here until it's dealt with.
 function dangerHere(){ var w=curWp(); if(!w||!w.danger) return null; var D=w.danger;
@@ -522,13 +559,21 @@ function genLocation(){ var g={area:T.areas[d(20)-1],details:[]}; var n=d(4); fo
 function inhabitant(){ return T.pickRange(T.inhabitants,d(20)); }
 function genText(g){ return g.area+(g.details.length?': '+g.details.map(function(x){ return x.v; }).join(', '):'')+(g.inhabitants?' · '+g.inhabitants:''); }
 function genHtml(g){ return '<b>'+esc(g.area)+'</b>'+(g.details.length?' — '+g.details.map(function(x){ return '<span class="chip" title="'+esc(x.k)+'">'+esc(x.v)+'</span>'; }).join(' '):'')+(g.inhabitants?'<br><span class="small">Inhabitants: <b>'+esc(g.inhabitants)+'</b></span>':''); }
+// A module can bring its own treasure table (MOD.treasures: {name, note, value|coins:'2D6 gold'}),
+// drawn without repeats. Otherwise: coins, valuables, weapons, armour or useful gear — never an
+// empty container, clothes or raw trade goods (a "Chest" you can't open isn't treasure).
 function treasure(){
-  var cat=pick(['coins','valuable','valuable','weapon','armor','gear','gear']);
   var arr=function(v){ return Array.isArray(v)?v:[]; };
-  if(cat==='coins'&&window.DB_GM&&DB_GM.coins){ var c=DB_GM.coins(); return {kind:'coins',name:c.name,amount:c.amount,unit:c.unit,text:c.name+': '+c.text}; }
-  if(cat==='valuable'){ var v=pick(arr(window.DB_GM&&DB_GM.valuables)); if(v){ var val=/D/.test(v.value)?rollExpr(v.value.split(' ')[0]).total+' '+v.value.split(' ')[1]:v.value; return {kind:'item',name:v.name,note:'worth '+val,text:v.name+' (worth '+val+')',wt:0}; } }
-  var list= cat==='weapon'?arr(window.DB_WEAPONS).filter(function(w){ return !w.natural&&w.cost; }) : cat==='armor'?arr(window.DB_ARMOR).concat(arr(window.DB_HELMETS)) : arr(window.DB_GEAR).filter(function(g){ return !/^(Services|Animals|Means of Travel|Magic Items)$/.test(g.category); });
-  var it=pick(list)||{name:'A purse',cost:null}; return {kind:'item',name:it.name,note:'',text:it.name+(cat==='weapon'&&it.damage?' (weapon, '+it.damage+')':'')};
+  if(MOD&&arr(MOD.treasures).length){ S.m.tUsed=S.m.tUsed||[]; var left=MOD.treasures.filter(function(t){ return S.m.tUsed.indexOf(t.name)<0; }); if(!left.length){ S.m.tUsed=[]; left=MOD.treasures.slice(); }
+    var t=pick(left); S.m.tUsed.push(t.name);
+    if(t.coins){ var p=String(t.coins).split(' '), r=rollExpr(p[0]); return {kind:'coins',name:t.name,amount:r.total,unit:p[1]||'silver',text:t.name+': '+r.total+' '+(p[1]||'silver')+(t.note?' — '+t.note:'')}; }
+    var val=t.value&&/D/.test(t.value)?rollExpr(t.value.split(' ')[0]).total+' '+t.value.split(' ')[1]:t.value;
+    return {kind:'item',name:t.name,note:[t.note,val?'worth '+val:''].filter(Boolean).join(' · '),text:t.name+(val?' (worth '+val+')':'')+(t.note?' — '+t.note:''),wt:t.wt||0}; }
+  var cat=pick(['coins','valuable','valuable','valuable','weapon','armor','gear']);
+  if(cat==='coins'&&window.DB_GM&&DB_GM.coins){ var c=DB_GM.coins(); return {kind:'coins',name:c.name,amount:c.amount,unit:c.unit,text:c.name+' holding '+c.amount+' '+c.unit}; }
+  if(cat==='valuable'){ var v=pick(arr(window.DB_GM&&DB_GM.valuables)); if(v){ var val2=/D/.test(v.value)?rollExpr(v.value.split(' ')[0]).total+' '+v.value.split(' ')[1]:v.value; return {kind:'item',name:v.name,note:'worth '+val2,text:v.name+' (worth '+val2+')',wt:0}; } }
+  var list= cat==='weapon'?arr(window.DB_WEAPONS).filter(function(w){ return !w.natural&&w.cost; }) : cat==='armor'?arr(window.DB_ARMOR).concat(arr(window.DB_HELMETS)) : arr(window.DB_GEAR).filter(function(g){ return /^(Light Sources|Medicine|Alchemical Substances|Studies & Magic|Musical Instruments|Hunting & Fishing)$/.test(g.category); });
+  var it=pick(list)||{name:'A silver ring',cost:null}; return {kind:'item',name:it.name,note:'',text:it.name+(cat==='weapon'&&it.damage?' (weapon, '+it.damage+')':'')};
 }
 
 // ── mission flow ───────────────────────────────────────────────────────────
@@ -553,7 +598,7 @@ function arr1(x){ return x==null?[]:Array.isArray(x)?x:[x]; }
 // `best: [skills]` rolls whichever of them the hero is best at
 function chSkill(c){ if(c.best){ var b=null, bl=-1; c.best.forEach(function(k){ var l=skillLvl(k); if(l!=null&&l>bl){ bl=l; b=k; } }); return b||c.best[0]; } return c.skill||null; }
 function wpIndex(id){ for(var i=0;i<S.m.wps.length;i++) if(S.m.wps[i].def===id) return i; return -1; }
-function goTo(id){ var i=wpIndex(id); if(i<0) return; var from=curWp(); if(from) from.done=true;
+function goTo(id){ var i=wpIndex(id); if(i<0) return; var from=curWp(); if(from) from.done=true; if(!solo()&&S.m.cur!==i){ newPartyRound(true); var f0=aliveHeroes()[0]; if(f0) setActing(f0,true); }
   if(S.m.cur!==i) S.m.trail.push(S.m.cur); S.m.cur=i; var w=curWp(), def=wpDef(w);
   jlog('mission',(w.visited?'Back to ':'')+w.name,''); if(!w.visited){ w.visited=true; enterFx(w,def,false); } }
 function enterFx(w,def,first){ var mi=curMission(); if(!def) return;
@@ -590,6 +635,7 @@ function clockStage(){ if(!S.m||S.m.status!=='active'||S.m.sink) return; var mi=
 function applyEffects(fx,w,def,c){
   if(!fx) return;
   if(fx.say) story(fx.say);
+  arr1(fx.clue).forEach(function(cl){ S.m.clues=S.m.clues||[]; if(!S.m.clues.some(function(x){ return x.id===cl.id; })){ S.m.clues.push({id:cl.id,text:cl.text,where:(w&&w.name)||''}); jlog('clue','New clue',cl.text); } });
   if(fx.ifFlag!=null){ applyEffects(hasReq(fx.ifFlag,w)?fx.then:fx.else,w,def,c); }
   if(fx.reveal) fx.reveal.forEach(function(s){ if(A(w.revealed).indexOf(s)<0) w.revealed.push(s); });
   arr1(fx.flag).forEach(function(k){ S.m.flags[k]=true; });
@@ -604,7 +650,7 @@ function applyEffects(fx,w,def,c){
   if(fx.objective){ S.m.objective=true; jlog('mission','Objective achieved',curMission().objective); }
   arr1(fx.show).forEach(function(id){ if(A(S.m.shown).indexOf(id)<0) S.m.shown.push(id); });
   if(fx.goto) goTo(fx.goto);
-  if(fx.treasure){ setTimeout(function(){ offerTreasures(fx.treasure); },50); }
+  if(fx.treasure){ var finder=S.acting; setTimeout(function(){ offerTreasures(fx.treasure,finder); },50); }
   if(fx.encounter){ var e=findEncounter(fx.encounter); if(e&&!S.m.flags['won:'+e.id]){ if(A(S.m.shown).indexOf(e.id)<0) S.m.shown.push(e.id); setDanger(w||curWp(),{type:'fight',enc:e.id}); } }
   if(fx.sink) setTimeout(function(){ startSinking(); },80);
   if(fx.escape) setTimeout(function(){ escapeTower(typeof fx.escape==='string'?fx.escape:'You got out'); },80);
@@ -634,6 +680,7 @@ function doChallenge(cid){
     if(r.ok){ if(c.firstTry&&attempt===1&&!w.failedOnce&&!anyOn(c.firstTryUnless,w)) addScore(c.firstTry.n||1,c.firstTry.label||c.label+' on the first attempt'); applyEffects(c.onSuccess,w,def,c); }
     else if(r.demon) applyEffects(c.onFail,w,def,c); // a Demon can't be pushed: the failure lands now
     if(r.dragon||r.demon){ var k=r.dragon?0:1; var row=T.dragonDemon[d(6)-1][k]; jlog('roll',(r.dragon?'Dragon':'Demon')+' effect',row); toast((r.dragon?'Dragon: ':'Demon: ')+row); }
+    if(!res.pendingFail) endTurn();   // a failure waits: the hero may still push it
     save(); render();
   }); });
 }
@@ -642,16 +689,16 @@ function doChoice(cid){ var w=curWp(), def=wpDef(w); var c=A(def&&def.challenges
   preCheck(w,def,c,function(){ w.tries=w.tries||{}; w.tries[c.id]=(w.tries[c.id]||0)+1;
     w.results[c.id]={ok:true,word:c.resultWord||'Done',text:c.success||''}; jlog('note',c.label,''); story(c.success);
     if(c.firstTry&&w.tries[c.id]===1&&!anyOn(c.firstTryUnless,w)) addScore(c.firstTry.n||1,c.firstTry.label||c.label);
-    applyEffects(c.onSuccess,w,def,c); save(); render(); }); }
+    applyEffects(c.onSuccess,w,def,c); if(!c.free) endTurn(); save(); render(); }); }
 // A card of options (press plates, open chests, take a stone): each option once.
 function doOption(cid,oid){ var w=curWp(), def=wpDef(w); var c=A(def&&def.challenges).find(function(x){ return x.id===cid; }); if(!c) return; var o=A(c.options).find(function(x){ return x.id===oid; }); if(!o) return;
   w.used=w.used||{}; if(w.used[cid+':'+oid]&&!o.repeat) return;
   preCheck(w,def,c,function(){ w.tries=w.tries||{}; w.tries[c.id]=(w.tries[c.id]||0)+1; w.used[cid+':'+oid]=(w.used[cid+':'+oid]||0)+1;
     jlog('note',c.label+': '+o.label,''); story(o.text);
     if(o.firstTry&&w.tries[c.id]===1) addScore(o.firstTry.n||1,o.firstTry.label||c.label+' on the first attempt');
-    w.results[c.id]={ok:true,word:o.label,text:o.text||''}; applyEffects(o.fx,w,def,{label:c.label+': '+o.label}); save(); render(); }); }
+    w.results[c.id]={ok:true,word:o.label,text:o.text||''}; applyEffects(o.fx,w,def,{label:c.label+': '+o.label}); endTurn(); save(); render(); }); }
 function acceptFail(cid){ var w=curWp(), def=wpDef(w); var c=A(def&&def.challenges).find(function(x){ return x.id===cid; }); var res=w.results[cid]; if(!c||!res) return;
-  res.pendingFail=false; if(c.firstTry) w.failedOnce=true; jlog('roll',c.label+': failure accepted',''); story(c.failure); applyEffects(c.onFail,w,def,c); save(); render(); }
+  res.pendingFail=false; if(c.firstTry) w.failedOnce=true; jlog('roll',c.label+': failure accepted',''); story(c.failure); applyEffects(c.onFail,w,def,c); endTurn(); save(); render(); }
 // ── the sinking finale ────────────────────────────────────────────────────
 function startSinking(){ if(!S.m||S.m.sink||S.m.status!=='active') return; var mi=curMission(); if(!mi.sink) return;
   S.m.sink={round:0}; jlog('threat',mi.sink.title||'Sinking!',''); story(mi.sink.text); toast(mi.sink.title||'Sinking!'); sinkNext(); }
@@ -663,9 +710,9 @@ function sinkNext(){ var mi=curMission(), sk=S.m&&S.m.sink; if(!sk) return;
 function drownFlow(){ var mi=curMission(); if(S.combat){ jlog('combat','The fight ends','The sea takes the floor'); S.combat=null; }
   dlg('<h3>The sea pours in</h3><p class="small">'+esc(mi.sink.drown||'The floor you stand on goes under. Anyone still inside drowns.')+'</p><p class="small muted">Solo mercy rule (ours, not the book\'s): one SWIMMING roll with a bane to fight your way out through a window.</p><div class="row" style="margin-top:10px"><button class="btn pri" data-a="drown-swim">Roll SWIMMING · bane</button></div>'); }
 function escapeTower(how){ if(!S.m||S.m.status!=='active') return; closeDlg(); S.m.escaped=true; S.m.objective=true; jlog('mission',how||'You got out',''); finishMission(); }
-function offerTreasures(n){ var list=[]; for(var i=0;i<n;i++){ var t=treasure(); list.push(t); jlog('note','Treasure',t.text); }
+function offerTreasures(n,who){ UI.treasureFor=who||S.acting; var list=[]; for(var i=0;i<n;i++){ var t=treasure(); list.push(t); jlog('note','Treasure',t.text); }
   addScore(n,n>1?n+' treasures found':'Treasure found'); UI.lastTreasures=list; UI.lastTreasure=list[0];
-  dlgQ('<h3>Treasure'+(n>1?' ×'+n:'')+'</h3>'+list.map(function(t){ return '<p><b>'+esc(t.text)+'</b></p>'; }).join('')+'<div class="row" style="margin-top:10px"><button class="btn pri" data-a="take-treasure">Add '+(n>1?'them':'it')+' to '+esc(heroName(S.acting))+'\'s sheet</button><button class="btn ghost" data-a="close">Leave '+(n>1?'them':'it')+'</button></div>'); save(); render(); }
+  dlgQ('<h3>Treasure'+(n>1?' ×'+n:'')+'</h3>'+list.map(function(t){ return '<p><b>'+esc(t.text)+'</b></p>'; }).join('')+'<div class="row" style="margin-top:10px"><button class="btn pri" data-a="take-treasure">Add '+(n>1?'them':'it')+' to '+esc(heroName(UI.treasureFor))+'\'s sheet</button><button class="btn ghost" data-a="close">Leave '+(n>1?'them':'it')+'</button></div>'); save(); render(); }
 function nextWaypoint(){ var w=curWp(); if(w) w.done=true; if(S.m.cur<S.m.wps.length-1){ S.m.cur++; var n=curWp(); jlog('mission','Waypoint '+(S.m.cur+1)+': '+(n.unknown?'Unknown':n.name),''); var nd=wpDef(n); if(nd&&nd.text&&!n.told){ n.told=true; story(nd.text); } }
   if(w&&w.foundLoot){ offerTreasure(); w.foundLoot=false; } save(); render(); }
 function addWaypoints(n,label){ for(var i=0;i<n;i++) S.m.wps.splice(S.m.cur+1+i,0,{name:'Unknown',unknown:true,results:{},revealed:[],done:false,extra:label}); jlog('mission',n+' new waypoint'+(n>1?'s':''),label); }
@@ -815,22 +862,27 @@ function resolveIncoming(how){
 // The player's damage from the sheet: choose the target.
 function onPlayerDamage(m,pid){
   if(m.self) return;
+  var cp=S.combat&&S.combat.pending;
+  if(S.combat&&alive().length&&!(cp&&cp.type==='pc'&&(!cp.pid||cp.pid===pid))){ toast(cp&&cp.type==='pc'?'It\'s '+heroName(cp.pid)+'\'s turn':'Wait for your turn'); jlog('combat',heroName(pid)+' acts out of turn','The damage is ignored'); save(); renderJournal(); return; }
   if(!S.combat||!alive().length){ jlog('roll',m.label+(m.weapon?' · '+m.weapon:''),m.total+' damage'); save(); renderJournal(); return; }
   var foes=alive();
-  dlg('<h3>Hit for '+m.total+' damage</h3><p class="small muted">'+esc(m.weapon||'')+(m.types&&m.types.length?' · '+esc(m.types.join('/')):'')+(m.ignoresArmor?' · ignores armor':'')+'</p>'+
+  dlg('<h3>'+(m.magic?'Spell hits':'Hit')+' for '+m.total+' damage</h3><p class="small muted">'+esc(m.weapon||'')+(m.types&&m.types.length?' · '+esc(m.types.join('/')):'')+(m.ignoresArmor?' · ignores armor':'')+'</p>'+
     '<p class="small">Ask Fortune whether the foe uses its action to dodge or parry — or do what is most sensible. Mundane foes seldom defend.</p>'+
-    '<div class="list" style="margin-top:8px">'+foes.map(function(f){ var ia=(m.ignoresArmor?1:0);
-      return '<div class="row"><button class="btn pri" data-a="hit" data-f="'+f.uid+'" data-n="'+m.total+'" data-ia="'+ia+'">'+esc(f.name)+' ('+f.hp+'/'+f.hpMax+' HP, armor '+f.armor+(f.shield?', shield '+f.shield:'')+')'+(f.immune?' — only if '+esc(f.immune.hurtBy||'magic'):'')+'</button>'+
-        (f.vuln?'<button class="btn" data-a="hit" data-f="'+f.uid+'" data-n="'+(m.total*(f.vuln.mult||2))+'" data-ia="'+ia+'">×'+(f.vuln.mult||2)+' ('+esc(f.vuln.type)+')</button>':'')+
-        '<button class="btn ghost" data-a="foe-dodge" data-f="'+f.uid+'" data-n="'+m.total+'" data-ia="'+ia+'">It tries to dodge</button></div>'+(f.immune?'<div class="tiny muted">'+esc(f.immune.text||'Immune to other damage.')+'</div>':''); }).join('')+'</div><div class="row" style="margin-top:10px"><button class="btn ghost" data-a="close">No target</button></div>');
+    '<div class="list" style="margin-top:8px">'+foes.map(function(f){ var ia=(m.ignoresArmor?1:0); var tps=A(m.types).map(function(x){ return String(x).toLowerCase(); }); var hurtBy=f.immune?String(f.immune.hurtBy||'magic').toLowerCase():''; var canHurt=!f.immune||(m.magic&&/magic/.test(hurtBy))||tps.some(function(x){ return x&&hurtBy.indexOf(x)>=0; });
+      var vx=f.vuln&&tps.indexOf(String(f.vuln.type).toLowerCase())>=0?(f.vuln.mult||2):1, n2=canHurt?m.total*vx:0;
+      return '<div class="row"><button class="btn pri" data-a="hit" data-f="'+f.uid+'" data-n="'+n2+'" data-ia="'+ia+'"'+(canHurt?'':' title="'+esc(f.immune.text||'Immune')+'"')+'>'+esc(f.name)+' ('+f.hp+'/'+f.hpMax+' HP, armor '+f.armor+(f.shield?', shield '+f.shield:'')+')'+(canHurt?(vx>1?' — ×'+vx+' '+esc(f.vuln.type)+'!':''):' — no effect: only '+esc(f.immune.hurtBy||'magic')+' hurts it')+'</button>'+
+        (f.vuln&&vx===1&&canHurt?'<button class="btn" data-a="hit" data-f="'+f.uid+'" data-n="'+(m.total*(f.vuln.mult||2))+'" data-ia="'+ia+'" title="Only if the damage is '+esc(f.vuln.type)+'">×'+(f.vuln.mult||2)+' ('+esc(f.vuln.type)+')</button>':'')+
+        (canHurt?'<button class="btn ghost" data-a="foe-dodge" data-f="'+f.uid+'" data-n="'+n2+'" data-ia="'+ia+'">It tries to dodge</button>':'')+'</div>'+(f.immune?'<div class="tiny muted">'+esc(f.immune.text||'Immune to other damage.')+'</div>':''); }).join('')+'</div><div class="row" style="margin-top:10px"><button class="btn ghost" data-a="close">No target</button></div>');
 }
 function hitFoe(id,n,ignoreArmor){ var f=foeBy(id); if(!f) return; var soak=(ignoreArmor?0:f.armor)+(f.shield||0); var dmg=Math.max(0,n-soak);
   f.hp=Math.max(0,f.hp-dmg); jlog('combat',f.name+' takes '+dmg,n+(soak?' − '+soak+' soak':'')+' → '+f.hp+'/'+f.hpMax);
   if(f.hp<=0&&!f.defeated){ f.defeated=true; jlog('combat',f.name+' is down',''); toast(f.name+' is down!'); if(f.scoreEach) addScore(f.scoreEach.n||1,f.scoreEach.label||f.name+' defeated'); }
-  closeDlg(); save(); render(); }
+  closeDlg(); afterAttack(); save(); render(); }
+// The attack has landed (or been dodged): that was the hero's action — next in the initiative order.
+function afterAttack(){ var c=S.combat, P=c&&c.pending; if(!P||P.type!=='pc') return; c.pending=null; setTimeout(function(){ if(S.combat) nextTurn(); },350); }
 function foeDodge(id,n,ia){ var f=foeBy(id); var rs=[d(20)]; if(f.defensive) rs.push(d(20)); var r=Math.min.apply(null,rs); f.defensive=false; var ok=r===1||(r!==20&&r<=f.dodge); f.flipped=true;
   jlog('combat',f.name+(ok?' dodges!':' fails to dodge'),'d20 '+r+' vs '+f.dodge+' · it loses its next turn this round');
-  if(ok){ closeDlg(); save(); render(); toast(f.name+' dodges!'); } else hitFoe(id,n,ia); }
+  if(ok){ closeDlg(); afterAttack(); save(); render(); toast(f.name+' dodges!'); } else hitFoe(id,n,ia); }
 function combatBody(){
   var c=S.combat; var h='<div class="wyd-h"><span>'+esc(c.label)+' — round '+c.round+'</span>'+(solo()?'<label class="chip tiny" title="Draw two initiative cards and keep both"><input type="checkbox" data-a="army"'+(S.army?' checked':'')+'> Army of One</label>':'')+'</div>';
   h+='<div class="order">'+c.order.map(function(o,i){ var nm=o.who==='pc'?heroName(o.pid||S.acting):((foeBy(o.who)||{}).name||'?'); var gone=o.who!=='pc'&&foeBy(o.who)&&(foeBy(o.who).defeated||foeBy(o.who).fled);
@@ -840,7 +892,7 @@ function combatBody(){
   if(br.length&&alive().length) h+='<div class="sink"><b>Under water.</b> Roll CON to hold your breath this round (not an action) — failure: D6 drowning damage. Melee attacks get a bane; no ranged attacks.<div class="row" style="margin-top:6px">'+br.map(function(id){ return '<button class="btn pri" data-a="breath" data-id="'+esc(id)+'">Roll CON'+(solo()?'':' — '+esc(heroName(id)))+'</button>'; }).join('')+'</div></div>';
   if(!alive().length){ h+='<div class="attack"><b>Victory!</b> Every foe is down or gone.</div><div class="row"><button class="btn pri" data-a="end-fight">End the fight</button></div>'; }
   else if(P&&P.type==='pc'){ var enc=findEncounter(c.enc)||{};
-    var pl=c.pcLeft[P.pid]||0; h+='<div class="attack"><b>'+(solo()?'Your turn.':esc(heroName(P.pid))+'\'s turn.')+'</b> Act on the sheet — attack, cast, dash, help someone — then end the turn here. Damage comes here to pick a target.'+(pl>0?' <span class="muted tiny">('+pl+' more turn this round)</span>':'')+'</div>';
+    var pl=c.pcLeft[P.pid]||0; h+='<div class="attack"><b>'+(solo()?'Your turn.':esc(heroName(P.pid))+'\'s turn.')+'</b> '+(P.missed?'The attack missed. Push the roll on the sheet, or end the turn.':P.attacked?'A hit! Roll the damage on the sheet and pick the target.':'Act on the sheet: attack or cast and the turn ends when it lands; for anything else (dash, help, an item) end the turn here.')+(pl>0?' <span class="muted tiny">('+pl+' more turn this round)</span>':'')+'</div>';
     var acts=A(enc.combatActions).filter(function(x){ return hasReq(x.requires,curWp())&&!anyOn(x.hideIf,curWp())&&(!x.max||((c.acts||{})[x.id]||0)<x.max); });
     if(acts.length) h+='<div class="row" style="margin-bottom:6px">'+acts.map(function(x){ return '<button class="btn" data-a="c-act" data-i="'+A(enc.combatActions).indexOf(x)+'" title="'+esc(x.note||'Uses your action')+'">'+esc(x.label)+'</button>'; }).join('')+'</div>';
     h+='<div class="row"><button class="btn pri" data-a="pc-done">End '+(solo()?'my':esc(heroName(P.pid))+'\'s')+' turn</button>'+(enc.endable?'<button class="btn" data-a="calm" title="'+esc(enc.endable.note||'')+'">'+esc(enc.endable.label)+'</button>':'')+(enc.noFlee?'':'<button class="btn warn" data-a="flee" title="'+((wpDef(curWp())||{}).exits?'Back to where you came from — they\'ll still be here':'Adds a diversion waypoint')+'">Flee</button>')+'</div>'; }
@@ -870,7 +922,8 @@ document.addEventListener('click',function(e){
   switch(a){
     case 'close': closeDlg(); break;
     case 'brief': startBriefing(+t.dataset.i); break;
-    case 'hero': setActing(t.dataset.id); break;
+    case 'hero': if(!canAct(t.dataset.id)){ toast(heroName(t.dataset.id)+' has already acted this round'); break; } setActing(t.dataset.id); break;
+    case 'view': VIEW=t.dataset.id===S.acting?null:t.dataset.id; showSheet(); renderHeroTabs(); break;
     case 'pick': { if(S.party.length) break; UI.pick=UI.pick||[]; var pid2=t.dataset.id, at=UI.pick.indexOf(pid2); if(at>=0) UI.pick.splice(at,1); else if(UI.pick.length<4){ UI.pick.push(pid2); UI.pickNames=UI.pickNames||{}; UI.pickNames[pid2]=t.dataset.name; } render(); break; }
     case 'party-set': { if(S.party.length||!(UI.pick||[]).length) break; S.party=UI.pick.map(function(id){ return {id:id,name:UI.pickNames[id]||'Hero'}; }); S.acting=S.party[0].id; syncChar(); UI.pick=null; mountSheets(); save(); render(); break; }
     case 'sneak': { var Dn=dangerHere(); if(!Dn||Dn.type!=='fight') break; var en=findEncounter(Dn.enc);
@@ -916,19 +969,19 @@ document.addEventListener('click',function(e){
     case 'next': nextWaypoint(); break;
     case 'back': S.m.cur=Math.max(0,S.m.cur-1); save(); render(); break;
     case 'objective': S.m.objective=true; jlog('mission','Objective achieved',curMission().objective); save(); render(); break;
-    case 'search': threatAdd(1,'Searching takes a stretch'); if(dangerHere()){ save(); render(); break; } rollSheet({skill:'Spot Hidden',label:'Search (Spot Hidden)'},function(r){
+    case 'search': threatAdd(1,'Searching takes a stretch'); if(dangerHere()){ save(); render(); break; } UI.treasureFor=S.acting; rollSheet({skill:'Spot Hidden',label:'Search (Spot Hidden)'},function(r){
         var rows=[]; var one=function(){ var x=T.pickRange(T.search,d(10)); return x; };
         if(r.demon){ jlog('roll','Search: Demon','You find nothing — and a new danger finds you.'); toast('Demon: a new danger!'); trapFlow(); return; }
-        if(!r.ok){ jlog('roll','Search: nothing','You waste time and find nothing of interest.'); save(); render(); return; }
+        if(!r.ok){ jlog('roll','Search: nothing','You waste time and find nothing of interest.'); endTurn(); save(); render(); return; }
         rows.push(one()); if(r.dragon) rows.push(one());
         var html='<h3>Search'+(r.dragon?' — Dragon: choose one':'')+'</h3>'+rows.map(function(x,i){ return '<div class="ch" style="margin:6px 0"><p class="small">'+esc(x.text)+'</p><div class="row">'+(x.treasure?'<button class="btn" data-a="s-treasure" data-n="'+x.treasure+'">Draw '+x.treasure+' treasure</button>':'')+(x.path?'<button class="btn" data-a="s-path">Add D4 waypoints</button>':'')+(x.details?'<button class="btn" data-a="s-details">Roll location details</button>':'')+(x.trap?'<button class="btn" data-a="trap">Trap</button>':'')+'</div></div>'; }).join('')+'<div class="row"><button class="btn ghost" data-a="close">Done</button></div>';
-        rows.forEach(function(x){ jlog('roll','Search found',x.text); }); save(); dlg(html); render(); }); break;
-    case 's-treasure': closeDlg(); for(var i=0;i<(+t.dataset.n||1);i++) offerTreasure(); break;
+        rows.forEach(function(x){ jlog('roll','Search found',x.text); }); endTurn(); save(); dlg(html); render(); }); break;
+    case 's-treasure': closeDlg(); offerTreasures(+t.dataset.n||1,UI.treasureFor||S.acting); break;
     case 's-path': { var n2=d(4); addWaypoints(n2,'Secret path'); closeDlg(); save(); render(); break; }
     case 's-details': { var g=genLocation(); jlog('roll','Hidden antechamber',''); story('Behind it, a hidden antechamber: '+genText(g)+'.'); closeDlg(); dlg('<h3>Hidden antechamber</h3><p>'+genHtml(g)+'</p><div class="row" style="margin-top:10px"><button class="btn pri" data-a="close">Go on</button></div>'); save(); render(); break; }
-    case 'scavenge': { var sc=T.pickRange(T.scavenge,d(10)); var txt2=sc.text+(sc.sub?' '+sc.sub.rows[d(sc.sub.die)-1]+'.':''); jlog('roll','Scavenge',txt2); if(curWp()){ curWp().scav=(curWp().scav||0)+1; if(curWp().scav>1) threatAdd(1,'Scavenging again takes a stretch'); }
+    case 'scavenge': { UI.treasureFor=S.acting; endTurn(); var sc=T.pickRange(T.scavenge,d(10)); var txt2=sc.text+(sc.sub?' '+sc.sub.rows[d(sc.sub.die)-1]+'.':''); jlog('roll','Scavenge',txt2); if(curWp()){ curWp().scav=(curWp().scav||0)+1; if(curWp().scav>1) threatAdd(1,'Scavenging again takes a stretch'); }
       dlg('<h3>Scavenge</h3><p>'+esc(txt2)+'</p><div class="row" style="margin-top:8px">'+(sc.treasure?'<button class="btn pri" data-a="s-treasure" data-n="1">Draw a treasure</button>':'')+(sc.again?'<button class="btn" data-a="scavenge">Roll again</button>':'')+(sc.sub&&/Supplies|Interesting/.test(sc.text)?'<button class="btn" data-a="take-item" data-name="'+esc(sc.sub.rows.find(function(x){ return txt2.indexOf(x)>=0; })||'')+'">Add to my sheet</button>':'')+'<button class="btn ghost" data-a="close">Done</button></div>'); save(); render(); break; }
-    case 'take-item': send('addItem',{name:t.dataset.name||'Item'}); closeDlg(); break;
+    case 'take-item': send('addItem',{name:t.dataset.name||'Item'},null,UI.treasureFor||S.acting); closeDlg(); break;
     case 'rest': threatAdd(1,'Resting a stretch'); if(dangerHere()){ save(); render(); break; } jlog('note','Stretch rest','Use the sheet\'s Rest button.'); story('You stop to catch your breath.'); dlg('<h3>Stretch rest</h3><p class="small">Take the rest on '+(solo()?'your sheet':'each hero\'s sheet')+' (Rest → Stretch). '+(solo()?'As a solo hero you may also tend your own wounds:':'Someone may also tend wounds:')+'</p><div class="row" style="margin-top:8px"><button class="btn pri" data-a="self-heal">Roll HEALING (2D6 HP on a success)</button><button class="btn ghost" data-a="close">Done</button></div>'); save(); render(); break;
     case 'self-heal': rollSheet({skill:'Healing',label:'Tend your own wounds (Healing)'},function(r){ if(r.ok){ var hh=rollExpr('2D6'); send('heal',{n:hh.total,why:'Tended your own wounds'}); jlog('roll','Self-healing','+'+hh.total+' HP'); } else jlog('roll','Self-healing failed',''); closeDlg(); save(); render(); }); break;
     case 'divert': addWaypoints(1,'Diversion'); closeDlg(); save(); render(); break;
@@ -956,9 +1009,10 @@ document.addEventListener('click',function(e){
       story('You run.'); save(); render(); break; }
     case 'end-fight': { var obj=S.combat.objective, won=!alive().length, eid=S.combat.enc, wasThreat=S.combat.danger&&S.combat.danger.threat; jlog('combat','Fight over',S.combat.label); S.combat=null; if(obj&&S.m&&!S.m.objective){ S.m.objective=true; jlog('mission','Objective achieved',curMission().objective); }
       if(won&&S.m&&S.m.flags){ S.m.flags['won:'+eid]=true; var ew=findEncounter(eid); if(ew&&ew.time) threatAdd(ew.time,'The fight took time'); if(ew&&ew.onWin) applyEffects(ew.onWin,curWp(),wpDef(curWp()),{label:ew.label}); if(wasThreat) threatResolved(); } save(); render(); break; }
-    case 'take-treasure': { A(UI.lastTreasures||(UI.lastTreasure?[UI.lastTreasure]:[])).forEach(function(tr){ if(tr.kind==='coins') send('coins',{unit:tr.unit,n:tr.amount}); else send('addItem',{name:tr.name,note:tr.note||'',wt:tr.wt}); }); UI.lastTreasures=null; closeDlg(); break; }
+    case 'take-treasure': { A(UI.lastTreasures||(UI.lastTreasure?[UI.lastTreasure]:[])).forEach(function(tr){ if(tr.kind==='coins') send('coins',{unit:tr.unit,n:tr.amount},null,UI.treasureFor); else send('addItem',{name:tr.name,note:tr.note||'',wt:tr.wt},null,UI.treasureFor); }); UI.lastTreasures=null; closeDlg(); break; }
   }
 });
+document.addEventListener('toggle',function(e){ if(e.target&&e.target.classList&&e.target.classList.contains('clues')) UI.cluesOpen=e.target.open; },true);
 document.addEventListener('change',function(e){ if(e.target.dataset&&e.target.dataset.a==='army'){ S.army=e.target.checked; save(); } });
 document.querySelector('.so-tabs').addEventListener('click',function(e){ var b=e.target.closest('button[data-tab]'); if(!b) return; document.body.dataset.tab=b.dataset.tab; [].forEach.call(this.children,function(x){ x.classList.toggle('on',x===b); }); });
 $('dlg').addEventListener('click',function(e){ if(e.target===this) closeDlg(); });

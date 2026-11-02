@@ -1443,7 +1443,9 @@ var _actFromTab=false;
 // can when on); Aim/Defend still last until End Turn; Broken still limits you.
 function turnOn(){ return !S||S.turnBased!==false; }
 function toggleTurnMode(){ S.turnBased=!turnOn(); if(_act.aimed){ var t=$('tray-mod'); if(t&&num(t.value)>0) t.value=String(num(t.value)-1); } _act=actFresh(false); renderAction(); scheduleAutosave(); if(window.SheetSettings) SheetSettings.refresh(); }
-function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: your action and maneuver are spent automatically. Click to tick them by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
+// The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
+function turnModeBtn(){ return ''; }
+function turnModeBtnPill(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="'+(on?'Turn-based: your action and maneuver are spent automatically. Click to tick them by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
 // the pips are buttons: tick or untick them by hand (both modes)
 function actTogglePip(k){ if(k==='fast') _act.fast=!_act.fast; else { _act.slow=!_act.slow; if(!_act.slow){ _act.slowAsFast=false; _act.owed=false; } } renderAction(); scheduleAutosave(); }
 function actMainRoll(){ if(!turnOn()) return; if(_actFromTab||typeof _act==='undefined'||!_act) return; if(!_act.slow){ _act.slow=true; if(typeof renderAction==='function') renderAction(); if(typeof scheduleAutosave==='function') scheduleAutosave(); } }

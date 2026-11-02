@@ -4359,7 +4359,9 @@ let _turnBased = true;
 function turnOn(){ return _turnBased !== false; }
 function freshTurn(){ return { action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0, sneakUsed:false, dash:false, dodge:0, ready:0, hand:{} }; }
 function toggleTurnMode(){ _turnBased = !turnOn(); _turn = freshTurn(); renderTurn(); scheduleAutosave(); if(window.SheetSettings) SheetSettings.refresh(); }
-function turnModeBtn(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: Action, Bonus Action and Reaction are spent automatically, End Turn brings them back. Click to tick them by hand instead.' : 'Manual: actions aren\'t spent automatically — tick the chips yourself. Click to spend them automatically.') + '"><span class="tm-sw"></span></button>'; }
+// The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
+function turnModeBtn(){ return ''; }
+function turnModeBtnPill(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: Action, Bonus Action and Reaction are spent automatically, End Turn brings them back. Click to tick them by hand instead.' : 'Manual: actions aren\'t spent automatically — tick the chips yourself. Click to spend them automatically.') + '"><span class="tm-sw"></span></button>'; }
 // Manual mode: whatever an action just spent comes straight back (only the hand-ticked chips,
 // _turn.hand, stay); Dash / Dodge / Ready and movement are kept until End Turn.
 function freePlayClear(){ if(turnOn()) return; const k = _turn; _turn = Object.assign(freshTurn(), { move:k.move||0, dash:!!k.dash, dodge:k.dodge||0, ready:k.ready||0, hand:k.hand||{} }); }

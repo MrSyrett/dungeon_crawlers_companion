@@ -1439,7 +1439,9 @@ function tEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g
 // they can when on); conditions that stop you still apply.
 function turnOn(){ return S.turnBased!==false; }
 function toggleTurnMode(){ S.turnBased=!turnOn(); var t=turnState(); t.std=t.move=t.react=false; t.dodge=0; renderTurn(); scheduleAutosave(); try{ SheetSettings.refresh(); }catch(e){} }
-function turnModeBtn(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" onclick="toggleTurnMode()" aria-label="Turn-based: spend actions automatically" title="'+(on?'Turn-based: actions are spent automatically. Click to tick them by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
+// The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
+function turnModeBtn(){ return ''; }
+function turnModeBtnPill(){ var on=turnOn(); return '<button type="button" class="turn-mode'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" onclick="toggleTurnMode()" aria-label="Turn-based: spend actions automatically" title="'+(on?'Turn-based: actions are spent automatically. Click to tick them by hand instead.':'Manual: actions aren\'t spent automatically — tick the pip yourself. Click to spend them automatically.')+'"><span class="tm-sw"></span></button>'; }
 // the Action / Reaction pips are buttons: tick or untick them by hand (both modes)
 function togglePip(k){ var t=turnState(); t[k]=!t[k]; renderTurn(); scheduleAutosave(); }
 function turnCan(kind){ var t=turnState();

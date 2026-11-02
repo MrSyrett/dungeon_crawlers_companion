@@ -2061,7 +2061,9 @@ function nimSpellCost(sp){ if(!sp || !sp.actions) return { n: 1, timed: '' }; co
 function nimAfter(){ renderActions(); renderNimTurn(); if(typeof scheduleAutosave === 'function') scheduleAutosave(); }
 function nimSpend(n){ if(!turnOn()) return; actions = Math.max(0, actions - n); }
 function toggleTurnMode(){ _nimTB = !turnOn(); actions = nimMaxActions(); _nturn.attacks = 0; _nturn.moves = 0; _nturn.reacted = {}; nimAfter(); if(window.SheetSettings) SheetSettings.refresh(); }
-function turnModeBtn(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: actions are spent automatically (3 per turn), End Turn recharges them. Click to tick them by hand instead.' : 'Manual: actions aren\'t spent automatically — tick the pips yourself. Click to spend them automatically.') + '"><span class="tm-sw"></span></button>'; }
+// The Turn-based switch lives in ⚙ Sheet Settings (roll log) now; the Action tab no longer shows it.
+function turnModeBtn(){ return ''; }
+function turnModeBtnPill(){ const on = turnOn(); return '<button type="button" class="turn-mode' + (on ? ' on' : '') + '" role="switch" aria-checked="' + on + '" aria-label="Turn-based: spend actions automatically" onclick="toggleTurnMode()" title="' + (on ? 'Turn-based: actions are spent automatically (3 per turn), End Turn recharges them. Click to tick them by hand instead.' : 'Manual: actions aren\'t spent automatically — tick the pips yourself. Click to spend them automatically.') + '"><span class="tm-sw"></span></button>'; }
 // An Action pip, by hand (both modes): an unspent pip spends one action, a spent one gives one back.
 function nimTogglePip(k){ const max = nimMaxActions(); if(k > max) return; actions = k > actions ? Math.min(max, actions + 1) : Math.max(0, actions - 1); nimAfter(); }
 
